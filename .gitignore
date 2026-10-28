@@ -1,0 +1,20 @@
+# dependencies & build
+node_modules
+dist
+*.tsbuildinfo
+
+# local env
+.env.local
+.env.*.local
+
+# Owner's private source assets (never committed, repo is public)
+assets-src/
+# Locally converted private assets, loaded via VITE_ASSET_BASE_URL
+public/assets-local/
+
+# editor / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.log

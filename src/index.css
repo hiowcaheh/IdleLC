@@ -1,0 +1,77 @@
+:root {
+  --bg: #0d0b10;
+  --bg-elevated: #17131c;
+  --panel: rgba(20, 16, 24, 0.86);
+  --panel-border: #5a4628;
+  --gold: #d9a441;
+  --gold-bright: #f3cf7a;
+  --text: #ece4d6;
+  --text-dim: #a89c8a;
+  --hp: #c8322b;
+  --hp-bg: #3a1513;
+  --exp: #6fb4e8;
+  --danger: #e0533d;
+  --font-display: 'Cinzel', 'Times New Roman', serif;
+  --font-body: 'Source Sans 3', system-ui, sans-serif;
+
+  color-scheme: dark;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--bg);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.home {
+  display: grid;
+  place-content: center;
+  height: 100%;
+  padding: 16px;
+  text-align: center;
+  background: radial-gradient(ellipse at 50% 30%, #2a1f33 0%, var(--bg) 70%);
+}
+
+.home__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.5rem, 10vw, 5rem);
+  letter-spacing: 0.08em;
+  color: var(--gold-bright);
+  text-shadow: 0 2px 24px rgba(217, 164, 65, 0.35);
+}
+
+.home__subtitle {
+  margin: 8px 0 0;
+  color: var(--text);
+}
+
+.home__note {
+  margin: 24px 0 0;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
