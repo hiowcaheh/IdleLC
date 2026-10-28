@@ -25,7 +25,14 @@ Inne komendy:
 | `npm run format`         | formatowanie Prettierem                                   |
 | `npm run convert-models` | konwersja modeli z `assets-src/` do zoptymalizowanych GLB |
 
-Tryb deweloperski: dopisz `?dev=1` do adresu, np. `http://localhost:5173/IdleLC/?dev=1`.
+### Tryb deweloperski
+
+Dopisz `?dev=1` do adresu, np. `http://localhost:5173/IdleLC/?dev=1` albo
+`https://hiowcaheh.github.io/IdleLC/?dev=1`. Pojawi się panel z:
+
+- przyspieszeniem czasu (×0,25 … ×10) — walka, animacje i regeneracja,
+- linkiem **Podgląd modeli i animacji** — każdy model z manifestu i każdy klip z pliku GLB
+  (klipy podpięte pod logiczne animacje są oznaczone, np. `Punch attack`).
 
 ## Deploy na GitHub Pages
 

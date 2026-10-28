@@ -10,8 +10,8 @@ export const ZONES: Record<string, ZoneDef> = {
       skyTop: '#3b5a86',
       skyBottom: '#c9a77a',
       fog: '#a99a86',
-      groundLow: '#3d5a2a',
-      groundHigh: '#6b7a3a',
+      groundLow: '#46692b',
+      groundHigh: '#7f8d43',
     },
   },
 }

@@ -12,16 +12,8 @@ export default defineConfig({
   },
   build: {
     target: 'es2022',
-    chunkSizeWarningLimit: 1500,
-    rollupOptions: {
-      output: {
-        manualChunks(id: string) {
-          if (id.includes('node_modules/three/')) return 'three'
-          if (id.includes('node_modules/@react-three/')) return 'r3f'
-          return undefined
-        },
-      },
-    },
+    // three.js + react-three-fiber are ~1.3 MB unminified-equivalent; expected for a 3D game.
+    chunkSizeWarningLimit: 1600,
   },
   test: {
     include: ['src/**/*.test.ts'],
