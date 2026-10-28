@@ -3,9 +3,9 @@ import type { GraphicsQuality } from '../game/logic/save.ts'
 import { useGameStore } from '../state/gameStore.ts'
 
 const QUALITY_OPTIONS: { value: GraphicsQuality; label: string; hint: string }[] = [
-  { value: 'auto', label: 'Auto', hint: 'Dopasowuje się do urządzenia' },
-  { value: 'low', label: 'Niska', hint: 'Bez cieni — dla słabszych telefonów' },
-  { value: 'high', label: 'Wysoka', hint: 'Pełna rozdzielczość i cienie' },
+  { value: 'auto', label: 'Auto', hint: 'Adapts to your device' },
+  { value: 'low', label: 'Low', hint: 'No shadows, for older phones' },
+  { value: 'high', label: 'High', hint: 'Full resolution and shadows' },
 ]
 
 export function SettingsPanel({ onClose }: { onClose(): void }) {
@@ -52,9 +52,9 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
       >
         <header className="sheet__header">
           <h2 id="settings-title" className="sheet__title">
-            Ustawienia
+            Settings
           </h2>
-          <button type="button" className="icon-button" onClick={onClose} aria-label="Zamknij">
+          <button type="button" className="icon-button" onClick={onClose} aria-label="Close">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 6 L18 18 M18 6 L6 18" />
             </svg>
@@ -62,7 +62,7 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
         </header>
 
         <fieldset className="setting">
-          <legend className="setting__label">Jakość grafiki</legend>
+          <legend className="setting__label">Graphics quality</legend>
           <div className="segmented">
             {QUALITY_OPTIONS.map((o) => (
               <label key={o.value} className="segmented__option">
@@ -83,7 +83,7 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
         </fieldset>
 
         <label className="setting setting--row">
-          <span className="setting__label">Liczby obrażeń</span>
+          <span className="setting__label">Damage numbers</span>
           <input
             type="checkbox"
             className="switch"
@@ -93,18 +93,18 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
         </label>
 
         <div className="setting setting--danger">
-          <span className="setting__label">Zapis gry</span>
+          <span className="setting__label">Saved game</span>
           <p className="setting__hint">
             {resetDone
-              ? 'Zapis usunięty. Zaczynasz od nowa.'
-              : 'Postęp jest zapisywany w tej przeglądarce.'}
+              ? 'Save deleted. You are starting over.'
+              : 'Your progress is saved in this browser.'}
           </p>
           <button
             type="button"
             className={`button button--danger${confirmReset ? ' is-armed' : ''}`}
             onClick={onReset}
           >
-            {confirmReset ? 'Na pewno? Kliknij, aby usunąć' : 'Reset zapisu'}
+            {confirmReset ? 'Are you sure? Tap again to delete' : 'Reset save'}
           </button>
         </div>
 

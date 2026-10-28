@@ -8,9 +8,9 @@ export function DevPanel() {
   const timeScale = useGameStore((s) => s.timeScale)
   const setTimeScale = useGameStore((s) => s.setTimeScale)
   return (
-    <aside className="dev-panel" aria-label="Narzędzia deweloperskie">
-      <p className="dev-panel__title">Tryb dev</p>
-      <div className="dev-panel__row" role="group" aria-label="Prędkość czasu">
+    <aside className="dev-panel" aria-label="Developer tools">
+      <p className="dev-panel__title">Dev mode</p>
+      <div className="dev-panel__row" role="group" aria-label="Time speed">
         {SPEEDS.map((speed) => (
           <button
             key={speed}
@@ -23,7 +23,7 @@ export function DevPanel() {
         ))}
       </div>
       <Link className="dev-panel__link" to="/dev/models">
-        Podgląd modeli i animacji
+        Model & animation viewer
       </Link>
     </aside>
   )

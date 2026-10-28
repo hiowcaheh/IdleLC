@@ -13,14 +13,14 @@ export function HuntPanel() {
   const zone = ZONES[zoneId]!
 
   return (
-    <section className="hunt" aria-label="Polowanie">
+    <section className="hunt" aria-label="Hunting">
       <header className="hunt__header">
         <h2 className="hunt__zone">{zone.name}</h2>
         <p className="hunt__kills">
-          Pokonane: <strong>{kills}</strong>
+          Kills: <strong>{kills}</strong>
         </p>
       </header>
-      <div className="hunt__targets" role="radiogroup" aria-label="Na kogo polujesz">
+      <div className="hunt__targets" role="radiogroup" aria-label="Choose your target">
         {zone.monsterIds.map((id) => {
           const monster = getMonster(id)
           const active = id === selected

@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { useGameStore } from '../state/gameStore.ts'
 
 const MESSAGES: Partial<Record<string, string>> = {
-  migrated: 'Zapis zaktualizowany do nowej wersji gry.',
-  'reset-invalid': 'Zapis był uszkodzony, więc zaczynasz od nowa.',
-  'reset-newer': 'Zapis pochodzi z nowszej wersji gry, więc zaczynasz od nowa.',
+  migrated: 'Your save was updated to the new game version.',
+  'reset-invalid': 'Your save was damaged, so you are starting over.',
+  'reset-newer': 'Your save is from a newer game version, so you are starting over.',
 }
 
 /** One-time message about what happened to the save on startup. */

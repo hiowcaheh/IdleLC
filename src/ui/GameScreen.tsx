@@ -24,7 +24,7 @@ export function GameScreen() {
             type="button"
             className="icon-button hud__settings"
             onClick={() => setSettingsOpen(true)}
-            aria-label="Ustawienia"
+            aria-label="Settings"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="12" cy="12" r="3.2" />

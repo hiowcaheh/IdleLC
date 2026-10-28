@@ -119,7 +119,7 @@ export function Battle() {
           )
           break
         case 'miss':
-          textAt(e.target, 'Pudło', 'miss')
+          textAt(e.target, 'Miss', 'miss')
           break
         case 'death':
           if (e.who === 'monster') {

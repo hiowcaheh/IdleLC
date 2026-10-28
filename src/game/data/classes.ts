@@ -4,8 +4,8 @@ import type { ClassDef, ClassId } from './types.ts'
 export const CLASSES: Record<ClassId, ClassDef> = {
   titan: {
     id: 'titan',
-    name: 'Tytan',
-    description: 'Potężne, wolne ciosy dwuręczną bronią.',
+    name: 'Titan',
+    description: 'Slow, crushing blows with a two-handed weapon.',
     modelId: 'hero',
     base: {
       maxHp: 140,
@@ -19,8 +19,8 @@ export const CLASSES: Record<ClassId, ClassDef> = {
   },
   knight: {
     id: 'knight',
-    name: 'Rycerz',
-    description: 'Miecz i tarcza — najwięcej zdrowia i obrony.',
+    name: 'Knight',
+    description: 'Sword and shield. The most health and defense.',
     modelId: 'hero',
     base: {
       maxHp: 160,
@@ -34,8 +34,8 @@ export const CLASSES: Record<ClassId, ClassDef> = {
   },
   healer: {
     id: 'healer',
-    name: 'Uzdrowiciel',
-    description: 'Szybkie, lżejsze ataki i wsparcie.',
+    name: 'Healer',
+    description: 'Quick, lighter attacks and support.',
     modelId: 'hero',
     base: {
       maxHp: 110,
@@ -49,8 +49,8 @@ export const CLASSES: Record<ClassId, ClassDef> = {
   },
   mage: {
     id: 'mage',
-    name: 'Mag',
-    description: 'Najwyższy atak i krytyki, ale kruche zdrowie.',
+    name: 'Mage',
+    description: 'The highest attack and crits, but fragile.',
     modelId: 'hero',
     base: {
       maxHp: 95,

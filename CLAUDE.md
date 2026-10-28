@@ -38,12 +38,13 @@ Budujemy **IdleLC** — przeglądarkowe RPG typu IDLE / AFK z walką 3D, w klima
 - **Assety wymienne przez manifest:** każdy potwór/postać ma wpis w `src/game/assets/manifest.json`: `id`, ścieżka do modelu, skala, mapa nazw animacji (`idle`, `run`, `attack`, `hit`, `die`). Podmiana modelu = zmiana jednego wpisu, bez ruszania kodu gry.
 - Assety spoza repo mogą być ładowane z konfigurowalnego `VITE_ASSET_BASE_URL`. Domyślnie gra działa na assetach CC0 z repo.
 - Nie używaj nazwy „Last Chaos”, logotypów ani oryginalnych grafik w nazwie, UI ani materiałach promocyjnych. Nazwa gry: IdleLC.
+- Zrzut bazy danych LC (dostarczony przez właściciela) to wyłącznie **wzorzec mechanik** (struktura klas, statystyk, dropu, ekwipunku, ulepszeń). Nie kopiujemy do repo jego tabel, liczb 1:1 ani nazw własnych (miasta, NPC, unikalne przedmioty) — tworzymy własne.
 
 ## Dane gry (na razie pliki TS w repo)
 
 Definicje w `src/game/data/` — w etapie 2 przeniesiemy je do bazy:
 
-- `classes` (Tytan, Rycerz, Uzdrowiciel, Mag — statystyki bazowe i przyrost na poziom)
+- `classes` (Titan, Knight, Healer, Mage — statystyki bazowe i przyrost na poziom)
 - `zones` (mapy/lokacje, wymagany poziom)
 - `monsters` (lokacja, poziom, HP, atak, obrona, exp, złoto, model_id)
 - `items` (typ, slot, statystyki, wymagany poziom, rzadkość)
@@ -68,6 +69,7 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 - Małe, opisane commity. Po każdym kamieniu: lista zmian, link do wersji na GitHub Pages i co sprawdzić ręcznie.
 - Jeśli coś jest niejasne (balans, wygląd, nazewnictwo) — zapytaj, nie zgaduj.
 - Pisz po polsku w rozmowie; kod, nazwy zmiennych i komentarze po angielsku.
+- **Gra jest po angielsku**: cały tekst w UI oraz nazwy klas, potworów, lokacji i przedmiotów. Dokumentacja dla właściciela (README, `docs/`) może być po polsku.
 
 ## Komendy
 

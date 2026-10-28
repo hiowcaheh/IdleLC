@@ -3,7 +3,7 @@ import type { ZoneDef } from './types.ts'
 export const ZONES: Record<string, ZoneDef> = {
   glade: {
     id: 'glade',
-    name: 'Polana Świtu',
+    name: 'Dawnlight Glade',
     minLevel: 1,
     monsterIds: ['rust-golem', 'stone-sentinel'],
     environment: {

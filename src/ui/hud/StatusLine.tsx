@@ -1,9 +1,9 @@
 import { useGameStore } from '../../state/gameStore.ts'
 
 const MESSAGES: Partial<Record<string, string>> = {
-  spawning: 'Szukasz przeciwnika…',
-  victory: 'Zwycięstwo!',
-  defeat: 'Porażka. Za chwilę wracasz do walki.',
+  spawning: 'Looking for a target…',
+  victory: 'Victory!',
+  defeat: 'Defeated. Back in the fight shortly.',
 }
 
 export function StatusLine() {

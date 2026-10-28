@@ -15,7 +15,7 @@ export function TargetFrame() {
   const monster = getMonster(monsterId)
 
   return (
-    <section className="unit-frame unit-frame--target" aria-label="Cel">
+    <section className="unit-frame unit-frame--target" aria-label="Target">
       <div className="unit-frame__body">
         <div className="unit-frame__name">
           <span className={`level-tag level-tag--${levelTone(playerLevel, monster.level)}`}>
@@ -27,7 +27,7 @@ export function TargetFrame() {
           value={phase === 'victory' ? 0 : hp}
           max={maxHp}
           variant="enemy"
-          label="Zdrowie celu"
+          label="Target health"
         />
       </div>
     </section>

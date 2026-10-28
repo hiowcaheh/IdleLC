@@ -3,7 +3,7 @@ import type { MonsterDef } from './types.ts'
 export const MONSTERS: Record<string, MonsterDef> = {
   'rust-golem': {
     id: 'rust-golem',
-    name: 'Rdzawy Golem',
+    name: 'Rust Golem',
     zoneId: 'glade',
     level: 1,
     stats: {
@@ -20,7 +20,7 @@ export const MONSTERS: Record<string, MonsterDef> = {
   },
   'stone-sentinel': {
     id: 'stone-sentinel',
-    name: 'Kamienny Strażnik',
+    name: 'Stone Sentinel',
     zoneId: 'glade',
     level: 3,
     stats: {

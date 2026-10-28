@@ -86,9 +86,9 @@ export function ModelViewer() {
 
       <aside className="viewer__panel">
         <header className="viewer__header">
-          <h1 className="viewer__title">Modele i animacje</h1>
+          <h1 className="viewer__title">Models & animations</h1>
           <Link className="dev-panel__link" to="/">
-            Wróć do gry
+            Back to game
           </Link>
         </header>
 
@@ -110,7 +110,7 @@ export function ModelViewer() {
         </label>
 
         <p className="viewer__meta">
-          Skala {model.scale}, moment ciosu {model.attackImpact} s
+          Scale {model.scale}, hit lands at {model.attackImpact} s
         </p>
 
         <div className="viewer__clips">
@@ -127,7 +127,7 @@ export function ModelViewer() {
           ))}
         </div>
 
-        <div className="dev-panel__row" role="group" aria-label="Prędkość">
+        <div className="dev-panel__row" role="group" aria-label="Speed">
           {[0.25, 0.5, 1, 2].map((s) => (
             <button
               key={s}

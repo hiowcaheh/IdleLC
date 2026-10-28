@@ -26,12 +26,12 @@ stat(poziom) = round(base + perLevel × (poziom − 1))     dla maxHp, attack, d
 Pozostałe statystyki (szybkość ataku, krytyk) na razie nie rosną z poziomem.
 Poziom jest ograniczony do zakresu 1–99 (`MAX_LEVEL`).
 
-| Klasa       | HP  | Atak | Obrona | Interwał | Krytyk   | +HP/poz | +Atak/poz | +Obr/poz |
-| ----------- | --- | ---- | ------ | -------- | -------- | ------- | --------- | -------- |
-| Tytan       | 140 | 14   | 6      | 1,6 s    | 8% ×1,8  | 14      | 2,2       | 0,9      |
-| Rycerz      | 160 | 11   | 9      | 1,3 s    | 5% ×1,5  | 16      | 1,7       | 1,3      |
-| Uzdrowiciel | 110 | 9    | 5      | 1,2 s    | 5% ×1,5  | 11      | 1,4       | 0,8      |
-| Mag         | 95  | 15   | 4      | 1,5 s    | 10% ×1,7 | 9,5     | 2,4       | 0,6      |
+| Klasa  | HP  | Atak | Obrona | Interwał | Krytyk   | +HP/poz | +Atak/poz | +Obr/poz |
+| ------ | --- | ---- | ------ | -------- | -------- | ------- | --------- | -------- |
+| Titan  | 140 | 14   | 6      | 1,6 s    | 8% ×1,8  | 14      | 2,2       | 0,9      |
+| Knight | 160 | 11   | 9      | 1,3 s    | 5% ×1,5  | 16      | 1,7       | 1,3      |
+| Healer | 110 | 9    | 5      | 1,2 s    | 5% ×1,5  | 11      | 1,4       | 0,8      |
+| Mage   | 95  | 15   | 4      | 1,5 s    | 10% ×1,7 | 9,5     | 2,4       | 0,6      |
 
 ## Trafienie
 
@@ -52,7 +52,7 @@ obrażenia = max(1, round(bazowe × rozrzut × (krytyk ? critMultiplier : 1)))
 Wzór `atak² / (atak + obrona)` daje malejące zyski z obrony: obrona równa atakowi
 połowi obrażenia, ale nigdy ich nie zeruje.
 
-Przykład: Rycerz (atak 11) vs Rdzawy Golem (obrona 3): `121 / 14 ≈ 8,6` obrażeń na cios.
+Przykład: Knight (atak 11) vs Rust Golem (obrona 3): `121 / 14 ≈ 8,6` obrażeń na cios.
 
 ## Regeneracja
 
