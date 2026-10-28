@@ -18,3 +18,7 @@ public/assets-local/
 !.vscode/extensions.json
 .idea
 *.log
+
+# Python
+__pycache__/
+*.pyc
