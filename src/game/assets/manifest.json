@@ -1,0 +1,44 @@
+{
+  "models": [
+    {
+      "id": "hero",
+      "file": "RobotExpressive.glb",
+      "scale": 0.4,
+      "animations": {
+        "idle": "Idle",
+        "run": "Running",
+        "attack": "Punch",
+        "die": "Death",
+        "victory": "ThumbsUp"
+      },
+      "attackImpact": 0.38,
+      "tint": { "Main": "#2f5f96", "Grey": "#c9c4b6" }
+    },
+    {
+      "id": "golem-rust",
+      "file": "RobotExpressive.glb",
+      "scale": 0.46,
+      "animations": {
+        "idle": "Idle",
+        "run": "Running",
+        "attack": "Punch",
+        "die": "Death"
+      },
+      "attackImpact": 0.38,
+      "tint": { "Main": "#7a3b1f", "Grey": "#4a3f36", "Black": "#1c1410" }
+    },
+    {
+      "id": "golem-stone",
+      "file": "RobotExpressive.glb",
+      "scale": 0.56,
+      "animations": {
+        "idle": "Idle",
+        "run": "Running",
+        "attack": "Punch",
+        "die": "Death"
+      },
+      "attackImpact": 0.38,
+      "tint": { "Main": "#5d6a6e", "Grey": "#33393b", "Black": "#16191a" }
+    }
+  ]
+}

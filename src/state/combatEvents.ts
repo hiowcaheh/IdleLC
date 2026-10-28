@@ -1,0 +1,18 @@
+import type { CombatEvent } from '../game/logic/combat.ts'
+
+/** Events the 3D scene reacts to: combat events plus a full reset (new save). */
+export type ViewEvent = CombatEvent | { type: 'reset' }
+
+type Listener = (event: ViewEvent) => void
+
+const listeners = new Set<Listener>()
+
+export const combatEvents = {
+  emit(events: readonly ViewEvent[]): void {
+    for (const event of events) for (const listener of listeners) listener(event)
+  },
+  subscribe(listener: Listener): () => void {
+    listeners.add(listener)
+    return () => listeners.delete(listener)
+  },
+}
