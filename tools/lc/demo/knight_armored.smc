@@ -1,0 +1,25 @@
+NAME "knight_armored";
+{
+  MESH TFNM "Data\Character\Knight\Login\ni_bd_L.bm";
+  TEXTURES { "ni_bd_L" TFNM "Data\Character\Knight\Login\Texture\ni_bd_L.tex"; }
+  MESH TFNM "Data\Character\Knight\Login\ni_bd_add_L.bm";
+  TEXTURES { "ni_bd_add_L" TFNM "Data\Character\Knight\Login\Texture\ni_bd_add_L.tex"; }
+  MESH TFNM "Data\Character\Knight\Login\ni_bu_L.bm";
+  TEXTURES { "ni_bu_L" TFNM "Data\Character\Knight\Login\Texture\ni_bu_L.tex"; }
+  MESH TFNM "Data\Character\Knight\Login\ni_bu_add_L.bm";
+  TEXTURES { "ni_bu_add_L" TFNM "Data\Character\Knight\Login\Texture\ni_bu_add_L.tex"; }
+  MESH TFNM "Data\Character\Knight\Login\ni_ft_L.bm";
+  TEXTURES { "ni_ft_L" TFNM "Data\Character\Knight\Login\Texture\ni_ft_L.tex"; }
+  MESH TFNM "Data\Character\Knight\Login\ni_hn_L.bm";
+  TEXTURES { "ni_hn_L" TFNM "Data\Character\Knight\Login\Texture\ni_hn_L.tex"; }
+  MESH TFNM "Data\Character\Knight\Login\ni_face_004.bm";
+  TEXTURES { "ni_face_004" TFNM "Data\Character\Knight\Login\Texture\ni_face_004.tex"; }
+  MESH TFNM "Data\Character\Knight\Login\ni_hair_003.bm";
+  TEXTURES { "ni_hair_003" TFNM "Data\Character\Knight\Login\Texture\ni_hair_003.tex"; }
+  MESH TFNM "Data\Character\Knight\Login\ni_sword_014.bm";
+  TEXTURES { "ni_sword_014" TFNM "Data\Character\Knight\Login\Texture\ni_sword_014.tex"; }
+  MESH TFNM "Data\Character\Knight\Login\ni_shield_011.bm";
+  TEXTURES { "ni_shield_011" TFNM "Data\Character\Knight\Login\Texture\ni_shield_011.tex"; }
+  SKELETON TFNM "Data\Character\Knight\ni.bs";
+  ANIMSET TFNM "Data\Character\Knight\ni.ba";
+}
