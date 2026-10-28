@@ -77,3 +77,35 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 - `npm run check` — lint + format + typecheck + testy (to samo co CI)
 - `npm run build` — build produkcyjny do `dist/`
 - `npm run convert-models` — konwersja modeli z `assets-src/`
+
+## Stan prac (aktualizuj na koniec każdej sesji)
+
+**Stan na 2026-10-28:**
+
+- M0 i M1 gotowe i opublikowane (https://hiowcaheh.github.io/IdleLC/). UI gry po angielsku. Na Pages
+  działają tymczasowe modele CC0 (robot).
+- Przeanalizowano zrzut bazy LC → [`docs/lc-database.md`](docs/lc-database.md).
+- Rozpracowano formaty klienta LC (siatki, szkielety, animacje, tekstury, UI) →
+  [`docs/lc-formats.md`](docs/lc-formats.md). Prototyp konwertera: [`tools/lc/`](tools/lc/README.md).
+  Wynik: Knight w zbroi z mieczem i tarczą, lis, jeleń, jaguar, sfinks — z animacjami — działają w three.js.
+- Prywatna strona demo (claude.ai, artefakt „IdleLC Arena Preview”) pokazuje walkę na modelach LC ze
+  statystykami i dropem 1:1 z bazy. Budowana przez `tools/lc/demo/build_demo.py`.
+
+**Decyzje właściciela:** 6 klas na start (Titan, Knight, Healer, Mage, Rogue, Sorcerer); tempo exp jak w LC
+(będą bonusy); dane 1:1 z bazy; repo przejdzie na prywatne (GitHub Pro) — do tego czasu bez assetów i danych
+LC w repo (konwerter i dokumentacja formatów mogą być w repo).
+
+**Następne kroki:**
+
+1. Właściciel udostępnia cały folder klienta (Remote Control na Mac/Linux albo sesja Claude Code
+   na jego komputerze z Windows).
+2. Docelowy konwerter `npm run convert-lc` w Node (port `tools/lc/`): hurtowa konwersja `Data/`,
+   manifest modeli generowany z bazy (`t_npc.a_file_smc`, `a_scale`, `a_motion_*`), ikony z atlasów,
+   normal mapy, broń na kościach.
+3. Podpięcie modeli LC do gry lokalnie (manifest lokalny poza gitem + `VITE_ASSET_BASE_URL`), a po
+   przejściu repo na prywatne — także na Pages.
+4. M2 (tworzenie postaci) na danych 1:1.
+
+**Otwarte kwestie:** brak siatek broni z `Data\Item\Weapon` (przyszły tylko tekstury i tagi); brak mapy
+z otwartym terenem (`.wld` + `.wtr`); brak w bazie statystyk startowych klas, poziomów umiejętności
+(`t_skillLevel` pusta) i wzorów walki — źródło: kod serwera, jeśli właściciel ma.
