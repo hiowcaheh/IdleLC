@@ -1339,7 +1339,6 @@ a.button {
 }
 
 .hunt__expedition {
-  margin-left: auto;
   min-height: 30px;
   padding: 2px 12px;
   border-radius: 15px;
@@ -2282,14 +2281,6 @@ a.button {
   cursor: pointer;
 }
 
-.hunt__shop + .hunt__expedition {
-  margin-left: 0;
-}
-
-.hunt__header .hunt__shop {
-  margin-left: auto;
-}
-
 .shop__gold {
   display: flex;
   align-items: center;
@@ -2476,10 +2467,6 @@ a.button {
   margin-bottom: 8px;
 }
 
-.hunt__shop + .hunt__shop {
-  margin-left: 0;
-}
-
 /* Rare items: unidentified red, identified by grade (owner's colours) */
 .item-row__name.name--unidentified,
 .name--unidentified {
@@ -2577,10 +2564,21 @@ a.button {
   accent-color: var(--gilt);
 }
 
-/* Names over the fighters and the monster's curses under its HP bar (scene/SceneLabel.tsx) */
-.scene-label {
-  white-space: nowrap;
+/* Names over the fighters and the monster's curses under its HP bar (ui/hud/SceneLabels.tsx): the
+   scene moves each label to its bar's point; the content sits above (names) or below (curses) it */
+.scene-labels {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
   pointer-events: none;
+}
+
+.scene-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  visibility: hidden;
+  white-space: nowrap;
   user-select: none;
   font-weight: 700;
   font-size: 12px;
@@ -2591,17 +2589,13 @@ a.button {
     0 1px 2px #000;
 }
 
-.scene-label--player,
-.scene-label--monster {
-  transform: translateY(-15px);
+.scene-label__text {
+  display: block;
+  transform: translate(-50%, calc(-100% - 7px));
 }
 
 .scene-label--player {
   color: #bfe7ff;
-}
-
-.scene-label--effects {
-  transform: translateY(17px);
 }
 
 .scene-label__level {
@@ -2635,6 +2629,7 @@ a.button {
   margin: 0;
   flex-wrap: nowrap;
   gap: 2px;
+  transform: translate(-50%, 7px);
 }
 
 .scene-label--effects .effect-row__time {
@@ -2716,4 +2711,17 @@ a.button {
   margin-left: auto;
   color: var(--gilt-bright);
   font-weight: 700;
+}
+
+/* Shop, Appraiser and Expedition share one row under the zone name */
+.hunt__actions {
+  display: flex;
+  flex-basis: 100%;
+  gap: 6px;
+}
+
+.hunt__actions > button {
+  flex: 1;
+  min-height: 34px;
+  padding: 2px 8px;
 }

@@ -51,15 +51,21 @@ export function HuntPanel() {
         <p className="hunt__kills">
           Kills: <strong>{kills}</strong>
         </p>
-        <button type="button" className="hunt__shop" onClick={() => setShopOpen(true)}>
-          Shop
-        </button>
-        <button type="button" className="hunt__shop" onClick={() => setAppraiserOpen(true)}>
-          Appraiser
-        </button>
-        <button type="button" className="hunt__expedition" onClick={() => setExpeditionOpen(true)}>
-          Expedition
-        </button>
+        <div className="hunt__actions">
+          <button type="button" className="hunt__shop" onClick={() => setShopOpen(true)}>
+            Shop
+          </button>
+          <button type="button" className="hunt__shop" onClick={() => setAppraiserOpen(true)}>
+            Appraiser
+          </button>
+          <button
+            type="button"
+            className="hunt__expedition"
+            onClick={() => setExpeditionOpen(true)}
+          >
+            Expedition
+          </button>
+        </div>
       </header>
       <div ref={list} className="hunt__targets" role="radiogroup" aria-label="Choose your target">
         {zone.monsterIds.map((id) => {

@@ -14,12 +14,10 @@ import { DamageNumbers } from './DamageNumbers.tsx'
 import { HpBar3D } from './HpBar3D.tsx'
 import { LevelUpEffect } from './LevelUpEffect.tsx'
 import { ModelBoundary } from './ModelBoundary.tsx'
-import { SceneLabel } from './SceneLabel.tsx'
+import { placeLabel, type SceneLabelId } from './labelAnchors.ts'
 import { SkillAura } from './SkillAura.tsx'
 import { ARENA_RADIUS, smoothstep } from './terrain.ts'
 import { optionText } from '../ui/gear/format.ts'
-import { levelTone } from '../ui/hud/levelColor.ts'
-import { EffectRow } from '../ui/skills/EffectRow.tsx'
 import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
 /** How far the player runs to reach a newly spawned monster. */
@@ -87,8 +85,6 @@ export function Battle() {
   useEffect(() => {
     showNumbersRef.current = showNumbers
   }, [showNumbers])
-  const characterName = useGameStore((s) => s.character?.name ?? '')
-  const playerLevel = useGameStore((s) => s.character?.level ?? 1)
 
   /** Where the HP bars go each frame (the labels sit around them). */
   const playerBar = () => {
@@ -318,6 +314,23 @@ export function Battle() {
     }
   })
 
+  // the HTML labels (ui/hud/SceneLabels.tsx) follow the HP bars
+  const labelPoint = useRef(new Vector3())
+  useFrame(({ camera, size }) => {
+    const place = (
+      id: SceneLabelId,
+      bar: { x: number; y: number; z: number; visible: boolean },
+    ) => {
+      const p = labelPoint.current.set(bar.x, bar.y, bar.z).project(camera)
+      const inView = bar.visible && p.z < 1
+      placeLabel(id, ((p.x + 1) / 2) * size.width, ((1 - p.y) / 2) * size.height, inView)
+    }
+    place('player', playerBar())
+    const monsterAt = monsterBar()
+    place('monster', monsterAt)
+    place('effects', monsterAt)
+  })
+
   return (
     <>
       <group ref={playerGroup}>
@@ -338,21 +351,7 @@ export function Battle() {
         </ModelBoundary>
       </group>
       <HpBar3D color="#62c04a" read={playerBar} />
-      <SceneLabel className="scene-label scene-label--player" read={playerBar}>
-        {characterName}
-      </SceneLabel>
       <HpBar3D color="#d8392b" read={monsterBar} />
-      <SceneLabel className="scene-label scene-label--monster" read={monsterBar}>
-        <span
-          className={`scene-label__level level-tone--${levelTone(playerLevel, monsterDef.level)}`}
-        >
-          Lv {monsterDef.level}
-        </span>
-        {monsterDef.name}
-      </SceneLabel>
-      <SceneLabel className="scene-label scene-label--effects" read={monsterBar}>
-        <EffectRow side="monster" size={16} />
-      </SceneLabel>
       <DamageNumbers />
       <LevelUpEffect />
       <SkillAura />
