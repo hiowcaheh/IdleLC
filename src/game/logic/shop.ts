@@ -28,9 +28,14 @@ export interface SaleResult {
   gold: number
 }
 
-/** What the shop pays for one piece: t_item.a_price × t_shop.a_sell_rate %, rounded down. */
+/**
+ * What the shop pays for one piece: t_item.a_price × t_shop.a_sell_rate %, rounded down. Weapons and
+ * armor fetch at least 1 gold (owner's rule: the free starter set can be sold too).
+ */
 export function sellPrice(itemId: number): number {
-  return Math.max(0, Math.floor((getItem(itemId).price * SHOP_SELL_RATE) / 100))
+  const item = getItem(itemId)
+  const price = Math.max(0, Math.floor((item.price * SHOP_SELL_RATE) / 100))
+  return item.gear ? Math.max(1, price) : price
 }
 
 /** What a set of stacks would sell for. */

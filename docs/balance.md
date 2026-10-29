@@ -225,9 +225,10 @@ cenie z bazy (decyzja własna).
 
 - **broń i zbroje klasy**: dla każdego slotu poprzedni, obecny i następny próg (`tierWindow`) z głównej linii
   przedmiotów w bazie (zwykłe przedmioty, flaga ulepszania, cena ≥ 100, najczęstsza cena w progu; bez poziomu 1 —
-  każdy ma zestaw startowy). Broń co 4 poziomy, zbroja co 5;
+  każdy ma zestaw startowy), w każdym progu **jeden, najsłabszy** przedmiot (najmniej ataku / obrony; prośba
+  właściciela — bez duplikatów i mocniejszych odmian). Broń co 4 poziomy, zbroja co 5;
 - **akcesoria** z losowymi opcjami;
-- **towary** sklepów NPC strefy (`t_shopitem`): mikstury i kamienie (Heaven Stone).
+- **towary** sklepów NPC strefy (`t_shopitem`): mikstury i kamienie (Heaven Stone), plus lupy.
 
 Cena = `a_price × a_buy_rate %` (100%).
 
@@ -312,5 +313,6 @@ na pasek, jeśli jest miejsce; w oknie Skills: „Add to bar” / „Remove from
 
 Sklep płaci `t_item.a_price × t_shop.a_sell_rate %`, w dół do pełnej sztuki złota. We wszystkich 65 sklepach
 LC `a_sell_rate = 40`, a `a_buy_rate = 100` (to, ile płaci gracz przy kupnie). Przykład: Fox Tail (cena 26)
-→ 10 złota; broń poziomu 5 (cena 1 066) → 426 złota. Przedmioty z ceną 0 nie są skupowane.
+→ 10 złota; broń poziomu 5 (cena 1 066) → 426 złota. Przedmioty z ceną 0 nie są skupowane — poza bronią i zbroją, które sklep bierze za co najmniej 1 złoto
+(decyzja właściciela: da się sprzedać zestaw startowy).
 Znaczenie obu kolumn potwierdzi kod serwera.

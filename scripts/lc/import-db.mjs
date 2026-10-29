@@ -368,9 +368,10 @@ function buildPotions(tables, itemRows, usable) {
 }
 
 /**
- * Gear the IdleLC shop offers a class, by slot and tier (t_item.a_level): the regular pieces of each
- * tier with the tier's most common price (premium sets cost more). Level-1 pieces are left out —
- * every character starts with them. The shop shows the tiers around the character's level.
+ * Gear the IdleLC shop offers a class, by slot and tier (t_item.a_level): of the regular pieces of
+ * each tier with the tier's most common price (premium sets cost more), the weakest one. Level-1
+ * pieces are left out — every character starts with them. The shop shows the tiers around the
+ * character's level.
  */
 function buildShopGear(itemTable, isGear, usable) {
   const shopGear = {}
@@ -399,13 +400,14 @@ function buildShopGear(itemTable, isGear, usable) {
           const prices = new Map()
           for (const r of pieces) prices.set(int(r.a_price), (prices.get(int(r.a_price)) ?? 0) + 1)
           const [mainPrice] = [...prices].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0]
-          return {
-            level,
-            items: pieces
-              .filter((r) => int(r.a_price) === mainPrice)
-              .map((r) => int(r.a_index))
-              .sort((a, b) => a - b),
-          }
+          // one piece per tier (owner's rule): the weakest of the main line — attack + magic
+          // attack, or defense + magic defense (a_num_0 + a_num_1) — so the same item listed
+          // under several ids and the stronger variants of a tier don't fill the shop
+          const power = (r) => int(r.a_num_0) + int(r.a_num_1)
+          const [weakest] = pieces
+            .filter((r) => int(r.a_price) === mainPrice)
+            .sort((a, b) => power(a) - power(b) || int(a.a_index) - int(b.a_index))
+          return { level, items: [int(weakest.a_index)] }
         })
       if (tiers.length) slots[slot] = tiers
     }

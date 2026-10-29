@@ -3,6 +3,7 @@ import { skillsForClass } from '../game/data/skills.ts'
 import { checkLearn } from '../game/logic/skills.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { GameCanvas } from '../scene/GameCanvas.tsx'
+import { RewardFeed } from './hud/RewardFeed.tsx'
 import { SceneLabels } from './hud/SceneLabels.tsx'
 import { AfkSummary } from './AfkSummary.tsx'
 import { DevPanel } from './dev/DevPanel.tsx'
@@ -41,6 +42,7 @@ export function GameScreen() {
     <div className="game">
       <GameCanvas />
       {character && !character.expedition && <SceneLabels />}
+      {character && !character.expedition && <RewardFeed />}
 
       <div className="hud">
         <div className="hud__top">

@@ -29,6 +29,11 @@ describe('shop', () => {
     expect(stacksValue(hero.inventory)).toBe(5 * price(1) + price(4))
   })
 
+  it('buys weapons and armor for at least 1 gold (the free starter set too)', () => {
+    expect(getItem(5).price).toBe(0) // Training Sword, starter weapon
+    expect(sellPrice(5)).toBe(1)
+  })
+
   it('sells part of a stack and removes emptied stacks', () => {
     const sale = applySale(hero, [
       { itemId: 1, count: 2 },

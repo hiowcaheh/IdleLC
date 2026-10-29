@@ -1185,12 +1185,6 @@ a.button {
   white-space: nowrap;
 }
 
-.item-row--weapon .item-row__name,
-.item-row--armor .item-row__name,
-.item-row--accessory .item-row__name {
-  color: #a9dcff;
-}
-
 .item-row__meta {
   font-size: 13px;
   color: var(--parchment-dim);
@@ -2334,13 +2328,6 @@ a.button {
   color: #8fd2ff;
 }
 
-.option-list__item.is-useless {
-  font-weight: 400;
-  color: var(--parchment-dim);
-  text-decoration: line-through;
-  text-decoration-color: rgba(185, 168, 136, 0.5);
-}
-
 .shop__slot {
   margin-bottom: 10px;
 }
@@ -2724,4 +2711,106 @@ a.button {
   flex: 1;
   min-height: 34px;
   padding: 2px 8px;
+}
+
+.hero-stats__buff {
+  font-size: 13px;
+  color: #8fe36a;
+}
+
+/* Rewards of a kill rising up the right side (ui/hud/RewardFeed.tsx) */
+.reward-feed {
+  --rise: 30vh;
+  position: absolute;
+  right: 10px;
+  top: 34%;
+  height: var(--rise);
+  width: min(52vw, 220px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.reward-feed__group {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  max-width: 100%;
+  opacity: 0;
+  animation: reward-rise 3.6s ease-out both;
+}
+
+.reward-feed__entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--parchment);
+  text-shadow:
+    0 0 3px #000,
+    0 1px 2px #000;
+}
+
+.reward-feed__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reward-feed__entry--exp {
+  color: #f2d870;
+}
+
+.reward-feed__entry--sp {
+  color: #8fe36a;
+}
+
+.reward-feed__entry--gold {
+  color: var(--gilt-bright);
+}
+
+.reward-feed__entry--option {
+  color: #8fd2ff;
+}
+
+@keyframes reward-rise {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(calc(-1 * var(--rise) + 100%));
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reward-feed__group {
+    animation-name: reward-fade;
+  }
+
+  @keyframes reward-fade {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    15%,
+    80% {
+      opacity: 1;
+    }
+  }
 }

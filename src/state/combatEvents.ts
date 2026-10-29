@@ -6,7 +6,15 @@ import type { ItemOption } from '../game/logic/options.ts'
 export type ViewEvent =
   | CombatEvent
   | { type: 'reset' }
-  | { type: 'reward'; exp: number; gold: number; levelsGained: number; drops: ItemStack[] }
+  | {
+      type: 'reward'
+      exp: number
+      gold: number
+      /** Skill points in 1/10 000 SP. */
+      sp: number
+      levelsGained: number
+      drops: ItemStack[]
+    }
   | { type: 'levelUp'; level: number }
   /** A worn piece gained an option from play time. */
   | { type: 'optionGained'; itemId: number; option: ItemOption }

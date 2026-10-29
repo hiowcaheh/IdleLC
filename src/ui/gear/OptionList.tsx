@@ -2,7 +2,7 @@ import type { ClassId } from '../../game/data/types.ts'
 import type { ItemOption } from '../../game/logic/options.ts'
 import { optionLines } from './format.ts'
 
-/** A piece's options; ones that do nothing for the class are dimmed. */
+/** A piece's options, all shown alike (a hover note says when one does nothing for the class). */
 export function OptionList({
   options,
   classId,
@@ -15,11 +15,7 @@ export function OptionList({
   return (
     <span className="option-list">
       {lines.map((line, i) => (
-        <span
-          key={i}
-          className={`option-list__item${line.helps ? '' : ' is-useless'}`}
-          title={line.note}
-        >
+        <span key={i} className="option-list__item" title={line.note}>
           {line.text}
         </span>
       ))}

@@ -39,7 +39,8 @@ poziom, exp, złoto, SP, umiejętności, zabicia, ekwipunek i miejsce polowania.
 ostatniej postaci.
 
 **Ekran walki:** nad potworem „Lv N Nazwa” (kolor poziomu = trudność), pod jego paskiem HP ikony klątw,
-ogłuszenia i trucizny; nad graczem jego nick. Ramka gracza u góry ma portret klasy z klienta. **Mapa świata:**
+ogłuszenia i trucizny; nad graczem jego nick. Nagrody za zabicie (drop z ikoną, EXP, SP, złoto) jadą po prawej
+stronie z dołu do góry; liczby nad głowami układają się w wiersze, żeby się nie nakładały. Ramka gracza u góry ma portret klasy z klienta. **Mapa świata:**
 dotknij nazwy strefy w panelu polowania — 9 stref z typowymi poziomami potworów (od najłatwiejszej); wybór
 przenosi polowanie tam (potwór najbliższy poziomem), więc widać inne potwory i ich drop.
 

@@ -3,12 +3,17 @@ import { CLASSES } from '../../game/data/classes.ts'
 import { classSlots, getItem } from '../../game/data/items.ts'
 import type { EquipSlot } from '../../game/data/types.ts'
 import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
-import { MAX_COOLDOWN_REDUCTION, MAX_MP_COST_REDUCTION } from '../../game/logic/combat.ts'
+import {
+  MAX_COOLDOWN_REDUCTION,
+  MAX_MP_COST_REDUCTION,
+  effectiveStats,
+} from '../../game/logic/combat.ts'
 import { GameError } from '../../game/logic/character.ts'
 import { MAX_PLUS, stonesOwned, upgradeChance, type GearPiece } from '../../game/logic/equipment.ts'
 import { OPTION_PLAY_SECONDS } from '../../game/logic/options.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
+import { useCombatTicker } from '../skills/useCombatTicker.ts'
 import { Sheet } from '../Sheet.tsx'
 import {
   SLOT_LABELS,
@@ -43,26 +48,44 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   const [selected, setSelected] = useState<EquipSlot | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const combat = useCombatTicker(500)
   if (!character) return null
 
-  const stats = heroStats(character)
+  const away = character.expedition !== null
+  // the fight's stats include the buffs on the hero right now; the gear-only ones are the base
+  const base = heroStats(character)
+  const stats = away ? base : effectiveStats(combat.player)
+  const buffs = away ? [] : combat.player.effects.map((e) => e.name)
   const options = optionTotals(character.equipment, character.classId)
   const nextOption = OPTION_PLAY_SECONDS - character.optionProgress
   const castTime = stats.castTime ?? 0
-  const statRows: [string, string][] = [
-    ['Health', fmt(stats.maxHp)],
-    ['Mana', fmt(stats.maxMp ?? 0)],
-    ['Attack', fmt(stats.attack)],
-    ['Defense', fmt(stats.defense)],
-    ['Attack speed', `${stats.attackInterval.toFixed(2)} s`],
+  /** What the buffs on the hero change in a stat ("+25"), or nothing. */
+  const change = (now: number, before: number, digits = 0) => {
+    const d = Number((now - before).toFixed(digits))
+    return d === 0 ? undefined : `${d > 0 ? '+' : '−'}${Math.abs(d).toFixed(digits)}`
+  }
+  const statRows: [string, string, string?][] = [
+    ['Health', fmt(stats.maxHp), change(stats.maxHp, base.maxHp)],
+    ['Mana', fmt(stats.maxMp ?? 0), change(stats.maxMp ?? 0, base.maxMp ?? 0)],
+    ['Attack', fmt(stats.attack), change(stats.attack, base.attack)],
+    ['Defense', fmt(stats.defense), change(stats.defense, base.defense)],
+    [
+      'Attack speed',
+      `${stats.attackInterval.toFixed(2)} s`,
+      change(stats.attackInterval, base.attackInterval, 2),
+    ],
     [
       'Cast time',
       castTime === 0 ? 'Normal' : `${castTime > 0 ? '+' : '−'}${Math.abs(castTime).toFixed(1)} s`,
     ],
-    ['Critical chance', percent(stats.critChance * 100)],
+    [
+      'Critical chance',
+      percent(stats.critChance * 100),
+      change(stats.critChance * 100, base.critChance * 100, 1),
+    ],
     ['Critical damage', `×${stats.critMultiplier.toFixed(2)}`],
-    ['Accuracy', `+${percent(stats.hit ?? 0)}`],
-    ['Evasion', `+${percent(stats.dodge ?? 0)}`],
+    ['Accuracy', `+${percent(stats.hit ?? 0)}`, change(stats.hit ?? 0, base.hit ?? 0, 1)],
+    ['Evasion', `+${percent(stats.dodge ?? 0)}`, change(stats.dodge ?? 0, base.dodge ?? 0, 1)],
     ['HP recovery', `+${fmt(stats.hpRegen ?? 0)} / ${REGEN_TICK_SECONDS} s`],
     ['MP recovery', `+${fmt(stats.mpRegen ?? 0)} / ${REGEN_TICK_SECONDS} s`],
   ]
@@ -79,7 +102,6 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
     if (value !== 0) statRows.push([label, `${value > 0 ? '+' : '−'}${percent(Math.abs(value))}`])
   }
   const stones = stonesOwned(character)
-  const away = character.expedition !== null
   const slots = classSlots(character.classId)
 
   const run = async (action: () => Promise<string>) => {
@@ -131,13 +153,21 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
       {tab === 'stats' && (
         <div role="tabpanel" id="character-panel-stats" aria-labelledby="character-tab-stats">
           <dl className="hero-stats">
-            {statRows.map(([label, value]) => (
+            {statRows.map(([label, value, buffed]) => (
               <div key={label}>
                 <dt>{label}</dt>
-                <dd>{value}</dd>
+                <dd>
+                  {value}
+                  {buffed && <span className="hero-stats__buff"> ({buffed})</span>}
+                </dd>
               </div>
             ))}
           </dl>
+          {buffs.length > 0 && (
+            <p className="sheet__meta">
+              Active now: {buffs.join(', ')} (in brackets: what they add).
+            </p>
+          )}
           <h3 className="inventory__heading">Options on your gear</h3>
           <p className="sheet__meta">
             Next option on a worn piece in {Math.max(1, Math.ceil(nextOption / 60))} min of play
@@ -146,11 +176,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
           {options.length > 0 ? (
             <span className="option-list option-list--totals">
               {options.map((line) => (
-                <span
-                  key={line.text}
-                  className={`option-list__item${line.helps ? '' : ' is-useless'}`}
-                  title={line.note}
-                >
+                <span key={line.text} className="option-list__item" title={line.note}>
                   {line.text}
                 </span>
               ))}

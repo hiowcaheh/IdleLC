@@ -147,12 +147,13 @@ export const useGameStore = create<GameStore>((set, get) => {
         option,
       })),
     )
-    if (result.exp || result.gold || result.levelsGained || result.drops.length) {
+    if (result.exp || result.gold || result.sp || result.levelsGained || result.drops.length) {
       combatEvents.emit([
         {
           type: 'reward',
           exp: result.exp,
           gold: result.gold,
+          sp: result.sp,
           levelsGained: result.levelsGained,
           drops: result.drops,
         },

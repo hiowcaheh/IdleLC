@@ -2,7 +2,6 @@ import { useFrame } from '@react-three/fiber'
 import { Suspense, useEffect, useRef } from 'react'
 import { Vector3, type Group } from 'three'
 import { getModel, playerModelId } from '../game/assets/manifest.ts'
-import { getItem } from '../game/data/items.ts'
 import { getMonster } from '../game/data/monsters.ts'
 import { TIMINGS, approachTime, effectiveStats, type Side } from '../game/logic/combat.ts'
 import { combatSession } from '../game/session/combatSession.ts'
@@ -17,7 +16,6 @@ import { ModelBoundary } from './ModelBoundary.tsx'
 import { placeLabel, type SceneLabelId } from './labelAnchors.ts'
 import { SkillAura } from './SkillAura.tsx'
 import { ARENA_RADIUS, smoothstep } from './terrain.ts'
-import { optionText } from '../ui/gear/format.ts'
 import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
 /** How far the player runs to reach a newly spawned monster. */
@@ -39,6 +37,11 @@ function engageDistance(monsterId: string, playerModel: string): number {
   const heroRadius = (hero.radius ?? 0.5) * hero.scale * 0.6
   return Math.min(6, Math.max(1.5, heroRadius + monsterRadius + 0.5))
 }
+
+/** Floating texts over one fighter within this many ms stack in rows (up to TEXT_ROWS). */
+const TEXT_STACK_MS = 600
+const TEXT_ROWS = 4
+const TEXT_ROW_HEIGHT = 0.3
 
 /** Height of the HP bars over the heads (world units); names and curses sit on them (CSS offsets). */
 const BAR_LIFT = 0.22
@@ -123,21 +126,20 @@ export function Battle() {
   }, [])
 
   useEffect(() => {
+    // texts over the same fighter close together in time take the next row up, so they don't overlap
+    const recent: Record<Side, number[]> = { player: [], monster: [] }
     const textAt = (side: Side, text: string, kind: FloatingKind) => {
       if (!showNumbersRef.current) return
       const pos = side === 'player' ? view.player : view.monster
       const handle = side === 'player' ? player.current : monster.current
       const height = handle?.height() ?? 1.8
-      const jitter = (Math.random() - 0.5) * 0.5
-      useFloatingTexts.getState().add(text, kind, [pos.x + jitter, height + 0.45, pos.z])
-    }
-
-    /** Rewards float above the player (shown even with damage numbers off). */
-    const rewardText = (text: string, kind: FloatingKind, lift: number) => {
-      const height = player.current?.height() ?? 1.8
-      useFloatingTexts
-        .getState()
-        .add(text, kind, [view.player.x, height + 0.7 + lift, view.player.z])
+      const now = performance.now()
+      recent[side] = [...recent[side].filter((t) => now - t < TEXT_STACK_MS), now]
+      const row = (recent[side].length - 1) % TEXT_ROWS
+      const lift =
+        row * TEXT_ROW_HEIGHT + (kind === 'skill' || kind === 'effect' ? TEXT_ROW_HEIGHT : 0)
+      const jitter = (Math.random() - 0.5) * 0.3
+      useFloatingTexts.getState().add(text, kind, [pos.x + jitter, height + 0.45 + lift, pos.z])
     }
 
     const onEvent = (e: ViewEvent) => {
@@ -221,20 +223,6 @@ export function Battle() {
         case 'revive':
           player.current?.revive()
           player.current?.setBase('idle')
-          break
-        case 'reward':
-          if (e.exp > 0) rewardText(`+${e.exp.toLocaleString('en-US')} EXP`, 'exp', 0)
-          if (e.gold > 0) rewardText(`+${e.gold.toLocaleString('en-US')} gold`, 'gold', -0.35)
-          e.drops.forEach((d, i) =>
-            rewardText(
-              `${getItem(d.itemId).name}${d.count > 1 ? ` ×${d.count}` : ''}`,
-              'loot',
-              0.4 + i * 0.32,
-            ),
-          )
-          break
-        case 'optionGained':
-          rewardText(`${getItem(e.itemId).name}: ${optionText(e.option)}`, 'skill', 1.1)
           break
         case 'reset':
           resetView()
