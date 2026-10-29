@@ -1,5 +1,7 @@
 import type { AfkResult } from '../logic/afk.ts'
+import type { EquipSlot } from '../data/types.ts'
 import type { CharacterData, CharacterLocation, NewCharacter } from '../logic/character.ts'
+import type { GearSource, UpgradeResult } from '../logic/equipment.ts'
 import type { ItemStack } from '../logic/loot.ts'
 import type { CombatReport, CombatResult } from '../logic/rewards.ts'
 import type { LoadResult, SaveData, Settings } from '../logic/save.ts'
@@ -38,6 +40,15 @@ export interface GameService {
   learnSkill(characterId: string, skillId: number): Promise<CharacterData>
   /** Turns automatic use of a learned skill in combat on or off. */
   setSkillAuto(characterId: string, skillId: number, auto: boolean): Promise<CharacterData>
+  /** Wears a weapon or armor piece from the bag (class and level checked). */
+  equipItem(characterId: string, source: GearSource): Promise<CharacterData>
+  unequipItem(characterId: string, slot: EquipSlot): Promise<CharacterData>
+  /** Upgrades a worn piece with a Smelting Stone; the server rolls the chance. */
+  upgradeItem(characterId: string, slot: EquipSlot): Promise<UpgradeResult>
+  /** Buys from the shop of the zone the character is in. */
+  buyItem(characterId: string, itemId: number, count: number): Promise<CharacterData>
+  /** Sells an upgraded piece from the bag. */
+  sellGear(characterId: string, uid: string): Promise<CharacterData>
   updateSettings(patch: Partial<Settings>): Promise<Settings>
   /** Deletes the whole save (all characters) and starts over. */
   resetSave(): Promise<SaveData>

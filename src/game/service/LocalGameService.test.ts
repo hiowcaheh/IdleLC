@@ -7,6 +7,7 @@ import { createRng } from '../logic/rng.ts'
 import { MIN_KILL_CYCLE, KILL_BURST } from '../logic/rewards.ts'
 import { SAVE_VERSION } from '../logic/save.ts'
 import { SP_UNIT } from '../logic/skills.ts'
+import { UPGRADE_STONE_ID } from '../data/items.ts'
 import type { KeyValueStorage } from './GameService.ts'
 import { LocalGameService, SAVE_KEY } from './LocalGameService.ts'
 
@@ -222,6 +223,31 @@ describe('LocalGameService', () => {
 
     await game.startAfk(hero.id)
     await expect(game.learnSkill(hero.id, 1)).rejects.toThrow('on-expedition')
+  })
+
+  it('buys, wears and upgrades gear, and keeps it after a reload', async () => {
+    const { game, clock, hero, storage } = await withKnight()
+    await game.dev.addGold(hero.id, 1000)
+    await game.dev.setLevel(hero.id, 3)
+    await expect(game.buyItem(hero.id, 1, 1)).rejects.toThrow('not-in-shop')
+    await game.buyItem(hero.id, 4, 1)
+    const stones = await game.buyItem(hero.id, UPGRADE_STONE_ID, 3)
+    expect(stones.gold).toBe(1000 - 120 - 300)
+
+    const armed = await game.equipItem(hero.id, { itemId: 4 })
+    expect(armed.equipment.weapon).toMatchObject({ itemId: 4, plus: 0 })
+    expect(armed.inventory).toContainEqual({ itemId: 5, count: 1 }) // the old sword
+
+    const upgrade = await game.upgradeItem(hero.id, 'weapon')
+    expect(upgrade.character.equipment.weapon!.plus).toBe(upgrade.plusAfter)
+    expect(upgrade.character.inventory).toContainEqual({ itemId: UPGRADE_STONE_ID, count: 2 })
+
+    const reloaded = new LocalGameService(storage, { now: () => clock.now, rng: createRng(1) })
+    const { save } = await reloaded.load()
+    expect(save.characters[0]!.equipment.weapon).toEqual(upgrade.character.equipment.weapon)
+
+    await game.startAfk(hero.id)
+    await expect(game.unequipItem(hero.id, 'weapon')).rejects.toThrow('on-expedition')
   })
 
   it('offers a dev command for skill points', async () => {

@@ -6,8 +6,9 @@
 import { CLASSES } from '../data/classes.ts'
 import { MONSTERS } from '../data/monsters.ts'
 import { MAX_LEVEL } from '../data/progression.ts'
+import { getItem } from '../data/items.ts'
 import { getSkill } from '../data/skills.ts'
-import type { ClassId } from '../data/types.ts'
+import type { ClassId, EquipSlot } from '../data/types.ts'
 import { ZONES } from '../data/zones.ts'
 import {
   MAX_CHARACTERS,
@@ -17,11 +18,12 @@ import {
   type CharacterLocation,
   type Expedition,
 } from './character.ts'
+import { MAX_PLUS, starterEquipment, type Equipment, type GearPiece } from './equipment.ts'
 import { newId } from './id.ts'
 import { addToInventory, type ItemStack } from './loot.ts'
 import { starterSkills, type LearnedSkill } from './skills.ts'
 
-export const SAVE_VERSION = 5
+export const SAVE_VERSION = 6
 
 export type GraphicsQuality = 'auto' | 'low' | 'high'
 
@@ -91,6 +93,17 @@ export const MIGRATIONS: Record<number, Migration> = {
       ? save.characters.map((c: unknown) =>
           isRecord(c) && typeof c.classId === 'string' && Object.hasOwn(CLASSES, c.classId)
             ? { ...c, sp: 0, skills: starterSkills(c.classId as ClassId) }
+            : c,
+        )
+      : [],
+  }),
+  // v6: equipment — everyone wears the free starter set of their class
+  5: (save) => ({
+    ...save,
+    characters: Array.isArray(save.characters)
+      ? save.characters.map((c: unknown) =>
+          isRecord(c) && typeof c.classId === 'string' && Object.hasOwn(CLASSES, c.classId)
+            ? { ...c, equipment: starterEquipment(c.classId as ClassId), gear: [] }
             : c,
         )
       : [],
@@ -188,7 +201,30 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     expedition: sanitizeExpedition(raw.expedition),
     sp: int(raw.sp, 0),
     skills: sanitizeSkills(raw.skills, raw.classId as ClassId),
+    equipment: sanitizeEquipment(raw.equipment),
+    gear: (Array.isArray(raw.gear) ? raw.gear : [])
+      .map((p: unknown) => sanitizePiece(p))
+      .filter((p): p is GearPiece => p !== null),
   }
+}
+
+/** A weapon or armor piece that still exists. */
+function sanitizePiece(raw: unknown): GearPiece | null {
+  if (!isRecord(raw) || typeof raw.uid !== 'string' || !raw.uid) return null
+  const itemId = int(raw.itemId, 0)
+  if (!getItem(itemId).gear) return null
+  return { uid: raw.uid, itemId, plus: Math.min(MAX_PLUS, int(raw.plus, 0)) }
+}
+
+/** Worn pieces in the slot they belong to. */
+function sanitizeEquipment(raw: unknown): Equipment {
+  const equipment: Equipment = {}
+  if (!isRecord(raw)) return equipment
+  for (const [slot, entry] of Object.entries(raw)) {
+    const piece = sanitizePiece(entry)
+    if (piece && getItem(piece.itemId).gear!.slot === slot) equipment[slot as EquipSlot] = piece
+  }
+  return equipment
 }
 
 /** Learned skills that still exist for the class, at a level they have. */

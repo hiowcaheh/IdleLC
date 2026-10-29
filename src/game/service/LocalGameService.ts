@@ -23,6 +23,16 @@ import { createRng, type Rng } from '../logic/rng.ts'
 import type { ItemStack } from '../logic/loot.ts'
 import { applySale, type SaleResult } from '../logic/shop.ts'
 import { SP_UNIT, applyAuto, applyLearn } from '../logic/skills.ts'
+import type { EquipSlot } from '../data/types.ts'
+import {
+  applyBuy,
+  applyEquip,
+  applySellPiece,
+  applyUnequip,
+  applyUpgrade,
+  type GearSource,
+  type UpgradeResult,
+} from '../logic/equipment.ts'
 import {
   createDefaultSave,
   loadSave,
@@ -151,6 +161,32 @@ export class LocalGameService implements GameService {
   async setSkillAuto(characterId: string, skillId: number, auto: boolean): Promise<CharacterData> {
     const changed = applyAuto(this.notOnExpedition(characterId), skillId, auto)
     return copy(this.update(characterId, () => changed))
+  }
+
+  async equipItem(characterId: string, source: GearSource): Promise<CharacterData> {
+    const changed = applyEquip(this.notOnExpedition(characterId), source)
+    return copy(this.update(characterId, () => changed))
+  }
+
+  async unequipItem(characterId: string, slot: EquipSlot): Promise<CharacterData> {
+    const changed = applyUnequip(this.notOnExpedition(characterId), slot)
+    return copy(this.update(characterId, () => changed))
+  }
+
+  async upgradeItem(characterId: string, slot: EquipSlot): Promise<UpgradeResult> {
+    const result = applyUpgrade(this.notOnExpedition(characterId), slot, this.rng)
+    const updated = this.update(characterId, () => result.character)
+    return copy({ ...result, character: updated })
+  }
+
+  async buyItem(characterId: string, itemId: number, count: number): Promise<CharacterData> {
+    const changed = applyBuy(this.notOnExpedition(characterId), itemId, count)
+    return copy(this.update(characterId, () => changed))
+  }
+
+  async sellGear(characterId: string, uid: string): Promise<CharacterData> {
+    const { character } = applySellPiece(this.character(characterId), uid)
+    return copy(this.update(characterId, () => character))
   }
 
   async updateSettings(patch: Partial<Settings>): Promise<Settings> {

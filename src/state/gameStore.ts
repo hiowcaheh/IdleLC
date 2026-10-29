@@ -4,6 +4,8 @@ import type { AfkResult } from '../game/logic/afk.ts'
 import type { CharacterData, NewCharacter } from '../game/logic/character.ts'
 import { effectiveStats, type CombatPhase, type CombatState } from '../game/logic/combat.ts'
 import { heroKey } from '../game/logic/fighters.ts'
+import type { EquipSlot } from '../game/data/types.ts'
+import type { GearSource, UpgradeResult } from '../game/logic/equipment.ts'
 import type { ItemStack } from '../game/logic/loot.ts'
 import type { CombatResult } from '../game/logic/rewards.ts'
 import type { LoadResult, SaveData, Settings } from '../game/logic/save.ts'
@@ -55,6 +57,12 @@ interface GameStore {
   /** Learns the next level of a skill (rejects with a GameError). */
   learnSkill(skillId: number): Promise<void>
   setSkillAuto(skillId: number, auto: boolean): Promise<void>
+  /** Equipment commands of the played character (reject with a GameError). */
+  equipItem(source: GearSource): Promise<void>
+  unequipItem(slot: EquipSlot): Promise<void>
+  upgradeItem(slot: EquipSlot): Promise<UpgradeResult>
+  buyItem(itemId: number, count: number): Promise<void>
+  sellGear(uid: string): Promise<void>
   selectMonster(monsterId: string): void
   selectZone(zoneId: string, monsterId?: string): void
   syncCombat(combat: CombatState): void
@@ -182,6 +190,12 @@ export const useGameStore = create<GameStore>((set, get) => {
     }
   }
 
+  const playedId = () => {
+    const character = get().character
+    if (!character) throw new Error('No character is being played')
+    return character.id
+  }
+
   const dev = (command: (characterId: string) => Promise<CharacterData> | undefined) => {
     const character = get().character
     if (!character) return
@@ -292,6 +306,33 @@ export const useGameStore = create<GameStore>((set, get) => {
       const character = get().character
       if (!character) throw new Error('No character is being played')
       applyCharacter(await enqueue(() => gameService.setSkillAuto(character.id, skillId, auto)))
+    },
+
+    async equipItem(source) {
+      const id = playedId()
+      applyCharacter(await enqueue(() => gameService.equipItem(id, source)))
+    },
+
+    async unequipItem(slot) {
+      const id = playedId()
+      applyCharacter(await enqueue(() => gameService.unequipItem(id, slot)))
+    },
+
+    async upgradeItem(slot) {
+      const id = playedId()
+      const result = await enqueue(() => gameService.upgradeItem(id, slot))
+      applyCharacter(result.character)
+      return result
+    },
+
+    async buyItem(itemId, count) {
+      const id = playedId()
+      applyCharacter(await enqueue(() => gameService.buyItem(id, itemId, count)))
+    },
+
+    async sellGear(uid) {
+      const id = playedId()
+      applyCharacter(await enqueue(() => gameService.sellGear(id, uid)))
     },
 
     selectMonster(monsterId) {

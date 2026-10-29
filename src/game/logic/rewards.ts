@@ -6,7 +6,7 @@ import type { MonsterDef } from '../data/types.ts'
 import { clamp } from './balance.ts'
 import type { CharacterData } from './character.ts'
 import { TIMINGS } from './combat.ts'
-import { addToInventory, rollDrops, type ItemStack } from './loot.ts'
+import { addToInventory, lootTable, rollDrops, type ItemStack } from './loot.ts'
 import { gainExp } from './progression.ts'
 import type { Rng } from './rng.ts'
 
@@ -70,7 +70,7 @@ export function applyCombatReport(
   const gold = reward.gold * kills
   const sp = reward.sp * kills
   const progress = gainExp(character.level, character.exp, exp)
-  const drops = rollDrops(monster.drops, kills, rng)
+  const drops = rollDrops(lootTable(monster), kills, rng)
   return {
     character: {
       ...character,

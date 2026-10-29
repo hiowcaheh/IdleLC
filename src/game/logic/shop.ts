@@ -1,6 +1,7 @@
 /** Selling items to the shop. Pure — the server will run the same checks. */
 import { SHOP_SELL_RATE, getItem } from '../data/items.ts'
-import { GameError, type CharacterData } from './character.ts'
+import type { CharacterData } from './character.ts'
+import { GameError } from './errors.ts'
 import type { ItemStack } from './loot.ts'
 
 export interface SaleResult {

@@ -1,6 +1,18 @@
 /** Drops and the inventory. Pure. */
-import type { MonsterDrop } from '../data/types.ts'
+import { UPGRADE_STONE_ID } from '../data/items.ts'
+import type { MonsterDef, MonsterDrop } from '../data/types.ts'
 import { chance, type Rng } from './rng.ts'
+
+/**
+ * Drops every monster has on top of its own table. LC drops Smelting Stones by a server rule that is
+ * not in the database; 1% per kill is our own value until the server code is available.
+ */
+export const GENERAL_DROPS: MonsterDrop[] = [{ itemId: UPGRADE_STONE_ID, chance: 0.01 }]
+
+/** Everything a kill of the monster can drop. */
+export function lootTable(monster: Pick<MonsterDef, 'drops'>): MonsterDrop[] {
+  return [...(monster.drops ?? []), ...GENERAL_DROPS]
+}
 
 export interface ItemStack {
   itemId: number

@@ -7,7 +7,7 @@ import { getMonster } from '../data/monsters.ts'
 import type { CharacterData } from './character.ts'
 import { combatTick, createCombat, type FighterInit } from './combat.ts'
 import { monsterFighter, playerFighter, type Hero } from './fighters.ts'
-import { addToInventory, rollDrops, type ItemStack } from './loot.ts'
+import { addToInventory, lootTable, rollDrops, type ItemStack } from './loot.ts'
 import { gainExp } from './progression.ts'
 import { killReward } from './rewards.ts'
 import type { Rng } from './rng.ts'
@@ -118,7 +118,7 @@ export function simulateAfk(character: CharacterData, awaySeconds: number, rng: 
     ;({ level, exp } = gainExp(level, exp, sliceKills * reward.exp))
   }
 
-  const drops = rollDrops(monster.drops, kills, rng)
+  const drops = rollDrops(lootTable(monster), kills, rng)
   const gold = kills * reward.gold
   const sp = kills * reward.sp
   return {

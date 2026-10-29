@@ -110,6 +110,46 @@ describe('loadSave', () => {
     ])
   })
 
+  it('dresses version 5 characters in the starter set of their class', () => {
+    const v5 = { ...withCharacter(), saveVersion: 5 }
+    const knight = createCharacterData({ name: 'Brom', classId: 'knight' }, 'id-2', NOW)
+    const characters = [v5.characters[0]!, knight].map((c) => {
+      const old: Record<string, unknown> = { ...c }
+      delete old.equipment
+      delete old.gear
+      return old
+    })
+    const r = loadSave(JSON.stringify({ ...v5, characters }), NOW)
+    expect(r.status).toBe('migrated')
+    expect(r.save.characters[0]!.equipment).toEqual({})
+    expect(r.save.characters[1]!.equipment).toMatchObject({
+      weapon: { itemId: 5, plus: 0 },
+      armor: { itemId: 6, plus: 0 },
+    })
+    expect(r.save.characters[1]!.gear).toEqual([])
+  })
+
+  it('keeps worn and bagged gear that exists, in its own slot', () => {
+    const save = withCharacter()
+    const broken = {
+      ...save,
+      characters: [
+        {
+          ...save.characters[0],
+          equipment: {
+            weapon: { uid: 'a', itemId: 4, plus: 99 },
+            helmet: { uid: 'b', itemId: 6, plus: 0 }, // armor piece in the helmet slot
+            boots: { uid: 'c', itemId: 1, plus: 0 }, // not gear
+          },
+          gear: [{ uid: 'd', itemId: 7, plus: 2 }, { uid: '', itemId: 7 }, 'x'],
+        },
+      ],
+    }
+    const [hero] = loadSave(JSON.stringify(broken), NOW).save.characters
+    expect(hero!.equipment).toEqual({ weapon: { uid: 'a', itemId: 4, plus: 15 } })
+    expect(hero!.gear).toEqual([{ uid: 'd', itemId: 7, plus: 2 }])
+  })
+
   it('keeps only skills of the class, at levels they have', () => {
     const save = withCharacter()
     const knight = createCharacterData({ name: 'Brom', classId: 'knight' }, 'id-2', NOW)

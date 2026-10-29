@@ -5,6 +5,7 @@
 import { CLASSES } from '../data/classes.ts'
 import type { ClassId } from '../data/types.ts'
 import { DEFAULT_ZONE_ID, ZONES } from '../data/zones.ts'
+import { starterEquipment, type Equipment, type GearPiece } from './equipment.ts'
 import type { ItemStack } from './loot.ts'
 import { starterSkills, type LearnedSkill } from './skills.ts'
 
@@ -46,6 +47,10 @@ export interface CharacterData {
   sp: number
   /** Learned skills by skill id. */
   skills: Record<string, LearnedSkill>
+  /** Worn weapon and armor. */
+  equipment: Equipment
+  /** Upgraded pieces in the bag (plain ones stack in `inventory`). */
+  gear: GearPiece[]
 }
 
 export interface NewCharacter {
@@ -102,5 +107,7 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     expedition: null,
     sp: 0,
     skills: starterSkills(input.classId),
+    equipment: starterEquipment(input.classId),
+    gear: [],
   }
 }
