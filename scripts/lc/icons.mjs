@@ -84,3 +84,42 @@ export const ICON_KINDS = [
     atlasPath: (id) => `Data\\Interface\\SkillBtn${id}.tex`,
   },
 ]
+
+/** Class portraits: the round faces in Data\Interface\TopUI.tex (78 px circles on an 86 px grid). */
+export const PORTRAIT_ATLAS = 'Data\\Interface\\TopUI.tex'
+export const PORTRAIT_SIZE = 78
+/** Top-left corner of each class's portrait in TopUI.tex (picked by eye: the class's face). */
+export const PORTRAITS = {
+  titan: [925, 427],
+  knight: [925, 258],
+  healer: [751, 427],
+  mage: [925, 341],
+  rogue: [838, 427],
+  sorcerer: [838, 341],
+}
+
+/** One sheet with the class portraits (keys: class ids), or no image without the atlas. */
+export async function buildPortraitSheet(files, file) {
+  const ids = Object.keys(PORTRAITS)
+  const width = ids.length * PORTRAIT_SIZE
+  const height = PORTRAIT_SIZE
+  const icons = Object.fromEntries(ids.map((id, i) => [id, i]))
+  const sheet = { file, size: PORTRAIT_SIZE, columns: ids.length, width, height, icons }
+  if (!files.resolve(PORTRAIT_ATLAS)) return { image: null, sheet }
+  const atlas = parseTexture(files.read(PORTRAIT_ATLAS))
+  const pixels = Buffer.alloc(width * height * 4)
+  ids.forEach((id, i) => {
+    const [x, y] = PORTRAITS[id]
+    for (let row = 0; row < PORTRAIT_SIZE; row++) {
+      const from = ((y + row) * atlas.width + x) * 4
+      pixels.set(
+        atlas.rgba.subarray(from, from + PORTRAIT_SIZE * 4),
+        (row * width + i * PORTRAIT_SIZE) * 4,
+      )
+    }
+  })
+  const image = await sharp(pixels, { raw: { width, height, channels: 4 } })
+    .webp({ quality: 90 })
+    .toBuffer()
+  return { image, sheet }
+}

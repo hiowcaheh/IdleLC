@@ -29,7 +29,7 @@ import { dedup, meshopt, prune, resample, weld } from '@gltf-transform/functions
 import { MeshoptDecoder, MeshoptEncoder } from 'meshoptimizer'
 import { CLASS_MODELS } from './classes.mjs'
 import { ClientFiles } from './client.mjs'
-import { ICON_KINDS, buildIconSheet } from './icons.mjs'
+import { ICON_KINDS, buildIconSheet, buildPortraitSheet } from './icons.mjs'
 import { buildModelManifest, modelIdFromSmc } from './manifest.mjs'
 import { buildModel } from './model.mjs'
 import { parseSmc } from './smc.mjs'
@@ -37,6 +37,8 @@ import { parseSmc } from './smc.mjs'
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const GENERATED = path.join(ROOT, 'src/game/data/generated')
 const DEFAULT_OUT = path.join(ROOT, 'public/models/lc')
+/** Class portraits sheet (relative to public/). */
+const PORTRAITS_FILE = 'icons/lc/portraits.webp'
 
 function parseArgs(argv) {
   const args = {
@@ -211,6 +213,17 @@ async function main() {
           `${(image.length / 1024).toFixed(0)} KB` +
           (missingAtlases.length ? ` (missing atlases ${missingAtlases.join(', ')})` : ''),
       )
+    }
+    const portraits = await buildPortraitSheet(files, PORTRAITS_FILE)
+    if (portraits.image) {
+      const out = path.join(ROOT, 'public', PORTRAITS_FILE)
+      fs.mkdirSync(path.dirname(out), { recursive: true })
+      fs.writeFileSync(out, portraits.image)
+      const version = createHash('sha1').update(portraits.image).digest('hex').slice(0, 10)
+      manifest.portraits = { ...portraits.sheet, file: `${PORTRAITS_FILE}?v=${version}` }
+      console.log(`icons: class portraits ${Object.keys(portraits.sheet.icons).join(', ')}`)
+    } else {
+      console.warn('icons: no TopUI.tex (class portraits) in the client folder(s)')
     }
     if (Object.keys(manifest).length) {
       fs.mkdirSync(GENERATED, { recursive: true })

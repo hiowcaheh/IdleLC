@@ -11,7 +11,7 @@ export interface IconSprite {
 }
 
 /** Position of an icon in a sprite sheet written by convert-lc, or null when it has none. */
-export function iconSprite(sheet: LcIconSheet | undefined, id: number): IconSprite | null {
+export function iconSprite(sheet: LcIconSheet | undefined, id: number | string): IconSprite | null {
   const index = sheet?.icons[id]
   if (!sheet || index === undefined) return null
   const { size, columns } = sheet

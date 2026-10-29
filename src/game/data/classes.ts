@@ -1,3 +1,5 @@
+import { iconSprite, type IconSprite } from './icons.ts'
+import { lcIcons } from './lcSource.ts'
 import type { ClassDef, ClassId } from './types.ts'
 
 // Placeholder numbers and descriptions (own values): the LC database has no class stats.
@@ -109,3 +111,8 @@ export const CLASSES: Record<ClassId, ClassDef> = {
 
 /** Character creation order. */
 export const CLASS_ORDER: ClassId[] = ['titan', 'knight', 'healer', 'mage', 'rogue', 'sorcerer']
+
+/** The class's round face in the LC interface atlas (convert-lc), or null without the LC data. */
+export function classPortrait(classId: ClassId): IconSprite | null {
+  return iconSprite(lcIcons?.portraits, classId)
+}

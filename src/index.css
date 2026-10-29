@@ -181,6 +181,18 @@ p {
   stroke-linejoin: round;
 }
 
+.class-portrait {
+  display: block;
+  border-radius: 50%;
+  background-repeat: no-repeat;
+}
+
+.unit-frame__portrait .class-portrait {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+}
+
 .unit-frame__portrait .crest-line {
   fill: none;
   stroke-width: 2;
@@ -2595,4 +2607,81 @@ a.button {
 
 .scene-label--effects .effect-row__time {
   font-size: 8px;
+}
+
+/* World map (zone picker) */
+.hunt__zone-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 30px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-shadow: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.hunt__zone-chevron {
+  font-size: 12px;
+  color: var(--parchment-dim);
+}
+
+.world-map {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.world-map__zone {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  min-height: 56px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--bronze-dim);
+  background: rgba(14, 10, 7, 0.65);
+  color: var(--parchment);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.world-map__zone.is-current {
+  border-color: var(--gilt);
+  cursor: default;
+}
+
+.world-map__zone:disabled:not(.is-current) {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.world-map__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--gilt);
+}
+
+.world-map__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+
+.world-map__here {
+  margin-left: auto;
+  color: var(--gilt-bright);
+  font-weight: 700;
 }

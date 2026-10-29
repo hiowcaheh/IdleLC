@@ -3,6 +3,7 @@ import { CLASSES } from '../../game/data/classes.ts'
 import { classSlots, getItem } from '../../game/data/items.ts'
 import type { EquipSlot } from '../../game/data/types.ts'
 import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
+import { MAX_COOLDOWN_REDUCTION, MAX_MP_COST_REDUCTION } from '../../game/logic/combat.ts'
 import { GameError } from '../../game/logic/character.ts'
 import { MAX_PLUS, stonesOwned, upgradeChance, type GearPiece } from '../../game/logic/equipment.ts'
 import { OPTION_PLAY_SECONDS } from '../../game/logic/options.ts'
@@ -65,6 +66,18 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
     ['HP recovery', `+${fmt(stats.hpRegen ?? 0)} / ${REGEN_TICK_SECONDS} s`],
     ['MP recovery', `+${fmt(stats.mpRegen ?? 0)} / ${REGEN_TICK_SECONDS} s`],
   ]
+  // rare options: shown when the gear has them (with the caps combat applies)
+  const capped = (value: number | undefined, cap: number) => Math.min(cap * 100, value ?? 0)
+  const extras: [string, number][] = [
+    ['Skill cooldown', -capped(stats.cooldownReduction, MAX_COOLDOWN_REDUCTION)],
+    ['Skill MP cost', -capped(stats.mpCostReduction, MAX_MP_COST_REDUCTION)],
+    ['HP steal', stats.hpSteal ?? 0],
+    ['MP steal', stats.mpSteal ?? 0],
+    ['Move speed', stats.moveSpeed ?? 0],
+  ]
+  for (const [label, value] of extras) {
+    if (value !== 0) statRows.push([label, `${value > 0 ? '+' : '−'}${percent(Math.abs(value))}`])
+  }
   const stones = stonesOwned(character)
   const away = character.expedition !== null
   const slots = classSlots(character.classId)

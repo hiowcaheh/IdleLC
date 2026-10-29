@@ -6,6 +6,7 @@ import { ExpeditionDialog } from '../expedition/ExpeditionDialog.tsx'
 import { AppraiserPanel } from '../gear/AppraiserPanel.tsx'
 import { ShopPanel } from '../gear/ShopPanel.tsx'
 import { levelTone } from './levelColor.ts'
+import { WorldMapPanel } from './WorldMapPanel.tsx'
 
 /** Zone name, the monsters you can hunt here, and the kill count. */
 export function HuntPanel() {
@@ -20,6 +21,7 @@ export function HuntPanel() {
   const [expeditionOpen, setExpeditionOpen] = useState(false)
   const [shopOpen, setShopOpen] = useState(false)
   const [appraiserOpen, setAppraiserOpen] = useState(false)
+  const [mapOpen, setMapOpen] = useState(false)
 
   // keep the hunted monster visible when it was picked elsewhere (dev tools, zone change)
   useEffect(() => {
@@ -33,7 +35,19 @@ export function HuntPanel() {
   return (
     <section className="hunt" aria-label="Hunting">
       <header className="hunt__header">
-        <h2 className="hunt__zone">{zone.name}</h2>
+        <h2 className="hunt__zone">
+          <button
+            type="button"
+            className="hunt__zone-button"
+            aria-label={`${zone.name} — open the world map`}
+            onClick={() => setMapOpen(true)}
+          >
+            {zone.name}
+            <span className="hunt__zone-chevron" aria-hidden="true">
+              ▾
+            </span>
+          </button>
+        </h2>
         <p className="hunt__kills">
           Kills: <strong>{kills}</strong>
         </p>
@@ -70,6 +84,7 @@ export function HuntPanel() {
       </div>
       {shopOpen && <ShopPanel onClose={() => setShopOpen(false)} />}
       {appraiserOpen && <AppraiserPanel onClose={() => setAppraiserOpen(false)} />}
+      {mapOpen && <WorldMapPanel onClose={() => setMapOpen(false)} />}
       {expeditionOpen && character && (
         <ExpeditionDialog character={character} onClose={() => setExpeditionOpen(false)} />
       )}

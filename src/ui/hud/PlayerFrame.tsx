@@ -1,7 +1,8 @@
-import { CLASSES } from '../../game/data/classes.ts'
+import { CLASSES, classPortrait } from '../../game/data/classes.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { EffectRow } from '../skills/EffectRow.tsx'
 import { Bar } from './Bar.tsx'
+import { ClassPortrait } from './ClassPortrait.tsx'
 import { PotionSlots } from './PotionSlots.tsx'
 
 const formatGold = (gold: number) => gold.toLocaleString('en-US')
@@ -18,10 +19,14 @@ export function PlayerFrame() {
   return (
     <section className="unit-frame unit-frame--player" aria-label="Your character">
       <div className="unit-frame__portrait" aria-hidden="true">
-        <svg viewBox="0 0 40 40">
-          <path d="M20 4 L32 9 V19 C32 27 26 33 20 36 C14 33 8 27 8 19 V9 Z" />
-          <path d="M20 10 V30 M13 17 H27" className="crest-line" />
-        </svg>
+        {classPortrait(character.classId) ? (
+          <ClassPortrait classId={character.classId} size={54} />
+        ) : (
+          <svg viewBox="0 0 40 40">
+            <path d="M20 4 L32 9 V19 C32 27 26 33 20 36 C14 33 8 27 8 19 V9 Z" />
+            <path d="M20 10 V30 M13 17 H27" className="crest-line" />
+          </svg>
+        )}
         <span className="unit-frame__level" title={`Level ${level}`}>
           {level}
         </span>

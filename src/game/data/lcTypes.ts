@@ -149,4 +149,6 @@ export interface LcIconSheet {
 export interface LcIconManifest {
   items?: LcIconSheet
   skills?: LcIconSheet
+  /** Round class faces from TopUI.tex, keyed by class id. */
+  portraits?: LcIconSheet
 }
