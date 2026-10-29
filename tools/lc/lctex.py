@@ -40,8 +40,15 @@ def decode_dxt(data, w, h, dxt5):
                     px[x, y] = (r, g, b, alpha[i] if alpha else a)
     return img
 
-def dxt_dims(sizes):
-    """Find (width, height, is_dxt5) whose DXT mip chain matches the stored mip sizes."""
+def dxt_dims(sizes, hint=None):
+    """Find (width, height, is_dxt5) whose DXT mip chain matches the stored mip sizes.
+    The TDAT size (hint) comes first: the chain alone cannot tell 256x128 from 128x256."""
+    if hint:
+        w, h = hint
+        blocks = max(1, -(-w // 4)) * max(1, -(-h // 4))
+        for dxt5 in (False, True):
+            if sizes[0] == blocks * (16 if dxt5 else 8):
+                return w, h, dxt5
     for dxt5 in (False, True):
         block = 16 if dxt5 else 8
         for lw in range(0, 13):
@@ -80,7 +87,8 @@ def convert(path, out):
         o, sizes = i + 8, []
         while o < i + 8 + total:
             s = struct.unpack_from('<I', b, o)[0]; sizes.append(s); o += 4 + s
-        w, h, dxt5 = dxt_dims(sizes)
+        t = read_tdat(b) if b.find(b'TDAT') >= 0 else None
+        w, h, dxt5 = dxt_dims(sizes, (t['width'], t['height']) if t else None)
         img = decode_dxt(b[i + 12:i + 12 + mip0], w, h, dxt5)
         kind = 'DXT5' if dxt5 else 'DXT1'
     else:
