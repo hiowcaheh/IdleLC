@@ -54,6 +54,8 @@ export interface MonsterDef {
   elite?: boolean
   /** Loot table: each entry is rolled separately on every kill. */
   drops?: MonsterDrop[]
+  /** Skill points for a kill, in 1/10 000 SP (LC t_npc.a_skill_point). */
+  sp?: number
 }
 
 export interface MonsterDrop {
@@ -72,4 +74,43 @@ export interface ItemDef {
   level: number
   /** Shop price in gold. */
   price: number
+}
+
+/** One effect of a skill level: t_magic (type, subtype, damage type) + t_magiclevel.a_power. */
+export interface SkillEffectDef {
+  type: number
+  subtype: number
+  /** 1 = flat value, 2 = percent (as used by the LC data). */
+  damageType: number
+  power: number
+}
+
+export interface SkillLevelDef {
+  level: number
+  mp: number
+  hp: number
+  /** Effect duration in 1/10 s. */
+  duration: number
+  /** Character level needed to learn this skill level. */
+  learnLevel: number
+  /** Skill points needed (whole SP). */
+  learnSp: number
+  requires: { skill: number; level: number }[]
+  effects: SkillEffectDef[]
+}
+
+/** A class skill, 1:1 from t_skill + t_skilllevel. Interpreted by src/game/logic/skills.ts. */
+export interface SkillDef {
+  id: number
+  classId: ClassId
+  name: string
+  description: string
+  /** t_skill.a_type: 0 melee, 1 ranged, 2 magic, 3 passive. */
+  type: number
+  targetType: number
+  /** Timings in 1/10 s. */
+  readyTime: number
+  fireTime: number
+  reuseTime: number
+  levels: SkillLevelDef[]
 }

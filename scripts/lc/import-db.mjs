@@ -97,6 +97,8 @@ function buildData(tables) {
       attackSpeed: int(r.a_attackSpeed),
       exp: int(r.a_exp),
       gold: int(r.a_prize),
+      // skill points for a kill, in 1/10 000 SP like the server stores them
+      sp: int(r.a_skill_point),
       scale: num(r.a_scale) || 1,
       elite: (flag & FLAG_ELITE) !== 0,
       model: modelIdFromSmc(r.a_file_smc),
@@ -148,6 +150,8 @@ function buildData(tables) {
     if (level >= 1 && level <= MAX_LEVEL) expTable[level - 1] = num(r.a_exp)
   }
 
+  const skills = buildSkills(tables)
+
   // NPC shops: a_buy_rate = % of a_price the player pays, a_sell_rate = % the shop pays the player
   const mostCommon = (column) => {
     const counts = new Map()
@@ -164,7 +168,88 @@ function buildData(tables) {
     items,
     expTable,
     shop,
+    skills,
   }
+}
+
+/** t_skill.a_job → IdleLC class (base classes only; a_job2 = 0 are the skills before a subclass). */
+const SKILL_CLASSES = ['titan', 'knight', 'healer', 'mage', 'rogue', 'sorcerer']
+
+/**
+ * Class skills 1:1: t_skill (name, description, type, timings in 1/10 s, icon) with every level from
+ * t_skilllevel (mana, learn level, SP, duration, prerequisites) and its effects from t_magic /
+ * t_magiclevel (type, subtype, damage type, power). How the game uses them: src/game/logic/skills.ts.
+ */
+function buildSkills(tables) {
+  const magics = new Map(tables.t_magic.map((r) => [int(r.a_index), r]))
+  const magicPower = new Map(
+    tables.t_magiclevel.map((r) => [`${int(r.a_index)}/${int(r.a_level)}`, r]),
+  )
+  const levelsOf = new Map()
+  for (const r of tables.t_skilllevel) {
+    const list = levelsOf.get(int(r.a_index)) ?? []
+    list.push(r)
+    levelsOf.set(int(r.a_index), list)
+  }
+
+  const skills = []
+  for (const r of tables.t_skill) {
+    const job = int(r.a_job)
+    const name = String(r.a_name_usa ?? '').trim()
+    if (job < 0 || job >= SKILL_CLASSES.length || int(r.a_job2) !== 0 || !name) continue
+    const rows = (levelsOf.get(int(r.a_index)) ?? []).sort(
+      (a, b) => int(a.a_level) - int(b.a_level),
+    )
+    if (rows.length === 0 || int(rows[0].a_learnLevel) > MAX_LEVEL) continue
+    const levels = rows.map((l) => {
+      const effects = []
+      for (let k = 1; k <= 3; k++) {
+        const magic = magics.get(int(l[`a_magicIndex${k}`]))
+        if (!magic) continue
+        const power = magicPower.get(`${int(magic.a_index)}/${int(l[`a_magicLevel${k}`])}`)
+        effects.push({
+          magic: int(magic.a_index),
+          type: int(magic.a_type),
+          subtype: int(magic.a_subtype),
+          damageType: int(magic.a_damagetype),
+          power: power ? int(power.a_power) : 0,
+        })
+      }
+      const requires = []
+      for (let k = 1; k <= 3; k++) {
+        const skill = int(l[`a_learnSkillIndex${k}`])
+        if (skill > 0) requires.push({ skill, level: int(l[`a_learnSkillLevel${k}`]) })
+      }
+      return {
+        level: int(l.a_level),
+        mp: int(l.a_needMP),
+        hp: int(l.a_needHP),
+        duration: int(l.a_durtime),
+        learnLevel: int(l.a_learnLevel),
+        learnSp: int(l.a_learnSP),
+        requires,
+        effects,
+      }
+    })
+    skills.push({
+      id: int(r.a_index),
+      classId: SKILL_CLASSES[job],
+      name,
+      description: String(r.a_client_description_usa ?? '').trim(),
+      type: int(r.a_type),
+      targetType: int(r.a_targetType),
+      readyTime: int(r.a_readyTime),
+      fireTime: int(r.a_fireTime),
+      reuseTime: int(r.a_reuseTime),
+      icon: {
+        atlas: int(r.a_client_icon_texid),
+        row: int(r.a_client_icon_row),
+        col: int(r.a_client_icon_col),
+      },
+      levels,
+    })
+  }
+  return skills.sort((a, b) => a.levels[0].learnLevel - b.levels[0].learnLevel || a.id - b.id)
 }
 
 async function main() {
@@ -177,7 +262,17 @@ async function main() {
   }
   console.log(`reading ${args.dump}`)
   const text = fs.readFileSync(args.dump, 'utf8')
-  const tables = readTables(text, ['t_npc', 't_item', 't_exp', 't_npc_regen', 't_shop'])
+  const tables = readTables(text, [
+    't_npc',
+    't_item',
+    't_exp',
+    't_npc_regen',
+    't_shop',
+    't_skill',
+    't_skilllevel',
+    't_magic',
+    't_magiclevel',
+  ])
   const data = buildData(tables)
   const manifest = await buildModelManifest(data, args.models)
 

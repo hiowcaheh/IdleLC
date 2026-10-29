@@ -28,6 +28,8 @@ export interface LcMonster {
   /** Model id = .smc file name, lower case (e.g. "fox"). */
   model: string
   smc: string
+  /** t_npc.a_skill_point (1/10 000 SP per kill). */
+  sp: number
   /** t_npc.a_motion_* clip names; `attack` holds a_motion_attack and a_motion_attack2. */
   animations: Record<string, string | string[] | undefined>
   zones: string[]
@@ -65,6 +67,31 @@ export interface LcData {
   expTable: number[]
   /** NPC shop rates in % of t_item.a_price (t_shop: a_sell_rate — what the shop pays, a_buy_rate). */
   shop?: { sellRate: number; buyRate: number }
+  /** Class skills (base classes), see scripts/lc/import-db.mjs buildSkills. */
+  skills?: LcSkill[]
+}
+
+export interface LcSkill {
+  id: number
+  classId: string
+  name: string
+  description: string
+  type: number
+  targetType: number
+  readyTime: number
+  fireTime: number
+  reuseTime: number
+  icon: { atlas: number; row: number; col: number }
+  levels: {
+    level: number
+    mp: number
+    hp: number
+    duration: number
+    learnLevel: number
+    learnSp: number
+    requires: { skill: number; level: number }[]
+    effects: { magic: number; type: number; subtype: number; damageType: number; power: number }[]
+  }[]
 }
 
 export interface LcModelEntry {
@@ -84,8 +111,8 @@ export interface LcModelManifest {
   models: LcModelEntry[]
 }
 
-/** Item icon sprite sheet written by `npm run convert-lc` (scripts/lc/icons.mjs). */
-export interface LcIconManifest {
+/** An icon sprite sheet written by `npm run convert-lc` (scripts/lc/icons.mjs). */
+export interface LcIconSheet {
   /** Sheet image, relative to the app base URL. */
   file: string
   /** Icon size in pixels. */
@@ -93,6 +120,11 @@ export interface LcIconManifest {
   columns: number
   width: number
   height: number
-  /** Item id → cell index in the sheet. */
-  items: Record<string, number>
+  /** Item / skill id → cell index in the sheet. */
+  icons: Record<string, number>
+}
+
+export interface LcIconManifest {
+  items?: LcIconSheet
+  skills?: LcIconSheet
 }

@@ -7,13 +7,13 @@
  *
  * Without --smc it converts the player class models (classes.mjs) and every monster model listed
  * in src/game/data/generated/lc-data.json (run `npm run import-lc-db` first), keeping only the
- * clips the database uses, then refreshes lc-models.json. It also cuts the item icons out of the
- * ItemBtn*.tex atlases into public/icons/lc/items.webp (+ lc-icons.json).
+ * clips the database uses, then refreshes lc-models.json. It also cuts the item and skill icons out
+ * of the ItemBtn*.tex / SkillBtn*.tex atlases into public/icons/lc/ (+ lc-icons.json).
  *
  * Options:
  *   --out <dir>            output folder (default public/models/lc)
  *   --data <lc-data.json>  generated game data (default src/game/data/generated/lc-data.json)
- *   --only <id,id>         convert only these model ids (e.g. fox,class-knight); `icons` = item icons
+ *   --only <id,id>         convert only these model ids (e.g. fox,class-knight); `icons` = item and skill icons
  *   --smc <path>           convert one .smc (client path or file); with --anims <a,b> to pick clips
  *   --max-texture <px>     longest texture side (default 1024)
  *
@@ -28,7 +28,7 @@ import { dedup, meshopt, prune, resample, weld } from '@gltf-transform/functions
 import { MeshoptDecoder, MeshoptEncoder } from 'meshoptimizer'
 import { CLASS_MODELS } from './classes.mjs'
 import { ClientFiles } from './client.mjs'
-import { buildItemIconSheet } from './icons.mjs'
+import { ICON_KINDS, buildIconSheet } from './icons.mjs'
 import { buildModelManifest, modelIdFromSmc } from './manifest.mjs'
 import { buildModel } from './model.mjs'
 import { parseSmc } from './smc.mjs'
@@ -182,20 +182,32 @@ async function main() {
   }
 
   if (data && !args.smc && (!args.only || args.only.has('icons'))) {
-    const { image, manifest, missingAtlases } = await buildItemIconSheet(files, data.items)
-    if (image) {
-      const sheet = path.join(ROOT, 'public', manifest.file)
-      fs.mkdirSync(path.dirname(sheet), { recursive: true })
-      fs.writeFileSync(sheet, image)
+    const manifest = {}
+    for (const kind of ICON_KINDS) {
+      const entries = kind.entries(data)
+      const { image, sheet, missingAtlases } = await buildIconSheet(
+        files,
+        entries,
+        kind.atlasPath,
+        kind.file,
+      )
+      if (!image) {
+        console.warn(`icons: no ${kind.kind} atlases in the client folder(s)`)
+        continue
+      }
+      const out = path.join(ROOT, 'public', kind.file)
+      fs.mkdirSync(path.dirname(out), { recursive: true })
+      fs.writeFileSync(out, image)
+      manifest[kind.kind] = sheet
+      console.log(
+        `icons: ${kind.kind} ${Object.keys(sheet.icons).length} of ${entries.length}, ` +
+          `${(image.length / 1024).toFixed(0)} KB` +
+          (missingAtlases.length ? ` (missing atlases ${missingAtlases.join(', ')})` : ''),
+      )
+    }
+    if (Object.keys(manifest).length) {
       fs.mkdirSync(GENERATED, { recursive: true })
       fs.writeFileSync(path.join(GENERATED, 'lc-icons.json'), JSON.stringify(manifest))
-      const covered = Object.keys(manifest.items).length
-      console.log(
-        `icons: ${covered} of ${data.items.length} items, ${(image.length / 1024).toFixed(0)} KB` +
-          (missingAtlases.length ? ` (missing ItemBtn${missingAtlases.join(', ItemBtn')})` : ''),
-      )
-    } else {
-      console.warn('icons: no ItemBtn*.tex atlases in the client folder(s)')
     }
   }
 

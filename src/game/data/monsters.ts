@@ -20,6 +20,7 @@ const PLACEHOLDER_MONSTERS: Record<string, MonsterDef> = {
     exp: 12,
     gold: 5,
     modelId: 'golem-rust',
+    sp: 2000,
     drops: [
       { itemId: 1, chance: 0.4 },
       { itemId: 2, chance: 0.05 },
@@ -41,6 +42,7 @@ const PLACEHOLDER_MONSTERS: Record<string, MonsterDef> = {
     exp: 25,
     gold: 11,
     modelId: 'golem-stone',
+    sp: 3500,
     drops: [
       { itemId: 3, chance: 0.3 },
       { itemId: 2, chance: 0.1 },
@@ -73,6 +75,7 @@ export function fromLc(m: LcMonster): MonsterDef {
     scale: m.scale,
     elite: m.elite,
     drops: m.drops.map((d) => ({ itemId: d.item, chance: d.chance })),
+    sp: m.sp ?? 0,
   }
 }
 

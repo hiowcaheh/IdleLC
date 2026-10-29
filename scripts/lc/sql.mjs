@@ -80,19 +80,25 @@ export function parseValues(text, i) {
   return { rows, end: i }
 }
 
-/** Returns { table: rowObjects[] } for the requested tables. */
+/**
+ * Returns { table: rowObjects[] } for the requested tables. Table names are matched ignoring case:
+ * the LC dump creates `t_skillLevel` but inserts into `t_skilllevel` (MySQL on Windows).
+ */
 export function readTables(text, wanted) {
-  const schemas = readSchemas(text)
-  const want = new Set(wanted)
+  const schemas = Object.fromEntries(
+    Object.entries(readSchemas(text)).map(([name, cols]) => [name.toLowerCase(), cols]),
+  )
+  const want = new Map(wanted.map((t) => [t.toLowerCase(), t]))
   const out = Object.fromEntries(wanted.map((t) => [t, []]))
   const re = /INSERT INTO `(\w+)`(?: \([^)]*\))? VALUES /g
   for (let m; (m = re.exec(text));) {
     const { rows, end } = parseValues(text, re.lastIndex)
     re.lastIndex = end
-    if (!want.has(m[1])) continue
-    const cols = schemas[m[1]]
+    const table = want.get(m[1].toLowerCase())
+    if (!table) continue
+    const cols = schemas[m[1].toLowerCase()]
     if (!cols) throw new Error(`No CREATE TABLE for ${m[1]}`)
-    for (const row of rows) out[m[1]].push(Object.fromEntries(cols.map((c, k) => [c, row[k]])))
+    for (const row of rows) out[table].push(Object.fromEntries(cols.map((c, k) => [c, row[k]])))
   }
   return out
 }

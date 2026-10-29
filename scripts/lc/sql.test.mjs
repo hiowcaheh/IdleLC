@@ -37,6 +37,15 @@ describe('readTables', () => {
     expect(t.t_npc[3].a_name).toBe('Line\nbreak')
   })
 
+  it('matches table names ignoring case, like the LC dump needs', () => {
+    const dump = `CREATE TABLE \`t_skillLevel\` (\n  \`a_index\` int(11),\n  \`a_level\` int(11)\n) ENGINE=MyISAM;
+INSERT INTO \`t_skilllevel\` VALUES (14,1),(14,2);`
+    expect(readTables(dump, ['t_skilllevel']).t_skilllevel).toEqual([
+      { a_index: 14, a_level: 1 },
+      { a_index: 14, a_level: 2 },
+    ])
+  })
+
   it('int() converts text numbers', () => {
     expect(int('8')).toBe(8)
     expect(int(null)).toBe(0)
