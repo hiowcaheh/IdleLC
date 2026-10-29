@@ -1976,7 +1976,7 @@ a.button {
   stroke: #c99bff;
 }
 
-.buff-row {
+.effect-row {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
@@ -1985,16 +1985,35 @@ a.button {
   list-style: none;
 }
 
-.buff-row__item {
+.effect-row--monster {
+  justify-content: center;
+}
+
+.effect-row__item {
   position: relative;
   display: grid;
 }
 
-.buff-row__item .skill-icon {
+.effect-row__item .skill-icon {
   border-color: #6a9cc4;
 }
 
-.buff-row__time {
+.effect-row__item--debuff .skill-icon {
+  border-color: #b06ad8;
+  box-shadow: 0 0 4px rgba(176, 106, 216, 0.7);
+}
+
+.effect-row__item--stun .skill-icon {
+  border-color: #f2cf5b;
+  box-shadow: 0 0 5px rgba(242, 207, 91, 0.8);
+}
+
+.effect-row__item--poison .skill-icon {
+  border-color: #8fd14f;
+  box-shadow: 0 0 4px rgba(143, 209, 79, 0.7);
+}
+
+.effect-row__time {
   position: absolute;
   right: -2px;
   bottom: -3px;

@@ -354,6 +354,28 @@ describe('skills in combat', () => {
     expect(events).toContainEqual({ type: 'death', who: 'monster' })
   })
 
+  it('curses and poison end with the monster', () => {
+    const start = engaged(caster([rank()]))
+    const cursed: CombatState = {
+      ...start,
+      monster: {
+        ...start.monster,
+        effects: [
+          {
+            skillId: 7,
+            name: 'Curse',
+            remaining: 20,
+            stats: [{ kind: 'stat', stat: 'defense', value: -5, percent: false }],
+            stun: false,
+            poison: 3,
+            nextTick: 1,
+          },
+        ],
+      },
+    }
+    expect(killMonster(cursed).state.monster.effects).toEqual([])
+  })
+
   it('a defeat clears buffs; the hero comes back with full HP and MP', () => {
     const start = engaged(caster([rank()]))
     const buffed: CombatState = {

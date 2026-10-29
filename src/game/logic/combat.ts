@@ -376,6 +376,7 @@ function endFight(s: CombatState, loser: Side, events: CombatEvent[]): void {
   events.push({ type: 'death', who: loser })
   if (loser === 'monster') {
     s.kills += 1
+    s.monster.effects = []
     enter(s, 'victory')
   } else {
     s.deaths += 1

@@ -1,6 +1,6 @@
 import { CLASSES } from '../../game/data/classes.ts'
 import { useGameStore } from '../../state/gameStore.ts'
-import { BuffRow } from '../skills/BuffRow.tsx'
+import { EffectRow } from '../skills/EffectRow.tsx'
 import { Bar } from './Bar.tsx'
 
 const formatGold = (gold: number) => gold.toLocaleString('en-US')
@@ -36,7 +36,7 @@ export function PlayerFrame() {
           <span className="coin" aria-hidden="true" />
           {formatGold(gold)}
         </p>
-        {!character.expedition && <BuffRow />}
+        {!character.expedition && <EffectRow side="player" />}
       </div>
     </section>
   )

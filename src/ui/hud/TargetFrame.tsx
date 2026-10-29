@@ -1,5 +1,6 @@
 import { getMonster } from '../../game/data/monsters.ts'
 import { useGameStore } from '../../state/gameStore.ts'
+import { EffectRow } from '../skills/EffectRow.tsx'
 import { Bar } from './Bar.tsx'
 import { levelTone } from './levelColor.ts'
 
@@ -29,6 +30,7 @@ export function TargetFrame() {
           variant="enemy"
           label="Target health"
         />
+        {phase === 'fighting' && <EffectRow side="monster" />}
       </div>
     </section>
   )
