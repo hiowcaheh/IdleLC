@@ -102,3 +102,24 @@ Interwał ataku i krytyki zostają z klasy. Interwał ataku potwora LC = `a_atta
   za najwyżej `floor(czas od poprzedniego zgłoszenia × prędkość gry / 3,2 s) + 2` zabić. 3,2 s to najkrótszy
   możliwy cykl (2,2 s zwycięstwa + 1,0 s na nowego potwora). Prędkość gry > 1 jest tylko w narzędziach dev;
   na serwerze (Supabase) zawsze 1. Patrz [`docs/supabase.md`](supabase.md).
+
+## Drop
+
+Każde zabicie losuje tabelę dropu potwora 1:1 z bazy (`t_npc.a_item_0…19` z szansą `a_item_percent_N / 10000`).
+Każdy wpis losujemy **osobno** (jedno zabicie może dać kilka przedmiotów) — założenie do sprawdzenia
+w kodzie serwera LC (tam mogą być dodatkowe zasady: mnożnik dropu serwera, różnica poziomów, drop z „+”).
+Przedmioty trafiają do ekwipunku jako stosy (jeden stos na rodzaj; osobne egzemplarze sprzętu z ulepszeniem
+dojdą w M5). Ekwipunek nie ma na razie limitu miejsc.
+
+## AFK (czas poza grą)
+
+- Czas od ostatniej aktywności postaci (`lastPlayedAt` — ostatnie zgłoszenie walki) liczy się jako polowanie
+  AFK na ostatnio wybranego potwora, **maksymalnie 8 h**. Krótsze niż 1 min przerwy się nie liczą.
+- Odbiór: przy wejściu do gry postacią i przy powrocie do karty/aplikacji (np. po odblokowaniu telefonu).
+- Tempo polowania mierzymy na **prawdziwej symulacji walki** (`measureHuntRate`: 20 minut walki tymi samymi
+  wzorami co na ekranie) osobno dla każdego poziomu postaci; czas AFK dzielimy na 10-minutowe odcinki,
+  więc awans w trakcie AFK wzmacnia postać. Wynik: zabicia (z losowym zaokrągleniem), śmierci, exp,
+  złoto i drop jak za zwykłe zabicia. `AFK_EFFICIENCY = 1` (wartość własna: AFK daje tyle co gra przy
+  włączonym ekranie).
+- Jedno zgłoszenie walki obejmuje najwyżej 10 minut (`MAX_REPORT_WINDOW`), więc za czas poza grą płaci
+  tylko symulacja AFK.

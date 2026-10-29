@@ -93,6 +93,10 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 - **M2 gotowe** (+ część M3): konto z 4 slotami postaci w `localStorage`, ekran wyboru i tworzenia postaci
   (6 klas, podgląd 3D, zasady imion), migracja starych zapisów (postać „Hero”). Zapisywany progres: poziom
   i exp z `t_exp` 1:1, złoto i exp za potwory 1:1 (`a_exp`, `a_prize`), zabicia, miejsce polowania.
+  Widoczny awans: pasek EXP na dole (x / y, %), baner i efekt „LEVEL UP”.
+- **Drop i ekwipunek:** drop 1:1 z tabel `t_npc` (każdy wpis losowany osobno), ekwipunek jako stosy (zapis v3).
+- **M4 (AFK) w dużej części:** czas poza grą (do 8 h) liczony z prawdziwej symulacji walki, okno
+  „While you were away…”; dev: AFK 1h/8h. Brakuje jeszcze jawnego wysyłania na wyprawę (jeśli właściciel chce).
 - **Przygotowanie pod Supabase:** `GameService` jest asynchroniczny i oparty na komendach
   (`createCharacter`, `travel`, `reportCombat`…); walka na ekranie to `CombatSession` w przeglądarce,
   a nagrody liczy serwis z wyniku walki (limit zabić wg czasu). Plan tabel, RLS i funkcji: `docs/supabase.md`.
@@ -115,7 +119,8 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
    na całości (wszystkie potwory, 5 pozostałych klas w `scripts/lc/classes.mjs`, ikony przedmiotów, mapy;
    konwerter wypisuje nowe shadery do sprawdzenia). Z kodu serwera: statystyki klas i przyrost na poziom,
    wzory obrażeń/trafień, kary exp za różnicę poziomów, szanse ulepszeń, poziomy umiejętności.
-2. Dalej M3: drop z `lootTables` (1:1 z bazy) i ekwipunek-lista, potem M4 (AFK do 8 h) i M5 (ekwipunek).
+2. Dalej: M5 (sloty sprzętu, zakładanie, wpływ na statystyki, ulepszanie +0…+15), sprzedaż przedmiotów,
+   ikony przedmiotów z atlasów `ItemBtn*.tex`, M6 (mapa świata, wymagany poziom stref).
 3. Etap 2 (Supabase) według `docs/supabase.md` — dopiero po zgodzie właściciela.
 
 **Otwarte kwestie:** brak siatek broni z `Data\Item\Weapon` (przyszły tylko tekstury i tagi); brak mapy

@@ -28,7 +28,11 @@ Inne komendy:
 ### Postacie i zapis
 
 Konto ma do 4 postaci (6 klas). Wszystko zapisuje się w przeglądarce (`localStorage`, klucz `idlelc.save`):
-poziom, exp, złoto, zabicia i miejsce polowania. Po powrocie gra otwiera się na ostatniej postaci.
+poziom, exp, złoto, zabicia, ekwipunek i miejsce polowania. Po powrocie gra otwiera się na ostatniej postaci.
+
+**AFK:** czas poza grą (zamknięta karta, zablokowany telefon) postać spędza na polowaniu — do 8 h. Po powrocie
+okno „While you were away…” pokazuje zabicia, exp, złoto, awans i drop. Drop (1:1 z bazy) trafia do ekwipunku
+(ikona torby w HUD). Szczegóły w [`docs/balance.md`](docs/balance.md).
 **Settings → Change character** wraca do wyboru postaci, **Reset save** kasuje wszystkie postacie.
 Zapisy ze starszej wersji gry są przenoszone automatycznie (postać „Hero”).
 
@@ -40,6 +44,7 @@ Panel (można go zwinąć do małej pigułki „DEV”) ma:
 - prędkość gry ×0,5 … ×20 — walka, animacje i regeneracja,
 - wybór dowolnego potwora z dowolnej strefy,
 - poziom postaci (−10 … +10), +25% expa, +1000 złota (zapisywane jak normalny postęp),
+- **AFK 1h / AFK 8h** — symulacja powrotu po godzinie lub 8 godzinach (okno podsumowania i drop),
 - **Kill target** i **Heal**,
 - **Model viewer** — każdy model z manifestu i każdy klip z pliku GLB.
 
