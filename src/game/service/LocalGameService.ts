@@ -10,6 +10,7 @@ import {
   type CharacterLocation,
   type NewCharacter,
 } from '../logic/character.ts'
+import { AFK_MIN_SECONDS, simulateAfk, type AfkResult } from '../logic/afk.ts'
 import { newId } from '../logic/id.ts'
 import { gainExp } from '../logic/progression.ts'
 import {
@@ -18,6 +19,7 @@ import {
   type CombatReport,
   type CombatResult,
 } from '../logic/rewards.ts'
+import { createRng, type Rng } from '../logic/rng.ts'
 import {
   createDefaultSave,
   loadSave,
@@ -40,13 +42,13 @@ export class LocalGameService implements GameService {
   private save: SaveData
   private readonly storage: KeyValueStorage
   private readonly now: () => number
-  /** When each character last reported combat (ms) — the kill rate limit counts from here. */
-  private readonly lastReport = new Map<string, number>()
+  private readonly rng: Rng
   private timeScale = 1
 
-  constructor(storage: KeyValueStorage, options: { now?: () => number } = {}) {
+  constructor(storage: KeyValueStorage, options: { now?: () => number; rng?: Rng } = {}) {
     this.storage = storage
     this.now = options.now ?? Date.now
+    this.rng = options.rng ?? createRng(this.now())
     this.save = createDefaultSave(this.now())
   }
 
@@ -74,15 +76,11 @@ export class LocalGameService implements GameService {
       activeCharacterId:
         this.save.activeCharacterId === characterId ? null : this.save.activeCharacterId,
     }
-    this.lastReport.delete(characterId)
     this.persist()
   }
 
   async setActiveCharacter(characterId: string | null): Promise<void> {
-    if (characterId !== null) {
-      this.update(characterId, (c) => ({ ...c, lastPlayedAt: this.now() }))
-      this.lastReport.set(characterId, this.now())
-    }
+    if (characterId !== null) this.character(characterId)
     this.save = { ...this.save, activeCharacterId: characterId }
     this.persist()
   }
@@ -103,12 +101,23 @@ export class LocalGameService implements GameService {
     }
     const monster = MONSTERS[report.monsterId]!
     const now = this.now()
-    const since = this.lastReport.get(characterId) ?? now
-    const allowed = maxKills((now - since) / 1000, this.timeScale)
-    const result = applyCombatReport(character, monster, report, allowed)
-    this.lastReport.set(characterId, now)
-    this.update(characterId, () => ({ ...result.character, lastPlayedAt: now }))
-    return copy({ ...result, character: this.character(characterId) })
+    const allowed = maxKills((now - character.lastPlayedAt) / 1000, this.timeScale)
+    const result = applyCombatReport(character, monster, report, allowed, this.rng)
+    const updated = this.update(characterId, () => ({ ...result.character, lastPlayedAt: now }))
+    return copy({ ...result, character: updated })
+  }
+
+  async claimAfk(characterId: string): Promise<AfkResult | null> {
+    const character = this.character(characterId)
+    const now = this.now()
+    const away = Math.max(0, (now - character.lastPlayedAt) / 1000)
+    if (away < AFK_MIN_SECONDS) {
+      this.update(characterId, (c) => ({ ...c, lastPlayedAt: now }))
+      return null
+    }
+    const result = simulateAfk(character, away, this.rng)
+    const updated = this.update(characterId, () => ({ ...result.character, lastPlayedAt: now }))
+    return copy({ ...result, character: updated })
   }
 
   async updateSettings(patch: Partial<Settings>): Promise<Settings> {
@@ -124,7 +133,6 @@ export class LocalGameService implements GameService {
       // storage unavailable — nothing to remove
     }
     this.save = createDefaultSave(this.now())
-    this.lastReport.clear()
     this.persist()
     return copy(this.save)
   }
@@ -154,6 +162,12 @@ export class LocalGameService implements GameService {
       ),
     setTimeScale: (scale) => {
       this.timeScale = Math.max(1, scale)
+    },
+    simulateAfk: async (characterId, seconds) => {
+      this.update(characterId, (c) => ({
+        ...c,
+        lastPlayedAt: this.now() - Math.max(0, seconds) * 1000,
+      }))
     },
   }
 

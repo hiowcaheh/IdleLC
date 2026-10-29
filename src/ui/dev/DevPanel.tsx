@@ -23,6 +23,7 @@ export function DevPanel() {
   const devAddGold = useGameStore((s) => s.devAddGold)
   const devKillTarget = useGameStore((s) => s.devKillTarget)
   const devHeal = useGameStore((s) => s.devHeal)
+  const devSimulateAfk = useGameStore((s) => s.devSimulateAfk)
 
   if (!open) {
     return (
@@ -110,6 +111,15 @@ export function DevPanel() {
         </button>
         <button type="button" className="dev-chip" onClick={() => devAddGold(1000)}>
           +1,000 gold
+        </button>
+      </div>
+
+      <div className="dev-panel__row" role="group" aria-label="Simulate time away">
+        <button type="button" className="dev-chip" onClick={() => devSimulateAfk(3600)}>
+          AFK 1h
+        </button>
+        <button type="button" className="dev-chip" onClick={() => devSimulateAfk(8 * 3600)}>
+          AFK 8h
         </button>
       </div>
 

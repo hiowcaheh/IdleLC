@@ -16,8 +16,9 @@ import {
   type CharacterLocation,
 } from './character.ts'
 import { newId } from './id.ts'
+import { addToInventory, type ItemStack } from './loot.ts'
 
-export const SAVE_VERSION = 2
+export const SAVE_VERSION = 3
 
 export type GraphicsQuality = 'auto' | 'low' | 'high'
 
@@ -64,6 +65,15 @@ export const MIGRATIONS: Record<number, Migration> = {
       activeCharacterId: id,
     }
   },
+  // v3: characters get an inventory
+  2: (save) => ({
+    ...save,
+    characters: Array.isArray(save.characters)
+      ? save.characters.map((c: unknown) =>
+          isRecord(c) ? { ...c, inventory: Array.isArray(c.inventory) ? c.inventory : [] } : c,
+        )
+      : [],
+  }),
 }
 
 export const DEFAULT_SETTINGS: Settings = { quality: 'auto', showDamageNumbers: true }
@@ -153,7 +163,20 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     lastPlayedAt: num(raw.lastPlayedAt, createdAt),
     location: sanitizeLocation(raw.location),
     stats: { kills: int(stats.kills, 0), deaths: int(stats.deaths, 0) },
+    inventory: sanitizeInventory(raw.inventory),
   }
+}
+
+/** Valid stacks only, merged per item. */
+function sanitizeInventory(raw: unknown): ItemStack[] {
+  const stacks: ItemStack[] = []
+  for (const entry of Array.isArray(raw) ? raw : []) {
+    if (!isRecord(entry)) continue
+    const itemId = int(entry.itemId, 0)
+    const count = int(entry.count, 0)
+    if (itemId > 0 && count > 0) stacks.push({ itemId, count })
+  }
+  return addToInventory([], stacks)
 }
 
 /** Fills missing/invalid fields with defaults so a partly broken save still loads. */

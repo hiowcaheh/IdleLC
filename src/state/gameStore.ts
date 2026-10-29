@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { ZONES } from '../game/data/zones.ts'
+import type { AfkResult } from '../game/logic/afk.ts'
 import type { CharacterData, NewCharacter } from '../game/logic/character.ts'
 import type { CombatPhase, CombatState } from '../game/logic/combat.ts'
 import type { CombatResult } from '../game/logic/rewards.ts'
@@ -31,12 +32,17 @@ interface GameStore {
   timeScale: number
   /** Latest level up of the played character (`key` changes every time). */
   levelUp: { level: number; key: number } | null
+  /** Rewards for the time away, shown until dismissed. */
+  afkResult: AfkResult | null
 
   init(): Promise<void>
   createCharacter(input: NewCharacter): Promise<CharacterData>
   deleteCharacter(characterId: string): Promise<void>
   enterGame(characterId: string): Promise<void>
   leaveGame(): Promise<void>
+  /** The game is visible again (tab/app brought back): pays the time away, if long enough. */
+  resume(): void
+  dismissAfk(): void
   selectMonster(monsterId: string): void
   selectZone(zoneId: string, monsterId?: string): void
   syncCombat(combat: CombatState): void
@@ -49,6 +55,7 @@ interface GameStore {
   devAddGold(amount: number): void
   devKillTarget(): void
   devHeal(): void
+  devSimulateAfk(seconds: number): void
 }
 
 function toHud(c: CombatState): CombatHud {
@@ -103,9 +110,15 @@ export const useGameStore = create<GameStore>((set, get) => {
 
   const applyResult = (result: CombatResult) => {
     applyCharacter(result.character)
-    if (result.exp || result.gold || result.levelsGained) {
+    if (result.exp || result.gold || result.levelsGained || result.drops.length) {
       combatEvents.emit([
-        { type: 'reward', exp: result.exp, gold: result.gold, levelsGained: result.levelsGained },
+        {
+          type: 'reward',
+          exp: result.exp,
+          gold: result.gold,
+          levelsGained: result.levelsGained,
+          drops: result.drops,
+        },
       ])
     }
   }
@@ -137,6 +150,19 @@ export const useGameStore = create<GameStore>((set, get) => {
       .catch(logError)
   }
 
+  /** Asks the service for the AFK rewards of the played character. */
+  const claimAfk = () => {
+    const character = get().character
+    if (!character) return Promise.resolve()
+    return enqueue(() => gameService.claimAfk(character.id))
+      .then((result) => {
+        if (!result) return
+        applyCharacter(result.character)
+        set({ afkResult: result })
+      })
+      .catch(logError)
+  }
+
   const dev = (command: (characterId: string) => Promise<CharacterData> | undefined) => {
     const character = get().character
     if (!character) return
@@ -153,6 +179,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     hud: toHud(combatSession.state),
     timeScale: 1,
     levelUp: null,
+    afkResult: null,
 
     init() {
       initializing ??= (async () => {
@@ -185,12 +212,22 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     async enterGame(characterId) {
       await enqueue(() => gameService.setActiveCharacter(characterId))
-      const character = get().save.characters.find((c) => c.id === characterId)
+      const afk = await enqueue(() => gameService.claimAfk(characterId)).catch((error) => {
+        logError(error)
+        return null
+      })
+      const save = get().save
+      const character = afk?.character ?? save.characters.find((c) => c.id === characterId)
       if (!character) return
       combatSession.start(character.classId, character.level, character.location.monsterId)
       set({
         character,
-        save: { ...get().save, activeCharacterId: characterId },
+        afkResult: afk,
+        save: {
+          ...save,
+          activeCharacterId: characterId,
+          characters: save.characters.map((c) => (c.id === characterId ? character : c)),
+        },
         hud: toHud(combatSession.state),
       })
     },
@@ -200,10 +237,19 @@ export const useGameStore = create<GameStore>((set, get) => {
         character: null,
         timeScale: 1,
         levelUp: null,
+        afkResult: null,
         save: { ...get().save, activeCharacterId: null },
       })
       gameService.dev?.setTimeScale(1)
       await enqueue(() => gameService.setActiveCharacter(null))
+    },
+
+    resume() {
+      void claimAfk()
+    },
+
+    dismissAfk() {
+      set({ afkResult: null })
     },
 
     selectMonster(monsterId) {
@@ -233,7 +279,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const save = await enqueue(() => gameService.resetSave())
       gameService.dev?.setTimeScale(1)
       combatEvents.emit([{ type: 'reset' }])
-      set({ save, character: null, timeScale: 1 })
+      set({ save, character: null, timeScale: 1, afkResult: null, levelUp: null })
     },
 
     setTimeScale(scale) {
@@ -261,6 +307,15 @@ export const useGameStore = create<GameStore>((set, get) => {
     devHeal() {
       combatSession.heal()
       set({ hud: toHud(combatSession.state) })
+    },
+
+    devSimulateAfk(seconds) {
+      const character = get().character
+      if (!character || !gameService.dev) return
+      const dev = gameService.dev
+      enqueue(() => dev.simulateAfk(character.id, seconds))
+        .then(claimAfk)
+        .catch(logError)
     },
   }
 })

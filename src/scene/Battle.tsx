@@ -2,6 +2,7 @@ import { useFrame } from '@react-three/fiber'
 import { Suspense, useEffect, useRef } from 'react'
 import { Vector3, type Group } from 'three'
 import { getModel, playerModelId } from '../game/assets/manifest.ts'
+import { getItem } from '../game/data/items.ts'
 import { getMonster } from '../game/data/monsters.ts'
 import { TIMINGS, type Side } from '../game/logic/combat.ts'
 import { combatSession } from '../game/session/combatSession.ts'
@@ -167,6 +168,13 @@ export function Battle() {
         case 'reward':
           if (e.exp > 0) rewardText(`+${e.exp.toLocaleString('en-US')} EXP`, 'exp', 0)
           if (e.gold > 0) rewardText(`+${e.gold.toLocaleString('en-US')} gold`, 'gold', -0.35)
+          e.drops.forEach((d, i) =>
+            rewardText(
+              `${getItem(d.itemId).name}${d.count > 1 ? ` ×${d.count}` : ''}`,
+              'loot',
+              0.4 + i * 0.32,
+            ),
+          )
           break
         case 'reset':
           resetView()

@@ -72,6 +72,15 @@ describe('loadSave', () => {
     expect(r.save.activeCharacterId).toBe(hero!.id)
   })
 
+  it('gives version 2 characters an empty inventory', () => {
+    const v2 = { ...withCharacter(), saveVersion: 2 }
+    const hero: Record<string, unknown> = { ...v2.characters[0]! }
+    delete hero.inventory
+    const r = loadSave(JSON.stringify({ ...v2, characters: [hero] }), NOW)
+    expect(r.status).toBe('migrated')
+    expect(r.save.characters[0]!.inventory).toEqual([])
+  })
+
   it('repairs invalid character fields and drops unrecoverable characters', () => {
     const save = withCharacter()
     const broken = {
@@ -85,6 +94,12 @@ describe('loadSave', () => {
           gold: 5.7,
           location: { zoneId: 'nowhere', monsterId: 'dragon' },
           stats: { kills: 5.7, deaths: -3 },
+          inventory: [
+            { itemId: 1, count: 2 },
+            { itemId: 1, count: 3 },
+            { itemId: -4, count: 1 },
+            'x',
+          ],
         },
         { id: 'x', name: 'Ghost', classId: 'necromancer' },
         'garbage',
@@ -100,6 +115,7 @@ describe('loadSave', () => {
       gold: 5,
       location: save.characters[0]!.location,
       stats: { kills: 5, deaths: 0 },
+      inventory: [{ itemId: 1, count: 5 }],
     })
     expect(r.save.activeCharacterId).toBeNull()
   })

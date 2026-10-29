@@ -6,13 +6,21 @@ import type { MonsterDef } from '../data/types.ts'
 import { clamp } from './balance.ts'
 import type { CharacterData } from './character.ts'
 import { TIMINGS } from './combat.ts'
+import { addToInventory, rollDrops, type ItemStack } from './loot.ts'
 import { gainExp } from './progression.ts'
+import type { Rng } from './rng.ts'
 
 /** Shortest possible time between two kills (victory pause + respawn), in game seconds. */
 export const MIN_KILL_CYCLE = TIMINGS.victory + TIMINGS.spawning
 
 /** Extra kills tolerated in one report (timing jitter, batched reports). */
 export const KILL_BURST = 2
+
+/**
+ * Longest time one report may cover, in seconds. Fights are reported every few seconds; time away
+ * from the game is paid by the AFK simulation instead, so an old report window grants nothing extra.
+ */
+export const MAX_REPORT_WINDOW = 600
 
 export interface CombatReport {
   monsterId: string
@@ -27,13 +35,14 @@ export interface CombatResult {
   exp: number
   gold: number
   levelsGained: number
+  /** Items that dropped (already added to the inventory). */
+  drops: ItemStack[]
 }
 
 /** Most kills a report may hold after `elapsedSeconds` of real time at a given game speed. */
 export function maxKills(elapsedSeconds: number, timeScale = 1): number {
-  return (
-    Math.floor((Math.max(0, elapsedSeconds) * Math.max(1, timeScale)) / MIN_KILL_CYCLE) + KILL_BURST
-  )
+  const window = Math.min(Math.max(0, elapsedSeconds), MAX_REPORT_WINDOW)
+  return Math.floor((window * Math.max(1, timeScale)) / MIN_KILL_CYCLE) + KILL_BURST
 }
 
 /**
@@ -44,12 +53,13 @@ export function killReward(monster: MonsterDef): { exp: number; gold: number } {
   return { exp: monster.exp, gold: monster.gold }
 }
 
-/** Pays out a combat report, accepting at most `allowedKills` kills. */
+/** Pays out a combat report, accepting at most `allowedKills` kills; rolls the drops. */
 export function applyCombatReport(
   character: CharacterData,
   monster: MonsterDef,
   report: CombatReport,
   allowedKills: number,
+  rng: Rng,
 ): CombatResult {
   const kills = clamp(Math.floor(report.kills), 0, Math.max(0, allowedKills))
   const deaths = Math.max(0, Math.floor(report.deaths))
@@ -57,6 +67,7 @@ export function applyCombatReport(
   const exp = reward.exp * kills
   const gold = reward.gold * kills
   const progress = gainExp(character.level, character.exp, exp)
+  const drops = rollDrops(monster.drops, kills, rng)
   return {
     character: {
       ...character,
@@ -64,10 +75,12 @@ export function applyCombatReport(
       exp: progress.exp,
       gold: character.gold + gold,
       stats: { kills: character.stats.kills + kills, deaths: character.stats.deaths + deaths },
+      inventory: addToInventory(character.inventory, drops),
     },
     kills,
     exp,
     gold,
     levelsGained: progress.levelsGained,
+    drops,
   }
 }

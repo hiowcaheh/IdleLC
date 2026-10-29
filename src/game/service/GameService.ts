@@ -1,3 +1,4 @@
+import type { AfkResult } from '../logic/afk.ts'
 import type { CharacterData, CharacterLocation, NewCharacter } from '../logic/character.ts'
 import type { CombatReport, CombatResult } from '../logic/rewards.ts'
 import type { LoadResult, SaveData, Settings } from '../logic/save.ts'
@@ -23,6 +24,11 @@ export interface GameService {
   travel(characterId: string, location: CharacterLocation): Promise<CharacterData>
   /** Outcome of the fights since the last report; the service checks it and pays out. */
   reportCombat(characterId: string, report: CombatReport): Promise<CombatResult>
+  /**
+   * Pays the time the character spent away from the game (AFK, up to 8 h) — call when the game
+   * shows the character again. Resolves to null when the break was too short to count.
+   */
+  claimAfk(characterId: string): Promise<AfkResult | null>
   updateSettings(patch: Partial<Settings>): Promise<Settings>
   /** Deletes the whole save (all characters) and starts over. */
   resetSave(): Promise<SaveData>
@@ -37,6 +43,8 @@ export interface DevCommands {
   addGold(characterId: string, amount: number): Promise<CharacterData>
   /** Game speed — allows proportionally more kills per report. */
   setTimeScale(scale: number): void
+  /** Pretends the character has been away for `seconds` (claim it with claimAfk). */
+  simulateAfk(characterId: string, seconds: number): Promise<void>
 }
 
 /** Subset of the Web Storage API — lets tests use an in-memory store. */

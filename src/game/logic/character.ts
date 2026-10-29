@@ -5,6 +5,7 @@
 import { CLASSES } from '../data/classes.ts'
 import type { ClassId } from '../data/types.ts'
 import { DEFAULT_ZONE_ID, ZONES } from '../data/zones.ts'
+import type { ItemStack } from './loot.ts'
 
 export const MAX_CHARACTERS = 4
 export const NAME_MIN = 3
@@ -24,9 +25,11 @@ export interface CharacterData {
   exp: number
   gold: number
   createdAt: number
+  /** Last time the game heard from this character; time away since then counts as AFK. */
   lastPlayedAt: number
   location: CharacterLocation
   stats: { kills: number; deaths: number }
+  inventory: ItemStack[]
 }
 
 export interface NewCharacter {
@@ -79,6 +82,7 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     lastPlayedAt: now,
     location: startLocation(),
     stats: { kills: 0, deaths: 0 },
+    inventory: [],
   }
 }
 

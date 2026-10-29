@@ -610,6 +610,11 @@ p {
   animation-name: float-crit;
 }
 
+.float-text--loot {
+  font-size: 15px;
+  color: #a9dcff;
+}
+
 .float-text--miss {
   font-size: 16px;
   font-style: italic;
@@ -1040,6 +1045,204 @@ a.button {
   font-weight: 700;
   font-size: 20px;
   color: var(--gilt);
+}
+
+.sheet__meta,
+.sheet__empty {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: var(--parchment-dim);
+}
+
+.sheet-backdrop--center {
+  align-items: center;
+  padding: 16px;
+}
+
+.sheet-backdrop--center .sheet {
+  width: min(100%, 420px);
+  border-bottom: var(--panel-border);
+  border-radius: 8px;
+}
+
+.hud__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ---------- Items ---------- */
+
+.item-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 6px 6px;
+  border-radius: 5px;
+  background: rgba(14, 10, 7, 0.65);
+  box-shadow: inset 0 0 0 1px rgba(138, 106, 58, 0.35);
+}
+
+.item-row__body {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.item-row__name {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-row--weapon .item-row__name,
+.item-row--armor .item-row__name,
+.item-row--accessory .item-row__name {
+  color: #a9dcff;
+}
+
+.item-row__meta {
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+
+.item-row__count {
+  font-weight: 800;
+  color: var(--gilt-bright);
+  font-variant-numeric: tabular-nums;
+}
+
+.item-icon {
+  display: grid;
+  place-content: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 5px;
+  border: 1px solid var(--bronze-dim);
+  background: radial-gradient(circle at 50% 30%, #3a2b1f, #120d09 80%);
+}
+
+.item-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: var(--parchment);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.item-icon--weapon svg {
+  stroke: #d8e4ee;
+}
+
+.item-icon--armor svg {
+  stroke: #9bd0f0;
+}
+
+.item-icon--accessory svg {
+  stroke: #e3a7f5;
+}
+
+.item-icon--scroll svg {
+  stroke: #e9d79a;
+}
+
+.item-icon--potion svg {
+  stroke: #ff8a7a;
+}
+
+.item-icon--material svg {
+  stroke: #b9e86a;
+}
+
+/* ---------- AFK summary ---------- */
+
+.afk__title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gilt-bright);
+  text-align: center;
+}
+
+.afk__subtitle {
+  margin: 6px 0 14px;
+  text-align: center;
+  color: var(--parchment-dim);
+}
+
+.afk__stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.afk__stats > div {
+  padding: 8px 10px;
+  border-radius: 5px;
+  background: rgba(14, 10, 7, 0.65);
+  box-shadow: inset 0 0 0 1px rgba(138, 106, 58, 0.35);
+}
+
+.afk__stats dt {
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+
+.afk__stats dd {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.afk__stat--exp dd {
+  color: #c4ec7c;
+}
+
+.afk__stat--gold dd {
+  color: var(--gilt-bright);
+}
+
+.afk__level {
+  margin-bottom: 12px;
+  padding: 8px;
+  border-radius: 5px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--parchment);
+  background: linear-gradient(90deg, transparent, rgba(226, 184, 100, 0.22), transparent);
+}
+
+.afk__level strong {
+  color: var(--gilt-bright);
+}
+
+.afk__heading {
+  margin: 4px 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.afk__ok {
+  width: 100%;
+  margin-top: 16px;
 }
 
 .sheet__version {

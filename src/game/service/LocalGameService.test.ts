@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { EXP_TABLE } from '../data/progression.ts'
 import { MONSTERS } from '../data/monsters.ts'
+import { AFK_MAX_SECONDS, AFK_MIN_SECONDS } from '../logic/afk.ts'
 import { GameError, MAX_CHARACTERS } from '../logic/character.ts'
+import { createRng } from '../logic/rng.ts'
 import { MIN_KILL_CYCLE, KILL_BURST } from '../logic/rewards.ts'
 import { SAVE_VERSION } from '../logic/save.ts'
 import type { KeyValueStorage } from './GameService.ts'
@@ -23,7 +25,7 @@ class MemoryStorage implements KeyValueStorage {
 /** A service with a controllable clock (ms). */
 function make(storage = new MemoryStorage()) {
   const clock = { now: 1_000_000 }
-  const game = new LocalGameService(storage, { now: () => clock.now })
+  const game = new LocalGameService(storage, { now: () => clock.now, rng: createRng(5) })
   return { game, clock, storage }
 }
 
@@ -109,6 +111,42 @@ describe('LocalGameService', () => {
       stats: { kills, deaths: 1 },
     })
     expect(stored(storage).characters[0].level).toBe(2)
+  })
+
+  it('puts the drops of reported kills into the inventory', async () => {
+    const { game, clock, hero } = await withKnight()
+    clock.now += 600 * 1000
+    const result = await game.reportCombat(hero.id, {
+      monsterId: hero.location.monsterId,
+      kills: 100,
+      deaths: 0,
+    })
+    expect(result.drops.length).toBeGreaterThan(0)
+    expect(result.character.inventory).toEqual(result.drops)
+  })
+
+  it('pays the time away as AFK, at most 8 hours, and only once', async () => {
+    const { game, clock, hero, storage } = await withKnight()
+    clock.now += (AFK_MIN_SECONDS - 1) * 1000
+    expect(await game.claimAfk(hero.id)).toBeNull()
+
+    clock.now += 10 * 3600 * 1000
+    const afk = await game.claimAfk(hero.id)
+    expect(afk).not.toBeNull()
+    expect(afk!.seconds).toBe(AFK_MAX_SECONDS)
+    expect(afk!.kills).toBeGreaterThan(0)
+    expect(afk!.character.level).toBeGreaterThan(1)
+    expect(afk!.character.inventory.length).toBeGreaterThan(0)
+    expect(stored(storage).characters[0].gold).toBe(afk!.gold)
+
+    expect(await game.claimAfk(hero.id)).toBeNull()
+  })
+
+  it('simulates time away with a dev command', async () => {
+    const { game, hero } = await withKnight()
+    await game.dev.simulateAfk(hero.id, 3600)
+    const afk = await game.claimAfk(hero.id)
+    expect(afk!.seconds).toBe(3600)
   })
 
   it('caps kills that come faster than a fight can take', async () => {

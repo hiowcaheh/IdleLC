@@ -1,10 +1,11 @@
 import type { CombatEvent } from '../game/logic/combat.ts'
+import type { ItemStack } from '../game/logic/loot.ts'
 
 /** Events the 3D scene reacts to: combat events, rewards paid out and a full reset (new save). */
 export type ViewEvent =
   | CombatEvent
   | { type: 'reset' }
-  | { type: 'reward'; exp: number; gold: number; levelsGained: number }
+  | { type: 'reward'; exp: number; gold: number; levelsGained: number; drops: ItemStack[] }
   | { type: 'levelUp'; level: number }
 
 type Listener = (event: ViewEvent) => void

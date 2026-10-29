@@ -52,4 +52,24 @@ export interface MonsterDef {
   /** Extra model scale on top of the manifest scale (LC: t_npc.a_scale). */
   scale?: number
   elite?: boolean
+  /** Loot table: each entry is rolled separately on every kill. */
+  drops?: MonsterDrop[]
+}
+
+export interface MonsterDrop {
+  itemId: number
+  /** Probability 0..1 per kill (LC: a_item_percent / 10000). */
+  chance: number
+}
+
+export type ItemType = 'weapon' | 'armor' | 'scroll' | 'material' | 'accessory' | 'potion' | 'other'
+
+export interface ItemDef {
+  id: number
+  name: string
+  type: ItemType
+  /** Required level. */
+  level: number
+  /** Shop price in gold. */
+  price: number
 }
