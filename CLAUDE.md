@@ -131,6 +131,10 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   kolory klas wg właściciela (A niebieski, B zielony, C jasnoniebieski, D żółty, E biały), masowa sprzedaż.
   Opcje specjalne (cooldown, mana, kradzież HP/MP, Move Speed itd.) — działanie własne (`options.ts`, `combat.ts`).
   Zwykły sprzęt nie spada z opcjami: co 10 min aktywnej gry opcja na losową założoną część (decyzja właściciela).
+- **Ekran walki i świat:** napisy w scenie („Lv N Nazwa” nad potworem, nick nad graczem, klątwy pod paskiem
+  potwora; górna ramka celu usunięta), portrety klas z `TopUI.tex` (`npm run convert-lc -- --only icons`),
+  mapa świata (9 stref, bez blokady poziomu — prośba właściciela), powrót z wyprawy nie leczy (HP/MP sprzed
+  wyprawy + regeneracja za czas nieobecności).
 - Skille trafiają po `a_readyTime` + 0,4 s (`a_fireTime` to animacja po wystrzale — bez blokady, dopóki nie ma
   animacji skilli z klienta: `TIMINGS.skillAnimationLock = 0`).
 - Narzędzia dev włączane w Settings (bez `?dev=1`): prędkość ×20, dowolny potwór, poziom, exp, złoto, SP,
@@ -158,8 +162,8 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
    na całości (wszystkie potwory, 5 pozostałych klas w `scripts/lc/classes.mjs`, ikony przedmiotów, mapy;
    konwerter wypisuje nowe shadery do sprawdzenia). Z kodu serwera: statystyki klas i przyrost na poziom,
    wzory obrażeń/trafień, kary exp za różnicę poziomów, szanse ulepszeń, poziomy umiejętności.
-2. Dalej: M6 (mapa świata, podróż między strefami — właściciel: „mapa świata potem, na razie tylko Juno”),
-   opcje na broni/zbroi z dropu, żywioły.
+2. Dalej: M6 do końca (osobne tło / teren każdej strefy, gdy będą mapy z klienta; ewentualny wymagany poziom
+   strefy — na razie właściciel chce swobodnego wyboru), żywioły, opcje specjalne, które jeszcze nie działają.
 3. Etap 2 (Supabase) według `docs/supabase.md` — dopiero po zgodzie właściciela.
 
 **Otwarte kwestie:** brak siatek broni z `Data\Item\Weapon` (przyszły tylko tekstury i tagi); brak mapy

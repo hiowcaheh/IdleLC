@@ -123,6 +123,9 @@ dojdą w M5). Ekwipunek nie ma na razie limitu miejsc.
 
 ## AFK — wyprawy
 
+- Powrót z wyprawy nie odnawia HP i MP: postać ma ich tyle (proporcjonalnie), ile przed wyprawą, plus
+  regeneracja poza walką za czas nieobecności (`carryVitals`).
+
 - Gracz wysyła postać na **wyprawę** (przycisk „Expedition” w panelu polowania). Postać poluje na wybranego
   potwora, a walka na ekranie staje. Start zapisuje czas (`expedition.startedAt`); wyprawa przetrwa
   zamknięcie gry.
@@ -269,6 +272,13 @@ dostaje jedną nową opcję — losowy typ z `t_option` dozwolony dla jej podtyp
 poziom według wag `a_prob`. Akcesoria też mogą dostać opcję. Czas liczy serwis przy zgłoszeniach walki:
 odstęp między zgłoszeniami, najwyżej 2 minuty (dłuższa przerwa = gra była zamknięta). Gdy żadna część nie
 może dostać opcji, licznik czeka pełny. W karcie postaci (Stats) widać, za ile minut następna opcja.
+
+## Mapa świata
+
+Każda z 9 stref z bazy da się wybrać od razu (prośba właściciela — bez blokady poziomu). Mapa pokazuje
+typowe poziomy potworów strefy: bez najniższych 15% i najwyższych 10%, bo w każdej strefie są potwory
+eventowe (np. Triangle ball 1, Pumpkin 20, poziom 100). Po wyborze polowanie zaczyna się na zwykłym potworze
+strefy najbliższym poziomowi postaci.
 
 ## Mikstury
 

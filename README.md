@@ -38,6 +38,11 @@ Konto ma do 4 postaci (6 klas). Wszystko zapisuje się w przeglądarce (`localSt
 poziom, exp, złoto, SP, umiejętności, zabicia, ekwipunek i miejsce polowania. Po powrocie gra otwiera się na
 ostatniej postaci.
 
+**Ekran walki:** nad potworem „Lv N Nazwa” (kolor poziomu = trudność), pod jego paskiem HP ikony klątw,
+ogłuszenia i trucizny; nad graczem jego nick. Ramka gracza u góry ma portret klasy z klienta. **Mapa świata:**
+dotknij nazwy strefy w panelu polowania — 9 stref z typowymi poziomami potworów (od najłatwiejszej); wybór
+przenosi polowanie tam (potwór najbliższy poziomem), więc widać inne potwory i ich drop.
+
 **Umiejętności:** wszystkie umiejętności klas 1:1 z bazy (koszty many, czasy, poziomy, wymagania). Potwory dają
 punkty umiejętności (SP); w oknie **Skills** (ikona księgi w HUD, zielona liczba = ile można się nauczyć)
 uczy się ich i podnosi poziomy. Nauczone umiejętności działają same w walce (pasek nad panelem polowania:
