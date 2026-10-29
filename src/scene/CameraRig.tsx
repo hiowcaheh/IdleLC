@@ -1,6 +1,6 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useRef } from 'react'
-import { Vector3 } from 'three'
+import { PerspectiveCamera, Vector3 } from 'three'
 import { CAMERA_OFFSET, view } from './viewState.ts'
 
 const LOOK_HEIGHT = 1.1
@@ -9,6 +9,12 @@ const ZOOM_OUT = 1.12
 const TALL = 2.4
 const BIG_ZOOM_PER_UNIT = 0.3
 const MAX_BIG_ZOOM = 2.6
+/**
+ * Share of the screen height the picture moves up, so the fight sits in the space the HUD leaves
+ * free (the skill bar and hunt panel cover the bottom of a phone screen).
+ */
+const VIEW_SHIFT_TALL = 0.13
+const VIEW_SHIFT_WIDE = 0.05
 
 /** Third-person camera that keeps both fighters in frame; pulls back on portrait screens. */
 export function CameraRig() {
@@ -18,9 +24,19 @@ export function CameraRig() {
   const desired = useRef(new Vector3())
   const initialized = useRef(false)
   const zoom = useRef(1)
+  const viewShift = useRef({ width: 0, height: 0, shift: 0 })
 
   useFrame((_, delta) => {
     const aspect = size.width / size.height
+    const shift = aspect < 1 ? VIEW_SHIFT_TALL : VIEW_SHIFT_WIDE
+    const last = viewShift.current
+    if (
+      camera instanceof PerspectiveCamera &&
+      (last.width !== size.width || last.height !== size.height || last.shift !== shift)
+    ) {
+      camera.setViewOffset(size.width, size.height, 0, size.height * shift, size.width, size.height)
+      viewShift.current = { width: size.width, height: size.height, shift }
+    }
     // a little further out than the arena needs, so the fighters have room around them; big
     // monsters (Treant, Balrog…) push the camera back until they fit
     const big = view.monsterVisible

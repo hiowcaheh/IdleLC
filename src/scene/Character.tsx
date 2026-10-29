@@ -73,6 +73,9 @@ interface Props {
   timeScale?: () => number
 }
 
+/** Share of a model's texture that shines on its own (see prepareModel). */
+const SELF_LIGHT = 0.35
+
 function prepareModel(source: Object3D, model: ModelEntry) {
   const object = cloneSkinned(source)
   const materials: { material: MeshStandardMaterial; emissive: Color }[] = []
@@ -80,6 +83,12 @@ function prepareModel(source: Object3D, model: ModelEntry) {
     const copy = m.clone() as MeshStandardMaterial
     const tint = model.tint[m.name]
     if (tint && copy.color) copy.color.set(tint)
+    // LC lit its models with a strong ambient light; a share of the texture shining on its own
+    // keeps darker monster textures readable under our physical lighting
+    if (copy.map && copy.emissive) {
+      copy.emissiveMap = copy.map
+      copy.emissive.setScalar(SELF_LIGHT)
+    }
     if (copy.emissive) materials.push({ material: copy, emissive: copy.emissive.clone() })
     return copy
   }
