@@ -108,7 +108,7 @@ Podtypy broni (przypisanie do klas wg nazw i `a_job_flag`, część do potwierdz
 
 ## Umiejętności — `t_skill` (1 849), `t_magic`
 
-`a_job, a_job2, a_name_usa, a_maxLevel`, `a_type` (0 aktywna na cel, 2 wzmocnienie, 3 pasywna), zasięg
+`a_job, a_job2, a_name_usa, a_maxLevel`, `a_type` (wg danych: 0 walka wręcz, 1 dystans, 2 magia — ataki i wzmocnienia, 3 pasywna, 9 specjalna), zasięg
 (`a_fireRange`), czasy w dziesiątych sekundy (`a_readyTime, a_fireTime, a_reuseTime` — np. Knuckle Spear:
 rzut 2,6 s, odnowienie 3 s), opis (`a_client_description_usa`), ikona (`a_client_icon_texid/row/col` →
 `SkillBtn{id}.tex`).
