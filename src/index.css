@@ -964,6 +964,38 @@ p {
   outline-offset: 2px;
 }
 
+.class-option .class-portrait {
+  justify-self: center;
+  margin-bottom: 2px;
+  box-shadow: 0 0 0 1px var(--bronze-dim);
+}
+
+.slot__portrait {
+  position: relative;
+  flex: none;
+}
+
+.slot__portrait .class-portrait {
+  box-shadow: 0 0 0 1px var(--bronze);
+}
+
+.slot__portrait-level {
+  position: absolute;
+  right: -5px;
+  bottom: -4px;
+  min-width: 20px;
+  padding: 0 4px;
+  border-radius: 10px;
+  background: #17110c;
+  border: 1px solid var(--bronze);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+  color: var(--gilt-bright);
+  font-variant-numeric: tabular-nums;
+}
+
 .class-option__name {
   font-family: var(--font-display);
   font-weight: 700;

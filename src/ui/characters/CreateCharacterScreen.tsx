@@ -11,6 +11,7 @@ import {
   type CreateCharacterError,
 } from '../../game/logic/character.ts'
 import { useGameStore } from '../../state/gameStore.ts'
+import { ClassPortrait } from '../hud/ClassPortrait.tsx'
 import { ClassPreview } from './ClassPreview.tsx'
 
 const ERRORS: Record<CreateCharacterError, string> = {
@@ -77,6 +78,7 @@ export function CreateCharacterScreen() {
                   checked={classId === id}
                   onChange={() => setClassId(id)}
                 />
+                <ClassPortrait classId={id} size={40} />
                 <span className="class-option__name">{CLASSES[id].name}</span>
                 <span className="class-option__role">{CLASSES[id].role}</span>
               </label>

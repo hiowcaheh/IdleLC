@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { CLASSES } from '../../game/data/classes.ts'
+import { CLASSES, classPortrait } from '../../game/data/classes.ts'
 import { ZONES } from '../../game/data/zones.ts'
 import { MAX_CHARACTERS } from '../../game/logic/character.ts'
 import { useGameStore } from '../../state/gameStore.ts'
+import { ClassPortrait } from '../hud/ClassPortrait.tsx'
 import { ClassPreview } from './ClassPreview.tsx'
 
 /** Account screen: up to MAX_CHARACTERS characters, enter the world or create a new one. */
@@ -77,7 +78,14 @@ export function CharacterSelectScreen() {
                   setConfirmDelete(false)
                 }}
               >
-                <span className="slot__level">{c.level}</span>
+                {classPortrait(c.classId) ? (
+                  <span className="slot__portrait">
+                    <ClassPortrait classId={c.classId} size={40} />
+                    <span className="slot__portrait-level">{c.level}</span>
+                  </span>
+                ) : (
+                  <span className="slot__level">{c.level}</span>
+                )}
                 <span className="slot__body">
                   <span className="slot__name">{c.name}</span>
                   <span className="slot__meta">
