@@ -14,3 +14,19 @@ createRoot(root).render(
     </HashRouter>
   </StrictMode>,
 )
+
+// Installable app: the service worker caches the game for fast (and offline) starts. Production only —
+// in development it would serve stale modules.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register(`${import.meta.env.BASE_URL}sw.js`)
+      .then(() => navigator.serviceWorker.ready)
+      .then((registration) => {
+        // files loaded before the worker took over (first visit) are cached now
+        const urls = performance.getEntriesByType('resource').map((entry) => entry.name)
+        registration.active?.postMessage({ type: 'cache-loaded', urls })
+      })
+      .catch(() => undefined)
+  })
+}

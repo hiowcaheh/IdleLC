@@ -78,6 +78,7 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 - `npm run check` — lint + format + typecheck + testy (to samo co CI)
 - `npm run build` — build produkcyjny do `dist/`
 - `npm run convert-models` — konwersja modeli z `assets-src/`
+- `npm run pwa-icons` — ikony aplikacji (PWA) do `public/pwa/`
 - `npm run import-lc-db -- --dump <newproject_data.sql>` — dane gry z bazy LC → `src/game/data/generated/`
 - `npm run convert-lc -- --client <folder klienta>` — modele LC → `public/models/lc/` + manifest, ikony
   przedmiotów → `public/icons/lc/items.webp` (same ikony: `--only icons`)
@@ -120,6 +121,10 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   animacji skilli z klienta: `TIMINGS.skillAnimationLock = 0`).
 - Narzędzia dev włączane w Settings (bez `?dev=1`): prędkość ×20, dowolny potwór, poziom, exp, złoto, SP,
   kill/heal, podgląd modeli.
+- **PWA:** `public/manifest.webmanifest`, własne ikony (`npm run pwa-icons`), service worker `public/sw.js`
+  (strona: najpierw sieć; `/assets/`: cache; modele/ikony/czcionki: cache + odświeżanie w tle; offline działa
+  po pierwszej wizycie). Paczka JS podzielona (`three`, `react-three`, `vendor`, `lc-data`, kod gry ~120 KB).
+  Brak modelu nie wywraca gry (`ModelBoundary` → zastępcza figura).
 - Statystyki klas i wzory walki są **własne, tymczasowe** (`classes.ts`, `lcBalance.ts`) — czekają na kod
   serwera LC od właściciela.
 
@@ -137,8 +142,8 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
    na całości (wszystkie potwory, 5 pozostałych klas w `scripts/lc/classes.mjs`, ikony przedmiotów, mapy;
    konwerter wypisuje nowe shadery do sprawdzenia). Z kodu serwera: statystyki klas i przyrost na poziom,
    wzory obrażeń/trafień, kary exp za różnicę poziomów, szanse ulepszeń, poziomy umiejętności.
-2. Dalej: instalacja jako aplikacja (PWA) i szybsze ładowanie, M6 (mapa świata, podróż między strefami),
-   mikstury HP/MP (dane w bazie, auto-użycie), akcesoria (slot 7, opcje `t_option`).
+2. Dalej: M6 (mapa świata, podróż między strefami), mikstury HP/MP (dane w bazie, auto-użycie),
+   akcesoria (slot 7, opcje `t_option`).
 3. Etap 2 (Supabase) według `docs/supabase.md` — dopiero po zgodzie właściciela.
 
 **Otwarte kwestie:** brak siatek broni z `Data\Item\Weapon` (przyszły tylko tekstury i tagi); brak mapy

@@ -19,7 +19,8 @@
     "convert-models": "node scripts/convert-models.mjs",
     "check": "npm run lint && npm run format:check && npm run typecheck && npm run test",
     "import-lc-db": "node scripts/lc/import-db.mjs",
-    "convert-lc": "node scripts/lc/convert-lc.mjs"
+    "convert-lc": "node scripts/lc/convert-lc.mjs",
+    "pwa-icons": "node scripts/pwa-icons.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

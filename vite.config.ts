@@ -12,8 +12,25 @@ export default defineConfig({
   },
   build: {
     target: 'es2022',
-    // three.js + react-three-fiber (~1.3 MB) and the LC game data (~0.4 MB); expected for a 3D game.
-    chunkSizeWarningLimit: 2000,
+    // three.js (~0.7 MB) is the largest chunk; expected for a 3D game
+    chunkSizeWarningLimit: 1000,
+    rolldownOptions: {
+      output: {
+        // libraries and game data change less often than the game code: separate files stay
+        // cached (service worker, browser) across deploys
+        codeSplitting: {
+          groups: [
+            { name: 'three', test: /node_modules[\\/]three[\\/]/ },
+            {
+              name: 'react-three',
+              test: /node_modules[\\/](@react-three|three-stdlib|@monogrid|troika)/,
+            },
+            { name: 'vendor', test: /node_modules/ },
+            { name: 'lc-data', test: /src[\\/]game[\\/]data[\\/]generated/ },
+          ],
+        },
+      },
+    },
   },
   test: {
     include: ['src/**/*.test.ts', 'scripts/**/*.test.mjs'],

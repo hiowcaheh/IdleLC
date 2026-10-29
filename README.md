@@ -5,6 +5,12 @@ Działa na PC i telefonie, bez instalacji.
 
 **Wersja testowa:** https://hiowcaheh.github.io/IdleLC/
 
+**Jako aplikacja na telefonie:** otwórz stronę i wybierz „Dodaj do ekranu głównego” (Android/Chrome: menu ⋮ →
+„Zainstaluj aplikację”; iPhone/Safari: Udostępnij → „Do ekranu początkowego”). Gra otwiera się wtedy na pełnym
+ekranie z ikoną IdleLC. Po pierwszej wizycie pliki gry są w pamięci telefonu (service worker `public/sw.js`),
+więc start jest szybszy i działa nawet bez internetu; nowa wersja wczytuje się przy następnym otwarciu
+z internetem. Ikony aplikacji (własne, bez grafik LC) generuje `npm run pwa-icons`.
+
 ## Uruchomienie lokalne
 
 Wymagany Node.js 22+.
@@ -24,6 +30,7 @@ Inne komendy:
 | `npm run preview`        | podgląd buildu produkcyjnego                              |
 | `npm run format`         | formatowanie Prettierem                                   |
 | `npm run convert-models` | konwersja modeli z `assets-src/` do zoptymalizowanych GLB |
+| `npm run pwa-icons`      | ikony aplikacji (PWA) do `public/pwa/`                    |
 
 ### Postacie i zapis
 
