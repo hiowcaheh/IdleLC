@@ -227,6 +227,48 @@ cenie z bazy (decyzja własna).
 
 Cena = `a_price × a_buy_rate %` (100%).
 
+## Rzadkie przedmioty i lupy
+
+Dane 1:1 z bazy:
+
+- `t_item.a_rare_index_N` / `a_rare_prob_N` — które zestawy `t_rareoption` przedmiot może dostać i z jaką wagą
+  (np. Perion Sword 73: Mighty — E 60%, Razing — D 30%, Destructive — C 10%). Rzadkie są bronie i zbroje od
+  ok. 70 poz. (Ignis 70–72, bronie 73, rękawice 75, spodnie i zbroja 76, hełm i buty 77…).
+- `t_rareoption` — klasa (`a_grade` 0 = A … 4 = E), typ (broń / zbroja / akcesorium), prefiks nazwy
+  („Mighty Perion Sword”), stałe premie (`a_attack`, `a_defense`, `a_magic`, `a_resist`) i do 10 opcji, każda
+  z poziomem i szansą `a_option_prob` (na 10 000).
+- Lupy: Magnifying glass (1838, 600 000) i Golden magnifying glass (1839, 1 000 000 — „zawsze działa”).
+
+Zasady:
+
+- rzadki przedmiot spada (i jest sprzedawany) **nieodkryty** — czerwona nazwa, leży w stosie; można go założyć
+  i działa jak zwykły, bez opcji (decyzja właściciela);
+- odkrycie u **Appraisera** (przycisk w panelu polowania) zużywa jedną lupę na sztukę: losuje zestaw z wag
+  przedmiotu, potem każdą opcję zestawu z jej szansą. Zwykła lupa działa w **60%** przypadków (własne —
+  cena za sukces jak złotej), przy porażce lupa przepada, przedmiot zostaje nieodkryty;
+- premie zestawu dodają się do mocy przedmiotu (broń: atak + magia, zbroja: obrona + odporność), ulepszenia
+  „+” liczą się od sumy;
+- kolory nazw (decyzja właściciela): nieodkryty czerwony, **A niebieski, B zielony, C jasnoniebieski,
+  D żółty, E biały**;
+- Appraiser odkrywa hurtem (tyle sztuk, na ile starczy lup), pokazuje odkryte od najlepszych (klasa, liczba
+  i siła opcji, poziom), zaznacza je klasami („E ×5”) i sprzedaje zaznaczone (`a_price × 40%`);
+- lupy sprzedaje sklep w każdej strefie (własne — w LC są w sklepach miast).
+
+Opcje specjalne zestawów (działanie **własne**): skrócenie odnowienia skilli (58, max −50%), mniej many na
+skille (59, max −75%), kradzież HP / MP z obrażeń (24, 25, 51, 52), szybkość ruchu (64 — krótsze podbieganie
+do potwora, więc więcej zabić na godzinę), blok (63 → unik w punktach %), szansa krytyka (55, w 1/10 %),
+obrażenia krytyczne (66, %), regeneracja HP / MP (50, 56, 57), niższy wymagany poziom (49). Odporności (60–62),
+lot (65), ataki ciemności / trucizny (53, 54) i przemiana (84) są wyświetlane, ale jeszcze nie działają.
+
+## Opcje z gry (zwykły sprzęt)
+
+Decyzja właściciela: broń i zbroja **nigdy nie spadają z opcjami**. Za każde **10 minut aktywnej gry**
+(walka na ekranie; wyprawy się nie liczą) losowa założona część, która nie jest rzadka i ma mniej niż 5 opcji,
+dostaje jedną nową opcję — losowy typ z `t_option` dozwolony dla jej podtypu (maski) i jeszcze nieobecny,
+poziom według wag `a_prob`. Akcesoria też mogą dostać opcję. Czas liczy serwis przy zgłoszeniach walki:
+odstęp między zgłoszeniami, najwyżej 2 minuty (dłuższa przerwa = gra była zamknięta). Gdy żadna część nie
+może dostać opcji, licznik czeka pełny. W karcie postaci (Stats) widać, za ile minut następna opcja.
+
 ## Mikstury
 
 Dane 1:1 z bazy: mikstura w LC to umiejętność (`t_item.a_num_0` → `t_skill`): stan z `t_magic` i moc

@@ -53,6 +53,13 @@ i obrony), a w oknie **Character** (ikona hełmu) widać statystyki i sloty, mo�
 +0…+15 kamieniami (Smelting Stone z dropu, Heaven Stone ze sklepu; porażka od +3 zabiera jeden „+”). Lepszy
 sprzęt = szybsze polowanie, także na wyprawach. „Sell all loot” w torbie zostawia sprzęt twojej klasy.
 
+**Rzadkie przedmioty:** od ok. 70 poz. bronie i zbroje spadają nieodkryte (czerwona nazwa; można je nosić
+bez opcji). **Appraiser** (panel polowania) odkrywa je lupami ze sklepu (złota 1 000 000 — zawsze, zwykła
+600 000 — 60%): zestaw z bazy daje prefiks nazwy, klasę (kolor: E biały, D żółty, C jasnoniebieski, B zielony,
+A niebieski), premie i opcje. Odkryte są posortowane od najlepszych; „E ×5” zaznacza klasę, „Sell selected”
+sprzedaje. Zwykły sprzęt dostaje opcje z gry: co 10 minut aktywnej walki jedna opcja na losową założoną część
+(karta postaci → Stats pokazuje, kiedy następna).
+
 **Mikstury:** w sklepie Juno (dane 1:1: leczenie i mana przez 15 s, regeneracja przez 10 min). Postać pije je
 sama w walce i na wyprawach (leczenie poniżej 50% HP, mana poniżej 30% MP, regeneracja, gdy brakuje HP / MP).
 Dwa sloty obok złota w ramce postaci pokazują, ile zostało; dotknięcie włącza / wyłącza AUTO (litera „A”).
@@ -66,7 +73,7 @@ przedmioty sprzedaje się tam za cenę z bazy × stawkę skupu sklepu (40%). Szc
 **Settings → Change character** wraca do wyboru postaci, **Reset save** kasuje wszystkie postacie.
 Zapisy ze starszej wersji gry są przenoszone automatycznie (postać „Hero”; od wersji 5 postacie dostają
 darmowe umiejętności startowe i 0 SP, od wersji 6 — darmowy zestaw startowy sprzętu, od wersji 7 — pasek 7
-umiejętności).
+umiejętności, od wersji 8 — rzadkie przedmioty i licznik opcji z gry).
 
 ### Narzędzia deweloperskie
 

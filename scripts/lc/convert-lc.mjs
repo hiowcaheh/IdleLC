@@ -19,6 +19,7 @@
  *
  * See docs/lc-formats.md for the file formats.
  */
+import { createHash } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -182,7 +183,11 @@ async function main() {
   }
 
   if (data && !args.smc && (!args.only || args.only.has('icons'))) {
-    const manifest = {}
+    // sheets whose atlases are not in these client folders stay as they are
+    const manifestFile = path.join(GENERATED, 'lc-icons.json')
+    const manifest = fs.existsSync(manifestFile)
+      ? JSON.parse(fs.readFileSync(manifestFile, 'utf8'))
+      : {}
     for (const kind of ICON_KINDS) {
       const entries = kind.entries(data)
       const { image, sheet, missingAtlases } = await buildIconSheet(
@@ -198,7 +203,9 @@ async function main() {
       const out = path.join(ROOT, 'public', kind.file)
       fs.mkdirSync(path.dirname(out), { recursive: true })
       fs.writeFileSync(out, image)
-      manifest[kind.kind] = sheet
+      // a new sheet gets a new URL, so cached copies of the old one are never mixed with new positions
+      const version = createHash('sha1').update(image).digest('hex').slice(0, 10)
+      manifest[kind.kind] = { ...sheet, file: `${kind.file}?v=${version}` }
       console.log(
         `icons: ${kind.kind} ${Object.keys(sheet.icons).length} of ${entries.length}, ` +
           `${(image.length / 1024).toFixed(0)} KB` +
@@ -207,7 +214,7 @@ async function main() {
     }
     if (Object.keys(manifest).length) {
       fs.mkdirSync(GENERATED, { recursive: true })
-      fs.writeFileSync(path.join(GENERATED, 'lc-icons.json'), JSON.stringify(manifest))
+      fs.writeFileSync(manifestFile, JSON.stringify(manifest))
     }
   }
 

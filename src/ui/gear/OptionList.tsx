@@ -18,7 +18,7 @@ export function OptionList({
         <span
           key={i}
           className={`option-list__item${line.helps ? '' : ' is-useless'}`}
-          title={line.helps ? undefined : 'No effect for your class'}
+          title={line.note}
         >
           {line.text}
         </span>

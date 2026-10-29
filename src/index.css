@@ -2443,3 +2443,104 @@ a.button {
 .option-list--totals {
   margin-bottom: 8px;
 }
+
+.hunt__shop + .hunt__shop {
+  margin-left: 0;
+}
+
+/* Rare items: unidentified red, identified by grade (owner's colours) */
+.item-row__name.name--unidentified,
+.name--unidentified {
+  color: #ff6b5e;
+}
+
+.item-row__name.name--grade-A,
+.name--grade-A {
+  color: #4f8bff;
+}
+
+.item-row__name.name--grade-B,
+.name--grade-B {
+  color: #5fd36a;
+}
+
+.item-row__name.name--grade-C,
+.name--grade-C {
+  color: #8fe3ff;
+}
+
+.item-row__name.name--grade-D,
+.name--grade-D {
+  color: #f2d45c;
+}
+
+.item-row__name.name--grade-E,
+.name--grade-E {
+  color: #f4efe4;
+}
+
+/* Appraiser */
+.appraiser__glasses {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.appraiser__glass {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(14, 10, 7, 0.65);
+  box-shadow: inset 0 0 0 1px rgba(138, 106, 58, 0.35);
+}
+
+.appraiser__glass-actions {
+  display: flex;
+  flex: none;
+  gap: 6px;
+}
+
+.appraiser__glass-actions .button {
+  min-height: 36px;
+  padding: 6px 10px;
+}
+
+.appraiser__select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.grade-chip {
+  min-height: 32px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--bronze-dim);
+  background: rgba(14, 10, 7, 0.65);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.grade-chip.is-active {
+  border-color: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.appraiser__row .item-row__main {
+  cursor: pointer;
+}
+
+.appraiser__check {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--gilt);
+}

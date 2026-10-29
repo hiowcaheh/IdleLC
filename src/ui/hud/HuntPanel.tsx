@@ -3,6 +3,7 @@ import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { ExpeditionDialog } from '../expedition/ExpeditionDialog.tsx'
+import { AppraiserPanel } from '../gear/AppraiserPanel.tsx'
 import { ShopPanel } from '../gear/ShopPanel.tsx'
 import { levelTone } from './levelColor.ts'
 
@@ -18,6 +19,7 @@ export function HuntPanel() {
   const list = useRef<HTMLDivElement>(null)
   const [expeditionOpen, setExpeditionOpen] = useState(false)
   const [shopOpen, setShopOpen] = useState(false)
+  const [appraiserOpen, setAppraiserOpen] = useState(false)
 
   // keep the hunted monster visible when it was picked elsewhere (dev tools, zone change)
   useEffect(() => {
@@ -37,6 +39,9 @@ export function HuntPanel() {
         </p>
         <button type="button" className="hunt__shop" onClick={() => setShopOpen(true)}>
           Shop
+        </button>
+        <button type="button" className="hunt__shop" onClick={() => setAppraiserOpen(true)}>
+          Appraiser
         </button>
         <button type="button" className="hunt__expedition" onClick={() => setExpeditionOpen(true)}>
           Expedition
@@ -64,6 +69,7 @@ export function HuntPanel() {
         })}
       </div>
       {shopOpen && <ShopPanel onClose={() => setShopOpen(false)} />}
+      {appraiserOpen && <AppraiserPanel onClose={() => setAppraiserOpen(false)} />}
       {expeditionOpen && character && (
         <ExpeditionDialog character={character} onClose={() => setExpeditionOpen(false)} />
       )}

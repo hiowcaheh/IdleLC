@@ -16,6 +16,7 @@ import { LevelUpEffect } from './LevelUpEffect.tsx'
 import { ModelBoundary } from './ModelBoundary.tsx'
 import { SkillAura } from './SkillAura.tsx'
 import { ARENA_RADIUS, smoothstep } from './terrain.ts'
+import { optionText } from '../ui/gear/format.ts'
 import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
 /** How far the player runs to reach a newly spawned monster. */
@@ -205,6 +206,9 @@ export function Battle() {
               0.4 + i * 0.32,
             ),
           )
+          break
+        case 'optionGained':
+          rewardText(`${getItem(e.itemId).name}: ${optionText(e.option)}`, 'skill', 1.1)
           break
         case 'reset':
           resetView()

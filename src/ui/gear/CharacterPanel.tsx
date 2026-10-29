@@ -5,10 +5,20 @@ import type { EquipSlot } from '../../game/data/types.ts'
 import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
 import { GameError } from '../../game/logic/character.ts'
 import { MAX_PLUS, stonesOwned, upgradeChance, type GearPiece } from '../../game/logic/equipment.ts'
+import { OPTION_PLAY_SECONDS } from '../../game/logic/options.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { Sheet } from '../Sheet.tsx'
-import { SLOT_LABELS, fmt, gearLine, heroStats, optionTotals, pieceName } from './format.ts'
+import {
+  SLOT_LABELS,
+  fmt,
+  gearLine,
+  heroStats,
+  nameTone,
+  optionTotals,
+  pieceName,
+  rareLabel,
+} from './format.ts'
 import { OptionList } from './OptionList.tsx'
 
 type Tab = 'stats' | 'equipment'
@@ -36,6 +46,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
 
   const stats = heroStats(character)
   const options = optionTotals(character.equipment, character.classId)
+  const nextOption = OPTION_PLAY_SECONDS - character.optionProgress
   const castTime = stats.castTime ?? 0
   const statRows: [string, string][] = [
     ['Health', fmt(stats.maxHp)],
@@ -75,7 +86,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   const upgrade = (slot: EquipSlot, piece: GearPiece) =>
     run(async () => {
       const r = await upgradeItem(slot)
-      const name = getItem(piece.itemId).name
+      const name = pieceName(piece.itemId, 0, piece.rare)
       if (r.success) return `Success! ${name} is now +${r.plusAfter}.`
       return r.plusAfter < r.plusBefore
         ? `The upgrade failed: ${name} dropped to +${r.plusAfter}.`
@@ -115,13 +126,17 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
             ))}
           </dl>
           <h3 className="inventory__heading">Options on your gear</h3>
+          <p className="sheet__meta">
+            Next option on a worn piece in {Math.max(1, Math.ceil(nextOption / 60))} min of play
+            (not on expeditions).
+          </p>
           {options.length > 0 ? (
             <span className="option-list option-list--totals">
               {options.map((line) => (
                 <span
                   key={line.text}
                   className={`option-list__item${line.helps ? '' : ' is-useless'}`}
-                  title={line.helps ? undefined : 'No effect for your class'}
+                  title={line.note}
                 >
                   {line.text}
                 </span>
@@ -177,11 +192,15 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
                     )}
                     <span className="item-row__body">
                       <span className="gear-slot__label">{SLOT_LABELS[slot]}</span>
-                      <span className="item-row__name">
-                        {piece ? pieceName(piece.itemId, piece.plus) : 'Empty'}
+                      <span className={`item-row__name${piece ? nameTone(piece) : ''}`}>
+                        {piece ? pieceName(piece.itemId, piece.plus, piece.rare) : 'Empty'}
                       </span>
-                      {piece && gearLine(piece.itemId, piece.plus) && (
-                        <span className="item-row__meta">{gearLine(piece.itemId, piece.plus)}</span>
+                      {piece && (
+                        <span className="item-row__meta">
+                          {[rareLabel(piece), gearLine(piece.itemId, piece.plus, piece.rare)]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </span>
                       )}
                       {piece && <OptionList options={piece.options} classId={character.classId} />}
                     </span>
@@ -208,7 +227,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
                           run(async () => {
                             await unequipItem(slot)
                             setSelected(null)
-                            return `${pieceName(piece.itemId, piece.plus)} is back in your bag.`
+                            return `${pieceName(piece.itemId, piece.plus, piece.rare)} is back in your bag.`
                           })
                         }
                       >

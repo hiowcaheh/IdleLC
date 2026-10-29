@@ -1,5 +1,6 @@
 import type { CombatEvent } from '../game/logic/combat.ts'
 import type { ItemStack } from '../game/logic/loot.ts'
+import type { ItemOption } from '../game/logic/options.ts'
 
 /** Events the 3D scene reacts to: combat events, rewards paid out and a full reset (new save). */
 export type ViewEvent =
@@ -7,6 +8,8 @@ export type ViewEvent =
   | { type: 'reset' }
   | { type: 'reward'; exp: number; gold: number; levelsGained: number; drops: ItemStack[] }
   | { type: 'levelUp'; level: number }
+  /** A worn piece gained an option from play time. */
+  | { type: 'optionGained'; itemId: number; option: ItemOption }
 
 type Listener = (event: ViewEvent) => void
 

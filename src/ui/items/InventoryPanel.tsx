@@ -1,13 +1,21 @@
 import { useEffect, useState } from 'react'
-import { getItem } from '../../game/data/items.ts'
+import { UPGRADE_STONE_IDS, getItem } from '../../game/data/items.ts'
 import type { ItemType } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
 import type { GearSource } from '../../game/logic/equipment.ts'
 import type { ItemOption } from '../../game/logic/options.ts'
+import { isRare } from '../../game/logic/rare.ts'
 import type { ItemStack } from '../../game/logic/loot.ts'
 import { sellPrice, stacksValue } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
-import { compareText, gearLine, pieceName, wearProblem } from '../gear/format.ts'
+import {
+  compareText,
+  gearLine,
+  nameTone,
+  pieceName,
+  rareLabel,
+  wearProblem,
+} from '../gear/format.ts'
 import { OptionList } from '../gear/OptionList.tsx'
 import { potionText } from './potionText.ts'
 import { Sheet } from '../Sheet.tsx'
@@ -57,10 +65,17 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
         a.item.name.localeCompare(b.item.name),
     )
   const total = inventory.reduce((sum, s) => sum + s.count, 0)
-  // "sell all" keeps the gear the hero's class can wear
-  const ownGear = (itemId: number) =>
-    getItem(itemId).gear?.classes.includes(character.classId) ?? false
-  const sellable = inventory.filter((s) => sellPrice(s.itemId) > 0 && !ownGear(s.itemId))
+  // "sell all" keeps what the hero uses: its class's gear, potions, upgrade stones and glasses
+  const keep = (itemId: number) => {
+    const item = getItem(itemId)
+    return (
+      (item.gear?.classes.includes(character.classId) ?? false) ||
+      item.potion !== undefined ||
+      item.magnifier !== undefined ||
+      UPGRADE_STONE_IDS.includes(itemId)
+    )
+  }
+  const sellable = inventory.filter((s) => sellPrice(s.itemId) > 0 && !keep(s.itemId))
   const value = stacksValue(sellable)
 
   const run = async (action: () => Promise<string>) => {
@@ -109,18 +124,22 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
     plus: number,
     source: GearSource,
     options?: ItemOption[],
+    rare?: number,
   ) => {
-    const problem = wearProblem(character, itemId)
+    const problem = wearProblem(character, itemId, options)
     return (
       <>
         <p className="item-row__note">
-          {problem ?? `If you wear it: ${compareText(character, { itemId, plus, options })}`}
+          {problem ?? `If you wear it: ${compareText(character, { itemId, plus, options, rare })}`}
+          {!problem && isRare(itemId) && rare === undefined
+            ? ' — unidentified: its options appear when the Appraiser identifies it.'
+            : ''}
         </p>
         <button
           type="button"
           className="button button--gold"
           disabled={busy || away || problem !== null}
-          onClick={() => wear(source, pieceName(itemId, plus))}
+          onClick={() => wear(source, pieceName(itemId, plus, rare))}
         >
           Wear
         </button>
@@ -136,7 +155,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
 
       {character.gear.length > 0 && (
         <>
-          <h3 className="inventory__heading">Accessories and upgraded gear</h3>
+          <h3 className="inventory__heading">Single pieces</h3>
           <ul className="item-list">
             {character.gear.map((piece) => {
               const item = getItem(piece.itemId)
@@ -154,16 +173,26 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                   >
                     <ItemIcon item={item} />
                     <span className="item-row__body">
-                      <span className="item-row__name">{pieceName(piece.itemId, piece.plus)}</span>
-                      {gearLine(piece.itemId, piece.plus) && (
-                        <span className="item-row__meta">{gearLine(piece.itemId, piece.plus)}</span>
-                      )}
+                      <span className={`item-row__name${nameTone(piece)}`}>
+                        {pieceName(piece.itemId, piece.plus, piece.rare)}
+                      </span>
+                      <span className="item-row__meta">
+                        {[rareLabel(piece), gearLine(piece.itemId, piece.plus, piece.rare)]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
                       <OptionList options={piece.options} classId={character.classId} />
                     </span>
                   </button>
                   {open && (
                     <div className="item-row__actions">
-                      {wearActions(piece.itemId, piece.plus, { uid: piece.uid }, piece.options)}
+                      {wearActions(
+                        piece.itemId,
+                        piece.plus,
+                        { uid: piece.uid },
+                        piece.options,
+                        piece.rare,
+                      )}
                       {sellPrice(piece.itemId) > 0 && (
                         <button
                           type="button"
@@ -172,7 +201,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                           onClick={() =>
                             run(async () => {
                               await sellGear([piece.uid])
-                              return `Sold ${pieceName(piece.itemId, piece.plus)} for ${fmt(sellPrice(piece.itemId))} gold.`
+                              return `Sold ${pieceName(piece.itemId, piece.plus, piece.rare)} for ${fmt(sellPrice(piece.itemId))} gold.`
                             })
                           }
                         >
@@ -263,7 +292,9 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
             </button>
           )}
           {sellable.length > 0 && (
-            <p className="sheet__meta inventory__keep-note">Gear your class can wear is kept.</p>
+            <p className="sheet__meta inventory__keep-note">
+              Kept: gear your class can wear, potions, upgrade stones and magnifying glasses.
+            </p>
           )}
         </>
       )}

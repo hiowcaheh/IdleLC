@@ -125,6 +125,12 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   Auto-picie w walce i na wyprawach (progi 50% HP / 30% MP i wybór mikstury — **własne**), sloty HP/MP
   z przełącznikiem AUTO w ramce postaci, zużycie zgłaszane w `reportCombat` (`potions`) i liczone w `simulateAfk`.
   Stany `t_magic` 2/9 i 2/10 = HP/MP na sekundę także w skillach (Mana Recovery).
+- **Karta postaci** z zakładkami Stats (wszystkie statystyki + suma opcji) i Equipment; „+N” za nazwą.
+- **Rzadkie przedmioty (zapis v8):** `t_rareoption` 1:1 (klasy A–E, prefiksy, premie, opcje z szansami),
+  nieodkryte (czerwone, można nosić), Appraiser z lupami (złota 1 000 000 zawsze, zwykła 600 000 — 60% własne),
+  kolory klas wg właściciela (A niebieski, B zielony, C jasnoniebieski, D żółty, E biały), masowa sprzedaż.
+  Opcje specjalne (cooldown, mana, kradzież HP/MP, Move Speed itd.) — działanie własne (`options.ts`, `combat.ts`).
+  Zwykły sprzęt nie spada z opcjami: co 10 min aktywnej gry opcja na losową założoną część (decyzja właściciela).
 - Skille trafiają po `a_readyTime` + 0,4 s (`a_fireTime` to animacja po wystrzale — bez blokady, dopóki nie ma
   animacji skilli z klienta: `TIMINGS.skillAnimationLock = 0`).
 - Narzędzia dev włączane w Settings (bez `?dev=1`): prędkość ×20, dowolny potwór, poziom, exp, złoto, SP,
@@ -146,7 +152,9 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
 
 **Następne kroki:**
 
-1. Właściciel udostępni **pełny klient i kod serwera LC**. Z klienta: `npm run convert-lc -- --client <folder>`
+1. Właściciel udostępni **pełny klient (3 GB) i kod serwera LC** — przez Remote Control z Maca (folder
+   klienta jako lokalne repo `git init`, Node.js do konwersji) albo link do zipa (Google Drive po dodaniu
+   `drive.google.com` i `drive.usercontent.google.com` w Network access środowiska). Z klienta: `npm run convert-lc -- --client <folder>`
    na całości (wszystkie potwory, 5 pozostałych klas w `scripts/lc/classes.mjs`, ikony przedmiotów, mapy;
    konwerter wypisuje nowe shadery do sprawdzenia). Z kodu serwera: statystyki klas i przyrost na poziom,
    wzory obrażeń/trafień, kary exp za różnicę poziomów, szanse ulepszeń, poziomy umiejętności.

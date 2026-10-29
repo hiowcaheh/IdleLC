@@ -2,13 +2,22 @@ import { useState, type ReactNode } from 'react'
 import { EQUIP_SLOTS, UPGRADE_STONE_IDS, getItem } from '../../game/data/items.ts'
 import type { EquipSlot, GearSlot, ItemDef } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
+import { isRare } from '../../game/logic/rare.ts'
 import { buyPrice, shopOffer } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { TYPE_LABELS } from '../items/itemTypes.ts'
 import { potionLine, potionText } from '../items/potionText.ts'
 import { Sheet } from '../Sheet.tsx'
-import { SLOT_LABELS, compareText, fmt, gearLine, optionLines, wearProblem } from './format.ts'
+import {
+  SLOT_LABELS,
+  compareText,
+  fmt,
+  gearLine,
+  nameTone,
+  optionLines,
+  wearProblem,
+} from './format.ts'
 
 /** The display slot of a shop slot (the accessory places share one label). */
 const slotKey = (slot: GearSlot): EquipSlot => (slot === 'accessory' ? 'accessory1' : slot)
@@ -30,7 +39,7 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
   const gear = [...offer.gear].sort(
     (a, b) => EQUIP_SLOTS.indexOf(slotKey(a.slot)) - EQUIP_SLOTS.indexOf(slotKey(b.slot)),
   )
-  // potions first, then stones (stable: the merchants' order within each)
+  // potions first, then stones and glasses (stable: the merchants' order within each)
   const goods = [...offer.goods].sort(
     (a, b) => Number(!getItem(a).potion) - Number(!getItem(b).potion),
   )
@@ -81,7 +90,7 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
         >
           <ItemIcon item={item} />
           <span className="item-row__body">
-            <span className="item-row__name">{item.name}</span>
+            <span className={`item-row__name${nameTone({ itemId: item.id })}`}>{item.name}</span>
             <span className="item-row__meta">
               {accessory
                 ? 'Accessory · random options'
@@ -120,6 +129,20 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
               </p>
             )}
             {item.potion && <p className="item-row__note">{potionText(item.potion)}</p>}
+            {item.magnifier && (
+              <p className="item-row__note">
+                Identifies one rare item at the Appraiser
+                {item.magnifier.chance < 1
+                  ? ` — works ${Math.round(item.magnifier.chance * 100)}% of the time.`
+                  : ' — always works.'}
+              </p>
+            )}
+            {isRare(item.id) && (
+              <p className="item-row__note">
+                Rare item: sold unidentified. The Appraiser reveals its rare options with a
+                magnifying glass.
+              </p>
+            )}
             {UPGRADE_STONE_IDS.includes(item.id) && (
               <p className="item-row__note">
                 Upgrades a worn weapon or armor piece by +1 (Character window).

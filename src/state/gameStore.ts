@@ -139,6 +139,13 @@ export const useGameStore = create<GameStore>((set, get) => {
 
   const applyResult = (result: CombatResult) => {
     applyCharacter(result.character)
+    combatEvents.emit(
+      result.optionsGained.map(({ itemId, option }) => ({
+        type: 'optionGained' as const,
+        itemId,
+        option,
+      })),
+    )
     if (result.exp || result.gold || result.levelsGained || result.drops.length) {
       combatEvents.emit([
         {

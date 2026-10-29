@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import type { ItemDef } from '../../game/data/types.ts'
+import { isRare } from '../../game/logic/rare.ts'
 import { sellPrice } from '../../game/logic/shop.ts'
+import { nameTone } from '../gear/format.ts'
 import { ItemIcon } from './ItemIcon.tsx'
 import { TYPE_LABELS } from './itemTypes.ts'
 
@@ -19,9 +21,10 @@ export function ItemRowContent({ itemId, count, item }: ListedItem) {
     <>
       <ItemIcon item={item} />
       <span className="item-row__body">
-        <span className="item-row__name">{item.name}</span>
+        <span className={`item-row__name${nameTone({ itemId })}`}>{item.name}</span>
         <span className="item-row__meta">
           {TYPE_LABELS[item.type]}
+          {isRare(itemId) ? ' · Unidentified' : ''}
           {item.level > 1 && item.type !== 'material' ? ` · Lv ${item.level}` : ''}
           {price > 0 && (
             <>
