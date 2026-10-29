@@ -73,3 +73,16 @@ W trakcie walki i po śmierci regeneracji nie ma.
 - Cios trafia **0,4 s po rozpoczęciu zamachu** (`impactDelay`). Animacja ataku jest
   dopasowywana do tego czasu niezależnie od modelu.
 - Gdy ktoś zginie, jego rozpoczęty cios przepada.
+
+## Tryb LC — tymczasowe statystyki gracza
+
+W bazie LC nie ma statystyk startowych klas, a wartości potworów LC są w innej skali niż nasze
+zastępcze klasy. Dopóki nie ustalimy statystyk klas (M3), w trybie LC (`VITE_LC_DATA=1`) gracz jest
+**skalowany do potworów ze swojego poziomu** (`src/game/logic/lcBalance.ts`, wartości własne):
+
+- bierzemy zwykłe (nie elitarne) potwory w oknie ±3 poziomy i liczymy medianę HP, obrony i ataku,
+- atak gracza dobieramy tak, żeby typowy potwór padał po ~8 ciosach (`atak² / (atak + obrona) = HP / 8`),
+- obrona gracza = 2 × atak potwora (potwór zadaje ok. ⅓ swojego ataku),
+- HP gracza = max(100 + 60 × poziom, 30 ciosów potwora).
+
+Interwał ataku i krytyki zostają z klasy. Interwał ataku potwora LC = `a_attackSpeed / 10` s (założenie).

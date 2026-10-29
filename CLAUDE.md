@@ -91,6 +91,10 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 - Prywatna strona demo (claude.ai, artefakt „IdleLC Arena Preview”) pokazuje walkę na modelach LC ze
   statystykami i dropem 1:1 z bazy. Budowana przez `tools/lc/demo/build_demo.py`.
 
+**Cel końcowy (właściciel):** cała gra w **prywatnym repo**, hostowana tak, żeby dało się grać na telefonie
+i komputerze w dowolnej chwili; na końcu **Supabase** (konta, logowanie, zapis w chmurze, logika po stronie
+serwera). Najpierw robimy wszystko, co się da na froncie.
+
 **Decyzje właściciela:** 6 klas na start (Titan, Knight, Healer, Mage, Rogue, Sorcerer); tempo exp jak w LC
 (będą bonusy); dane 1:1 z bazy; repo przejdzie na prywatne (GitHub Pro) — do tego czasu bez assetów i danych
 LC w repo (konwerter i dokumentacja formatów mogą być w repo).

@@ -64,6 +64,27 @@ Gra będzie dostępna pod `https://<użytkownik>.github.io/IdleLC/`.
 
 - Pliki FBX/OBJ/DAE wymagają Blendera (na `PATH` albo w zmiennej `BLENDER=/ścieżka/do/blender`).
 
+## Tryb LC (lokalnie)
+
+Gra może działać na danych i modelach z klienta i bazy LC. Pliki LC nigdy nie trafiają do repo,
+dopóki jest publiczne, więc ten tryb działa tylko lokalnie:
+
+1. Skonwertuj modele LC do `public/assets-local/models/lc/` (nazwa pliku = nazwa `.smc` małymi
+   literami, np. `fox.glb`; postać gracza: `class-knight.glb`) — patrz [`tools/lc/`](tools/lc/README.md).
+2. Wygeneruj dane gry z zrzutu bazy:
+
+   ```bash
+   npm run import-lc-db -- --dump <folder zrzutu>/newproject_data.sql
+   ```
+
+   Powstaną `src/game/data/generated/lc-data.json` (potwory, strefy, drop, przedmioty, exp) i
+   `lc-models.json` (manifest skonwertowanych modeli).
+
+3. Utwórz `.env.local` z linią `VITE_LC_DATA=1` i uruchom `npm run dev`.
+
+Potwory bez skonwertowanego modelu pokazują tymczasowy model. W trybie dev (`?dev=1`) można zmienić
+strefę i poziom postaci. Bez tych plików (np. na GitHub Pages) gra działa na danych zastępczych.
+
 ## Struktura
 
 ```
