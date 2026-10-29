@@ -2,6 +2,7 @@ import { CLASSES } from '../../game/data/classes.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { EffectRow } from '../skills/EffectRow.tsx'
 import { Bar } from './Bar.tsx'
+import { PotionSlots } from './PotionSlots.tsx'
 
 const formatGold = (gold: number) => gold.toLocaleString('en-US')
 
@@ -32,10 +33,13 @@ export function PlayerFrame() {
         </div>
         <Bar value={hp} max={maxHp} variant="hp" label="Health" />
         {maxMp > 0 && <Bar value={mp} max={maxMp} variant="mp" label="Mana" />}
-        <p className="unit-frame__gold" aria-label={`${formatGold(gold)} gold`}>
-          <span className="coin" aria-hidden="true" />
-          {formatGold(gold)}
-        </p>
+        <div className="unit-frame__row">
+          <p className="unit-frame__gold" aria-label={`${formatGold(gold)} gold`}>
+            <span className="coin" aria-hidden="true" />
+            {formatGold(gold)}
+          </p>
+          <PotionSlots />
+        </div>
         {!character.expedition && <EffectRow side="player" />}
       </div>
     </section>

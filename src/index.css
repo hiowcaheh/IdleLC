@@ -285,11 +285,19 @@ p {
   background: linear-gradient(180deg, #e3533f, var(--blood) 50%, var(--blood-dark));
 }
 
+.unit-frame__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 5px;
+}
+
 .unit-frame__gold {
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-top: 5px;
+  margin: 0;
   font-size: 13px;
   font-weight: 700;
   color: var(--gilt-bright);
@@ -2321,4 +2329,77 @@ a.button {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--gilt);
+}
+
+/* Potion quick slots (player frame) */
+.potion-slots {
+  display: flex;
+  gap: 5px;
+}
+
+.potion-slot {
+  position: relative;
+  display: grid;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.potion-slot .item-icon {
+  border-color: var(--bronze-dim);
+}
+
+.potion-slot.is-auto .item-icon {
+  border-color: var(--gilt);
+  box-shadow: 0 0 4px rgba(232, 190, 96, 0.55);
+}
+
+.potion-slot:not(.is-auto) .item-icon,
+.potion-slot.is-empty .item-icon {
+  filter: grayscale(0.85) brightness(0.7);
+}
+
+.potion-slot:disabled {
+  cursor: default;
+}
+
+.potion-slot:focus-visible {
+  outline: 2px solid var(--gilt-bright);
+  outline-offset: 1px;
+  border-radius: 5px;
+}
+
+.potion-slot__count {
+  position: absolute;
+  right: -3px;
+  bottom: -4px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  text-shadow:
+    0 0 2px #000,
+    0 0 2px #000;
+}
+
+.potion-slot__auto {
+  position: absolute;
+  left: -3px;
+  top: -4px;
+  padding: 0 2px;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 10px;
+  color: #1a120a;
+  background: var(--gilt-bright);
+  border-radius: 2px;
+}
+
+.expedition-dialog__potions {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--parchment-dim);
 }

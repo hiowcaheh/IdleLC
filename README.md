@@ -53,6 +53,11 @@ i obrony), a w oknie **Character** (ikona hełmu) widać statystyki i sloty, mo�
 +0…+15 kamieniami (Smelting Stone z dropu, Heaven Stone ze sklepu; porażka od +3 zabiera jeden „+”). Lepszy
 sprzęt = szybsze polowanie, także na wyprawach. „Sell all loot” w torbie zostawia sprzęt twojej klasy.
 
+**Mikstury:** w sklepie Juno (dane 1:1: leczenie i mana przez 15 s, regeneracja przez 10 min). Postać pije je
+sama w walce i na wyprawach (leczenie poniżej 50% HP, mana poniżej 30% MP, regeneracja, gdy brakuje HP / MP).
+Dwa sloty obok złota w ramce postaci pokazują, ile zostało; dotknięcie włącza / wyłącza AUTO (litera „A”).
+Działająca mikstura jest wśród efektów pod paskami, a zużyte na wyprawie — w podsumowaniu.
+
 **Wyprawy AFK:** przycisk **Expedition** w panelu polowania wysyła postać na polowanie bez ciebie (do 8 h, także
 przy zamkniętej grze). **Return now** kończy wyprawę i otwiera okno „While you were away…” z zabiciami, expem,
 złotem, awansem i dropem. Drop (1:1 z bazy) trafia do ekwipunku (ikona torby w HUD) z ikonami z klienta;

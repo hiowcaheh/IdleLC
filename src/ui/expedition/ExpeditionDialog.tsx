@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { getItem } from '../../game/data/items.ts'
 import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
 import { AFK_MAX_SECONDS } from '../../game/logic/afk.ts'
@@ -19,6 +20,9 @@ export function ExpeditionDialog({
   const { zoneId, monsterId } = character.location
   const monster = getMonster(monsterId)
   const estimate = useHourlyEstimate(character, monsterId)
+  const potions = Object.entries(estimate.potionsPerHour)
+    .filter(([, perHour]) => perHour >= 0.5)
+    .map(([id, perHour]) => `${getItem(Number(id)).name} ×${fmt(perHour)}`)
   const [busy, setBusy] = useState(false)
   const confirm = useRef<HTMLButtonElement>(null)
 
@@ -73,6 +77,11 @@ export function ExpeditionDialog({
             </dd>
           </div>
         </dl>
+        {potions.length > 0 && (
+          <p className="expedition-dialog__potions">
+            Potions per hour, while they last: {potions.join(', ')}
+          </p>
+        )}
         {estimate.killsPerHour === 0 && (
           <p className="expedition-dialog__warning">
             {monster.name} is too strong — your hero would not win a single fight.

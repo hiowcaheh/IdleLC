@@ -6,6 +6,7 @@ import { buyPrice, shopOffer } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { TYPE_LABELS } from '../items/itemTypes.ts'
+import { potionLine, potionText } from '../items/potionText.ts'
 import { Sheet } from '../Sheet.tsx'
 import { SLOT_LABELS, compareText, fmt, gearLine, optionLines, wearProblem } from './format.ts'
 
@@ -14,7 +15,7 @@ const slotKey = (slot: GearSlot): EquipSlot => (slot === 'accessory' ? 'accessor
 
 /**
  * The shop: weapons and armor of the hero's class around its level (previous, current and next
- * tier), accessories with random options, and the zone merchants' goods (stones).
+ * tier), accessories with random options, and the zone merchants' goods (potions, stones).
  */
 export function ShopPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)
@@ -29,8 +30,10 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
   const gear = [...offer.gear].sort(
     (a, b) => EQUIP_SLOTS.indexOf(slotKey(a.slot)) - EQUIP_SLOTS.indexOf(slotKey(b.slot)),
   )
-  // potions come with their auto-use in combat
-  const goods = offer.goods.filter((id) => !getItem(id).potion)
+  // potions first, then stones (stable: the merchants' order within each)
+  const goods = [...offer.goods].sort(
+    (a, b) => Number(!getItem(a).potion) - Number(!getItem(b).potion),
+  )
 
   const buy = async (itemId: number, count: number) => {
     if (busy) return
@@ -84,7 +87,15 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
                 ? 'Accessory · random options'
                 : item.gear
                   ? gearLine(item.id)
-                  : TYPE_LABELS[item.type]}
+                  : item.potion
+                    ? potionLine(item.potion)
+                    : TYPE_LABELS[item.type]}
+              {!item.gear && item.level > 1 && (
+                <span className={character.level < item.level ? 'shop__locked' : ''}>
+                  {' '}
+                  · Lv {item.level}
+                </span>
+              )}
               {tier !== undefined && (
                 <span className={problem ? 'shop__locked' : ''}> · Lv {tier}</span>
               )}
@@ -108,6 +119,7 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
                 worn.
               </p>
             )}
+            {item.potion && <p className="item-row__note">{potionText(item.potion)}</p>}
             {UPGRADE_STONE_IDS.includes(item.id) && (
               <p className="item-row__note">
                 Upgrades a worn weapon or armor piece by +1 (Character window).

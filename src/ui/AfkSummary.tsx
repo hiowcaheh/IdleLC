@@ -24,6 +24,7 @@ export function AfkSummary() {
   const zone = ZONES[result.character.location.zoneId]
   const capped = result.awaySeconds > AFK_MAX_SECONDS
   const items = result.drops.map((d) => ({ ...d, item: getItem(d.itemId) }))
+  const potions = result.potionsUsed.map((p) => ({ ...p, item: getItem(p.itemId) }))
   const levelAfter = result.levelBefore + result.levelsGained
 
   return (
@@ -82,6 +83,13 @@ export function AfkSummary() {
           <ItemList items={items} />
         ) : (
           <p className="sheet__empty">Nothing dropped this time.</p>
+        )}
+
+        {potions.length > 0 && (
+          <>
+            <h3 className="afk__heading">Potions used</h3>
+            <ItemList items={potions} />
+          </>
         )}
 
         <button

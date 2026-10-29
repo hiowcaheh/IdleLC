@@ -167,6 +167,9 @@ export function Battle() {
         case 'heal':
           if (e.amount > 0) textAt(e.target, `+${e.amount}`, e.mana ? 'mana' : 'heal')
           break
+        case 'potion':
+          textAt('player', e.name, e.kind === 'hp' || e.kind === 'hpRegen' ? 'heal' : 'mana')
+          break
         case 'effect':
           if (e.kind === 'stun') textAt(e.target, 'Stunned', 'effect')
           else if (e.kind === 'poison') textAt(e.target, 'Poisoned', 'effect')

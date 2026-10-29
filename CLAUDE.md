@@ -85,7 +85,7 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 
 ## Stan prac (aktualizuj na koniec każdej sesji)
 
-**Stan na 2026-10-29 (noc):**
+**Stan na 2026-10-29 (wieczór, sesja 2):**
 
 - M0 i M1 gotowe. Gra na Pages (https://hiowcaheh.github.io/IdleLC/) działa na danych i modelach LC
   (Knight w zbroi + 13 potworów; reszta potworów na modelu zastępczym). UI po angielsku.
@@ -117,6 +117,14 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   potwora — własne; Heaven Stone ze sklepu Juno), zapis v6. Wpływ sprzętu na walkę, szanse ulepszeń i bonus
   za „+” są **własne** (`equipment.ts`, `docs/balance.md`): sprzęt mierzony względem typowego dla poziomu
   (`gearReference` z importu). Wygląd sprzętu na modelu — gdy będą siatki broni/zbroi z klienta.
+- **Akcesoria i opcje (zapis v7):** 3 sloty akcesoriów, opcje 1:1 z `t_option` (maski podtypów, wagi
+  poziomów `a_prob`, wartości `a_level`); liczba opcji 1–5 i ich działanie w walce są **własne**
+  (`options.ts`). Sklep: broń i zbroje klasy z progu poprzedniego / obecnego / następnego (`shopGear`),
+  akcesoria z losowymi opcjami, towary strefy. Pasek umiejętności: max 7, ataki z lewej, buffy z prawej.
+- **Mikstury:** dane 1:1 (mikstura = skill: HP/MP na sekundę lub regeneracja, czas, odnowienie), sklep Juno.
+  Auto-picie w walce i na wyprawach (progi 50% HP / 30% MP i wybór mikstury — **własne**), sloty HP/MP
+  z przełącznikiem AUTO w ramce postaci, zużycie zgłaszane w `reportCombat` (`potions`) i liczone w `simulateAfk`.
+  Stany `t_magic` 2/9 i 2/10 = HP/MP na sekundę także w skillach (Mana Recovery).
 - Skille trafiają po `a_readyTime` + 0,4 s (`a_fireTime` to animacja po wystrzale — bez blokady, dopóki nie ma
   animacji skilli z klienta: `TIMINGS.skillAnimationLock = 0`).
 - Narzędzia dev włączane w Settings (bez `?dev=1`): prędkość ×20, dowolny potwór, poziom, exp, złoto, SP,
@@ -142,8 +150,8 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
    na całości (wszystkie potwory, 5 pozostałych klas w `scripts/lc/classes.mjs`, ikony przedmiotów, mapy;
    konwerter wypisuje nowe shadery do sprawdzenia). Z kodu serwera: statystyki klas i przyrost na poziom,
    wzory obrażeń/trafień, kary exp za różnicę poziomów, szanse ulepszeń, poziomy umiejętności.
-2. Dalej: M6 (mapa świata, podróż między strefami), mikstury HP/MP (dane w bazie, auto-użycie),
-   akcesoria (slot 7, opcje `t_option`).
+2. Dalej: M6 (mapa świata, podróż między strefami — właściciel: „mapa świata potem, na razie tylko Juno”),
+   opcje na broni/zbroi z dropu, żywioły.
 3. Etap 2 (Supabase) według `docs/supabase.md` — dopiero po zgodzie właściciela.
 
 **Otwarte kwestie:** brak siatek broni z `Data\Item\Weapon` (przyszły tylko tekstury i tagi); brak mapy

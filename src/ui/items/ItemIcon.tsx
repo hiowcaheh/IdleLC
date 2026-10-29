@@ -13,28 +13,34 @@ const GLYPHS: Record<ItemType, string> = {
   other: 'M8 8 H16 V16 H8 Z',
 }
 
-/** The item's icon from the LC atlases (sprite sheet), or a glyph for its type. */
-export function ItemIcon({ item }: { item: ItemDef }) {
+/** The item's icon from the LC atlases (sprite sheet), or a glyph for its type; `size` in px. */
+export function ItemIcon({ item, size }: { item: ItemDef; size?: number }) {
   const sprite = itemIcon(item.id)
+  const box = size ? { width: size + 2, height: size + 2 } : undefined
   if (sprite) {
+    const px = size ?? sprite.size
+    const k = px / sprite.size
     return (
-      <span className="item-icon" aria-hidden="true">
+      <span className="item-icon" style={box} aria-hidden="true">
         <span
           className="item-icon__sprite"
           style={{
-            width: sprite.size,
-            height: sprite.size,
+            width: px,
+            height: px,
             backgroundImage: `url(${sprite.url})`,
-            backgroundPosition: `-${sprite.x}px -${sprite.y}px`,
-            backgroundSize: `${sprite.sheetWidth}px ${sprite.sheetHeight}px`,
+            backgroundPosition: `-${sprite.x * k}px -${sprite.y * k}px`,
+            backgroundSize: `${sprite.sheetWidth * k}px ${sprite.sheetHeight * k}px`,
           }}
         />
       </span>
     )
   }
   return (
-    <span className={`item-icon item-icon--${item.type}`} aria-hidden="true">
-      <svg viewBox="0 0 24 24">
+    <span className={`item-icon item-icon--${item.type}`} style={box} aria-hidden="true">
+      <svg
+        viewBox="0 0 24 24"
+        style={size ? { width: size * 0.75, height: size * 0.75 } : undefined}
+      >
         <path d={GLYPHS[item.type]} />
       </svg>
     </span>

@@ -9,6 +9,7 @@ import { sellPrice, stacksValue } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { compareText, gearLine, pieceName, wearProblem } from '../gear/format.ts'
 import { OptionList } from '../gear/OptionList.tsx'
+import { potionText } from './potionText.ts'
 import { Sheet } from '../Sheet.tsx'
 import { ItemIcon } from './ItemIcon.tsx'
 import { ItemRowContent, type ListedItem } from './ItemList.tsx'
@@ -216,6 +217,9 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                   {open && (
                     <div className="item-row__actions">
                       {entry.item.gear && wearActions(entry.itemId, 0, { itemId: entry.itemId })}
+                      {entry.item.potion && (
+                        <p className="item-row__note">{potionText(entry.item.potion)}</p>
+                      )}
                       {price > 0 ? (
                         <>
                           <button
