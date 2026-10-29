@@ -5,6 +5,8 @@ import {
   changeMonster,
   combatTick,
   createCombat,
+  healPlayer,
+  killMonster,
   updatePlayer,
   type CombatEvent,
   type CombatState,
@@ -157,5 +159,28 @@ describe('updatePlayer', () => {
     const r = updatePlayer(half, { level: 11, stats: stats({ maxHp: 200 }) })
     expect(r.player.hp).toBe(100)
     expect(r.player.level).toBe(11)
+  })
+})
+
+describe('dev helpers', () => {
+  it('killMonster ends the fight as a victory, only while the monster is out', () => {
+    const rng = createRng(3)
+    const start = createCombat(strongPlayer, 'm', weakMonster)
+    expect(killMonster(start).events).toEqual([]) // still spawning
+
+    const fighting = run(start, TIMINGS.spawning + 0.1, rng).state
+    expect(fighting.phase).toBe('approach')
+    const { state, events } = killMonster(fighting)
+    expect(events).toEqual([{ type: 'death', who: 'monster' }])
+    expect(state).toMatchObject({ phase: 'victory', kills: 1 })
+    expect(state.monster.hp).toBe(0)
+  })
+
+  it('healPlayer restores HP unless the player is down', () => {
+    const start = createCombat(strongPlayer, 'm', weakMonster)
+    const hurt = { ...start, player: { ...start.player, hp: 5 } }
+    expect(healPlayer(hurt).player.hp).toBe(strongPlayer.stats.maxHp)
+    const down = { ...hurt, phase: 'defeat' as const }
+    expect(healPlayer(down)).toBe(down)
   })
 })

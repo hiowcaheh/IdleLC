@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { GraphicsQuality } from '../game/logic/save.ts'
 import { useGameStore } from '../state/gameStore.ts'
+import { useDevTools } from './dev/devMode.ts'
 
 const QUALITY_OPTIONS: { value: GraphicsQuality; label: string; hint: string }[] = [
   { value: 'auto', label: 'Auto', hint: 'Adapts to your device' },
@@ -12,6 +13,8 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
   const settings = useGameStore((s) => s.save.settings)
   const updateSettings = useGameStore((s) => s.updateSettings)
   const resetSave = useGameStore((s) => s.resetSave)
+  const devTools = useDevTools((s) => s.enabled)
+  const setDevTools = useDevTools((s) => s.setEnabled)
   const [confirmReset, setConfirmReset] = useState(false)
   const [resetDone, setResetDone] = useState(false)
   const dialog = useRef<HTMLDivElement>(null)
@@ -89,6 +92,19 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
             className="switch"
             checked={settings.showDamageNumbers}
             onChange={(e) => updateSettings({ showDamageNumbers: e.target.checked })}
+          />
+        </label>
+
+        <label className="setting setting--row">
+          <span>
+            <span className="setting__label">Developer tools</span>
+            <span className="setting__hint">Game speed, level and any monster — for testing</span>
+          </span>
+          <input
+            type="checkbox"
+            className="switch"
+            checked={devTools}
+            onChange={(e) => setDevTools(e.target.checked)}
           />
         </label>
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { GameCanvas } from '../scene/GameCanvas.tsx'
 import { DevPanel } from './dev/DevPanel.tsx'
-import { DEV_MODE } from './dev/devMode.ts'
+import { useDevTools } from './dev/devMode.ts'
 import { HuntPanel } from './hud/HuntPanel.tsx'
 import { PlayerFrame } from './hud/PlayerFrame.tsx'
 import { StatusLine } from './hud/StatusLine.tsx'
@@ -12,6 +12,7 @@ import { SettingsPanel } from './SettingsPanel.tsx'
 
 export function GameScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const devTools = useDevTools((s) => s.enabled)
 
   return (
     <div className="game">
@@ -38,7 +39,7 @@ export function GameScreen() {
         </div>
         <div className="hud__bottom">
           <HuntPanel />
-          {DEV_MODE && <DevPanel />}
+          {devTools && <DevPanel />}
         </div>
       </div>
 

@@ -125,6 +125,22 @@ export function updatePlayer(state: CombatState, player: FighterInit): CombatSta
   }
 }
 
+/** Dev tool: the current monster dies at once (only while it is on the field). */
+export function killMonster(state: CombatState): TickResult {
+  if (state.phase !== 'approach' && state.phase !== 'fighting') return { state, events: [] }
+  const s: CombatState = { ...state, player: { ...state.player }, monster: { ...state.monster } }
+  const events: CombatEvent[] = []
+  s.monster.hp = 0
+  endFight(s, 'monster', events)
+  return { state: s, events }
+}
+
+/** Dev tool: restores the player's HP (no effect while defeated). */
+export function healPlayer(state: CombatState): CombatState {
+  if (state.phase === 'defeat') return state
+  return { ...state, player: { ...state.player, hp: state.player.stats.maxHp } }
+}
+
 export function combatTick(state: CombatState, dt: number, rng: Rng): TickResult {
   const s: CombatState = { ...state, player: { ...state.player }, monster: { ...state.monster } }
   const events: CombatEvent[] = []
@@ -194,6 +210,19 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
   }
 }
 
+function endFight(s: CombatState, loser: Side, events: CombatEvent[]): void {
+  s.player.impactIn = null
+  s.monster.impactIn = null
+  events.push({ type: 'death', who: loser })
+  if (loser === 'monster') {
+    s.kills += 1
+    enter(s, 'victory')
+  } else {
+    s.deaths += 1
+    enter(s, 'defeat')
+  }
+}
+
 /** Advances one fighter's swing. Returns true when the fight ended. */
 function fighterStep(
   s: CombatState,
@@ -227,15 +256,7 @@ function fighterStep(
     })
     if (target.hp > 0) return false
 
-    target.impactIn = null
-    events.push({ type: 'death', who: targetSide })
-    if (targetSide === 'monster') {
-      s.kills += 1
-      enter(s, 'victory')
-    } else {
-      s.deaths += 1
-      enter(s, 'defeat')
-    }
+    endFight(s, targetSide, events)
     return true
   }
 

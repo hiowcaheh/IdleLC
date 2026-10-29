@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router'
-import { DEV_MODE } from './ui/dev/devMode.ts'
+import { useDevTools } from './ui/dev/devMode.ts'
 import { GameScreen } from './ui/GameScreen.tsx'
 
 const ModelViewer = lazy(() =>
@@ -8,10 +8,11 @@ const ModelViewer = lazy(() =>
 )
 
 export default function App() {
+  const devTools = useDevTools((s) => s.enabled)
   return (
     <Routes>
       <Route path="/" element={<GameScreen />} />
-      {DEV_MODE && (
+      {devTools && (
         <Route
           path="/dev/models"
           element={

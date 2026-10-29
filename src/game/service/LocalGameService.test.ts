@@ -65,11 +65,30 @@ describe('LocalGameService', () => {
     const game = make()
     game.load()
     const before = game.getCombat().player.stats.maxHp
-    game.setPlayerLevel(20)
+    game.dev.setLevel(20)
     expect(game.getCombat().player.level).toBe(20)
     expect(game.getCombat().player.stats.maxHp).toBeGreaterThan(before)
-    game.setPlayerLevel(500)
+    game.dev.setLevel(500)
     expect(game.getCombat().player.level).toBe(99)
+  })
+
+  it('kills the target and heals on dev command, saving the kill', () => {
+    const storage = new MemoryStorage()
+    const game = make(storage)
+    game.load()
+    game.combatTick(1.1) // the monster has spawned
+    expect(game.dev.killTarget()).toEqual([{ type: 'death', who: 'monster' }])
+    expect(JSON.parse(storage.getItem(SAVE_KEY)!).stats.kills).toBe(1)
+    game.dev.heal()
+    expect(game.getCombat().player.hp).toBe(game.getCombat().player.stats.maxHp)
+  })
+
+  it('moves to a zone with a chosen monster', () => {
+    const game = make()
+    game.load()
+    game.selectZone('glade', 'stone-sentinel')
+    expect(game.getSave().location.monsterId).toBe('stone-sentinel')
+    expect(() => game.selectZone('glade', 'dragon')).toThrow()
   })
 
   it('rejects monsters from outside the current zone', () => {

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
 import { useGameStore } from '../../state/gameStore.ts'
@@ -11,6 +12,14 @@ export function HuntPanel() {
   const playerLevel = useGameStore((s) => s.hud.playerLevel)
   const selectMonster = useGameStore((s) => s.selectMonster)
   const zone = ZONES[zoneId]!
+  const list = useRef<HTMLDivElement>(null)
+
+  // keep the hunted monster visible when it was picked elsewhere (dev tools, zone change)
+  useEffect(() => {
+    list.current
+      ?.querySelector<HTMLElement>('.hunt__target.is-active')
+      ?.scrollIntoView({ block: 'nearest' })
+  }, [selected])
 
   return (
     <section className="hunt" aria-label="Hunting">
@@ -20,7 +29,7 @@ export function HuntPanel() {
           Kills: <strong>{kills}</strong>
         </p>
       </header>
-      <div className="hunt__targets" role="radiogroup" aria-label="Choose your target">
+      <div ref={list} className="hunt__targets" role="radiogroup" aria-label="Choose your target">
         {zone.monsterIds.map((id) => {
           const monster = getMonster(id)
           const active = id === selected

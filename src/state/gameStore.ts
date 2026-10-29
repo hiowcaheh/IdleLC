@@ -24,8 +24,11 @@ interface GameStore {
   timeScale: number
   syncCombat(combat: CombatState): void
   selectMonster(monsterId: string): void
-  selectZone(zoneId: string): void
-  setPlayerLevel(level: number): void
+  selectZone(zoneId: string, monsterId?: string): void
+  /** Dev tools (no-ops when the service does not offer them). */
+  devSetLevel(level: number): void
+  devKillTarget(): void
+  devHeal(): void
   updateSettings(patch: Partial<Settings>): void
   resetSave(): void
   setTimeScale(scale: number): void
@@ -66,13 +69,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set({ save: gameService.getSave(), hud: toHud(gameService.getCombat()) })
   },
 
-  selectZone(zoneId) {
-    combatEvents.emit(gameService.selectZone(zoneId))
+  selectZone(zoneId, monsterId) {
+    combatEvents.emit(gameService.selectZone(zoneId, monsterId))
     set({ save: gameService.getSave(), hud: toHud(gameService.getCombat()) })
   },
 
-  setPlayerLevel(level) {
-    gameService.setPlayerLevel(level)
+  devSetLevel(level) {
+    gameService.dev?.setLevel(level)
+    set({ hud: toHud(gameService.getCombat()) })
+  },
+
+  devKillTarget() {
+    combatEvents.emit(gameService.dev?.killTarget() ?? [])
+    set({ save: gameService.getSave(), hud: toHud(gameService.getCombat()) })
+  },
+
+  devHeal() {
+    gameService.dev?.heal()
     set({ hud: toHud(gameService.getCombat()) })
   },
 

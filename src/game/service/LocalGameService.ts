@@ -8,6 +8,8 @@ import {
   changeMonster,
   combatTick,
   createCombat,
+  healPlayer,
+  killMonster,
   updatePlayer,
   type CombatEvent,
   type CombatState,
@@ -23,7 +25,7 @@ import {
   type SaveData,
   type Settings,
 } from '../logic/save.ts'
-import type { GameService, KeyValueStorage } from './GameService.ts'
+import type { DevCommands, GameService, KeyValueStorage } from './GameService.ts'
 
 export const SAVE_KEY = 'idlelc.save'
 
@@ -76,11 +78,13 @@ export class LocalGameService implements GameService {
   combatTick(dt: number): CombatEvent[] {
     const { state, events } = combatTick(this.combat, dt, this.rng)
     this.combat = state
-    if (events.some((e) => e.type === 'death')) {
-      this.save = { ...this.save, stats: { kills: state.kills, deaths: state.deaths } }
-      this.persist()
-    }
+    if (events.some((e) => e.type === 'death')) this.saveStats()
     return events
+  }
+
+  private saveStats(): void {
+    this.save = { ...this.save, stats: { kills: this.combat.kills, deaths: this.combat.deaths } }
+    this.persist()
   }
 
   selectMonster(monsterId: string): CombatEvent[] {
@@ -96,11 +100,14 @@ export class LocalGameService implements GameService {
     return events
   }
 
-  selectZone(zoneId: string): CombatEvent[] {
+  selectZone(zoneId: string, target?: string): CombatEvent[] {
     const zone = ZONES[zoneId]
     if (!zone) throw new Error(`Unknown zone: ${zoneId}`)
-    if (zoneId === this.save.location.zoneId) return []
-    const monsterId = zone.monsterIds[0]!
+    if (target !== undefined && !zone.monsterIds.includes(target)) {
+      throw new Error(`Monster ${target} is not in zone ${zoneId}`)
+    }
+    if (zoneId === this.save.location.zoneId) return target ? this.selectMonster(target) : []
+    const monsterId = target ?? zone.monsterIds[0]!
     this.save = { ...this.save, location: { zoneId, monsterId } }
     const { state, events } = changeMonster(this.combat, monsterId, monsterFighter(monsterId))
     this.combat = state
@@ -108,9 +115,20 @@ export class LocalGameService implements GameService {
     return events
   }
 
-  setPlayerLevel(level: number): void {
-    this.playerLevel = clamp(Math.floor(level), 1, MAX_LEVEL)
-    this.combat = updatePlayer(this.combat, playerFighter(this.playerLevel))
+  readonly dev: DevCommands = {
+    setLevel: (level) => {
+      this.playerLevel = clamp(Math.floor(level), 1, MAX_LEVEL)
+      this.combat = updatePlayer(this.combat, playerFighter(this.playerLevel))
+    },
+    killTarget: () => {
+      const { state, events } = killMonster(this.combat)
+      this.combat = state
+      if (events.length) this.saveStats()
+      return events
+    },
+    heal: () => {
+      this.combat = healPlayer(this.combat)
+    },
   }
 
   updateSettings(patch: Partial<Settings>): SaveData {

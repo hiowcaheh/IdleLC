@@ -14,13 +14,22 @@ export interface GameService {
   combatTick(dt: number): CombatEvent[]
   /** Switches the fought monster within the current zone. */
   selectMonster(monsterId: string): CombatEvent[]
-  /** Moves to another zone and starts hunting its first monster. */
-  selectZone(zoneId: string): CombatEvent[]
-  /** Dev tool until progression (M3): sets the player's level. */
-  setPlayerLevel(level: number): void
+  /** Moves to another zone and starts hunting `monsterId` (default: the zone's first monster). */
+  selectZone(zoneId: string, monsterId?: string): CombatEvent[]
   updateSettings(patch: Partial<Settings>): SaveData
   /** Wipes the save and starts over. */
   resetSave(): SaveData
+  /** Testing tools. A production backend leaves this out (or refuses the commands). */
+  readonly dev?: DevCommands
+}
+
+export interface DevCommands {
+  /** Sets the player's level (until progression, M3). */
+  setLevel(level: number): void
+  /** The current monster dies at once; counts as a kill. */
+  killTarget(): CombatEvent[]
+  /** Restores the player's HP. */
+  heal(): void
 }
 
 /** Subset of the Web Storage API — lets tests use an in-memory store. */
