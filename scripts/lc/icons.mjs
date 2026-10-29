@@ -88,14 +88,14 @@ export const ICON_KINDS = [
 /** Class portraits: the round faces in Data\Interface\TopUI.tex (78 px circles on an 86 px grid). */
 export const PORTRAIT_ATLAS = 'Data\\Interface\\TopUI.tex'
 export const PORTRAIT_SIZE = 78
-/** Top-left corner of each class's portrait in TopUI.tex (picked by eye: the class's face). */
+/** Top-left corner of each class's portrait in TopUI.tex (which face is which: the owner). */
 export const PORTRAITS = {
   titan: [925, 427],
-  knight: [925, 258],
+  knight: [838, 341],
   healer: [751, 427],
-  mage: [925, 341],
-  rogue: [838, 427],
-  sorcerer: [838, 341],
+  mage: [838, 427],
+  rogue: [925, 258],
+  sorcerer: [925, 341],
 }
 
 /** One sheet with the class portraits (keys: class ids), or no image without the atlas. */
