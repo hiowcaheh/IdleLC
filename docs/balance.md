@@ -77,7 +77,7 @@ W trakcie walki i po śmierci regeneracji nie ma.
 ## Tryb LC — tymczasowe statystyki gracza
 
 W bazie LC nie ma statystyk startowych klas, a wartości potworów LC są w innej skali niż nasze
-zastępcze klasy. Dopóki nie ustalimy statystyk klas (M3), w trybie LC (`VITE_LC_DATA=1`) gracz jest
+zastępcze klasy. Dopóki nie ustalimy statystyk klas (M3), w trybie LC (dane z bazy LC) gracz jest
 **skalowany do potworów ze swojego poziomu** (`src/game/logic/lcBalance.ts`, wartości własne):
 
 - bierzemy zwykłe (nie elitarne) potwory w oknie ±3 poziomy i liczymy medianę HP, obrony i ataku,

@@ -32,8 +32,9 @@ Budujemy **IdleLC** — przeglądarkowe RPG typu IDLE / AFK z walką 3D, w klima
 
 ## Assety — WAŻNE
 
-- Repo jest **na razie publiczne**; właściciel przełączy je na prywatne (GitHub Pro — strona na Pages nadal będzie publiczna). Dopóki repo jest publiczne, trafiają do niego tylko assety z wolną licencją (CC0), wpisane do `ASSETS-LICENSES.md`.
-- **Dopóki repo jest publiczne, nie commituj assetów ani danych z klienta/bazy LC.** Folder `assets-src/` (pliki źródłowe właściciela) i `public/assets-local/` (ich skonwertowane wersje) są w `.gitignore` i służą tylko do lokalnych testów.
+- Repo jest **na razie publiczne**; właściciel przełączy je na prywatne (GitHub Pro — strona na Pages nadal będzie publiczna).
+- **Decyzja właściciela (2026-10-29): skonwertowane modele LC (`public/models/lc/`) i dane wygenerowane z bazy LC (`src/game/data/generated/`) commitujemy mimo publicznego repo**, żeby GitHub Pages pokazywało postęp (właściciel testuje na telefonie). Surowe pliki klienta i zrzut bazy nie trafiają do repo — leżą w `assets-src/` (w `.gitignore`). `public/assets-local/` (też w `.gitignore`) służy do lokalnych eksperymentów.
+- Assety spoza LC — tylko z wolną licencją (CC0), wpisane do `ASSETS-LICENSES.md`.
 - `npm run convert-models` (gltf-transform; FBX/OBJ/DAE przez Blendera w trybie headless) konwertuje modele z `assets-src/` do zoptymalizowanych GLB.
 - **Assety wymienne przez manifest:** każdy potwór/postać ma wpis w `src/game/assets/manifest.json`: `id`, ścieżka do modelu, skala, mapa nazw animacji (`idle`, `run`, `attack`, `hit`, `die`). Podmiana modelu = zmiana jednego wpisu, bez ruszania kodu gry.
 - Assety spoza repo mogą być ładowane z konfigurowalnego `VITE_ASSET_BASE_URL`. Domyślnie gra działa na assetach CC0 z repo.
@@ -66,7 +67,7 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 ## Sposób pracy
 
 - Przed każdym kamieniem milowym pokaż krótki plan i poczekaj na akceptację.
-- Małe, opisane commity. Po każdym kamieniu: lista zmian, link do wersji na GitHub Pages i co sprawdzić ręcznie.
+- Małe, opisane commity. **Każdy działający krok od razu pushuj na `main`** (każdy push = deploy na Pages), żeby właściciel mógł w ciągu dnia sprawdzać efekty na telefonie. Po każdym kamieniu: lista zmian, link do wersji na GitHub Pages i co sprawdzić ręcznie.
 - Jeśli coś jest niejasne (balans, wygląd, nazewnictwo) — zapytaj, nie zgaduj.
 - Pisz po polsku w rozmowie; kod, nazwy zmiennych i komentarze po angielsku.
 - **Gra jest po angielsku**: cały tekst w UI oraz nazwy klas, potworów, lokacji i przedmiotów. Dokumentacja dla właściciela (README, `docs/`) może być po polsku.
@@ -92,9 +93,9 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   - `npm run convert-lc` (Node, `scripts/lc/`) — modele klas (`classes.mjs`, na razie Knight w zbroi
     z mieczem i tarczą) i wszystkich potworów z bazy, z animacjami z `t_npc.a_motion_*`; odświeża manifest.
     Prototyp w Pythonie (`tools/lc/`) zostaje jako punkt odniesienia.
-  - Tryb LC w grze (`VITE_LC_DATA=1`, pliki w `src/game/data/generated/` i `public/assets-local/` poza
-    gitem): strefy i potwory z bazy, w trybie dev wybór strefy i poziomu. Statystyki gracza tymczasowe
-    (`lcBalance.ts`, opis w `docs/balance.md`) — do zastąpienia w M3.
+  - Tryb LC w grze — domyślny, także na Pages (dane w `src/game/data/generated/`, modele w
+    `public/models/lc/`): strefy i potwory z bazy, w trybie dev (`?dev=1`) wybór strefy i poziomu.
+    Statystyki gracza tymczasowe (`lcBalance.ts`, opis w `docs/balance.md`) — do zastąpienia w M3.
 - Prywatna strona demo (claude.ai, artefakt „IdleLC Arena Preview”) pokazuje walkę na modelach LC ze
   statystykami i dropem 1:1 z bazy. Budowana przez `tools/lc/demo/build_demo.py`.
 
@@ -103,8 +104,8 @@ i komputerze w dowolnej chwili; na końcu **Supabase** (konta, logowanie, zapis 
 serwera). Najpierw robimy wszystko, co się da na froncie.
 
 **Decyzje właściciela:** 6 klas na start (Titan, Knight, Healer, Mage, Rogue, Sorcerer); tempo exp jak w LC
-(będą bonusy); dane 1:1 z bazy; repo przejdzie na prywatne (GitHub Pro) — do tego czasu bez assetów i danych
-LC w repo (konwerter i dokumentacja formatów mogą być w repo).
+(będą bonusy); dane 1:1 z bazy; repo przejdzie na prywatne (GitHub Pro); od 2026-10-29 skonwertowane modele
+i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
 
 **Następne kroki:**
 
@@ -113,7 +114,6 @@ LC w repo (konwerter i dokumentacja formatów mogą być w repo).
    nowe shadery (przezroczystość — konwerter wypisuje listę), dopisać pozostałe 5 klas do
    `scripts/lc/classes.mjs`, ikony przedmiotów z atlasów, broń na kościach, mapę z otwartym terenem.
 2. M2 (tworzenie postaci, 6 klas) na danych 1:1 — najpierw plan do akceptacji.
-3. Po przejściu repo na prywatne — dane i modele LC także na Pages.
 
 **Otwarte kwestie:** brak siatek broni z `Data\Item\Weapon` (przyszły tylko tekstury i tagi); brak mapy
 z otwartym terenem (`.wld` + `.wtr`); brak w bazie statystyk startowych klas, poziomów umiejętności

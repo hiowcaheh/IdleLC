@@ -49,7 +49,8 @@ Gra będzie dostępna pod `https://<użytkownik>.github.io/IdleLC/`.
 
 ## Assety 3D
 
-- W repo są tylko modele na wolnej licencji (CC0) — lista w [`ASSETS-LICENSES.md`](ASSETS-LICENSES.md).
+- Modele spoza LC są na wolnej licencji (CC0) — lista w [`ASSETS-LICENSES.md`](ASSETS-LICENSES.md);
+  modele LC (`public/models/lc/`) opisuje sekcja „Tryb LC” niżej.
 - Modele opisuje manifest `src/game/assets/manifest.json` (ścieżka, skala, mapowanie animacji
   `idle` / `run` / `attack` / `hit` / `die`). Podmiana modelu = zmiana jednego wpisu.
 - Własne pliki źródłowe wrzucaj do `assets-src/` (folder jest w `.gitignore`, nie trafia do repo).
@@ -64,10 +65,11 @@ Gra będzie dostępna pod `https://<użytkownik>.github.io/IdleLC/`.
 
 - Pliki FBX/OBJ/DAE wymagają Blendera (na `PATH` albo w zmiennej `BLENDER=/ścieżka/do/blender`).
 
-## Tryb LC (lokalnie)
+## Tryb LC (dane i modele z klienta i bazy LC)
 
-Gra może działać na danych i modelach z klienta i bazy LC. Pliki LC nigdy nie trafiają do repo,
-dopóki jest publiczne, więc ten tryb działa tylko lokalnie:
+Gra działa na danych z bazy LC (`src/game/data/generated/`) i modelach z klienta (`public/models/lc/`) —
+oba foldery są w repo (decyzja właściciela), więc tak samo działa na GitHub Pages. Surowe pliki klienta
+i zrzut bazy trzymamy poza repo, w `assets-src/`. Żeby odświeżyć dane albo dodać modele:
 
 1. Wygeneruj dane gry z zrzutu bazy:
 
@@ -84,15 +86,16 @@ dopóki jest publiczne, więc ten tryb działa tylko lokalnie:
    ```
 
    Konwerter bierze modele klas (`scripts/lc/classes.mjs`) i wszystkich potworów z `lc-data.json`
-   (tylko animacje używane w bazie), zapisuje GLB do `public/assets-local/models/lc/` (np. `fox.glb`,
+   (tylko animacje używane w bazie), zapisuje GLB do `public/models/lc/` (np. `fox.glb`,
    `class-knight.glb`) i odświeża manifest `src/game/data/generated/lc-models.json`. Pojedynczy model:
    `--smc "Data\Monster\Animals\Fox.smc"`, wybrane modele: `--only fox,class-knight`.
    Formaty plików: [`docs/lc-formats.md`](docs/lc-formats.md).
 
-3. Utwórz `.env.local` z linią `VITE_LC_DATA=1` i uruchom `npm run dev`.
+3. `npm run dev` i commit zmienionych plików.
 
 Potwory bez skonwertowanego modelu pokazują tymczasowy model. W trybie dev (`?dev=1`) można zmienić
-strefę i poziom postaci. Bez tych plików (np. na GitHub Pages) gra działa na danych zastępczych.
+strefę i poziom postaci. `VITE_LC_DATA=0` (np. w `.env.local`; tak działają testy) wyłącza dane LC
+i gra wraca do danych zastępczych.
 
 ## Struktura
 

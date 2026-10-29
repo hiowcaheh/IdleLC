@@ -15,8 +15,8 @@ Prototyp zostaje jako punkt odniesienia i do budowy strony demo. Formaty:
 | `json2glb.mjs`            | `model.mjs` + optymalizacja w `convert-lc.mjs` |
 | `demo/knight_armored.smc` | `classes.mjs` (modele klas)                    |
 
-**Pliki klienta i wyniki konwersji nie trafiają do repo**, dopóki jest publiczne — trzymaj je w
-`assets-src/` (ignorowane przez git).
+**Pliki klienta nie trafiają do repo** — trzymaj je w `assets-src/` (ignorowane przez git). Wyniki
+konwersji z prototypu też zostaw lokalnie; modele dla gry robi `npm run convert-lc` (`public/models/lc/`).
 
 Wymagania: Python 3 + Pillow, Node 22 i `npm install` w repo (gltf-transform, meshoptimizer).
 

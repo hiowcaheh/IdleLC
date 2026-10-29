@@ -1,7 +1,7 @@
 # Baza danych LC (zrzut MySQL, luty 2016) — co gdzie jest
 
-Decyzja właściciela: dane gry mają być **1:1 z tej bazy**. Sam zrzut nie trafia do repo, dopóki repo jest
-publiczne. Lokalnie ładujemy go do SQLite:
+Decyzja właściciela: dane gry mają być **1:1 z tej bazy**. Sam zrzut nie trafia do repo — trafiają dane
+wygenerowane z niego przez `npm run import-lc-db` (`src/game/data/generated/`). Do analizy ładujemy go do SQLite:
 
 ```bash
 python3 tools/lc-db/mysql2sqlite.py /tmp/lc.sqlite <zrzut>/newproject_data.sql
