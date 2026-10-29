@@ -1,11 +1,13 @@
 import type { ClassDef, ClassId } from './types.ts'
 
-// Placeholder numbers — tuned together with docs/balance.md.
+// Placeholder numbers and descriptions (own values): the LC database has no class stats.
+// They will be replaced with the values from the LC server code — see docs/balance.md.
 export const CLASSES: Record<ClassId, ClassDef> = {
   titan: {
     id: 'titan',
     name: 'Titan',
-    description: 'Slow, crushing blows with a two-handed weapon.',
+    role: 'Two-handed sword or axe',
+    description: 'A towering warrior. Slow, crushing blows and plenty of health.',
     modelId: 'hero',
     base: {
       maxHp: 140,
@@ -20,7 +22,8 @@ export const CLASSES: Record<ClassId, ClassDef> = {
   knight: {
     id: 'knight',
     name: 'Knight',
-    description: 'Sword and shield. The most health and defense.',
+    role: 'Sword and shield',
+    description: 'A steadfast defender with the best armor. Hard to bring down.',
     modelId: 'hero',
     base: {
       maxHp: 160,
@@ -35,7 +38,8 @@ export const CLASSES: Record<ClassId, ClassDef> = {
   healer: {
     id: 'healer',
     name: 'Healer',
-    description: 'Quick, lighter attacks and support.',
+    role: 'Bow and holy magic',
+    description: 'Strikes quickly from afar and mends wounds with holy light.',
     modelId: 'hero',
     base: {
       maxHp: 110,
@@ -50,7 +54,8 @@ export const CLASSES: Record<ClassId, ClassDef> = {
   mage: {
     id: 'mage',
     name: 'Mage',
-    description: 'The highest attack and crits, but fragile.',
+    role: 'Staff and elemental magic',
+    description: 'Commands fire and ice. The heaviest damage, but fragile.',
     modelId: 'hero',
     base: {
       maxHp: 95,
@@ -62,4 +67,39 @@ export const CLASSES: Record<ClassId, ClassDef> = {
     },
     perLevel: { maxHp: 9.5, attack: 2.4, defense: 0.6 },
   },
+  rogue: {
+    id: 'rogue',
+    name: 'Rogue',
+    role: 'Daggers or crossbow',
+    description: 'Quick and deadly. Fast attacks and frequent critical hits.',
+    modelId: 'hero',
+    base: {
+      maxHp: 105,
+      attack: 11,
+      defense: 5,
+      attackInterval: 0.95,
+      critChance: 0.14,
+      critMultiplier: 1.6,
+    },
+    perLevel: { maxHp: 10.5, attack: 1.7, defense: 0.7 },
+  },
+  sorcerer: {
+    id: 'sorcerer',
+    name: 'Sorcerer',
+    role: 'Scythe or polearm',
+    description: 'Fights with a great blade and spirit magic. Strong and versatile.',
+    modelId: 'hero',
+    base: {
+      maxHp: 120,
+      attack: 13,
+      defense: 6,
+      attackInterval: 1.35,
+      critChance: 0.08,
+      critMultiplier: 1.6,
+    },
+    perLevel: { maxHp: 12, attack: 2, defense: 0.9 },
+  },
 }
+
+/** Character creation order. */
+export const CLASS_ORDER: ClassId[] = ['titan', 'knight', 'healer', 'mage', 'rogue', 'sorcerer']

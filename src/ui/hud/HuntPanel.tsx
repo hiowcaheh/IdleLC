@@ -6,12 +6,12 @@ import { levelTone } from './levelColor.ts'
 
 /** Zone name, the monsters you can hunt here, and the kill count. */
 export function HuntPanel() {
-  const zoneId = useGameStore((s) => s.save.location.zoneId)
-  const selected = useGameStore((s) => s.save.location.monsterId)
-  const kills = useGameStore((s) => s.hud.kills)
-  const playerLevel = useGameStore((s) => s.hud.playerLevel)
+  const zoneId = useGameStore((s) => s.character?.location.zoneId ?? '')
+  const selected = useGameStore((s) => s.character?.location.monsterId ?? '')
+  const kills = useGameStore((s) => s.character?.stats.kills ?? 0)
+  const playerLevel = useGameStore((s) => s.character?.level ?? 1)
   const selectMonster = useGameStore((s) => s.selectMonster)
-  const zone = ZONES[zoneId]!
+  const zone = ZONES[zoneId]
   const list = useRef<HTMLDivElement>(null)
 
   // keep the hunted monster visible when it was picked elsewhere (dev tools, zone change)
@@ -20,6 +20,8 @@ export function HuntPanel() {
       ?.querySelector<HTMLElement>('.hunt__target.is-active')
       ?.scrollIntoView({ block: 'nearest' })
   }, [selected])
+
+  if (!zone) return null
 
   return (
     <section className="hunt" aria-label="Hunting">

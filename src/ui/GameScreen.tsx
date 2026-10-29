@@ -7,7 +7,6 @@ import { PlayerFrame } from './hud/PlayerFrame.tsx'
 import { StatusLine } from './hud/StatusLine.tsx'
 import { TargetFrame } from './hud/TargetFrame.tsx'
 import { LoadingOverlay } from './LoadingOverlay.tsx'
-import { LoadNotice } from './LoadNotice.tsx'
 import { SettingsPanel } from './SettingsPanel.tsx'
 
 export function GameScreen() {
@@ -43,7 +42,6 @@ export function GameScreen() {
         </div>
       </div>
 
-      <LoadNotice />
       <LoadingOverlay />
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
     </div>

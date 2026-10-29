@@ -10,7 +10,7 @@ const MESSAGES: Partial<Record<string, string>> = {
 /** One-time message about what happened to the save on startup. */
 export function LoadNotice() {
   const status = useGameStore((s) => s.loadStatus)
-  const [visible, setVisible] = useState(Boolean(MESSAGES[status]))
+  const [visible, setVisible] = useState(Boolean(status && MESSAGES[status]))
   useEffect(() => {
     if (!visible) return
     const timer = setTimeout(() => setVisible(false), 6000)
@@ -19,7 +19,7 @@ export function LoadNotice() {
   if (!visible) return null
   return (
     <p className="notice" role="status">
-      {MESSAGES[status]}
+      {status && MESSAGES[status]}
     </p>
   )
 }

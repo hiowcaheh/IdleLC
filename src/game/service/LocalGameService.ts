@@ -1,22 +1,23 @@
-import { CLASSES } from '../data/classes.ts'
-import { getMonster } from '../data/monsters.ts'
-import type { ClassId } from '../data/types.ts'
-import { lcData } from '../data/lcSource.ts'
+import { MONSTERS } from '../data/monsters.ts'
+import { MAX_LEVEL } from '../data/progression.ts'
 import { ZONES } from '../data/zones.ts'
-import { MAX_LEVEL, clamp, statsForLevel } from '../logic/balance.ts'
+import { clamp } from '../logic/balance.ts'
 import {
-  changeMonster,
-  combatTick,
-  createCombat,
-  healPlayer,
-  killMonster,
-  updatePlayer,
-  type CombatEvent,
-  type CombatState,
-  type FighterInit,
-} from '../logic/combat.ts'
-import { lcPlayerStats } from '../logic/lcBalance.ts'
-import { createRng, type Rng } from '../logic/rng.ts'
+  GameError,
+  checkNewCharacter,
+  createCharacterData,
+  type CharacterData,
+  type CharacterLocation,
+  type NewCharacter,
+} from '../logic/character.ts'
+import { newId } from '../logic/id.ts'
+import { gainExp } from '../logic/progression.ts'
+import {
+  applyCombatReport,
+  maxKills,
+  type CombatReport,
+  type CombatResult,
+} from '../logic/rewards.ts'
 import {
   createDefaultSave,
   loadSave,
@@ -29,134 +30,150 @@ import type { DevCommands, GameService, KeyValueStorage } from './GameService.ts
 
 export const SAVE_KEY = 'idlelc.save'
 
-/** Until character creation (M2) everyone plays a knight (level 1 unless changed in dev mode). */
-const DEFAULT_CLASS: ClassId = 'knight'
+const copy = <T>(value: T): T => structuredClone(value)
 
-function monsterFighter(monsterId: string): FighterInit {
-  const monster = getMonster(monsterId)
-  return { level: monster.level, stats: monster.stats }
-}
-
-function playerFighter(level: number): FighterInit {
-  const base = statsForLevel(CLASSES[DEFAULT_CLASS], level)
-  // LC mode: class stats are not in the LC database yet — scale against LC monsters instead
-  return { level, stats: lcData ? lcPlayerStats(level, lcData.monsters, base) : base }
-}
-
+/**
+ * Stage 1 backend: the whole account lives in browser storage. It runs the same checks a
+ * server will (character rules, hunting spot, kill rate), so the UI is ready for Supabase.
+ */
 export class LocalGameService implements GameService {
   private save: SaveData
-  private combat: CombatState
   private readonly storage: KeyValueStorage
-  private readonly rng: Rng
   private readonly now: () => number
-  private playerLevel = 1
+  /** When each character last reported combat (ms) — the kill rate limit counts from here. */
+  private readonly lastReport = new Map<string, number>()
+  private timeScale = 1
 
-  constructor(storage: KeyValueStorage, options: { rng?: Rng; now?: () => number } = {}) {
+  constructor(storage: KeyValueStorage, options: { now?: () => number } = {}) {
     this.storage = storage
     this.now = options.now ?? Date.now
-    this.rng = options.rng ?? createRng(this.now())
     this.save = createDefaultSave(this.now())
-    this.combat = this.createCombatFor(this.save)
   }
 
-  load(): LoadResult['status'] {
+  async load(): Promise<LoadResult> {
     const { save, status } = loadSave(this.read(), this.now())
     this.save = save
-    this.combat = this.createCombatFor(save)
     if (status !== 'loaded') this.persist()
-    return status
+    return { save: copy(save), status }
   }
 
-  getSave(): SaveData {
-    return this.save
-  }
-
-  getCombat(): CombatState {
-    return this.combat
-  }
-
-  combatTick(dt: number): CombatEvent[] {
-    const { state, events } = combatTick(this.combat, dt, this.rng)
-    this.combat = state
-    if (events.some((e) => e.type === 'death')) this.saveStats()
-    return events
-  }
-
-  private saveStats(): void {
-    this.save = { ...this.save, stats: { kills: this.combat.kills, deaths: this.combat.deaths } }
+  async createCharacter(input: NewCharacter): Promise<CharacterData> {
+    const error = checkNewCharacter(input, this.save.characters)
+    if (error) throw new GameError(error)
+    const character = createCharacterData(input, newId(), this.now())
+    this.save = { ...this.save, characters: [...this.save.characters, character] }
     this.persist()
+    return copy(character)
   }
 
-  selectMonster(monsterId: string): CombatEvent[] {
-    const zone = ZONES[this.save.location.zoneId]
-    if (!zone?.monsterIds.includes(monsterId)) {
-      throw new Error(`Monster ${monsterId} is not in zone ${this.save.location.zoneId}`)
+  async deleteCharacter(characterId: string): Promise<void> {
+    this.character(characterId)
+    this.save = {
+      ...this.save,
+      characters: this.save.characters.filter((c) => c.id !== characterId),
+      activeCharacterId:
+        this.save.activeCharacterId === characterId ? null : this.save.activeCharacterId,
     }
-    if (monsterId === this.combat.monsterId) return []
-    const { state, events } = changeMonster(this.combat, monsterId, monsterFighter(monsterId))
-    this.combat = state
-    this.save = { ...this.save, location: { ...this.save.location, monsterId } }
+    this.lastReport.delete(characterId)
     this.persist()
-    return events
   }
 
-  selectZone(zoneId: string, target?: string): CombatEvent[] {
-    const zone = ZONES[zoneId]
-    if (!zone) throw new Error(`Unknown zone: ${zoneId}`)
-    if (target !== undefined && !zone.monsterIds.includes(target)) {
-      throw new Error(`Monster ${target} is not in zone ${zoneId}`)
+  async setActiveCharacter(characterId: string | null): Promise<void> {
+    if (characterId !== null) {
+      this.update(characterId, (c) => ({ ...c, lastPlayedAt: this.now() }))
+      this.lastReport.set(characterId, this.now())
     }
-    if (zoneId === this.save.location.zoneId) return target ? this.selectMonster(target) : []
-    const monsterId = target ?? zone.monsterIds[0]!
-    this.save = { ...this.save, location: { zoneId, monsterId } }
-    const { state, events } = changeMonster(this.combat, monsterId, monsterFighter(monsterId))
-    this.combat = state
+    this.save = { ...this.save, activeCharacterId: characterId }
     this.persist()
-    return events
   }
 
-  readonly dev: DevCommands = {
-    setLevel: (level) => {
-      this.playerLevel = clamp(Math.floor(level), 1, MAX_LEVEL)
-      this.combat = updatePlayer(this.combat, playerFighter(this.playerLevel))
-    },
-    killTarget: () => {
-      const { state, events } = killMonster(this.combat)
-      this.combat = state
-      if (events.length) this.saveStats()
-      return events
-    },
-    heal: () => {
-      this.combat = healPlayer(this.combat)
-    },
+  async travel(characterId: string, location: CharacterLocation): Promise<CharacterData> {
+    const zone = ZONES[location.zoneId]
+    if (!zone) throw new GameError('unknown-zone', `Unknown zone: ${location.zoneId}`)
+    if (!zone.monsterIds.includes(location.monsterId)) {
+      throw new GameError('wrong-monster', `${location.monsterId} is not in ${location.zoneId}`)
+    }
+    return copy(this.update(characterId, (c) => ({ ...c, location: { ...location } })))
   }
 
-  updateSettings(patch: Partial<Settings>): SaveData {
+  async reportCombat(characterId: string, report: CombatReport): Promise<CombatResult> {
+    const character = this.character(characterId)
+    if (report.monsterId !== character.location.monsterId) {
+      throw new GameError('wrong-monster', `${characterId} is not hunting ${report.monsterId}`)
+    }
+    const monster = MONSTERS[report.monsterId]!
+    const now = this.now()
+    const since = this.lastReport.get(characterId) ?? now
+    const allowed = maxKills((now - since) / 1000, this.timeScale)
+    const result = applyCombatReport(character, monster, report, allowed)
+    this.lastReport.set(characterId, now)
+    this.update(characterId, () => ({ ...result.character, lastPlayedAt: now }))
+    return copy({ ...result, character: this.character(characterId) })
+  }
+
+  async updateSettings(patch: Partial<Settings>): Promise<Settings> {
     this.save = { ...this.save, settings: { ...this.save.settings, ...patch } }
     this.persist()
-    return this.save
+    return copy(this.save.settings)
   }
 
-  resetSave(): SaveData {
+  async resetSave(): Promise<SaveData> {
     try {
       this.storage.removeItem(SAVE_KEY)
     } catch {
       // storage unavailable — nothing to remove
     }
     this.save = createDefaultSave(this.now())
-    this.combat = this.createCombatFor(this.save)
+    this.lastReport.clear()
     this.persist()
-    return this.save
+    return copy(this.save)
   }
 
-  private createCombatFor(save: SaveData): CombatState {
-    const { monsterId } = save.location
-    const combat = createCombat(
-      playerFighter(this.playerLevel),
-      monsterId,
-      monsterFighter(monsterId),
-    )
-    return { ...combat, kills: save.stats.kills, deaths: save.stats.deaths }
+  readonly dev: DevCommands = {
+    setLevel: async (characterId, level) =>
+      copy(
+        this.update(characterId, (c) => ({
+          ...c,
+          level: clamp(Math.floor(level), 1, MAX_LEVEL),
+          exp: 0,
+        })),
+      ),
+    addExp: async (characterId, amount) =>
+      copy(
+        this.update(characterId, (c) => {
+          const progress = gainExp(c.level, c.exp, Math.max(0, Math.floor(amount)))
+          return { ...c, level: progress.level, exp: progress.exp }
+        }),
+      ),
+    addGold: async (characterId, amount) =>
+      copy(
+        this.update(characterId, (c) => ({
+          ...c,
+          gold: Math.max(0, c.gold + Math.floor(amount)),
+        })),
+      ),
+    setTimeScale: (scale) => {
+      this.timeScale = Math.max(1, scale)
+    },
+  }
+
+  private character(characterId: string): CharacterData {
+    const character = this.save.characters.find((c) => c.id === characterId)
+    if (!character) throw new GameError('unknown-character', `No character ${characterId}`)
+    return character
+  }
+
+  private update(
+    characterId: string,
+    change: (character: CharacterData) => CharacterData,
+  ): CharacterData {
+    const next = change(this.character(characterId))
+    this.save = {
+      ...this.save,
+      characters: this.save.characters.map((c) => (c.id === characterId ? next : c)),
+    }
+    this.persist()
+    return next
   }
 
   private read(): string | null {

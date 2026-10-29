@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { createRng } from '../logic/rng.ts'
+import { EXP_TABLE } from '../data/progression.ts'
+import { MONSTERS } from '../data/monsters.ts'
+import { GameError, MAX_CHARACTERS } from '../logic/character.ts'
+import { MIN_KILL_CYCLE, KILL_BURST } from '../logic/rewards.ts'
 import { SAVE_VERSION } from '../logic/save.ts'
 import type { KeyValueStorage } from './GameService.ts'
 import { LocalGameService, SAVE_KEY } from './LocalGameService.ts'
@@ -17,109 +20,168 @@ class MemoryStorage implements KeyValueStorage {
   }
 }
 
-const make = (storage = new MemoryStorage()) =>
-  new LocalGameService(storage, { rng: createRng(1), now: () => 1000 })
+/** A service with a controllable clock (ms). */
+function make(storage = new MemoryStorage()) {
+  const clock = { now: 1_000_000 }
+  const game = new LocalGameService(storage, { now: () => clock.now })
+  return { game, clock, storage }
+}
+
+const stored = (storage: MemoryStorage) => JSON.parse(storage.getItem(SAVE_KEY)!)
+
+async function withKnight() {
+  const ctx = make()
+  await ctx.game.load()
+  const hero = await ctx.game.createCharacter({ name: 'Brom', classId: 'knight' })
+  await ctx.game.setActiveCharacter(hero.id)
+  return { ...ctx, hero }
+}
+
+const fox = (hero: { location: { monsterId: string } }) => MONSTERS[hero.location.monsterId]!
 
 describe('LocalGameService', () => {
-  it('creates and persists a new save on first load', () => {
-    const storage = new MemoryStorage()
-    expect(make(storage).load()).toBe('new')
-    const stored = JSON.parse(storage.getItem(SAVE_KEY)!)
-    expect(stored.saveVersion).toBe(SAVE_VERSION)
+  it('creates and persists an empty account on first load', async () => {
+    const { game, storage } = make()
+    const { status, save } = await game.load()
+    expect(status).toBe('new')
+    expect(save.characters).toEqual([])
+    expect(stored(storage).saveVersion).toBe(SAVE_VERSION)
   })
 
-  it('persists kills after monsters die and restores them on reload', () => {
-    const storage = new MemoryStorage()
-    const game = make(storage)
-    game.load()
-    for (let i = 0; i < 60 * 60; i++) game.combatTick(1 / 60)
-    const kills = game.getSave().stats.kills
-    expect(kills).toBeGreaterThan(0)
+  it('creates characters with the account rules and keeps them after a reload', async () => {
+    const { game, storage } = make()
+    await game.load()
+    const hero = await game.createCharacter({ name: '  Brom ', classId: 'knight' })
+    expect(hero).toMatchObject({ name: 'Brom', classId: 'knight', level: 1, exp: 0, gold: 0 })
 
-    const reloaded = make(storage)
-    expect(reloaded.load()).toBe('loaded')
-    expect(reloaded.getSave().stats.kills).toBe(kills)
-    expect(reloaded.getCombat().kills).toBe(kills)
+    await expect(game.createCharacter({ name: 'brom', classId: 'mage' })).rejects.toThrow(
+      'name-taken',
+    )
+    await expect(game.createCharacter({ name: 'x', classId: 'mage' })).rejects.toBeInstanceOf(
+      GameError,
+    )
+
+    const reloaded = make(storage).game
+    const { status, save } = await reloaded.load()
+    expect(status).toBe('loaded')
+    expect(save.characters.map((c) => c.name)).toEqual(['Brom'])
   })
 
-  it('switches monsters within the zone and remembers the choice', () => {
-    const storage = new MemoryStorage()
-    const game = make(storage)
-    game.load()
-    game.selectMonster('stone-sentinel')
-    expect(game.getCombat().monsterId).toBe('stone-sentinel')
-    expect(make(storage).getSave().location.monsterId).not.toBe('stone-sentinel') // not loaded yet
-    const reloaded = make(storage)
-    reloaded.load()
-    expect(reloaded.getSave().location.monsterId).toBe('stone-sentinel')
+  it(`allows at most ${MAX_CHARACTERS} characters and frees a slot on delete`, async () => {
+    const { game } = make()
+    await game.load()
+    const names = ['Anna', 'Bert', 'Cora', 'Dain']
+    const created = []
+    for (const name of names) created.push(await game.createCharacter({ name, classId: 'rogue' }))
+    await expect(game.createCharacter({ name: 'Ezra', classId: 'rogue' })).rejects.toThrow(
+      'no-free-slot',
+    )
+    await game.setActiveCharacter(created[0]!.id)
+    await game.deleteCharacter(created[0]!.id)
+    const { save } = await game.load()
+    expect(save.activeCharacterId).toBeNull()
+    await expect(game.createCharacter({ name: 'Ezra', classId: 'rogue' })).resolves.toBeTruthy()
   })
 
-  it('switches zones and rejects unknown ones', () => {
-    const game = make()
-    game.load()
-    expect(game.selectZone('glade')).toEqual([])
-    expect(() => game.selectZone('nowhere')).toThrow()
+  it('returns copies that do not change the saved game', async () => {
+    const { game, hero } = await withKnight()
+    hero.gold = 999_999
+    const { save } = await game.load()
+    expect(save.characters[0]!.gold).toBe(0)
   })
 
-  it('changes the player level (dev) and scales stats', () => {
-    const game = make()
-    game.load()
-    const before = game.getCombat().player.stats.maxHp
-    game.dev.setLevel(20)
-    expect(game.getCombat().player.level).toBe(20)
-    expect(game.getCombat().player.stats.maxHp).toBeGreaterThan(before)
-    game.dev.setLevel(500)
-    expect(game.getCombat().player.level).toBe(99)
+  it('pays exp and gold for reported kills and levels up from the exp table', async () => {
+    const { game, clock, hero, storage } = await withKnight()
+    const monster = fox(hero)
+    const kills = Math.ceil(EXP_TABLE[0]! / monster.exp)
+    clock.now += kills * MIN_KILL_CYCLE * 1000
+    const result = await game.reportCombat(hero.id, {
+      monsterId: monster.id,
+      kills,
+      deaths: 1,
+    })
+    expect(result).toMatchObject({ kills, exp: kills * monster.exp, gold: kills * monster.gold })
+    expect(result.levelsGained).toBe(1)
+    expect(result.character).toMatchObject({
+      level: 2,
+      exp: kills * monster.exp - EXP_TABLE[0]!,
+      gold: kills * monster.gold,
+      stats: { kills, deaths: 1 },
+    })
+    expect(stored(storage).characters[0].level).toBe(2)
   })
 
-  it('kills the target and heals on dev command, saving the kill', () => {
-    const storage = new MemoryStorage()
-    const game = make(storage)
-    game.load()
-    game.combatTick(1.1) // the monster has spawned
-    expect(game.dev.killTarget()).toEqual([{ type: 'death', who: 'monster' }])
-    expect(JSON.parse(storage.getItem(SAVE_KEY)!).stats.kills).toBe(1)
-    game.dev.heal()
-    expect(game.getCombat().player.hp).toBe(game.getCombat().player.stats.maxHp)
+  it('caps kills that come faster than a fight can take', async () => {
+    const { game, clock, hero } = await withKnight()
+    clock.now += 10 * 1000
+    const allowed = Math.floor(10 / MIN_KILL_CYCLE) + KILL_BURST
+    const result = await game.reportCombat(hero.id, {
+      monsterId: hero.location.monsterId,
+      kills: 1000,
+      deaths: 0,
+    })
+    expect(result.kills).toBe(allowed)
+
+    // the dev game speed allows proportionally more
+    game.dev.setTimeScale(10)
+    clock.now += 10 * 1000
+    const fast = await game.reportCombat(hero.id, {
+      monsterId: hero.location.monsterId,
+      kills: 1000,
+      deaths: 0,
+    })
+    expect(fast.kills).toBe(Math.floor(100 / MIN_KILL_CYCLE) + KILL_BURST)
   })
 
-  it('moves to a zone with a chosen monster', () => {
-    const game = make()
-    game.load()
-    game.selectZone('glade', 'stone-sentinel')
-    expect(game.getSave().location.monsterId).toBe('stone-sentinel')
-    expect(() => game.selectZone('glade', 'dragon')).toThrow()
+  it('rejects reports for a monster the character is not hunting', async () => {
+    const { game, hero } = await withKnight()
+    await expect(
+      game.reportCombat(hero.id, { monsterId: 'stone-sentinel', kills: 1, deaths: 0 }),
+    ).rejects.toThrow('wrong-monster')
+    await expect(
+      game.reportCombat('nobody', { monsterId: hero.location.monsterId, kills: 1, deaths: 0 }),
+    ).rejects.toThrow('unknown-character')
   })
 
-  it('rejects monsters from outside the current zone', () => {
-    const game = make()
-    game.load()
-    expect(() => game.selectMonster('dragon')).toThrow()
+  it('travels only to existing spots', async () => {
+    const { game, hero } = await withKnight()
+    const moved = await game.travel(hero.id, { zoneId: 'glade', monsterId: 'stone-sentinel' })
+    expect(moved.location.monsterId).toBe('stone-sentinel')
+    await expect(game.travel(hero.id, { zoneId: 'glade', monsterId: 'dragon' })).rejects.toThrow(
+      'wrong-monster',
+    )
+    await expect(game.travel(hero.id, { zoneId: 'nowhere', monsterId: 'x' })).rejects.toThrow(
+      'unknown-zone',
+    )
   })
 
-  it('updates settings and resets the save', () => {
-    const storage = new MemoryStorage()
-    const game = make(storage)
-    game.load()
-    game.updateSettings({ quality: 'low' })
-    expect(game.getSave().settings.quality).toBe('low')
-    for (let i = 0; i < 60 * 30; i++) game.combatTick(1 / 60)
+  it('offers dev commands for level, exp and gold', async () => {
+    const { game, hero } = await withKnight()
+    expect((await game.dev.setLevel(hero.id, 500)).level).toBe(99)
+    expect((await game.dev.setLevel(hero.id, 5)).level).toBe(5)
+    const levelled = await game.dev.addExp(hero.id, EXP_TABLE[4]! + 1)
+    expect(levelled).toMatchObject({ level: 6, exp: 1 })
+    expect((await game.dev.addGold(hero.id, 1000)).gold).toBe(1000)
+  })
 
-    const fresh = game.resetSave()
+  it('updates settings and resets the whole save', async () => {
+    const { game, storage } = await withKnight()
+    expect(await game.updateSettings({ quality: 'low' })).toMatchObject({ quality: 'low' })
+    const fresh = await game.resetSave()
+    expect(fresh.characters).toEqual([])
     expect(fresh.settings.quality).toBe('auto')
-    expect(fresh.stats.kills).toBe(0)
-    expect(game.getCombat().phase).toBe('spawning')
+    expect(stored(storage).characters).toEqual([])
   })
 
-  it('recovers from a corrupted save', () => {
+  it('recovers from a corrupted save', async () => {
     const storage = new MemoryStorage()
     storage.setItem(SAVE_KEY, '{oops')
-    const game = make(storage)
-    expect(game.load()).toBe('reset-invalid')
-    expect(JSON.parse(storage.getItem(SAVE_KEY)!).saveVersion).toBe(SAVE_VERSION)
+    const { game } = make(storage)
+    expect((await game.load()).status).toBe('reset-invalid')
+    expect(stored(storage).saveVersion).toBe(SAVE_VERSION)
   })
 
-  it('keeps running when storage throws', () => {
+  it('keeps running when storage throws', async () => {
     const broken: KeyValueStorage = {
       getItem: () => {
         throw new Error('denied')
@@ -131,9 +193,9 @@ describe('LocalGameService', () => {
         throw new Error('denied')
       },
     }
-    const game = make(broken as MemoryStorage)
-    expect(game.load()).toBe('new')
-    expect(() => game.combatTick(5)).not.toThrow()
-    expect(() => game.resetSave()).not.toThrow()
+    const { game } = make(broken as MemoryStorage)
+    expect((await game.load()).status).toBe('new')
+    await expect(game.createCharacter({ name: 'Solo', classId: 'titan' })).resolves.toBeTruthy()
+    await expect(game.resetSave()).resolves.toBeTruthy()
   })
 })

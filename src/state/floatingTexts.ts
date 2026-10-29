@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type FloatingKind = 'dealt' | 'crit' | 'taken' | 'miss'
+export type FloatingKind = 'dealt' | 'crit' | 'taken' | 'miss' | 'exp' | 'gold' | 'level'
 
 export interface FloatingText {
   id: number

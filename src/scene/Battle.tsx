@@ -4,7 +4,7 @@ import { Vector3, type Group } from 'three'
 import { getModel, playerModelId } from '../game/assets/manifest.ts'
 import { getMonster } from '../game/data/monsters.ts'
 import { TIMINGS, type Side } from '../game/logic/combat.ts'
-import { gameService } from '../game/service/index.ts'
+import { combatSession } from '../game/session/combatSession.ts'
 import { combatEvents, type ViewEvent } from '../state/combatEvents.ts'
 import { useFloatingTexts, type FloatingKind } from '../state/floatingTexts.ts'
 import { useGameStore } from '../state/gameStore.ts'
@@ -21,14 +21,13 @@ const SINK_TIME = 0.7
 const TURN_SPEED = 10
 const HUD_SYNC_INTERVAL = 0.1
 
-const PLAYER_MODEL = playerModelId('knight')
 const UP = new Vector3(0, 1, 0)
 
 /** Distance between fighters' centers while trading blows, from the models' sizes. */
-function engageDistance(monsterId: string): number {
+function engageDistance(monsterId: string, playerModel: string): number {
   const def = getMonster(monsterId)
   const model = getModel(def.modelId)
-  const hero = getModel(PLAYER_MODEL)
+  const hero = getModel(playerModel)
   const monsterRadius = (model.radius ?? 0.6) * model.scale * (def.scale ?? 1)
   // the player's bounds include the weapon, so only part of them counts
   const heroRadius = (hero.radius ?? 0.5) * hero.scale * 0.6
@@ -50,6 +49,12 @@ export function Battle() {
   const monsterDef = getMonster(monsterId)
   const monsterModel = monsterDef.modelId
   const showNumbers = useGameStore((s) => s.save.settings.showDamageNumbers)
+  const classId = useGameStore((s) => s.character?.classId ?? 'knight')
+  const playerModel = playerModelId(classId)
+  const playerModelRef = useRef(playerModel)
+  useEffect(() => {
+    playerModelRef.current = playerModel
+  }, [playerModel])
 
   const playerGroup = useRef<Group>(null)
   const monsterGroup = useRef<Group>(null)
@@ -69,10 +74,10 @@ export function Battle() {
 
   // Bring visuals in line with whatever phase the (persistent) combat is in on mount.
   useEffect(() => {
-    const combat = gameService.getCombat()
+    const combat = combatSession.state
     resetView()
     if (combat.phase !== 'spawning') {
-      const engage = engageDistance(combat.monsterId)
+      const engage = engageDistance(combat.monsterId, playerModelRef.current)
       view.monster.copy(SCREEN_RIGHT).multiplyScalar(engage + RUN_DISTANCE)
       view.monsterVisible = true
       motion.current.approachFrom.set(0, 0, 0)
@@ -91,6 +96,14 @@ export function Battle() {
       useFloatingTexts.getState().add(text, kind, [pos.x + jitter, height + 0.45, pos.z])
     }
 
+    /** Rewards float above the player (shown even with damage numbers off). */
+    const rewardText = (text: string, kind: FloatingKind, lift: number) => {
+      const height = player.current?.height() ?? 1.8
+      useFloatingTexts
+        .getState()
+        .add(text, kind, [view.player.x, height + 0.7 + lift, view.player.z])
+    }
+
     const onEvent = (e: ViewEvent) => {
       const m = motion.current
       switch (e.type) {
@@ -102,7 +115,7 @@ export function Battle() {
           const dir = SCREEN_RIGHT.clone()
             .multiplyScalar(side)
             .applyAxisAngle(UP, (Math.random() - 0.5) * 0.7)
-          const engage = engageDistance(e.monsterId)
+          const engage = engageDistance(e.monsterId, playerModelRef.current)
           view.monster.copy(view.player).addScaledVector(dir, engage + RUN_DISTANCE)
           if (view.monster.length() > ARENA_RADIUS) view.monster.setLength(ARENA_RADIUS)
           dir.subVectors(view.monster, view.player).normalize()
@@ -150,6 +163,11 @@ export function Battle() {
           player.current?.revive()
           player.current?.setBase('idle')
           break
+        case 'reward':
+          if (e.exp > 0) rewardText(`+${e.exp.toLocaleString('en-US')} EXP`, 'exp', 0)
+          if (e.gold > 0) rewardText(`+${e.gold.toLocaleString('en-US')} gold`, 'gold', -0.35)
+          if (e.levelsGained > 0) rewardText('LEVEL UP!', 'level', 0.45)
+          break
         case 'reset':
           resetView()
           m.sink = -1
@@ -165,10 +183,10 @@ export function Battle() {
   useFrame((_, delta) => {
     const realDt = Math.min(delta, 0.1)
     const dt = realDt * useGameStore.getState().timeScale
-    const events = gameService.combatTick(dt)
+    const events = combatSession.tick(dt)
     if (events.length > 0) combatEvents.emit(events)
 
-    const combat = gameService.getCombat()
+    const combat = combatSession.state
     const m = motion.current
 
     if (combat.phase === 'approach') {
@@ -216,7 +234,7 @@ export function Battle() {
   return (
     <>
       <group ref={playerGroup}>
-        <Character ref={player} modelId={PLAYER_MODEL} />
+        <Character key={playerModel} ref={player} modelId={playerModel} />
       </group>
       <group ref={monsterGroup} visible={false}>
         <Suspense fallback={null}>
@@ -231,7 +249,7 @@ export function Battle() {
       <HpBar3D
         color="#62c04a"
         read={() => {
-          const c = gameService.getCombat()
+          const c = combatSession.state
           return {
             x: view.player.x,
             y: view.playerHeight + 0.22,
@@ -244,7 +262,7 @@ export function Battle() {
       <HpBar3D
         color="#d8392b"
         read={() => {
-          const c = gameService.getCombat()
+          const c = combatSession.state
           return {
             x: view.monster.x,
             y: view.monsterHeight * (motion.current.appear || 0) + 0.22,

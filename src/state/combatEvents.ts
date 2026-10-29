@@ -1,7 +1,10 @@
 import type { CombatEvent } from '../game/logic/combat.ts'
 
-/** Events the 3D scene reacts to: combat events plus a full reset (new save). */
-export type ViewEvent = CombatEvent | { type: 'reset' }
+/** Events the 3D scene reacts to: combat events, rewards paid out and a full reset (new save). */
+export type ViewEvent =
+  | CombatEvent
+  | { type: 'reset' }
+  | { type: 'reward'; exp: number; gold: number; levelsGained: number }
 
 type Listener = (event: ViewEvent) => void
 

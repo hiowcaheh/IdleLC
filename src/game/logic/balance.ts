@@ -1,10 +1,11 @@
 /**
  * All balance formulas live here. Documented in docs/balance.md — keep both in sync.
  */
+import { MAX_LEVEL } from '../data/progression.ts'
 import type { ClassDef, CombatStats } from '../data/types.ts'
 import { chance, type Rng } from './rng.ts'
 
-export const MAX_LEVEL = 99
+export { MAX_LEVEL }
 
 /** Hit chance at equal levels, change per level of difference, and its bounds. */
 export const BASE_HIT_CHANCE = 0.92

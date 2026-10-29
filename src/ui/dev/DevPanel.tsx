@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
+import { expToNextLevel } from '../../game/logic/progression.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { useDevTools } from './devMode.ts'
 
@@ -13,10 +14,13 @@ export function DevPanel() {
   const setOpen = useDevTools((s) => s.setOpen)
   const timeScale = useGameStore((s) => s.timeScale)
   const setTimeScale = useGameStore((s) => s.setTimeScale)
-  const { zoneId, monsterId } = useGameStore((s) => s.save.location)
+  const zoneId = useGameStore((s) => s.character?.location.zoneId ?? '')
+  const monsterId = useGameStore((s) => s.character?.location.monsterId ?? '')
   const selectZone = useGameStore((s) => s.selectZone)
-  const level = useGameStore((s) => s.hud.playerLevel)
+  const level = useGameStore((s) => s.character?.level ?? 1)
   const devSetLevel = useGameStore((s) => s.devSetLevel)
+  const devAddExp = useGameStore((s) => s.devAddExp)
+  const devAddGold = useGameStore((s) => s.devAddGold)
   const devKillTarget = useGameStore((s) => s.devKillTarget)
   const devHeal = useGameStore((s) => s.devHeal)
 
@@ -94,6 +98,19 @@ export function DevPanel() {
           </button>
         ))}
         <span className="dev-panel__value">Lv {level}</span>
+      </div>
+
+      <div className="dev-panel__row" role="group" aria-label="Experience and gold">
+        <button
+          type="button"
+          className="dev-chip"
+          onClick={() => devAddExp(Math.ceil(expToNextLevel(level) / 4))}
+        >
+          +25% exp
+        </button>
+        <button type="button" className="dev-chip" onClick={() => devAddGold(1000)}>
+          +1,000 gold
+        </button>
       </div>
 
       <div className="dev-panel__row" role="group" aria-label="Combat">

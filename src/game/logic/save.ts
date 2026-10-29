@@ -1,11 +1,23 @@
 /**
  * Save format, versioning and migrations. Pure — storage access lives in the service layer.
+ * The save is one account: settings + up to MAX_CHARACTERS characters (future database rows).
  * When the shape changes: bump SAVE_VERSION and add a migration from the previous version.
  */
+import { CLASSES } from '../data/classes.ts'
 import { MONSTERS } from '../data/monsters.ts'
-import { DEFAULT_ZONE_ID, ZONES } from '../data/zones.ts'
+import { MAX_LEVEL } from '../data/progression.ts'
+import type { ClassId } from '../data/types.ts'
+import { ZONES } from '../data/zones.ts'
+import {
+  MAX_CHARACTERS,
+  NAME_MAX,
+  startLocation,
+  type CharacterData,
+  type CharacterLocation,
+} from './character.ts'
+import { newId } from './id.ts'
 
-export const SAVE_VERSION = 1
+export const SAVE_VERSION = 2
 
 export type GraphicsQuality = 'auto' | 'low' | 'high'
 
@@ -18,30 +30,51 @@ export interface SaveData {
   saveVersion: typeof SAVE_VERSION
   createdAt: number
   settings: Settings
-  location: {
-    zoneId: string
-    monsterId: string
-  }
-  stats: {
-    kills: number
-    deaths: number
-  }
+  characters: CharacterData[]
+  /** Character that was in play when the game was closed (reopens straight into the game). */
+  activeCharacterId: string | null
 }
 
 /** Upgrades a save from version N to N + 1. */
 export type Migration = (save: Record<string, unknown>) => Record<string, unknown>
 
 /** Keyed by the version they upgrade FROM. */
-export const MIGRATIONS: Record<number, Migration> = {}
+export const MIGRATIONS: Record<number, Migration> = {
+  // v1 had one implicit knight: its location and kill count become the character "Hero"
+  1: (save) => {
+    const id = newId()
+    const createdAt = typeof save.createdAt === 'number' ? save.createdAt : 0
+    const { location, stats, ...rest } = save
+    return {
+      ...rest,
+      characters: [
+        {
+          id,
+          name: 'Hero',
+          classId: 'knight',
+          level: 1,
+          exp: 0,
+          gold: 0,
+          createdAt,
+          lastPlayedAt: createdAt,
+          location,
+          stats,
+        },
+      ],
+      activeCharacterId: id,
+    }
+  },
+}
+
+export const DEFAULT_SETTINGS: Settings = { quality: 'auto', showDamageNumbers: true }
 
 export function createDefaultSave(now = Date.now()): SaveData {
-  const zone = ZONES[DEFAULT_ZONE_ID]!
   return {
     saveVersion: SAVE_VERSION,
     createdAt: now,
-    settings: { quality: 'auto', showDamageNumbers: true },
-    location: { zoneId: zone.id, monsterId: zone.monsterIds[0]! },
-    stats: { kills: 0, deaths: 0 },
+    settings: { ...DEFAULT_SETTINGS },
+    characters: [],
+    activeCharacterId: null,
   }
 }
 
@@ -70,42 +103,74 @@ export function applyMigrations(
 const num = (value: unknown, fallback: number) =>
   typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : fallback
 
-/** Fills missing/invalid fields with defaults so a partly broken save still loads. */
-function sanitize(raw: Record<string, unknown>, defaults: SaveData): SaveData {
-  const settings = isRecord(raw.settings) ? raw.settings : {}
-  const location = isRecord(raw.location) ? raw.location : {}
-  const stats = isRecord(raw.stats) ? raw.stats : {}
+const int = (value: unknown, fallback: number) => Math.floor(num(value, fallback))
 
-  const quality = ['auto', 'low', 'high'].includes(settings.quality as string)
-    ? (settings.quality as GraphicsQuality)
-    : defaults.settings.quality
+function sanitizeSettings(raw: unknown): Settings {
+  const settings = isRecord(raw) ? raw : {}
+  return {
+    quality: ['auto', 'low', 'high'].includes(settings.quality as string)
+      ? (settings.quality as GraphicsQuality)
+      : DEFAULT_SETTINGS.quality,
+    showDamageNumbers:
+      typeof settings.showDamageNumbers === 'boolean'
+        ? settings.showDamageNumbers
+        : DEFAULT_SETTINGS.showDamageNumbers,
+  }
+}
 
+/** Keeps a saved location when its zone and monster still exist, else the starting location. */
+export function sanitizeLocation(raw: unknown): CharacterLocation {
+  const location = isRecord(raw) ? raw : {}
+  const fallback = startLocation()
   const zoneId =
-    typeof location.zoneId === 'string' && ZONES[location.zoneId]
-      ? location.zoneId
-      : defaults.location.zoneId
+    typeof location.zoneId === 'string' && ZONES[location.zoneId] ? location.zoneId : null
+  if (!zoneId) return fallback
   const monsterId =
     typeof location.monsterId === 'string' &&
-    ZONES[zoneId]?.monsterIds.includes(location.monsterId) &&
+    ZONES[zoneId]!.monsterIds.includes(location.monsterId) &&
     MONSTERS[location.monsterId]
       ? location.monsterId
       : ZONES[zoneId]!.monsterIds[0]!
+  return { zoneId, monsterId }
+}
 
+/** A stored character, repaired where possible; null when it cannot be recovered. */
+function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
+  if (!isRecord(raw)) return null
+  if (typeof raw.id !== 'string' || !raw.id) return null
+  if (typeof raw.name !== 'string' || !raw.name.trim()) return null
+  if (typeof raw.classId !== 'string' || !Object.hasOwn(CLASSES, raw.classId)) return null
+  const stats = isRecord(raw.stats) ? raw.stats : {}
+  const createdAt = num(raw.createdAt, now)
+  return {
+    id: raw.id,
+    name: raw.name.trim().slice(0, NAME_MAX),
+    classId: raw.classId as ClassId,
+    level: Math.min(MAX_LEVEL, Math.max(1, int(raw.level, 1))),
+    exp: int(raw.exp, 0),
+    gold: int(raw.gold, 0),
+    createdAt,
+    lastPlayedAt: num(raw.lastPlayedAt, createdAt),
+    location: sanitizeLocation(raw.location),
+    stats: { kills: int(stats.kills, 0), deaths: int(stats.deaths, 0) },
+  }
+}
+
+/** Fills missing/invalid fields with defaults so a partly broken save still loads. */
+function sanitize(raw: Record<string, unknown>, now: number): SaveData {
+  const characters: CharacterData[] = []
+  for (const entry of Array.isArray(raw.characters) ? raw.characters : []) {
+    const character = sanitizeCharacter(entry, now)
+    if (character && !characters.some((c) => c.id === character.id)) characters.push(character)
+    if (characters.length === MAX_CHARACTERS) break
+  }
+  const active = characters.find((c) => c.id === raw.activeCharacterId)
   return {
     saveVersion: SAVE_VERSION,
-    createdAt: num(raw.createdAt, defaults.createdAt),
-    settings: {
-      quality,
-      showDamageNumbers:
-        typeof settings.showDamageNumbers === 'boolean'
-          ? settings.showDamageNumbers
-          : defaults.settings.showDamageNumbers,
-    },
-    location: { zoneId, monsterId },
-    stats: {
-      kills: Math.floor(num(stats.kills, 0)),
-      deaths: Math.floor(num(stats.deaths, 0)),
-    },
+    createdAt: num(raw.createdAt, now),
+    settings: sanitizeSettings(raw.settings),
+    characters,
+    activeCharacterId: active ? active.id : null,
   }
 }
 
@@ -135,7 +200,7 @@ export function loadSave(stored: string | null, now = Date.now()): LoadResult {
   if (!migrated) return { save: defaults, status: 'reset-invalid' }
 
   return {
-    save: sanitize(migrated, defaults),
+    save: sanitize(migrated, now),
     status: version === SAVE_VERSION ? 'loaded' : 'migrated',
   }
 }

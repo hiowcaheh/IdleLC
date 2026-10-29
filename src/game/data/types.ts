@@ -11,11 +11,13 @@ export interface CombatStats {
   critMultiplier: number
 }
 
-export type ClassId = 'titan' | 'knight' | 'healer' | 'mage'
+export type ClassId = 'titan' | 'knight' | 'healer' | 'mage' | 'rogue' | 'sorcerer'
 
 export interface ClassDef {
   id: ClassId
   name: string
+  /** Weapon and fighting style in a few words (character creation). */
+  role: string
   description: string
   modelId: string
   /** Stats at level 1. */

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router'
 import type { GraphicsQuality } from '../game/logic/save.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { useDevTools } from './dev/devMode.ts'
@@ -13,6 +14,8 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
   const settings = useGameStore((s) => s.save.settings)
   const updateSettings = useGameStore((s) => s.updateSettings)
   const resetSave = useGameStore((s) => s.resetSave)
+  const leaveGame = useGameStore((s) => s.leaveGame)
+  const navigate = useNavigate()
   const devTools = useDevTools((s) => s.enabled)
   const setDevTools = useDevTools((s) => s.setEnabled)
   const [confirmReset, setConfirmReset] = useState(false)
@@ -37,9 +40,14 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
       setConfirmReset(true)
       return
     }
-    resetSave()
     setConfirmReset(false)
     setResetDone(true)
+    void resetSave().then(() => navigate('/characters'))
+  }
+
+  const onChangeCharacter = async () => {
+    await leaveGame()
+    navigate('/characters')
   }
 
   return (
@@ -108,12 +116,18 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
           />
         </label>
 
+        <div className="setting">
+          <button type="button" className="button button--wide" onClick={onChangeCharacter}>
+            Change character
+          </button>
+        </div>
+
         <div className="setting setting--danger">
           <span className="setting__label">Saved game</span>
           <p className="setting__hint">
             {resetDone
               ? 'Save deleted. You are starting over.'
-              : 'Your progress is saved in this browser.'}
+              : 'All your characters are saved in this browser. Reset deletes them all.'}
           </p>
           <button
             type="button"

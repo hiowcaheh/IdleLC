@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { createCharacterData } from './character.ts'
 import {
   SAVE_VERSION,
   applyMigrations,
@@ -6,20 +7,29 @@ import {
   loadSave,
   serializeSave,
   type Migration,
+  type SaveData,
 } from './save.ts'
 
 const NOW = 1_700_000_000_000
 
+const withCharacter = (): SaveData => {
+  const save = createDefaultSave(NOW)
+  const hero = createCharacterData({ name: 'Aria', classId: 'mage' }, 'id-1', NOW)
+  return { ...save, characters: [hero], activeCharacterId: hero.id }
+}
+
 describe('loadSave', () => {
-  it('creates a default save when nothing is stored', () => {
+  it('creates an empty account when nothing is stored', () => {
     const r = loadSave(null, NOW)
     expect(r.status).toBe('new')
     expect(r.save).toEqual(createDefaultSave(NOW))
+    expect(r.save.characters).toEqual([])
   })
 
   it('round-trips a current save', () => {
-    const save = createDefaultSave(NOW)
-    save.stats.kills = 12
+    const save = withCharacter()
+    save.characters[0]!.stats.kills = 12
+    save.characters[0]!.level = 7
     save.settings.quality = 'low'
     const r = loadSave(serializeSave(save), NOW + 1)
     expect(r.status).toBe('loaded')
@@ -38,29 +48,67 @@ describe('loadSave', () => {
     expect(r.save.saveVersion).toBe(SAVE_VERSION)
   })
 
-  it('repairs invalid fields with defaults but keeps valid ones', () => {
-    const r = loadSave(
-      JSON.stringify({
-        saveVersion: SAVE_VERSION,
-        createdAt: NOW,
-        settings: { quality: 'ultra', showDamageNumbers: false },
-        location: { zoneId: 'nowhere', monsterId: 'dragon' },
-        stats: { kills: 5.7, deaths: -3 },
-      }),
-      NOW,
-    )
-    expect(r.save.settings).toEqual({ quality: 'auto', showDamageNumbers: false })
-    expect(r.save.location).toEqual(createDefaultSave(NOW).location)
-    expect(r.save.stats).toEqual({ kills: 5, deaths: 0 })
+  it('migrates a version 1 save into a knight called Hero', () => {
+    const v1 = {
+      saveVersion: 1,
+      createdAt: NOW - 5000,
+      settings: { quality: 'high', showDamageNumbers: false },
+      location: { zoneId: 'glade', monsterId: 'stone-sentinel' },
+      stats: { kills: 42, deaths: 3 },
+    }
+    const r = loadSave(JSON.stringify(v1), NOW)
+    expect(r.status).toBe('migrated')
+    expect(r.save.settings).toEqual({ quality: 'high', showDamageNumbers: false })
+    expect(r.save.characters).toHaveLength(1)
+    const [hero] = r.save.characters
+    expect(hero).toMatchObject({
+      name: 'Hero',
+      classId: 'knight',
+      level: 1,
+      location: { zoneId: 'glade', monsterId: 'stone-sentinel' },
+      stats: { kills: 42, deaths: 3 },
+    })
+    expect(hero!.id).toMatch(/^[0-9a-f-]{36}$/)
+    expect(r.save.activeCharacterId).toBe(hero!.id)
   })
 
-  it('rejects a monster that does not belong to the saved zone', () => {
-    const save = createDefaultSave(NOW)
-    const r = loadSave(
-      JSON.stringify({ ...save, location: { zoneId: 'glade', monsterId: 'missing' } }),
-      NOW,
-    )
-    expect(r.save.location.monsterId).toBe(save.location.monsterId)
+  it('repairs invalid character fields and drops unrecoverable characters', () => {
+    const save = withCharacter()
+    const broken = {
+      ...save,
+      settings: { quality: 'ultra', showDamageNumbers: false },
+      characters: [
+        {
+          ...save.characters[0],
+          level: 500,
+          exp: -3,
+          gold: 5.7,
+          location: { zoneId: 'nowhere', monsterId: 'dragon' },
+          stats: { kills: 5.7, deaths: -3 },
+        },
+        { id: 'x', name: 'Ghost', classId: 'necromancer' },
+        'garbage',
+      ],
+      activeCharacterId: 'missing',
+    }
+    const r = loadSave(JSON.stringify(broken), NOW)
+    expect(r.save.settings).toEqual({ quality: 'auto', showDamageNumbers: false })
+    expect(r.save.characters).toHaveLength(1)
+    expect(r.save.characters[0]).toMatchObject({
+      level: 99,
+      exp: 0,
+      gold: 5,
+      location: save.characters[0]!.location,
+      stats: { kills: 5, deaths: 0 },
+    })
+    expect(r.save.activeCharacterId).toBeNull()
+  })
+
+  it('keeps the zone but picks its first monster when the monster is not there', () => {
+    const save = withCharacter()
+    save.characters[0]!.location = { zoneId: 'glade', monsterId: 'missing' }
+    const r = loadSave(JSON.stringify(save), NOW)
+    expect(r.save.characters[0]!.location).toEqual({ zoneId: 'glade', monsterId: 'rust-golem' })
   })
 })
 

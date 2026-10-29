@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import { Suspense, useEffect, useState } from 'react'
 import { getModel, modelUrl, playerModelId } from '../game/assets/manifest.ts'
 import { getMonster } from '../game/data/monsters.ts'
+import type { ClassId } from '../game/data/types.ts'
 import { ZONES } from '../game/data/zones.ts'
 import type { GraphicsQuality } from '../game/logic/save.ts'
 import { useGameStore } from '../state/gameStore.ts'
@@ -23,26 +24,30 @@ function maxDpr(quality: GraphicsQuality): number {
 
 export function GameCanvas() {
   const quality = useGameStore((s) => s.save.settings.quality)
-  const zoneId = useGameStore((s) => s.save.location.zoneId)
-  const zone = ZONES[zoneId]!
+  const zoneId = useGameStore((s) => s.character?.location.zoneId)
+  const classId = useGameStore((s) => s.character?.classId ?? 'knight')
+  const zone = zoneId ? ZONES[zoneId] : undefined
+  if (!zone) return null
   // Remount on quality change: shadows and antialiasing are fixed at context creation.
-  return <QualityCanvas key={quality} quality={quality} zone={zone} />
+  return <QualityCanvas key={quality} quality={quality} zone={zone} classId={classId} />
 }
 
 function QualityCanvas({
   quality,
   zone,
+  classId,
 }: {
   quality: GraphicsQuality
   zone: (typeof ZONES)[string]
+  classId: ClassId
 }) {
   const [dpr, setDpr] = useState(() => maxDpr(quality))
   const shadows = quality !== 'low'
 
   useEffect(() => {
-    preloadModel(playerModelId('knight'))
+    preloadModel(playerModelId(classId))
     for (const id of zone.monsterIds) preloadModel(getMonster(id).modelId)
-  }, [zone])
+  }, [zone, classId])
 
   return (
     <Canvas

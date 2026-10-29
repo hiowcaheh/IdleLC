@@ -8,7 +8,7 @@ export function TargetFrame() {
   const monsterId = useGameStore((s) => s.hud.monsterId)
   const hp = useGameStore((s) => s.hud.monsterHp)
   const maxHp = useGameStore((s) => s.hud.monsterMaxHp)
-  const playerLevel = useGameStore((s) => s.hud.playerLevel)
+  const playerLevel = useGameStore((s) => s.character?.level ?? 1)
 
   const present = phase === 'approach' || phase === 'fighting' || phase === 'victory'
   if (!present) return null
