@@ -84,7 +84,7 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 
 ## Stan prac (aktualizuj na koniec każdej sesji)
 
-**Stan na 2026-10-29 (po południu):**
+**Stan na 2026-10-29 (wieczór):**
 
 - M0 i M1 gotowe. Gra na Pages (https://hiowcaheh.github.io/IdleLC/) działa na danych i modelach LC
   (Knight w zbroi + 13 potworów; reszta potworów na modelu zastępczym). UI po angielsku.
@@ -104,7 +104,13 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 - **Przygotowanie pod Supabase:** `GameService` jest asynchroniczny i oparty na komendach
   (`createCharacter`, `travel`, `reportCombat`…); walka na ekranie to `CombatSession` w przeglądarce,
   a nagrody liczy serwis z wyniku walki (limit zabić wg czasu). Plan tabel, RLS i funkcji: `docs/supabase.md`.
-- Narzędzia dev włączane w Settings (bez `?dev=1`): prędkość ×20, dowolny potwór, poziom, exp, złoto,
+- **Umiejętności (pełne):** 107 umiejętności 6 klas 1:1 z `t_skill`/`t_skilllevel`/`t_magic(level)`, ikony
+  `SkillBtn*.tex` → `public/icons/lc/skills.webp`. SP z zabić (`a_skill_point`, 1/10 000), nauka za SP
+  (`learnSkill`), AUTO (`setSkillAuto`), zapis v5. Walka: mana i regeneracja, rzucanie, cooldowny, buffy,
+  klątwy, ogłuszenie, trucizna, leczenie, pasywne w statystykach; ta sama logika w wyprawach AFK. UI: pasek MP,
+  pasek skilli, buffy, okno Skills. Interpretacja efektów `t_magic` i mnożnik obrażeń są **własne**
+  (`skills.ts`, opis w `docs/balance.md`); przywołania, ruch i wskrzeszenie jeszcze nie działają.
+- Narzędzia dev włączane w Settings (bez `?dev=1`): prędkość ×20, dowolny potwór, poziom, exp, złoto, SP,
   kill/heal, podgląd modeli.
 - Statystyki klas i wzory walki są **własne, tymczasowe** (`classes.ts`, `lcBalance.ts`) — czekają na kod
   serwera LC od właściciela.
@@ -123,11 +129,12 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
    na całości (wszystkie potwory, 5 pozostałych klas w `scripts/lc/classes.mjs`, ikony przedmiotów, mapy;
    konwerter wypisuje nowe shadery do sprawdzenia). Z kodu serwera: statystyki klas i przyrost na poziom,
    wzory obrażeń/trafień, kary exp za różnicę poziomów, szanse ulepszeń, poziomy umiejętności.
-2. Dalej (propozycja dla właściciela): umiejętności z maną i cooldownami (dane są w bazie), M5 (sloty
-   sprzętu, zakładanie, wpływ na statystyki, ulepszanie +0…+15), instalacja jako aplikacja (PWA), M6.
+2. Dalej (propozycja dla właściciela): M5 (sloty sprzętu, zakładanie, wpływ na statystyki, ulepszanie
+   +0…+15), instalacja jako aplikacja (PWA), M6.
 3. Etap 2 (Supabase) według `docs/supabase.md` — dopiero po zgodzie właściciela.
 
 **Otwarte kwestie:** brak siatek broni z `Data\Item\Weapon` (przyszły tylko tekstury i tagi); brak mapy
 z otwartym terenem (`.wld` + `.wtr`); brak w bazie statystyk startowych klas (także many) i wzorów walki
-(w tym jak `a_power` umiejętności przekłada się na obrażenia) — źródło: kod serwera (właściciel go ma).
-Umiejętności **są** w bazie: `t_skilllevel`/`t_magiclevel` (małe litery) — mana, poziomy, moc, czasy.
+(w tym jak `a_power` umiejętności przekłada się na obrażenia, czym są podtypy `t_magic`, jednostki regeneracji)
+— źródło: kod serwera (właściciel go ma). Animacje rzucania skilli z klienta — do podpięcia, gdy będzie
+pełny klient.

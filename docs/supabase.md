@@ -41,6 +41,7 @@ create table characters (
   monster_id text not null,
   kills int not null default 0,
   deaths int not null default 0,
+  sp bigint not null default 0 check (sp >= 0),        -- 1/10 000 punktu, jak na serwerze LC
   created_at timestamptz not null default now(),
   last_played_at timestamptz not null default now(),
   last_report_at timestamptz not null default now()   -- limit zabić liczony od tej chwili
@@ -55,6 +56,16 @@ create table inventory_items (
   item_id int not null,                 -- t_item.a_index
   count int not null check (count > 0),
   primary key (character_id, item_id)   -- stosy; egzemplarze sprzętu z „+N” w M5
+);
+```
+
+```sql
+create table character_skills (
+  character_id uuid not null references characters on delete cascade,
+  skill_id int not null,                -- t_skill.a_index
+  level int not null check (level > 0),
+  auto boolean not null default true,   -- używana sama w walce
+  primary key (character_id, skill_id)
 );
 ```
 
@@ -74,20 +85,22 @@ Odpowiednik w kodzie: `CharacterData` w `src/game/logic/character.ts`, `SaveData
 
 ## Komendy → funkcje serwera
 
-| `GameService`        | Na Supabase                                                 | Co sprawdza serwer                                              |
-| -------------------- | ----------------------------------------------------------- | --------------------------------------------------------------- |
-| `load`               | `select` profilu i postaci                                  | RLS                                                             |
-| `createCharacter`    | funkcja `create_character`                                  | max 4 postacie, imię (wzór, unikalność), klasa                  |
-| `deleteCharacter`    | funkcja `delete_character`                                  | właściciel postaci                                              |
-| `travel`             | funkcja `travel`                                            | strefa i potwór istnieją; od M6 wymagany poziom                 |
-| `reportCombat`       | Edge Function `report-combat`                               | poluje na tego potwora; limit zabić wg czasu serwera; drop      |
-| `startAfk`           | funkcja `start_afk`                                         | postać nie jest już na wyprawie; zapisuje miejsce i czas startu |
-| `claimAfk`           | Edge Function `claim-afk`                                   | czas od `expedition_started_at` wg zegara serwera, max 8 h      |
-| `sellItems`          | funkcja `sell_items`                                        | postać ma te przedmioty; cena z danych gry × stawka sklepu      |
-| `updateSettings`     | `update profiles set settings`                              | RLS                                                             |
-| `resetSave`          | funkcja `delete_all_characters`                             | właściciel                                                      |
-| `setActiveCharacter` | tylko w przeglądarce (+ `last_played_at`, `last_report_at`) | —                                                               |
-| `dev.*`              | brak (albo tylko rola admina)                               | —                                                               |
+| `GameService`        | Na Supabase                                                 | Co sprawdza serwer                                                |
+| -------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------- |
+| `load`               | `select` profilu i postaci                                  | RLS                                                               |
+| `createCharacter`    | funkcja `create_character`                                  | max 4 postacie, imię (wzór, unikalność), klasa                    |
+| `deleteCharacter`    | funkcja `delete_character`                                  | właściciel postaci                                                |
+| `travel`             | funkcja `travel`                                            | strefa i potwór istnieją; od M6 wymagany poziom                   |
+| `reportCombat`       | Edge Function `report-combat`                               | poluje na tego potwora; limit zabić wg czasu serwera; drop        |
+| `startAfk`           | funkcja `start_afk`                                         | postać nie jest już na wyprawie; zapisuje miejsce i czas startu   |
+| `claimAfk`           | Edge Function `claim-afk`                                   | czas od `expedition_started_at` wg zegara serwera, max 8 h        |
+| `sellItems`          | funkcja `sell_items`                                        | postać ma te przedmioty; cena z danych gry × stawka sklepu        |
+| `learnSkill`         | funkcja `learn_skill`                                       | klasa, poziom postaci, wymagane skille, SP; nie w trakcie wyprawy |
+| `setSkillAuto`       | funkcja `set_skill_auto`                                    | skill jest nauczony; nie w trakcie wyprawy                        |
+| `updateSettings`     | `update profiles set settings`                              | RLS                                                               |
+| `resetSave`          | funkcja `delete_all_characters`                             | właściciel                                                        |
+| `setActiveCharacter` | tylko w przeglądarce (+ `last_played_at`, `last_report_at`) | —                                                                 |
+| `dev.*`              | brak (albo tylko rola admina)                               | —                                                                 |
 
 `report-combat` i `claim-afk` to Edge Functions w TypeScripcie, bo korzystają wprost z
 `src/game/logic/rewards.ts`, `afk.ts`, `loot.ts`, `progression.ts` i danych gry — te same pliki co

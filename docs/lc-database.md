@@ -126,6 +126,8 @@ rzut 2,6 s, odnowienie 3 s), opis (`a_client_description_usa`), ikona (`a_client
 Przykład (Knight): Knuckle Spear poz. 1–5: mana 7/8/10/12/14, moc 120/140/175/230/300; Divine Shield
 poz. 1–7: mana 20…190, czas działania 300 s, moc 40…500. Jak dokładnie moc przekłada się na obrażenia
 (procent ataku? dodatek?) — wzór jest w kodzie serwera.
+Do tego czasu gra używa własnej interpretacji (`a_power` % ponad zwykły cios, mapa typów `t_magic`) —
+opis w [`balance.md`](balance.md#umiejętności).
 
 ## Czego brakuje do pełnego 1:1
 

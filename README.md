@@ -28,7 +28,14 @@ Inne komendy:
 ### Postacie i zapis
 
 Konto ma do 4 postaci (6 klas). Wszystko zapisuje się w przeglądarce (`localStorage`, klucz `idlelc.save`):
-poziom, exp, złoto, zabicia, ekwipunek i miejsce polowania. Po powrocie gra otwiera się na ostatniej postaci.
+poziom, exp, złoto, SP, umiejętności, zabicia, ekwipunek i miejsce polowania. Po powrocie gra otwiera się na
+ostatniej postaci.
+
+**Umiejętności:** wszystkie umiejętności klas 1:1 z bazy (koszty many, czasy, poziomy, wymagania). Potwory dają
+punkty umiejętności (SP); w oknie **Skills** (ikona księgi w HUD, zielona liczba = ile można się nauczyć)
+uczy się ich i podnosi poziomy. Nauczone umiejętności działają same w walce (pasek nad panelem polowania:
+odnowienie, AUTO / OFF po dotknięciu), zużywają manę (niebieski pasek) i działają też na wyprawach.
+Umiejętności, których efektów jeszcze nie mamy (przywołania, prędkość ruchu, wskrzeszenie), są szare.
 
 **Wyprawy AFK:** przycisk **Expedition** w panelu polowania wysyła postać na polowanie bez ciebie (do 8 h, także
 przy zamkniętej grze). **Return now** kończy wyprawę i otwiera okno „While you were away…” z zabiciami, expem,
@@ -36,7 +43,8 @@ złotem, awansem i dropem. Drop (1:1 z bazy) trafia do ekwipunku (ikona torby w 
 przedmioty sprzedaje się tam za cenę z bazy × stawkę skupu sklepu (40%). Szczegóły w
 [`docs/balance.md`](docs/balance.md).
 **Settings → Change character** wraca do wyboru postaci, **Reset save** kasuje wszystkie postacie.
-Zapisy ze starszej wersji gry są przenoszone automatycznie (postać „Hero”).
+Zapisy ze starszej wersji gry są przenoszone automatycznie (postać „Hero”; od wersji 5 postacie dostają
+darmowe umiejętności startowe i 0 SP).
 
 ### Narzędzia deweloperskie
 
@@ -45,7 +53,7 @@ Panel (można go zwinąć do małej pigułki „DEV”) ma:
 
 - prędkość gry ×0,5 … ×20 — walka, animacje i regeneracja,
 - wybór dowolnego potwora z dowolnej strefy,
-- poziom postaci (−10 … +10), +25% expa, +1000 złota (zapisywane jak normalny postęp),
+- poziom postaci (−10 … +10), +25% expa, +1000 złota, +10 SP (zapisywane jak normalny postęp),
 - **AFK 1h / AFK 8h** — wyprawa cofnięta w czasie o 1 h / 8 h i od razu odebrana (okno podsumowania i drop),
 - **Kill target** i **Heal**,
 - **Model viewer** — każdy model z manifestu i każdy klip z pliku GLB.

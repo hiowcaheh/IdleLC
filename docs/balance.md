@@ -17,6 +17,10 @@ Wszystkie wzory są w `src/game/logic/balance.ts`, a czasy faz walki w `src/game
 | `attackInterval` | sekundy między kolejnymi atakami               |
 | `critChance`     | szansa na cios krytyczny (0–1), gdy cios trafi |
 | `critMultiplier` | mnożnik obrażeń przy krytyku                   |
+| `maxMp`          | mana na umiejętności (potwory nie mają)        |
+
+Tylko z umiejętności (domyślnie 0): `hit` / `dodge` (punkty procentowe szansy trafienia), `hpRegen` /
+`mpRegen` (HP/MP na 5 s), `castTime` (sekundy dodane do rzucania).
 
 ### Statystyki klasy na poziomie
 
@@ -24,7 +28,9 @@ Wszystkie wzory są w `src/game/logic/balance.ts`, a czasy faz walki w `src/game
 stat(poziom) = round(base + perLevel × (poziom − 1))     dla maxHp, attack, defense
 ```
 
-Pozostałe statystyki (szybkość ataku, krytyk) na razie nie rosną z poziomem.
+Pozostałe statystyki (szybkość ataku, krytyk) na razie nie rosną z poziomem. Mana:
+`maxMp = round(mana.base + mana.perLevel × (poziom − 1))` — Titan 40 (+4), Knight 45 (+4,5), Healer 60 (+7),
+Mage 70 (+8), Rogue 45 (+4,5), Sorcerer 55 (+6) (wartości własne).
 Poziom jest ograniczony do zakresu 1–99 (`MAX_LEVEL`).
 
 | Klasa    | HP  | Atak | Obrona | Interwał | Krytyk   | +HP/poz | +Atak/poz | +Obr/poz |
@@ -39,17 +45,19 @@ Poziom jest ograniczony do zakresu 1–99 (`MAX_LEVEL`).
 ## Trafienie
 
 ```
-szansaTrafienia = clamp(0,92 + 0,02 × (poziomAtakującego − poziomBroniącego), 0,50, 0,98)
+szansaTrafienia = clamp(0,92 + 0,02 × (poziomAtakującego − poziomBroniącego)
+                        + (hitAtakującego − dodgeBroniącego) / 100, 0,50, 0,98)
 ```
 
-Równy poziom: 92%. Każdy poziom przewagi +2%, każdy poziom niedoboru −2%.
+Równy poziom: 92%. Każdy poziom przewagi +2%, każdy poziom niedoboru −2%. `hit` i `dodge` dają umiejętności.
 
 ## Obrażenia
 
 ```
 bazowe   = max(1, atak² / (atak + obrona))
 rozrzut  = losowo z [0,9; 1,1]
-obrażenia = max(1, round(bazowe × rozrzut × (krytyk ? critMultiplier : 1)))
+obrażenia = max(1, round(bazowe × rozrzut × mnożnikSkilla × (krytyk ? critMultiplier : 1)))
+mnożnikSkilla = 1 dla zwykłego ciosu, 1 + a_power / 100 dla umiejętności (np. power 300 → ×4)
 ```
 
 Wzór `atak² / (atak + obrona)` daje malejące zyski z obrony: obrona równa atakowi
@@ -59,8 +67,10 @@ Przykład: Knight (atak 11) vs Rust Golem (obrona 3): `121 / 14 ≈ 8,6` obraże
 
 ## Regeneracja
 
-Poza walką (szukanie potwora, podbieganie, po zwycięstwie) gracz odzyskuje **3% maks. HP na sekundę**.
-W trakcie walki i po śmierci regeneracji nie ma.
+Poza walką (szukanie potwora, podbieganie, po zwycięstwie) gracz odzyskuje **3% maks. HP i 2% maks. MP na
+sekundę**. W trakcie walki: HP nie wraca, MP wraca 0,5% maks. na sekundę. Do tego premie z umiejętności
+(`hpRegen` / `mpRegen` — wartość z bazy na 5 s, nasze odczytanie). Po śmierci postać wstaje z pełnym HP i MP,
+a buffy znikają.
 
 ## Przebieg walki (czasy)
 
@@ -121,10 +131,40 @@ dojdą w M5). Ekwipunek nie ma na razie limitu miejsc.
 - Tempo polowania mierzymy na **prawdziwej symulacji walki** (`measureHuntRate`: 20 minut walki tymi samymi
   wzorami co na ekranie) osobno dla każdego poziomu postaci. Czas wyprawy dzielimy na 10-minutowe odcinki,
   więc awans w trakcie wyprawy wzmacnia postać. Wynik: zabicia (z losowym zaokrągleniem), śmierci, exp,
-  złoto i drop jak za zwykłe zabicia. `AFK_EFFICIENCY = 1` (wartość własna: wyprawa daje tyle co gra przy
+  złoto, SP i drop jak za zwykłe zabicia. Symulacja używa nauczonych umiejętności postaci. `AFK_EFFICIENCY = 1` (wartość własna: wyprawa daje tyle co gra przy
   włączonym ekranie). Okno przed wysłaniem pokazuje oczekiwane zabicia, exp i złoto na godzinę.
 - Jedno zgłoszenie walki obejmuje najwyżej 10 minut (`MAX_REPORT_WINDOW`), więc czas poza grą może zapłacić
   tylko wyprawa.
+
+## Umiejętności
+
+Dane 1:1 z bazy: `t_skill` (klasa, typ, cel, czasy w 1/10 s), `t_skilllevel` (mana, HP, czas trwania,
+wymagany poziom postaci, koszt SP, wymagane inne umiejętności) i `t_magic` + `t_magiclevel` (efekty i ich moc).
+Interpretacja efektów jest **nasza** (`src/game/logic/skills.ts`) do czasu kodu serwera.
+
+- **SP** — za zabicie `t_npc.a_skill_point`, liczone jak na serwerze LC w 1/10 000 punktu (Fox: 1375 →
+  0,1375 SP). Nauka kolejnego poziomu kosztuje `a_learnSP` pełnych punktów i wymaga `a_learnLevel` oraz
+  wymaganych umiejętności. Nowa postać zna 1. poziom darmowych umiejętności z poziomu 1 (np. Knuckle Spear).
+- **Czasy** — rzucanie `max(0,4 s, (a_readyTime + a_fireTime) / 10)`, odnowienie `max(rzucanie, a_reuseTime / 10)`
+  liczone od początku rzucania, efekty trwają `a_durtime / 10` s.
+- **Efekty** (`t_magic` typ/podtyp):
+  - typ 3 — obrażenia: cios × `1 + power/100`;
+  - typ 0 — zmiana statystyki: 0 atak, 1 obrona, 2 atak magiczny → atak, 3 obrona magiczna → obrona, 4 celność,
+    5 unik, 6 szansa krytyka (power/10 %), 7 i 23 szybkość ataku, 8 czas rzucania, 10/11 regeneracja HP/MP,
+    12/13 maks. HP/MP, 14 obrażenia krytyczne (power %), 22 atak %; `a_damagetype` 2 = procent;
+  - typ 2 — stany: 2, 5, 7 ogłuszenie (power > 0 = szansa %), 16 spowolnienie ataku, 10 regeneracja MP,
+    0 trucizna (power obrażeń na sekundę);
+  - typ 4 — 0 leczenie (power HP), 1 przywrócenie many (power MP);
+  - reszta (przywołania, prędkość ruchu, wskrzeszenie, oczyszczanie) — w IdleLC jeszcze nie działa; takie
+    umiejętności (i te, które ich wymagają) są szare i nie da się ich uczyć.
+- **Rodzaje** — umiejętność z obrażeniami = atak; ogłuszenie / trucizna / same ujemne statystyki na cel =
+  klątwa (na potwora); leczenie / mana = odnowa; reszta aktywnych = buff (na siebie); `a_type 3` = pasywna
+  (zawsze działa, wliczona w statystyki).
+- **Auto-walka** — gdy bohater może działać, wybiera spośród gotowych umiejętności z włączonym AUTO, na które
+  ma manę: 1) odnowa, gdy HP < 60% (lub MP < 40% dla many), 2) buff, którego nie ma, 3) klątwa, której nie ma
+  na potworze, 4) najsilniejszy atak; inaczej zwykły cios. Ogłuszony nie atakuje (ogłuszenie przerywa
+  rzucanie). Klątwy znikają z potworem; buffy trwają między walkami.
+- Ten sam kod liczy walkę na ekranie i tempo wypraw AFK, więc umiejętności przyspieszają też wyprawy.
 
 ## Sklep (sprzedaż przedmiotów)
 
