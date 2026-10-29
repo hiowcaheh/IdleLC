@@ -1,0 +1,279 @@
+{
+  "baseUrl": "models/lc/",
+  "models": [
+    {
+      "id": "class-knight",
+      "file": "class-knight.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "ni_idle_01",
+        "run": "ni_run_01",
+        "walk": "ni_walk_01",
+        "attack": [
+          "ni_att_01",
+          "ni_att_02",
+          "ni_att_03",
+          "ni_att_04"
+        ],
+        "hit": "ni_dam",
+        "die": "ni_die_01",
+        "victory": "ni_idle_02"
+      },
+      "attackImpact": 0.3999959945678711,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "fox",
+      "file": "fox.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "m_fo",
+        "walk": "m_fo_walk",
+        "run": "m_fo_run",
+        "attack": [
+          "m_fo_att"
+        ],
+        "hit": "m_fo_da",
+        "die": "m_fo_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.0690023499252297,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "deer",
+      "file": "deer.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "m_de",
+        "walk": "m_de_walk",
+        "run": "m_de_run",
+        "attack": [
+          "m_de_att"
+        ],
+        "hit": "m_de_da",
+        "die": "m_de_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 0.8247016815698721,
+      "tint": {}
+    },
+    {
+      "id": "jaguar",
+      "file": "jaguar.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "jaguar_idle",
+        "walk": "jaguar_walk",
+        "run": "jaguar_run",
+        "attack": [
+          "jaguar_att"
+        ],
+        "hit": "jaguar_da",
+        "die": "jaguar_die"
+      },
+      "attackImpact": 0.5199947834014893,
+      "height": 0.8033082064271981,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "deer_dk",
+      "file": "deer_dk.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "m_de",
+        "walk": "m_de_walk",
+        "run": "m_de_run",
+        "attack": [
+          "m_de_att"
+        ],
+        "hit": "m_de_da",
+        "die": "m_de_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 0.8247016815698721,
+      "tint": {}
+    },
+    {
+      "id": "jaguar_dk",
+      "file": "jaguar_dk.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "jaguar_idle",
+        "walk": "jaguar_walk",
+        "run": "jaguar_run",
+        "attack": [
+          "jaguar_att"
+        ],
+        "hit": "jaguar_da",
+        "die": "jaguar_die"
+      },
+      "attackImpact": 0.5199947834014893,
+      "height": 0.8033082064271981,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "fox01",
+      "file": "fox01.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "m_fo",
+        "walk": "m_fo_walk",
+        "run": "m_fo_run",
+        "attack": [
+          "m_fo_att"
+        ],
+        "hit": "m_fo_da",
+        "die": "m_fo_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.0690023499252297,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "fox_sand",
+      "file": "fox_sand.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "m_fo",
+        "walk": "m_fo_walk",
+        "run": "m_fo_run",
+        "attack": [
+          "m_fo_att"
+        ],
+        "hit": "m_fo_da",
+        "die": "m_fo_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.0690023499252297,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "deer_sand",
+      "file": "deer_sand.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "m_de",
+        "walk": "m_de_walk",
+        "run": "m_de_run",
+        "attack": [
+          "m_de_att"
+        ],
+        "hit": "m_de_da",
+        "die": "m_de_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 0.8247016815698721,
+      "tint": {}
+    },
+    {
+      "id": "jaguar_sand",
+      "file": "jaguar_sand.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "jaguar_idle",
+        "walk": "jaguar_walk",
+        "run": "jaguar_run",
+        "attack": [
+          "jaguar_att"
+        ],
+        "hit": "jaguar_da",
+        "die": "jaguar_die"
+      },
+      "attackImpact": 0.5199947834014893,
+      "height": 0.8033082064271981,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "sphinx_ft",
+      "file": "sphinx_ft.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "sphinx_ft_idle",
+        "idle2": "sphinx_ft_idle2",
+        "walk": "sphinx_ft_walk",
+        "run": "sphinx_ft_run",
+        "attack": [
+          "sphinx_ft_att01",
+          "sphinx_ft_att02"
+        ],
+        "hit": "sphinx_ft_dam",
+        "die": "sphinx_ft_die"
+      },
+      "attackImpact": 0.37332959175109864,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "sphinx_sp",
+      "file": "sphinx_sp.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "sphinx_sp_idle",
+        "idle2": "sphinx_sp_idle2",
+        "walk": "sphinx_sp_walk",
+        "run": "sphinx_sp_run",
+        "attack": [
+          "sphinx_sp_att01",
+          "sphinx_sp_att02"
+        ],
+        "hit": "sphinx_sp_dam",
+        "die": "sphinx_sp_die"
+      },
+      "attackImpact": 0.453328800201416,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "whitedeer",
+      "file": "whitedeer.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "whitedeer_idle",
+        "walk": "whitedeer_walk",
+        "run": "whitedeer_run",
+        "attack": [
+          "whitedeer_att01"
+        ],
+        "hit": "whitedeer_dam",
+        "die": "whitedeer_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.6904202398754844,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "blackdeer",
+      "file": "blackdeer.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "blackdeer_idle",
+        "walk": "blackdeer_walk",
+        "run": "blackdeer_run",
+        "attack": [
+          "blackdeer_att01"
+        ],
+        "hit": "blackdeer_dam",
+        "die": "blackdeer_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.6904202398754844,
+      "radius": 1,
+      "tint": {}
+    }
+  ]
+}
