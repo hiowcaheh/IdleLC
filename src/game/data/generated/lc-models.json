@@ -172,6 +172,82 @@
       "tint": {}
     },
     {
+      "id": "sball",
+      "file": "sball.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "idle01",
+        "walk": "move",
+        "run": "move",
+        "attack": [
+          "idle01"
+        ],
+        "hit": "move",
+        "die": "idle01"
+      },
+      "attackImpact": 0.3599963903427124,
+      "height": 1.8974578081606495,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "wolf",
+      "file": "wolf.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "m_wolf_stand",
+        "walk": "m_wolf_walk",
+        "run": "m_wolf_run",
+        "attack": [
+          "m_wolf_att"
+        ],
+        "hit": "m_wolf_da",
+        "die": "m_wolf_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.1170995208594012,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "wolf01",
+      "file": "wolf01.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "m_wolf_stand",
+        "walk": "m_wolf_walk",
+        "run": "m_wolf_run",
+        "attack": [
+          "m_wolf_att"
+        ],
+        "hit": "m_wolf_da",
+        "die": "m_wolf_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.1022064882351146,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "wolf02",
+      "file": "wolf02.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "m_wolf_stand",
+        "walk": "m_wolf_walk",
+        "run": "m_wolf_run",
+        "attack": [
+          "m_wolf_att"
+        ],
+        "hit": "m_wolf_da",
+        "die": "m_wolf_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.0885341959898678,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "jaguar",
       "file": "jaguar.glb",
       "scale": 1,
@@ -210,6 +286,144 @@
       "tint": {}
     },
     {
+      "id": "yeti",
+      "file": "yeti.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "m_yeti",
+        "walk": "m_yeti_walk_01",
+        "run": "m_yeti_run_01",
+        "attack": [
+          "m_yeti_att_01",
+          "m_yeti_att_02"
+        ],
+        "hit": "m_yeti_da_01",
+        "die": "m_yeti_die_01"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 0.9691152684102908,
+      "tint": {}
+    },
+    {
+      "id": "wolfman",
+      "file": "wolfman.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "anubisstop",
+        "walk": "anubiswalk",
+        "run": "anubiswalk",
+        "attack": [
+          "anubisattack"
+        ],
+        "hit": "anubisdamage",
+        "die": "anubis"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 0.7808771019623402,
+      "tint": {}
+    },
+    {
+      "id": "treeghost",
+      "file": "treeghost.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "Trant_idle",
+        "idle2": "Trant_idle1",
+        "walk": "Trant_walk",
+        "run": "Trant_walk",
+        "attack": [
+          "Trant_att",
+          "Trant_att1"
+        ],
+        "hit": "Trant_damage",
+        "die": "Trant_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "rhino",
+      "file": "rhino.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "m_bear",
+        "walk": "m_bear_walk_01",
+        "run": "m_bear_walk_01",
+        "attack": [
+          "m_bear_att_01"
+        ],
+        "hit": "m_bear_da_01",
+        "die": "m_bear_die_01"
+      },
+      "attackImpact": 0.6,
+      "height": 1.9262672811059909,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "wyvernhigh",
+      "file": "wyvernhigh.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "m_wm02",
+        "walk": "m_wm02",
+        "run": "m_wm02",
+        "attack": [
+          "m_wm02_att01"
+        ],
+        "hit": "m_wm02_da",
+        "die": "m_wm02_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "treeghost_red",
+      "file": "treeghost_red.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "Trant_idle",
+        "idle2": "Trant_idle1",
+        "walk": "Trant_walk",
+        "run": "Trant_walk",
+        "attack": [
+          "Trant_att",
+          "Trant_att1"
+        ],
+        "hit": "Trant_damage",
+        "die": "Trant_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "halloween_mon",
+      "file": "halloween_mon.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "halloween_mon_idle",
+        "walk": "halloween_mon_walk",
+        "run": "halloween_mon_run",
+        "attack": [
+          "halloween_mon_att01"
+        ],
+        "hit": "halloween_mon_dam",
+        "die": "halloween_mon_die"
+      },
+      "attackImpact": 0.37332959175109864,
+      "height": 1.6208380382702108,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "jaguar_dk",
       "file": "jaguar_dk.glb",
       "scale": 1,
@@ -229,6 +443,26 @@
       "tint": {}
     },
     {
+      "id": "yeti_red",
+      "file": "yeti_red.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "m_yeti",
+        "walk": "m_yeti_walk_01",
+        "run": "m_yeti_run_01",
+        "attack": [
+          "m_yeti_att_01",
+          "m_yeti_att_02"
+        ],
+        "hit": "m_yeti_da_01",
+        "die": "m_yeti_die_01"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 0.9691152684102908,
+      "tint": {}
+    },
+    {
       "id": "fox01",
       "file": "fox01.glb",
       "scale": 1,
@@ -244,6 +478,47 @@
       },
       "attackImpact": 0.6,
       "height": 1.0690023499252297,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "anubis",
+      "file": "anubis.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "anubis_idle01",
+        "idle2": "anubis_idle02",
+        "walk": "anubis_walk",
+        "run": "anubis_run",
+        "attack": [
+          "anubis_att01",
+          "anubis_att02"
+        ],
+        "hit": "anubis_dam",
+        "die": "anubis_die"
+      },
+      "attackImpact": 0.5999939918518067,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "balrog",
+      "file": "balrog.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "idle",
+        "walk": "balrok",
+        "run": "balrok",
+        "attack": [
+          "attack2",
+          "attackl"
+        ],
+        "hit": "idle",
+        "die": "d"
+      },
+      "attackImpact": 0.5519999980926514,
+      "height": 1.7228919339579456,
       "radius": 1,
       "tint": {}
     },
