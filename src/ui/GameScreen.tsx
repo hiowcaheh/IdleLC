@@ -16,6 +16,7 @@ import { TargetFrame } from './hud/TargetFrame.tsx'
 import { InventoryPanel } from './items/InventoryPanel.tsx'
 import { LoadingOverlay } from './LoadingOverlay.tsx'
 import { SettingsPanel } from './SettingsPanel.tsx'
+import { CharacterPanel } from './gear/CharacterPanel.tsx'
 import { SkillBar } from './skills/SkillBar.tsx'
 import { SkillsPanel } from './skills/SkillsPanel.tsx'
 
@@ -23,6 +24,7 @@ export function GameScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [inventoryOpen, setInventoryOpen] = useState(false)
   const [skillsOpen, setSkillsOpen] = useState(false)
+  const [characterOpen, setCharacterOpen] = useState(false)
   const devTools = useDevTools((s) => s.enabled)
   const character = useGameStore((s) => s.character)
   const expedition = character?.expedition ?? null
@@ -75,6 +77,16 @@ export function GameScreen() {
               </svg>
               {learnable > 0 && <span className="icon-button__badge">{learnable}</span>}
             </button>
+            <button
+              type="button"
+              className="icon-button"
+              onClick={() => setCharacterOpen(true)}
+              aria-label="Character and gear"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 11 C6 6.5 8.5 4 12 4 C15.5 4 18 6.5 18 11 V15 H14.5 V12 H9.5 V15 H6 Z M8 15 V20 M16 15 V20 M12 12 V20" />
+              </svg>
+            </button>
           </div>
         </div>
         <div className="hud__center">
@@ -102,6 +114,7 @@ export function GameScreen() {
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
       {inventoryOpen && <InventoryPanel onClose={() => setInventoryOpen(false)} />}
       {skillsOpen && <SkillsPanel onClose={() => setSkillsOpen(false)} />}
+      {characterOpen && <CharacterPanel onClose={() => setCharacterOpen(false)} />}
       <AfkSummary />
     </div>
   )

@@ -2149,3 +2149,123 @@ a.button {
   opacity: 0.5;
   cursor: default;
 }
+
+/* ---------- Gear and shop ---------- */
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 0 0 8px;
+}
+
+.hero-stats > div {
+  padding: 6px 8px;
+  border-radius: 5px;
+  background: rgba(14, 10, 7, 0.65);
+  box-shadow: inset 0 0 0 1px rgba(138, 106, 58, 0.35);
+}
+
+.hero-stats dt {
+  font-size: 12px;
+  color: var(--parchment-dim);
+}
+
+.hero-stats dd {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.gear-slot__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gilt);
+}
+
+.gear-slot.is-empty .item-row__name {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--parchment-dim);
+}
+
+.gear-slot .item-row__main:disabled {
+  cursor: default;
+}
+
+.inventory__heading {
+  margin: 4px 0 6px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--gilt);
+}
+
+.inventory__heading + .item-list {
+  margin-bottom: 12px;
+}
+
+.inventory__keep-note {
+  margin-top: 6px;
+  text-align: center;
+}
+
+.hunt__shop {
+  min-height: 30px;
+  padding: 2px 12px;
+  border-radius: 15px;
+  border: 1px solid var(--bronze);
+  background: linear-gradient(180deg, #3a2b1f, #1f1710);
+  color: var(--parchment);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hunt__shop + .hunt__expedition {
+  margin-left: 0;
+}
+
+.hunt__header .hunt__shop {
+  margin-left: auto;
+}
+
+.shop__gold {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  margin-right: 12px;
+  font-weight: 800;
+  color: var(--gilt-bright);
+  font-variant-numeric: tabular-nums;
+}
+
+.shop__filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: var(--parchment-dim);
+}
+
+.shop__price {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  font-weight: 800;
+  color: var(--gilt-bright);
+  font-variant-numeric: tabular-nums;
+}
+
+.shop__price.is-short {
+  color: #c98a7a;
+}
+
+.shop__locked {
+  color: #e9937a;
+}

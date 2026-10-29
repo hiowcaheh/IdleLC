@@ -3,6 +3,7 @@ import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { ExpeditionDialog } from '../expedition/ExpeditionDialog.tsx'
+import { ShopPanel } from '../gear/ShopPanel.tsx'
 import { levelTone } from './levelColor.ts'
 
 /** Zone name, the monsters you can hunt here, and the kill count. */
@@ -16,6 +17,7 @@ export function HuntPanel() {
   const zone = ZONES[zoneId]
   const list = useRef<HTMLDivElement>(null)
   const [expeditionOpen, setExpeditionOpen] = useState(false)
+  const [shopOpen, setShopOpen] = useState(false)
 
   // keep the hunted monster visible when it was picked elsewhere (dev tools, zone change)
   useEffect(() => {
@@ -33,6 +35,9 @@ export function HuntPanel() {
         <p className="hunt__kills">
           Kills: <strong>{kills}</strong>
         </p>
+        <button type="button" className="hunt__shop" onClick={() => setShopOpen(true)}>
+          Shop
+        </button>
         <button type="button" className="hunt__expedition" onClick={() => setExpeditionOpen(true)}>
           Expedition
         </button>
@@ -58,6 +63,7 @@ export function HuntPanel() {
           )
         })}
       </div>
+      {shopOpen && <ShopPanel onClose={() => setShopOpen(false)} />}
       {expeditionOpen && character && (
         <ExpeditionDialog character={character} onClose={() => setExpeditionOpen(false)} />
       )}
