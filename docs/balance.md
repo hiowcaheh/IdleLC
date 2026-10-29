@@ -111,15 +111,17 @@ w kodzie serwera LC (tam mogą być dodatkowe zasady: mnożnik dropu serwera, r�
 Przedmioty trafiają do ekwipunku jako stosy (jeden stos na rodzaj; osobne egzemplarze sprzętu z ulepszeniem
 dojdą w M5). Ekwipunek nie ma na razie limitu miejsc.
 
-## AFK (czas poza grą)
+## AFK — wyprawy
 
-- Czas od ostatniej aktywności postaci (`lastPlayedAt` — ostatnie zgłoszenie walki) liczy się jako polowanie
-  AFK na ostatnio wybranego potwora, **maksymalnie 8 h**. Krótsze niż 1 min przerwy się nie liczą.
-- Odbiór: przy wejściu do gry postacią i przy powrocie do karty/aplikacji (np. po odblokowaniu telefonu).
+- Gracz wysyła postać na **wyprawę** (przycisk „Expedition” w panelu polowania). Postać poluje na wybranego
+  potwora, a walka na ekranie staje. Start zapisuje czas (`expedition.startedAt`); wyprawa przetrwa
+  zamknięcie gry.
+- Powrót („Return now”) płaci `min(teraz − start, 8 h)`; wyprawa krótsza niż 1 min nie daje nic. Bez wyprawy
+  czas poza grą nie daje nagród (aktywna gra albo wyprawa — jak w opisie M4).
 - Tempo polowania mierzymy na **prawdziwej symulacji walki** (`measureHuntRate`: 20 minut walki tymi samymi
-  wzorami co na ekranie) osobno dla każdego poziomu postaci; czas AFK dzielimy na 10-minutowe odcinki,
-  więc awans w trakcie AFK wzmacnia postać. Wynik: zabicia (z losowym zaokrągleniem), śmierci, exp,
-  złoto i drop jak za zwykłe zabicia. `AFK_EFFICIENCY = 1` (wartość własna: AFK daje tyle co gra przy
-  włączonym ekranie).
-- Jedno zgłoszenie walki obejmuje najwyżej 10 minut (`MAX_REPORT_WINDOW`), więc za czas poza grą płaci
-  tylko symulacja AFK.
+  wzorami co na ekranie) osobno dla każdego poziomu postaci. Czas wyprawy dzielimy na 10-minutowe odcinki,
+  więc awans w trakcie wyprawy wzmacnia postać. Wynik: zabicia (z losowym zaokrągleniem), śmierci, exp,
+  złoto i drop jak za zwykłe zabicia. `AFK_EFFICIENCY = 1` (wartość własna: wyprawa daje tyle co gra przy
+  włączonym ekranie). Okno przed wysłaniem pokazuje oczekiwane zabicia, exp i złoto na godzinę.
+- Jedno zgłoszenie walki obejmuje najwyżej 10 minut (`MAX_REPORT_WINDOW`), więc czas poza grą może zapłacić
+  tylko wyprawa.

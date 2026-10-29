@@ -95,8 +95,9 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   i exp z `t_exp` 1:1, złoto i exp za potwory 1:1 (`a_exp`, `a_prize`), zabicia, miejsce polowania.
   Widoczny awans: pasek EXP na dole (x / y, %), baner i efekt „LEVEL UP”.
 - **Drop i ekwipunek:** drop 1:1 z tabel `t_npc` (każdy wpis losowany osobno), ekwipunek jako stosy (zapis v3).
-- **M4 (AFK) w dużej części:** czas poza grą (do 8 h) liczony z prawdziwej symulacji walki, okno
-  „While you were away…”; dev: AFK 1h/8h. Brakuje jeszcze jawnego wysyłania na wyprawę (jeśli właściciel chce).
+- **M4 (AFK) gotowe:** wyprawy (przycisk „Expedition”, `startAfk`/`claimAfk`, zapis v4) do 8 h; nagrody
+  z prawdziwej symulacji walki, okno „While you were away…”; dev: AFK 1h/8h. Bez wyprawy czas poza grą
+  nie daje nagród (decyzja właściciela: „wyślij na wyprawę”).
 - **Przygotowanie pod Supabase:** `GameService` jest asynchroniczny i oparty na komendach
   (`createCharacter`, `travel`, `reportCombat`…); walka na ekranie to `CombatSession` w przeglądarce,
   a nagrody liczy serwis z wyniku walki (limit zabić wg czasu). Plan tabel, RLS i funkcji: `docs/supabase.md`.
@@ -124,5 +125,6 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
 3. Etap 2 (Supabase) według `docs/supabase.md` — dopiero po zgodzie właściciela.
 
 **Otwarte kwestie:** brak siatek broni z `Data\Item\Weapon` (przyszły tylko tekstury i tagi); brak mapy
-z otwartym terenem (`.wld` + `.wtr`); brak w bazie statystyk startowych klas, poziomów umiejętności
-(`t_skillLevel` pusta) i wzorów walki — źródło: kod serwera, jeśli właściciel ma.
+z otwartym terenem (`.wld` + `.wtr`); brak w bazie statystyk startowych klas (także many) i wzorów walki
+(w tym jak `a_power` umiejętności przekłada się na obrażenia) — źródło: kod serwera (właściciel go ma).
+Umiejętności **są** w bazie: `t_skilllevel`/`t_magiclevel` (małe litery) — mana, poziomy, moc, czasy.

@@ -58,7 +58,8 @@ create table inventory_items (
 );
 ```
 
-AFK nie potrzebuje osobnej tabeli: liczy się od `characters.last_report_at` (czas serwera). Później: ranking
+Wyprawa AFK to trzy kolumny w `characters`: `expedition_zone_id`, `expedition_monster_id`,
+`expedition_started_at` (null = brak wyprawy); w trakcie wyprawy `report-combat` i `travel` odmawiają. Później: ranking
 jako widok.
 
 Odpowiednik w kodzie: `CharacterData` w `src/game/logic/character.ts`, `SaveData.settings` w
@@ -73,18 +74,19 @@ Odpowiednik w kodzie: `CharacterData` w `src/game/logic/character.ts`, `SaveData
 
 ## Komendy → funkcje serwera
 
-| `GameService`        | Na Supabase                                                 | Co sprawdza serwer                                         |
-| -------------------- | ----------------------------------------------------------- | ---------------------------------------------------------- |
-| `load`               | `select` profilu i postaci                                  | RLS                                                        |
-| `createCharacter`    | funkcja `create_character`                                  | max 4 postacie, imię (wzór, unikalność), klasa             |
-| `deleteCharacter`    | funkcja `delete_character`                                  | właściciel postaci                                         |
-| `travel`             | funkcja `travel`                                            | strefa i potwór istnieją; od M6 wymagany poziom            |
-| `reportCombat`       | Edge Function `report-combat`                               | poluje na tego potwora; limit zabić wg czasu serwera; drop |
-| `claimAfk`           | Edge Function `claim-afk`                                   | czas od `last_report_at` wg zegara serwera, max 8 h        |
-| `updateSettings`     | `update profiles set settings`                              | RLS                                                        |
-| `resetSave`          | funkcja `delete_all_characters`                             | właściciel                                                 |
-| `setActiveCharacter` | tylko w przeglądarce (+ `last_played_at`, `last_report_at`) | —                                                          |
-| `dev.*`              | brak (albo tylko rola admina)                               | —                                                          |
+| `GameService`        | Na Supabase                                                 | Co sprawdza serwer                                              |
+| -------------------- | ----------------------------------------------------------- | --------------------------------------------------------------- |
+| `load`               | `select` profilu i postaci                                  | RLS                                                             |
+| `createCharacter`    | funkcja `create_character`                                  | max 4 postacie, imię (wzór, unikalność), klasa                  |
+| `deleteCharacter`    | funkcja `delete_character`                                  | właściciel postaci                                              |
+| `travel`             | funkcja `travel`                                            | strefa i potwór istnieją; od M6 wymagany poziom                 |
+| `reportCombat`       | Edge Function `report-combat`                               | poluje na tego potwora; limit zabić wg czasu serwera; drop      |
+| `startAfk`           | funkcja `start_afk`                                         | postać nie jest już na wyprawie; zapisuje miejsce i czas startu |
+| `claimAfk`           | Edge Function `claim-afk`                                   | czas od `expedition_started_at` wg zegara serwera, max 8 h      |
+| `updateSettings`     | `update profiles set settings`                              | RLS                                                             |
+| `resetSave`          | funkcja `delete_all_characters`                             | właściciel                                                      |
+| `setActiveCharacter` | tylko w przeglądarce (+ `last_played_at`, `last_report_at`) | —                                                               |
+| `dev.*`              | brak (albo tylko rola admina)                               | —                                                               |
 
 `report-combat` i `claim-afk` to Edge Functions w TypeScripcie, bo korzystają wprost z
 `src/game/logic/rewards.ts`, `afk.ts`, `loot.ts`, `progression.ts` i danych gry — te same pliki co

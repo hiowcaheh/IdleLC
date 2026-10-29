@@ -108,15 +108,29 @@ Podtypy broni (przypisanie do klas wg nazw i `a_job_flag`, część do potwierdz
 
 ## Umiejętności — `t_skill` (1 849), `t_magic`
 
-`a_job, a_job2, a_name_usa, a_maxLevel`, zasięg, czasy (`a_readyTime, a_fireTime, a_reuseTime`), ikona
-(`a_client_icon_texid/row/col` → `SkillBtn{id}.tex`). **Tabele poziomów `t_skillLevel` i `t_magicLevel`
-są w zrzucie puste** — moc i koszt umiejętności na poziomach trzeba wziąć z innego źródła.
+`a_job, a_job2, a_name_usa, a_maxLevel`, `a_type` (0 aktywna na cel, 2 wzmocnienie, 3 pasywna), zasięg
+(`a_fireRange`), czasy w dziesiątych sekundy (`a_readyTime, a_fireTime, a_reuseTime` — np. Knuckle Spear:
+rzut 2,6 s, odnowienie 3 s), opis (`a_client_description_usa`), ikona (`a_client_icon_texid/row/col` →
+`SkillBtn{id}.tex`).
+
+**Poziomy umiejętności są w zrzucie** — tabele mają nazwy małymi literami: `t_skilllevel` (5 926) i
+`t_magiclevel` (5 960). (Wcześniej błędnie zapisałem, że są puste.)
+
+| Tabela         | Kolumny                                                                                                                                                                                                          |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `t_skilllevel` | `a_index, a_level`, **`a_needMP`** (mana), `a_needHP`, `a_durtime` (czas działania), `a_learnLevel` (wymagany poziom postaci), `a_learnSP` (punkty umiejętności), `a_magicIndex1…3` + `a_magicLevel1…3` (efekty) |
+| `t_magic`      | `a_index`, typ efektu (`a_type, a_subtype, a_damagetype, a_hittype, a_attribute`)                                                                                                                                |
+| `t_magiclevel` | `a_index, a_level`, **`a_power`** (moc), `a_hitrate`                                                                                                                                                             |
+
+Przykład (Knight): Knuckle Spear poz. 1–5: mana 7/8/10/12/14, moc 120/140/175/230/300; Divine Shield
+poz. 1–7: mana 20…190, czas działania 300 s, moc 40…500. Jak dokładnie moc przekłada się na obrażenia
+(procent ataku? dodatek?) — wzór jest w kodzie serwera.
 
 ## Czego brakuje do pełnego 1:1
 
-- statystyki startowe klas i przyrost na poziom,
-- poziomy umiejętności (`t_skillLevel`, `t_magicLevel`),
-- wzory: obrażenia, trafienie/unik, szanse ulepszeń +1…+15 i bonus za każdy „+”.
+- statystyki startowe klas i przyrost na poziom (w tym mana),
+- wzory: obrażenia (także z umiejętności: jak działa `a_power`), trafienie/unik, szanse ulepszeń +1…+15
+  i bonus za każdy „+”.
 
 Źródło: kod serwera albo pełniejszy zrzut — jeśli właściciel go dostarczy. Inaczej proponujemy własne
 wartości i oznaczamy je jako własne.
