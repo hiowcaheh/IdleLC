@@ -60,6 +60,18 @@ create table inventory_items (
 ```
 
 ```sql
+-- noszony sprzęt i ulepszone sztuki w torbie (zwykłe sztuki +0 leżą w inventory_items jako stosy)
+create table gear_pieces (
+  id uuid primary key,
+  character_id uuid not null references characters on delete cascade,
+  item_id int not null,                 -- t_item.a_index
+  plus int not null default 0 check (plus between 0 and 15),
+  slot text check (slot in ('helmet','armor','weapon','pants','shield','gloves','boots')),  -- null = w torbie
+  unique (character_id, slot)
+);
+```
+
+```sql
 create table character_skills (
   character_id uuid not null references characters on delete cascade,
   skill_id int not null,                -- t_skill.a_index
@@ -97,6 +109,11 @@ Odpowiednik w kodzie: `CharacterData` w `src/game/logic/character.ts`, `SaveData
 | `sellItems`          | funkcja `sell_items`                                        | postać ma te przedmioty; cena z danych gry × stawka sklepu        |
 | `learnSkill`         | funkcja `learn_skill`                                       | klasa, poziom postaci, wymagane skille, SP; nie w trakcie wyprawy |
 | `setSkillAuto`       | funkcja `set_skill_auto`                                    | skill jest nauczony; nie w trakcie wyprawy                        |
+| `equipItem`          | funkcja `equip_item`                                        | postać ma przedmiot; klasa i poziom; nie w trakcie wyprawy        |
+| `unequipItem`        | funkcja `unequip_item`                                      | slot nie jest pusty                                               |
+| `upgradeItem`        | Edge Function `upgrade-item`                                | kamień w torbie; **szansę losuje serwer**                         |
+| `buyItem`            | funkcja `buy_item`                                          | przedmiot jest w sklepie strefy postaci; złoto                    |
+| `sellGear`           | funkcja `sell_gear`                                         | postać ma tę sztukę                                               |
 | `updateSettings`     | `update profiles set settings`                              | RLS                                                               |
 | `resetSave`          | funkcja `delete_all_characters`                             | właściciel                                                        |
 | `setActiveCharacter` | tylko w przeglądarce (+ `last_played_at`, `last_report_at`) | —                                                                 |

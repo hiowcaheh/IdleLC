@@ -37,6 +37,12 @@ uczy się ich i podnosi poziomy. Nauczone umiejętności działają same w walce
 odnowienie, AUTO / OFF po dotknięciu), zużywają manę (niebieski pasek) i działają też na wyprawach.
 Umiejętności, których efektów jeszcze nie mamy (przywołania, prędkość ruchu, wskrzeszenie), są szare.
 
+**Ekwipunek:** postać zaczyna w darmowym zestawie swojej klasy z bazy. **Shop** (panel polowania) sprzedaje
+broń, zbroje i kamienie ze sklepów NPC danej strefy (ceny 1:1). Sprzęt zakłada się z torby (podgląd zmiany ataku
+i obrony), a w oknie **Character** (ikona hełmu) widać statystyki i sloty, można zdjąć sprzęt i ulepszać go
++0…+15 kamieniami (Smelting Stone z dropu, Heaven Stone ze sklepu; porażka od +3 zabiera jeden „+”). Lepszy
+sprzęt = szybsze polowanie, także na wyprawach. „Sell all loot” w torbie zostawia sprzęt twojej klasy.
+
 **Wyprawy AFK:** przycisk **Expedition** w panelu polowania wysyła postać na polowanie bez ciebie (do 8 h, także
 przy zamkniętej grze). **Return now** kończy wyprawę i otwiera okno „While you were away…” z zabiciami, expem,
 złotem, awansem i dropem. Drop (1:1 z bazy) trafia do ekwipunku (ikona torby w HUD) z ikonami z klienta;
@@ -44,7 +50,7 @@ przedmioty sprzedaje się tam za cenę z bazy × stawkę skupu sklepu (40%). Szc
 [`docs/balance.md`](docs/balance.md).
 **Settings → Change character** wraca do wyboru postaci, **Reset save** kasuje wszystkie postacie.
 Zapisy ze starszej wersji gry są przenoszone automatycznie (postać „Hero”; od wersji 5 postacie dostają
-darmowe umiejętności startowe i 0 SP).
+darmowe umiejętności startowe i 0 SP, od wersji 6 — darmowy zestaw startowy sprzętu).
 
 ### Narzędzia deweloperskie
 

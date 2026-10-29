@@ -169,6 +169,38 @@ Interpretacja efektów jest **nasza** (`src/game/logic/skills.ts`) do czasu kodu
   rzucanie). Klątwy znikają z potworem; buffy trwają między walkami.
 - Ten sam kod liczy walkę na ekranie i tempo wypraw AFK, więc umiejętności przyspieszają też wyprawy.
 
+## Ekwipunek (M5)
+
+Dane 1:1 z `t_item`: slot (`a_wearing` 0 hełm, 1 zbroja, 2 broń, 3 spodnie, 4 tarcza — tylko Knight, 5 rękawice,
+6 buty), klasy (`a_job_flag`), wymagany poziom (`a_level`), broń: atak `a_num_0`, atak magiczny `a_num_1`,
+**szybkość ataku `a_num_2 / 10` s** (miecz 1,0 s, topór 1,6 s — zastępuje interwał klasy); zbroja: obrona
+`a_num_0`, obrona magiczna `a_num_1`. Nowa postać nosi **darmowy zestaw startowy klasy** z bazy (cena 0, poziom 1,
+np. Knight: Lancer Sword, Squire Helm/Shirt/Pants/Gloves/Boots, Scale Shield).
+
+**Jak sprzęt wpływa na walkę (własne, tymczasowe — do czasu wzorów z kodu serwera).** Bazowe statystyki postaci
+są skalowane do potworów (patrz „Tryb LC”), więc liczby ze sprzętu LC nie dodają się wprost. Sprzęt mierzymy
+względem **typowego sprzętu klasy na danym poziomie** (`gearReference`, liczone przez `import-lc-db`: dla każdego
+slotu mediana mocy najnowszego progu dostępnych przedmiotów — drop, sklepy, zestaw startowy — z ich główną linią
+cenową, bez drogich zestawów premium):
+
+```
+moc       = (atak + atak mag.) albo (obrona + obrona mag.) × (1 + 0,1 × plus)
+atak      = atakPoziomu  × (0,6 + 0,4 × mocBroni / typowaBroń)
+obrona    = obronaPoziomu × (0,5 + 0,5 × mocZbroi / typowaZbroja)     (mocZbroi = suma slotów poza bronią)
+```
+
+Typowy sprzęt = dotychczasowy balans; bez broni zostaje 60% ataku, bez zbroi 50% obrony; lepszy albo
+ulepszony sprzęt daje więcej (np. broń +5 = 150% typowej → 120% ataku).
+
+**Ulepszanie +0…+15** (okno Character): zużywa jeden kamień — najpierw Smelting Stone (`t_item` 84), potem
+Heaven Stone (85, sprzedawany w Juno za 1 000). Szansa z +N (własne): 95, 90, 85, 75, 65, 55, 50, 45, 40, 35,
+30, 25, 20, 15, 10%. Porażka od +3 zabiera jeden „+”, niżej tylko kamień. Każdy „+” = +10% mocy przedmiotu.
+Smelting Stone w LC wypada z potworów według zasady serwera, której nie ma w bazie — u nas **1% na zabicie
+każdego potwora** (`GENERAL_DROPS`, własne). Poziom kamienia z LC („do przedmiotów tego samego poziomu”) pomijamy.
+
+**Sklep (kupno):** każda strefa ma sklepy NPC z bazy (`t_shop.a_zone_num` + `t_shopitem`): broń i zbroje klas
+oraz kamienie. Cena = `a_price × a_buy_rate %` (100%). Kupuje się w strefie, w której postać poluje.
+
 ## Sklep (sprzedaż przedmiotów)
 
 Sklep płaci `t_item.a_price × t_shop.a_sell_rate %`, w dół do pełnej sztuki złota. We wszystkich 65 sklepach

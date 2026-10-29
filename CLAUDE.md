@@ -84,7 +84,7 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 
 ## Stan prac (aktualizuj na koniec każdej sesji)
 
-**Stan na 2026-10-29 (wieczór):**
+**Stan na 2026-10-29 (noc):**
 
 - M0 i M1 gotowe. Gra na Pages (https://hiowcaheh.github.io/IdleLC/) działa na danych i modelach LC
   (Knight w zbroi + 13 potworów; reszta potworów na modelu zastępczym). UI po angielsku.
@@ -110,6 +110,14 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   klątwy, ogłuszenie, trucizna, leczenie, pasywne w statystykach; ta sama logika w wyprawach AFK. UI: pasek MP,
   pasek skilli, buffy, okno Skills. Interpretacja efektów `t_magic` i mnożnik obrażeń są **własne**
   (`skills.ts`, opis w `docs/balance.md`); przywołania, ruch i wskrzeszenie jeszcze nie działają.
+- **M5 (ekwipunek) — bez wyglądu na postaci:** sloty, klasy, poziomy i statystyki 1:1 z `t_item`, szybkość
+  ataku z broni (`a_num_2`), darmowy zestaw startowy klasy, sklepy stref 1:1 (`t_shopitem`, kupno ×100%),
+  zakładanie z torby z porównaniem, okno Character, ulepszanie +0…+15 kamieniami (Smelting Stone 1% z każdego
+  potwora — własne; Heaven Stone ze sklepu Juno), zapis v6. Wpływ sprzętu na walkę, szanse ulepszeń i bonus
+  za „+” są **własne** (`equipment.ts`, `docs/balance.md`): sprzęt mierzony względem typowego dla poziomu
+  (`gearReference` z importu). Wygląd sprzętu na modelu — gdy będą siatki broni/zbroi z klienta.
+- Skille trafiają po `a_readyTime` + 0,4 s (`a_fireTime` to animacja po wystrzale — bez blokady, dopóki nie ma
+  animacji skilli z klienta: `TIMINGS.skillAnimationLock = 0`).
 - Narzędzia dev włączane w Settings (bez `?dev=1`): prędkość ×20, dowolny potwór, poziom, exp, złoto, SP,
   kill/heal, podgląd modeli.
 - Statystyki klas i wzory walki są **własne, tymczasowe** (`classes.ts`, `lcBalance.ts`) — czekają na kod
@@ -129,8 +137,8 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
    na całości (wszystkie potwory, 5 pozostałych klas w `scripts/lc/classes.mjs`, ikony przedmiotów, mapy;
    konwerter wypisuje nowe shadery do sprawdzenia). Z kodu serwera: statystyki klas i przyrost na poziom,
    wzory obrażeń/trafień, kary exp za różnicę poziomów, szanse ulepszeń, poziomy umiejętności.
-2. Dalej (propozycja dla właściciela): M5 (sloty sprzętu, zakładanie, wpływ na statystyki, ulepszanie
-   +0…+15), instalacja jako aplikacja (PWA), M6.
+2. Dalej: instalacja jako aplikacja (PWA) i szybsze ładowanie, M6 (mapa świata, podróż między strefami),
+   mikstury HP/MP (dane w bazie, auto-użycie), akcesoria (slot 7, opcje `t_option`).
 3. Etap 2 (Supabase) według `docs/supabase.md` — dopiero po zgodzie właściciela.
 
 **Otwarte kwestie:** brak siatek broni z `Data\Item\Weapon` (przyszły tylko tekstury i tagi); brak mapy
