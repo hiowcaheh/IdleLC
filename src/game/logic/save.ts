@@ -6,6 +6,7 @@
 import { CLASSES } from '../data/classes.ts'
 import { MONSTERS } from '../data/monsters.ts'
 import { MAX_LEVEL } from '../data/progression.ts'
+import { getSkill } from '../data/skills.ts'
 import type { ClassId } from '../data/types.ts'
 import { ZONES } from '../data/zones.ts'
 import {
@@ -18,8 +19,9 @@ import {
 } from './character.ts'
 import { newId } from './id.ts'
 import { addToInventory, type ItemStack } from './loot.ts'
+import { starterSkills, type LearnedSkill } from './skills.ts'
 
-export const SAVE_VERSION = 4
+export const SAVE_VERSION = 5
 
 export type GraphicsQuality = 'auto' | 'low' | 'high'
 
@@ -80,6 +82,17 @@ export const MIGRATIONS: Record<number, Migration> = {
     ...save,
     characters: Array.isArray(save.characters)
       ? save.characters.map((c: unknown) => (isRecord(c) ? { ...c, expedition: null } : c))
+      : [],
+  }),
+  // v5: skills — no SP yet, the free first skills of the class are known
+  4: (save) => ({
+    ...save,
+    characters: Array.isArray(save.characters)
+      ? save.characters.map((c: unknown) =>
+          isRecord(c) && typeof c.classId === 'string' && Object.hasOwn(CLASSES, c.classId)
+            ? { ...c, sp: 0, skills: starterSkills(c.classId as ClassId) }
+            : c,
+        )
       : [],
   }),
 }
@@ -173,7 +186,23 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     stats: { kills: int(stats.kills, 0), deaths: int(stats.deaths, 0) },
     inventory: sanitizeInventory(raw.inventory),
     expedition: sanitizeExpedition(raw.expedition),
+    sp: int(raw.sp, 0),
+    skills: sanitizeSkills(raw.skills, raw.classId as ClassId),
   }
+}
+
+/** Learned skills that still exist for the class, at a level they have. */
+function sanitizeSkills(raw: unknown, classId: ClassId): Record<string, LearnedSkill> {
+  const skills: Record<string, LearnedSkill> = {}
+  if (!isRecord(raw)) return skills
+  for (const [id, entry] of Object.entries(raw)) {
+    const skill = getSkill(Number(id))
+    if (!skill || skill.classId !== classId || !isRecord(entry)) continue
+    const level = Math.min(skill.levels.length, int(entry.level, 0))
+    if (level < 1) continue
+    skills[skill.id] = { level, auto: typeof entry.auto === 'boolean' ? entry.auto : true }
+  }
+  return skills
 }
 
 /** A running expedition, if its hunting spot still exists. */

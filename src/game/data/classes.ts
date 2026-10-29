@@ -18,6 +18,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       critMultiplier: 1.8,
     },
     perLevel: { maxHp: 14, attack: 2.2, defense: 0.9 },
+    mana: { base: 40, perLevel: 4 },
   },
   knight: {
     id: 'knight',
@@ -34,6 +35,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       critMultiplier: 1.5,
     },
     perLevel: { maxHp: 16, attack: 1.7, defense: 1.3 },
+    mana: { base: 45, perLevel: 4.5 },
   },
   healer: {
     id: 'healer',
@@ -50,6 +52,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       critMultiplier: 1.5,
     },
     perLevel: { maxHp: 11, attack: 1.4, defense: 0.8 },
+    mana: { base: 60, perLevel: 7 },
   },
   mage: {
     id: 'mage',
@@ -66,6 +69,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       critMultiplier: 1.7,
     },
     perLevel: { maxHp: 9.5, attack: 2.4, defense: 0.6 },
+    mana: { base: 70, perLevel: 8 },
   },
   rogue: {
     id: 'rogue',
@@ -82,6 +86,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       critMultiplier: 1.6,
     },
     perLevel: { maxHp: 10.5, attack: 1.7, defense: 0.7 },
+    mana: { base: 45, perLevel: 4.5 },
   },
   sorcerer: {
     id: 'sorcerer',
@@ -98,6 +103,7 @@ export const CLASSES: Record<ClassId, ClassDef> = {
       critMultiplier: 1.6,
     },
     perLevel: { maxHp: 12, attack: 2, defense: 0.9 },
+    mana: { base: 55, perLevel: 6 },
   },
 }
 

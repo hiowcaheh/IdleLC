@@ -9,6 +9,16 @@ export interface CombatStats {
   critChance: number
   /** Damage multiplier applied to critical hits. */
   critMultiplier: number
+  /** Mana for skills (monsters have none). */
+  maxMp?: number
+  /** HP and MP regenerated per second on top of the base regeneration (skills). */
+  hpRegen?: number
+  mpRegen?: number
+  /** Percentage points added to the hit chance of this fighter / taken off the attacker's. */
+  hit?: number
+  dodge?: number
+  /** Seconds added to every skill's cast time (negative = faster casting). */
+  castTime?: number
 }
 
 export type ClassId = 'titan' | 'knight' | 'healer' | 'mage' | 'rogue' | 'sorcerer'
@@ -24,6 +34,8 @@ export interface ClassDef {
   base: CombatStats
   /** Flat increase per level above 1 (only growing stats). */
   perLevel: Pick<CombatStats, 'maxHp' | 'attack' | 'defense'>
+  /** Mana at level 1 and its increase per level. */
+  mana: { base: number; perLevel: number }
 }
 
 export interface ZoneDef {

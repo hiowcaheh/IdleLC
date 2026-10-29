@@ -28,7 +28,7 @@ export function ExpeditionPanel({
   const returnFromExpedition = useGameStore((s) => s.returnFromExpedition)
   const [busy, setBusy] = useState(false)
   const now = useNow()
-  const estimate = useHourlyEstimate(character.classId, character.level, expedition.monsterId)
+  const estimate = useHourlyEstimate(character, expedition.monsterId)
   const elapsed = Math.max(0, (now - expedition.startedAt) / 1000)
   const counted = Math.min(elapsed, AFK_MAX_SECONDS)
   const hours = elapsed >= AFK_MIN_SECONDS ? counted / 3600 : 0

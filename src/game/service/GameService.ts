@@ -34,6 +34,10 @@ export interface GameService {
   claimAfk(characterId: string): Promise<AfkResult>
   /** Sells items from the inventory to the shop for their database price. */
   sellItems(characterId: string, items: ItemStack[]): Promise<SaleResult>
+  /** Learns the next level of a class skill for its SP (level and prerequisites checked). */
+  learnSkill(characterId: string, skillId: number): Promise<CharacterData>
+  /** Turns automatic use of a learned skill in combat on or off. */
+  setSkillAuto(characterId: string, skillId: number, auto: boolean): Promise<CharacterData>
   updateSettings(patch: Partial<Settings>): Promise<Settings>
   /** Deletes the whole save (all characters) and starts over. */
   resetSave(): Promise<SaveData>
@@ -46,6 +50,8 @@ export interface DevCommands {
   setLevel(characterId: string, level: number): Promise<CharacterData>
   addExp(characterId: string, amount: number): Promise<CharacterData>
   addGold(characterId: string, amount: number): Promise<CharacterData>
+  /** Adds whole skill points. */
+  addSp(characterId: string, amount: number): Promise<CharacterData>
   /** Game speed — allows proportionally more kills per report. */
   setTimeScale(scale: number): void
   /** Moves the expedition start `seconds` into the past (starting one if needed); claim it after. */

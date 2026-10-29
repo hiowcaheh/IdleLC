@@ -22,7 +22,7 @@ describe('rewards', () => {
     expect(maxKills(8 * 3600)).toBe(maxKills(MAX_REPORT_WINDOW))
   })
 
-  it('pays the monster exp and gold per accepted kill', () => {
+  it('pays the monster exp, gold and SP per accepted kill', () => {
     const monster = getMonster('rust-golem')
     const hero = createCharacterData({ name: 'Brom', classId: 'knight' }, 'a', 0)
     const r = applyCombatReport(
@@ -35,6 +35,8 @@ describe('rewards', () => {
     expect(r.kills).toBe(3)
     expect(r.exp).toBe(3 * monster.exp)
     expect(r.gold).toBe(3 * monster.gold)
+    expect(r.sp).toBe(3 * monster.sp!)
+    expect(r.character.sp).toBe(r.sp)
     expect(r.character.stats).toEqual({ kills: 3, deaths: 2 })
     expect(r.character.gold).toBe(3 * monster.gold)
     expect(r.character.inventory).toEqual(r.drops)

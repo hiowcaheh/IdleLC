@@ -1,16 +1,15 @@
 import { useMemo } from 'react'
-import type { ClassId } from '../../game/data/types.ts'
 import { estimateHourly, type HourlyEstimate } from '../../game/logic/afk.ts'
+import { heroKey, type Hero } from '../../game/logic/fighters.ts'
 import { createRng } from '../../game/logic/rng.ts'
 
 /** Measured hunting rate for the preview (a fixed seed keeps the numbers steady). */
-export function useHourlyEstimate(
-  classId: ClassId,
-  level: number,
-  monsterId: string,
-): HourlyEstimate {
+export function useHourlyEstimate(hero: Hero, monsterId: string): HourlyEstimate {
+  const key = heroKey(hero)
   return useMemo(
-    () => estimateHourly(classId, level, monsterId, createRng(level * 7919 + monsterId.length)),
-    [classId, level, monsterId],
+    () => estimateHourly(hero, monsterId, createRng(hero.level * 7919 + monsterId.length)),
+    // the hero object changes on every save; its key only when the estimate would
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [key, monsterId],
   )
 }

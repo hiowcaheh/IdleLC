@@ -23,7 +23,7 @@ const stats = (over: Partial<CombatStats> = {}): CombatStats => ({
 
 describe('statsForLevel', () => {
   it('returns base stats at level 1', () => {
-    expect(statsForLevel(CLASSES.knight, 1)).toEqual(CLASSES.knight.base)
+    expect(statsForLevel(CLASSES.knight, 1)).toEqual({ ...CLASSES.knight.base, maxMp: 45 })
   })
 
   it('adds per-level growth and rounds', () => {

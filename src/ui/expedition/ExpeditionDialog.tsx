@@ -18,7 +18,7 @@ export function ExpeditionDialog({
   const startExpedition = useGameStore((s) => s.startExpedition)
   const { zoneId, monsterId } = character.location
   const monster = getMonster(monsterId)
-  const estimate = useHourlyEstimate(character.classId, character.level, monsterId)
+  const estimate = useHourlyEstimate(character, monsterId)
   const [busy, setBusy] = useState(false)
   const confirm = useRef<HTMLButtonElement>(null)
 

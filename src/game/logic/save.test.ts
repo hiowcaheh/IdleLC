@@ -93,6 +93,46 @@ describe('loadSave', () => {
     expect(r.save.characters[0]!.inventory).toEqual([])
   })
 
+  it('gives version 4 characters no SP and the free skills of their class', () => {
+    const v4 = { ...withCharacter(), saveVersion: 4 }
+    const knight = createCharacterData({ name: 'Brom', classId: 'knight' }, 'id-2', NOW)
+    const characters = [v4.characters[0]!, knight].map((c) => {
+      const old: Record<string, unknown> = { ...c }
+      delete old.sp
+      delete old.skills
+      return old
+    })
+    const r = loadSave(JSON.stringify({ ...v4, characters }), NOW)
+    expect(r.status).toBe('migrated')
+    expect(r.save.characters.map((c) => [c.sp, c.skills])).toEqual([
+      [0, {}],
+      [0, { 1: { level: 1, auto: true } }],
+    ])
+  })
+
+  it('keeps only skills of the class, at levels they have', () => {
+    const save = withCharacter()
+    const knight = createCharacterData({ name: 'Brom', classId: 'knight' }, 'id-2', NOW)
+    const broken = {
+      ...save,
+      characters: [
+        {
+          ...knight,
+          sp: -5,
+          skills: {
+            1: { level: 9, auto: false },
+            2: { level: 0 },
+            3: { level: 1 },
+            77: { level: 1 },
+          },
+        },
+      ],
+    }
+    const [hero] = loadSave(JSON.stringify(broken), NOW).save.characters
+    expect(hero!.sp).toBe(0)
+    expect(hero!.skills).toEqual({ 1: { level: 3, auto: false }, 3: { level: 1, auto: true } })
+  })
+
   it('repairs invalid character fields and drops unrecoverable characters', () => {
     const save = withCharacter()
     const broken = {

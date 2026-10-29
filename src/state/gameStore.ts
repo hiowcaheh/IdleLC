@@ -2,7 +2,8 @@ import { create } from 'zustand'
 import { ZONES } from '../game/data/zones.ts'
 import type { AfkResult } from '../game/logic/afk.ts'
 import type { CharacterData, NewCharacter } from '../game/logic/character.ts'
-import type { CombatPhase, CombatState } from '../game/logic/combat.ts'
+import { effectiveStats, type CombatPhase, type CombatState } from '../game/logic/combat.ts'
+import { heroKey } from '../game/logic/fighters.ts'
 import type { ItemStack } from '../game/logic/loot.ts'
 import type { CombatResult } from '../game/logic/rewards.ts'
 import type { LoadResult, SaveData, Settings } from '../game/logic/save.ts'
@@ -18,6 +19,8 @@ export interface CombatHud {
   monsterId: string
   playerHp: number
   playerMaxHp: number
+  playerMp: number
+  playerMaxMp: number
   monsterHp: number
   monsterMaxHp: number
 }
@@ -49,6 +52,9 @@ interface GameStore {
   dismissAfk(): void
   /** Sells items of the played character; resolves to the sale (rejects with a GameError). */
   sellItems(items: ItemStack[]): Promise<SaleResult>
+  /** Learns the next level of a skill (rejects with a GameError). */
+  learnSkill(skillId: number): Promise<void>
+  setSkillAuto(skillId: number, auto: boolean): Promise<void>
   selectMonster(monsterId: string): void
   selectZone(zoneId: string, monsterId?: string): void
   syncCombat(combat: CombatState): void
@@ -59,17 +65,21 @@ interface GameStore {
   devSetLevel(level: number): void
   devAddExp(amount: number): void
   devAddGold(amount: number): void
+  devAddSp(amount: number): void
   devKillTarget(): void
   devHeal(): void
   devSimulateAfk(seconds: number): void
 }
 
 function toHud(c: CombatState): CombatHud {
+  const player = effectiveStats(c.player)
   return {
     phase: c.phase,
     monsterId: c.monsterId,
     playerHp: Math.ceil(c.player.hp),
-    playerMaxHp: c.player.stats.maxHp,
+    playerMaxHp: player.maxHp,
+    playerMp: Math.floor(c.player.mp),
+    playerMaxMp: player.maxMp ?? 0,
     monsterHp: Math.ceil(c.monster.hp),
     monsterMaxHp: c.monster.stats.maxHp,
   }
@@ -94,7 +104,7 @@ function logError(error: unknown): void {
 }
 
 export const useGameStore = create<GameStore>((set, get) => {
-  /** Puts an updated character into the store (and the fight, when its level changed). */
+  /** Puts an updated character into the store (and the fight, when its level or skills changed). */
   const applyCharacter = (character: CharacterData) => {
     const { save, character: current } = get()
     set({
@@ -104,8 +114,9 @@ export const useGameStore = create<GameStore>((set, get) => {
       },
       character: current?.id === character.id ? character : current,
     })
-    if (current?.id === character.id && current.level !== character.level) {
-      combatSession.setPlayer(character.classId, character.level)
+    if (current?.id !== character.id) return
+    if (heroKey(current) !== heroKey(character)) {
+      combatSession.setPlayer(character)
       set({ hud: toHud(combatSession.state) })
       if (character.level > current.level) {
         set({ levelUp: { level: character.level, key: Date.now() } })
@@ -163,11 +174,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     try {
       const result = await enqueue(() => gameService.claimAfk(character.id))
       applyCharacter(result.character)
-      combatSession.start(
-        result.character.classId,
-        result.character.level,
-        result.character.location.monsterId,
-      )
+      combatSession.start(result.character, result.character.location.monsterId)
       combatEvents.emit([{ type: 'reset' }])
       set({ hud: toHud(combatSession.state), afkResult: result.seconds > 0 ? result : null })
     } catch (error) {
@@ -227,7 +234,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const save = get().save
       const character = save.characters.find((c) => c.id === characterId)
       if (!character) return
-      combatSession.start(character.classId, character.level, character.location.monsterId)
+      combatSession.start(character, character.location.monsterId)
       set({
         character,
         afkResult: null,
@@ -275,6 +282,18 @@ export const useGameStore = create<GameStore>((set, get) => {
       return sale
     },
 
+    async learnSkill(skillId) {
+      const character = get().character
+      if (!character) throw new Error('No character is being played')
+      applyCharacter(await enqueue(() => gameService.learnSkill(character.id, skillId)))
+    },
+
+    async setSkillAuto(skillId, auto) {
+      const character = get().character
+      if (!character) throw new Error('No character is being played')
+      applyCharacter(await enqueue(() => gameService.setSkillAuto(character.id, skillId, auto)))
+    },
+
     selectMonster(monsterId) {
       const character = get().character
       if (character) travel(character.location.zoneId, monsterId)
@@ -320,6 +339,10 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     devAddGold(amount) {
       dev((id) => gameService.dev?.addGold(id, amount))
+    },
+
+    devAddSp(amount) {
+      dev((id) => gameService.dev?.addSp(id, amount))
     },
 
     devKillTarget() {

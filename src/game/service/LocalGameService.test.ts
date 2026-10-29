@@ -6,6 +6,7 @@ import { GameError, MAX_CHARACTERS } from '../logic/character.ts'
 import { createRng } from '../logic/rng.ts'
 import { MIN_KILL_CYCLE, KILL_BURST } from '../logic/rewards.ts'
 import { SAVE_VERSION } from '../logic/save.ts'
+import { SP_UNIT } from '../logic/skills.ts'
 import type { KeyValueStorage } from './GameService.ts'
 import { LocalGameService, SAVE_KEY } from './LocalGameService.ts'
 
@@ -192,6 +193,40 @@ describe('LocalGameService', () => {
     expect(sale.character.inventory.find((s) => s.itemId === stack!.itemId)).toBeUndefined()
     expect(stored(storage).characters[0].gold).toBe(sale.character.gold)
     await expect(game.sellItems(hero.id, [stack!])).rejects.toThrow('not-enough-items')
+  })
+
+  it('earns SP from kills and spends it on skills', async () => {
+    const { game, clock, hero, storage } = await withKnight()
+    expect(hero.skills).toEqual({ 1: { level: 1, auto: true } })
+    await expect(game.learnSkill(hero.id, 1)).rejects.toThrow('level-too-low')
+    await game.dev.setLevel(hero.id, 3)
+
+    clock.now += 600 * 1000
+    const kills = Math.ceil(SP_UNIT / fox(hero).sp!)
+    const result = await game.reportCombat(hero.id, {
+      monsterId: hero.location.monsterId,
+      kills,
+      deaths: 0,
+    })
+    expect(result.sp).toBe(kills * fox(hero).sp!)
+    expect(result.character.sp).toBeGreaterThanOrEqual(SP_UNIT)
+
+    const learned = await game.learnSkill(hero.id, 1)
+    expect(learned.skills[1]).toEqual({ level: 2, auto: true })
+    expect(learned.sp).toBe(result.character.sp - SP_UNIT)
+    expect(stored(storage).characters[0].skills[1].level).toBe(2)
+
+    const manual = await game.setSkillAuto(hero.id, 1, false)
+    expect(manual.skills[1]!.auto).toBe(false)
+    await expect(game.setSkillAuto(hero.id, 3, true)).rejects.toThrow('not-learned')
+
+    await game.startAfk(hero.id)
+    await expect(game.learnSkill(hero.id, 1)).rejects.toThrow('on-expedition')
+  })
+
+  it('offers a dev command for skill points', async () => {
+    const { game, hero } = await withKnight()
+    expect((await game.dev.addSp(hero.id, 12)).sp).toBe(12 * SP_UNIT)
   })
 
   it('caps kills that come faster than a fight can take', async () => {

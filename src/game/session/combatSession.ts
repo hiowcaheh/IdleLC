@@ -2,7 +2,6 @@
  * The fight on screen. It runs in the browser only (it is the animation of the hunt);
  * its outcome is reported to the GameService, which decides the rewards.
  */
-import type { ClassId } from '../data/types.ts'
 import {
   changeMonster,
   combatTick,
@@ -14,7 +13,7 @@ import {
   type CombatState,
   type FighterInit,
 } from '../logic/combat.ts'
-import { monsterFighter, playerFighter } from '../logic/fighters.ts'
+import { monsterFighter, playerFighter, type Hero } from '../logic/fighters.ts'
 import { createRng, type Rng } from '../logic/rng.ts'
 
 /** Stand-in fighter before a character enters the game. */
@@ -37,8 +36,8 @@ export class CombatSession {
   }
 
   /** Starts a fresh fight for a character against a monster (entering the game). */
-  start(classId: ClassId, level: number, monsterId: string): void {
-    this.combat = createCombat(playerFighter(classId, level), monsterId, monsterFighter(monsterId))
+  start(hero: Hero, monsterId: string): void {
+    this.combat = createCombat(playerFighter(hero), monsterId, monsterFighter(monsterId))
   }
 
   tick(dt: number): CombatEvent[] {
@@ -54,9 +53,9 @@ export class CombatSession {
     return events
   }
 
-  /** New level or class stats (level up), keeping the HP ratio. */
-  setPlayer(classId: ClassId, level: number): void {
-    this.combat = updatePlayer(this.combat, playerFighter(classId, level))
+  /** New level or skills, keeping the HP and MP ratios. */
+  setPlayer(hero: Hero): void {
+    this.combat = updatePlayer(this.combat, playerFighter(hero))
   }
 
   /** Dev tool. */

@@ -22,6 +22,7 @@ import {
 import { createRng, type Rng } from '../logic/rng.ts'
 import type { ItemStack } from '../logic/loot.ts'
 import { applySale, type SaleResult } from '../logic/shop.ts'
+import { SP_UNIT, applyAuto, applyLearn } from '../logic/skills.ts'
 import {
   createDefaultSave,
   loadSave,
@@ -142,6 +143,16 @@ export class LocalGameService implements GameService {
     return copy({ ...sale, character: updated })
   }
 
+  async learnSkill(characterId: string, skillId: number): Promise<CharacterData> {
+    const learned = applyLearn(this.notOnExpedition(characterId), skillId)
+    return copy(this.update(characterId, () => learned))
+  }
+
+  async setSkillAuto(characterId: string, skillId: number, auto: boolean): Promise<CharacterData> {
+    const changed = applyAuto(this.notOnExpedition(characterId), skillId, auto)
+    return copy(this.update(characterId, () => changed))
+  }
+
   async updateSettings(patch: Partial<Settings>): Promise<Settings> {
     this.save = { ...this.save, settings: { ...this.save.settings, ...patch } }
     this.persist()
@@ -180,6 +191,13 @@ export class LocalGameService implements GameService {
         this.update(characterId, (c) => ({
           ...c,
           gold: Math.max(0, c.gold + Math.floor(amount)),
+        })),
+      ),
+    addSp: async (characterId, amount) =>
+      copy(
+        this.update(characterId, (c) => ({
+          ...c,
+          sp: Math.max(0, c.sp + Math.floor(amount * SP_UNIT)),
         })),
       ),
     setTimeScale: (scale) => {

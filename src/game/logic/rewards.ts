@@ -34,6 +34,8 @@ export interface CombatResult {
   kills: number
   exp: number
   gold: number
+  /** Skill points, in 1/10 000 SP. */
+  sp: number
   levelsGained: number
   /** Items that dropped (already added to the inventory). */
   drops: ItemStack[]
@@ -46,11 +48,11 @@ export function maxKills(elapsedSeconds: number, timeScale = 1): number {
 }
 
 /**
- * Reward for one kill: t_npc.a_exp and a_prize 1:1. Level-difference rules and party bonuses
- * come with the LC server code.
+ * Reward for one kill: t_npc.a_exp, a_prize and a_skill_point 1:1. Level-difference rules and
+ * party bonuses come with the LC server code.
  */
-export function killReward(monster: MonsterDef): { exp: number; gold: number } {
-  return { exp: monster.exp, gold: monster.gold }
+export function killReward(monster: MonsterDef): { exp: number; gold: number; sp: number } {
+  return { exp: monster.exp, gold: monster.gold, sp: monster.sp ?? 0 }
 }
 
 /** Pays out a combat report, accepting at most `allowedKills` kills; rolls the drops. */
@@ -66,6 +68,7 @@ export function applyCombatReport(
   const reward = killReward(monster)
   const exp = reward.exp * kills
   const gold = reward.gold * kills
+  const sp = reward.sp * kills
   const progress = gainExp(character.level, character.exp, exp)
   const drops = rollDrops(monster.drops, kills, rng)
   return {
@@ -74,12 +77,14 @@ export function applyCombatReport(
       level: progress.level,
       exp: progress.exp,
       gold: character.gold + gold,
+      sp: character.sp + sp,
       stats: { kills: character.stats.kills + kills, deaths: character.stats.deaths + deaths },
       inventory: addToInventory(character.inventory, drops),
     },
     kills,
     exp,
     gold,
+    sp,
     levelsGained: progress.levelsGained,
     drops,
   }

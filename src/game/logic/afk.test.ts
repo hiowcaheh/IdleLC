@@ -76,7 +76,7 @@ describe('simulateAfk', () => {
       expedition: { zoneId: 'glade', monsterId: 'stone-sentinel', startedAt: 0 },
     }
     expect(simulateAfk(away, 3600, createRng(1)).monsterId).toBe('stone-sentinel')
-    const estimate = estimateHourly('knight', 1, 'rust-golem', createRng(1))
+    const estimate = estimateHourly({ classId: 'knight', level: 1 }, 'rust-golem', createRng(1))
     const golem = getMonster('rust-golem')
     expect(estimate.expPerHour).toBeCloseTo(estimate.killsPerHour * golem.exp)
     expect(estimate.goldPerHour).toBeCloseTo(estimate.killsPerHour * golem.gold)

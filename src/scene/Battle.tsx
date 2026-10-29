@@ -4,7 +4,7 @@ import { Vector3, type Group } from 'three'
 import { getModel, playerModelId } from '../game/assets/manifest.ts'
 import { getItem } from '../game/data/items.ts'
 import { getMonster } from '../game/data/monsters.ts'
-import { TIMINGS, type Side } from '../game/logic/combat.ts'
+import { TIMINGS, effectiveStats, type Side } from '../game/logic/combat.ts'
 import { combatSession } from '../game/session/combatSession.ts'
 import { combatEvents, type ViewEvent } from '../state/combatEvents.ts'
 import { useFloatingTexts, type FloatingKind } from '../state/floatingTexts.ts'
@@ -13,6 +13,7 @@ import { Character, type CharacterHandle } from './Character.tsx'
 import { DamageNumbers } from './DamageNumbers.tsx'
 import { HpBar3D } from './HpBar3D.tsx'
 import { LevelUpEffect } from './LevelUpEffect.tsx'
+import { SkillAura } from './SkillAura.tsx'
 import { ARENA_RADIUS, smoothstep } from './terrain.ts'
 import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
@@ -71,6 +72,8 @@ export function Battle() {
     appear: 1,
     sink: -1,
     hudTimer: 0,
+    /** Game seconds until the hero swings for a skill being cast (-1: none). */
+    swingIn: -1,
   })
   const showNumbersRef = useRef(showNumbers)
   useEffect(() => {
@@ -141,7 +144,18 @@ export function Battle() {
         case 'attack':
           ;(e.source === 'player' ? player : monster).current?.attack()
           break
+        case 'cast':
+          textAt(e.source, e.name, 'skill')
+          // the swing starts so that the blow lands when the skill does
+          if (e.kind === 'attack' || e.kind === 'debuff') {
+            m.swingIn = Math.max(0, e.castTime - TIMINGS.impactDelay)
+          }
+          break
         case 'hit':
+          if (e.poison) {
+            textAt(e.target, String(e.amount), 'poison')
+            break
+          }
           ;(e.target === 'player' ? player : monster).current?.hit(e.crit)
           textAt(
             e.target,
@@ -149,10 +163,19 @@ export function Battle() {
             e.target === 'player' ? 'taken' : e.crit ? 'crit' : 'dealt',
           )
           break
+        case 'heal':
+          if (e.amount > 0) textAt(e.target, `+${e.amount}`, e.mana ? 'mana' : 'heal')
+          break
+        case 'effect':
+          if (e.kind === 'stun') textAt(e.target, 'Stunned', 'effect')
+          else if (e.kind === 'poison') textAt(e.target, 'Poisoned', 'effect')
+          else if (e.kind === 'debuff') textAt(e.target, e.name, 'effect')
+          break
         case 'miss':
           textAt(e.target, 'Miss', 'miss')
           break
         case 'death':
+          m.swingIn = -1
           if (e.who === 'monster') {
             monster.current?.die()
             player.current?.victory()
@@ -182,6 +205,7 @@ export function Battle() {
         case 'reset':
           resetView()
           m.sink = -1
+          m.swingIn = -1
           useFloatingTexts.getState().clear()
           player.current?.revive()
           player.current?.setBase('idle')
@@ -209,6 +233,14 @@ export function Battle() {
     if (combat.phase === 'approach') {
       const t = smoothstep(0, 1, combat.phaseTime / TIMINGS.approach)
       view.player.lerpVectors(m.approachFrom, m.engageAt, t)
+    }
+
+    if (m.swingIn >= 0) {
+      m.swingIn -= dt
+      if (m.swingIn <= 0) {
+        m.swingIn = -1
+        player.current?.attack()
+      }
     }
 
     if (m.appear < 1) m.appear = Math.min(1, m.appear + dt / APPEAR_TIME)
@@ -271,7 +303,7 @@ export function Battle() {
             x: view.player.x,
             y: view.playerHeight + 0.22,
             z: view.player.z,
-            ratio: c.player.hp / c.player.stats.maxHp,
+            ratio: c.player.hp / effectiveStats(c.player).maxHp,
             visible: c.phase !== 'defeat' && !isAway(),
           }
         }}
@@ -292,6 +324,7 @@ export function Battle() {
       />
       <DamageNumbers />
       <LevelUpEffect />
+      <SkillAura />
     </>
   )
 }

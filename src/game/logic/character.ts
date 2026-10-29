@@ -6,6 +6,9 @@ import { CLASSES } from '../data/classes.ts'
 import type { ClassId } from '../data/types.ts'
 import { DEFAULT_ZONE_ID, ZONES } from '../data/zones.ts'
 import type { ItemStack } from './loot.ts'
+import { starterSkills, type LearnedSkill } from './skills.ts'
+
+export { GameError } from './errors.ts'
 
 export const MAX_CHARACTERS = 4
 export const NAME_MIN = 3
@@ -39,6 +42,10 @@ export interface CharacterData {
   inventory: ItemStack[]
   /** Set while the character is away on an AFK expedition. */
   expedition: Expedition | null
+  /** Skill points in 1/10 000 SP (SP_UNIT), as the LC server counts them. */
+  sp: number
+  /** Learned skills by skill id. */
+  skills: Record<string, LearnedSkill>
 }
 
 export interface NewCharacter {
@@ -93,15 +100,7 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     stats: { kills: 0, deaths: 0 },
     inventory: [],
     expedition: null,
-  }
-}
-
-/** A refused command. `code` is stable (UI messages, tests); the message adds details. */
-export class GameError extends Error {
-  readonly code: string
-  constructor(code: string, detail?: string) {
-    super(detail ? `${code}: ${detail}` : code)
-    this.name = 'GameError'
-    this.code = code
+    sp: 0,
+    skills: starterSkills(input.classId),
   }
 }

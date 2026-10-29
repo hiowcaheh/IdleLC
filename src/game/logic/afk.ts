@@ -4,10 +4,9 @@
  * a sample period — and is then paid out like real fights. Pure; the server will run it too.
  */
 import { getMonster } from '../data/monsters.ts'
-import type { ClassId } from '../data/types.ts'
 import type { CharacterData } from './character.ts'
 import { combatTick, createCombat, type FighterInit } from './combat.ts'
-import { monsterFighter, playerFighter } from './fighters.ts'
+import { monsterFighter, playerFighter, type Hero } from './fighters.ts'
 import { addToInventory, rollDrops, type ItemStack } from './loot.ts'
 import { gainExp } from './progression.ts'
 import { killReward } from './rewards.ts'
@@ -58,6 +57,8 @@ export interface AfkResult {
   deaths: number
   exp: number
   gold: number
+  /** Skill points, in 1/10 000 SP. */
+  sp: number
   levelBefore: number
   levelsGained: number
   drops: ItemStack[]
@@ -67,21 +68,19 @@ export interface AfkResult {
 export interface HourlyEstimate extends HuntRate {
   expPerHour: number
   goldPerHour: number
+  spPerHour: number
 }
 
-/** What an hour of hunting `monsterId` is worth at the character's current level. */
-export function estimateHourly(
-  classId: ClassId,
-  level: number,
-  monsterId: string,
-  rng: Rng,
-): HourlyEstimate {
-  const rate = measureHuntRate(playerFighter(classId, level), monsterFighter(monsterId), rng)
+/** What an hour of hunting `monsterId` is worth to the hero (level and skills) right now. */
+export function estimateHourly(hero: Hero, monsterId: string, rng: Rng): HourlyEstimate {
+  const rate = measureHuntRate(playerFighter(hero), monsterFighter(monsterId), rng)
   const reward = killReward(getMonster(monsterId))
+  const kills = rate.killsPerHour * AFK_EFFICIENCY
   return {
     ...rate,
-    expPerHour: rate.killsPerHour * AFK_EFFICIENCY * reward.exp,
-    goldPerHour: rate.killsPerHour * AFK_EFFICIENCY * reward.gold,
+    expPerHour: kills * reward.exp,
+    goldPerHour: kills * reward.gold,
+    spPerHour: kills * reward.sp,
   }
 }
 
@@ -100,7 +99,11 @@ export function simulateAfk(character: CharacterData, awaySeconds: number, rng: 
   const rateAt = (lvl: number) => {
     let rate = rates.get(lvl)
     if (!rate) {
-      rate = measureHuntRate(playerFighter(character.classId, lvl), monsterFighter(monster.id), rng)
+      rate = measureHuntRate(
+        playerFighter({ ...character, level: lvl }),
+        monsterFighter(monster.id),
+        rng,
+      )
       rates.set(lvl, rate)
     }
     return rate
@@ -117,6 +120,7 @@ export function simulateAfk(character: CharacterData, awaySeconds: number, rng: 
 
   const drops = rollDrops(monster.drops, kills, rng)
   const gold = kills * reward.gold
+  const sp = kills * reward.sp
   return {
     awaySeconds,
     seconds,
@@ -125,6 +129,7 @@ export function simulateAfk(character: CharacterData, awaySeconds: number, rng: 
     deaths,
     exp: kills * reward.exp,
     gold,
+    sp,
     levelBefore: character.level,
     levelsGained: level - character.level,
     drops,
@@ -133,6 +138,7 @@ export function simulateAfk(character: CharacterData, awaySeconds: number, rng: 
       level,
       exp,
       gold: character.gold + gold,
+      sp: character.sp + sp,
       stats: { kills: character.stats.kills + kills, deaths: character.stats.deaths + deaths },
       inventory: addToInventory(character.inventory, drops),
     },
