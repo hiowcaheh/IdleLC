@@ -18,13 +18,7 @@ import {
   skillDamageMultiplier,
 } from './balance.ts'
 import { chance, type Rng } from './rng.ts'
-import {
-  MIN_CAST_TIME,
-  applyStats,
-  type SkillKind,
-  type SkillRank,
-  type StatEffect,
-} from './skills.ts'
+import { applyStats, type SkillKind, type SkillRank, type StatEffect } from './skills.ts'
 
 export type Side = 'player' | 'monster'
 export type CombatPhase = 'spawning' | 'approach' | 'fighting' | 'victory' | 'defeat'
@@ -39,6 +33,11 @@ export const TIMINGS = {
   impactDelay: 0.4,
   /** Fraction of attackInterval the monster waits before its first swing. */
   monsterInitiative: 0.5,
+  /**
+   * Share of a skill's fire animation (t_skill.a_fireTime) the hero stays busy after it lands.
+   * 0 until the client's skill animations are attached: standing still for it looks frozen.
+   */
+  skillAnimationLock: 0,
 } as const
 
 /** The hero heals below this share of HP and restores mana below this share of MP. */
@@ -427,20 +426,25 @@ function fighterStep(
     const stats = effectiveStats(self)
     const skill = chooseSkill(self, target)
     if (skill) {
-      const castTime = Math.max(MIN_CAST_TIME, skill.castTime + (stats.castTime ?? 0))
+      // wind-up (shortened by cast-speed skills), then it lands like a swing
+      const windUp = Math.max(0, skill.castTime + (stats.castTime ?? 0))
+      const landsIn = windUp + TIMINGS.impactDelay
       self.mp -= skill.mpCost
       self.hp -= skill.hpCost
       self.skillCooldowns[skill.id] = skill.cooldown
       self.casting = skill
-      self.impactIn = castTime
-      self.cooldown += castTime
+      self.impactIn = landsIn
+      self.cooldown += Math.max(
+        stats.attackInterval,
+        landsIn + skill.fireTime * TIMINGS.skillAnimationLock,
+      )
       events.push({
         type: 'cast',
         source: side,
         skillId: skill.id,
         name: skill.name,
         kind: skill.kind,
-        castTime,
+        castTime: landsIn,
       })
     } else {
       self.cooldown += stats.attackInterval

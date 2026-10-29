@@ -145,8 +145,11 @@ Interpretacja efektów jest **nasza** (`src/game/logic/skills.ts`) do czasu kodu
 - **SP** — za zabicie `t_npc.a_skill_point`, liczone jak na serwerze LC w 1/10 000 punktu (Fox: 1375 →
   0,1375 SP). Nauka kolejnego poziomu kosztuje `a_learnSP` pełnych punktów i wymaga `a_learnLevel` oraz
   wymaganych umiejętności. Nowa postać zna 1. poziom darmowych umiejętności z poziomu 1 (np. Knuckle Spear).
-- **Czasy** — rzucanie `max(0,4 s, (a_readyTime + a_fireTime) / 10)`, odnowienie `max(rzucanie, a_reuseTime / 10)`
-  liczone od początku rzucania, efekty trwają `a_durtime / 10` s.
+- **Czasy** — `a_readyTime / 10` s to przygotowanie (np. czarowanie maga, 0 dla większości ataków; skraca je
+  „Fast Spell Casting”), potem skill trafia jak zwykły cios (+0,4 s). `a_fireTime` to w LC animacja **po**
+  wystrzeleniu — dopóki nie mamy animacji skilli z klienta, postać nie stoi w tym czasie
+  (`TIMINGS.skillAnimationLock = 0`) i rusza dalej po zwykłym interwale ataku. Odnowienie
+  `max(przygotowanie, a_reuseTime / 10)` liczone od początku rzucania, efekty trwają `a_durtime / 10` s.
 - **Efekty** (`t_magic` typ/podtyp):
   - typ 3 — obrażenia: cios × `1 + power/100`;
   - typ 0 — zmiana statystyki: 0 atak, 1 obrona, 2 atak magiczny → atak, 3 obrona magiczna → obrona, 4 celność,

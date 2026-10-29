@@ -88,7 +88,9 @@ describe('skillRank', () => {
       kind: 'attack',
       offensive: true,
       mpCost: 6,
-      castTime: 1,
+      // readyTime 0: fires at once; fireTime 10 is the animation after it fired
+      castTime: 0,
+      fireTime: 1,
       cooldown: 4,
     })
     const ranks = learnedRanks('knight', {
@@ -125,7 +127,7 @@ describe('skillRank', () => {
         },
       ],
     }
-    expect(skillRank(curse, 1)).toMatchObject({ kind: 'debuff', offensive: true, castTime: 0.4 })
+    expect(skillRank(curse, 1)).toMatchObject({ kind: 'debuff', offensive: true, castTime: 0 })
     expect(isAvailable(curse)).toBe(true)
     const summon = {
       ...curse,

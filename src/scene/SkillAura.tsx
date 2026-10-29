@@ -33,6 +33,8 @@ export function SkillAura() {
   const ring = useRef<Mesh>(null)
   const column = useRef<Mesh>(null)
   const cast = useRef({ time: -1, duration: 1, selfCast: false, color: new Color() })
+  // drawn once while fully transparent, so the first cast does not stall on compiling its shaders
+  const warmedUp = useRef(false)
 
   useEffect(
     () =>
@@ -59,7 +61,8 @@ export function SkillAura() {
     const c = cast.current
     if (!g) return
     if (c.time < 0) {
-      g.visible = false
+      if (warmedUp.current) g.visible = false
+      warmedUp.current = true
       return
     }
     c.time += Math.min(delta, 0.1)
@@ -86,7 +89,7 @@ export function SkillAura() {
   })
 
   return (
-    <group ref={group} visible={false}>
+    <group ref={group}>
       <mesh ref={ring} position-y={0.06} rotation-x={-Math.PI / 2}>
         <ringGeometry args={[0.62, 0.78, 48, 1]} />
         <meshBasicMaterial

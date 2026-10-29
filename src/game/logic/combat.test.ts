@@ -196,7 +196,8 @@ const rank = (over: Partial<SkillRank> = {}): SkillRank => ({
   offensive: true,
   mpCost: 10,
   hpCost: 0,
-  castTime: 0.5,
+  castTime: 0,
+  fireTime: 0,
   cooldown: 3,
   duration: 0,
   effects: [{ kind: 'damage', percent: 200 }],
@@ -219,11 +220,38 @@ const engaged = (player: FighterInit, monster = tank): CombatState => {
 }
 
 describe('skills in combat', () => {
+  it('a skill without a wind-up lands like a swing, and the hero acts again after one interval', () => {
+    const instant = caster([rank({ castTime: 0, fireTime: 2.6, cooldown: 30 })])
+    const early = run(engaged(instant), TIMINGS.impactDelay + 0.05, createRng(2))
+    expect(early.events.filter((e) => e.type === 'cast')).toHaveLength(1)
+    expect(early.events.some((e) => e.type === 'hit' && e.target === 'monster' && e.skill)).toBe(
+      true,
+    )
+    // attackInterval is 1 s: the next swing starts then, not after the 2.6 s fire animation
+    const next = run(early.state, 1 - TIMINGS.impactDelay, createRng(3))
+    expect(next.events).toContainEqual({ type: 'attack', source: 'player' })
+  })
+
+  it('a wind-up (t_skill readyTime) delays the hit', () => {
+    const chant = caster([rank({ castTime: 1, cooldown: 30 })])
+    const during = run(engaged(chant), 1, createRng(4))
+    expect(during.events.some((e) => e.type === 'hit' && e.target === 'monster')).toBe(false)
+    const after = run(during.state, TIMINGS.impactDelay + 0.05, createRng(5))
+    expect(after.events.some((e) => e.type === 'hit' && e.target === 'monster' && e.skill)).toBe(
+      true,
+    )
+  })
+
   it('casts a ready skill for its MP, then waits for the cooldown', () => {
     const { state, events } = run(engaged(caster([rank()])), 2.9, createRng(2))
     const casts = events.filter((e) => e.type === 'cast')
     expect(casts).toHaveLength(1)
-    expect(casts[0]).toMatchObject({ source: 'player', skillId: 1, name: 'Strike', castTime: 0.5 })
+    expect(casts[0]).toMatchObject({
+      source: 'player',
+      skillId: 1,
+      name: 'Strike',
+      castTime: TIMINGS.impactDelay,
+    })
     expect(events.some((e) => e.type === 'hit' && e.skill)).toBe(true)
     expect(state.player.mp).toBeLessThan(100)
     expect(state.player.mp).toBeGreaterThan(90)

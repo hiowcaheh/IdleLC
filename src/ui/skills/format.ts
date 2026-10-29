@@ -95,12 +95,15 @@ export function describeEffect(effect: SkillEffect, rank: SkillRank): string {
   }
 }
 
-/** Cost and timing line of a rank ("12 MP · cast 2.6 s · every 3 s"). */
+/** Cost and timing line of a rank ("12 MP · instant · cooldown 3 s"). */
 export function rankCosts(rank: SkillRank): string {
   if (rank.kind === 'passive') return 'Always active'
   const parts = [`${rank.mpCost} MP`]
   if (rank.hpCost > 0) parts.push(`${rank.hpCost} HP`)
-  parts.push(`cast ${seconds(rank.castTime)}`, `cooldown ${seconds(rank.cooldown)}`)
+  parts.push(
+    rank.castTime > 0 ? `cast ${seconds(rank.castTime)}` : 'instant',
+    `cooldown ${seconds(rank.cooldown)}`,
+  )
   return parts.join(' · ')
 }
 

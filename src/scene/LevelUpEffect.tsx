@@ -35,6 +35,8 @@ export function LevelUpEffect() {
   // the light stays mounted (intensity 0) so a level up does not recompile shaders
   const light = useRef<PointLight>(null)
   const time = useRef(-1)
+  // drawn once while fully transparent, so the first level up does not stall on compiling shaders
+  const warmedUp = useRef(false)
   const alphaMap = useMemo(() => fadeTexture(), [])
 
   useEffect(() => () => alphaMap.dispose(), [alphaMap])
@@ -48,7 +50,12 @@ export function LevelUpEffect() {
 
   useFrame((_, delta) => {
     const g = group.current
-    if (!g || time.current < 0) return
+    if (!g) return
+    if (time.current < 0) {
+      if (warmedUp.current) g.visible = false
+      warmedUp.current = true
+      return
+    }
     time.current += Math.min(delta, 0.1)
     const k = time.current / DURATION
     if (k >= 1) {
@@ -73,7 +80,7 @@ export function LevelUpEffect() {
   })
 
   return (
-    <group ref={group} visible={false}>
+    <group ref={group}>
       <mesh ref={pillar} position-y={1.3}>
         <cylinderGeometry args={[0.75, 0.75, 2.6, 32, 1, true]} />
         <meshBasicMaterial

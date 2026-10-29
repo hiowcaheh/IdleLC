@@ -18,9 +18,6 @@ import { GameError } from './errors.ts'
 /** 10 000 units = 1 skill point, as the LC server stores them (t_npc.a_skill_point). */
 export const SP_UNIT = 10_000
 
-/** Shortest cast, in seconds (instant skills still play an attack). */
-export const MIN_CAST_TIME = 0.4
-
 /** A learned skill on a character. */
 export interface LearnedSkill {
   level: number
@@ -118,8 +115,10 @@ export interface SkillRank {
   offensive: boolean
   mpCost: number
   hpCost: number
-  /** Seconds from the start of the cast to the moment it lands. */
+  /** Wind-up before the skill fires, in seconds (t_skill.a_readyTime; 0 = at once). */
   castTime: number
+  /** Animation after it fired (t_skill.a_fireTime), in seconds. */
+  fireTime: number
   /** Seconds before it can be used again (counted from the start of the cast). */
   cooldown: number
   /** Seconds the stat changes, stun or poison last. */
@@ -151,7 +150,7 @@ export function skillRank(skill: SkillDef, level: number, auto = true): SkillRan
           : effects.some((e) => e.kind === 'heal' || e.kind === 'mana')
             ? 'heal'
             : 'buff'
-  const castTime = Math.max(MIN_CAST_TIME, (skill.readyTime + skill.fireTime) / 10)
+  const castTime = skill.readyTime / 10
   return {
     id: skill.id,
     name: skill.name,
@@ -161,6 +160,7 @@ export function skillRank(skill: SkillDef, level: number, auto = true): SkillRan
     mpCost: rank.mp,
     hpCost: rank.hp,
     castTime,
+    fireTime: skill.fireTime / 10,
     cooldown: Math.max(castTime, skill.reuseTime / 10),
     duration: rank.duration / 10,
     effects,
