@@ -2814,3 +2814,226 @@ a.button {
     }
   }
 }
+
+/* ===== Interface pieces from the LC client (public/ui/lc, `npm run convert-lc -- --only ui`) =====
+   9-slice borders stretched from the client's own window frame, title bar, buttons and slots. */
+.sheet {
+  border-style: solid;
+  border-width: 28px 9px 10px;
+  border-image: url('/ui/lc/window.webp') 37 8 10 8 / 28px 9px 10px stretch;
+  border-radius: 0;
+  background: #35393f;
+  padding: 6px 12px calc(16px + var(--safe-bottom));
+}
+
+.sheet__header {
+  min-height: 40px;
+  padding: 0 4px 0 18px;
+  border-style: solid;
+  border-width: 6px 18px;
+  border-image: url('/ui/lc/title.webp') 7 22 7 22 fill / 6px 18px stretch;
+}
+
+.sheet__title {
+  font-size: 17px;
+  color: var(--gilt-bright);
+  text-shadow: 0 1px 2px #000;
+}
+
+.icon-button.sheet__close {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: url('/ui/lc/close.webp') center / contain no-repeat;
+}
+
+.icon-button.sheet__close svg {
+  display: none;
+}
+
+.button {
+  border-style: solid;
+  border-width: 5px 9px;
+  border-image: url('/ui/lc/button.webp') 5 9 fill / 5px 9px stretch;
+  border-radius: 0;
+  background: none;
+  color: #e6edf5;
+  text-shadow: 0 1px 2px #000;
+}
+
+.button--gold,
+.button--primary {
+  border-color: transparent;
+  background: none;
+  color: var(--gilt-bright);
+}
+
+.button:disabled {
+  filter: grayscale(0.7) brightness(0.75);
+}
+
+.item-icon {
+  border: none;
+  border-radius: 0;
+  background: url('/ui/lc/slot.webp') center / 100% 100% no-repeat;
+}
+
+.hunt {
+  border-style: solid;
+  border-width: 8px;
+  border-image: url('/ui/lc/window.webp') 10 8 10 8 / 8px stretch;
+  border-radius: 0;
+  background: rgba(46, 50, 56, 0.94);
+  box-shadow: var(--panel-shadow);
+}
+
+.hunt__shop,
+.hunt__expedition,
+.hunt__target {
+  border-style: solid;
+  border-width: 5px 9px;
+  border-image: url('/ui/lc/button.webp') 5 9 fill / 5px 9px stretch;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: #e6edf5;
+  text-shadow: 0 1px 2px #000;
+}
+
+.hunt__expedition {
+  color: var(--gilt-bright);
+}
+
+.hunt__target.is-active {
+  filter: brightness(1.35) saturate(1.3);
+  color: var(--gilt-bright);
+}
+
+/* list rows: the dark steel of the client's windows instead of leather */
+.item-row {
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(36, 40, 46, 0.95), rgba(24, 27, 31, 0.95));
+  box-shadow:
+    inset 0 0 0 1px rgba(150, 120, 80, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.item-row.is-open {
+  box-shadow:
+    inset 0 0 0 1px var(--gilt),
+    0 0 8px rgba(226, 184, 100, 0.25);
+}
+
+/* The hero's frame from the client (TopUI): positions in % of the 277 × 93 frame picture */
+.unit-frame--player {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.player-frame {
+  position: relative;
+  width: min(76vw, 300px);
+  aspect-ratio: 277 / 93;
+  background: url('/ui/lc/player-frame.webp') center / 100% 100% no-repeat;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.player-frame__portrait {
+  position: absolute;
+  left: 1.6%;
+  top: 9%;
+  width: 26.5%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.player-frame__portrait svg {
+  width: 60%;
+  fill: rgba(226, 184, 100, 0.14);
+  stroke: var(--gilt);
+  stroke-width: 1.6;
+}
+
+.player-frame__level {
+  position: absolute;
+  left: 25.5%;
+  top: 74%;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  transform: translate(-50%, 0);
+  border-radius: 10px;
+  background: #17110c;
+  box-shadow: 0 0 0 1px var(--bronze);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--gilt-bright);
+  font-variant-numeric: tabular-nums;
+}
+
+.player-frame__name {
+  position: absolute;
+  left: 42.5%;
+  top: 4%;
+  width: 36%;
+  height: 25%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--gilt-bright);
+  text-shadow: 0 1px 2px #000;
+}
+
+.player-frame__bar {
+  position: absolute;
+  left: 39%;
+  width: 45.5%;
+}
+
+.player-frame__bar--hp {
+  top: 35.5%;
+}
+
+.player-frame__bar--mp {
+  top: 49.5%;
+}
+
+.player-frame__bar--exp {
+  top: 63.5%;
+}
+
+.player-frame__bar .bar {
+  height: 11px;
+  margin: 0;
+  border-radius: 1px;
+  background: rgba(0, 0, 0, 0.55);
+  box-shadow: none;
+}
+
+.player-frame__bar .bar__text {
+  font-size: 8.5px;
+  line-height: 11px;
+}
+
+.bar--exp .bar__fill {
+  background: linear-gradient(180deg, #f6df7a, #c99a2e 55%, #7d5a17);
+}
+
+.player-frame__below {
+  width: min(76vw, 300px);
+  margin-top: 2px;
+  padding: 2px 8px;
+}

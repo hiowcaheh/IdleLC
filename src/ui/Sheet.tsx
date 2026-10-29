@@ -39,7 +39,12 @@ export function Sheet({
             {title}
           </h2>
           {extra}
-          <button type="button" className="icon-button" onClick={onClose} aria-label="Close">
+          <button
+            type="button"
+            className="icon-button sheet__close"
+            onClick={onClose}
+            aria-label="Close"
+          >
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6 6 L18 18 M18 6 L6 18" />
             </svg>

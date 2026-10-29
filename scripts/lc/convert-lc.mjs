@@ -13,7 +13,7 @@
  * Options:
  *   --out <dir>            output folder (default public/models/lc)
  *   --data <lc-data.json>  generated game data (default src/game/data/generated/lc-data.json)
- *   --only <id,id>         convert only these model ids (e.g. fox,class-knight); `icons` = item and skill icons
+ *   --only <id,id>         convert only these model ids (e.g. fox,class-knight); `icons` = item and skill icons, `ui` = interface pieces
  *   --smc <path>           convert one .smc (client path or file); with --anims <a,b> to pick clips
  *   --max-texture <px>     longest texture side (default 1024)
  *
@@ -30,6 +30,7 @@ import { MeshoptDecoder, MeshoptEncoder } from 'meshoptimizer'
 import { CLASS_MODELS } from './classes.mjs'
 import { ClientFiles } from './client.mjs'
 import { ICON_KINDS, buildIconSheet, buildPortraitSheet } from './icons.mjs'
+import { buildUiParts } from './ui.mjs'
 import { buildModelManifest, modelIdFromSmc } from './manifest.mjs'
 import { buildModel } from './model.mjs'
 import { parseSmc } from './smc.mjs'
@@ -144,7 +145,9 @@ async function main() {
   fs.mkdirSync(args.out, { recursive: true })
 
   // `--only icons` rebuilds just the item icons
-  const iconsOnly = args.only?.size === 1 && args.only.has('icons')
+  // `--only icons` / `--only ui` (or both) convert no models
+  const iconsOnly =
+    args.only !== undefined && [...args.only].every((o) => o === 'icons' || o === 'ui')
   const jobs = iconsOnly ? [] : listJobs(args, data, files)
   const textureCache = new Map()
   const shaders = new Set()
@@ -182,6 +185,17 @@ async function main() {
       console.error(`fail  ${job.id}  ${error instanceof Error ? error.message : error}`)
       failed++
     }
+  }
+
+  if (!args.smc && args.only?.has('ui')) {
+    const parts = await buildUiParts(files)
+    const dir = path.join(ROOT, 'public', 'ui', 'lc')
+    fs.mkdirSync(dir, { recursive: true })
+    for (const [name, image] of Object.entries(parts))
+      fs.writeFileSync(path.join(dir, `${name}.webp`), image)
+    console.log(
+      `ui: ${Object.keys(parts).join(', ') || 'no interface atlases in the client folder(s)'}`,
+    )
   }
 
   if (data && !args.smc && (!args.only || args.only.has('icons'))) {

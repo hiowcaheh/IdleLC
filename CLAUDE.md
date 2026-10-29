@@ -38,7 +38,10 @@ Budujemy **IdleLC** — przeglądarkowe RPG typu IDLE / AFK z walką 3D, w klima
 - `npm run convert-models` (gltf-transform; FBX/OBJ/DAE przez Blendera w trybie headless) konwertuje modele z `assets-src/` do zoptymalizowanych GLB.
 - **Assety wymienne przez manifest:** każdy potwór/postać ma wpis w `src/game/assets/manifest.json`: `id`, ścieżka do modelu, skala, mapa nazw animacji (`idle`, `run`, `attack`, `hit`, `die`). Podmiana modelu = zmiana jednego wpisu, bez ruszania kodu gry.
 - Assety spoza repo mogą być ładowane z konfigurowalnego `VITE_ASSET_BASE_URL`. Domyślnie gra działa na assetach CC0 z repo.
-- Nie używaj nazwy „Last Chaos”, logotypów ani oryginalnych grafik w nazwie, UI ani materiałach promocyjnych. Nazwa gry: IdleLC.
+- Nie używaj nazwy „Last Chaos” ani logotypów w nazwie, UI ani materiałach promocyjnych. Nazwa gry: IdleLC.
+  **Decyzja właściciela (2026-10-29):** grafiki interfejsu z klienta (ramki okien, przyciski, sloty, ramka
+  gracza, ikony, portrety) wolno używać w UI gry — `npm run convert-lc -- --client <klient 2015> --only ui`
+  tnie je do `public/ui/lc/` (interfejs klienta Nemesis jest zaszyfrowany).
 - **Dane gry mają być 1:1 z bazy danych LC** dostarczonej przez właściciela (klasy, potwory, przedmioty, drop, exp, strefy, umiejętności, nazwy) — decyzja właściciela. Brakujące w zrzucie elementy (statystyki startowe klas, poziomy umiejętności `t_skillLevel`, wzory obrażeń, szanse ulepszeń) uzupełniamy z kodu serwera, jeśli właściciel go dostarczy, inaczej proponujemy własne i oznaczamy jako własne.
 
 ## Dane gry (na razie pliki TS w repo)
