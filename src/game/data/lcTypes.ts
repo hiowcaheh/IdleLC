@@ -69,6 +69,12 @@ export interface LcData {
   shop?: { sellRate: number; buyRate: number }
   /** Class skills (base classes), see scripts/lc/import-db.mjs buildSkills. */
   skills?: LcSkill[]
+  /** Item ids the NPC shops of each field zone sell (gear and the upgrade stone), by zone id. */
+  shops?: Record<string, number[]>
+  /** The free level-1 set of each class, by class id. */
+  starterGear?: Record<string, number[]>
+  /** Typical gear power of each class per level (index 0 = level 1), see import-db buildGearReference. */
+  gearReference?: Record<string, { weapon: number[]; armor: number[] }>
 }
 
 export interface LcSkill {

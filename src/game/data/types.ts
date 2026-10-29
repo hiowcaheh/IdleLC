@@ -78,6 +78,22 @@ export interface MonsterDrop {
 
 export type ItemType = 'weapon' | 'armor' | 'scroll' | 'material' | 'accessory' | 'potion' | 'other'
 
+/** Equipment slots (LC t_item.a_wearing 0…6). */
+export type EquipSlot = 'helmet' | 'armor' | 'weapon' | 'pants' | 'shield' | 'gloves' | 'boots'
+
+/** What a weapon or armor piece gives, 1:1 from t_item.a_num_0…2. */
+export interface GearDef {
+  slot: EquipSlot
+  /** Classes that can wear it (a_job_flag). */
+  classes: ClassId[]
+  attack: number
+  magicAttack: number
+  defense: number
+  magicDefense: number
+  /** Weapons: seconds between attacks (a_num_2 in 1/10 s). */
+  attackInterval?: number
+}
+
 export interface ItemDef {
   id: number
   name: string
@@ -86,6 +102,8 @@ export interface ItemDef {
   level: number
   /** Shop price in gold. */
   price: number
+  /** Weapons and armor. */
+  gear?: GearDef
 }
 
 /** One effect of a skill level: t_magic (type, subtype, damage type) + t_magiclevel.a_power. */
