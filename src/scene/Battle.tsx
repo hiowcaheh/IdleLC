@@ -13,6 +13,7 @@ import { Character, type CharacterHandle } from './Character.tsx'
 import { DamageNumbers } from './DamageNumbers.tsx'
 import { HpBar3D } from './HpBar3D.tsx'
 import { LevelUpEffect } from './LevelUpEffect.tsx'
+import { ModelBoundary } from './ModelBoundary.tsx'
 import { SkillAura } from './SkillAura.tsx'
 import { ARENA_RADIUS, smoothstep } from './terrain.ts'
 import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
@@ -283,17 +284,21 @@ export function Battle() {
   return (
     <>
       <group ref={playerGroup}>
-        <Character key={playerModel} ref={player} modelId={playerModel} />
+        <ModelBoundary resetKey={playerModel}>
+          <Character key={playerModel} ref={player} modelId={playerModel} />
+        </ModelBoundary>
       </group>
       <group ref={monsterGroup} visible={false}>
-        <Suspense fallback={null}>
-          <Character
-            key={`${monsterModel}:${monsterDef.scale ?? 1}`}
-            ref={monster}
-            modelId={monsterModel}
-            scale={monsterDef.scale ?? 1}
-          />
-        </Suspense>
+        <ModelBoundary resetKey={monsterModel}>
+          <Suspense fallback={null}>
+            <Character
+              key={`${monsterModel}:${monsterDef.scale ?? 1}`}
+              ref={monster}
+              modelId={monsterModel}
+              scale={monsterDef.scale ?? 1}
+            />
+          </Suspense>
+        </ModelBoundary>
       </group>
       <HpBar3D
         color="#62c04a"
