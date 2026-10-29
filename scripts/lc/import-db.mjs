@@ -13,10 +13,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { NodeIO } from '@gltf-transform/core'
-import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
-import { getBounds } from '@gltf-transform/functions'
-import { MeshoptDecoder } from 'meshoptimizer'
+import { buildModelManifest, modelIdFromSmc } from './manifest.mjs'
 import { int, num, readTables } from './sql.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
@@ -38,21 +35,6 @@ const FIELD_ZONES = [
   { index: 42, name: 'Alber' }, // 6259 "Alber (Trouble Spot)"
 ]
 
-/** Player class models built from the client (animation names are not in the database). */
-const CLASS_MODELS = {
-  'class-knight': {
-    animations: {
-      idle: 'ni_idle_01',
-      run: 'ni_run_01',
-      walk: 'ni_walk_01',
-      attack: ['ni_att_01', 'ni_att_02', 'ni_att_03', 'ni_att_04'],
-      hit: 'ni_dam',
-      die: 'ni_die_01',
-      victory: 'ni_idle_02',
-    },
-  },
-}
-
 /** t_npc.a_flag: bit 2 = can be attacked (monsters), bit 27 = elite. */
 const FLAG_ATTACKABLE = 1 << 2
 const FLAG_ELITE = 1 << 27
@@ -70,8 +52,6 @@ function parseArgs(argv) {
     args.dump = path.join(args.dump, 'newproject_data.sql')
   return args
 }
-
-const modelIdFromSmc = (smc) => path.basename(String(smc).replace(/\\/g, '/'), '.smc').toLowerCase()
 
 function buildData(tables) {
   const npcs = new Map(tables.t_npc.map((r) => [int(r.a_index), r]))
@@ -123,9 +103,10 @@ function buildData(tables) {
       smc: String(r.a_file_smc),
       animations: {
         idle: r.a_motion_idle,
+        idle2: r.a_motion_idle2 !== r.a_motion_idle ? r.a_motion_idle2 || undefined : undefined,
         walk: r.a_motion_walk,
         run: r.a_motion_run,
-        attack: r.a_motion_attack,
+        attack: [...new Set([r.a_motion_attack, r.a_motion_attack2].filter(Boolean))],
         hit: r.a_motion_dam,
         die: r.a_motion_die,
       },
@@ -168,64 +149,6 @@ function buildData(tables) {
   }
 
   return { version: 1, generatedAt: new Date().toISOString(), monsters, zones, items, expTable }
-}
-
-async function buildModelManifest(data, modelsDir) {
-  await MeshoptDecoder.ready
-  const io = new NodeIO()
-    .registerExtensions(ALL_EXTENSIONS)
-    .registerDependencies({ 'meshopt.decoder': MeshoptDecoder })
-  const wanted = new Map(Object.entries(CLASS_MODELS))
-  for (const m of data.monsters)
-    if (!wanted.has(m.model)) wanted.set(m.model, { animations: m.animations })
-
-  const models = []
-  for (const [id, def] of wanted) {
-    const file = `${id}.glb`
-    const full = path.join(modelsDir, file)
-    if (!fs.existsSync(full)) continue
-    const doc = await io.read(full)
-    const scene = doc.getRoot().getDefaultScene() ?? doc.getRoot().listScenes()[0]
-    const { min, max } = getBounds(scene)
-    // clip names in the database and in the .ba files sometimes differ in letter case
-    const clips = new Map(
-      doc
-        .getRoot()
-        .listAnimations()
-        .map((a) => [a.getName().toLowerCase(), a]),
-    )
-    const clipName = (name) => (name ? clips.get(String(name).toLowerCase())?.getName() : undefined)
-    const duration = (name) =>
-      Math.max(
-        0,
-        ...(clips
-          .get(name.toLowerCase())
-          ?.listSamplers()
-          .map((s) => s.getInput().getMax([0])[0]) ?? [0]),
-      )
-    const animations = {}
-    for (const [key, value] of Object.entries(def.animations)) {
-      const names = [value].flat().map(clipName)
-      if (names.length && names.every(Boolean))
-        animations[key] = Array.isArray(value) ? names : names[0]
-    }
-    const attacks = [animations.attack ?? []].flat()
-    for (const required of ['idle', 'run', 'attack', 'die']) {
-      if (!animations[required]) console.warn(`  ${id}: missing "${required}" clip`)
-    }
-    models.push({
-      id,
-      file,
-      scale: 1,
-      animations,
-      // the blow lands roughly 40% into the attack clip
-      attackImpact: attacks.length ? Math.min(0.6, duration(attacks[0]) * 0.4) : 0.4,
-      height: max[1] - min[1],
-      radius: Math.max(max[0] - min[0], max[2] - min[2]) / 2,
-      tint: {},
-    })
-  }
-  return { baseUrl: 'assets-local/models/lc/', models }
 }
 
 async function main() {

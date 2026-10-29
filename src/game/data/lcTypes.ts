@@ -28,7 +28,8 @@ export interface LcMonster {
   /** Model id = .smc file name, lower case (e.g. "fox"). */
   model: string
   smc: string
-  animations: Record<string, string>
+  /** t_npc.a_motion_* clip names; `attack` holds a_motion_attack and a_motion_attack2. */
+  animations: Record<string, string | string[] | undefined>
   zones: string[]
   drops: LcDrop[]
 }

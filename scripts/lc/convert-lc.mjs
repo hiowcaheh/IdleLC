@@ -1,0 +1,197 @@
+#!/usr/bin/env node
+/**
+ * Converts LC client models into optimized GLB files for the game (local use only — the output
+ * folder is git-ignored and must not be committed while the repo is public).
+ *
+ *   npm run convert-lc -- --client <client folder> [--client <another>] [options]
+ *
+ * Without --smc it converts the player class models (classes.mjs) and every monster model listed
+ * in src/game/data/generated/lc-data.json (run `npm run import-lc-db` first), keeping only the
+ * clips the database uses, then refreshes lc-models.json.
+ *
+ * Options:
+ *   --out <dir>            output folder (default public/assets-local/models/lc)
+ *   --data <lc-data.json>  generated game data (default src/game/data/generated/lc-data.json)
+ *   --only <id,id>         convert only these model ids (e.g. fox,class-knight)
+ *   --smc <path>           convert one .smc (client path or file); with --anims <a,b> to pick clips
+ *   --max-texture <px>     longest texture side (default 1024)
+ *
+ * See docs/lc-formats.md for the file formats.
+ */
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { Logger, NodeIO } from '@gltf-transform/core'
+import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
+import { dedup, meshopt, prune, resample, weld } from '@gltf-transform/functions'
+import { MeshoptDecoder, MeshoptEncoder } from 'meshoptimizer'
+import { CLASS_MODELS } from './classes.mjs'
+import { ClientFiles } from './client.mjs'
+import { buildModelManifest, modelIdFromSmc } from './manifest.mjs'
+import { buildModel } from './model.mjs'
+import { parseSmc } from './smc.mjs'
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
+const GENERATED = path.join(ROOT, 'src/game/data/generated')
+const DEFAULT_OUT = path.join(ROOT, 'public/assets-local/models/lc')
+
+function parseArgs(argv) {
+  const args = {
+    clients: [],
+    out: DEFAULT_OUT,
+    data: path.join(GENERATED, 'lc-data.json'),
+    maxTexture: 1024,
+  }
+  for (let i = 0; i < argv.length; i++) {
+    const flag = argv[i]
+    const value = () => {
+      if (i + 1 >= argv.length) throw new Error(`${flag} needs a value`)
+      return argv[++i]
+    }
+    if (flag === '--client') args.clients.push(path.resolve(value()))
+    else if (flag === '--out') args.out = path.resolve(value())
+    else if (flag === '--data') args.data = path.resolve(value())
+    else if (flag === '--only') args.only = new Set(value().toLowerCase().split(','))
+    else if (flag === '--smc') args.smc = value()
+    else if (flag === '--anims') args.anims = value().split(',')
+    else if (flag === '--max-texture') args.maxTexture = Number(value())
+    else if (flag === '--help' || flag === '-h') args.help = true
+    else throw new Error(`unknown option ${flag}`)
+  }
+  return args
+}
+
+/** Conversion jobs: { id, smc (client path or parsed), animations (clip names or null) }. */
+function listJobs(args, data, files) {
+  if (args.smc) {
+    const smc = fs.existsSync(args.smc) ? path.resolve(args.smc) : args.smc
+    return [{ id: modelIdFromSmc(args.smc), smc, animations: args.anims ?? null }]
+  }
+  const jobs = Object.entries(CLASS_MODELS).map(([id, def]) => ({
+    id,
+    smc: def.smc,
+    animations: Object.values(def.animations).flat(),
+  }))
+  const monsters = new Map()
+  for (const m of data?.monsters ?? []) {
+    const job = monsters.get(m.model) ?? { id: m.model, smc: m.smc, animations: new Set() }
+    for (const clip of Object.values(m.animations).flat())
+      if (clip) job.animations.add(String(clip))
+    monsters.set(m.model, job)
+  }
+  let absent = 0
+  for (const job of monsters.values()) {
+    if (!files.resolve(job.smc)) {
+      absent++ // not in this client (yet)
+      continue
+    }
+    jobs.push({ ...job, animations: [...job.animations] })
+  }
+  if (absent)
+    console.log(`${absent} of ${monsters.size} monster models are not in the client folder(s)`)
+  return args.only ? jobs.filter((j) => args.only.has(j.id)) : jobs
+}
+
+function readSmc(job, files) {
+  if (typeof job.smc === 'object') return job.smc
+  const text = fs.existsSync(job.smc)
+    ? fs.readFileSync(job.smc, 'latin1')
+    : files.read(job.smc).toString('latin1')
+  return parseSmc(text)
+}
+
+const USAGE =
+  'Usage: npm run convert-lc -- --client <client folder> [--client <another>] [--only fox,class-knight]\n' +
+  '       [--smc <model.smc> [--anims a,b]] [--out <dir>] [--data <lc-data.json>] [--max-texture 1024]'
+
+async function main() {
+  let args
+  try {
+    args = parseArgs(process.argv.slice(2))
+  } catch (error) {
+    console.error(`${error.message}\n${USAGE}`)
+    process.exit(1)
+  }
+  if (args.help || args.clients.length === 0) {
+    console.log(USAGE)
+    process.exit(args.help ? 0 : 1)
+  }
+
+  const absent = args.clients.filter((dir) => !fs.existsSync(dir))
+  if (absent.length) {
+    console.error(`client folder not found: ${absent.join(', ')}`)
+    process.exit(1)
+  }
+  const files = new ClientFiles(args.clients)
+  console.log(`client: ${files.size} files in ${args.clients.join(', ')}`)
+  const data = fs.existsSync(args.data) ? JSON.parse(fs.readFileSync(args.data, 'utf8')) : null
+  if (!data && !args.smc)
+    console.warn(
+      `no ${path.relative(ROOT, args.data)} — monsters skipped (run npm run import-lc-db first)`,
+    )
+
+  await MeshoptEncoder.ready
+  await MeshoptDecoder.ready
+  const io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({
+    'meshopt.encoder': MeshoptEncoder,
+    'meshopt.decoder': MeshoptDecoder,
+  })
+  fs.mkdirSync(args.out, { recursive: true })
+
+  const jobs = listJobs(args, data, files)
+  const textureCache = new Map()
+  const shaders = new Set()
+  let converted = 0
+  let failed = 0
+  for (const job of jobs) {
+    try {
+      const smc = readSmc(job, files)
+      const options = { animations: job.animations, maxTextureSize: args.maxTexture, textureCache }
+      let { document, stats } = await buildModel(files, smc, options)
+      if (job.animations?.length && stats.animations.length === 0 && stats.bones > 0) {
+        // none of the requested clip names exist: keep every clip rather than none
+        ;({ document, stats } = await buildModel(files, smc, { ...options, animations: null }))
+      }
+      if (stats.meshes === 0) throw new Error(`no meshes (missing: ${stats.missing.join(', ')})`)
+      stats.shaders.forEach((s) => shaders.add(s))
+      document.setLogger(new Logger(Logger.Verbosity.ERROR))
+      await document.transform(
+        dedup(),
+        prune(),
+        weld(),
+        resample(),
+        meshopt({ encoder: MeshoptEncoder, level: 'medium' }),
+      )
+      const outFile = path.join(args.out, `${job.id}.glb`)
+      await io.write(outFile, document)
+      const size = (fs.statSync(outFile).size / 1024).toFixed(0)
+      console.log(
+        `ok    ${job.id}  ${size} KB  meshes ${stats.meshes}, bones ${stats.bones}, ` +
+          `clips ${stats.animations.length}` +
+          (stats.missing.length ? `  (missing: ${stats.missing.join(', ')})` : ''),
+      )
+      converted++
+    } catch (error) {
+      console.error(`fail  ${job.id}  ${error instanceof Error ? error.message : error}`)
+      failed++
+    }
+  }
+
+  // the manifest points the game at the default folder, so only that folder updates it
+  if (data && args.out === DEFAULT_OUT) {
+    const manifest = await buildModelManifest(data, args.out)
+    fs.mkdirSync(GENERATED, { recursive: true })
+    fs.writeFileSync(path.join(GENERATED, 'lc-models.json'), JSON.stringify(manifest, null, 2))
+    console.log(`lc-models.json: ${manifest.models.length} models`)
+  }
+  console.log(
+    `\nDone: ${converted} converted, ${failed} failed -> ${path.relative(ROOT, args.out)}` +
+      `\nshaders: ${[...shaders].sort().join(', ') || 'none'}`,
+  )
+  if (failed) process.exitCode = 1
+}
+
+main().catch((error) => {
+  console.error(error)
+  process.exit(1)
+})
