@@ -25,6 +25,115 @@
       "tint": {}
     },
     {
+      "id": "class-titan",
+      "file": "class-titan.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "ti_idle_01",
+        "run": "ti_run_01",
+        "walk": "ti_walk_01",
+        "attack": [
+          "ti_att_01",
+          "ti_att_02",
+          "ti_att_03",
+          "ti_att_04"
+        ],
+        "hit": "ti_dam",
+        "die": "ti_die_01",
+        "victory": "ti_idle_02"
+      },
+      "attackImpact": 0.5599944114685059,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "class-healer",
+      "file": "class-healer.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "hw_idle_01",
+        "run": "hw_run_01",
+        "walk": "hw_walk_01",
+        "attack": [
+          "hw_att_01",
+          "hw_att_02"
+        ],
+        "hit": "hw_dam",
+        "die": "hw_die_01",
+        "victory": "hw_idle_02"
+      },
+      "attackImpact": 0.4666619777679444,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "class-mage",
+      "file": "class-mage.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "ma_idle_01",
+        "run": "ma_run_01",
+        "walk": "ma_walk_01",
+        "attack": [
+          "ma_att_01",
+          "ma_att_02"
+        ],
+        "hit": "ma_dam",
+        "die": "ma_die_01",
+        "victory": "ma_idle_02"
+      },
+      "attackImpact": 0.5599944114685059,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "class-rogue",
+      "file": "class-rogue.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "ro_idle_01",
+        "run": "ro_run_01",
+        "walk": "ro_walk_01",
+        "attack": [
+          "ro_att_01",
+          "ro_att_02",
+          "ro_att_03"
+        ],
+        "hit": "ro_dam",
+        "die": "ro_die_01",
+        "victory": "ro_idle_02"
+      },
+      "attackImpact": 0.42666239738464357,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "class-sorcerer",
+      "file": "class-sorcerer.glb",
+      "scale": 1,
+      "animations": {
+        "idle": "so_idle_01",
+        "run": "so_run_02",
+        "walk": "so_run_02",
+        "attack": [
+          "so_att_01",
+          "so_att_02",
+          "so_att_03"
+        ],
+        "hit": "so_dam",
+        "die": "so_die",
+        "victory": "so_idle_02"
+      },
+      "attackImpact": 0.5599944114685059,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "fox",
       "file": "fox.glb",
       "scale": 1,
