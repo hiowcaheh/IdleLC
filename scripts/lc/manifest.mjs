@@ -11,7 +11,7 @@ import { getBounds } from '@gltf-transform/functions'
 import { MeshoptDecoder } from 'meshoptimizer'
 import { CLASS_MODELS } from './classes.mjs'
 
-export const MODELS_BASE_URL = 'assets-local/models/lc/'
+export const MODELS_BASE_URL = 'models/lc/'
 
 /** Model id from an .smc path (`Data\monster\Animals\Fox.smc` → `fox`). */
 export const modelIdFromSmc = (smc) =>

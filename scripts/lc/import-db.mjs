@@ -2,13 +2,13 @@
 /**
  * Generates IdleLC game data 1:1 from the LC database dump (newproject_data.sql).
  *
- *   npm run import-lc-db -- --dump <newproject_data.sql> [--models public/assets-local/models/lc]
+ *   npm run import-lc-db -- --dump <newproject_data.sql> [--models public/models/lc]
  *
- * Writes (git-ignored, never committed while the repo is public):
+ * Writes (committed by the owner's decision; the dump itself stays out of the repo):
  *   src/game/data/generated/lc-data.json    monsters, field zones, drops, items, exp table
  *   src/game/data/generated/lc-models.json  model manifest for the LC GLBs that exist in --models
  *
- * The game uses them only with VITE_LC_DATA=1 (see README). See docs/lc-database.md.
+ * The game uses them whenever they exist (see README). See docs/lc-database.md.
  */
 import fs from 'node:fs'
 import path from 'node:path'
@@ -41,7 +41,7 @@ const FLAG_ELITE = 1 << 27
 
 function parseArgs(argv) {
   const args = {
-    models: path.join(ROOT, 'public/assets-local/models/lc'),
+    models: path.join(ROOT, 'public/models/lc'),
     out: path.join(ROOT, 'src/game/data/generated'),
   }
   for (let i = 0; i < argv.length; i++) {

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Converts LC client models into optimized GLB files for the game (local use only — the output
- * folder is git-ignored and must not be committed while the repo is public).
+ * Converts LC client models into optimized GLB files for the game (public/models/lc, committed by
+ * the owner's decision; the client folder itself stays out of the repo).
  *
  *   npm run convert-lc -- --client <client folder> [--client <another>] [options]
  *
@@ -10,7 +10,7 @@
  * clips the database uses, then refreshes lc-models.json.
  *
  * Options:
- *   --out <dir>            output folder (default public/assets-local/models/lc)
+ *   --out <dir>            output folder (default public/models/lc)
  *   --data <lc-data.json>  generated game data (default src/game/data/generated/lc-data.json)
  *   --only <id,id>         convert only these model ids (e.g. fox,class-knight)
  *   --smc <path>           convert one .smc (client path or file); with --anims <a,b> to pick clips
@@ -33,7 +33,7 @@ import { parseSmc } from './smc.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const GENERATED = path.join(ROOT, 'src/game/data/generated')
-const DEFAULT_OUT = path.join(ROOT, 'public/assets-local/models/lc')
+const DEFAULT_OUT = path.join(ROOT, 'public/models/lc')
 
 function parseArgs(argv) {
   const args = {

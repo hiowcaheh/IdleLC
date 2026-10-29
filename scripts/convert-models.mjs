@@ -10,8 +10,8 @@
  * - .fbx / .obj / .dae are first exported to glTF with Blender in headless mode,
  *   if Blender is available (on PATH or via the BLENDER env var).
  *
- * Output goes to a git-ignored folder by default: private source assets must never be committed
- * (the repository is public). Only CC0 assets belong in public/models/.
+ * Output goes to a git-ignored folder by default (local experiments). Only CC0 assets belong in
+ * public/models/ — apart from public/models/lc/, written by `npm run convert-lc`.
  */
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, statSync } from 'node:fs'

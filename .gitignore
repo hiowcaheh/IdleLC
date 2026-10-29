@@ -7,9 +7,9 @@ dist
 .env.local
 .env.*.local
 
-# Owner's private source assets (never committed, repo is public)
+# Owner's source files (LC client folders, database dump) — never committed
 assets-src/
-# Locally converted private assets, loaded via VITE_ASSET_BASE_URL
+# Local experiments, loaded via VITE_ASSET_BASE_URL
 public/assets-local/
 
 # editor / OS
@@ -22,6 +22,3 @@ public/assets-local/
 # Python
 __pycache__/
 *.pyc
-
-# Generated from the LC database dump (never committed while the repo is public)
-src/game/data/generated/

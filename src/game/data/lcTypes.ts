@@ -77,7 +77,7 @@ export interface LcModelEntry {
 }
 
 export interface LcModelManifest {
-  /** Relative to the app base URL, e.g. "assets-local/models/lc/". */
+  /** Relative to the app base URL, e.g. "models/lc/". */
   baseUrl: string
   models: LcModelEntry[]
 }
