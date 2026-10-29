@@ -24,6 +24,8 @@ interface GameStore {
   timeScale: number
   syncCombat(combat: CombatState): void
   selectMonster(monsterId: string): void
+  selectZone(zoneId: string): void
+  setPlayerLevel(level: number): void
   updateSettings(patch: Partial<Settings>): void
   resetSave(): void
   setTimeScale(scale: number): void
@@ -62,6 +64,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
   selectMonster(monsterId) {
     combatEvents.emit(gameService.selectMonster(monsterId))
     set({ save: gameService.getSave(), hud: toHud(gameService.getCombat()) })
+  },
+
+  selectZone(zoneId) {
+    combatEvents.emit(gameService.selectZone(zoneId))
+    set({ save: gameService.getSave(), hud: toHud(gameService.getCombat()) })
+  },
+
+  setPlayerLevel(level) {
+    gameService.setPlayerLevel(level)
+    set({ hud: toHud(gameService.getCombat()) })
   },
 
   updateSettings(patch) {

@@ -14,6 +14,10 @@ export interface GameService {
   combatTick(dt: number): CombatEvent[]
   /** Switches the fought monster within the current zone. */
   selectMonster(monsterId: string): CombatEvent[]
+  /** Moves to another zone and starts hunting its first monster. */
+  selectZone(zoneId: string): CombatEvent[]
+  /** Dev tool until progression (M3): sets the player's level. */
+  setPlayerLevel(level: number): void
   updateSettings(patch: Partial<Settings>): SaveData
   /** Wipes the save and starts over. */
   resetSave(): SaveData

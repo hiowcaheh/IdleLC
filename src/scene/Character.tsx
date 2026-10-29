@@ -67,6 +67,8 @@ function fadeTo(state: AnimState, action: AnimationAction, fade: number): void {
 interface Props {
   modelId: string
   ref?: Ref<CharacterHandle>
+  /** Extra scale on top of the manifest scale (e.g. LC t_npc.a_scale). */
+  scale?: number
   /** Animation speed multiplier source; defaults to the dev time scale. */
   timeScale?: () => number
 }
@@ -94,20 +96,27 @@ function prepareModel(source: Object3D, model: ModelEntry) {
   return { object, materials }
 }
 
-export function Character({ modelId, ref, timeScale }: Props) {
+export function Character({ modelId, ref, timeScale, scale = 1 }: Props) {
   const model = getModel(modelId)
   const gltf = useGLTF(modelUrl(model))
   const { object, materials } = useMemo(() => prepareModel(gltf.scene, model), [gltf.scene, model])
   const mixer = useMemo(() => new AnimationMixer(object), [object])
 
-  const actions = useMemo(() => {
+  const { actions, attacks } = useMemo(() => {
+    const find = (clipName: string, logical: string) => {
+      const clip = AnimationClip.findByName(gltf.animations, clipName)
+      if (!clip) console.warn(`[${model.id}] clip "${clipName}" not found for "${logical}"`)
+      return clip ? mixer.clipAction(clip) : undefined
+    }
     const map: Partial<Record<LogicalAnimation, AnimationAction>> = {}
     for (const [logical, clipName] of Object.entries(model.animations)) {
-      const clip = AnimationClip.findByName(gltf.animations, clipName)
-      if (clip) map[logical as LogicalAnimation] = mixer.clipAction(clip)
-      else console.warn(`[${model.id}] clip "${clipName}" not found for "${logical}"`)
+      const action = find(clipName, logical)
+      if (action) map[logical as LogicalAnimation] = action
     }
-    return map
+    const attackActions = model.attacks
+      .map((name) => find(name, 'attack'))
+      .filter((a): a is AnimationAction => Boolean(a))
+    return { actions: map, attacks: attackActions }
   }, [gltf.animations, mixer, model])
 
   const flinchRef = useRef<Group>(null)
@@ -121,6 +130,7 @@ export function Character({ modelId, ref, timeScale }: Props) {
     height: 1.8,
     measured: 0,
   })
+  const swing = useRef(0)
 
   useEffect(() => {
     const state = anim.current
@@ -171,7 +181,7 @@ export function Character({ modelId, ref, timeScale }: Props) {
         if (!state.oneShot && !state.dead) playBase(0.2)
       },
       attack() {
-        const action = actions.attack
+        const action = attacks[swing.current++ % Math.max(1, attacks.length)]
         if (state.dead || !action) return
         playOnce(action, model.attackImpact / TIMINGS.impactDelay, 0.08)
       },
@@ -205,7 +215,7 @@ export function Character({ modelId, ref, timeScale }: Props) {
       },
       height: () => state.height,
     }
-  }, [actions, model])
+  }, [actions, attacks, model])
 
   useFrame((_, delta) => {
     const state = anim.current
@@ -239,7 +249,7 @@ export function Character({ modelId, ref, timeScale }: Props) {
 
   return (
     <group ref={flinchRef}>
-      <primitive object={object} scale={model.scale} />
+      <primitive object={object} scale={model.scale * scale} />
     </group>
   )
 }

@@ -47,4 +47,7 @@ export interface MonsterDef {
   exp: number
   gold: number
   modelId: string
+  /** Extra model scale on top of the manifest scale (LC: t_npc.a_scale). */
+  scale?: number
+  elite?: boolean
 }

@@ -1,7 +1,7 @@
 import { PerformanceMonitor, useGLTF } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Suspense, useEffect, useState } from 'react'
-import { getModel, modelUrl } from '../game/assets/manifest.ts'
+import { getModel, modelUrl, playerModelId } from '../game/assets/manifest.ts'
 import { getMonster } from '../game/data/monsters.ts'
 import { ZONES } from '../game/data/zones.ts'
 import type { GraphicsQuality } from '../game/logic/save.ts'
@@ -40,7 +40,7 @@ function QualityCanvas({
   const shadows = quality !== 'low'
 
   useEffect(() => {
-    preloadModel('hero')
+    preloadModel(playerModelId('knight'))
     for (const id of zone.monsterIds) preloadModel(getMonster(id).modelId)
   }, [zone])
 

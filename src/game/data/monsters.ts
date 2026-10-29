@@ -1,6 +1,9 @@
+import { hasModel } from '../assets/manifest.ts'
+import { lcData } from './lcSource.ts'
+import type { LcMonster } from './lcTypes.ts'
 import type { MonsterDef } from './types.ts'
 
-export const MONSTERS: Record<string, MonsterDef> = {
+const PLACEHOLDER_MONSTERS: Record<string, MonsterDef> = {
   'rust-golem': {
     id: 'rust-golem',
     name: 'Rust Golem',
@@ -36,6 +39,36 @@ export const MONSTERS: Record<string, MonsterDef> = {
     modelId: 'golem-stone',
   },
 }
+
+/** Model used for LC monsters whose model hasn't been converted yet. */
+const FALLBACK_MODEL = 'golem-rust'
+
+/** LC database row → game monster. Crit values are not in the database (own values). */
+export function fromLc(m: LcMonster): MonsterDef {
+  return {
+    id: m.id,
+    name: m.name,
+    zoneId: m.zones[0] ?? '',
+    level: m.level,
+    stats: {
+      maxHp: m.hp,
+      attack: m.attack,
+      defense: m.defense,
+      attackInterval: Math.max(0.6, m.attackSpeed / 10),
+      critChance: 0.05,
+      critMultiplier: 1.5,
+    },
+    exp: m.exp,
+    gold: m.gold,
+    modelId: hasModel(m.model) ? m.model : FALLBACK_MODEL,
+    scale: m.scale,
+    elite: m.elite,
+  }
+}
+
+export const MONSTERS: Record<string, MonsterDef> = lcData
+  ? Object.fromEntries(lcData.monsters.map((m) => [m.id, fromLc(m)]))
+  : PLACEHOLDER_MONSTERS
 
 export function getMonster(id: string): MonsterDef {
   const monster = MONSTERS[id]

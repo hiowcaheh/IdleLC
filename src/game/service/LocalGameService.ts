@@ -1,16 +1,19 @@
 import { CLASSES } from '../data/classes.ts'
 import { getMonster } from '../data/monsters.ts'
 import type { ClassId } from '../data/types.ts'
+import { lcData } from '../data/lcSource.ts'
 import { ZONES } from '../data/zones.ts'
-import { statsForLevel } from '../logic/balance.ts'
+import { MAX_LEVEL, clamp, statsForLevel } from '../logic/balance.ts'
 import {
   changeMonster,
   combatTick,
   createCombat,
+  updatePlayer,
   type CombatEvent,
   type CombatState,
   type FighterInit,
 } from '../logic/combat.ts'
+import { lcPlayerStats } from '../logic/lcBalance.ts'
 import { createRng, type Rng } from '../logic/rng.ts'
 import {
   createDefaultSave,
@@ -24,19 +27,18 @@ import type { GameService, KeyValueStorage } from './GameService.ts'
 
 export const SAVE_KEY = 'idlelc.save'
 
-/** Until character creation (M2) everyone plays a level 1 knight. */
-const DEFAULT_PLAYER: { classId: ClassId; level: number } = { classId: 'knight', level: 1 }
+/** Until character creation (M2) everyone plays a knight (level 1 unless changed in dev mode). */
+const DEFAULT_CLASS: ClassId = 'knight'
 
 function monsterFighter(monsterId: string): FighterInit {
   const monster = getMonster(monsterId)
   return { level: monster.level, stats: monster.stats }
 }
 
-function playerFighter(): FighterInit {
-  return {
-    level: DEFAULT_PLAYER.level,
-    stats: statsForLevel(CLASSES[DEFAULT_PLAYER.classId], DEFAULT_PLAYER.level),
-  }
+function playerFighter(level: number): FighterInit {
+  const base = statsForLevel(CLASSES[DEFAULT_CLASS], level)
+  // LC mode: class stats are not in the LC database yet — scale against LC monsters instead
+  return { level, stats: lcData ? lcPlayerStats(level, lcData.monsters, base) : base }
 }
 
 export class LocalGameService implements GameService {
@@ -45,6 +47,7 @@ export class LocalGameService implements GameService {
   private readonly storage: KeyValueStorage
   private readonly rng: Rng
   private readonly now: () => number
+  private playerLevel = 1
 
   constructor(storage: KeyValueStorage, options: { rng?: Rng; now?: () => number } = {}) {
     this.storage = storage
@@ -93,6 +96,23 @@ export class LocalGameService implements GameService {
     return events
   }
 
+  selectZone(zoneId: string): CombatEvent[] {
+    const zone = ZONES[zoneId]
+    if (!zone) throw new Error(`Unknown zone: ${zoneId}`)
+    if (zoneId === this.save.location.zoneId) return []
+    const monsterId = zone.monsterIds[0]!
+    this.save = { ...this.save, location: { zoneId, monsterId } }
+    const { state, events } = changeMonster(this.combat, monsterId, monsterFighter(monsterId))
+    this.combat = state
+    this.persist()
+    return events
+  }
+
+  setPlayerLevel(level: number): void {
+    this.playerLevel = clamp(Math.floor(level), 1, MAX_LEVEL)
+    this.combat = updatePlayer(this.combat, playerFighter(this.playerLevel))
+  }
+
   updateSettings(patch: Partial<Settings>): SaveData {
     this.save = { ...this.save, settings: { ...this.save.settings, ...patch } }
     this.persist()
@@ -113,7 +133,11 @@ export class LocalGameService implements GameService {
 
   private createCombatFor(save: SaveData): CombatState {
     const { monsterId } = save.location
-    const combat = createCombat(playerFighter(), monsterId, monsterFighter(monsterId))
+    const combat = createCombat(
+      playerFighter(this.playerLevel),
+      monsterId,
+      monsterFighter(monsterId),
+    )
     return { ...combat, kills: save.stats.kills, deaths: save.stats.deaths }
   }
 

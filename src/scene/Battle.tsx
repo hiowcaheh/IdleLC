@@ -1,6 +1,7 @@
 import { useFrame } from '@react-three/fiber'
 import { Suspense, useEffect, useRef } from 'react'
 import { Vector3, type Group } from 'three'
+import { getModel, playerModelId } from '../game/assets/manifest.ts'
 import { getMonster } from '../game/data/monsters.ts'
 import { TIMINGS, type Side } from '../game/logic/combat.ts'
 import { gameService } from '../game/service/index.ts'
@@ -13,17 +14,26 @@ import { HpBar3D } from './HpBar3D.tsx'
 import { ARENA_RADIUS, smoothstep } from './terrain.ts'
 import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
-/** Distance between fighters' centers while trading blows. */
-const ENGAGE_DISTANCE = 1.75
-/** How far from the player a new monster appears. */
-const SPAWN_DISTANCE = 5.5
+/** How far the player runs to reach a newly spawned monster. */
+const RUN_DISTANCE = 3.8
 const APPEAR_TIME = 0.45
 const SINK_TIME = 0.7
 const TURN_SPEED = 10
 const HUD_SYNC_INTERVAL = 0.1
 
-const PLAYER_MODEL = 'hero'
+const PLAYER_MODEL = playerModelId('knight')
 const UP = new Vector3(0, 1, 0)
+
+/** Distance between fighters' centers while trading blows, from the models' sizes. */
+function engageDistance(monsterId: string): number {
+  const def = getMonster(monsterId)
+  const model = getModel(def.modelId)
+  const hero = getModel(PLAYER_MODEL)
+  const monsterRadius = (model.radius ?? 0.6) * model.scale * (def.scale ?? 1)
+  // the player's bounds include the weapon, so only part of them counts
+  const heroRadius = (hero.radius ?? 0.5) * hero.scale * 0.6
+  return Math.min(6, Math.max(1.5, heroRadius + monsterRadius + 0.5))
+}
 
 function yawTowards(from: Vector3, to: Vector3): number {
   return Math.atan2(to.x - from.x, to.z - from.z)
@@ -37,7 +47,8 @@ function turn(group: Group, yaw: number, dt: number): void {
 
 export function Battle() {
   const monsterId = useGameStore((s) => s.hud.monsterId)
-  const monsterModel = getMonster(monsterId).modelId
+  const monsterDef = getMonster(monsterId)
+  const monsterModel = monsterDef.modelId
   const showNumbers = useGameStore((s) => s.save.settings.showDamageNumbers)
 
   const playerGroup = useRef<Group>(null)
@@ -61,10 +72,11 @@ export function Battle() {
     const combat = gameService.getCombat()
     resetView()
     if (combat.phase !== 'spawning') {
-      view.monster.copy(SCREEN_RIGHT).multiplyScalar(SPAWN_DISTANCE)
+      const engage = engageDistance(combat.monsterId)
+      view.monster.copy(SCREEN_RIGHT).multiplyScalar(engage + RUN_DISTANCE)
       view.monsterVisible = true
       motion.current.approachFrom.set(0, 0, 0)
-      motion.current.engageAt.copy(SCREEN_RIGHT).multiplyScalar(SPAWN_DISTANCE - ENGAGE_DISTANCE)
+      motion.current.engageAt.copy(SCREEN_RIGHT).multiplyScalar(RUN_DISTANCE)
       if (combat.phase !== 'approach') view.player.copy(motion.current.engageAt)
     }
   }, [])
@@ -90,11 +102,12 @@ export function Battle() {
           const dir = SCREEN_RIGHT.clone()
             .multiplyScalar(side)
             .applyAxisAngle(UP, (Math.random() - 0.5) * 0.7)
-          view.monster.copy(view.player).addScaledVector(dir, SPAWN_DISTANCE)
+          const engage = engageDistance(e.monsterId)
+          view.monster.copy(view.player).addScaledVector(dir, engage + RUN_DISTANCE)
           if (view.monster.length() > ARENA_RADIUS) view.monster.setLength(ARENA_RADIUS)
           dir.subVectors(view.monster, view.player).normalize()
           m.approachFrom.copy(view.player)
-          m.engageAt.copy(view.monster).addScaledVector(dir, -ENGAGE_DISTANCE)
+          m.engageAt.copy(view.monster).addScaledVector(dir, -engage)
           view.monsterVisible = true
           m.appear = 0
           m.sink = -1
@@ -207,7 +220,12 @@ export function Battle() {
       </group>
       <group ref={monsterGroup} visible={false}>
         <Suspense fallback={null}>
-          <Character key={monsterModel} ref={monster} modelId={monsterModel} />
+          <Character
+            key={`${monsterModel}:${monsterDef.scale ?? 1}`}
+            ref={monster}
+            modelId={monsterModel}
+            scale={monsterDef.scale ?? 1}
+          />
         </Suspense>
       </group>
       <HpBar3D

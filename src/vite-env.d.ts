@@ -10,3 +10,8 @@ interface ImportMeta {
 }
 
 declare const __APP_VERSION__: string
+
+interface ImportMetaEnv {
+  /** "1" = use the locally generated LC data and models (src/game/data/generated/). */
+  readonly VITE_LC_DATA?: string
+}

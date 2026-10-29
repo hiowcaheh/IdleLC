@@ -54,6 +54,24 @@ describe('LocalGameService', () => {
     expect(reloaded.getSave().location.monsterId).toBe('stone-sentinel')
   })
 
+  it('switches zones and rejects unknown ones', () => {
+    const game = make()
+    game.load()
+    expect(game.selectZone('glade')).toEqual([])
+    expect(() => game.selectZone('nowhere')).toThrow()
+  })
+
+  it('changes the player level (dev) and scales stats', () => {
+    const game = make()
+    game.load()
+    const before = game.getCombat().player.stats.maxHp
+    game.setPlayerLevel(20)
+    expect(game.getCombat().player.level).toBe(20)
+    expect(game.getCombat().player.stats.maxHp).toBeGreaterThan(before)
+    game.setPlayerLevel(500)
+    expect(game.getCombat().player.level).toBe(99)
+  })
+
   it('rejects monsters from outside the current zone', () => {
     const game = make()
     game.load()
