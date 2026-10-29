@@ -1,8 +1,19 @@
-# Konwerter assetów LC (prototyp)
+# Konwerter assetów LC — prototyp (Python)
 
-Prototyp w Pythonie + Node, który zamienia pliki klienta LC (Serious Engine SKA, zmodyfikowany przez LC)
-na GLB do three.js. Formaty opisane są w [`docs/lc-formats.md`](../../docs/lc-formats.md).
-Docelowo zastąpi go `npm run convert-lc` w Node.
+Pierwsza wersja konwertera plików klienta LC (Serious Engine SKA, zmodyfikowany przez LC) do GLB.
+**Do gry używaj `npm run convert-lc`** (Node, `scripts/lc/`, opis w głównym README) — daje te same
+wyniki (184/184 tekstur identycznych, te same modele i animacje) i od razu odświeża manifest modeli.
+Prototyp zostaje jako punkt odniesienia i do budowy strony demo. Formaty:
+[`docs/lc-formats.md`](../../docs/lc-formats.md).
+
+| Prototyp (Python)         | Konwerter (Node, `scripts/lc/`)                |
+| ------------------------- | ---------------------------------------------- |
+| `lcmesh.py`               | `mesh.mjs` (+ `binary.mjs`: klucze XOR)        |
+| `lcska.py`                | `ska.mjs`                                      |
+| `lctex.py`                | `texture.mjs` (JPEG/PNG przez `sharp`)         |
+| `lc2json.py`              | `smc.mjs`, `client.mjs`, `model.mjs`           |
+| `json2glb.mjs`            | `model.mjs` + optymalizacja w `convert-lc.mjs` |
+| `demo/knight_armored.smc` | `classes.mjs` (modele klas)                    |
 
 **Pliki klienta i wyniki konwersji nie trafiają do repo**, dopóki jest publiczne — trzymaj je w
 `assets-src/` (ignorowane przez git).

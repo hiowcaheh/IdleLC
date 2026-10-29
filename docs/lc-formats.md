@@ -3,7 +3,8 @@
 Klient LC jest zbudowany na **Serious Engine 1** (system modeli SKA). LC zmodyfikował część formatów
 i zaszyfrował w nich liczby całkowite. Wszystko poniżej zostało ustalone na plikach z klienta 2015
 i zweryfikowane: **76/76 siatek** czyta się co do bajta do końca pliku, **184/184 tekstur** dekoduje się
-poprawnie, szkielety i animacje czytają się w całości (patrz `tools/lc/`).
+poprawnie, szkielety i animacje czytają się w całości. Konwerter: `npm run convert-lc` (`scripts/lc/`,
+Node); prototyp w Pythonie w `tools/lc/` daje te same wyniki.
 
 Liczby całkowite są w little-endian. `string` = `u32 długość` + bajty (bez zera na końcu).
 
@@ -117,6 +118,9 @@ Zbroja podmienia części ciała (np. `ni_bu_L.bm` zamiast `ni_bu_000.bm`), bro�
 "FRMC" u32 total, potem kolejne mipy: { u32 size, bloki DXT1 (8 B/4×4) lub DXT5 (16 B/4×4) }
 na końcu opcjonalnie "ANIM"/"ADAT" (animacja tekstury)
 ```
+
+Wymiary tekstury DXT bierzemy z TDAT. Sam łańcuch rozmiarów mipów nie odróżnia np. 256×128 od 128×256
+(tak powstawały poszarpane tekstury niekwadratowe), więc służy tylko za zapas, gdy TDAT nie pasuje.
 
 Kanał alfa w teksturach postaci i potworów to zwykle maska połysku, nie przezroczystość — w glTF materiały
 są OPAQUE i alfę pomijamy (tekstury → JPEG).

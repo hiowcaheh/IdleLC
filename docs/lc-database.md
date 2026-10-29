@@ -55,6 +55,7 @@ właściciel planuje bonusy do EXP).
 | `a_file_smc`                            | **model** (np. `Data\monster\Animals\Fox.smc`)                                          |
 | `a_scale`                               | **skala modelu** (np. Little Fox 0.8, Elite Jaguar 1.2)                                 |
 | `a_motion_idle/walk/run/attack/dam/die` | **nazwy animacji w `.ba`** (np. `m_fo`, `m_fo_att`, `m_fo_da`)                          |
+| `a_motion_idle2`, `a_motion_attack2`    | druga animacja spoczynku i ataku (zwykle ta sama co pierwsza; sfinksy mają `att02`)     |
 | `a_item_0…19`, `a_item_percent_0…19`    | **drop**: id przedmiotu i szansa w 1/10000 (500 = 5 %)                                  |
 | `a_minplus, a_maxplus, a_probplus`      | drop sprzętu z ulepszeniem +min…+max (elity: +1…+4)                                     |
 | `a_flag`                                | maska cech; elita = bit 27 (`0x08000000`), pozostałe bity do ustalenia                  |

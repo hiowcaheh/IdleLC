@@ -80,14 +80,21 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 
 ## Stan prac (aktualizuj na koniec każdej sesji)
 
-**Stan na 2026-10-28:**
+**Stan na 2026-10-29:**
 
 - M0 i M1 gotowe i opublikowane (https://hiowcaheh.github.io/IdleLC/). UI gry po angielsku. Na Pages
   działają tymczasowe modele CC0 (robot).
 - Przeanalizowano zrzut bazy LC → [`docs/lc-database.md`](docs/lc-database.md).
 - Rozpracowano formaty klienta LC (siatki, szkielety, animacje, tekstury, UI) →
-  [`docs/lc-formats.md`](docs/lc-formats.md). Prototyp konwertera: [`tools/lc/`](tools/lc/README.md).
-  Wynik: Knight w zbroi z mieczem i tarczą, lis, jeleń, jaguar, sfinks — z animacjami — działają w three.js.
+  [`docs/lc-formats.md`](docs/lc-formats.md).
+- **M1.5 „tor LC → gra” gotowy lokalnie** (opis w README, „Tryb LC”):
+  - `npm run import-lc-db` — dane 1:1 z bazy: 279 potworów w 9 strefach, drop, 1440 przedmiotów, exp.
+  - `npm run convert-lc` (Node, `scripts/lc/`) — modele klas (`classes.mjs`, na razie Knight w zbroi
+    z mieczem i tarczą) i wszystkich potworów z bazy, z animacjami z `t_npc.a_motion_*`; odświeża manifest.
+    Prototyp w Pythonie (`tools/lc/`) zostaje jako punkt odniesienia.
+  - Tryb LC w grze (`VITE_LC_DATA=1`, pliki w `src/game/data/generated/` i `public/assets-local/` poza
+    gitem): strefy i potwory z bazy, w trybie dev wybór strefy i poziomu. Statystyki gracza tymczasowe
+    (`lcBalance.ts`, opis w `docs/balance.md`) — do zastąpienia w M3.
 - Prywatna strona demo (claude.ai, artefakt „IdleLC Arena Preview”) pokazuje walkę na modelach LC ze
   statystykami i dropem 1:1 z bazy. Budowana przez `tools/lc/demo/build_demo.py`.
 
@@ -102,13 +109,11 @@ LC w repo (konwerter i dokumentacja formatów mogą być w repo).
 **Następne kroki:**
 
 1. Właściciel udostępnia cały folder klienta (Remote Control na Mac/Linux albo sesja Claude Code
-   na jego komputerze z Windows).
-2. Docelowy konwerter `npm run convert-lc` w Node (port `tools/lc/`): hurtowa konwersja `Data/`,
-   manifest modeli generowany z bazy (`t_npc.a_file_smc`, `a_scale`, `a_motion_*`), ikony z atlasów,
-   normal mapy, broń na kościach.
-3. Podpięcie modeli LC do gry lokalnie (manifest lokalny poza gitem + `VITE_ASSET_BASE_URL`), a po
-   przejściu repo na prywatne — także na Pages.
-4. M2 (tworzenie postaci) na danych 1:1.
+   na jego komputerze z Windows) → `npm run convert-lc -- --client <folder>` na całości; sprawdzić
+   nowe shadery (przezroczystość — konwerter wypisuje listę), dopisać pozostałe 5 klas do
+   `scripts/lc/classes.mjs`, ikony przedmiotów z atlasów, broń na kościach, mapę z otwartym terenem.
+2. M2 (tworzenie postaci, 6 klas) na danych 1:1 — najpierw plan do akceptacji.
+3. Po przejściu repo na prywatne — dane i modele LC także na Pages.
 
 **Otwarte kwestie:** brak siatek broni z `Data\Item\Weapon` (przyszły tylko tekstury i tagi); brak mapy
 z otwartym terenem (`.wld` + `.wtr`); brak w bazie statystyk startowych klas, poziomów umiejętności

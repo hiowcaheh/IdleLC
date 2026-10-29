@@ -69,16 +69,25 @@ Gra będzie dostępna pod `https://<użytkownik>.github.io/IdleLC/`.
 Gra może działać na danych i modelach z klienta i bazy LC. Pliki LC nigdy nie trafiają do repo,
 dopóki jest publiczne, więc ten tryb działa tylko lokalnie:
 
-1. Skonwertuj modele LC do `public/assets-local/models/lc/` (nazwa pliku = nazwa `.smc` małymi
-   literami, np. `fox.glb`; postać gracza: `class-knight.glb`) — patrz [`tools/lc/`](tools/lc/README.md).
-2. Wygeneruj dane gry z zrzutu bazy:
+1. Wygeneruj dane gry z zrzutu bazy:
 
    ```bash
    npm run import-lc-db -- --dump <folder zrzutu>/newproject_data.sql
    ```
 
-   Powstaną `src/game/data/generated/lc-data.json` (potwory, strefy, drop, przedmioty, exp) i
-   `lc-models.json` (manifest skonwertowanych modeli).
+   Powstanie `src/game/data/generated/lc-data.json` (potwory, strefy, drop, przedmioty, exp).
+
+2. Skonwertuj modele z klienta (folder z `Data/`; może być kilka `--client`):
+
+   ```bash
+   npm run convert-lc -- --client <folder klienta>
+   ```
+
+   Konwerter bierze modele klas (`scripts/lc/classes.mjs`) i wszystkich potworów z `lc-data.json`
+   (tylko animacje używane w bazie), zapisuje GLB do `public/assets-local/models/lc/` (np. `fox.glb`,
+   `class-knight.glb`) i odświeża manifest `src/game/data/generated/lc-models.json`. Pojedynczy model:
+   `--smc "Data\Monster\Animals\Fox.smc"`, wybrane modele: `--only fox,class-knight`.
+   Formaty plików: [`docs/lc-formats.md`](docs/lc-formats.md).
 
 3. Utwórz `.env.local` z linią `VITE_LC_DATA=1` i uruchom `npm run dev`.
 
@@ -97,6 +106,6 @@ src/
   state/        store Zustand
   scene/        scena 3D (react-three-fiber)
   ui/           komponenty interfejsu
-scripts/        narzędzia (konwersja modeli)
+scripts/        narzędzia: konwersja modeli, lc/ — import bazy i konwerter klienta LC
 docs/           dokumentacja (balans)
 ```
