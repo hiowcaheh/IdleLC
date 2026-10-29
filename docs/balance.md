@@ -3,8 +3,9 @@
 Wszystkie wzory są w `src/game/logic/balance.ts`, a czasy faz walki w `src/game/logic/combat.ts`
 (`TIMINGS`). Zmiana wzoru = zmiana kodu + tego dokumentu + testów w `balance.test.ts`.
 
-> Liczby w `src/game/data/` są **robocze** (do strojenia). Docelowy balans ustalimy razem
-> przy M3 (exp, poziomy, łupy).
+> Statystyki klas i wzory walki są **robocze (własne)** — baza LC ich nie ma. Zastąpimy je
+> wartościami z kodu serwera LC, gdy właściciel go dostarczy. Exp, poziomy i nagrody za potwory
+> są już 1:1 z bazy (patrz „Doświadczenie i nagrody”).
 
 ## Statystyki
 
@@ -26,12 +27,14 @@ stat(poziom) = round(base + perLevel × (poziom − 1))     dla maxHp, attack, d
 Pozostałe statystyki (szybkość ataku, krytyk) na razie nie rosną z poziomem.
 Poziom jest ograniczony do zakresu 1–99 (`MAX_LEVEL`).
 
-| Klasa  | HP  | Atak | Obrona | Interwał | Krytyk   | +HP/poz | +Atak/poz | +Obr/poz |
-| ------ | --- | ---- | ------ | -------- | -------- | ------- | --------- | -------- |
-| Titan  | 140 | 14   | 6      | 1,6 s    | 8% ×1,8  | 14      | 2,2       | 0,9      |
-| Knight | 160 | 11   | 9      | 1,3 s    | 5% ×1,5  | 16      | 1,7       | 1,3      |
-| Healer | 110 | 9    | 5      | 1,2 s    | 5% ×1,5  | 11      | 1,4       | 0,8      |
-| Mage   | 95  | 15   | 4      | 1,5 s    | 10% ×1,7 | 9,5     | 2,4       | 0,6      |
+| Klasa    | HP  | Atak | Obrona | Interwał | Krytyk   | +HP/poz | +Atak/poz | +Obr/poz |
+| -------- | --- | ---- | ------ | -------- | -------- | ------- | --------- | -------- |
+| Titan    | 140 | 14   | 6      | 1,6 s    | 8% ×1,8  | 14      | 2,2       | 0,9      |
+| Knight   | 160 | 11   | 9      | 1,3 s    | 5% ×1,5  | 16      | 1,7       | 1,3      |
+| Healer   | 110 | 9    | 5      | 1,2 s    | 5% ×1,5  | 11      | 1,4       | 0,8      |
+| Mage     | 95  | 15   | 4      | 1,5 s    | 10% ×1,7 | 9,5     | 2,4       | 0,6      |
+| Rogue    | 105 | 11   | 5      | 0,95 s   | 14% ×1,6 | 10,5    | 1,7       | 0,7      |
+| Sorcerer | 120 | 13   | 6      | 1,35 s   | 8% ×1,6  | 12      | 2         | 0,9      |
 
 ## Trafienie
 
@@ -86,3 +89,16 @@ zastępcze klasy. Dopóki nie ustalimy statystyk klas (M3), w trybie LC (dane z 
 - HP gracza = max(100 + 60 × poziom, 30 ciosów potwora).
 
 Interwał ataku i krytyki zostają z klasy. Interwał ataku potwora LC = `a_attackSpeed / 10` s (założenie).
+
+## Doświadczenie i nagrody
+
+- **Exp na poziom** — `t_exp` z bazy 1:1 (`src/game/data/progression.ts`): `EXP_TABLE[poziom − 1]` to exp
+  potrzebny z poziomu `poziom` na następny (1 → 34, 10 → 18 748, 30 → 4 046 233). Nadmiar przechodzi na
+  kolejny poziom; jedna nagroda może dać kilka poziomów. Na poziomie 99 exp się nie zbiera. Bez danych LC
+  działa zastępcza krzywa `30 × poziom^2,2`.
+- **Nagroda za zabicie** — `t_npc.a_exp` i `a_prize` (złoto) 1:1 (`src/game/logic/rewards.ts`).
+  Kary i premie za różnicę poziomów, drużynę i exp tracony po śmierci dodamy z kodu serwera.
+- **Limit zabić** — przeglądarka tylko pokazuje walkę i zgłasza jej wynik (`reportCombat`). Serwis płaci
+  za najwyżej `floor(czas od poprzedniego zgłoszenia × prędkość gry / 3,2 s) + 2` zabić. 3,2 s to najkrótszy
+  możliwy cykl (2,2 s zwycięstwa + 1,0 s na nowego potwora). Prędkość gry > 1 jest tylko w narzędziach dev;
+  na serwerze (Supabase) zawsze 1. Patrz [`docs/supabase.md`](supabase.md).

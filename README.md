@@ -25,14 +25,23 @@ Inne komendy:
 | `npm run format`         | formatowanie Prettierem                                   |
 | `npm run convert-models` | konwersja modeli z `assets-src/` do zoptymalizowanych GLB |
 
-### Tryb deweloperski
+### Postacie i zapis
 
-Dopisz `?dev=1` do adresu, np. `http://localhost:5173/IdleLC/?dev=1` albo
-`https://hiowcaheh.github.io/IdleLC/?dev=1`. Pojawi się panel z:
+Konto ma do 4 postaci (6 klas). Wszystko zapisuje się w przeglądarce (`localStorage`, klucz `idlelc.save`):
+poziom, exp, złoto, zabicia i miejsce polowania. Po powrocie gra otwiera się na ostatniej postaci.
+**Settings → Change character** wraca do wyboru postaci, **Reset save** kasuje wszystkie postacie.
+Zapisy ze starszej wersji gry są przenoszone automatycznie (postać „Hero”).
 
-- przyspieszeniem czasu (×0,25 … ×10) — walka, animacje i regeneracja,
-- linkiem **Model & animation viewer** — każdy model z manifestu i każdy klip z pliku GLB
-  (klipy podpięte pod logiczne animacje są oznaczone, np. `Punch attack`).
+### Narzędzia deweloperskie
+
+Włącz w grze: **Settings → Developer tools** (przeglądarka to zapamięta) albo dopisz `?dev=1` do adresu.
+Panel (można go zwinąć do małej pigułki „DEV”) ma:
+
+- prędkość gry ×0,5 … ×20 — walka, animacje i regeneracja,
+- wybór dowolnego potwora z dowolnej strefy,
+- poziom postaci (−10 … +10), +25% expa, +1000 złota (zapisywane jak normalny postęp),
+- **Kill target** i **Heal**,
+- **Model viewer** — każdy model z manifestu i każdy klip z pliku GLB.
 
 ## Deploy na GitHub Pages
 
@@ -93,8 +102,8 @@ i zrzut bazy trzymamy poza repo, w `assets-src/`. Żeby odświeżyć dane albo d
 
 3. `npm run dev` i commit zmienionych plików.
 
-Potwory bez skonwertowanego modelu pokazują tymczasowy model. W trybie dev (`?dev=1`) można zmienić
-strefę i poziom postaci. `VITE_LC_DATA=0` (np. w `.env.local`; tak działają testy) wyłącza dane LC
+Potwory bez skonwertowanego modelu pokazują tymczasowy model. Narzędzia deweloperskie pozwalają zmienić
+strefę, potwora i poziom postaci. `VITE_LC_DATA=0` (np. w `.env.local`; tak działają testy) wyłącza dane LC
 i gra wraca do danych zastępczych.
 
 ## Struktura
@@ -102,13 +111,14 @@ i gra wraca do danych zastępczych.
 ```
 src/
   game/
-    logic/      czyste funkcje gry (walka, balans, zapis) — bez Reacta, z testami
-    data/       definicje klas, stref, potworów
+    logic/      czyste funkcje gry (walka, balans, postacie, exp, nagrody, zapis) — bez Reacta, z testami
+    data/       definicje klas, stref, potworów, tabela expa (generated/ — dane z bazy LC)
     assets/     manifest modeli 3D
-    service/    GameService (interfejs) + LocalGameService (localStorage)
+    service/    GameService (interfejs, komendy async) + LocalGameService (localStorage)
+    session/    walka na ekranie (CombatSession) — tylko w przeglądarce
   state/        store Zustand
   scene/        scena 3D (react-three-fiber)
   ui/           komponenty interfejsu
 scripts/        narzędzia: konwersja modeli, lc/ — import bazy i konwerter klienta LC
-docs/           dokumentacja (balans)
+docs/           dokumentacja: balans, formaty i baza LC, plan Supabase
 ```

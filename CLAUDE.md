@@ -78,26 +78,28 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 - `npm run check` — lint + format + typecheck + testy (to samo co CI)
 - `npm run build` — build produkcyjny do `dist/`
 - `npm run convert-models` — konwersja modeli z `assets-src/`
+- `npm run import-lc-db -- --dump <newproject_data.sql>` — dane gry z bazy LC → `src/game/data/generated/`
+- `npm run convert-lc -- --client <folder klienta>` — modele LC → `public/models/lc/` + manifest
 
 ## Stan prac (aktualizuj na koniec każdej sesji)
 
-**Stan na 2026-10-29:**
+**Stan na 2026-10-29 (po południu):**
 
-- M0 i M1 gotowe i opublikowane (https://hiowcaheh.github.io/IdleLC/). UI gry po angielsku. Na Pages
-  działają tymczasowe modele CC0 (robot).
-- Przeanalizowano zrzut bazy LC → [`docs/lc-database.md`](docs/lc-database.md).
-- Rozpracowano formaty klienta LC (siatki, szkielety, animacje, tekstury, UI) →
-  [`docs/lc-formats.md`](docs/lc-formats.md).
-- **M1.5 „tor LC → gra” gotowy lokalnie** (opis w README, „Tryb LC”):
-  - `npm run import-lc-db` — dane 1:1 z bazy: 279 potworów w 9 strefach, drop, 1440 przedmiotów, exp.
-  - `npm run convert-lc` (Node, `scripts/lc/`) — modele klas (`classes.mjs`, na razie Knight w zbroi
-    z mieczem i tarczą) i wszystkich potworów z bazy, z animacjami z `t_npc.a_motion_*`; odświeża manifest.
-    Prototyp w Pythonie (`tools/lc/`) zostaje jako punkt odniesienia.
-  - Tryb LC w grze — domyślny, także na Pages (dane w `src/game/data/generated/`, modele w
-    `public/models/lc/`): strefy i potwory z bazy, w trybie dev (`?dev=1`) wybór strefy i poziomu.
-    Statystyki gracza tymczasowe (`lcBalance.ts`, opis w `docs/balance.md`) — do zastąpienia w M3.
-- Prywatna strona demo (claude.ai, artefakt „IdleLC Arena Preview”) pokazuje walkę na modelach LC ze
-  statystykami i dropem 1:1 z bazy. Budowana przez `tools/lc/demo/build_demo.py`.
+- M0 i M1 gotowe. Gra na Pages (https://hiowcaheh.github.io/IdleLC/) działa na danych i modelach LC
+  (Knight w zbroi + 13 potworów; reszta potworów na modelu zastępczym). UI po angielsku.
+- **M1.5 „tor LC → gra”:** `npm run import-lc-db` (dane 1:1 z bazy: 279 potworów w 9 strefach, drop,
+  1440 przedmiotów, exp) i `npm run convert-lc` (Node, `scripts/lc/`; modele klas z `classes.mjs`
+  i potworów z bazy). Opis w README („Tryb LC”), formaty w `docs/lc-formats.md`, baza w `docs/lc-database.md`.
+- **M2 gotowe** (+ część M3): konto z 4 slotami postaci w `localStorage`, ekran wyboru i tworzenia postaci
+  (6 klas, podgląd 3D, zasady imion), migracja starych zapisów (postać „Hero”). Zapisywany progres: poziom
+  i exp z `t_exp` 1:1, złoto i exp za potwory 1:1 (`a_exp`, `a_prize`), zabicia, miejsce polowania.
+- **Przygotowanie pod Supabase:** `GameService` jest asynchroniczny i oparty na komendach
+  (`createCharacter`, `travel`, `reportCombat`…); walka na ekranie to `CombatSession` w przeglądarce,
+  a nagrody liczy serwis z wyniku walki (limit zabić wg czasu). Plan tabel, RLS i funkcji: `docs/supabase.md`.
+- Narzędzia dev włączane w Settings (bez `?dev=1`): prędkość ×20, dowolny potwór, poziom, exp, złoto,
+  kill/heal, podgląd modeli.
+- Statystyki klas i wzory walki są **własne, tymczasowe** (`classes.ts`, `lcBalance.ts`) — czekają na kod
+  serwera LC od właściciela.
 
 **Cel końcowy (właściciel):** cała gra w **prywatnym repo**, hostowana tak, żeby dało się grać na telefonie
 i komputerze w dowolnej chwili; na końcu **Supabase** (konta, logowanie, zapis w chmurze, logika po stronie
@@ -109,11 +111,12 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
 
 **Następne kroki:**
 
-1. Właściciel udostępnia cały folder klienta (Remote Control na Mac/Linux albo sesja Claude Code
-   na jego komputerze z Windows) → `npm run convert-lc -- --client <folder>` na całości; sprawdzić
-   nowe shadery (przezroczystość — konwerter wypisuje listę), dopisać pozostałe 5 klas do
-   `scripts/lc/classes.mjs`, ikony przedmiotów z atlasów, broń na kościach, mapę z otwartym terenem.
-2. M2 (tworzenie postaci, 6 klas) na danych 1:1 — najpierw plan do akceptacji.
+1. Właściciel udostępni **pełny klient i kod serwera LC**. Z klienta: `npm run convert-lc -- --client <folder>`
+   na całości (wszystkie potwory, 5 pozostałych klas w `scripts/lc/classes.mjs`, ikony przedmiotów, mapy;
+   konwerter wypisuje nowe shadery do sprawdzenia). Z kodu serwera: statystyki klas i przyrost na poziom,
+   wzory obrażeń/trafień, kary exp za różnicę poziomów, szanse ulepszeń, poziomy umiejętności.
+2. Dalej M3: drop z `lootTables` (1:1 z bazy) i ekwipunek-lista, potem M4 (AFK do 8 h) i M5 (ekwipunek).
+3. Etap 2 (Supabase) według `docs/supabase.md` — dopiero po zgodzie właściciela.
 
 **Otwarte kwestie:** brak siatek broni z `Data\Item\Weapon` (przyszły tylko tekstury i tagi); brak mapy
 z otwartym terenem (`.wld` + `.wtr`); brak w bazie statystyk startowych klas, poziomów umiejętności
