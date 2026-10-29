@@ -232,7 +232,7 @@ describe('LocalGameService', () => {
     await expect(game.buyItem(hero.id, 1, 1)).rejects.toThrow('not-in-shop')
     await game.buyItem(hero.id, 4, 1)
     const stones = await game.buyItem(hero.id, UPGRADE_STONE_ID, 3)
-    expect(stones.gold).toBe(1000 - 120 - 300)
+    expect(stones.character.gold).toBe(1000 - 120 - 300)
 
     const armed = await game.equipItem(hero.id, { itemId: 4 })
     expect(armed.equipment.weapon).toMatchObject({ itemId: 4, plus: 0 })

@@ -255,14 +255,65 @@ export function applyLearn(character: CharacterData, skillId: number): Character
   if (error) throw new GameError(error, `skill ${skillId}`)
   const skill = getSkill(skillId)!
   const next = nextRank(character, skill)!
+  const skills = {
+    ...character.skills,
+    [skillId]: { level: next.level, auto: character.skills[skillId]?.auto ?? true },
+  }
+  // a new active skill goes onto the bar while there is room
+  const joins =
+    !character.skills[skillId] &&
+    skillRank(skill, 1).kind !== 'passive' &&
+    character.skillBar.length < SKILL_BAR_SIZE
   return {
     ...character,
     sp: character.sp - next.learnSp * SP_UNIT,
-    skills: {
-      ...character.skills,
-      [skillId]: { level: next.level, auto: character.skills[skillId]?.auto ?? true },
-    },
+    skills,
+    skillBar: joins
+      ? arrangeBar(character.classId, [...character.skillBar, skillId])
+      : character.skillBar,
   }
+}
+
+/** Skills used in fights sit on the bar; it has room for this many. */
+export const SKILL_BAR_SIZE = 7
+
+/** Bar order: attacks and curses on the left, buffs and recovery on the right; else as given. */
+export function arrangeBar(classId: ClassId, ids: readonly number[]): number[] {
+  const side = (id: number) => {
+    const skill = getSkill(id)
+    const kind = skill && skill.classId === classId ? skillRank(skill, 1).kind : 'attack'
+    return kind === 'buff' || kind === 'heal' ? 1 : 0
+  }
+  return ids
+    .map((id, i) => ({ id, i, side: side(id) }))
+    .sort((a, b) => a.side - b.side || a.i - b.i)
+    .map((e) => e.id)
+}
+
+/** The learned active skills that fit on a fresh bar (in learning order), arranged. */
+export function defaultBar(
+  classId: ClassId,
+  learned: Readonly<Record<string, LearnedSkill>>,
+): number[] {
+  const active = learnedRanks(classId, learned)
+    .filter((r) => r.kind !== 'passive')
+    .map((r) => r.id)
+  // the first skills learned, then attacks left and buffs right
+  return arrangeBar(classId, active.slice(0, SKILL_BAR_SIZE))
+}
+
+/** Puts a new set of skills on the bar (learned active skills, at most SKILL_BAR_SIZE). */
+export function applyBar(character: CharacterData, ids: readonly number[]): CharacterData {
+  const unique = [...new Set(ids)]
+  if (unique.length > SKILL_BAR_SIZE) throw new GameError('bar-full', `${unique.length}`)
+  for (const id of unique) {
+    const skill = getSkill(id)
+    if (!skill || !character.skills[id] || skill.classId !== character.classId) {
+      throw new GameError('not-learned', `skill ${id}`)
+    }
+    if (skillRank(skill, 1).kind === 'passive') throw new GameError('passive-skill', `skill ${id}`)
+  }
+  return { ...character, skillBar: arrangeBar(character.classId, unique) }
 }
 
 /** Turns automatic use of a learned skill on or off. */

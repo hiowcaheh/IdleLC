@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { ZONES } from '../game/data/zones.ts'
 import type { AfkResult } from '../game/logic/afk.ts'
-import type { CharacterData, NewCharacter } from '../game/logic/character.ts'
+import type { CharacterData, NewCharacter, PotionAuto } from '../game/logic/character.ts'
 import { effectiveStats, type CombatPhase, type CombatState } from '../game/logic/combat.ts'
 import { heroKey } from '../game/logic/fighters.ts'
 import type { EquipSlot } from '../game/data/types.ts'
@@ -9,7 +9,7 @@ import type { GearSource, UpgradeResult } from '../game/logic/equipment.ts'
 import type { ItemStack } from '../game/logic/loot.ts'
 import type { CombatResult } from '../game/logic/rewards.ts'
 import type { LoadResult, SaveData, Settings } from '../game/logic/save.ts'
-import type { SaleResult } from '../game/logic/shop.ts'
+import type { PurchaseResult, SaleResult } from '../game/logic/shop.ts'
 import { createDefaultSave } from '../game/logic/save.ts'
 import { gameService } from '../game/service/index.ts'
 import { combatSession } from '../game/session/combatSession.ts'
@@ -57,12 +57,14 @@ interface GameStore {
   /** Learns the next level of a skill (rejects with a GameError). */
   learnSkill(skillId: number): Promise<void>
   setSkillAuto(skillId: number, auto: boolean): Promise<void>
+  setSkillBar(skillIds: number[]): Promise<void>
   /** Equipment commands of the played character (reject with a GameError). */
-  equipItem(source: GearSource): Promise<void>
+  equipItem(source: GearSource, slot?: EquipSlot): Promise<void>
   unequipItem(slot: EquipSlot): Promise<void>
   upgradeItem(slot: EquipSlot): Promise<UpgradeResult>
-  buyItem(itemId: number, count: number): Promise<void>
+  buyItem(itemId: number, count: number): Promise<PurchaseResult>
   sellGear(uid: string): Promise<void>
+  setPotionAuto(auto: PotionAuto): Promise<void>
   selectMonster(monsterId: string): void
   selectZone(zoneId: string, monsterId?: string): void
   syncCombat(combat: CombatState): void
@@ -308,9 +310,14 @@ export const useGameStore = create<GameStore>((set, get) => {
       applyCharacter(await enqueue(() => gameService.setSkillAuto(character.id, skillId, auto)))
     },
 
-    async equipItem(source) {
+    async setSkillBar(skillIds) {
       const id = playedId()
-      applyCharacter(await enqueue(() => gameService.equipItem(id, source)))
+      applyCharacter(await enqueue(() => gameService.setSkillBar(id, skillIds)))
+    },
+
+    async equipItem(source, slot) {
+      const id = playedId()
+      applyCharacter(await enqueue(() => gameService.equipItem(id, source, slot)))
     },
 
     async unequipItem(slot) {
@@ -327,7 +334,14 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     async buyItem(itemId, count) {
       const id = playedId()
-      applyCharacter(await enqueue(() => gameService.buyItem(id, itemId, count)))
+      const purchase = await enqueue(() => gameService.buyItem(id, itemId, count))
+      applyCharacter(purchase.character)
+      return purchase
+    },
+
+    async setPotionAuto(auto) {
+      const id = playedId()
+      applyCharacter(await enqueue(() => gameService.setPotionAuto(id, auto)))
     },
 
     async sellGear(uid) {

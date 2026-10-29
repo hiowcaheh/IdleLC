@@ -1,8 +1,24 @@
-/** Selling items to the shop. Pure — the server will run the same checks. */
-import { SHOP_SELL_RATE, getItem } from '../data/items.ts'
+/**
+ * The shop: selling items for their database price and buying gear, accessories, potions and
+ * upgrade stones. Pure — the server will run the same checks.
+ */
+import {
+  SHOP_BUY_RATE,
+  SHOP_SELL_RATE,
+  getItem,
+  shopAccessories,
+  shopGear,
+  shopItems,
+  type ShopTier,
+} from '../data/items.ts'
+import type { GearSlot } from '../data/types.ts'
 import type { CharacterData } from './character.ts'
+import type { GearPiece } from './equipment.ts'
 import { GameError } from './errors.ts'
-import type { ItemStack } from './loot.ts'
+import { newId } from './id.ts'
+import { addToInventory, type ItemStack } from './loot.ts'
+import { rollOptions } from './options.ts'
+import type { Rng } from './rng.ts'
 
 export interface SaleResult {
   character: CharacterData
@@ -50,4 +66,110 @@ export function applySale(character: CharacterData, items: readonly ItemStack[])
     sold,
     gold,
   }
+}
+
+/** Sells a single piece (upgraded or with options) from the bag; its "+" and options add nothing. */
+export function applySellPiece(
+  character: CharacterData,
+  uid: string,
+): { character: CharacterData; gold: number } {
+  const piece = character.gear.find((p) => p.uid === uid)
+  if (!piece) throw new GameError('not-owned', `piece ${uid}`)
+  const gold = sellPrice(piece.itemId)
+  return {
+    character: {
+      ...character,
+      gold: character.gold + gold,
+      gear: character.gear.filter((p) => p.uid !== uid),
+    },
+    gold,
+  }
+}
+
+/** What the shop asks for one piece: t_item.a_price × t_shop.a_buy_rate %. */
+export function buyPrice(itemId: number): number {
+  return Math.ceil((getItem(itemId).price * SHOP_BUY_RATE) / 100)
+}
+
+export interface ShopOffer {
+  /** Weapons and armor of the character's class: the previous, current and next tier per slot. */
+  gear: { slot: GearSlot; tiers: ShopTier[] }[]
+  /** Plain accessories; their options are rolled on purchase. */
+  accessories: number[]
+  /** Potions and upgrade stones of the zone's NPC shops (t_shopitem). */
+  goods: number[]
+}
+
+/**
+ * The tiers of one slot the shop offers at a level: the tier the character is in, the one before
+ * and the next one (only the first tier before reaching it).
+ */
+export function tierWindow(tiers: readonly ShopTier[], level: number): ShopTier[] {
+  let current = -1
+  tiers.forEach((t, i) => {
+    if (t.level <= level) current = i
+  })
+  return tiers.slice(Math.max(0, current - 1), current + 2)
+}
+
+export function shopOffer(
+  character: Pick<CharacterData, 'classId' | 'level' | 'location'>,
+): ShopOffer {
+  const byClass = shopGear(character.classId)
+  return {
+    gear: (Object.entries(byClass) as [GearSlot, ShopTier[]][]).map(([slot, tiers]) => ({
+      slot,
+      tiers: tierWindow(tiers, character.level),
+    })),
+    accessories: shopAccessories(),
+    goods: shopItems(character.location.zoneId).filter((id) => !getItem(id).gear),
+  }
+}
+
+export function canBuy(
+  character: Pick<CharacterData, 'classId' | 'level' | 'location'>,
+  itemId: number,
+): boolean {
+  const offer = shopOffer(character)
+  return (
+    offer.goods.includes(itemId) ||
+    offer.accessories.includes(itemId) ||
+    offer.gear.some((g) => g.tiers.some((t) => t.items.includes(itemId)))
+  )
+}
+
+export interface PurchaseResult {
+  character: CharacterData
+  /** Accessories bought, with the options they came with. */
+  pieces: GearPiece[]
+}
+
+/** Buys from the shop. Accessories arrive as single pieces with freshly rolled options. */
+export function applyBuy(
+  character: CharacterData,
+  itemId: number,
+  count: number,
+  rng: Rng,
+  makeId: () => string = newId,
+): PurchaseResult {
+  if (!Number.isInteger(count) || count < 1 || count > 999) {
+    throw new GameError('bad-count', `${count}`)
+  }
+  if (!canBuy(character, itemId)) throw new GameError('not-in-shop', `item ${itemId}`)
+  const cost = buyPrice(itemId) * count
+  if (character.gold < cost) throw new GameError('not-enough-gold', `${cost}`)
+  const paid = { ...character, gold: character.gold - cost }
+  if (getItem(itemId).gear?.slot !== 'accessory') {
+    return {
+      character: { ...paid, inventory: addToInventory(paid.inventory, [{ itemId, count }]) },
+      pieces: [],
+    }
+  }
+  const pieces = Array.from({ length: count }, () => ({
+    uid: makeId(),
+    itemId,
+    plus: 0,
+    options: rollOptions(itemId, rng),
+  }))
+  return { character: { ...paid, gear: [...paid.gear, ...pieces] }, pieces }
 }

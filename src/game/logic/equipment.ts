@@ -1,16 +1,16 @@
 /**
- * Equipment: wearing weapons and armor, upgrading them (+0…+15) and buying them in the zone's shop.
- * Items, slots, classes, levels, stats and prices are 1:1 from the LC data; how gear turns into
- * IdleLC's combat stats, the upgrade chances and the bonus per "+" are our own until the LC server
- * code is available (docs/balance.md). Pure — the server will run the same code.
+ * Equipment: wearing weapons, armor and accessories and upgrading weapons and armor (+0…+15).
+ * Items, slots, classes, levels and stats are 1:1 from the LC data; how gear turns into IdleLC's
+ * combat stats, the upgrade chances and the bonus per "+" are our own until the LC server code is
+ * available (docs/balance.md). Pure — the server will run the same code.
  */
 import {
-  SHOP_BUY_RATE,
+  ARMOR_SLOTS,
   UPGRADE_STONE_IDS,
   gearPower,
   gearReference,
   getItem,
-  shopItems,
+  slotsFor,
   starterGear,
 } from '../data/items.ts'
 import type { ClassId, CombatStats, EquipSlot } from '../data/types.ts'
@@ -18,8 +18,9 @@ import type { CharacterData } from './character.ts'
 import { GameError } from './errors.ts'
 import { newId } from './id.ts'
 import { addToInventory } from './loot.ts'
+import { optionEffects, type ItemOption } from './options.ts'
 import { chance, type Rng } from './rng.ts'
-import { sellPrice } from './shop.ts'
+import { applyStats } from './skills.ts'
 
 export const MAX_PLUS = 15
 
@@ -38,11 +39,13 @@ export const UPGRADE_CHANCE = [
 /** From this "+" on, a failed upgrade takes one "+" away (own rule). */
 export const UPGRADE_RISK_FROM = 3
 
-/** One weapon or armor piece with its upgrade level. */
+/** One weapon, armor piece or accessory with its upgrade level and options. */
 export interface GearPiece {
   uid: string
   itemId: number
   plus: number
+  /** Options (accessories always have some). */
+  options?: ItemOption[]
 }
 
 export type Equipment = Partial<Record<EquipSlot, GearPiece>>
@@ -53,11 +56,10 @@ export type EquipError =
   | 'level-too-low'
   | 'not-owned'
   | 'nothing-equipped'
+  | 'wrong-slot'
+  | 'not-upgradeable'
   | 'max-plus'
   | 'no-stone'
-  | 'not-in-shop'
-  | 'not-enough-gold'
-  | 'bad-count'
 
 /** Power of a piece including its upgrades. */
 export function piecePower(piece: Pick<GearPiece, 'itemId' | 'plus'>): number {
@@ -69,7 +71,8 @@ export function piecePower(piece: Pick<GearPiece, 'itemId' | 'plus'>): number {
  * Combat stats with the worn gear. The weapon and the armor are measured against what a character
  * of the class typically wears at its level (gearReference): typical gear keeps the level's stats,
  * none leaves NAKED_ATTACK / NAKED_DEFENSE of them, better or upgraded gear goes above. The weapon
- * sets the attack speed (t_item.a_num_2). Without `equipment` the typical gear is assumed.
+ * sets the attack speed (t_item.a_num_2). Options (accessories) add their values on top. Without
+ * `equipment` the typical gear is assumed.
  */
 export function applyGear(
   stats: CombatStats,
@@ -81,12 +84,14 @@ export function applyGear(
   const reference = gearReference(classId, level)
   const ratio = (power: number, typical: number) => (typical > 0 ? power / typical : 1)
   const weapon = equipment.weapon
-  const armorPower = Object.entries(equipment)
-    .filter(([slot]) => slot !== 'weapon')
-    .reduce((sum, [, piece]) => sum + (piece ? piecePower(piece) : 0), 0)
+  const armorPower = ARMOR_SLOTS.reduce((sum, slot) => {
+    const piece = equipment[slot]
+    return sum + (piece ? piecePower(piece) : 0)
+  }, 0)
   const weaponRatio = ratio(weapon ? piecePower(weapon) : 0, reference.weapon)
   const armorRatio = ratio(armorPower, reference.armor)
-  return {
+  const options = Object.values(equipment).flatMap((piece) => piece?.options ?? [])
+  const withGear: CombatStats = {
     ...stats,
     attack: Math.max(
       1,
@@ -95,6 +100,7 @@ export function applyGear(
     defense: Math.round(stats.defense * (NAKED_DEFENSE + (1 - NAKED_DEFENSE) * armorRatio)),
     attackInterval: (weapon && getItem(weapon.itemId).gear?.attackInterval) || stats.attackInterval,
   }
+  return applyStats(withGear, optionEffects(options, classId))
 }
 
 /** The class's free starter set, worn. */
@@ -102,7 +108,8 @@ export function starterEquipment(classId: ClassId, makeId: () => string = newId)
   const equipment: Equipment = {}
   for (const itemId of starterGear(classId)) {
     const gear = getItem(itemId).gear
-    if (gear && !equipment[gear.slot]) equipment[gear.slot] = { uid: makeId(), itemId, plus: 0 }
+    const slot = gear && slotsFor(gear).find((s) => !equipment[s])
+    if (slot) equipment[slot] = { uid: makeId(), itemId, plus: 0 }
   }
   return equipment
 }
@@ -119,9 +126,18 @@ export function checkWear(
   return null
 }
 
-/** Puts a piece that comes off back into the bag: plain pieces stack, upgraded ones stay pieces. */
+/** Pieces that can't stack: upgraded, with options, or accessories (they always have options). */
+export function isUnique(piece: Pick<GearPiece, 'itemId' | 'plus' | 'options'>): boolean {
+  return (
+    piece.plus > 0 ||
+    (piece.options?.length ?? 0) > 0 ||
+    getItem(piece.itemId).gear?.slot === 'accessory'
+  )
+}
+
+/** Puts a piece that comes off back into the bag: plain pieces stack, the others stay pieces. */
 function stow(character: CharacterData, piece: GearPiece): CharacterData {
-  return piece.plus === 0
+  return !isUnique(piece)
     ? {
         ...character,
         inventory: addToInventory(character.inventory, [{ itemId: piece.itemId, count: 1 }]),
@@ -129,14 +145,18 @@ function stow(character: CharacterData, piece: GearPiece): CharacterData {
     : { ...character, gear: [...character.gear, piece] }
 }
 
-/** Where a piece to wear comes from: a plain item from the bag, or an upgraded piece by uid. */
+/** Where a piece to wear comes from: a plain item from the bag, or a single piece by uid. */
 export type GearSource = { itemId: number } | { uid: string }
 
-/** Wears a piece from the bag; what was in its slot goes back to the bag. */
+/**
+ * Wears a piece from the bag; what was in its slot goes back to the bag. Accessories go to `slot`
+ * when given, else to a free accessory slot, else replace the first one.
+ */
 export function applyEquip(
   character: CharacterData,
   source: GearSource,
   makeId: () => string = newId,
+  slot?: EquipSlot,
 ): CharacterData {
   let piece: GearPiece
   let next: CharacterData
@@ -158,9 +178,11 @@ export function applyEquip(
   }
   const error = checkWear(character, piece.itemId)
   if (error) throw new GameError(error, `item ${piece.itemId}`)
-  const slot = getItem(piece.itemId).gear!.slot
-  const previous = next.equipment[slot]
-  next = { ...next, equipment: { ...next.equipment, [slot]: piece } }
+  const slots = slotsFor(getItem(piece.itemId).gear!)
+  if (slot && !slots.includes(slot)) throw new GameError('wrong-slot', slot)
+  const target = slot ?? slots.find((s) => !next.equipment[s]) ?? slots[0]!
+  const previous = next.equipment[target]
+  next = { ...next, equipment: { ...next.equipment, [target]: piece } }
   return previous ? stow(next, previous) : next
 }
 
@@ -197,6 +219,7 @@ export function stonesOwned(character: Pick<CharacterData, 'inventory'>): number
 export function applyUpgrade(character: CharacterData, slot: EquipSlot, rng: Rng): UpgradeResult {
   const piece = character.equipment[slot]
   if (!piece) throw new GameError('nothing-equipped', slot)
+  if (!getItem(piece.itemId).upgradeable) throw new GameError('not-upgradeable', slot)
   if (piece.plus >= MAX_PLUS) throw new GameError('max-plus', slot)
   const stone = UPGRADE_STONE_IDS.find((id) =>
     character.inventory.some((s) => s.itemId === id && s.count > 0),
@@ -219,44 +242,5 @@ export function applyUpgrade(character: CharacterData, slot: EquipSlot, rng: Rng
     success,
     plusBefore: piece.plus,
     plusAfter,
-  }
-}
-
-/** What the shop asks for one piece: t_item.a_price × t_shop.a_buy_rate %. */
-export function buyPrice(itemId: number): number {
-  return Math.ceil((getItem(itemId).price * SHOP_BUY_RATE) / 100)
-}
-
-/** Buys items from the shop of the zone the character hunts in. */
-export function applyBuy(character: CharacterData, itemId: number, count: number): CharacterData {
-  if (!Number.isInteger(count) || count < 1 || count > 999)
-    throw new GameError('bad-count', `${count}`)
-  if (!shopItems(character.location.zoneId).includes(itemId)) {
-    throw new GameError('not-in-shop', `item ${itemId}`)
-  }
-  const cost = buyPrice(itemId) * count
-  if (character.gold < cost) throw new GameError('not-enough-gold', `${cost}`)
-  return {
-    ...character,
-    gold: character.gold - cost,
-    inventory: addToInventory(character.inventory, [{ itemId, count }]),
-  }
-}
-
-/** Sells an upgraded piece from the bag (the "+" adds nothing to the price). */
-export function applySellPiece(
-  character: CharacterData,
-  uid: string,
-): { character: CharacterData; gold: number } {
-  const piece = character.gear.find((p) => p.uid === uid)
-  if (!piece) throw new GameError('not-owned', `piece ${uid}`)
-  const gold = sellPrice(piece.itemId)
-  return {
-    character: {
-      ...character,
-      gold: character.gold + gold,
-      gear: character.gear.filter((p) => p.uid !== uid),
-    },
-    gold,
   }
 }

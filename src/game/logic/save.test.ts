@@ -129,6 +129,57 @@ describe('loadSave', () => {
     expect(r.save.characters[1]!.gear).toEqual([])
   })
 
+  it('gives version 6 characters automatic potions and a skill bar', () => {
+    const v6 = { ...withCharacter(), saveVersion: 6 }
+    const knight = createCharacterData({ name: 'Brom', classId: 'knight' }, 'id-2', NOW)
+    const old: Record<string, unknown> = {
+      ...knight,
+      skills: {
+        1: { level: 1, auto: true },
+        2: { level: 1, auto: true },
+        3: { level: 1, auto: true },
+      },
+    }
+    delete old.potionAuto
+    delete old.skillBar
+    const r = loadSave(JSON.stringify({ ...v6, characters: [old] }), NOW)
+    expect(r.status).toBe('migrated')
+    expect(r.save.characters[0]).toMatchObject({
+      potionAuto: { hp: true, mp: true },
+      skillBar: [1, 2],
+    })
+  })
+
+  it('keeps options that exist and accessories in accessory slots', () => {
+    const save = withCharacter()
+    const ring = {
+      uid: 'r',
+      itemId: 166,
+      plus: 3,
+      options: [
+        { type: 20, level: 2 },
+        { type: 999, level: 1 },
+        { type: 21, level: 99 },
+      ],
+    }
+    const broken = {
+      ...save,
+      characters: [
+        {
+          ...save.characters[0],
+          equipment: { accessory2: ring, helmet: { ...ring, uid: 'h' } },
+          skillBar: [1, 1, 3, 'x'],
+        },
+      ],
+    }
+    const [hero] = loadSave(JSON.stringify(broken), NOW).save.characters
+    // accessories can't be upgraded: the "+" goes
+    expect(hero!.equipment).toEqual({
+      accessory2: { uid: 'r', itemId: 166, plus: 0, options: [{ type: 20, level: 2 }] },
+    })
+    expect(hero!.skillBar).toEqual([])
+  })
+
   it('keeps worn and bagged gear that exists, in its own slot', () => {
     const save = withCharacter()
     const broken = {

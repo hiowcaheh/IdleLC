@@ -6,7 +6,7 @@
 import { CLASSES } from '../data/classes.ts'
 import { MONSTERS } from '../data/monsters.ts'
 import { MAX_LEVEL } from '../data/progression.ts'
-import { getItem } from '../data/items.ts'
+import { getItem, getOption, slotsFor } from '../data/items.ts'
 import { getSkill } from '../data/skills.ts'
 import type { ClassId, EquipSlot } from '../data/types.ts'
 import { ZONES } from '../data/zones.ts'
@@ -21,9 +21,15 @@ import {
 import { MAX_PLUS, starterEquipment, type Equipment, type GearPiece } from './equipment.ts'
 import { newId } from './id.ts'
 import { addToInventory, type ItemStack } from './loot.ts'
-import { starterSkills, type LearnedSkill } from './skills.ts'
+import {
+  SKILL_BAR_SIZE,
+  defaultBar,
+  skillRank,
+  starterSkills,
+  type LearnedSkill,
+} from './skills.ts'
 
-export const SAVE_VERSION = 6
+export const SAVE_VERSION = 7
 
 export type GraphicsQuality = 'auto' | 'low' | 'high'
 
@@ -104,6 +110,24 @@ export const MIGRATIONS: Record<number, Migration> = {
       ? save.characters.map((c: unknown) =>
           isRecord(c) && typeof c.classId === 'string' && Object.hasOwn(CLASSES, c.classId)
             ? { ...c, equipment: starterEquipment(c.classId as ClassId), gear: [] }
+            : c,
+        )
+      : [],
+  }),
+  // v7: accessories with options, potions used automatically, a skill bar of 7
+  6: (save) => ({
+    ...save,
+    characters: Array.isArray(save.characters)
+      ? save.characters.map((c: unknown) =>
+          isRecord(c) && typeof c.classId === 'string' && Object.hasOwn(CLASSES, c.classId)
+            ? {
+                ...c,
+                potionAuto: { hp: true, mp: true },
+                skillBar: defaultBar(
+                  c.classId as ClassId,
+                  sanitizeSkills(c.skills, c.classId as ClassId),
+                ),
+              }
             : c,
         )
       : [],
@@ -201,19 +225,48 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     expedition: sanitizeExpedition(raw.expedition),
     sp: int(raw.sp, 0),
     skills: sanitizeSkills(raw.skills, raw.classId as ClassId),
+    skillBar: sanitizeBar(raw.skillBar, sanitizeSkills(raw.skills, raw.classId as ClassId)),
     equipment: sanitizeEquipment(raw.equipment),
     gear: (Array.isArray(raw.gear) ? raw.gear : [])
       .map((p: unknown) => sanitizePiece(p))
       .filter((p): p is GearPiece => p !== null),
+    potionAuto: {
+      hp: !isRecord(raw.potionAuto) || raw.potionAuto.hp !== false,
+      mp: !isRecord(raw.potionAuto) || raw.potionAuto.mp !== false,
+    },
   }
+}
+
+/** Learned active skills on the bar, each once, at most SKILL_BAR_SIZE. */
+function sanitizeBar(raw: unknown, skills: Record<string, LearnedSkill>): number[] {
+  const ids = (Array.isArray(raw) ? raw : []).map((id: unknown) => int(id, 0))
+  const usable = new Set(Object.keys(skills).map(Number))
+  const active = (id: number) => {
+    const skill = getSkill(id)
+    return skill !== undefined && skillRank(skill, 1).kind !== 'passive'
+  }
+  return [...new Set(ids)].filter((id) => usable.has(id) && active(id)).slice(0, SKILL_BAR_SIZE)
 }
 
 /** A weapon or armor piece that still exists. */
 function sanitizePiece(raw: unknown): GearPiece | null {
   if (!isRecord(raw) || typeof raw.uid !== 'string' || !raw.uid) return null
   const itemId = int(raw.itemId, 0)
-  if (!getItem(itemId).gear) return null
-  return { uid: raw.uid, itemId, plus: Math.min(MAX_PLUS, int(raw.plus, 0)) }
+  const item = getItem(itemId)
+  if (!item.gear) return null
+  const options = (Array.isArray(raw.options) ? raw.options : []).flatMap((o: unknown) => {
+    if (!isRecord(o)) return []
+    const type = int(o.type, -1)
+    const level = int(o.level, 0)
+    const def = getOption(type)
+    return def && level >= 1 && level <= def.values.length ? [{ type, level }] : []
+  })
+  return {
+    uid: raw.uid,
+    itemId,
+    plus: item.upgradeable ? Math.min(MAX_PLUS, int(raw.plus, 0)) : 0,
+    ...(options.length ? { options } : {}),
+  }
 }
 
 /** Worn pieces in the slot they belong to. */
@@ -222,7 +275,9 @@ function sanitizeEquipment(raw: unknown): Equipment {
   if (!isRecord(raw)) return equipment
   for (const [slot, entry] of Object.entries(raw)) {
     const piece = sanitizePiece(entry)
-    if (piece && getItem(piece.itemId).gear!.slot === slot) equipment[slot as EquipSlot] = piece
+    if (piece && slotsFor(getItem(piece.itemId).gear!).includes(slot as EquipSlot)) {
+      equipment[slot as EquipSlot] = piece
+    }
   }
   return equipment
 }

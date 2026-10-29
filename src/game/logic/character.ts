@@ -7,7 +7,7 @@ import type { ClassId } from '../data/types.ts'
 import { DEFAULT_ZONE_ID, ZONES } from '../data/zones.ts'
 import { starterEquipment, type Equipment, type GearPiece } from './equipment.ts'
 import type { ItemStack } from './loot.ts'
-import { starterSkills, type LearnedSkill } from './skills.ts'
+import { defaultBar, starterSkills, type LearnedSkill } from './skills.ts'
 
 export { GameError } from './errors.ts'
 
@@ -47,10 +47,19 @@ export interface CharacterData {
   sp: number
   /** Learned skills by skill id. */
   skills: Record<string, LearnedSkill>
+  /** Active skills on the bar (at most 7) — the ones used in fights. */
+  skillBar: number[]
   /** Worn weapon and armor. */
   equipment: Equipment
-  /** Upgraded pieces in the bag (plain ones stack in `inventory`). */
+  /** Single pieces in the bag: upgraded, with options, accessories (plain ones stack in `inventory`). */
   gear: GearPiece[]
+  /** Potions are used automatically in fights (HP / MP). */
+  potionAuto: PotionAuto
+}
+
+export interface PotionAuto {
+  hp: boolean
+  mp: boolean
 }
 
 export interface NewCharacter {
@@ -107,7 +116,9 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     expedition: null,
     sp: 0,
     skills: starterSkills(input.classId),
+    skillBar: defaultBar(input.classId, starterSkills(input.classId)),
     equipment: starterEquipment(input.classId),
     gear: [],
+    potionAuto: { hp: true, mp: true },
   }
 }

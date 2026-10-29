@@ -16,9 +16,17 @@ export interface Hero {
   skills?: Readonly<Record<string, LearnedSkill>>
   /** Worn gear; left out = the typical gear of the level (estimates). */
   equipment?: Equipment
+  /** Skills used in fights; left out = every learned active skill. */
+  skillBar?: readonly number[]
 }
 
-export function playerFighter({ classId, level, skills = {}, equipment }: Hero): FighterInit {
+export function playerFighter({
+  classId,
+  level,
+  skills = {},
+  equipment,
+  skillBar,
+}: Hero): FighterInit {
   const base = statsForLevel(CLASSES[classId], level)
   // LC data: class stats are not in the LC database yet — scale against LC monsters instead
   const levelStats = lcData ? lcPlayerStats(level, lcData.monsters, base) : base
@@ -27,22 +35,22 @@ export function playerFighter({ classId, level, skills = {}, equipment }: Hero):
   return {
     level,
     stats: applyStats(stats, passiveEffects(ranks)),
-    skills: ranks.filter((r) => r.kind !== 'passive'),
+    skills: ranks.filter((r) => r.kind !== 'passive' && (!skillBar || skillBar.includes(r.id))),
   }
 }
 
-/** Changes whenever the hero's fighter would (level, learned skills, auto settings, gear). */
-export function heroKey({ classId, level, skills = {}, equipment }: Hero): string {
+/** Changes whenever the hero's fighter would (level, skills, auto settings, bar, gear). */
+export function heroKey({ classId, level, skills = {}, equipment, skillBar }: Hero): string {
   const learned = Object.keys(skills)
     .sort()
     .map((id) => `${id}:${skills[id]!.level}${skills[id]!.auto ? 'a' : ''}`)
   const worn = equipment
     ? Object.entries(equipment)
         .sort(([a], [b]) => a.localeCompare(b))
-        .map(([slot, piece]) => `${slot}:${piece?.itemId}+${piece?.plus}`)
+        .map(([slot, piece]) => `${slot}:${piece?.uid}+${piece?.plus}`)
         .join(',')
     : 'typical'
-  return `${classId}/${level}/${learned.join(',')}/${worn}`
+  return `${classId}/${level}/${learned.join(',')}/${worn}/${skillBar?.join(',') ?? 'all'}`
 }
 
 export function monsterFighter(monsterId: string): FighterInit {

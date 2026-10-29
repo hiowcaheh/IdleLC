@@ -6,7 +6,9 @@ import { playerFighter } from './fighters.ts'
 import {
   SP_UNIT,
   applyAuto,
+  applyBar,
   applyLearn,
+  arrangeBar,
   applyStats,
   checkLearn,
   interpretEffect,
@@ -225,5 +227,47 @@ describe('playerFighter', () => {
     expect(skilled.stats.maxHp).toBe(plain.stats.maxHp + 40)
     expect(skilled.stats.maxMp).toBe(plain.stats.maxMp)
     expect(skilled.skills!.map((r) => r.id)).toEqual([1])
+  })
+})
+
+describe('skill bar', () => {
+  it('starts with the free active skills and takes new active skills while there is room', () => {
+    const c = knight({ level: 3, sp: 5 * SP_UNIT })
+    expect(c.skillBar).toEqual([1])
+    const withBuff = applyLearn(c, 2) // Iron Skin, a buff
+    // buffs go to the right of the attacks
+    expect(withBuff.skillBar).toEqual([1, 2])
+    const withPassive = applyLearn(withBuff, 3) // Toughness, passive: not on the bar
+    expect(withPassive.skillBar).toEqual([1, 2])
+    const full = applyLearn({ ...c, skillBar: [11, 12, 13, 14, 15, 16, 17] }, 2)
+    expect(full.skillBar).toEqual([11, 12, 13, 14, 15, 16, 17])
+  })
+
+  it('arranges attacks left and buffs right', () => {
+    expect(arrangeBar('knight', [2, 1])).toEqual([1, 2])
+  })
+
+  it('takes only learned active skills, at most seven', () => {
+    const c = knight({
+      skills: {
+        1: { level: 1, auto: true },
+        2: { level: 1, auto: true },
+        3: { level: 1, auto: true },
+      },
+    })
+    expect(applyBar(c, [2, 1]).skillBar).toEqual([1, 2])
+    expect(applyBar(c, []).skillBar).toEqual([])
+    expect(() => applyBar(c, [3])).toThrowError(/passive-skill/)
+    expect(() => applyBar(knight(), [2])).toThrowError(/not-learned/)
+    expect(() => applyBar(c, [1, 2, 3, 4, 5, 6, 7, 8])).toThrowError(/bar-full/)
+  })
+
+  it('only the skills on the bar are used in fights', () => {
+    const skills = { 1: { level: 1, auto: true }, 2: { level: 1, auto: true } }
+    expect(
+      playerFighter({ classId: 'knight', level: 5, skills, skillBar: [2] }).skills!.map(
+        (r) => r.id,
+      ),
+    ).toEqual([2])
   })
 })

@@ -6,13 +6,10 @@ import {
   MAX_PLUS,
   NAKED_ATTACK,
   NAKED_DEFENSE,
-  applyBuy,
   applyEquip,
   applyGear,
-  applySellPiece,
   applyUnequip,
   applyUpgrade,
-  buyPrice,
   checkWear,
   starterEquipment,
   stonesOwned,
@@ -152,22 +149,38 @@ describe('upgrades', () => {
   })
 })
 
-describe('shop', () => {
-  it('sells what the zone shop has for its price × buy rate', () => {
-    expect(buyPrice(7)).toBe(200)
-    const after = applyBuy(knight({ gold: 500 }), 7, 2)
-    expect(after.gold).toBe(100)
-    expect(after.inventory).toEqual([{ itemId: 7, count: 2 }])
-    expect(() => applyBuy(knight({ gold: 150 }), 7, 1)).toThrowError(/not-enough-gold/)
-    expect(() => applyBuy(knight({ gold: 500 }), 1, 1)).toThrowError(/not-in-shop/)
-    expect(() => applyBuy(knight({ gold: 500 }), 7, 0)).toThrowError(/bad-count/)
+describe('accessories', () => {
+  const ring = (uid: string, options = [{ type: 20, level: 3 }]) => ({
+    uid,
+    itemId: 166,
+    plus: 0,
+    options,
   })
 
-  it('buys an upgraded piece back at the plain price', () => {
-    const c = knight({ gear: [{ uid: 'x', itemId: 4, plus: 7 }] })
-    const sale = applySellPiece(c, 'x')
-    expect(sale.gold).toBe(48) // 120 × 40%
-    expect(sale.character.gear).toEqual([])
-    expect(() => applySellPiece(c, 'nope')).toThrowError(/not-owned/)
+  it('fill the three accessory slots, then replace the first one', () => {
+    let c = knight({ gear: [ring('a'), ring('b'), ring('c'), ring('d')] })
+    for (const uid of ['a', 'b', 'c']) c = applyEquip(c, { uid }, makeId)
+    expect([
+      c.equipment.accessory1?.uid,
+      c.equipment.accessory2?.uid,
+      c.equipment.accessory3?.uid,
+    ]).toEqual(['a', 'b', 'c'])
+    c = applyEquip(c, { uid: 'd' }, makeId)
+    expect(c.equipment.accessory1?.uid).toBe('d')
+    // the replaced accessory keeps its options in the bag
+    expect(c.gear).toEqual([ring('a')])
+    const chosen = applyEquip(c, { uid: 'a' }, makeId, 'accessory3')
+    expect(chosen.equipment.accessory3?.uid).toBe('a')
+    expect(() => applyEquip(c, { uid: 'a' }, makeId, 'weapon')).toThrowError(/wrong-slot/)
+  })
+
+  it('add their option values to the stats and cannot be upgraded', () => {
+    const base = starterEquipment('knight', makeId)
+    const plain = applyGear(stats, 'knight', 1, base)
+    const withRing = applyGear(stats, 'knight', 1, { ...base, accessory1: ring('r') })
+    expect(withRing.attack).toBe(plain.attack + 3) // Attack level 3 = 3
+    const c = knight({ inventory: [{ itemId: UPGRADE_STONE_ID, count: 1 }] })
+    const wearing = { ...c, equipment: { ...c.equipment, accessory1: ring('r') } }
+    expect(() => applyUpgrade(wearing, 'accessory1', always)).toThrowError(/not-upgradeable/)
   })
 })

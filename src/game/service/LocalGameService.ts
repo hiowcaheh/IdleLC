@@ -9,6 +9,7 @@ import {
   type CharacterData,
   type CharacterLocation,
   type NewCharacter,
+  type PotionAuto,
 } from '../logic/character.ts'
 import { AFK_MIN_SECONDS, simulateAfk, type AfkResult } from '../logic/afk.ts'
 import { newId } from '../logic/id.ts'
@@ -21,13 +22,17 @@ import {
 } from '../logic/rewards.ts'
 import { createRng, type Rng } from '../logic/rng.ts'
 import type { ItemStack } from '../logic/loot.ts'
-import { applySale, type SaleResult } from '../logic/shop.ts'
-import { SP_UNIT, applyAuto, applyLearn } from '../logic/skills.ts'
-import type { EquipSlot } from '../data/types.ts'
 import {
   applyBuy,
-  applyEquip,
+  applySale,
   applySellPiece,
+  type PurchaseResult,
+  type SaleResult,
+} from '../logic/shop.ts'
+import { SP_UNIT, applyAuto, applyBar, applyLearn } from '../logic/skills.ts'
+import type { EquipSlot } from '../data/types.ts'
+import {
+  applyEquip,
   applyUnequip,
   applyUpgrade,
   type GearSource,
@@ -163,8 +168,17 @@ export class LocalGameService implements GameService {
     return copy(this.update(characterId, () => changed))
   }
 
-  async equipItem(characterId: string, source: GearSource): Promise<CharacterData> {
-    const changed = applyEquip(this.notOnExpedition(characterId), source)
+  async setSkillBar(characterId: string, skillIds: number[]): Promise<CharacterData> {
+    const changed = applyBar(this.notOnExpedition(characterId), skillIds)
+    return copy(this.update(characterId, () => changed))
+  }
+
+  async equipItem(
+    characterId: string,
+    source: GearSource,
+    slot?: EquipSlot,
+  ): Promise<CharacterData> {
+    const changed = applyEquip(this.notOnExpedition(characterId), source, newId, slot)
     return copy(this.update(characterId, () => changed))
   }
 
@@ -179,8 +193,17 @@ export class LocalGameService implements GameService {
     return copy({ ...result, character: updated })
   }
 
-  async buyItem(characterId: string, itemId: number, count: number): Promise<CharacterData> {
-    const changed = applyBuy(this.notOnExpedition(characterId), itemId, count)
+  async buyItem(characterId: string, itemId: number, count: number): Promise<PurchaseResult> {
+    const purchase = applyBuy(this.notOnExpedition(characterId), itemId, count, this.rng)
+    const updated = this.update(characterId, () => purchase.character)
+    return copy({ ...purchase, character: updated })
+  }
+
+  async setPotionAuto(characterId: string, auto: PotionAuto): Promise<CharacterData> {
+    const changed = {
+      ...this.notOnExpedition(characterId),
+      potionAuto: { hp: auto.hp, mp: auto.mp },
+    }
     return copy(this.update(characterId, () => changed))
   }
 
