@@ -78,12 +78,18 @@ export interface MonsterDrop {
 
 export type ItemType = 'weapon' | 'armor' | 'scroll' | 'material' | 'accessory' | 'potion' | 'other'
 
-/** Equipment slots (LC t_item.a_wearing 0…6). */
-export type EquipSlot = 'helmet' | 'armor' | 'weapon' | 'pants' | 'shield' | 'gloves' | 'boots'
+export type ArmorSlot = 'helmet' | 'armor' | 'pants' | 'shield' | 'gloves' | 'boots'
+export type AccessorySlot = 'accessory1' | 'accessory2' | 'accessory3'
+/** Equipment slots: LC t_item.a_wearing 0…6 and the three accessory places (a_wearing 7). */
+export type EquipSlot = 'weapon' | ArmorSlot | AccessorySlot
+/** Where a piece goes: one slot, or any accessory slot. */
+export type GearSlot = 'weapon' | ArmorSlot | 'accessory'
 
-/** What a weapon or armor piece gives, 1:1 from t_item.a_num_0…2. */
+/** What a weapon, armor piece or accessory gives, 1:1 from t_item.a_num_0…2. */
 export interface GearDef {
-  slot: EquipSlot
+  slot: GearSlot
+  /** t_item.a_subtype_idx: weapon kind, armor part or accessory kind (option masks use it). */
+  subtype: number
   /** Classes that can wear it (a_job_flag). */
   classes: ClassId[]
   attack: number
@@ -94,6 +100,33 @@ export interface GearDef {
   attackInterval?: number
 }
 
+/**
+ * A potion — in LC a skill (t_item.a_num_0 → t_skill): HP or MP per second while it lasts, or faster
+ * recovery (per 5 s tick).
+ */
+export interface PotionDef {
+  kind: 'hp' | 'mp' | 'hpRegen' | 'mpRegen'
+  power: number
+  /** Seconds the effect lasts. */
+  duration: number
+  /** Seconds before the next potion of the kind (t_skill.a_reuseTime). */
+  cooldown: number
+}
+
+/** An item option 1:1 from t_option. */
+export interface OptionDef {
+  type: number
+  name: string
+  /** Value at each option level (index 0 = level 1). */
+  values: number[]
+  /** Roll weight of each level; 0 = never rolls. */
+  weights: number[]
+  /** Bits of the weapon / armor / accessory subtypes the option can appear on. */
+  weaponMask: number
+  armorMask: number
+  accessoryMask: number
+}
+
 export interface ItemDef {
   id: number
   name: string
@@ -102,8 +135,11 @@ export interface ItemDef {
   level: number
   /** Shop price in gold. */
   price: number
-  /** Weapons and armor. */
+  /** Weapons, armor and accessories. */
   gear?: GearDef
+  /** Can be upgraded with stones (t_item.a_flag bit 2). */
+  upgradeable?: boolean
+  potion?: PotionDef
 }
 
 /** One effect of a skill level: t_magic (type, subtype, damage type) + t_magiclevel.a_power. */

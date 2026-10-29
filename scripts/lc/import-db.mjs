@@ -44,6 +44,16 @@ const UPGRADE_STONES = new Set([84, 85])
 const CLASS_WEAPONS = new Set([0, 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14])
 /** t_item.a_flag of the regular weapons and armor (shops, drops, starter sets). */
 const FLAG_STANDARD_ITEM = 134217758
+/** t_item.a_flag bits: 2 = can be upgraded, 27 = set on all regular gear, 28 = cash shop items. */
+const FLAG_UPGRADE = 1 << 2
+const FLAG_REGULAR = 1 << 27
+const FLAG_CASH = 1 << 28
+const isRegularGear = (flag) =>
+  (flag & FLAG_UPGRADE) !== 0 && (flag & FLAG_REGULAR) !== 0 && (flag & FLAG_CASH) === 0
+/** Region placeholders cost 1 gold; real gear costs hundreds. */
+const MIN_SHOP_PRICE = 100
+/** t_item.a_flag of the plain "Magical Accessory" pieces (cords, stones, eyes, earrings, rings). */
+const FLAG_MAGIC_ACCESSORY = 134217754
 /** a_job_flag bits of the six base classes (bit = t_skill.a_job). */
 const BASE_CLASS_BITS = 0b111111
 
@@ -149,8 +159,27 @@ function buildData(tables) {
     int(r.a_level) >= 1
   const usable = (r) => int(r.a_enable) === 1 && String(r.a_name_usa ?? '').trim() !== ''
 
+  const potions = buildPotions(tables, itemRows, usable)
   const starterGear = buildStarterGear(tables.t_item, isGear, usable)
-  const shops = buildShops(tables, itemRows, isGear, usable)
+  const shops = buildShops(tables, itemRows, isGear, usable, potions)
+  const shopGear = buildShopGear(tables.t_item, isGear, usable)
+  // plain accessories: no shop or monster sells them in the dump, IdleLC's shop does (own decision)
+  const accessories = tables.t_item
+    .filter(
+      (r) =>
+        usable(r) &&
+        int(r.a_type_idx) === 5 &&
+        int(r.a_subtype_idx) <= 4 &&
+        int(r.a_flag) === FLAG_MAGIC_ACCESSORY &&
+        int(r.a_price) > 0 &&
+        String(r.a_descr_usa ?? '').trim() === 'Magical Accessory',
+    )
+    .sort((a, b) => int(a.a_subtype_idx) - int(b.a_subtype_idx) || int(a.a_price) - int(b.a_price))
+    .map((r) => int(r.a_index))
+  accessories.forEach((id) => usedItems.add(id))
+  for (const slots of Object.values(shopGear))
+    for (const tiers of Object.values(slots))
+      for (const t of tiers) t.items.forEach((id) => usedItems.add(id))
   for (const ids of Object.values(starterGear)) ids.forEach((id) => usedItems.add(id))
   UPGRADE_STONES.forEach((id) => usedItems.add(id))
   const shopItems = new Set(Object.values(shops).flat())
@@ -169,9 +198,11 @@ function buildData(tables) {
       slot: int(r.a_wearing),
       level: int(r.a_level),
       jobFlag: int(r.a_job_flag),
+      flag: int(r.a_flag),
       price: int(r.a_price),
       stats: [0, 1, 2, 3, 4].map((k) => int(r[`a_num_${k}`])),
       icon: { atlas: int(r.a_texture_id), row: int(r.a_texture_row), col: int(r.a_texture_col) },
+      ...(potions.has(int(r.a_index)) ? { potion: potions.get(int(r.a_index)) } : {}),
     }))
 
   const expTable = Array.from({ length: MAX_LEVEL }, () => 0)
@@ -199,10 +230,132 @@ function buildData(tables) {
     expTable,
     shop,
     shops,
+    shopGear,
+    accessories,
+    options: buildOptions(tables.t_option),
     starterGear,
     gearReference,
     skills,
   }
+}
+
+const numbers = (text) =>
+  String(text ?? '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(Number)
+
+/**
+ * Item options 1:1 from t_option: per option level the value (a_level list) and the roll weight
+ * (a_prob list; levels with weight 0 never roll), and where the option may appear: weapon subtypes
+ * (a_weapon_type bits), armor subtypes (a_wear_type) and accessory subtypes (a_accessory_type).
+ * Only options that can roll are kept.
+ */
+function buildOptions(rows) {
+  return rows
+    .map((r) => {
+      const weights = numbers(r.a_prob)
+      const values = numbers(r.a_level).slice(0, weights.length)
+      return {
+        type: int(r.a_type),
+        name: String(r.a_name_usa ?? '').trim(),
+        values,
+        weights: weights.slice(0, values.length),
+        weaponMask: int(r.a_weapon_type),
+        armorMask: int(r.a_wear_type),
+        accessoryMask: int(r.a_accessory_type),
+      }
+    })
+    .filter((o) => o.name && o.weights.some((w) => w > 0))
+    .sort((a, b) => a.type - b.type)
+}
+
+/**
+ * Potions are skills in LC: t_item.a_num_0 points at a t_skill whose level 1 holds the effect (heal or
+ * mana over time, faster recovery), its duration and its reuse time.
+ */
+function buildPotions(tables, itemRows, usable) {
+  const skills = new Map(tables.t_skill.map((r) => [int(r.a_index), r]))
+  const level1 = new Map(
+    tables.t_skilllevel.filter((r) => int(r.a_level) === 1).map((r) => [int(r.a_index), r]),
+  )
+  const magics = new Map(tables.t_magic.map((r) => [int(r.a_index), r]))
+  const powers = new Map(tables.t_magiclevel.map((r) => [`${int(r.a_index)}/${int(r.a_level)}`, r]))
+  const potions = new Map()
+  for (const r of itemRows.values()) {
+    if (int(r.a_type_idx) !== 6 || !usable(r)) continue
+    const skill = skills.get(int(r.a_num_0))
+    const level = level1.get(int(r.a_num_0))
+    const magic = level && magics.get(int(level.a_magicIndex1))
+    if (!skill || !magic) continue
+    const kind =
+      int(magic.a_type) === 2 && int(magic.a_subtype) === 9
+        ? 'hp'
+        : int(magic.a_type) === 2 && int(magic.a_subtype) === 10
+          ? 'mp'
+          : int(magic.a_type) === 0 && int(magic.a_subtype) === 10
+            ? 'hpRegen'
+            : int(magic.a_type) === 0 && int(magic.a_subtype) === 11
+              ? 'mpRegen'
+              : null
+    if (!kind) continue
+    const power = powers.get(`${int(magic.a_index)}/${int(level.a_magicLevel1)}`)
+    potions.set(int(r.a_index), {
+      kind,
+      power: power ? int(power.a_power) : 0,
+      duration: int(level.a_durtime) / 10,
+      cooldown: int(skill.a_reuseTime) / 10,
+    })
+  }
+  return potions
+}
+
+/**
+ * Gear the IdleLC shop offers a class, by slot and tier (t_item.a_level): the regular pieces of each
+ * tier with the tier's most common price (premium sets cost more). Level-1 pieces are left out —
+ * every character starts with them. The shop shows the tiers around the character's level.
+ */
+function buildShopGear(itemTable, isGear, usable) {
+  const shopGear = {}
+  SKILL_CLASSES.forEach((classId, job) => {
+    const own = itemTable.filter(
+      (r) =>
+        usable(r) &&
+        isGear(r) &&
+        isRegularGear(int(r.a_flag)) &&
+        int(r.a_price) >= MIN_SHOP_PRICE &&
+        int(r.a_level) > 1 &&
+        int(r.a_level) <= MAX_LEVEL &&
+        (int(r.a_job_flag) & jobBit(job)) !== 0,
+    )
+    const slots = {}
+    for (const slot of GEAR_SLOTS) {
+      const byLevel = new Map()
+      for (const r of own.filter((r) => int(r.a_wearing) === slot)) {
+        const list = byLevel.get(int(r.a_level)) ?? []
+        list.push(r)
+        byLevel.set(int(r.a_level), list)
+      }
+      const tiers = [...byLevel]
+        .sort((a, b) => a[0] - b[0])
+        .map(([level, pieces]) => {
+          const prices = new Map()
+          for (const r of pieces) prices.set(int(r.a_price), (prices.get(int(r.a_price)) ?? 0) + 1)
+          const [mainPrice] = [...prices].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0]
+          return {
+            level,
+            items: pieces
+              .filter((r) => int(r.a_price) === mainPrice)
+              .map((r) => int(r.a_index))
+              .sort((a, b) => a - b),
+          }
+        })
+      if (tiers.length) slots[slot] = tiers
+    }
+    shopGear[classId] = slots
+  })
+  return shopGear
 }
 
 const jobBit = (classIndex) => 1 << classIndex
@@ -236,9 +389,9 @@ function buildStarterGear(itemTable, isGear, usable) {
 
 /**
  * What the NPC shops of each field zone sell (t_shop.a_zone_num + t_shopitem): weapons and armor of
- * the base classes and upgrade stones. Keyed by IdleLC zone id.
+ * the base classes, upgrade stones and potions. Keyed by IdleLC zone id.
  */
-function buildShops(tables, itemRows, isGear, usable) {
+function buildShops(tables, itemRows, isGear, usable, potions) {
   const fieldZones = new Map(FIELD_ZONES.map((z) => [z.index, `lc-zone-${z.index}`]))
   const zoneOfKeeper = new Map(tables.t_shop.map((r) => [int(r.a_keeper_idx), int(r.a_zone_num)]))
   const shops = {}
@@ -247,7 +400,7 @@ function buildShops(tables, itemRows, isGear, usable) {
     const item = itemRows.get(int(r.a_item_idx))
     if (!zoneId || !item || !usable(item) || int(item.a_price) <= 0) continue
     const gear = isGear(item) && (int(item.a_job_flag) & BASE_CLASS_BITS) !== 0
-    if (!gear && !UPGRADE_STONES.has(int(item.a_index))) continue
+    if (!gear && !UPGRADE_STONES.has(int(item.a_index)) && !potions.has(int(item.a_index))) continue
     ;(shops[zoneId] ??= new Set()).add(int(item.a_index))
   }
   return Object.fromEntries(
@@ -408,6 +561,7 @@ async function main() {
     't_skilllevel',
     't_magic',
     't_magiclevel',
+    't_option',
   ])
   const data = buildData(tables)
   const manifest = await buildModelManifest(data, args.models)

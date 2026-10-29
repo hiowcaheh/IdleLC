@@ -2,7 +2,17 @@ import { CLASS_ORDER } from './classes.ts'
 import { iconSprite, type IconSprite } from './icons.ts'
 import { lcData, lcIcons } from './lcSource.ts'
 import type { LcItem } from './lcTypes.ts'
-import type { ClassId, EquipSlot, GearDef, ItemDef, ItemType } from './types.ts'
+import type {
+  AccessorySlot,
+  ArmorSlot,
+  ClassId,
+  EquipSlot,
+  GearDef,
+  GearSlot,
+  ItemDef,
+  ItemType,
+  OptionDef,
+} from './types.ts'
 
 /** t_item.a_type_idx → item type (see docs/lc-database.md). */
 const LC_TYPES: Record<number, ItemType> = {
@@ -14,8 +24,8 @@ const LC_TYPES: Record<number, ItemType> = {
   6: 'potion',
 }
 
-/** t_item.a_wearing → slot. */
-export const SLOTS_BY_WEARING: EquipSlot[] = [
+/** t_item.a_wearing → slot (7 = any of the three accessory places). */
+export const SLOTS_BY_WEARING: GearSlot[] = [
   'helmet',
   'armor',
   'weapon',
@@ -23,18 +33,19 @@ export const SLOTS_BY_WEARING: EquipSlot[] = [
   'shield',
   'gloves',
   'boots',
+  'accessory',
 ]
 
+export const ARMOR_SLOTS: ArmorSlot[] = ['shield', 'helmet', 'armor', 'pants', 'gloves', 'boots']
+export const ACCESSORY_SLOTS: AccessorySlot[] = ['accessory1', 'accessory2', 'accessory3']
+
 /** Display order of the slots. */
-export const EQUIP_SLOTS: EquipSlot[] = [
-  'weapon',
-  'shield',
-  'helmet',
-  'armor',
-  'pants',
-  'gloves',
-  'boots',
-]
+export const EQUIP_SLOTS: EquipSlot[] = ['weapon', ...ARMOR_SLOTS, ...ACCESSORY_SLOTS]
+
+/** The slots a piece can go to. */
+export function slotsFor(gear: Pick<GearDef, 'slot'>): EquipSlot[] {
+  return gear.slot === 'accessory' ? ACCESSORY_SLOTS : [gear.slot]
+}
 
 /** t_item 84 "Smelting Stone": upgrades weapons and armor by one (drops, see logic/loot.ts). */
 export const UPGRADE_STONE_ID = 84
@@ -45,26 +56,44 @@ export const UPGRADE_STONE_IDS = [UPGRADE_STONE_ID, HEAVEN_STONE_ID]
 
 /** a_job_flag bit n = class n in t_skill.a_job order. */
 const JOB_ORDER: ClassId[] = ['titan', 'knight', 'healer', 'mage', 'rogue', 'sorcerer']
+/** t_item.a_flag bit 2: the item can be upgraded. */
+const FLAG_UPGRADE = 1 << 2
+/** Accessory subtypes IdleLC wears: cords, stones, eyes, earrings, rings (pets and others not). */
+const MAX_ACCESSORY_SUBTYPE = 4
 
 function lcGear(item: LcItem): GearDef | undefined {
   const slot = SLOTS_BY_WEARING[item.slot]
-  if ((item.type !== 0 && item.type !== 1) || !slot) return undefined
-  const [n0 = 0, n1 = 0, n2 = 0] = item.stats
+  if (!slot) return undefined
   const classes = JOB_ORDER.filter((_, bit) => (item.jobFlag & (1 << bit)) !== 0)
-  return item.type === 0
-    ? {
-        slot,
-        classes,
-        attack: n0,
-        magicAttack: n1,
-        defense: 0,
-        magicDefense: 0,
-        attackInterval: n2 > 0 ? n2 / 10 : undefined,
-      }
-    : { slot, classes, attack: 0, magicAttack: 0, defense: n0, magicDefense: n1 }
+  const base = {
+    subtype: item.subtype,
+    classes,
+    attack: 0,
+    magicAttack: 0,
+    defense: 0,
+    magicDefense: 0,
+  }
+  const [n0 = 0, n1 = 0, n2 = 0] = item.stats
+  if (item.type === 0 && slot === 'weapon') {
+    return {
+      ...base,
+      slot,
+      attack: n0,
+      magicAttack: n1,
+      attackInterval: n2 > 0 ? n2 / 10 : undefined,
+    }
+  }
+  if (item.type === 1 && slot !== 'weapon' && slot !== 'accessory') {
+    return { ...base, slot, defense: n0, magicDefense: n1 }
+  }
+  if (item.type === 5 && slot === 'accessory' && item.subtype <= MAX_ACCESSORY_SUBTYPE) {
+    return { ...base, slot }
+  }
+  return undefined
 }
 
 const knightGear = (gear: Partial<GearDef> & Pick<GearDef, 'slot'>): GearDef => ({
+  subtype: 0,
   classes: ['knight'],
   attack: 0,
   magicAttack: 0,
@@ -73,7 +102,17 @@ const knightGear = (gear: Partial<GearDef> & Pick<GearDef, 'slot'>): GearDef => 
   ...gear,
 })
 
-/** Own placeholder items for the game without the LC data — and the tests. */
+const accessory = (subtype: number): GearDef => ({
+  slot: 'accessory',
+  subtype,
+  classes: [...JOB_ORDER],
+  attack: 0,
+  magicAttack: 0,
+  defense: 0,
+  magicDefense: 0,
+})
+
+/** Own placeholder items for the game without the LC data — and the tests (LC ids where they exist). */
 const PLACEHOLDER_ITEMS: Record<number, ItemDef> = {
   1: { id: 1, name: 'Rusty Cog', type: 'material', level: 1, price: 4 },
   2: { id: 2, name: 'Golem Core', type: 'material', level: 1, price: 40 },
@@ -84,6 +123,7 @@ const PLACEHOLDER_ITEMS: Record<number, ItemDef> = {
     type: 'weapon',
     level: 3,
     price: 120,
+    upgradeable: true,
     gear: knightGear({ slot: 'weapon', attack: 14, attackInterval: 1.2 }),
   },
   5: {
@@ -92,6 +132,7 @@ const PLACEHOLDER_ITEMS: Record<number, ItemDef> = {
     type: 'weapon',
     level: 1,
     price: 0,
+    upgradeable: true,
     gear: knightGear({ slot: 'weapon', attack: 8, attackInterval: 1.3 }),
   },
   6: {
@@ -100,7 +141,8 @@ const PLACEHOLDER_ITEMS: Record<number, ItemDef> = {
     type: 'armor',
     level: 1,
     price: 0,
-    gear: knightGear({ slot: 'armor', defense: 10 }),
+    upgradeable: true,
+    gear: knightGear({ slot: 'armor', subtype: 1, defense: 10 }),
   },
   7: {
     id: 7,
@@ -108,7 +150,56 @@ const PLACEHOLDER_ITEMS: Record<number, ItemDef> = {
     type: 'armor',
     level: 2,
     price: 200,
+    upgradeable: true,
     gear: knightGear({ slot: 'helmet', defense: 6 }),
+  },
+  43: {
+    id: 43,
+    name: 'Small Healing Potion',
+    type: 'potion',
+    level: 0,
+    price: 440,
+    potion: { kind: 'hp', power: 16, duration: 15, cooldown: 5 },
+  },
+  44: {
+    id: 44,
+    name: 'Medium Healing Potion',
+    type: 'potion',
+    level: 0,
+    price: 3420,
+    potion: { kind: 'hp', power: 33, duration: 15, cooldown: 5 },
+  },
+  484: {
+    id: 484,
+    name: 'Small Mana Potion',
+    type: 'potion',
+    level: 0,
+    price: 330,
+    potion: { kind: 'mp', power: 8, duration: 15, cooldown: 5 },
+  },
+  490: {
+    id: 490,
+    name: 'Small HP Recovery Potion',
+    type: 'potion',
+    level: 0,
+    price: 240,
+    potion: { kind: 'hpRegen', power: 2, duration: 600, cooldown: 5 },
+  },
+  166: {
+    id: 166,
+    name: 'Magical Ring',
+    type: 'accessory',
+    level: 0,
+    price: 2000,
+    gear: accessory(4),
+  },
+  172: {
+    id: 172,
+    name: 'Blue Stone',
+    type: 'accessory',
+    level: 0,
+    price: 1300,
+    gear: accessory(1),
   },
   [UPGRADE_STONE_ID]: {
     id: UPGRADE_STONE_ID,
@@ -128,17 +219,25 @@ const PLACEHOLDER_ITEMS: Record<number, ItemDef> = {
 
 export const ITEMS: Record<number, ItemDef> = lcData
   ? Object.fromEntries(
-      lcData.items.map((i) => [
-        i.id,
-        {
-          id: i.id,
-          name: i.name,
-          type: LC_TYPES[i.type] ?? 'other',
-          level: i.level,
-          price: i.price,
-          gear: lcGear(i),
-        },
-      ]),
+      lcData.items.map((i) => {
+        const gear = lcGear(i)
+        return [
+          i.id,
+          {
+            id: i.id,
+            name: i.name,
+            type: LC_TYPES[i.type] ?? 'other',
+            level: i.level,
+            price: i.price,
+            gear,
+            upgradeable:
+              gear !== undefined &&
+              gear.slot !== 'accessory' &&
+              ((i.flag ?? 0) & FLAG_UPGRADE) !== 0,
+            potion: i.potion,
+          },
+        ]
+      }),
     )
   : PLACEHOLDER_ITEMS
 
@@ -160,12 +259,38 @@ export function itemIcon(id: number): IconSprite | null {
   return iconSprite(lcIcons?.items, id)
 }
 
-const PLACEHOLDER_SHOPS: Record<string, number[]> = { glade: [7, 4, UPGRADE_STONE_ID] }
+const PLACEHOLDER_SHOPS: Record<string, number[]> = {
+  glade: [7, 4, UPGRADE_STONE_ID, 43, 44, 484, 490],
+}
 const PLACEHOLDER_STARTER: Partial<Record<ClassId, number[]>> = { knight: [5, 6] }
+const PLACEHOLDER_SHOP_GEAR: Partial<Record<ClassId, Partial<Record<GearSlot, ShopTier[]>>>> = {
+  knight: { weapon: [{ level: 3, items: [4] }], helmet: [{ level: 2, items: [7] }] },
+}
+const PLACEHOLDER_ACCESSORIES = [172, 166]
 
 /** What the shops of a zone sell (LC t_shopitem of the zone's NPC shops). */
 export function shopItems(zoneId: string): number[] {
   return (lcData ? lcData.shops?.[zoneId] : PLACEHOLDER_SHOPS[zoneId]) ?? []
+}
+
+export interface ShopTier {
+  /** Required level of the tier's pieces. */
+  level: number
+  items: number[]
+}
+
+/** The weapon and armor tiers the shop sells a class, by slot (see import-db buildShopGear). */
+export function shopGear(classId: ClassId): Partial<Record<GearSlot, ShopTier[]>> {
+  if (!lcData) return PLACEHOLDER_SHOP_GEAR[classId] ?? {}
+  const byWearing = lcData.shopGear?.[classId] ?? {}
+  return Object.fromEntries(
+    Object.entries(byWearing).map(([wearing, tiers]) => [SLOTS_BY_WEARING[Number(wearing)], tiers]),
+  )
+}
+
+/** Plain accessories the shop sells (options are rolled when one is bought). */
+export function shopAccessories(): number[] {
+  return lcData ? (lcData.accessories ?? []) : PLACEHOLDER_ACCESSORIES
 }
 
 /** The free level-1 set a new character of the class starts with. */
@@ -187,7 +312,7 @@ export interface GearReference {
 
 /** Typical gear from any item list: per slot, the median power of the newest tier the class can wear. */
 function referenceFrom(items: readonly ItemDef[], classId: ClassId, level: number): GearReference {
-  const tierPower = (slot: EquipSlot) => {
+  const tierPower = (slot: GearSlot) => {
     const fits = items.filter(
       (i) => i.gear?.slot === slot && i.gear.classes.includes(classId) && i.level <= level,
     )
@@ -202,7 +327,7 @@ function referenceFrom(items: readonly ItemDef[], classId: ClassId, level: numbe
   }
   return {
     weapon: tierPower('weapon'),
-    armor: EQUIP_SLOTS.filter((s) => s !== 'weapon').reduce((sum, s) => sum + tierPower(s), 0),
+    armor: ARMOR_SLOTS.reduce((sum, s) => sum + tierPower(s), 0),
   }
 }
 
@@ -232,4 +357,53 @@ export function classSlots(classId: ClassId): EquipSlot[] {
         (i) => i.gear?.slot === 'shield' && i.gear.classes.includes(classId),
       ),
   )
+}
+
+/** Own placeholder options for the game without the LC data — and the tests (LC t_option values). */
+const PLACEHOLDER_OPTIONS: OptionDef[] = [
+  {
+    type: 0,
+    name: 'Strength',
+    values: [4, 6, 8, 12, 16],
+    weights: [0, 40, 20, 5, 1],
+    weaponMask: 0,
+    armorMask: 8,
+    accessoryMask: 42,
+  },
+  {
+    type: 11,
+    name: 'Physical Defense',
+    values: [1, 2, 3, 4, 6],
+    weights: [0, 80, 40, 10, 2],
+    weaponMask: 0,
+    armorMask: 70,
+    accessoryMask: 42,
+  },
+  {
+    type: 20,
+    name: 'Attack',
+    values: [1, 2, 3, 4, 5],
+    weights: [0, 80, 40, 10, 2],
+    weaponMask: 30975,
+    armorMask: 103,
+    accessoryMask: 21,
+  },
+  {
+    type: 21,
+    name: 'Hit Rate',
+    values: [18, 37, 56, 75, 93],
+    weights: [0, 80, 40, 10, 2],
+    weaponMask: 30975,
+    armorMask: 0,
+    accessoryMask: 21,
+  },
+]
+
+/** Item options (t_option) by type. */
+export const OPTIONS: Record<number, OptionDef> = Object.fromEntries(
+  (lcData?.options ?? PLACEHOLDER_OPTIONS).map((o) => [o.type, o]),
+)
+
+export function getOption(type: number): OptionDef | undefined {
+  return OPTIONS[type]
 }

@@ -1,3 +1,5 @@
+import type { OptionDef, PotionDef } from './types.ts'
+
 /** Shape of the files written by scripts/lc/import-db.mjs (src/game/data/generated/). */
 
 export interface LcDrop {
@@ -52,9 +54,11 @@ export interface LcItem {
   slot: number
   level: number
   jobFlag: number
+  flag?: number
   price: number
   stats: number[]
   icon: { atlas: number; row: number; col: number }
+  potion?: PotionDef
 }
 
 export interface LcData {
@@ -71,6 +75,12 @@ export interface LcData {
   skills?: LcSkill[]
   /** Item ids the NPC shops of each field zone sell (gear and the upgrade stone), by zone id. */
   shops?: Record<string, number[]>
+  /** Gear the IdleLC shop sells a class: by t_item.a_wearing, the tiers (level → item ids). */
+  shopGear?: Record<string, Record<string, { level: number; items: number[] }[]>>
+  /** Plain accessories the IdleLC shop sells (their options are rolled when bought). */
+  accessories?: number[]
+  /** Item options (t_option) that can roll. */
+  options?: OptionDef[]
   /** The free level-1 set of each class, by class id. */
   starterGear?: Record<string, number[]>
   /** Typical gear power of each class per level (index 0 = level 1), see import-db buildGearReference. */
