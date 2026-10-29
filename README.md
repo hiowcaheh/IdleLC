@@ -42,10 +42,13 @@ ostatniej postaci.
 punkty umiejętności (SP); w oknie **Skills** (ikona księgi w HUD, zielona liczba = ile można się nauczyć)
 uczy się ich i podnosi poziomy. Nauczone umiejętności działają same w walce (pasek nad panelem polowania:
 odnowienie, AUTO / OFF po dotknięciu), zużywają manę (niebieski pasek) i działają też na wyprawach.
-Umiejętności, których efektów jeszcze nie mamy (przywołania, prędkość ruchu, wskrzeszenie), są szare.
+Umiejętności, których efektów jeszcze nie mamy (przywołania, prędkość ruchu, wskrzeszenie), są szare. Na pasku
+mieści się 7 umiejętności (ataki z lewej, buffy z prawej) i tylko one są używane w walce — w oknie Skills „Add to
+bar” / „Remove from bar”.
 
 **Ekwipunek:** postać zaczyna w darmowym zestawie swojej klasy z bazy. **Shop** (panel polowania) sprzedaje
-broń, zbroje i kamienie ze sklepów NPC danej strefy (ceny 1:1). Sprzęt zakłada się z torby (podgląd zmiany ataku
+broń i zbroje twojej klasy z progu poprzedniego, obecnego i następnego, akcesoria (z losowymi opcjami z bazy,
+1–5 na sztukę; trzy sloty) i kamienie (ceny 1:1). Sprzęt zakłada się z torby (podgląd zmiany ataku
 i obrony), a w oknie **Character** (ikona hełmu) widać statystyki i sloty, można zdjąć sprzęt i ulepszać go
 +0…+15 kamieniami (Smelting Stone z dropu, Heaven Stone ze sklepu; porażka od +3 zabiera jeden „+”). Lepszy
 sprzęt = szybsze polowanie, także na wyprawach. „Sell all loot” w torbie zostawia sprzęt twojej klasy.
@@ -57,7 +60,8 @@ przedmioty sprzedaje się tam za cenę z bazy × stawkę skupu sklepu (40%). Szc
 [`docs/balance.md`](docs/balance.md).
 **Settings → Change character** wraca do wyboru postaci, **Reset save** kasuje wszystkie postacie.
 Zapisy ze starszej wersji gry są przenoszone automatycznie (postać „Hero”; od wersji 5 postacie dostają
-darmowe umiejętności startowe i 0 SP, od wersji 6 — darmowy zestaw startowy sprzętu).
+darmowe umiejętności startowe i 0 SP, od wersji 6 — darmowy zestaw startowy sprzętu, od wersji 7 — pasek 7
+umiejętności).
 
 ### Narzędzia deweloperskie
 

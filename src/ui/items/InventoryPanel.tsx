@@ -3,10 +3,12 @@ import { getItem } from '../../game/data/items.ts'
 import type { ItemType } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
 import type { GearSource } from '../../game/logic/equipment.ts'
+import type { ItemOption } from '../../game/logic/options.ts'
 import type { ItemStack } from '../../game/logic/loot.ts'
 import { sellPrice, stacksValue } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { compareText, gearLine, pieceName, wearProblem } from '../gear/format.ts'
+import { OptionList } from '../gear/OptionList.tsx'
 import { Sheet } from '../Sheet.tsx'
 import { ItemIcon } from './ItemIcon.tsx'
 import { ItemRowContent, type ListedItem } from './ItemList.tsx'
@@ -101,12 +103,17 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   }
 
   /** "Wear" button (or why not) for a piece of gear. */
-  const wearActions = (itemId: number, plus: number, source: GearSource) => {
+  const wearActions = (
+    itemId: number,
+    plus: number,
+    source: GearSource,
+    options?: ItemOption[],
+  ) => {
     const problem = wearProblem(character, itemId)
     return (
       <>
         <p className="item-row__note">
-          {problem ?? `If you wear it: ${compareText(character, { itemId, plus })}`}
+          {problem ?? `If you wear it: ${compareText(character, { itemId, plus, options })}`}
         </p>
         <button
           type="button"
@@ -128,7 +135,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
 
       {character.gear.length > 0 && (
         <>
-          <h3 className="inventory__heading">Upgraded gear</h3>
+          <h3 className="inventory__heading">Accessories and upgraded gear</h3>
           <ul className="item-list">
             {character.gear.map((piece) => {
               const item = getItem(piece.itemId)
@@ -147,12 +154,15 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                     <ItemIcon item={item} />
                     <span className="item-row__body">
                       <span className="item-row__name">{pieceName(piece.itemId, piece.plus)}</span>
-                      <span className="item-row__meta">{gearLine(piece.itemId, piece.plus)}</span>
+                      {gearLine(piece.itemId, piece.plus) && (
+                        <span className="item-row__meta">{gearLine(piece.itemId, piece.plus)}</span>
+                      )}
+                      <OptionList options={piece.options} classId={character.classId} />
                     </span>
                   </button>
                   {open && (
                     <div className="item-row__actions">
-                      {wearActions(piece.itemId, piece.plus, { uid: piece.uid })}
+                      {wearActions(piece.itemId, piece.plus, { uid: piece.uid }, piece.options)}
                       {sellPrice(piece.itemId) > 0 && (
                         <button
                           type="button"

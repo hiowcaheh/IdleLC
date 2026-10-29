@@ -8,6 +8,7 @@ import { useGameStore } from '../../state/gameStore.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { Sheet } from '../Sheet.tsx'
 import { SLOT_LABELS, fmt, gearLine, heroStats, pieceName } from './format.ts'
+import { OptionList } from './OptionList.tsx'
 
 /** The hero's stats and worn gear: take pieces off and upgrade them with Smelting Stones. */
 export function CharacterPanel({ onClose }: { onClose(): void }) {
@@ -112,23 +113,26 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
                   <span className="item-row__name">
                     {piece ? pieceName(piece.itemId, piece.plus) : 'Empty'}
                   </span>
-                  {piece && (
+                  {piece && gearLine(piece.itemId, piece.plus) && (
                     <span className="item-row__meta">{gearLine(piece.itemId, piece.plus)}</span>
                   )}
+                  {piece && <OptionList options={piece.options} classId={character.classId} />}
                 </span>
               </button>
               {open && piece && (
                 <div className="item-row__actions">
-                  <button
-                    type="button"
-                    className="button button--gold"
-                    disabled={busy || away || stones < 1 || piece.plus >= MAX_PLUS}
-                    onClick={() => upgrade(slot, piece)}
-                  >
-                    {piece.plus >= MAX_PLUS
-                      ? `+${MAX_PLUS} — maximum`
-                      : `Upgrade to +${piece.plus + 1} · ${Math.round(upgradeChance(piece.plus) * 100)}%`}
-                  </button>
+                  {item?.upgradeable && (
+                    <button
+                      type="button"
+                      className="button button--gold"
+                      disabled={busy || away || stones < 1 || piece.plus >= MAX_PLUS}
+                      onClick={() => upgrade(slot, piece)}
+                    >
+                      {piece.plus >= MAX_PLUS
+                        ? `+${MAX_PLUS} — maximum`
+                        : `Upgrade to +${piece.plus + 1} · ${Math.round(upgradeChance(piece.plus) * 100)}%`}
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="button"
@@ -143,11 +147,17 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
                   >
                     Take off
                   </button>
-                  <p className="item-row__note">
-                    Upgrade stones: {stones}
-                    {stones < 1 ? ' — the shop sells them, monsters drop Smelting Stones.' : '.'}
-                    {piece.plus >= 3 && piece.plus < MAX_PLUS ? ' A failure takes one + away.' : ''}
-                  </p>
+                  {item?.upgradeable ? (
+                    <p className="item-row__note">
+                      Upgrade stones: {stones}
+                      {stones < 1 ? ' — the shop sells them, monsters drop Smelting Stones.' : '.'}
+                      {piece.plus >= 3 && piece.plus < MAX_PLUS
+                        ? ' A failure takes one + away.'
+                        : ''}
+                    </p>
+                  ) : (
+                    <p className="item-row__note">Accessories can't be upgraded.</p>
+                  )}
                 </div>
               )}
             </li>

@@ -1,9 +1,15 @@
 import { CLASSES } from '../../game/data/classes.ts'
-import { getItem, gearClasses } from '../../game/data/items.ts'
+import { getItem, getOption, gearClasses, slotsFor } from '../../game/data/items.ts'
 import type { CombatStats, EquipSlot } from '../../game/data/types.ts'
 import type { CharacterData } from '../../game/logic/character.ts'
 import { PLUS_BONUS, checkWear, type GearPiece } from '../../game/logic/equipment.ts'
 import { playerFighter } from '../../game/logic/fighters.ts'
+import {
+  OPTION_EFFECTS,
+  optionHelps,
+  optionValue,
+  type ItemOption,
+} from '../../game/logic/options.ts'
 
 export const SLOT_LABELS: Record<EquipSlot, string> = {
   weapon: 'Weapon',
@@ -13,6 +19,9 @@ export const SLOT_LABELS: Record<EquipSlot, string> = {
   pants: 'Pants',
   gloves: 'Gloves',
   boots: 'Boots',
+  accessory1: 'Accessory',
+  accessory2: 'Accessory',
+  accessory3: 'Accessory',
 }
 
 export const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
@@ -61,17 +70,37 @@ export function heroStats(character: CharacterData): CombatStats {
   return playerFighter(character).stats
 }
 
+/** "Strength +6", "Hit Rate +3.7%" (hit and evasion are in 1/10 %). */
+export function optionText(option: ItemOption): string {
+  const name = getOption(option.type)?.name ?? `Option ${option.type}`
+  const value = optionValue(option)
+  const stat = OPTION_EFFECTS[option.type]?.stat
+  return stat === 'hit' || stat === 'dodge'
+    ? `${name} +${Number((value / 10).toFixed(1))}%`
+    : `${name} +${fmt(value)}`
+}
+
+/** The options of a piece with whether they help the class. */
+export function optionLines(
+  options: readonly ItemOption[] | undefined,
+  classId: CharacterData['classId'],
+): { text: string; helps: boolean }[] {
+  return (options ?? []).map((o) => ({ text: optionText(o), helps: optionHelps(o, classId) }))
+}
+
 /** How the hero's attack, defense and speed would change by wearing a piece ("Attack +12"). */
 export function compareText(
   character: CharacterData,
-  piece: Pick<GearPiece, 'itemId' | 'plus'>,
+  piece: Pick<GearPiece, 'itemId' | 'plus' | 'options'>,
 ): string {
   const gear = getItem(piece.itemId).gear
   if (!gear) return ''
+  const slots = slotsFor(gear)
+  const slot = slots.find((s) => !character.equipment[s]) ?? slots[0]!
   const before = heroStats(character)
   const after = playerFighter({
     ...character,
-    equipment: { ...character.equipment, [gear.slot]: { uid: 'preview', ...piece } },
+    equipment: { ...character.equipment, [slot]: { uid: 'preview', ...piece } },
   }).stats
   const parts: string[] = []
   const delta = (label: string, a: number, b: number) => {
@@ -80,6 +109,14 @@ export function compareText(
   }
   delta('Attack', before.attack, after.attack)
   delta('Defense', before.defense, after.defense)
+  delta('HP', before.maxHp, after.maxHp)
+  delta('MP', before.maxMp ?? 0, after.maxMp ?? 0)
+  const pct = (label: string, a = 0, b = 0) => {
+    const d = Math.round((b - a) * 10) / 10
+    if (d !== 0) parts.push(`${label} ${d > 0 ? '+' : '−'}${Math.abs(d)}%`)
+  }
+  pct('Accuracy', before.hit, after.hit)
+  pct('Evasion', before.dodge, after.dodge)
   if (Math.abs(after.attackInterval - before.attackInterval) > 0.001) {
     parts.push(
       `${after.attackInterval.toFixed(1)} s per hit (now ${before.attackInterval.toFixed(1)})`,

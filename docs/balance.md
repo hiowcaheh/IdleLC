@@ -198,8 +198,36 @@ Heaven Stone (85, sprzedawany w Juno za 1 000). Szansa z +N (własne): 95, 90, 8
 Smelting Stone w LC wypada z potworów według zasady serwera, której nie ma w bazie — u nas **1% na zabicie
 każdego potwora** (`GENERAL_DROPS`, własne). Poziom kamienia z LC („do przedmiotów tego samego poziomu”) pomijamy.
 
-**Sklep (kupno):** każda strefa ma sklepy NPC z bazy (`t_shop.a_zone_num` + `t_shopitem`): broń i zbroje klas
-oraz kamienie. Cena = `a_price × a_buy_rate %` (100%). Kupuje się w strefie, w której postać poluje.
+Ulepszać można tylko przedmioty z flagą ulepszania (`t_item.a_flag` bit 2) — broń i zbroje tak, akcesoria nie.
+
+**Akcesoria i opcje.** Trzy sloty na akcesoria (`a_wearing` 7). Zwykłe akcesoria z bazy („Magical Accessory”:
+sznury, kamienie, oczy, kolczyki, pierścienie) nie mają własnych statystyk — całą ich moc dają **opcje**
+(`t_option`, 1:1): na jakim przedmiocie opcja może się pojawić (maski `a_weapon_type` / `a_wear_type` /
+`a_accessory_type` po podtypie przedmiotu), z jaką wagą wypada każdy poziom (`a_prob`; poziom z wagą 0 nie wypada)
+i jaką ma wartość (`a_level`). Np. pierścień (podtyp 4) może dostać opcje ataku i celności, kamień (podtyp 1) —
+Strength/Dexterity/Intelligence/Constitution, obronę i unik. **Własne:** liczba opcji przy zakupie 1–5 (wagi
+40/30/18/9/3), typy wybierane równo spośród pasujących, i to, co opcja robi w IdleLC (`OPTION_EFFECTS`):
+Strength → atak Titana i Knighta, Dexterity → Healera i Rogue, Intelligence → Mage i Sorcerera, Constitution →
++5 HP za punkt, ataki fizyczne/magiczne/wręcz/dystansowe → atak klas, których dotyczą, obrony → obrona, celność
+i unik w 1/10 %. Opcje żywiołów (26–35) i specjalne nie wypadają, dopóki nie ma żywiołów. Opcja bez działania dla
+klasy jest w UI przekreślona. Akcesoriów nie ma w sklepach ani dropie w bazie — sprzedaje je sklep IdleLC po
+cenie z bazy (decyzja własna).
+
+**Sklep (kupno)** — przycisk Shop w panelu polowania:
+
+- **broń i zbroje klasy**: dla każdego slotu poprzedni, obecny i następny próg (`tierWindow`) z głównej linii
+  przedmiotów w bazie (zwykłe przedmioty, flaga ulepszania, cena ≥ 100, najczęstsza cena w progu; bez poziomu 1 —
+  każdy ma zestaw startowy). Broń co 4 poziomy, zbroja co 5;
+- **akcesoria** z losowymi opcjami;
+- **towary** sklepów NPC strefy (`t_shopitem`): kamienie (mikstury — gdy dojdzie ich użycie w walce).
+
+Cena = `a_price × a_buy_rate %` (100%).
+
+## Pasek umiejętności
+
+Najwyżej **7** umiejętności na pasku (`skillBar`), i tylko one są używane w walce (jak szybki pasek LC przy
+auto-polowaniu). Ułożenie: ataki i klątwy z lewej, buffy i leczenie z prawej. Nowa aktywna umiejętność trafia
+na pasek, jeśli jest miejsce; w oknie Skills: „Add to bar” / „Remove from bar”.
 
 ## Sklep (sprzedaż przedmiotów)
 

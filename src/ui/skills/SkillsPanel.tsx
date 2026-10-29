@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { skillsForClass } from '../../game/data/skills.ts'
 import type { SkillDef } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
-import { isAvailable, skillRank, type SkillRank } from '../../game/logic/skills.ts'
+import { SKILL_BAR_SIZE, isAvailable, skillRank, type SkillRank } from '../../game/logic/skills.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { KIND_LABELS, describeEffect, formatSp, learnState, rankCosts } from './format.ts'
 import { SkillIcon } from './SkillIcon.tsx'
@@ -26,6 +26,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)
   const learnSkill = useGameStore((s) => s.learnSkill)
   const setSkillAuto = useGameStore((s) => s.setSkillAuto)
+  const setSkillBar = useGameStore((s) => s.setSkillBar)
   const dialog = useRef<HTMLDivElement>(null)
   const [selected, setSelected] = useState<number | null>(null)
   const [message, setMessage] = useState<string | null>(null)
@@ -63,6 +64,8 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
     }
   }
 
+  const barFull = character.skillBar.length >= SKILL_BAR_SIZE
+
   const row = (skill: SkillDef) => {
     const learned = character.skills[skill.id]
     const available = isAvailable(skill)
@@ -70,6 +73,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
     const shown = current ?? skillRank(skill, 1)
     const state = learnState(character, skill)
     const open = selected === skill.id
+    const onBar = character.skillBar.includes(skill.id)
     const max = skill.levels.length
     return (
       <li
@@ -142,7 +146,35 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
                   Auto: {current.auto ? 'On' : 'Off'}
                 </button>
               )}
+              {current && current.kind !== 'passive' && (
+                <button
+                  type="button"
+                  className="button"
+                  aria-pressed={onBar}
+                  disabled={busy || character.expedition !== null || (!onBar && barFull)}
+                  onClick={() =>
+                    run(
+                      () =>
+                        setSkillBar(
+                          onBar
+                            ? character.skillBar.filter((id) => id !== skill.id)
+                            : [...character.skillBar, skill.id],
+                        ),
+                      `${skill.name} ${onBar ? 'left' : 'is on'} the skill bar.`,
+                    )
+                  }
+                >
+                  {onBar
+                    ? 'Remove from bar'
+                    : barFull
+                      ? `Bar full (${SKILL_BAR_SIZE})`
+                      : 'Add to bar'}
+                </button>
+              )}
             </div>
+            {current && current.kind !== 'passive' && !onBar && (
+              <p className="skill-row__note">Only skills on the bar are used in fights.</p>
+            )}
             {state.blocked && available && <p className="skill-row__note">{state.blocked}</p>}
           </div>
         )}

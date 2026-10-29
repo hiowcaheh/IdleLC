@@ -1,23 +1,24 @@
 import { useMemo } from 'react'
-import { learnedRanks } from '../../game/logic/skills.ts'
+import { learnedRanks, type SkillRank } from '../../game/logic/skills.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { SkillIcon } from './SkillIcon.tsx'
 import { useCombatTicker } from './useCombatTicker.ts'
 
 /**
- * The hero's active skills with their cooldowns. Skills fire on their own; tapping one turns its
- * automatic use on or off.
+ * The skills on the bar (at most 7; attacks left, buffs right) with their cooldowns. They fire on
+ * their own; tapping one turns its automatic use on or off. The Skills window changes the bar.
  */
 export function SkillBar() {
   const classId = useGameStore((s) => s.character?.classId)
   const skills = useGameStore((s) => s.character?.skills)
+  const bar = useGameStore((s) => s.character?.skillBar)
   const setSkillAuto = useGameStore((s) => s.setSkillAuto)
   const combat = useCombatTicker()
-  const ranks = useMemo(
-    () =>
-      classId && skills ? learnedRanks(classId, skills).filter((r) => r.kind !== 'passive') : [],
-    [classId, skills],
-  )
+  const ranks = useMemo(() => {
+    if (!classId || !skills || !bar) return []
+    const byId = new Map(learnedRanks(classId, skills).map((r) => [r.id, r]))
+    return bar.map((id) => byId.get(id)).filter((r): r is SkillRank => r !== undefined)
+  }, [classId, skills, bar])
   if (ranks.length === 0) return null
   const player = combat.player
 
@@ -27,7 +28,9 @@ export function SkillBar() {
       role="toolbar"
       aria-label="Skills — tap to turn automatic use on or off"
     >
-      {ranks.map((rank) => {
+      {ranks.map((rank, i) => {
+        // a small gap between the attacks and the buffs
+        const firstSupport = isSupport(rank) && i > 0 && !isSupport(ranks[i - 1]!)
         const cooldown = player.skillCooldowns[rank.id] ?? 0
         const ratio = cooldown > 0 ? Math.min(1, cooldown / rank.cooldown) : 0
         const dry = player.mp < rank.mpCost
@@ -36,7 +39,7 @@ export function SkillBar() {
           <button
             key={rank.id}
             type="button"
-            className={`skill-slot${rank.auto ? '' : ' is-off'}${dry ? ' is-dry' : ''}${casting ? ' is-casting' : ''}`}
+            className={`skill-slot${rank.auto ? '' : ' is-off'}${dry ? ' is-dry' : ''}${casting ? ' is-casting' : ''}${firstSupport ? ' is-first-support' : ''}`}
             aria-pressed={rank.auto}
             aria-label={`${rank.name} — automatic use ${rank.auto ? 'on' : 'off'}`}
             title={`${rank.name} (Lv ${rank.level}) · ${rank.mpCost} MP`}
@@ -59,4 +62,8 @@ export function SkillBar() {
       })}
     </div>
   )
+}
+
+function isSupport(rank: SkillRank): boolean {
+  return rank.kind === 'buff' || rank.kind === 'heal'
 }
