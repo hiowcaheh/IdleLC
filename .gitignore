@@ -22,3 +22,6 @@ public/assets-local/
 # Python
 __pycache__/
 *.pyc
+
+# Generated from the LC database dump (never committed while the repo is public)
+src/game/data/generated/

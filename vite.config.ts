@@ -16,7 +16,9 @@ export default defineConfig({
     chunkSizeWarningLimit: 1600,
   },
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'scripts/**/*.test.mjs'],
     environment: 'node',
+    // tests always run on the placeholder data, even when local LC data exists
+    env: { VITE_LC_DATA: '0' },
   },
 })
