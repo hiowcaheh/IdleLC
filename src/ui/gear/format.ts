@@ -26,10 +26,10 @@ export const SLOT_LABELS: Record<EquipSlot, string> = {
 
 export const fmt = (n: number) => Math.round(n).toLocaleString('en-US')
 
-/** "+3 Lancer Sword". */
+/** "Lancer Sword +3". */
 export function pieceName(itemId: number, plus = 0): string {
   const name = getItem(itemId).name
-  return plus > 0 ? `+${plus} ${name}` : name
+  return plus > 0 ? `${name} +${plus}` : name
 }
 
 /** What a piece gives, with its upgrades ("Attack 16 (+3) · 1.0 s per hit"). */
@@ -72,12 +72,36 @@ export function heroStats(character: CharacterData): CombatStats {
 
 /** "Strength +6", "Hit Rate +3.7%" (hit and evasion are in 1/10 %). */
 export function optionText(option: ItemOption): string {
-  const name = getOption(option.type)?.name ?? `Option ${option.type}`
-  const value = optionValue(option)
-  const stat = OPTION_EFFECTS[option.type]?.stat
+  return optionAmount(option.type, optionValue(option))
+}
+
+function optionAmount(type: number, value: number): string {
+  const name = getOption(type)?.name ?? `Option ${type}`
+  const stat = OPTION_EFFECTS[type]?.stat
   return stat === 'hit' || stat === 'dodge'
     ? `${name} +${Number((value / 10).toFixed(1))}%`
     : `${name} +${fmt(value)}`
+}
+
+/**
+ * The options of all worn pieces added up by type ("Strength +9"), with whether they help the class.
+ */
+export function optionTotals(
+  equipment: CharacterData['equipment'],
+  classId: CharacterData['classId'],
+): { text: string; helps: boolean }[] {
+  const totals = new Map<number, number>()
+  for (const piece of Object.values(equipment)) {
+    for (const option of piece?.options ?? []) {
+      totals.set(option.type, (totals.get(option.type) ?? 0) + optionValue(option))
+    }
+  }
+  return [...totals]
+    .sort(([a], [b]) => a - b)
+    .map(([type, value]) => ({
+      text: optionAmount(type, value),
+      helps: optionHelps({ type }, classId),
+    }))
 }
 
 /** The options of a piece with whether they help the class. */
