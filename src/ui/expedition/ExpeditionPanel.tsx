@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
-import { AFK_MAX_SECONDS, AFK_MIN_SECONDS } from '../../game/logic/afk.ts'
+import { AFK_EFFICIENCY, AFK_MAX_SECONDS, AFK_MIN_SECONDS } from '../../game/logic/afk.ts'
+import { killReward } from '../../game/logic/rewards.ts'
 import type { CharacterData, Expedition } from '../../game/logic/character.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { clock, fmt } from './format.ts'
@@ -33,6 +34,9 @@ export function ExpeditionPanel({
   const hours = elapsed >= AFK_MIN_SECONDS ? counted / 3600 : 0
   const done = elapsed >= AFK_MAX_SECONDS
   const monster = getMonster(expedition.monsterId)
+  // whole kills only, and exp/gold paid per kill, so the three numbers move together
+  const kills = Math.floor(estimate.killsPerHour * AFK_EFFICIENCY * hours)
+  const reward = killReward(monster)
 
   const onReturn = async () => {
     setBusy(true)
@@ -65,8 +69,8 @@ export function ExpeditionPanel({
         </span>
       </div>
       <p className="expedition__estimate">
-        So far about {fmt(estimate.killsPerHour * hours)} kills · {fmt(estimate.expPerHour * hours)}{' '}
-        EXP · {fmt(estimate.goldPerHour * hours)} gold
+        So far about {fmt(kills)} kills · {fmt(kills * reward.exp)} EXP · {fmt(kills * reward.gold)}{' '}
+        gold
       </p>
       <button
         type="button"
