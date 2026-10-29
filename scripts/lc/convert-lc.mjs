@@ -7,12 +7,13 @@
  *
  * Without --smc it converts the player class models (classes.mjs) and every monster model listed
  * in src/game/data/generated/lc-data.json (run `npm run import-lc-db` first), keeping only the
- * clips the database uses, then refreshes lc-models.json.
+ * clips the database uses, then refreshes lc-models.json. It also cuts the item icons out of the
+ * ItemBtn*.tex atlases into public/icons/lc/items.webp (+ lc-icons.json).
  *
  * Options:
  *   --out <dir>            output folder (default public/models/lc)
  *   --data <lc-data.json>  generated game data (default src/game/data/generated/lc-data.json)
- *   --only <id,id>         convert only these model ids (e.g. fox,class-knight)
+ *   --only <id,id>         convert only these model ids (e.g. fox,class-knight); `icons` = item icons
  *   --smc <path>           convert one .smc (client path or file); with --anims <a,b> to pick clips
  *   --max-texture <px>     longest texture side (default 1024)
  *
@@ -27,6 +28,7 @@ import { dedup, meshopt, prune, resample, weld } from '@gltf-transform/functions
 import { MeshoptDecoder, MeshoptEncoder } from 'meshoptimizer'
 import { CLASS_MODELS } from './classes.mjs'
 import { ClientFiles } from './client.mjs'
+import { buildItemIconSheet } from './icons.mjs'
 import { buildModelManifest, modelIdFromSmc } from './manifest.mjs'
 import { buildModel } from './model.mjs'
 import { parseSmc } from './smc.mjs'
@@ -138,7 +140,9 @@ async function main() {
   })
   fs.mkdirSync(args.out, { recursive: true })
 
-  const jobs = listJobs(args, data, files)
+  // `--only icons` rebuilds just the item icons
+  const iconsOnly = args.only?.size === 1 && args.only.has('icons')
+  const jobs = iconsOnly ? [] : listJobs(args, data, files)
   const textureCache = new Map()
   const shaders = new Set()
   let converted = 0
@@ -177,8 +181,26 @@ async function main() {
     }
   }
 
+  if (data && !args.smc && (!args.only || args.only.has('icons'))) {
+    const { image, manifest, missingAtlases } = await buildItemIconSheet(files, data.items)
+    if (image) {
+      const sheet = path.join(ROOT, 'public', manifest.file)
+      fs.mkdirSync(path.dirname(sheet), { recursive: true })
+      fs.writeFileSync(sheet, image)
+      fs.mkdirSync(GENERATED, { recursive: true })
+      fs.writeFileSync(path.join(GENERATED, 'lc-icons.json'), JSON.stringify(manifest))
+      const covered = Object.keys(manifest.items).length
+      console.log(
+        `icons: ${covered} of ${data.items.length} items, ${(image.length / 1024).toFixed(0)} KB` +
+          (missingAtlases.length ? ` (missing ItemBtn${missingAtlases.join(', ItemBtn')})` : ''),
+      )
+    } else {
+      console.warn('icons: no ItemBtn*.tex atlases in the client folder(s)')
+    }
+  }
+
   // the manifest points the game at the default folder, so only that folder updates it
-  if (data && args.out === DEFAULT_OUT) {
+  if (data && args.out === DEFAULT_OUT && !iconsOnly) {
     const manifest = await buildModelManifest(data, args.out)
     fs.mkdirSync(GENERATED, { recursive: true })
     fs.writeFileSync(path.join(GENERATED, 'lc-models.json'), JSON.stringify(manifest, null, 2))

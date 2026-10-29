@@ -1,6 +1,7 @@
-import type { ItemType } from '../../game/data/types.ts'
+import { itemIcon } from '../../game/data/items.ts'
+import type { ItemDef, ItemType } from '../../game/data/types.ts'
 
-/** Simple glyph per item type until the icons from the LC atlases are converted. */
+/** Glyph per item type, for items whose icon atlas has not been converted yet. */
 const GLYPHS: Record<ItemType, string> = {
   weapon: 'M6 18 L16 8 M14 6 L18 10 M5 15 L9 19 M4 20 L6 18',
   armor: 'M7 5 L12 7 L17 5 L19 9 L17 10 V19 H7 V10 L5 9 Z',
@@ -12,11 +13,29 @@ const GLYPHS: Record<ItemType, string> = {
   other: 'M8 8 H16 V16 H8 Z',
 }
 
-export function ItemIcon({ type }: { type: ItemType }) {
+/** The item's icon from the LC atlases (sprite sheet), or a glyph for its type. */
+export function ItemIcon({ item }: { item: ItemDef }) {
+  const sprite = itemIcon(item.id)
+  if (sprite) {
+    return (
+      <span className="item-icon" aria-hidden="true">
+        <span
+          className="item-icon__sprite"
+          style={{
+            width: sprite.size,
+            height: sprite.size,
+            backgroundImage: `url(${sprite.url})`,
+            backgroundPosition: `-${sprite.x}px -${sprite.y}px`,
+            backgroundSize: `${sprite.sheetWidth}px ${sprite.sheetHeight}px`,
+          }}
+        />
+      </span>
+    )
+  }
   return (
-    <span className={`item-icon item-icon--${type}`} aria-hidden="true">
+    <span className={`item-icon item-icon--${item.type}`} aria-hidden="true">
       <svg viewBox="0 0 24 24">
-        <path d={GLYPHS[type]} />
+        <path d={GLYPHS[item.type]} />
       </svg>
     </span>
   )

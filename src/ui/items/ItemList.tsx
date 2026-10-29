@@ -7,7 +7,7 @@ export function ItemList({ items }: { items: { itemId: number; count: number; it
     <ul className="item-list">
       {items.map(({ itemId, count, item }) => (
         <li key={itemId} className={`item-row item-row--${item.type}`}>
-          <ItemIcon type={item.type} />
+          <ItemIcon item={item} />
           <span className="item-row__body">
             <span className="item-row__name">{item.name}</span>
             <span className="item-row__meta">

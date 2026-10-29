@@ -81,3 +81,16 @@ export interface LcModelManifest {
   baseUrl: string
   models: LcModelEntry[]
 }
+
+/** Item icon sprite sheet written by `npm run convert-lc` (scripts/lc/icons.mjs). */
+export interface LcIconManifest {
+  /** Sheet image, relative to the app base URL. */
+  file: string
+  /** Icon size in pixels. */
+  size: number
+  columns: number
+  width: number
+  height: number
+  /** Item id → cell index in the sheet. */
+  items: Record<string, number>
+}

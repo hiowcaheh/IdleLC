@@ -1132,6 +1132,12 @@ a.button {
   background: radial-gradient(circle at 50% 30%, #3a2b1f, #120d09 80%);
 }
 
+.item-icon__sprite {
+  display: block;
+  border-radius: 2px;
+  background-repeat: no-repeat;
+}
+
 .item-icon svg {
   width: 24px;
   height: 24px;

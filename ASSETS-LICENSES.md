@@ -15,6 +15,7 @@ Na decyzję właściciela (2026-10-29) w repo są też zasoby wygenerowane z kli
 | Folder                     | Co zawiera                                       | Jak powstaje           |
 | -------------------------- | ------------------------------------------------ | ---------------------- |
 | `public/models/lc/`        | modele GLB postaci i potworów z klienta LC       | `npm run convert-lc`   |
+| `public/icons/lc/`         | ikony przedmiotów z atlasów `ItemBtn*.tex`       | `npm run convert-lc`   |
 | `src/game/data/generated/` | potwory, strefy, drop, przedmioty, exp z bazy LC | `npm run import-lc-db` |
 
 Surowe pliki klienta i zrzut bazy nie są w repo.
