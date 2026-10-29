@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { EQUIP_SLOTS, UPGRADE_STONE_IDS, getItem } from '../../game/data/items.ts'
+import { EQUIP_SLOTS, HEAVEN_STONE_ID, getItem } from '../../game/data/items.ts'
 import type { EquipSlot, GearSlot, ItemDef } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
 import { isRare } from '../../game/logic/rare.ts'
@@ -143,9 +143,10 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
                 magnifying glass.
               </p>
             )}
-            {UPGRADE_STONE_IDS.includes(item.id) && (
+            {item.id === HEAVEN_STONE_ID && (
               <p className="item-row__note">
-                Upgrades a worn weapon or armor piece by +1 (Character window).
+                Upgrades a worn weapon or armor piece by +1 (Character window). 10 Smelting Stones
+                from monsters can be exchanged for one in the Inventory.
               </p>
             )}
             <button

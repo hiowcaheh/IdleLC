@@ -82,7 +82,7 @@ describe('buying', () => {
     ])
     expect(offer.accessories).toEqual([172, 166])
     // the zone's goods, then the magnifying glasses every shop sells
-    expect(offer.goods).toEqual([84, 43, 44, 484, 490, 1838, 1839])
+    expect(offer.goods).toEqual([85, 43, 44, 484, 490, 1838, 1839])
     expect(buyPrice(7)).toBe(200)
     const { character } = applyBuy(knight({ gold: 500 }), 7, 2, createRng(1), makeId)
     expect(character.gold).toBe(100)

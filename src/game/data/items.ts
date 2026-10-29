@@ -48,12 +48,13 @@ export function slotsFor(gear: Pick<GearDef, 'slot'>): EquipSlot[] {
   return gear.slot === 'accessory' ? ACCESSORY_SLOTS : [gear.slot]
 }
 
-/** t_item 84 "Smelting Stone": upgrades weapons and armor by one (drops, see logic/loot.ts). */
-export const UPGRADE_STONE_ID = 84
-/** t_item 85 "Heaven Stone": the upgrade stone the Juno shop sells. */
+/**
+ * t_item 84 "Smelting Stone": drops from monsters (logic/loot.ts); 10 are exchanged for a Heaven Stone
+ * (owner's rule, logic/equipment.ts).
+ */
+export const SMELTING_STONE_ID = 84
+/** t_item 85 "Heaven Stone": the only stone that upgrades weapons and armor; the Juno shop sells it. */
 export const HEAVEN_STONE_ID = 85
-/** Stones an upgrade can use, in the order they are spent. */
-export const UPGRADE_STONE_IDS = [UPGRADE_STONE_ID, HEAVEN_STONE_ID]
 
 /** t_item 1838 "Magnifying glass" and 1839 "Golden magnifying glass": identify rare items. */
 export const MAGNIFIER_ID = 1838
@@ -211,8 +212,8 @@ const PLACEHOLDER_ITEMS: Record<number, ItemDef> = {
     price: 1300,
     gear: accessory(1),
   },
-  [UPGRADE_STONE_ID]: {
-    id: UPGRADE_STONE_ID,
+  [SMELTING_STONE_ID]: {
+    id: SMELTING_STONE_ID,
     name: 'Smelting Stone',
     type: 'material',
     level: 0,
@@ -306,7 +307,7 @@ export function itemIcon(id: number): IconSprite | null {
 }
 
 const PLACEHOLDER_SHOPS: Record<string, number[]> = {
-  glade: [7, 4, UPGRADE_STONE_ID, 43, 44, 484, 490],
+  glade: [7, 4, HEAVEN_STONE_ID, 43, 44, 484, 490],
 }
 const PLACEHOLDER_STARTER: Partial<Record<ClassId, number[]>> = { knight: [5, 6] }
 const PLACEHOLDER_SHOP_GEAR: Partial<Record<ClassId, Partial<Record<GearSlot, ShopTier[]>>>> = {

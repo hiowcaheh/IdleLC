@@ -50,8 +50,10 @@ export interface GameService {
   /** Wears a piece from the bag (class and level checked); accessories may name their slot. */
   equipItem(characterId: string, source: GearSource, slot?: EquipSlot): Promise<CharacterData>
   unequipItem(characterId: string, slot: EquipSlot): Promise<CharacterData>
-  /** Upgrades a worn piece with a Smelting Stone; the server rolls the chance. */
+  /** Upgrades a worn piece with a Heaven Stone; the server rolls the chance. */
   upgradeItem(characterId: string, slot: EquipSlot): Promise<UpgradeResult>
+  /** Exchanges 10 Smelting Stones for one Heaven Stone, `count` times. */
+  exchangeStones(characterId: string, count: number): Promise<CharacterData>
   /**
    * Buys from the shop: gear tiers around the character's level, accessories (the server rolls their
    * options), potions and stones of the zone.

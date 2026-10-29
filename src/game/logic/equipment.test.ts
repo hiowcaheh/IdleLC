@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { HEAVEN_STONE_ID, UPGRADE_STONE_ID } from '../data/items.ts'
+import { HEAVEN_STONE_ID, SMELTING_STONE_ID } from '../data/items.ts'
 import type { CombatStats } from '../data/types.ts'
 import { createCharacterData, type CharacterData } from './character.ts'
 import {
@@ -7,6 +7,7 @@ import {
   NAKED_ATTACK,
   NAKED_DEFENSE,
   applyEquip,
+  applyExchange,
   applyGear,
   applyUnequip,
   applyUpgrade,
@@ -110,7 +111,7 @@ describe('equip and unequip', () => {
 
 describe('upgrades', () => {
   const withStones = (plus: number, stones = 3) => {
-    const c = knight({ inventory: [{ itemId: UPGRADE_STONE_ID, count: stones }] })
+    const c = knight({ inventory: [{ itemId: HEAVEN_STONE_ID, count: stones }] })
     return { ...c, equipment: { ...c.equipment, weapon: { ...c.equipment.weapon!, plus } } }
   }
 
@@ -129,17 +130,23 @@ describe('upgrades', () => {
     expect(applyUpgrade(withStones(5), 'weapon', never).plusAfter).toBe(4)
   })
 
-  it('spends Smelting Stones before Heaven Stones', () => {
-    const c = withStones(0, 1)
-    const both = {
-      ...c,
-      inventory: [{ itemId: HEAVEN_STONE_ID, count: 2 }, ...c.inventory],
-    }
-    const first = applyUpgrade(both, 'weapon', always).character
-    expect(first.inventory).toEqual([{ itemId: HEAVEN_STONE_ID, count: 2 }])
-    expect(stonesOwned(first)).toBe(2)
-    const second = applyUpgrade(first, 'weapon', always).character
-    expect(second.inventory).toEqual([{ itemId: HEAVEN_STONE_ID, count: 1 }])
+  it('only Heaven Stones upgrade; 10 Smelting Stones exchange for one', () => {
+    const c = withStones(0, 0)
+    const smelting = { ...c, inventory: [{ itemId: SMELTING_STONE_ID, count: 25 }] }
+    expect(() => applyUpgrade(smelting, 'weapon', always)).toThrowError(/no-stone/)
+    const exchanged = applyExchange(smelting, 2)
+    expect(exchanged.inventory).toEqual([
+      { itemId: SMELTING_STONE_ID, count: 5 },
+      { itemId: HEAVEN_STONE_ID, count: 2 },
+    ])
+    expect(stonesOwned(exchanged)).toBe(2)
+    expect(() => applyExchange(exchanged, 1)).toThrowError(/no-stone/)
+    expect(() => applyExchange(smelting, 0)).toThrowError(/bad-count/)
+    const upgraded = applyUpgrade(exchanged, 'weapon', always).character
+    expect(upgraded.inventory).toEqual([
+      { itemId: SMELTING_STONE_ID, count: 5 },
+      { itemId: HEAVEN_STONE_ID, count: 1 },
+    ])
   })
 
   it('needs a stone, a worn piece and room to grow', () => {
@@ -179,7 +186,7 @@ describe('accessories', () => {
     const plain = applyGear(stats, 'knight', 1, base)
     const withRing = applyGear(stats, 'knight', 1, { ...base, accessory1: ring('r') })
     expect(withRing.attack).toBe(plain.attack + 3) // Attack level 3 = 3
-    const c = knight({ inventory: [{ itemId: UPGRADE_STONE_ID, count: 1 }] })
+    const c = knight({ inventory: [{ itemId: HEAVEN_STONE_ID, count: 1 }] })
     const wearing = { ...c, equipment: { ...c.equipment, accessory1: ring('r') } }
     expect(() => applyUpgrade(wearing, 'accessory1', always)).toThrowError(/not-upgradeable/)
   })

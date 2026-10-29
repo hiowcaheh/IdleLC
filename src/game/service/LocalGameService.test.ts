@@ -7,7 +7,7 @@ import { createRng } from '../logic/rng.ts'
 import { MAX_PLAY_GAP, MIN_KILL_CYCLE, KILL_BURST } from '../logic/rewards.ts'
 import { SAVE_VERSION } from '../logic/save.ts'
 import { SP_UNIT } from '../logic/skills.ts'
-import { GOLDEN_MAGNIFIER_ID, UPGRADE_STONE_ID } from '../data/items.ts'
+import { GOLDEN_MAGNIFIER_ID, HEAVEN_STONE_ID, SMELTING_STONE_ID } from '../data/items.ts'
 import type { KeyValueStorage } from './GameService.ts'
 import { LocalGameService, SAVE_KEY } from './LocalGameService.ts'
 
@@ -275,12 +275,13 @@ describe('LocalGameService', () => {
 
   it('buys, wears and upgrades gear, and keeps it after a reload', async () => {
     const { game, clock, hero, storage } = await withKnight()
-    await game.dev.addGold(hero.id, 1000)
+    await game.dev.addGold(hero.id, 3200)
     await game.dev.setLevel(hero.id, 3)
     await expect(game.buyItem(hero.id, 1, 1)).rejects.toThrow('not-in-shop')
+    await expect(game.buyItem(hero.id, SMELTING_STONE_ID, 1)).rejects.toThrow('not-in-shop')
     await game.buyItem(hero.id, 4, 1)
-    const stones = await game.buyItem(hero.id, UPGRADE_STONE_ID, 3)
-    expect(stones.character.gold).toBe(1000 - 120 - 300)
+    const stones = await game.buyItem(hero.id, HEAVEN_STONE_ID, 3)
+    expect(stones.character.gold).toBe(3200 - 120 - 3000)
 
     const armed = await game.equipItem(hero.id, { itemId: 4 })
     expect(armed.equipment.weapon).toMatchObject({ itemId: 4, plus: 0 })
@@ -288,7 +289,7 @@ describe('LocalGameService', () => {
 
     const upgrade = await game.upgradeItem(hero.id, 'weapon')
     expect(upgrade.character.equipment.weapon!.plus).toBe(upgrade.plusAfter)
-    expect(upgrade.character.inventory).toContainEqual({ itemId: UPGRADE_STONE_ID, count: 2 })
+    expect(upgrade.character.inventory).toContainEqual({ itemId: HEAVEN_STONE_ID, count: 2 })
 
     const reloaded = new LocalGameService(storage, { now: () => clock.now, rng: createRng(1) })
     const { save } = await reloaded.load()

@@ -196,11 +196,12 @@ obrona    = obronaPoziomu × (0,5 + 0,5 × mocZbroi / typowaZbroja)     (mocZbro
 Typowy sprzęt = dotychczasowy balans; bez broni zostaje 60% ataku, bez zbroi 50% obrony; lepszy albo
 ulepszony sprzęt daje więcej (np. broń +5 = 150% typowej → 120% ataku).
 
-**Ulepszanie +0…+15** (okno Character): zużywa jeden kamień — najpierw Smelting Stone (`t_item` 84), potem
-Heaven Stone (85, sprzedawany w Juno za 1 000). Szansa z +N (własne): 95, 90, 85, 75, 65, 55, 50, 45, 40, 35,
+**Ulepszanie +0…+15** (okno Character): zużywa jeden **Heaven Stone** (`t_item` 85, sprzedawany w Juno za
+1 000) — tylko on ulepsza (decyzja właściciela). Szansa z +N (własne): 95, 90, 85, 75, 65, 55, 50, 45, 40, 35,
 30, 25, 20, 15, 10%. Porażka od +3 zabiera jeden „+”, niżej tylko kamień. Każdy „+” = +10% mocy przedmiotu.
-Smelting Stone w LC wypada z potworów według zasady serwera, której nie ma w bazie — u nas **1% na zabicie
-każdego potwora** (`GENERAL_DROPS`, własne). Poziom kamienia z LC („do przedmiotów tego samego poziomu”) pomijamy.
+Smelting Stone (84) w LC wypada z potworów według zasady serwera, której nie ma w bazie — u nas **1% na zabicie
+każdego potwora** (`GENERAL_DROPS`, własne). W torbie **10 Smelting Stone wymienia się na 1 Heaven Stone**
+(`exchangeStones`, decyzja właściciela). Poziom kamienia z LC („do przedmiotów tego samego poziomu”) pomijamy.
 
 Ulepszać można tylko przedmioty z flagą ulepszania (`t_item.a_flag` bit 2) — broń i zbroje tak, akcesoria nie.
 

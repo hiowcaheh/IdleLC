@@ -113,8 +113,8 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   (`skills.ts`, opis w `docs/balance.md`); przywołania, ruch i wskrzeszenie jeszcze nie działają.
 - **M5 (ekwipunek) — bez wyglądu na postaci:** sloty, klasy, poziomy i statystyki 1:1 z `t_item`, szybkość
   ataku z broni (`a_num_2`), darmowy zestaw startowy klasy, sklepy stref 1:1 (`t_shopitem`, kupno ×100%),
-  zakładanie z torby z porównaniem, okno Character, ulepszanie +0…+15 kamieniami (Smelting Stone 1% z każdego
-  potwora — własne; Heaven Stone ze sklepu Juno), zapis v6. Wpływ sprzętu na walkę, szanse ulepszeń i bonus
+  zakładanie z torby z porównaniem, okno Character, ulepszanie +0…+15 tylko Heaven Stone (sklep Juno;
+  10 Smelting Stone z dropu 1% — własne — wymienia się na 1 Heaven Stone), zapis v6. Wpływ sprzętu na walkę, szanse ulepszeń i bonus
   za „+” są **własne** (`equipment.ts`, `docs/balance.md`): sprzęt mierzony względem typowego dla poziomu
   (`gearReference` z importu). Wygląd sprzętu na modelu — gdy będą siatki broni/zbroi z klienta.
 - **Akcesoria i opcje (zapis v7):** 3 sloty akcesoriów, opcje 1:1 z `t_option` (maski podtypów, wagi

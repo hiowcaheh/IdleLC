@@ -6,7 +6,8 @@
  */
 import {
   ARMOR_SLOTS,
-  UPGRADE_STONE_IDS,
+  HEAVEN_STONE_ID,
+  SMELTING_STONE_ID,
   gearPower,
   gearReference,
   getItem,
@@ -228,26 +229,38 @@ export interface UpgradeResult {
   plusAfter: number
 }
 
-/** Upgrade stones in the bag (Smelting and Heaven Stones). */
+/** Smelting Stones one Heaven Stone costs at the exchange (owner's value). */
+export const STONES_PER_HEAVEN = 10
+
+/** Heaven Stones in the bag — the only stone that upgrades. */
 export function stonesOwned(character: Pick<CharacterData, 'inventory'>): number {
-  return character.inventory
-    .filter((s) => UPGRADE_STONE_IDS.includes(s.itemId))
-    .reduce((sum, s) => sum + s.count, 0)
+  return character.inventory.find((s) => s.itemId === HEAVEN_STONE_ID)?.count ?? 0
 }
 
-/**
- * Upgrades a worn piece with one upgrade stone (Smelting Stones first): +1 on success; on failure
- * from +3 on it loses one.
- */
+/** Exchanges STONES_PER_HEAVEN Smelting Stones for one Heaven Stone, `count` times. */
+export function applyExchange(character: CharacterData, count: number): CharacterData {
+  if (!Number.isInteger(count) || count < 1) throw new GameError('bad-count', `${count}`)
+  const smelting = character.inventory.find((s) => s.itemId === SMELTING_STONE_ID)?.count ?? 0
+  if (smelting < count * STONES_PER_HEAVEN) throw new GameError('no-stone', `${smelting}`)
+  const inventory = character.inventory
+    .map((s) =>
+      s.itemId === SMELTING_STONE_ID ? { ...s, count: s.count - count * STONES_PER_HEAVEN } : s,
+    )
+    .filter((s) => s.count > 0)
+  return {
+    ...character,
+    inventory: addToInventory(inventory, [{ itemId: HEAVEN_STONE_ID, count }]),
+  }
+}
+
+/** Upgrades a worn piece with one Heaven Stone: +1 on success; on failure from +3 on it loses one. */
 export function applyUpgrade(character: CharacterData, slot: EquipSlot, rng: Rng): UpgradeResult {
   const piece = character.equipment[slot]
   if (!piece) throw new GameError('nothing-equipped', slot)
   if (!getItem(piece.itemId).upgradeable) throw new GameError('not-upgradeable', slot)
   if (piece.plus >= MAX_PLUS) throw new GameError('max-plus', slot)
-  const stone = UPGRADE_STONE_IDS.find((id) =>
-    character.inventory.some((s) => s.itemId === id && s.count > 0),
-  )
-  if (stone === undefined) throw new GameError('no-stone')
+  if (stonesOwned(character) < 1) throw new GameError('no-stone')
+  const stone = HEAVEN_STONE_ID
   const success = chance(rng, upgradeChance(piece.plus))
   const plusAfter = success
     ? piece.plus + 1

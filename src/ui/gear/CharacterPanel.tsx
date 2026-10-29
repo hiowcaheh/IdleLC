@@ -235,9 +235,9 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
                       </button>
                       {item?.upgradeable ? (
                         <p className="item-row__note">
-                          Upgrade stones: {stones}
+                          Heaven Stones: {stones}
                           {stones < 1
-                            ? ' — the shop sells them, monsters drop Smelting Stones.'
+                            ? ' — the shop sells them; 10 Smelting Stones from monsters make one (Inventory).'
                             : '.'}
                           {piece.plus >= 3 && piece.plus < MAX_PLUS
                             ? ' A failure takes one + away.'

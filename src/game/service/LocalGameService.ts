@@ -36,6 +36,7 @@ import { SP_UNIT, applyAuto, applyBar, applyLearn } from '../logic/skills.ts'
 import type { EquipSlot } from '../data/types.ts'
 import {
   applyEquip,
+  applyExchange,
   applyUnequip,
   applyUpgrade,
   type GearSource,
@@ -196,6 +197,11 @@ export class LocalGameService implements GameService {
     const result = applyUpgrade(this.notOnExpedition(characterId), slot, this.rng)
     const updated = this.update(characterId, () => result.character)
     return copy({ ...result, character: updated })
+  }
+
+  async exchangeStones(characterId: string, count: number): Promise<CharacterData> {
+    const changed = applyExchange(this.notOnExpedition(characterId), count)
+    return copy(this.update(characterId, () => changed))
   }
 
   async buyItem(characterId: string, itemId: number, count: number): Promise<PurchaseResult> {

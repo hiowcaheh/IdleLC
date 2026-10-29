@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { UPGRADE_STONE_IDS, getItem } from '../../game/data/items.ts'
+import { HEAVEN_STONE_ID, SMELTING_STONE_ID, getItem } from '../../game/data/items.ts'
 import type { ItemType } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
-import type { GearSource } from '../../game/logic/equipment.ts'
+import { STONES_PER_HEAVEN, type GearSource } from '../../game/logic/equipment.ts'
 import type { ItemOption } from '../../game/logic/options.ts'
 import { isRare } from '../../game/logic/rare.ts'
 import type { ItemStack } from '../../game/logic/loot.ts'
@@ -43,6 +43,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   const sellItems = useGameStore((s) => s.sellItems)
   const sellGear = useGameStore((s) => s.sellGear)
   const equipItem = useGameStore((s) => s.equipItem)
+  const exchangeStones = useGameStore((s) => s.exchangeStones)
   const [selected, setSelected] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [confirmAll, setConfirmAll] = useState(false)
@@ -72,7 +73,8 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
       (item.gear?.classes.includes(character.classId) ?? false) ||
       item.potion !== undefined ||
       item.magnifier !== undefined ||
-      UPGRADE_STONE_IDS.includes(itemId)
+      itemId === SMELTING_STONE_ID ||
+      itemId === HEAVEN_STONE_ID
     )
   }
   const sellable = inventory.filter((s) => sellPrice(s.itemId) > 0 && !keep(s.itemId))
@@ -248,6 +250,29 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                       {entry.item.gear && wearActions(entry.itemId, 0, { itemId: entry.itemId })}
                       {entry.item.potion && (
                         <p className="item-row__note">{potionText(entry.item.potion)}</p>
+                      )}
+                      {entry.itemId === SMELTING_STONE_ID && (
+                        <>
+                          <p className="item-row__note">
+                            Only Heaven Stones upgrade gear: {STONES_PER_HEAVEN} Smelting Stones
+                            make one.
+                          </p>
+                          <button
+                            type="button"
+                            className="button button--gold"
+                            disabled={busy || away || entry.count < STONES_PER_HEAVEN}
+                            onClick={() =>
+                              run(async () => {
+                                const count = Math.floor(entry.count / STONES_PER_HEAVEN)
+                                await exchangeStones(count)
+                                return `Exchanged ${fmt(count * STONES_PER_HEAVEN)} Smelting Stones for ${fmt(count)} Heaven ${count === 1 ? 'Stone' : 'Stones'}.`
+                              })
+                            }
+                          >
+                            Exchange for {fmt(Math.floor(entry.count / STONES_PER_HEAVEN))} Heaven
+                            Stone{Math.floor(entry.count / STONES_PER_HEAVEN) === 1 ? '' : 's'}
+                          </button>
+                        </>
                       )}
                       {price > 0 ? (
                         <>

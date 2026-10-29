@@ -63,6 +63,7 @@ interface GameStore {
   equipItem(source: GearSource, slot?: EquipSlot): Promise<void>
   unequipItem(slot: EquipSlot): Promise<void>
   upgradeItem(slot: EquipSlot): Promise<UpgradeResult>
+  exchangeStones(count: number): Promise<void>
   buyItem(itemId: number, count: number): Promise<PurchaseResult>
   sellGear(uids: string[]): Promise<PieceSale>
   identifyItems(magnifierId: number, targets: IdentifyTarget[]): Promise<IdentifyResult>
@@ -353,6 +354,11 @@ export const useGameStore = create<GameStore>((set, get) => {
       const result = await enqueue(() => gameService.upgradeItem(id, slot))
       applyCharacter(result.character)
       return result
+    },
+
+    async exchangeStones(count) {
+      const id = playedId()
+      applyCharacter(await enqueue(() => gameService.exchangeStones(id, count)))
     },
 
     async buyItem(itemId, count) {
