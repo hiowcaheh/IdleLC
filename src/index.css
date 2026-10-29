@@ -1115,6 +1115,84 @@ a.button {
   color: var(--parchment-dim);
 }
 
+.item-row--button {
+  display: block;
+  padding: 0;
+}
+
+.item-row__main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 10px 6px 6px;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.item-row--button.is-open {
+  box-shadow: inset 0 0 0 1px var(--gilt);
+}
+
+.item-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 8px 8px;
+}
+
+.item-row__actions .button {
+  flex: 1 1 140px;
+  min-height: 40px;
+  font-size: 14px;
+}
+
+.item-row__note {
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+
+.button--gold {
+  border-color: var(--gilt);
+  color: var(--gilt-bright);
+}
+
+.coin--small {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  vertical-align: -1px;
+}
+
+.inventory__status {
+  min-height: 1.4em;
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gilt-bright);
+}
+
+.inventory__sell-all {
+  margin-top: 12px;
+  border-color: var(--gilt);
+  color: var(--gilt-bright);
+}
+
+.inventory__sell-all.is-armed {
+  color: #1a120b;
+  background: linear-gradient(180deg, var(--gilt-bright), var(--gilt) 55%, #b98c3e);
+}
+
+.afk__heading-meta {
+  margin-left: 8px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--parchment-dim);
+}
+
 .item-row__count {
   font-weight: 800;
   color: var(--gilt-bright);

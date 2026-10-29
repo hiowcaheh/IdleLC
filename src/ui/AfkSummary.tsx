@@ -3,6 +3,7 @@ import { getItem } from '../game/data/items.ts'
 import { getMonster } from '../game/data/monsters.ts'
 import { ZONES } from '../game/data/zones.ts'
 import { AFK_MAX_SECONDS } from '../game/logic/afk.ts'
+import { stacksValue } from '../game/logic/shop.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { duration, fmt } from './expedition/format.ts'
 import { ItemList } from './items/ItemList.tsx'
@@ -63,7 +64,15 @@ export function AfkSummary() {
           </p>
         )}
 
-        <h3 className="afk__heading">Loot</h3>
+        <h3 className="afk__heading">
+          Loot
+          {result.drops.length > 0 && (
+            <span className="afk__heading-meta">
+              worth <span className="coin coin--small" aria-hidden="true" />{' '}
+              {fmt(stacksValue(result.drops))} gold
+            </span>
+          )}
+        </h3>
         {items.length ? (
           <ItemList items={items} />
         ) : (

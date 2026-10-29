@@ -1,7 +1,9 @@
 import type { AfkResult } from '../logic/afk.ts'
 import type { CharacterData, CharacterLocation, NewCharacter } from '../logic/character.ts'
+import type { ItemStack } from '../logic/loot.ts'
 import type { CombatReport, CombatResult } from '../logic/rewards.ts'
 import type { LoadResult, SaveData, Settings } from '../logic/save.ts'
+import type { SaleResult } from '../logic/shop.ts'
 
 /**
  * Everything that changes the saved game goes through this contract, and every call is
@@ -30,6 +32,8 @@ export interface GameService {
    * Ends the expedition and pays the time it lasted (up to 8 h; under a minute pays nothing).
    */
   claimAfk(characterId: string): Promise<AfkResult>
+  /** Sells items from the inventory to the shop for their database price. */
+  sellItems(characterId: string, items: ItemStack[]): Promise<SaleResult>
   updateSettings(patch: Partial<Settings>): Promise<Settings>
   /** Deletes the whole save (all characters) and starts over. */
   resetSave(): Promise<SaveData>

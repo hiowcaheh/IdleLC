@@ -177,6 +177,23 @@ describe('LocalGameService', () => {
     expect((await game.claimAfk(hero.id)).seconds).toBe(3600)
   })
 
+  it('sells drops for their price and saves the sale', async () => {
+    const { game, clock, hero, storage } = await withKnight()
+    clock.now += 600 * 1000
+    const { character } = await game.reportCombat(hero.id, {
+      monsterId: hero.location.monsterId,
+      kills: 100,
+      deaths: 0,
+    })
+    const [stack] = character.inventory
+    const sale = await game.sellItems(hero.id, [stack!])
+    expect(sale.gold).toBeGreaterThan(0)
+    expect(sale.character.gold).toBe(character.gold + sale.gold)
+    expect(sale.character.inventory.find((s) => s.itemId === stack!.itemId)).toBeUndefined()
+    expect(stored(storage).characters[0].gold).toBe(sale.character.gold)
+    await expect(game.sellItems(hero.id, [stack!])).rejects.toThrow('not-enough-items')
+  })
+
   it('caps kills that come faster than a fight can take', async () => {
     const { game, clock, hero } = await withKnight()
     clock.now += 10 * 1000

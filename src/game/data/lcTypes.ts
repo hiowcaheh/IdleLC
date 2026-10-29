@@ -63,6 +63,8 @@ export interface LcData {
   items: LcItem[]
   /** Exp needed to reach the next level, index 0 = level 1. */
   expTable: number[]
+  /** NPC shop rates in % of t_item.a_price (t_shop: a_sell_rate — what the shop pays, a_buy_rate). */
+  shop?: { sellRate: number; buyRate: number }
 }
 
 export interface LcModelEntry {

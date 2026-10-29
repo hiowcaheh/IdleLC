@@ -33,6 +33,12 @@ export const ITEMS: Record<number, ItemDef> = lcData
     )
   : PLACEHOLDER_ITEMS
 
+/**
+ * % of an item's price the shop pays when the player sells it — t_shop.a_sell_rate (40 in the LC data;
+ * the same value is used for the placeholder items).
+ */
+export const SHOP_SELL_RATE = lcData?.shop?.sellRate ?? 40
+
 export function getItem(id: number): ItemDef {
   return ITEMS[id] ?? { id, name: `Item #${id}`, type: 'other', level: 0, price: 0 }
 }

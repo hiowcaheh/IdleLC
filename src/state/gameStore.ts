@@ -3,8 +3,10 @@ import { ZONES } from '../game/data/zones.ts'
 import type { AfkResult } from '../game/logic/afk.ts'
 import type { CharacterData, NewCharacter } from '../game/logic/character.ts'
 import type { CombatPhase, CombatState } from '../game/logic/combat.ts'
+import type { ItemStack } from '../game/logic/loot.ts'
 import type { CombatResult } from '../game/logic/rewards.ts'
 import type { LoadResult, SaveData, Settings } from '../game/logic/save.ts'
+import type { SaleResult } from '../game/logic/shop.ts'
 import { createDefaultSave } from '../game/logic/save.ts'
 import { gameService } from '../game/service/index.ts'
 import { combatSession } from '../game/session/combatSession.ts'
@@ -45,6 +47,8 @@ interface GameStore {
   /** Brings the character back and pays the expedition. */
   returnFromExpedition(): Promise<void>
   dismissAfk(): void
+  /** Sells items of the played character; resolves to the sale (rejects with a GameError). */
+  sellItems(items: ItemStack[]): Promise<SaleResult>
   selectMonster(monsterId: string): void
   selectZone(zoneId: string, monsterId?: string): void
   syncCombat(combat: CombatState): void
@@ -261,6 +265,14 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     dismissAfk() {
       set({ afkResult: null })
+    },
+
+    async sellItems(items) {
+      const character = get().character
+      if (!character) throw new Error('No character is being played')
+      const sale = await enqueue(() => gameService.sellItems(character.id, items))
+      applyCharacter(sale.character)
+      return sale
     },
 
     selectMonster(monsterId) {

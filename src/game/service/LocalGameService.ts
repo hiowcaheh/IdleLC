@@ -20,6 +20,8 @@ import {
   type CombatResult,
 } from '../logic/rewards.ts'
 import { createRng, type Rng } from '../logic/rng.ts'
+import type { ItemStack } from '../logic/loot.ts'
+import { applySale, type SaleResult } from '../logic/shop.ts'
 import {
   createDefaultSave,
   loadSave,
@@ -132,6 +134,12 @@ export class LocalGameService implements GameService {
       lastPlayedAt: now,
     }))
     return copy({ ...result, awaySeconds: away, character: updated })
+  }
+
+  async sellItems(characterId: string, items: ItemStack[]): Promise<SaleResult> {
+    const sale = applySale(this.character(characterId), items)
+    const updated = this.update(characterId, () => sale.character)
+    return copy({ ...sale, character: updated })
   }
 
   async updateSettings(patch: Partial<Settings>): Promise<Settings> {

@@ -5,7 +5,7 @@
  *   npm run import-lc-db -- --dump <newproject_data.sql> [--models public/models/lc]
  *
  * Writes (committed by the owner's decision; the dump itself stays out of the repo):
- *   src/game/data/generated/lc-data.json    monsters, field zones, drops, items, exp table
+ *   src/game/data/generated/lc-data.json    monsters, field zones, drops, items, exp table, shop rates
  *   src/game/data/generated/lc-models.json  model manifest for the LC GLBs that exist in --models
  *
  * The game uses them whenever they exist (see README). See docs/lc-database.md.
@@ -148,7 +148,23 @@ function buildData(tables) {
     if (level >= 1 && level <= MAX_LEVEL) expTable[level - 1] = num(r.a_exp)
   }
 
-  return { version: 1, generatedAt: new Date().toISOString(), monsters, zones, items, expTable }
+  // NPC shops: a_buy_rate = % of a_price the player pays, a_sell_rate = % the shop pays the player
+  const mostCommon = (column) => {
+    const counts = new Map()
+    for (const r of tables.t_shop) counts.set(int(r[column]), (counts.get(int(r[column])) ?? 0) + 1)
+    return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 100
+  }
+  const shop = { sellRate: mostCommon('a_sell_rate'), buyRate: mostCommon('a_buy_rate') }
+
+  return {
+    version: 1,
+    generatedAt: new Date().toISOString(),
+    monsters,
+    zones,
+    items,
+    expTable,
+    shop,
+  }
 }
 
 async function main() {
@@ -161,7 +177,7 @@ async function main() {
   }
   console.log(`reading ${args.dump}`)
   const text = fs.readFileSync(args.dump, 'utf8')
-  const tables = readTables(text, ['t_npc', 't_item', 't_exp', 't_npc_regen'])
+  const tables = readTables(text, ['t_npc', 't_item', 't_exp', 't_npc_regen', 't_shop'])
   const data = buildData(tables)
   const manifest = await buildModelManifest(data, args.models)
 
