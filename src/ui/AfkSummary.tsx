@@ -6,6 +6,7 @@ import { AFK_MAX_SECONDS } from '../game/logic/afk.ts'
 import { stacksValue } from '../game/logic/shop.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { duration, fmt } from './expedition/format.ts'
+import { formatSp } from './skills/format.ts'
 import { ItemList } from './items/ItemList.tsx'
 
 /** "While you were away…" — what the character brought back from the expedition. */
@@ -55,6 +56,10 @@ export function AfkSummary() {
             <dd>
               <span className="coin" aria-hidden="true" /> +{fmt(result.gold)}
             </dd>
+          </div>
+          <div className="afk__stat--sp">
+            <dt>Skill points</dt>
+            <dd>+{formatSp(result.sp)} SP</dd>
           </div>
         </dl>
 

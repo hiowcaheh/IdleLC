@@ -21,6 +21,7 @@ export function DevPanel() {
   const devSetLevel = useGameStore((s) => s.devSetLevel)
   const devAddExp = useGameStore((s) => s.devAddExp)
   const devAddGold = useGameStore((s) => s.devAddGold)
+  const devAddSp = useGameStore((s) => s.devAddSp)
   const devKillTarget = useGameStore((s) => s.devKillTarget)
   const devHeal = useGameStore((s) => s.devHeal)
   const devSimulateAfk = useGameStore((s) => s.devSimulateAfk)
@@ -101,7 +102,7 @@ export function DevPanel() {
         <span className="dev-panel__value">Lv {level}</span>
       </div>
 
-      <div className="dev-panel__row" role="group" aria-label="Experience and gold">
+      <div className="dev-panel__row" role="group" aria-label="Experience, gold and SP">
         <button
           type="button"
           className="dev-chip"
@@ -111,6 +112,9 @@ export function DevPanel() {
         </button>
         <button type="button" className="dev-chip" onClick={() => devAddGold(1000)}>
           +1,000 gold
+        </button>
+        <button type="button" className="dev-chip" onClick={() => devAddSp(10)}>
+          +10 SP
         </button>
       </div>
 

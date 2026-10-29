@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { skillsForClass } from '../game/data/skills.ts'
+import { checkLearn } from '../game/logic/skills.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { GameCanvas } from '../scene/GameCanvas.tsx'
 import { AfkSummary } from './AfkSummary.tsx'
@@ -14,13 +16,24 @@ import { TargetFrame } from './hud/TargetFrame.tsx'
 import { InventoryPanel } from './items/InventoryPanel.tsx'
 import { LoadingOverlay } from './LoadingOverlay.tsx'
 import { SettingsPanel } from './SettingsPanel.tsx'
+import { SkillBar } from './skills/SkillBar.tsx'
+import { SkillsPanel } from './skills/SkillsPanel.tsx'
 
 export function GameScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [inventoryOpen, setInventoryOpen] = useState(false)
+  const [skillsOpen, setSkillsOpen] = useState(false)
   const devTools = useDevTools((s) => s.enabled)
   const character = useGameStore((s) => s.character)
   const expedition = character?.expedition ?? null
+  const learnable = useMemo(
+    () =>
+      character && !character.expedition
+        ? skillsForClass(character.classId).filter((s) => checkLearn(character, s.id) === null)
+            .length
+        : 0,
+    [character],
+  )
 
   return (
     <div className="game">
@@ -51,6 +64,17 @@ export function GameScreen() {
                 <path d="M8 8 V6.5 a4 4 0 0 1 8 0 V8 M5 8 H19 L18 20 H6 Z M9.5 12 H14.5" />
               </svg>
             </button>
+            <button
+              type="button"
+              className="icon-button"
+              onClick={() => setSkillsOpen(true)}
+              aria-label={learnable > 0 ? `Skills (${learnable} to learn)` : 'Skills'}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 6.5 C10 5 7 4.5 4 5 V18.5 C7 18 10 18.5 12 20 C14 18.5 17 18 20 18.5 V5 C17 4.5 14 5 12 6.5 Z M12 6.5 V20" />
+              </svg>
+              {learnable > 0 && <span className="icon-button__badge">{learnable}</span>}
+            </button>
           </div>
         </div>
         <div className="hud__center">
@@ -62,7 +86,10 @@ export function GameScreen() {
           {character && expedition ? (
             <ExpeditionPanel character={character} expedition={expedition} />
           ) : (
-            <HuntPanel />
+            <div className="hud__dock">
+              <SkillBar />
+              <HuntPanel />
+            </div>
           )}
           {devTools && <DevPanel />}
         </div>
@@ -74,6 +101,7 @@ export function GameScreen() {
       <LoadingOverlay />
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
       {inventoryOpen && <InventoryPanel onClose={() => setInventoryOpen(false)} />}
+      {skillsOpen && <SkillsPanel onClose={() => setSkillsOpen(false)} />}
       <AfkSummary />
     </div>
   )

@@ -309,6 +309,20 @@ p {
   text-overflow: ellipsis;
 }
 
+.bar--mp {
+  height: 11px;
+  margin-top: 3px;
+}
+
+.bar--mp .bar__fill {
+  background: linear-gradient(180deg, #6fb3ff, #2a6fd0 50%, #163d80);
+}
+
+.bar--mp .bar__text {
+  font-size: 9.5px;
+  line-height: 11px;
+}
+
 .bar--enemy .bar__fill {
   background: linear-gradient(180deg, #e3533f, #a3261a 50%, #5e1009);
 }
@@ -1399,6 +1413,14 @@ a.button {
   color: var(--gilt-bright);
 }
 
+.afk__stats > .afk__stat--sp {
+  grid-column: 1 / -1;
+}
+
+.afk__stat--sp dd {
+  color: #b8d8ff;
+}
+
 .afk__level {
   margin-bottom: 12px;
   padding: 8px;
@@ -1802,4 +1824,328 @@ a.button {
       opacity: 0;
     }
   }
+}
+
+/* ---------- Skills ---------- */
+
+.hud__dock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(100%, 560px);
+}
+
+.skill-bar {
+  display: flex;
+  gap: 6px;
+  max-width: 100%;
+  padding: 2px;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.skill-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.skill-slot {
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  border: 1px solid var(--bronze);
+  background: radial-gradient(circle at 50% 30%, #3a2b1f, #120d09 80%);
+  box-shadow: var(--panel-inner), var(--panel-shadow);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.skill-slot .skill-icon {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: none;
+}
+
+.skill-slot.is-off .skill-icon {
+  filter: grayscale(1) brightness(0.55);
+}
+
+.skill-slot.is-dry .skill-icon {
+  filter: saturate(0.4) brightness(0.6) sepia(0.4) hue-rotate(180deg);
+}
+
+.skill-slot.is-casting {
+  border-color: var(--gilt-bright);
+  box-shadow:
+    0 0 0 1px var(--gilt),
+    0 0 12px rgba(246, 217, 142, 0.7);
+}
+
+.skill-slot__cooldown {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff3d6;
+  text-shadow:
+    0 0 3px #000,
+    0 1px 1px #000;
+  font-variant-numeric: tabular-nums;
+}
+
+.skill-slot__auto {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 10px;
+  letter-spacing: 0.06em;
+  text-align: center;
+  color: #1a120a;
+  background: linear-gradient(180deg, var(--gilt-bright), var(--gilt));
+}
+
+.skill-slot.is-off .skill-slot__auto {
+  color: var(--parchment-dim);
+  background: rgba(10, 7, 5, 0.85);
+}
+
+.icon-button {
+  position: relative;
+}
+
+.icon-button__badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 18px;
+  color: #1a120a;
+  background: linear-gradient(180deg, #c6f08a, #7bc25a);
+  box-shadow: 0 0 0 1px #0f0a07;
+}
+
+.skill-icon {
+  display: grid;
+  place-content: center;
+  flex: none;
+  border-radius: 5px;
+  border: 1px solid var(--bronze-dim);
+  background: radial-gradient(circle at 50% 30%, #3a2b1f, #120d09 80%);
+}
+
+.skill-icon__sprite {
+  display: block;
+  border-radius: 3px;
+  background-repeat: no-repeat;
+}
+
+.skill-icon svg {
+  fill: none;
+  stroke: var(--gilt-bright);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.skill-icon--heal svg {
+  stroke: #7dff95;
+}
+
+.skill-icon--buff svg {
+  stroke: #8fd2ff;
+}
+
+.skill-icon--debuff svg {
+  stroke: #c99bff;
+}
+
+.buff-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 5px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.buff-row__item {
+  position: relative;
+  display: grid;
+}
+
+.buff-row__item .skill-icon {
+  border-color: #6a9cc4;
+}
+
+.buff-row__time {
+  position: absolute;
+  right: -2px;
+  bottom: -3px;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+  text-shadow:
+    0 0 2px #000,
+    0 0 2px #000;
+}
+
+.skills__sp {
+  margin-left: auto;
+  margin-right: 12px;
+  font-size: 15px;
+  color: var(--parchment-dim);
+}
+
+.skills__sp strong {
+  font-size: 18px;
+  color: #b8d8ff;
+  font-variant-numeric: tabular-nums;
+}
+
+.skill-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skill-row {
+  border-radius: 5px;
+  background: rgba(14, 10, 7, 0.65);
+  box-shadow: inset 0 0 0 1px rgba(138, 106, 58, 0.35);
+}
+
+.skill-row.is-open {
+  box-shadow: inset 0 0 0 1px var(--gilt);
+}
+
+.skill-row.is-unavailable {
+  opacity: 0.55;
+}
+
+.skill-row__main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 10px 6px 6px;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.skill-row:not(.is-learned) .skill-row__main .skill-icon {
+  filter: grayscale(0.85) brightness(0.7);
+}
+
+.skill-row__body {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.skill-row__name {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skill-row.is-learned .skill-row__name {
+  color: var(--gilt-bright);
+}
+
+.skill-row__meta {
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+
+.skill-row__badge {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #1a120a;
+  background: linear-gradient(180deg, #c6f08a, #7bc25a);
+}
+
+.skill-row__details {
+  display: grid;
+  gap: 8px;
+  padding: 0 10px 10px;
+}
+
+.skill-row__desc {
+  font-size: 14px;
+  font-style: italic;
+  color: var(--parchment);
+}
+
+.skill-row__note {
+  font-size: 13px;
+  color: #e9b48a;
+}
+
+.skill-rank {
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.skill-rank__title {
+  margin: 0 0 2px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gilt);
+}
+
+.skill-rank__costs {
+  font-size: 12px;
+  color: #9fc6f0;
+}
+
+.skill-rank__effects {
+  margin: 4px 0 0;
+  padding-left: 18px;
+  font-size: 14px;
+}
+
+.skill-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skill-row__actions .button {
+  flex: 1 1 130px;
+  min-height: 40px;
+  font-size: 14px;
+}
+
+.skill-row__actions .button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }

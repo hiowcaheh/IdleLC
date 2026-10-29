@@ -1,5 +1,6 @@
 import { CLASSES } from '../../game/data/classes.ts'
 import { useGameStore } from '../../state/gameStore.ts'
+import { BuffRow } from '../skills/BuffRow.tsx'
 import { Bar } from './Bar.tsx'
 
 const formatGold = (gold: number) => gold.toLocaleString('en-US')
@@ -7,6 +8,8 @@ const formatGold = (gold: number) => gold.toLocaleString('en-US')
 export function PlayerFrame() {
   const hp = useGameStore((s) => s.hud.playerHp)
   const maxHp = useGameStore((s) => s.hud.playerMaxHp)
+  const mp = useGameStore((s) => s.hud.playerMp)
+  const maxMp = useGameStore((s) => s.hud.playerMaxMp)
   const character = useGameStore((s) => s.character)
   if (!character) return null
   const { level, gold } = character
@@ -28,10 +31,12 @@ export function PlayerFrame() {
           <span className="unit-frame__sub">{CLASSES[character.classId].name}</span>
         </div>
         <Bar value={hp} max={maxHp} variant="hp" label="Health" />
+        {maxMp > 0 && <Bar value={mp} max={maxMp} variant="mp" label="Mana" />}
         <p className="unit-frame__gold" aria-label={`${formatGold(gold)} gold`}>
           <span className="coin" aria-hidden="true" />
           {formatGold(gold)}
         </p>
+        {!character.expedition && <BuffRow />}
       </div>
     </section>
   )
