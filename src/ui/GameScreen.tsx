@@ -12,7 +12,6 @@ import { HuntPanel } from './hud/HuntPanel.tsx'
 import { LevelUpBanner } from './hud/LevelUpBanner.tsx'
 import { PlayerFrame } from './hud/PlayerFrame.tsx'
 import { StatusLine } from './hud/StatusLine.tsx'
-import { TargetFrame } from './hud/TargetFrame.tsx'
 import { InventoryPanel } from './items/InventoryPanel.tsx'
 import { LoadingOverlay } from './LoadingOverlay.tsx'
 import { SettingsPanel } from './SettingsPanel.tsx'
@@ -90,7 +89,6 @@ export function GameScreen() {
           </div>
         </div>
         <div className="hud__center">
-          {!expedition && <TargetFrame />}
           {!expedition && <StatusLine />}
           <LevelUpBanner />
         </div>

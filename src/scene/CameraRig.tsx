@@ -4,6 +4,7 @@ import { Vector3 } from 'three'
 import { CAMERA_OFFSET, view } from './viewState.ts'
 
 const LOOK_HEIGHT = 1.1
+const ZOOM_OUT = 1.12
 
 /** Third-person camera that keeps both fighters in frame; pulls back on portrait screens. */
 export function CameraRig() {
@@ -15,7 +16,8 @@ export function CameraRig() {
 
   useFrame((_, delta) => {
     const aspect = size.width / size.height
-    const distance = aspect < 0.7 ? 1.65 : aspect < 1 ? 1.35 : aspect < 1.4 ? 1.1 : 1
+    // a little further out than the arena needs, so the fighters have room around them
+    const distance = (aspect < 0.7 ? 1.65 : aspect < 1 ? 1.35 : aspect < 1.4 ? 1.1 : 1) * ZOOM_OUT
 
     desiredFocus.current.copy(view.player)
     if (view.monsterVisible) desiredFocus.current.lerp(view.monster, 0.5)

@@ -25,7 +25,7 @@ const LABELS: Record<Look, string> = {
  * Effects on a fighter (the hero's buffs and potions, the monster's curses) with the seconds they
  * have left.
  */
-export function EffectRow({ side }: { side: Side }) {
+export function EffectRow({ side, size = 20 }: { side: Side; size?: number }) {
   const effects = useCombatTicker(250)[side].effects
   if (effects.length === 0) return null
   return (
@@ -47,9 +47,9 @@ export function EffectRow({ side }: { side: Side }) {
             aria-label={`${label}, ${left} seconds left`}
           >
             {effect.itemId === undefined ? (
-              <SkillIcon id={effect.skillId} kind={kind} size={20} />
+              <SkillIcon id={effect.skillId} kind={kind} size={size} />
             ) : (
-              <ItemIcon item={getItem(effect.itemId)} size={20} />
+              <ItemIcon item={getItem(effect.itemId)} size={size} />
             )}
             <span className="effect-row__time">
               {left >= 60 ? `${Math.floor(left / 60)}m` : left}

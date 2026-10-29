@@ -221,10 +221,6 @@ p {
   border-radius: 0 4px 4px 0;
 }
 
-.unit-frame--target .unit-frame__body {
-  width: min(72vw, 280px);
-}
-
 .unit-frame__name {
   display: flex;
   align-items: baseline;
@@ -239,10 +235,6 @@ p {
   text-overflow: ellipsis;
   color: var(--parchment);
   text-shadow: 0 1px 2px #000;
-}
-
-.unit-frame--target .unit-frame__name {
-  justify-content: center;
 }
 
 .unit-frame__sub {
@@ -329,10 +321,6 @@ p {
 .bar--mp .bar__text {
   font-size: 9.5px;
   line-height: 11px;
-}
-
-.bar--enemy .bar__fill {
-  background: linear-gradient(180deg, #e3533f, #a3261a 50%, #5e1009);
 }
 
 .bar__text {
@@ -2543,4 +2531,68 @@ a.button {
   height: 20px;
   margin: 0;
   accent-color: var(--gilt);
+}
+
+/* Names over the fighters and the monster's curses under its HP bar (scene/SceneLabel.tsx) */
+.scene-label {
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+  color: #f4ead6;
+  text-shadow:
+    0 0 3px #000,
+    0 1px 2px #000;
+}
+
+.scene-label--player,
+.scene-label--monster {
+  transform: translateY(-15px);
+}
+
+.scene-label--player {
+  color: #bfe7ff;
+}
+
+.scene-label--effects {
+  transform: translateY(17px);
+}
+
+.scene-label__level {
+  margin-right: 5px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.level-tone--trivial {
+  color: #b7b1a6;
+}
+
+.level-tone--easy {
+  color: #8fdc6a;
+}
+
+.level-tone--even {
+  color: #f2d870;
+}
+
+.level-tone--hard {
+  color: #ff9d4a;
+}
+
+.level-tone--deadly {
+  color: #ff5a48;
+}
+
+.scene-label--effects .effect-row {
+  margin: 0;
+  flex-wrap: nowrap;
+  gap: 2px;
+}
+
+.scene-label--effects .effect-row__time {
+  font-size: 8px;
 }

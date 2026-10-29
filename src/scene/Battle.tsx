@@ -14,9 +14,12 @@ import { DamageNumbers } from './DamageNumbers.tsx'
 import { HpBar3D } from './HpBar3D.tsx'
 import { LevelUpEffect } from './LevelUpEffect.tsx'
 import { ModelBoundary } from './ModelBoundary.tsx'
+import { SceneLabel } from './SceneLabel.tsx'
 import { SkillAura } from './SkillAura.tsx'
 import { ARENA_RADIUS, smoothstep } from './terrain.ts'
 import { optionText } from '../ui/gear/format.ts'
+import { levelTone } from '../ui/hud/levelColor.ts'
+import { EffectRow } from '../ui/skills/EffectRow.tsx'
 import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
 /** How far the player runs to reach a newly spawned monster. */
@@ -38,6 +41,9 @@ function engageDistance(monsterId: string, playerModel: string): number {
   const heroRadius = (hero.radius ?? 0.5) * hero.scale * 0.6
   return Math.min(6, Math.max(1.5, heroRadius + monsterRadius + 0.5))
 }
+
+/** Height of the HP bars over the heads (world units); names and curses sit on them (CSS offsets). */
+const BAR_LIFT = 0.22
 
 /** The played character is away on an AFK expedition: no fight on screen. */
 const isAway = () => useGameStore.getState().character?.expedition != null
@@ -81,6 +87,30 @@ export function Battle() {
   useEffect(() => {
     showNumbersRef.current = showNumbers
   }, [showNumbers])
+  const characterName = useGameStore((s) => s.character?.name ?? '')
+  const playerLevel = useGameStore((s) => s.character?.level ?? 1)
+
+  /** Where the HP bars go each frame (the labels sit around them). */
+  const playerBar = () => {
+    const c = combatSession.state
+    return {
+      x: view.player.x,
+      y: view.playerHeight + BAR_LIFT,
+      z: view.player.z,
+      ratio: c.player.hp / effectiveStats(c.player).maxHp,
+      visible: c.phase !== 'defeat' && !isAway(),
+    }
+  }
+  const monsterBar = () => {
+    const c = combatSession.state
+    return {
+      x: view.monster.x,
+      y: view.monsterHeight * (motion.current.appear || 0) + BAR_LIFT,
+      z: view.monster.z,
+      ratio: c.monster.hp / c.monster.stats.maxHp,
+      visible: view.monsterVisible && c.monster.hp > 0 && motion.current.sink < 0 && !isAway(),
+    }
+  }
 
   // Bring visuals in line with whatever phase the (persistent) combat is in on mount.
   useEffect(() => {
@@ -307,33 +337,22 @@ export function Battle() {
           </Suspense>
         </ModelBoundary>
       </group>
-      <HpBar3D
-        color="#62c04a"
-        read={() => {
-          const c = combatSession.state
-          return {
-            x: view.player.x,
-            y: view.playerHeight + 0.22,
-            z: view.player.z,
-            ratio: c.player.hp / effectiveStats(c.player).maxHp,
-            visible: c.phase !== 'defeat' && !isAway(),
-          }
-        }}
-      />
-      <HpBar3D
-        color="#d8392b"
-        read={() => {
-          const c = combatSession.state
-          return {
-            x: view.monster.x,
-            y: view.monsterHeight * (motion.current.appear || 0) + 0.22,
-            z: view.monster.z,
-            ratio: c.monster.hp / c.monster.stats.maxHp,
-            visible:
-              view.monsterVisible && c.monster.hp > 0 && motion.current.sink < 0 && !isAway(),
-          }
-        }}
-      />
+      <HpBar3D color="#62c04a" read={playerBar} />
+      <SceneLabel className="scene-label scene-label--player" read={playerBar}>
+        {characterName}
+      </SceneLabel>
+      <HpBar3D color="#d8392b" read={monsterBar} />
+      <SceneLabel className="scene-label scene-label--monster" read={monsterBar}>
+        <span
+          className={`scene-label__level level-tone--${levelTone(playerLevel, monsterDef.level)}`}
+        >
+          Lv {monsterDef.level}
+        </span>
+        {monsterDef.name}
+      </SceneLabel>
+      <SceneLabel className="scene-label scene-label--effects" read={monsterBar}>
+        <EffectRow side="monster" size={16} />
+      </SceneLabel>
       <DamageNumbers />
       <LevelUpEffect />
       <SkillAura />
