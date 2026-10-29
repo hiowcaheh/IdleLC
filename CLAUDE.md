@@ -88,7 +88,13 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 **Stan na 2026-10-29 (wieczór, sesja 2):**
 
 - M0 i M1 gotowe. Gra na Pages (https://hiowcaheh.github.io/IdleLC/) działa na danych i modelach LC
-  (Knight w zbroi + 13 potworów; reszta potworów na modelu zastępczym). UI po angielsku.
+  (6 klas w zbrojach z ekranu logowania; wszystkie potwory Juno oprócz Elder Drake — jego `.smc` wskazuje
+  brakujący folder `Data\Monster\Wyvern`; potwory innych stref na razie na modelu zastępczym). UI po angielsku.
+- **Pełny klient** leży lokalnie w `assets-src/client-full/LastChaos Nemesis/` (8 GB, poza repo; pobrany
+  z Google Drive właściciela). Spis: modele wszystkich 212 potworów z bazy, foldery wszystkich klas, 53 mapy
+  (`.wld`/`.wtr`, m.in. `juno`), `ItemBtn19.tex`; brak kodu serwera. `ro.ba` i `so.ba` są zaszyfrowane
+  (wersja 254) — Rogue bierze klipy z `ro_ep1.ba`, Sorcerer z `Monster/Undead/Sorcerer3/so.ba` (ten sam
+  szkielet). Właściciel chce przerabiać klienta **stopniowo, krokami** (oszczędzanie limitu).
 - **M1.5 „tor LC → gra”:** `npm run import-lc-db` (dane 1:1 z bazy: 279 potworów w 9 strefach, drop,
   1440 przedmiotów, exp) i `npm run convert-lc` (Node, `scripts/lc/`; modele klas z `classes.mjs`
   i potworów z bazy). Opis w README („Tryb LC”), formaty w `docs/lc-formats.md`, baza w `docs/lc-database.md`.
@@ -156,12 +162,11 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
 
 **Następne kroki:**
 
-1. Właściciel udostępni **pełny klient (3 GB) i kod serwera LC** — przez Remote Control z Maca (folder
-   klienta jako lokalne repo `git init`, Node.js do konwersji) albo link do zipa (Google Drive po dodaniu
-   `drive.google.com` i `drive.usercontent.google.com` w Network access środowiska). Z klienta: `npm run convert-lc -- --client <folder>`
-   na całości (wszystkie potwory, 5 pozostałych klas w `scripts/lc/classes.mjs`, ikony przedmiotów, mapy;
-   konwerter wypisuje nowe shadery do sprawdzenia). Z kodu serwera: statystyki klas i przyrost na poziom,
-   wzory obrażeń/trafień, kary exp za różnicę poziomów, szanse ulepszeń, poziomy umiejętności.
+1. Plan klienta krok po kroku (zrobione: 1 spis, 2 klasy, 3 potwory Juno): potwory kolejnych stref
+   (`npm run convert-lc -- --client "assets-src/client-full/LastChaos Nemesis" --only <model ids>`),
+   brakujące ikony z `ItemBtn19.tex` (`--only icons`), wygląd sprzętu na postaci (siatki broni/zbroi),
+   teren stref z map (`.wld`/`.wtr`, najpierw `juno`), animacje i efekty skilli. Kod serwera LC (statystyki
+   klas, wzory walki, szanse ulepszeń) — nadal brak; czekamy na właściciela.
 2. Dalej: M6 do końca (osobne tło / teren każdej strefy, gdy będą mapy z klienta; ewentualny wymagany poziom
    strefy — na razie właściciel chce swobodnego wyboru), żywioły, opcje specjalne, które jeszcze nie działają.
 3. Etap 2 (Supabase) według `docs/supabase.md` — dopiero po zgodzie właściciela.
