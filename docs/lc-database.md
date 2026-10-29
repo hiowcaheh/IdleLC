@@ -103,7 +103,8 @@ Podtypy broni (przypisanie do klas wg nazw i `a_job_flag`, część do potwierdz
 - `t_set_item` — 276 setów z bonusami.
 - `t_jewel_data` — klejnoty do socketów (składanie, szanse).
 - `t_drop_item_head/_data`, `t_npc_drop_all`, `t_npc_dropraid` — dropy globalne, eventowe, rajdowe.
-- `t_shop`, `t_shopitem` — sklepy NPC w miastach.
+- `t_shop`, `t_shopitem` — sklepy NPC w miastach. `t_shop.a_sell_rate` (40 we wszystkich sklepach) — ile %
+  ceny sklep płaci graczowi za przedmiot; `a_buy_rate` (100) — ile % ceny płaci gracz.
 - `t_crafting`, `t_decompose`, `t_special_skill` — rzemiosło i umiejętności zbierackie.
 
 ## Umiejętności — `t_skill` (1 849), `t_magic`

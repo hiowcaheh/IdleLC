@@ -79,7 +79,8 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 - `npm run build` — build produkcyjny do `dist/`
 - `npm run convert-models` — konwersja modeli z `assets-src/`
 - `npm run import-lc-db -- --dump <newproject_data.sql>` — dane gry z bazy LC → `src/game/data/generated/`
-- `npm run convert-lc -- --client <folder klienta>` — modele LC → `public/models/lc/` + manifest
+- `npm run convert-lc -- --client <folder klienta>` — modele LC → `public/models/lc/` + manifest, ikony
+  przedmiotów → `public/icons/lc/items.webp` (same ikony: `--only icons`)
 
 ## Stan prac (aktualizuj na koniec każdej sesji)
 
@@ -94,7 +95,9 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   (6 klas, podgląd 3D, zasady imion), migracja starych zapisów (postać „Hero”). Zapisywany progres: poziom
   i exp z `t_exp` 1:1, złoto i exp za potwory 1:1 (`a_exp`, `a_prize`), zabicia, miejsce polowania.
   Widoczny awans: pasek EXP na dole (x / y, %), baner i efekt „LEVEL UP”.
-- **Drop i ekwipunek:** drop 1:1 z tabel `t_npc` (każdy wpis losowany osobno), ekwipunek jako stosy (zapis v3).
+- **Drop i ekwipunek:** drop 1:1 z tabel `t_npc` (każdy wpis losowany osobno), ekwipunek jako stosy (zapis v3),
+  ikony przedmiotów z atlasów `ItemBtn*.tex` (brak tylko `ItemBtn19`), sprzedaż w sklepie: `a_price × 40%`
+  (`t_shop.a_sell_rate`), komenda `sellItems`.
 - **M4 (AFK) gotowe:** wyprawy (przycisk „Expedition”, `startAfk`/`claimAfk`, zapis v4) do 8 h; nagrody
   z prawdziwej symulacji walki, okno „While you were away…”; dev: AFK 1h/8h. Bez wyprawy czas poza grą
   nie daje nagród (decyzja właściciela: „wyślij na wyprawę”).
@@ -120,8 +123,8 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
    na całości (wszystkie potwory, 5 pozostałych klas w `scripts/lc/classes.mjs`, ikony przedmiotów, mapy;
    konwerter wypisuje nowe shadery do sprawdzenia). Z kodu serwera: statystyki klas i przyrost na poziom,
    wzory obrażeń/trafień, kary exp za różnicę poziomów, szanse ulepszeń, poziomy umiejętności.
-2. Dalej: M5 (sloty sprzętu, zakładanie, wpływ na statystyki, ulepszanie +0…+15), sprzedaż przedmiotów,
-   ikony przedmiotów z atlasów `ItemBtn*.tex`, M6 (mapa świata, wymagany poziom stref).
+2. Dalej (propozycja dla właściciela): umiejętności z maną i cooldownami (dane są w bazie), M5 (sloty
+   sprzętu, zakładanie, wpływ na statystyki, ulepszanie +0…+15), instalacja jako aplikacja (PWA), M6.
 3. Etap 2 (Supabase) według `docs/supabase.md` — dopiero po zgodzie właściciela.
 
 **Otwarte kwestie:** brak siatek broni z `Data\Item\Weapon` (przyszły tylko tekstury i tagi); brak mapy

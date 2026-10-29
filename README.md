@@ -32,7 +32,8 @@ poziom, exp, złoto, zabicia, ekwipunek i miejsce polowania. Po powrocie gra otw
 
 **Wyprawy AFK:** przycisk **Expedition** w panelu polowania wysyła postać na polowanie bez ciebie (do 8 h, także
 przy zamkniętej grze). **Return now** kończy wyprawę i otwiera okno „While you were away…” z zabiciami, expem,
-złotem, awansem i dropem. Drop (1:1 z bazy) trafia do ekwipunku (ikona torby w HUD). Szczegóły w
+złotem, awansem i dropem. Drop (1:1 z bazy) trafia do ekwipunku (ikona torby w HUD) z ikonami z klienta;
+przedmioty sprzedaje się tam za cenę z bazy × stawkę skupu sklepu (40%). Szczegóły w
 [`docs/balance.md`](docs/balance.md).
 **Settings → Change character** wraca do wyboru postaci, **Reset save** kasuje wszystkie postacie.
 Zapisy ze starszej wersji gry są przenoszone automatycznie (postać „Hero”).
@@ -102,7 +103,9 @@ i zrzut bazy trzymamy poza repo, w `assets-src/`. Żeby odświeżyć dane albo d
 
    Konwerter bierze modele klas (`scripts/lc/classes.mjs`) i wszystkich potworów z `lc-data.json`
    (tylko animacje używane w bazie), zapisuje GLB do `public/models/lc/` (np. `fox.glb`,
-   `class-knight.glb`) i odświeża manifest `src/game/data/generated/lc-models.json`. Pojedynczy model:
+   `class-knight.glb`) i odświeża manifest `src/game/data/generated/lc-models.json`. Wycina też ikony
+   przedmiotów z atlasów `ItemBtn*.tex` do `public/icons/lc/items.webp` (same ikony: `--only icons`).
+   Pojedynczy model:
    `--smc "Data\Monster\Animals\Fox.smc"`, wybrane modele: `--only fox,class-knight`.
    Formaty plików: [`docs/lc-formats.md`](docs/lc-formats.md).
 

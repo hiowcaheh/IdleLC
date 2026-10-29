@@ -125,3 +125,10 @@ dojdą w M5). Ekwipunek nie ma na razie limitu miejsc.
   włączonym ekranie). Okno przed wysłaniem pokazuje oczekiwane zabicia, exp i złoto na godzinę.
 - Jedno zgłoszenie walki obejmuje najwyżej 10 minut (`MAX_REPORT_WINDOW`), więc czas poza grą może zapłacić
   tylko wyprawa.
+
+## Sklep (sprzedaż przedmiotów)
+
+Sklep płaci `t_item.a_price × t_shop.a_sell_rate %`, w dół do pełnej sztuki złota. We wszystkich 65 sklepach
+LC `a_sell_rate = 40`, a `a_buy_rate = 100` (to, ile płaci gracz przy kupnie). Przykład: Fox Tail (cena 26)
+→ 10 złota; broń poziomu 5 (cena 1 066) → 426 złota. Przedmioty z ceną 0 nie są skupowane.
+Znaczenie obu kolumn potwierdzi kod serwera.
