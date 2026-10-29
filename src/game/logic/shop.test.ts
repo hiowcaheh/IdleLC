@@ -5,7 +5,7 @@ import { createRng } from './rng.ts'
 import {
   applyBuy,
   applySale,
-  applySellPiece,
+  applySellPieces,
   buyPrice,
   sellPrice,
   shopOffer,
@@ -81,7 +81,8 @@ describe('buying', () => {
       { slot: 'helmet', tiers: [{ level: 2, items: [7] }] },
     ])
     expect(offer.accessories).toEqual([172, 166])
-    expect(offer.goods).toEqual([84, 43, 44, 484, 490])
+    // the zone's goods, then the magnifying glasses every shop sells
+    expect(offer.goods).toEqual([84, 43, 44, 484, 490, 1838, 1839])
     expect(buyPrice(7)).toBe(200)
     const { character } = applyBuy(knight({ gold: 500 }), 7, 2, createRng(1), makeId)
     expect(character.gold).toBe(100)
@@ -108,11 +109,19 @@ describe('buying', () => {
     }
   })
 
-  it('buys an upgraded piece back at the plain price', () => {
-    const c = knight({ gear: [{ uid: 'x', itemId: 4, plus: 7 }] })
-    const sale = applySellPiece(c, 'x')
-    expect(sale.gold).toBe(48) // 120 × 40%
-    expect(sale.character.gear).toEqual([])
-    expect(() => applySellPiece(c, 'nope')).toThrowError(/not-owned/)
+  it('buys upgraded pieces back at the plain price, many at once', () => {
+    const c = knight({
+      gear: [
+        { uid: 'x', itemId: 4, plus: 7 },
+        { uid: 'y', itemId: 4, plus: 0, options: [{ type: 20, level: 2 }] },
+        { uid: 'z', itemId: 7, plus: 1 },
+      ],
+    })
+    const sale = applySellPieces(c, ['x', 'y'])
+    expect(sale.gold).toBe(96) // 2 × 120 × 40%
+    expect(sale.sold).toBe(2)
+    expect(sale.character.gear.map((p) => p.uid)).toEqual(['z'])
+    expect(() => applySellPieces(c, ['x', 'nope'])).toThrowError(/not-owned/)
+    expect(() => applySellPieces(c, [])).toThrowError(/nothing-to-sell/)
   })
 })

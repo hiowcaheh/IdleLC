@@ -171,7 +171,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                           disabled={busy}
                           onClick={() =>
                             run(async () => {
-                              await sellGear(piece.uid)
+                              await sellGear([piece.uid])
                               return `Sold ${pieceName(piece.itemId, piece.plus)} for ${fmt(sellPrice(piece.itemId))} gold.`
                             })
                           }

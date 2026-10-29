@@ -38,6 +38,11 @@ export type StatKey =
   | 'castTime'
   | 'hpRegen'
   | 'mpRegen'
+  | 'cooldownReduction'
+  | 'mpCostReduction'
+  | 'hpSteal'
+  | 'mpSteal'
+  | 'moveSpeed'
 
 export interface StatEffect {
   kind: 'stat'
@@ -372,6 +377,14 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
         break
       case 'castTime':
         s.castTime = (s.castTime ?? 0) + value / 10
+        break
+      case 'cooldownReduction':
+      case 'mpCostReduction':
+      case 'hpSteal':
+      case 'mpSteal':
+      case 'moveSpeed':
+        // percent values (rare options)
+        s[stat] = (s[stat] ?? 0) + value
         break
     }
   }

@@ -1,4 +1,4 @@
-import type { OptionDef, PotionDef } from './types.ts'
+import type { OptionDef, PotionDef, RareSetDef } from './types.ts'
 
 /** Shape of the files written by scripts/lc/import-db.mjs (src/game/data/generated/). */
 
@@ -59,6 +59,8 @@ export interface LcItem {
   stats: number[]
   icon: { atlas: number; row: number; col: number }
   potion?: PotionDef
+  /** Rare items: [t_rareoption index, weight] pairs. */
+  rare?: [number, number][]
 }
 
 export interface LcData {
@@ -79,8 +81,12 @@ export interface LcData {
   shopGear?: Record<string, Record<string, { level: number; items: number[] }[]>>
   /** Plain accessories the IdleLC shop sells (their options are rolled when bought). */
   accessories?: number[]
-  /** Item options (t_option) that can roll. */
+  /** Item options (t_option); weight 0 everywhere = only in rare sets. */
   options?: OptionDef[]
+  /** Rare option sets (t_rareoption) the rare items use. */
+  rareSets?: RareSetDef[]
+  /** Magnifying glasses (normal, golden). */
+  magnifiers?: number[]
   /** The free level-1 set of each class, by class id. */
   starterGear?: Record<string, number[]>
   /** Typical gear power of each class per level (index 0 = level 1), see import-db buildGearReference. */

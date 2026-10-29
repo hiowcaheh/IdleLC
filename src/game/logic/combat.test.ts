@@ -4,6 +4,7 @@ import {
   HP_POTION_BELOW,
   MP_POTION_BELOW,
   TIMINGS,
+  approachTime,
   changeMonster,
   choosePotion,
   combatTick,
@@ -526,5 +527,49 @@ describe('potions in combat', () => {
     const s = drinker([], 0)
     const next = updatePlayer({ ...s, phase: 'defeat' }, { level: 11, stats: stats() })
     expect(next.player.hp).toBe(0)
+  })
+})
+
+describe('rare options in combat', () => {
+  it('shorter skill cooldowns and cheaper skills', () => {
+    const start = engaged(caster([rank()], { cooldownReduction: 40, mpCostReduction: 50 }))
+    const r = combatTick(start, 0.01, createRng(1))
+    expect(r.events.some((e) => e.type === 'cast')).toBe(true)
+    expect(r.state.player.skillCooldowns[1]).toBeCloseTo(3 * 0.6, 1)
+    expect(r.state.player.mp).toBeCloseTo(100 - 5, 0)
+    // capped: never below half the cooldown
+    const capped = engaged(caster([rank()], { cooldownReduction: 90 }))
+    expect(combatTick(capped, 0.01, createRng(1)).state.player.skillCooldowns[1]).toBeCloseTo(
+      1.5,
+      1,
+    )
+  })
+
+  it('HP steal heals the hero by a share of the damage it deals', () => {
+    const thief = engaged({ level: 10, stats: stats({ attack: 40, hpSteal: 50 }) })
+    const hurt = { ...thief, player: { ...thief.player, hp: 10 } }
+    const { state, events } = run(hurt, 1, createRng(5))
+    const dealt = events
+      .filter((e) => e.type === 'hit' && e.target === 'monster')
+      .reduce((sum, e) => sum + (e.type === 'hit' ? e.amount : 0), 0)
+    const taken = events
+      .filter((e) => e.type === 'hit' && e.target === 'player')
+      .reduce((sum, e) => sum + (e.type === 'hit' ? e.amount : 0), 0)
+    expect(dealt).toBeGreaterThan(0)
+    expect(state.player.hp).toBeCloseTo(Math.min(100, 10 + dealt / 2) - taken, 0)
+  })
+
+  it('move speed shortens the run to the monster', () => {
+    const plain = createCombat(strongPlayer, 'm', weakMonster)
+    const quick = createCombat(
+      { ...strongPlayer, stats: { ...strongPlayer.stats, moveSpeed: 30 } },
+      'm',
+      weakMonster,
+    )
+    expect(approachTime(plain)).toBe(TIMINGS.approach)
+    expect(approachTime(quick)).toBeCloseTo(TIMINGS.approach / 1.3)
+    const step = TIMINGS.spawning + TIMINGS.approach / 1.3 + 0.02
+    expect(combatTick(quick, step, createRng(1)).state.phase).toBe('fighting')
+    expect(combatTick(plain, step, createRng(1)).state.phase).toBe('approach')
   })
 })

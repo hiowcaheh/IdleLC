@@ -10,6 +10,7 @@ import {
   gearPower,
   gearReference,
   getItem,
+  getRareSet,
   slotsFor,
   starterGear,
 } from '../data/items.ts'
@@ -18,7 +19,7 @@ import type { CharacterData } from './character.ts'
 import { GameError } from './errors.ts'
 import { newId } from './id.ts'
 import { addToInventory } from './loot.ts'
-import { optionEffects, type ItemOption } from './options.ts'
+import { levelReduction, optionEffects, type ItemOption } from './options.ts'
 import { chance, type Rng } from './rng.ts'
 import { applyStats } from './skills.ts'
 
@@ -44,8 +45,10 @@ export interface GearPiece {
   uid: string
   itemId: number
   plus: number
-  /** Options (accessories always have some). */
+  /** Options (accessories always have some; rare items get theirs from their rare set). */
   options?: ItemOption[]
+  /** Identified rare items: their t_rareoption set (logic/rare.ts). */
+  rare?: number
 }
 
 export type Equipment = Partial<Record<EquipSlot, GearPiece>>
@@ -61,10 +64,20 @@ export type EquipError =
   | 'max-plus'
   | 'no-stone'
 
-/** Power of a piece including its upgrades. */
-export function piecePower(piece: Pick<GearPiece, 'itemId' | 'plus'>): number {
+/**
+ * Power of a piece including its upgrades and the flat bonus of its rare set (weapons: attack + magic
+ * attack, armor: defense + magic defense, like the item's own stats).
+ */
+export function piecePower(piece: Pick<GearPiece, 'itemId' | 'plus' | 'rare'>): number {
   const gear = getItem(piece.itemId).gear
-  return gear ? gearPower(gear) * (1 + PLUS_BONUS * piece.plus) : 0
+  if (!gear) return 0
+  const set = piece.rare === undefined ? undefined : getRareSet(piece.rare)
+  const bonus = !set
+    ? 0
+    : gear.slot === 'weapon'
+      ? set.attack + set.magic
+      : set.defense + set.resist
+  return (gearPower(gear) + bonus) * (1 + PLUS_BONUS * piece.plus)
 }
 
 /**
@@ -114,23 +127,33 @@ export function starterEquipment(classId: ClassId, makeId: () => string = newId)
   return equipment
 }
 
+/** Level a piece needs: the item's, less what a "Reduced Level Requirement" option takes off. */
+export function requiredLevel(itemId: number, options?: readonly ItemOption[]): number {
+  return Math.max(0, getItem(itemId).level - levelReduction(options))
+}
+
 /** Whether the character could wear the item (class and level), or why not. */
 export function checkWear(
   character: Pick<CharacterData, 'classId' | 'level'>,
   itemId: number,
+  options?: readonly ItemOption[],
 ): EquipError | null {
   const item = getItem(itemId)
   if (!item.gear) return 'not-gear'
   if (!item.gear.classes.includes(character.classId)) return 'wrong-class'
-  if (character.level < item.level) return 'level-too-low'
+  if (character.level < requiredLevel(itemId, options)) return 'level-too-low'
   return null
 }
 
-/** Pieces that can't stack: upgraded, with options, or accessories (they always have options). */
-export function isUnique(piece: Pick<GearPiece, 'itemId' | 'plus' | 'options'>): boolean {
+/**
+ * Pieces that can't stack: upgraded, with options, identified rare items, or accessories (they
+ * always have options). A stack of a rare item holds unidentified pieces.
+ */
+export function isUnique(piece: Pick<GearPiece, 'itemId' | 'plus' | 'options' | 'rare'>): boolean {
   return (
     piece.plus > 0 ||
     (piece.options?.length ?? 0) > 0 ||
+    piece.rare !== undefined ||
     getItem(piece.itemId).gear?.slot === 'accessory'
   )
 }
@@ -176,7 +199,7 @@ export function applyEquip(
         .filter((s) => s.count > 0),
     }
   }
-  const error = checkWear(character, piece.itemId)
+  const error = checkWear(character, piece.itemId, piece.options)
   if (error) throw new GameError(error, `item ${piece.itemId}`)
   const slots = slotsFor(getItem(piece.itemId).gear!)
   if (slot && !slots.includes(slot)) throw new GameError('wrong-slot', slot)

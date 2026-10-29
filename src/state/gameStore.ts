@@ -9,7 +9,8 @@ import type { GearSource, UpgradeResult } from '../game/logic/equipment.ts'
 import type { ItemStack } from '../game/logic/loot.ts'
 import type { CombatResult } from '../game/logic/rewards.ts'
 import type { LoadResult, SaveData, Settings } from '../game/logic/save.ts'
-import type { PurchaseResult, SaleResult } from '../game/logic/shop.ts'
+import type { IdentifyResult, IdentifyTarget } from '../game/logic/rare.ts'
+import type { PieceSale, PurchaseResult, SaleResult } from '../game/logic/shop.ts'
 import { createDefaultSave } from '../game/logic/save.ts'
 import { gameService } from '../game/service/index.ts'
 import { combatSession } from '../game/session/combatSession.ts'
@@ -63,7 +64,8 @@ interface GameStore {
   unequipItem(slot: EquipSlot): Promise<void>
   upgradeItem(slot: EquipSlot): Promise<UpgradeResult>
   buyItem(itemId: number, count: number): Promise<PurchaseResult>
-  sellGear(uid: string): Promise<void>
+  sellGear(uids: string[]): Promise<PieceSale>
+  identifyItems(magnifierId: number, targets: IdentifyTarget[]): Promise<IdentifyResult>
   setPotionAuto(auto: PotionAuto): Promise<void>
   selectMonster(monsterId: string): void
   selectZone(zoneId: string, monsterId?: string): void
@@ -358,9 +360,18 @@ export const useGameStore = create<GameStore>((set, get) => {
       applyCharacter(await enqueue(() => gameService.setPotionAuto(id, auto)))
     },
 
-    async sellGear(uid) {
+    async sellGear(uids) {
       const id = playedId()
-      applyCharacter(await enqueue(() => gameService.sellGear(id, uid)))
+      const sale = await enqueue(() => gameService.sellGear(id, uids))
+      applyCharacter(sale.character)
+      return sale
+    },
+
+    async identifyItems(magnifierId, targets) {
+      const id = playedId()
+      const result = await enqueue(() => gameService.identifyItems(id, magnifierId, targets))
+      applyCharacter(result.character)
+      return result
     },
 
     selectMonster(monsterId) {

@@ -6,7 +6,8 @@ import type { GearSource, UpgradeResult } from '../logic/equipment.ts'
 import type { ItemStack } from '../logic/loot.ts'
 import type { CombatReport, CombatResult } from '../logic/rewards.ts'
 import type { LoadResult, SaveData, Settings } from '../logic/save.ts'
-import type { PurchaseResult, SaleResult } from '../logic/shop.ts'
+import type { IdentifyResult, IdentifyTarget } from '../logic/rare.ts'
+import type { PieceSale, PurchaseResult, SaleResult } from '../logic/shop.ts'
 
 /**
  * Everything that changes the saved game goes through this contract, and every call is
@@ -56,8 +57,17 @@ export interface GameService {
    * options), potions and stones of the zone.
    */
   buyItem(characterId: string, itemId: number, count: number): Promise<PurchaseResult>
-  /** Sells a single piece (upgraded, with options) from the bag. */
-  sellGear(characterId: string, uid: string): Promise<CharacterData>
+  /** Sells single pieces (upgraded, with options, identified rare items) from the bag. */
+  sellGear(characterId: string, uids: string[]): Promise<PieceSale>
+  /**
+   * Identifies rare items (bag stacks, bag pieces, worn pieces) with magnifying glasses of one kind,
+   * one per piece, until they run out; the server rolls the glass and the rare set.
+   */
+  identifyItems(
+    characterId: string,
+    magnifierId: number,
+    targets: IdentifyTarget[],
+  ): Promise<IdentifyResult>
   /** Turns the automatic use of HP / MP potions in fights on or off. */
   setPotionAuto(characterId: string, auto: PotionAuto): Promise<CharacterData>
   updateSettings(patch: Partial<Settings>): Promise<Settings>

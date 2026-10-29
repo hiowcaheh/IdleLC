@@ -12,6 +12,7 @@ import type {
   ItemDef,
   ItemType,
   OptionDef,
+  RareSetDef,
 } from './types.ts'
 
 /** t_item.a_type_idx → item type (see docs/lc-database.md). */
@@ -53,6 +54,15 @@ export const UPGRADE_STONE_ID = 84
 export const HEAVEN_STONE_ID = 85
 /** Stones an upgrade can use, in the order they are spent. */
 export const UPGRADE_STONE_IDS = [UPGRADE_STONE_ID, HEAVEN_STONE_ID]
+
+/** t_item 1838 "Magnifying glass" and 1839 "Golden magnifying glass": identify rare items. */
+export const MAGNIFIER_ID = 1838
+export const GOLDEN_MAGNIFIER_ID = 1839
+/**
+ * Chance that an identification works: the golden glass always (t_item description), the plain one
+ * "not guaranteed" — 60% is our own value, its price (600 000 vs 1 000 000) per success.
+ */
+const MAGNIFIER_CHANCE: Record<number, number> = { [MAGNIFIER_ID]: 0.6, [GOLDEN_MAGNIFIER_ID]: 1 }
 
 /** a_job_flag bit n = class n in t_skill.a_job order. */
 const JOB_ORDER: ClassId[] = ['titan', 'knight', 'healer', 'mage', 'rogue', 'sorcerer']
@@ -215,6 +225,36 @@ const PLACEHOLDER_ITEMS: Record<number, ItemDef> = {
     level: 0,
     price: 1000,
   },
+  1845: {
+    id: 1845,
+    name: 'Perion Sword',
+    type: 'weapon',
+    level: 73,
+    price: 1044040,
+    upgradeable: true,
+    gear: knightGear({ slot: 'weapon', attack: 280, attackInterval: 1 }),
+    rare: [
+      { set: 1, weight: 6000 },
+      { set: 7, weight: 3000 },
+      { set: 23, weight: 1000 },
+    ],
+  },
+  [MAGNIFIER_ID]: {
+    id: MAGNIFIER_ID,
+    name: 'Magnifying glass',
+    type: 'scroll',
+    level: 0,
+    price: 600000,
+    magnifier: { chance: MAGNIFIER_CHANCE[MAGNIFIER_ID]! },
+  },
+  [GOLDEN_MAGNIFIER_ID]: {
+    id: GOLDEN_MAGNIFIER_ID,
+    name: 'Golden magnifying glass',
+    type: 'scroll',
+    level: 0,
+    price: 1000000,
+    magnifier: { chance: MAGNIFIER_CHANCE[GOLDEN_MAGNIFIER_ID]! },
+  },
 }
 
 export const ITEMS: Record<number, ItemDef> = lcData
@@ -235,6 +275,12 @@ export const ITEMS: Record<number, ItemDef> = lcData
               gear.slot !== 'accessory' &&
               ((i.flag ?? 0) & FLAG_UPGRADE) !== 0,
             potion: i.potion,
+            ...(gear && i.rare?.length
+              ? { rare: i.rare.map(([set, weight]) => ({ set, weight })) }
+              : {}),
+            ...(MAGNIFIER_CHANCE[i.id] !== undefined
+              ? { magnifier: { chance: MAGNIFIER_CHANCE[i.id]! } }
+              : {}),
           },
         ]
       }),
@@ -288,6 +334,11 @@ export function shopGear(classId: ClassId): Partial<Record<GearSlot, ShopTier[]>
   )
 }
 
+/** Magnifying glasses the shop sells in every zone (own decision; LC sells them in towns). */
+export function shopMagnifiers(): number[] {
+  return [MAGNIFIER_ID, GOLDEN_MAGNIFIER_ID].filter((id) => ITEMS[id])
+}
+
 /** Plain accessories the shop sells (options are rolled when one is bought). */
 export function shopAccessories(): number[] {
   return lcData ? (lcData.accessories ?? []) : PLACEHOLDER_ACCESSORIES
@@ -296,6 +347,61 @@ export function shopAccessories(): number[] {
 /** The free level-1 set a new character of the class starts with. */
 export function starterGear(classId: ClassId): number[] {
   return (lcData ? lcData.starterGear?.[classId] : PLACEHOLDER_STARTER[classId]) ?? []
+}
+
+/** Own placeholder rare sets for the game without the LC data — and the tests (LC t_rareoption). */
+const PLACEHOLDER_RARE_SETS: RareSetDef[] = [
+  {
+    id: 1,
+    grade: 4,
+    type: 0,
+    prefix: 'Mighty',
+    attack: 0,
+    defense: 0,
+    magic: 0,
+    resist: 0,
+    options: [
+      { type: 20, level: 3, chance: 10000 },
+      { type: 21, level: 3, chance: 7000 },
+    ],
+  },
+  {
+    id: 7,
+    grade: 3,
+    type: 0,
+    prefix: 'Razing',
+    attack: 15,
+    defense: 0,
+    magic: 0,
+    resist: 0,
+    options: [
+      { type: 20, level: 3, chance: 10000 },
+      { type: 21, level: 3, chance: 4000 },
+    ],
+  },
+  {
+    id: 23,
+    grade: 2,
+    type: 0,
+    prefix: 'Destructive',
+    attack: 30,
+    defense: 0,
+    magic: 0,
+    resist: 0,
+    options: [
+      { type: 20, level: 4, chance: 10000 },
+      { type: 21, level: 4, chance: 6000 },
+    ],
+  },
+]
+
+/** Rare option sets (t_rareoption) by id. */
+export const RARE_SETS: Record<number, RareSetDef> = Object.fromEntries(
+  (lcData ? (lcData.rareSets ?? []) : PLACEHOLDER_RARE_SETS).map((r) => [r.id, r]),
+)
+
+export function getRareSet(id: number): RareSetDef | undefined {
+  return RARE_SETS[id]
 }
 
 /** Power of a piece without upgrades: attack + magic attack, or defense + magic defense. */
@@ -396,6 +502,33 @@ const PLACEHOLDER_OPTIONS: OptionDef[] = [
     weaponMask: 30975,
     armorMask: 0,
     accessoryMask: 21,
+  },
+  {
+    type: 49,
+    name: 'Reduced Level Requirement',
+    values: [1, 2, 3, 4, 5],
+    weights: [0, 0, 0, 0, 0],
+    weaponMask: 0,
+    armorMask: 0,
+    accessoryMask: 0,
+  },
+  {
+    type: 58,
+    name: 'Skill Cool Down Reduction',
+    values: [20, 30, 40, 50, 60],
+    weights: [0, 0, 0, 0, 0],
+    weaponMask: 0,
+    armorMask: 0,
+    accessoryMask: 0,
+  },
+  {
+    type: 64,
+    name: 'Move Speed',
+    values: [10, 20, 30],
+    weights: [0, 0, 0],
+    weaponMask: 0,
+    armorMask: 0,
+    accessoryMask: 0,
   },
 ]
 

@@ -15,17 +15,20 @@ import { AFK_MIN_SECONDS, simulateAfk, type AfkResult } from '../logic/afk.ts'
 import { newId } from '../logic/id.ts'
 import { gainExp } from '../logic/progression.ts'
 import {
+  MAX_PLAY_GAP,
   applyCombatReport,
   maxKills,
   type CombatReport,
   type CombatResult,
 } from '../logic/rewards.ts'
+import { applyIdentify, type IdentifyResult, type IdentifyTarget } from '../logic/rare.ts'
 import { createRng, type Rng } from '../logic/rng.ts'
 import type { ItemStack } from '../logic/loot.ts'
 import {
   applyBuy,
   applySale,
-  applySellPiece,
+  applySellPieces,
+  type PieceSale,
   type PurchaseResult,
   type SaleResult,
 } from '../logic/shop.ts'
@@ -120,8 +123,10 @@ export class LocalGameService implements GameService {
     }
     const monster = MONSTERS[report.monsterId]!
     const now = this.now()
-    const allowed = maxKills((now - character.lastPlayedAt) / 1000, this.timeScale)
-    const result = applyCombatReport(character, monster, report, allowed, this.rng)
+    const elapsed = Math.max(0, (now - character.lastPlayedAt) / 1000)
+    const allowed = maxKills(elapsed, this.timeScale)
+    const played = Math.min(elapsed, MAX_PLAY_GAP) * this.timeScale
+    const result = applyCombatReport(character, monster, report, allowed, this.rng, played)
     const updated = this.update(characterId, () => ({ ...result.character, lastPlayedAt: now }))
     return copy({ ...result, character: updated })
   }
@@ -207,9 +212,20 @@ export class LocalGameService implements GameService {
     return copy(this.update(characterId, () => changed))
   }
 
-  async sellGear(characterId: string, uid: string): Promise<CharacterData> {
-    const { character } = applySellPiece(this.character(characterId), uid)
-    return copy(this.update(characterId, () => character))
+  async sellGear(characterId: string, uids: string[]): Promise<PieceSale> {
+    const sale = applySellPieces(this.character(characterId), uids)
+    const updated = this.update(characterId, () => sale.character)
+    return copy({ ...sale, character: updated })
+  }
+
+  async identifyItems(
+    characterId: string,
+    magnifierId: number,
+    targets: IdentifyTarget[],
+  ): Promise<IdentifyResult> {
+    const result = applyIdentify(this.notOnExpedition(characterId), magnifierId, targets, this.rng)
+    const updated = this.update(characterId, () => result.character)
+    return copy({ ...result, character: updated })
   }
 
   async updateSettings(patch: Partial<Settings>): Promise<Settings> {

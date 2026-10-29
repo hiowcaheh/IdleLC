@@ -6,7 +6,7 @@
 import { CLASSES } from '../data/classes.ts'
 import { MONSTERS } from '../data/monsters.ts'
 import { MAX_LEVEL } from '../data/progression.ts'
-import { getItem, getOption, slotsFor } from '../data/items.ts'
+import { getItem, getOption, getRareSet, slotsFor } from '../data/items.ts'
 import { getSkill } from '../data/skills.ts'
 import type { ClassId, EquipSlot } from '../data/types.ts'
 import { ZONES } from '../data/zones.ts'
@@ -21,6 +21,7 @@ import {
 import { MAX_PLUS, starterEquipment, type Equipment, type GearPiece } from './equipment.ts'
 import { newId } from './id.ts'
 import { addToInventory, type ItemStack } from './loot.ts'
+import { OPTION_PLAY_SECONDS } from './options.ts'
 import {
   SKILL_BAR_SIZE,
   defaultBar,
@@ -29,7 +30,7 @@ import {
   type LearnedSkill,
 } from './skills.ts'
 
-export const SAVE_VERSION = 7
+export const SAVE_VERSION = 8
 
 export type GraphicsQuality = 'auto' | 'low' | 'high'
 
@@ -130,6 +131,13 @@ export const MIGRATIONS: Record<number, Migration> = {
               }
             : c,
         )
+      : [],
+  }),
+  // v8: rare items (identified pieces carry their set), options from play time
+  7: (save) => ({
+    ...save,
+    characters: Array.isArray(save.characters)
+      ? save.characters.map((c: unknown) => (isRecord(c) ? { ...c, optionProgress: 0 } : c))
       : [],
   }),
 }
@@ -234,6 +242,7 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
       hp: !isRecord(raw.potionAuto) || raw.potionAuto.hp !== false,
       mp: !isRecord(raw.potionAuto) || raw.potionAuto.mp !== false,
     },
+    optionProgress: Math.min(OPTION_PLAY_SECONDS, Math.max(0, num(raw.optionProgress, 0))),
   }
 }
 
@@ -254,6 +263,9 @@ function sanitizePiece(raw: unknown): GearPiece | null {
   const itemId = int(raw.itemId, 0)
   const item = getItem(itemId)
   if (!item.gear) return null
+  // a rare item keeps its set when the set is one the item can get; without one it is unidentified
+  const rare = int(raw.rare, -1)
+  const identified = item.rare?.some((r) => r.set === rare) && getRareSet(rare) !== undefined
   const options = (Array.isArray(raw.options) ? raw.options : []).flatMap((o: unknown) => {
     if (!isRecord(o)) return []
     const type = int(o.type, -1)
@@ -261,11 +273,13 @@ function sanitizePiece(raw: unknown): GearPiece | null {
     const def = getOption(type)
     return def && level >= 1 && level <= def.values.length ? [{ type, level }] : []
   })
+  const keepOptions = options.length > 0 && (!item.rare || identified)
   return {
     uid: raw.uid,
     itemId,
     plus: item.upgradeable ? Math.min(MAX_PLUS, int(raw.plus, 0)) : 0,
-    ...(options.length ? { options } : {}),
+    ...(keepOptions ? { options } : {}),
+    ...(identified ? { rare } : {}),
   }
 }
 

@@ -150,6 +150,33 @@ describe('loadSave', () => {
     })
   })
 
+  it('gives version 7 characters an empty play-time counter', () => {
+    const v7 = { ...withCharacter(), saveVersion: 7 }
+    const old: Record<string, unknown> = {
+      ...createCharacterData({ name: 'Brom', classId: 'knight' }, 'id-3', NOW),
+    }
+    delete old.optionProgress
+    const r = loadSave(JSON.stringify({ ...v7, characters: [old] }), NOW)
+    expect(r.status).toBe('migrated')
+    expect(r.save.characters[0]!.optionProgress).toBe(0)
+  })
+
+  it('keeps the rare set of identified pieces; others of a rare item are unidentified', () => {
+    const save = withCharacter()
+    const gear = [
+      { uid: 'a', itemId: 1845, plus: 0, rare: 7, options: [{ type: 20, level: 3 }] },
+      { uid: 'b', itemId: 1845, plus: 2, rare: 999, options: [{ type: 20, level: 3 }] },
+      { uid: 'c', itemId: 4, plus: 0, rare: 7, options: [{ type: 20, level: 2 }] },
+    ]
+    const stored = { ...save, characters: [{ ...save.characters[0], gear }] }
+    const loaded = loadSave(JSON.stringify(stored), NOW).save.characters[0]!.gear
+    expect(loaded).toEqual([
+      { uid: 'a', itemId: 1845, plus: 0, rare: 7, options: [{ type: 20, level: 3 }] },
+      { uid: 'b', itemId: 1845, plus: 2 },
+      { uid: 'c', itemId: 4, plus: 0, options: [{ type: 20, level: 2 }] },
+    ])
+  })
+
   it('keeps options that exist and accessories in accessory slots', () => {
     const save = withCharacter()
     const ring = {

@@ -50,6 +50,10 @@ export const MP_POTION_BELOW = 0.3
 /** Seconds between two poison ticks. */
 export const POISON_TICK = 1
 
+/** Caps of the rare-option reductions (own values): skill cooldowns and skill mana. */
+export const MAX_COOLDOWN_REDUCTION = 0.5
+export const MAX_MP_COST_REDUCTION = 0.75
+
 /** Largest simulated step; bigger dt values are split so event order stays correct. */
 const MAX_STEP = 0.05
 /** Tolerance for timers that add up many small steps. */
@@ -198,6 +202,17 @@ export function effectiveStats(f: Fighter): CombatStats {
 
 export function isStunned(f: Fighter): boolean {
   return f.effects.some((e) => e.stun)
+}
+
+/** Mana a skill costs the fighter (rare option "Decrease MP Consumption"). */
+export function skillMpCost(rank: SkillRank, stats: CombatStats): number {
+  const reduction = Math.min(MAX_MP_COST_REDUCTION, (stats.mpCostReduction ?? 0) / 100)
+  return rank.mpCost * (1 - reduction)
+}
+
+/** Seconds the hero runs to a new monster (rare option "Move Speed" makes it shorter). */
+export function approachTime(state: Pick<CombatState, 'player'>): number {
+  return TIMINGS.approach / (1 + Math.max(0, effectiveStats(state.player).moveSpeed ?? 0) / 100)
 }
 
 export function createCombat(
@@ -418,7 +433,7 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
 
     case 'approach':
       regen(s.player, dt, false)
-      if (s.phaseTime >= TIMINGS.approach) {
+      if (s.phaseTime >= approachTime(s)) {
         s.player.cooldown = 0
         s.player.impactIn = null
         s.player.casting = null
@@ -517,9 +532,10 @@ function fighterStep(
       // wind-up (shortened by cast-speed skills), then it lands like a swing
       const windUp = Math.max(0, skill.castTime + (stats.castTime ?? 0))
       const landsIn = windUp + TIMINGS.impactDelay
-      self.mp -= skill.mpCost
+      const faster = Math.min(MAX_COOLDOWN_REDUCTION, (stats.cooldownReduction ?? 0) / 100)
+      self.mp -= skillMpCost(skill, stats)
       self.hp -= skill.hpCost
-      self.skillCooldowns[skill.id] = skill.cooldown
+      self.skillCooldowns[skill.id] = skill.cooldown * (1 - faster)
       self.casting = skill
       self.impactIn = landsIn
       self.cooldown += Math.max(
@@ -567,6 +583,7 @@ function strike(
   }
   if (multiplier <= 0) return false
   target.hp = Math.max(0, target.hp - result.damage)
+  steal(self, result.damage)
   events.push({
     type: 'hit',
     target: targetSide,
@@ -577,6 +594,13 @@ function strike(
   if (target.hp > 0) return false
   endFight(s, targetSide, events)
   return true
+}
+
+/** Rare options "HP / MP Steal": a share of the damage dealt comes back as HP / MP. */
+function steal(f: Fighter, damage: number): void {
+  const stats = effectiveStats(f)
+  if (stats.hpSteal) f.hp = Math.min(stats.maxHp, f.hp + (damage * stats.hpSteal) / 100)
+  if (stats.mpSteal) f.mp = Math.min(stats.maxMp ?? 0, f.mp + (damage * stats.mpSteal) / 100)
 }
 
 function landSwing(s: CombatState, side: Side, rng: Rng, events: CombatEvent[]): boolean {
@@ -748,16 +772,16 @@ function damageOf(rank: SkillRank): number {
 /** Picks the automatic skill to use now, or null for a normal swing. */
 export function chooseSkill(self: Fighter, target: Fighter): SkillRank | null {
   if (!self.skills || self.skills.length === 0) return null
+  const stats = effectiveStats(self)
   const ready = self.skills.filter(
     (r) =>
       r.auto &&
       r.kind !== 'passive' &&
       !self.skillCooldowns[r.id] &&
-      self.mp >= r.mpCost &&
+      self.mp >= skillMpCost(r, stats) &&
       self.hp > r.hpCost,
   )
   if (ready.length === 0) return null
-  const stats = effectiveStats(self)
   const hurt = self.hp < stats.maxHp * HEAL_BELOW
   const drained = self.mp < (stats.maxMp ?? 0) * MANA_BELOW
   const on = (f: Fighter, id: number) => f.effects.some((e) => e.skillId === id)

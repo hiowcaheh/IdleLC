@@ -40,6 +40,11 @@ const GEAR_SLOTS = [0, 1, 2, 3, 4, 5, 6]
 const WEAPON_SLOT = 2
 /** t_item 84 "Smelting Stone" and 85 "Heaven Stone" (sold in Juno) upgrade weapons and armor. */
 const UPGRADE_STONES = new Set([84, 85])
+/**
+ * t_item 1838 "Magnifying glass" (may fail) and 1839 "Golden magnifying glass" (always works) identify
+ * rare items. LC sells them in town shops; IdleLC's shop offers them in every zone (own decision).
+ */
+const MAGNIFIERS = [1838, 1839]
 /** t_item.a_subtype_idx of the base classes' weapons (others are tools, Nightshadow…). */
 const CLASS_WEAPONS = new Set([0, 1, 2, 3, 4, 5, 6, 7, 11, 12, 13, 14])
 /** t_item.a_flag of the regular weapons and armor (shops, drops, starter sets). */
@@ -184,10 +189,22 @@ function buildData(tables) {
   UPGRADE_STONES.forEach((id) => usedItems.add(id))
   const shopItems = new Set(Object.values(shops).flat())
   shopItems.forEach((id) => usedItems.add(id))
+  MAGNIFIERS.forEach((id) => usedItems.add(id))
   const gearReference = buildGearReference(
     [...usedItems].map((id) => itemRows.get(id)).filter((r) => r && isGear(r) && usable(r)),
   )
 
+  // rare items: the t_rareoption sets each piece can get when it is identified, with their weights
+  const rareOf = (r) => {
+    if (!isGear(r) || (int(r.a_job_flag) & BASE_CLASS_BITS) === 0) return []
+    const sets = []
+    for (let i = 0; i < 10; i++) {
+      const set = int(r[`a_rare_index_${i}`])
+      const weight = int(r[`a_rare_prob_${i}`])
+      if (set > 0 && weight > 0) sets.push([set, weight])
+    }
+    return sets
+  }
   const items = tables.t_item
     .filter((r) => usedItems.has(int(r.a_index)))
     .map((r) => ({
@@ -203,7 +220,12 @@ function buildData(tables) {
       stats: [0, 1, 2, 3, 4].map((k) => int(r[`a_num_${k}`])),
       icon: { atlas: int(r.a_texture_id), row: int(r.a_texture_row), col: int(r.a_texture_col) },
       ...(potions.has(int(r.a_index)) ? { potion: potions.get(int(r.a_index)) } : {}),
+      ...(rareOf(r).length > 0 ? { rare: rareOf(r) } : {}),
     }))
+  const rareSets = buildRareSets(
+    tables.t_rareoption,
+    new Set(items.flatMap((i) => (i.rare ?? []).map(([set]) => set))),
+  )
 
   const expTable = Array.from({ length: MAX_LEVEL }, () => 0)
   for (const r of tables.t_exp) {
@@ -233,6 +255,8 @@ function buildData(tables) {
     shopGear,
     accessories,
     options: buildOptions(tables.t_option),
+    rareSets,
+    magnifiers: MAGNIFIERS,
     starterGear,
     gearReference,
     skills,
@@ -250,7 +274,7 @@ const numbers = (text) =>
  * Item options 1:1 from t_option: per option level the value (a_level list) and the roll weight
  * (a_prob list; levels with weight 0 never roll), and where the option may appear: weapon subtypes
  * (a_weapon_type bits), armor subtypes (a_wear_type) and accessory subtypes (a_accessory_type).
- * Only options that can roll are kept.
+ * Options with all weights 0 never roll on their own; rare option sets still use them.
  */
 function buildOptions(rows) {
   return rows
@@ -267,8 +291,40 @@ function buildOptions(rows) {
         accessoryMask: int(r.a_accessory_type),
       }
     })
-    .filter((o) => o.name && o.weights.some((w) => w > 0))
+    .filter((o) => o.name && o.values.length > 0)
     .sort((a, b) => a.type - b.type)
+}
+
+/**
+ * Rare option sets 1:1 from t_rareoption: grade (0 = A, the best … 4 = E), weapon / armor /
+ * accessory (a_type 0 / 1 / 2), the name prefix, flat attack / defense / magic attack / magic
+ * defense bonuses and up to 10 options, each with its level and its chance in 1/10 000.
+ */
+function buildRareSets(rows, used) {
+  return rows
+    .filter((r) => used.has(int(r.a_index)))
+    .map((r) => {
+      const options = []
+      for (let i = 0; i < 10; i++) {
+        const type = int(r[`a_option_index${i}`])
+        const chance = int(r[`a_option_prob${i}`])
+        if (type >= 0 && chance > 0) {
+          options.push({ type, level: int(r[`a_option_level${i}`]), chance })
+        }
+      }
+      return {
+        id: int(r.a_index),
+        grade: int(r.a_grade),
+        type: int(r.a_type),
+        prefix: String(r.a_prefix_usa ?? '').trim(),
+        attack: int(r.a_attack),
+        defense: int(r.a_defense),
+        magic: int(r.a_magic),
+        resist: int(r.a_resist),
+        options,
+      }
+    })
+    .sort((a, b) => a.id - b.id)
 }
 
 /**
@@ -562,6 +618,7 @@ async function main() {
     't_magic',
     't_magiclevel',
     't_option',
+    't_rareoption',
   ])
   const data = buildData(tables)
   const manifest = await buildModelManifest(data, args.models)

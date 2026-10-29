@@ -55,6 +55,8 @@ export interface CharacterData {
   gear: GearPiece[]
   /** Potions are used automatically in fights (HP / MP). */
   potionAuto: PotionAuto
+  /** Seconds of active play toward the next option on a worn piece (logic/options.ts). */
+  optionProgress: number
 }
 
 export interface PotionAuto {
@@ -120,5 +122,6 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     equipment: starterEquipment(input.classId),
     gear: [],
     potionAuto: { hp: true, mp: true },
+    optionProgress: 0,
   }
 }

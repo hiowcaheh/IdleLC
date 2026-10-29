@@ -4,7 +4,7 @@ import { Vector3, type Group } from 'three'
 import { getModel, playerModelId } from '../game/assets/manifest.ts'
 import { getItem } from '../game/data/items.ts'
 import { getMonster } from '../game/data/monsters.ts'
-import { TIMINGS, effectiveStats, type Side } from '../game/logic/combat.ts'
+import { TIMINGS, approachTime, effectiveStats, type Side } from '../game/logic/combat.ts'
 import { combatSession } from '../game/session/combatSession.ts'
 import { combatEvents, type ViewEvent } from '../state/combatEvents.ts'
 import { useFloatingTexts, type FloatingKind } from '../state/floatingTexts.ts'
@@ -235,7 +235,7 @@ export function Battle() {
     const m = motion.current
 
     if (combat.phase === 'approach') {
-      const t = smoothstep(0, 1, combat.phaseTime / TIMINGS.approach)
+      const t = smoothstep(0, 1, combat.phaseTime / approachTime(combat))
       view.player.lerpVectors(m.approachFrom, m.engageAt, t)
     }
 

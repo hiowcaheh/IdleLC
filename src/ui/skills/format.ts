@@ -45,6 +45,11 @@ const STAT_LABELS: Record<StatKey, string> = {
   castTime: 'Cast time',
   hpRegen: 'HP recovery',
   mpRegen: 'MP recovery',
+  cooldownReduction: 'Skill cooldown',
+  mpCostReduction: 'Skill MP cost',
+  hpSteal: 'HP steal',
+  mpSteal: 'MP steal',
+  moveSpeed: 'Move speed',
 }
 
 const signed = (n: number, unit = '') =>

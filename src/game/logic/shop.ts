@@ -9,6 +9,7 @@ import {
   shopAccessories,
   shopGear,
   shopItems,
+  shopMagnifiers,
   type ShopTier,
 } from '../data/items.ts'
 import type { GearSlot } from '../data/types.ts'
@@ -68,21 +69,31 @@ export function applySale(character: CharacterData, items: readonly ItemStack[])
   }
 }
 
-/** Sells a single piece (upgraded or with options) from the bag; its "+" and options add nothing. */
-export function applySellPiece(
-  character: CharacterData,
-  uid: string,
-): { character: CharacterData; gold: number } {
-  const piece = character.gear.find((p) => p.uid === uid)
-  if (!piece) throw new GameError('not-owned', `piece ${uid}`)
-  const gold = sellPrice(piece.itemId)
+/**
+ * Sells single pieces (upgraded, with options, identified rare items) from the bag; their "+" and
+ * options add nothing to the price.
+ */
+export interface PieceSale {
+  character: CharacterData
+  gold: number
+  /** Pieces sold. */
+  sold: number
+}
+
+export function applySellPieces(character: CharacterData, uids: readonly string[]): PieceSale {
+  const wanted = new Set(uids)
+  if (wanted.size === 0) throw new GameError('nothing-to-sell')
+  const pieces = character.gear.filter((p) => wanted.has(p.uid))
+  if (pieces.length !== wanted.size) throw new GameError('not-owned', 'piece')
+  const gold = pieces.reduce((sum, p) => sum + sellPrice(p.itemId), 0)
   return {
     character: {
       ...character,
       gold: character.gold + gold,
-      gear: character.gear.filter((p) => p.uid !== uid),
+      gear: character.gear.filter((p) => !wanted.has(p.uid)),
     },
     gold,
+    sold: pieces.length,
   }
 }
 
@@ -96,7 +107,7 @@ export interface ShopOffer {
   gear: { slot: GearSlot; tiers: ShopTier[] }[]
   /** Plain accessories; their options are rolled on purchase. */
   accessories: number[]
-  /** Potions and upgrade stones of the zone's NPC shops (t_shopitem). */
+  /** Potions and upgrade stones of the zone's NPC shops (t_shopitem), magnifying glasses. */
   goods: number[]
 }
 
@@ -122,7 +133,12 @@ export function shopOffer(
       tiers: tierWindow(tiers, character.level),
     })),
     accessories: shopAccessories(),
-    goods: shopItems(character.location.zoneId).filter((id) => !getItem(id).gear),
+    goods: [
+      ...new Set([
+        ...shopItems(character.location.zoneId).filter((id) => !getItem(id).gear),
+        ...shopMagnifiers(),
+      ]),
+    ],
   }
 }
 

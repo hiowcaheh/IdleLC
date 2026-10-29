@@ -19,6 +19,14 @@ export interface CombatStats {
   dodge?: number
   /** Seconds added to every skill's cast time (negative = faster casting). */
   castTime?: number
+  /** % shorter skill cooldowns and % less mana for skills (rare options). */
+  cooldownReduction?: number
+  mpCostReduction?: number
+  /** % of the damage dealt that comes back as HP / MP (rare options). */
+  hpSteal?: number
+  mpSteal?: number
+  /** % faster running to the monster (rare options). */
+  moveSpeed?: number
 }
 
 export type ClassId = 'titan' | 'knight' | 'healer' | 'mage' | 'rogue' | 'sorcerer'
@@ -127,6 +135,24 @@ export interface OptionDef {
   accessoryMask: number
 }
 
+/**
+ * A rare option set 1:1 from t_rareoption: what an identified rare item gets — a grade, a name
+ * prefix, flat bonuses and options, each with its chance (1/10 000).
+ */
+export interface RareSetDef {
+  id: number
+  /** 0 = A (the best) … 4 = E. */
+  grade: number
+  /** 0 weapon, 1 armor, 2 accessory. */
+  type: number
+  prefix: string
+  attack: number
+  defense: number
+  magic: number
+  resist: number
+  options: { type: number; level: number; chance: number }[]
+}
+
 export interface ItemDef {
   id: number
   name: string
@@ -140,6 +166,10 @@ export interface ItemDef {
   /** Can be upgraded with stones (t_item.a_flag bit 2). */
   upgradeable?: boolean
   potion?: PotionDef
+  /** Rare items: the option sets an identification can give (t_item.a_rare_index / a_rare_prob). */
+  rare?: { set: number; weight: number }[]
+  /** Magnifying glasses: chance that an identification works. */
+  magnifier?: { chance: number }
 }
 
 /** One effect of a skill level: t_magic (type, subtype, damage type) + t_magiclevel.a_power. */

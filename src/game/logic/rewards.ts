@@ -8,6 +8,7 @@ import { clamp } from './balance.ts'
 import type { CharacterData } from './character.ts'
 import { TIMINGS } from './combat.ts'
 import { addToInventory, lootTable, rollDrops, takeFromInventory, type ItemStack } from './loot.ts'
+import { applyPlayTime, type OptionGain } from './options.ts'
 import { gainExp } from './progression.ts'
 import type { Rng } from './rng.ts'
 
@@ -22,6 +23,12 @@ export const KILL_BURST = 2
  * from the game is paid by the AFK simulation instead, so an old report window grants nothing extra.
  */
 export const MAX_REPORT_WINDOW = 600
+
+/**
+ * Longest stretch between two reports counted as play time (options from play, logic/options.ts):
+ * a fight ends every few seconds, so a longer gap means the game was closed or in the background.
+ */
+export const MAX_PLAY_GAP = 120
 
 export interface CombatReport {
   monsterId: string
@@ -44,6 +51,8 @@ export interface CombatResult {
   drops: ItemStack[]
   /** Potions taken from the inventory. */
   potionsUsed: ItemStack[]
+  /** Options worn pieces gained from the play time of the report. */
+  optionsGained: OptionGain[]
 }
 
 /** Most kills a report may hold after `elapsedSeconds` of real time at a given game speed. */
@@ -61,8 +70,8 @@ export function killReward(monster: MonsterDef): { exp: number; gold: number; sp
 }
 
 /**
- * Pays out a combat report, accepting at most `allowedKills` kills; rolls the drops and takes the
- * potions drunk out of the inventory.
+ * Pays out a combat report, accepting at most `allowedKills` kills; rolls the drops, takes the
+ * potions drunk out of the inventory and adds `playSeconds` of play time (options on worn gear).
  */
 export function applyCombatReport(
   character: CharacterData,
@@ -70,6 +79,7 @@ export function applyCombatReport(
   report: CombatReport,
   allowedKills: number,
   rng: Rng,
+  playSeconds = 0,
 ): CombatResult {
   const kills = clamp(Math.floor(report.kills), 0, Math.max(0, allowedKills))
   const deaths = Math.max(0, Math.floor(report.deaths))
@@ -81,9 +91,10 @@ export function applyCombatReport(
   const drops = rollDrops(lootTable(monster), kills, rng)
   const potions = (report.potions ?? []).filter((p) => getItem(p.itemId).potion)
   const { inventory, taken } = takeFromInventory(character.inventory, potions)
+  const played = applyPlayTime(character, playSeconds, rng)
   return {
     character: {
-      ...character,
+      ...played.character,
       level: progress.level,
       exp: progress.exp,
       gold: character.gold + gold,
@@ -98,5 +109,6 @@ export function applyCombatReport(
     levelsGained: progress.levelsGained,
     drops,
     potionsUsed: taken,
+    optionsGained: played.gained,
   }
 }

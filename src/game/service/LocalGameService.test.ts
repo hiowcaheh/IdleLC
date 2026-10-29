@@ -4,10 +4,10 @@ import { MONSTERS } from '../data/monsters.ts'
 import { AFK_MAX_SECONDS, AFK_MIN_SECONDS } from '../logic/afk.ts'
 import { GameError, MAX_CHARACTERS } from '../logic/character.ts'
 import { createRng } from '../logic/rng.ts'
-import { MIN_KILL_CYCLE, KILL_BURST } from '../logic/rewards.ts'
+import { MAX_PLAY_GAP, MIN_KILL_CYCLE, KILL_BURST } from '../logic/rewards.ts'
 import { SAVE_VERSION } from '../logic/save.ts'
 import { SP_UNIT } from '../logic/skills.ts'
-import { UPGRADE_STONE_ID } from '../data/items.ts'
+import { GOLDEN_MAGNIFIER_ID, UPGRADE_STONE_ID } from '../data/items.ts'
 import type { KeyValueStorage } from './GameService.ts'
 import { LocalGameService, SAVE_KEY } from './LocalGameService.ts'
 
@@ -223,6 +223,40 @@ describe('LocalGameService', () => {
 
     await game.startAfk(hero.id)
     await expect(game.learnSkill(hero.id, 1)).rejects.toThrow('on-expedition')
+  })
+
+  it('counts active play between reports (at most 2 minutes each) toward options on worn gear', async () => {
+    const { game, clock, hero } = await withKnight()
+    const report = { monsterId: hero.location.monsterId, kills: 0, deaths: 0 }
+    clock.now += 3600 * 1000 // the game was closed: only MAX_PLAY_GAP counts
+    const first = await game.reportCombat(hero.id, report)
+    expect(first.character.optionProgress).toBe(MAX_PLAY_GAP)
+    expect(first.optionsGained).toEqual([])
+
+    game.dev.setTimeScale(5) // dev speed: 2 minutes are 10 minutes of play
+    clock.now += MAX_PLAY_GAP * 1000
+    const second = await game.reportCombat(hero.id, report)
+    expect(second.optionsGained).toHaveLength(1)
+    const { slot, option } = second.optionsGained[0]!
+    expect(second.character.equipment[slot]!.options).toEqual([option])
+  })
+
+  it('identifies rare items with magnifying glasses bought in the shop', async () => {
+    const { game, hero, storage } = await withKnight()
+    await game.dev.addGold(hero.id, 1_000_000)
+    await game.buyItem(hero.id, GOLDEN_MAGNIFIER_ID, 1)
+    // a rare sword in the bag (no placeholder shop or monster has one)
+    const saved = stored(storage)
+    saved.characters[0].inventory.push({ itemId: 1845, count: 2 })
+    storage.setItem(SAVE_KEY, JSON.stringify(saved))
+    await game.load()
+    const r = await game.identifyItems(hero.id, GOLDEN_MAGNIFIER_ID, [{ itemId: 1845, count: 2 }])
+    expect(r.used).toBe(1)
+    expect(r.character.gear).toHaveLength(1)
+    expect(r.character.gear[0]!.rare).toBeDefined()
+    expect(r.character.inventory).toContainEqual({ itemId: 1845, count: 1 })
+    const sale = await game.sellGear(hero.id, [r.character.gear[0]!.uid])
+    expect(sale.gold).toBe(Math.floor(1044040 * 0.4))
   })
 
   it('takes reported potions out of the bag', async () => {
