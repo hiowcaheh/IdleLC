@@ -6,9 +6,10 @@
  *                                               └─────→ defeat → (revive, despawn) → spawning …
  *
  * In a fight the hero uses its automatic skills (src/game/logic/skills.ts) when they are ready and
- * there is mana: heal when hurt, keep buffs up, weaken the monster, then the strongest attack.
+ * there is mana: heal when hurt, keep buffs up, weaken the monster, then the strongest attack. It
+ * also drinks the potions it carries: healing / mana potions when low, recovery potions while hurt.
  */
-import type { CombatStats } from '../data/types.ts'
+import type { CombatStats, PotionDef } from '../data/types.ts'
 import {
   COMBAT_MP_REGEN,
   OUT_OF_COMBAT_MP_REGEN,
@@ -43,6 +44,9 @@ export const TIMINGS = {
 /** The hero heals below this share of HP and restores mana below this share of MP. */
 export const HEAL_BELOW = 0.6
 export const MANA_BELOW = 0.4
+/** The hero drinks a healing potion below this share of HP and a mana potion below this share of MP. */
+export const HP_POTION_BELOW = 0.5
+export const MP_POTION_BELOW = 0.3
 /** Seconds between two poison ticks. */
 export const POISON_TICK = 1
 
@@ -51,16 +55,32 @@ const MAX_STEP = 0.05
 /** Tolerance for timers that add up many small steps. */
 const EPSILON = 1e-6
 
+export type PotionKind = PotionDef['kind']
+
+/** Potions of one kind the hero carries into fights. */
+export interface PotionSupply {
+  itemId: number
+  name: string
+  count: number
+  potion: PotionDef
+}
+
 export interface FighterInit {
   level: number
   stats: CombatStats
   /** Active skills the fighter uses (the hero); passives are already in `stats`. */
   skills?: readonly SkillRank[]
+  /** Potions the fighter drinks by itself (the hero). */
+  potions?: readonly PotionSupply[]
 }
 
-/** A buff, debuff, stun or poison on a fighter. */
+/** A buff, debuff, stun, poison or potion on a fighter. */
 export interface ActiveEffect {
+  /** The skill, or 0 for a potion. */
   skillId: number
+  /** The potion (item id) that gives the effect. */
+  itemId?: number
+  potion?: PotionKind
   name: string
   /** Seconds left. */
   remaining: number
@@ -70,6 +90,9 @@ export interface ActiveEffect {
   poison: number
   /** Seconds until the next poison tick. */
   nextTick: number
+  /** HP and MP restored per second (healing and mana potions). */
+  hpPerSecond?: number
+  mpPerSecond?: number
 }
 
 export interface Fighter extends FighterInit {
@@ -83,6 +106,10 @@ export interface Fighter extends FighterInit {
   casting: SkillRank | null
   /** Seconds before each skill can be used again, by skill id. */
   skillCooldowns: Record<number, number>
+  /** Seconds before another potion of the kind can be drunk. */
+  potionCooldowns: Partial<Record<PotionKind, number>>
+  /** Potions drunk and not yet taken off the supply (takePotionsUsed), by item id. */
+  potionsUsed: Record<number, number>
   effects: ActiveEffect[]
 }
 
@@ -116,6 +143,7 @@ export type CombatEvent =
   | { type: 'miss'; target: Side }
   | { type: 'heal'; target: Side; amount: number; mana?: boolean }
   | { type: 'effect'; target: Side; skillId: number; name: string; kind: EffectKind }
+  | { type: 'potion'; itemId: number; name: string; kind: PotionKind }
   | { type: 'death'; who: Side }
   | { type: 'despawn' }
   | { type: 'revive' }
@@ -130,12 +158,15 @@ function freshFighter(init: FighterInit): Fighter {
     level: init.level,
     stats: init.stats,
     skills: init.skills,
+    potions: init.potions,
     hp: init.stats.maxHp,
     mp: init.stats.maxMp ?? 0,
     cooldown: 0,
     impactIn: null,
     casting: null,
     skillCooldowns: {},
+    potionCooldowns: {},
+    potionsUsed: {},
     effects: [],
   }
 }
@@ -145,6 +176,8 @@ function copyFighter(f: Fighter): Fighter {
   return {
     ...f,
     skillCooldowns: { ...f.skillCooldowns },
+    potionCooldowns: { ...f.potionCooldowns },
+    potionsUsed: { ...f.potionsUsed },
     effects: f.effects.map((e) => ({ ...e })),
   }
 }
@@ -221,7 +254,10 @@ export function changeMonster(
   }
 }
 
-/** Replace player level, stats and skills (level up, new skill), keeping the HP and MP ratios. */
+/**
+ * Replace player level, stats, skills and potions (level up, new skill, potions bought), keeping the
+ * HP and MP ratios. Potions drunk since the last takePotionsUsed still count against the new supply.
+ */
 export function updatePlayer(state: CombatState, player: FighterInit): CombatState {
   const old = state.player
   const hpRatio = old.hp / old.stats.maxHp
@@ -234,9 +270,42 @@ export function updatePlayer(state: CombatState, player: FighterInit): CombatSta
       level: player.level,
       stats: player.stats,
       skills: player.skills,
-      hp: Math.max(1, Math.round(player.stats.maxHp * hpRatio)),
+      potions: player.potions,
+      hp: old.hp <= 0 ? 0 : Math.max(1, Math.round(player.stats.maxHp * hpRatio)),
       mp: oldMaxMp > 0 ? Math.round((maxMp * old.mp) / oldMaxMp) : maxMp,
     },
+  }
+}
+
+/** Potions of a supply entry the fighter still has. */
+export function potionsLeft(f: Fighter, supply: PotionSupply): number {
+  return Math.max(0, supply.count - (f.potionsUsed[supply.itemId] ?? 0))
+}
+
+/**
+ * Takes the potions the hero drank off its supply and returns them (to be reported to the service,
+ * which removes them from the inventory).
+ */
+export function takePotionsUsed(state: CombatState): {
+  state: CombatState
+  used: { itemId: number; count: number }[]
+} {
+  const player = state.player
+  const used = Object.entries(player.potionsUsed)
+    .map(([id, count]) => ({ itemId: Number(id), count }))
+    .filter((u) => u.count > 0)
+    .sort((a, b) => a.itemId - b.itemId)
+  if (used.length === 0) return { state, used }
+  return {
+    state: {
+      ...state,
+      player: {
+        ...copyFighter(player),
+        potions: player.potions?.map((p) => ({ ...p, count: potionsLeft(player, p) })),
+        potionsUsed: {},
+      },
+    },
+    used,
   }
 }
 
@@ -275,26 +344,43 @@ function enter(s: CombatState, phase: CombatPhase): void {
   s.phaseTime = 0
 }
 
-/** HP and MP regeneration: a lot out of combat, only MP (and skill bonuses) during a fight. */
+/**
+ * HP and MP regeneration: a lot out of combat, only MP (and skill bonuses) during a fight; healing
+ * and mana potions restore their amount per second wherever the hero is.
+ */
 function regen(f: Fighter, dt: number, inCombat: boolean): void {
   const stats = effectiveStats(f)
+  let hpPotions = 0
+  let mpPotions = 0
+  for (const e of f.effects) {
+    hpPotions += e.hpPerSecond ?? 0
+    mpPotions += e.mpPerSecond ?? 0
+  }
   const hpRate =
-    (inCombat ? 0 : stats.maxHp * OUT_OF_COMBAT_REGEN) + (stats.hpRegen ?? 0) / REGEN_TICK_SECONDS
+    (inCombat ? 0 : stats.maxHp * OUT_OF_COMBAT_REGEN) +
+    (stats.hpRegen ?? 0) / REGEN_TICK_SECONDS +
+    hpPotions
   f.hp = Math.min(stats.maxHp, Math.max(f.hp, f.hp + hpRate * dt))
   const maxMp = stats.maxMp ?? 0
   if (maxMp > 0) {
     const share = inCombat ? COMBAT_MP_REGEN : OUT_OF_COMBAT_MP_REGEN
-    const mpRate = maxMp * share + (stats.mpRegen ?? 0) / REGEN_TICK_SECONDS
+    const mpRate = maxMp * share + (stats.mpRegen ?? 0) / REGEN_TICK_SECONDS + mpPotions
     f.mp = Math.min(maxMp, Math.max(f.mp, f.mp + mpRate * dt))
   }
 }
 
-/** Skill cooldowns run all the time. */
+/** Skill and potion cooldowns run all the time. */
 function tickCooldowns(f: Fighter, dt: number): void {
   for (const id in f.skillCooldowns) {
     const left = f.skillCooldowns[id]! - dt
     if (left > 0) f.skillCooldowns[id] = left
     else delete f.skillCooldowns[id]
+  }
+  for (const kind in f.potionCooldowns) {
+    const k = kind as PotionKind
+    const left = f.potionCooldowns[k]! - dt
+    if (left > 0) f.potionCooldowns[k] = left
+    else delete f.potionCooldowns[k]
   }
 }
 
@@ -345,6 +431,7 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
 
     case 'fighting':
       regen(s.player, dt, true)
+      drinkPotions(s.player, events)
       if (poisonStep(s, 'player', dt, events)) return
       if (poisonStep(s, 'monster', dt, events)) return
       if (fighterStep(s, 'player', dt, rng, events)) return
@@ -544,7 +631,14 @@ function applyEffects(
   const stunEffect = skill.effects.find((e) => e.kind === 'stun')
   const stun = stunEffect !== undefined && chance(rng, stunEffect.chance)
   const poison = skill.effects.find((e) => e.kind === 'poison')?.perSecond ?? 0
-  if (stats.length === 0 && !stun && poison <= 0) return
+  const perSecond = (resource: 'hp' | 'mp') =>
+    skill.effects.reduce(
+      (sum, e) => sum + (e.kind === 'regen' && e.resource === resource ? e.perSecond : 0),
+      0,
+    )
+  const hpPerSecond = perSecond('hp')
+  const mpPerSecond = perSecond('mp')
+  if (stats.length === 0 && !stun && poison <= 0 && hpPerSecond <= 0 && mpPerSecond <= 0) return
   f.effects = [
     ...f.effects.filter((e) => e.skillId !== skill.id),
     {
@@ -555,6 +649,8 @@ function applyEffects(
       stun,
       poison,
       nextTick: POISON_TICK,
+      hpPerSecond,
+      mpPerSecond,
     },
   ]
   if (stun) {
@@ -570,6 +666,77 @@ function applyEffects(
         ? 'debuff'
         : 'buff'
   events.push({ type: 'effect', target: side, skillId: skill.id, name: skill.name, kind })
+}
+
+/** Total HP / MP a potion restores, or its regeneration bonus for recovery potions. */
+function potionValue(potion: PotionDef): number {
+  return potion.kind === 'hp' || potion.kind === 'mp'
+    ? potion.power * potion.duration
+    : potion.power
+}
+
+/**
+ * The potion of a kind to drink now, or null: healing below HP_POTION_BELOW, mana below
+ * MP_POTION_BELOW, recovery potions while HP / MP is not full — only when no potion of the kind is
+ * working and its cooldown is over. Picks the smallest potion that covers what is missing (the
+ * strongest when none does; recovery potions: the strongest).
+ */
+export function choosePotion(
+  f: Fighter,
+  kind: PotionKind,
+  stats: CombatStats = effectiveStats(f),
+): PotionSupply | null {
+  if (!f.potions || f.potionCooldowns[kind] || f.effects.some((e) => e.potion === kind)) return null
+  const maxMp = stats.maxMp ?? 0
+  const missing = kind === 'hp' || kind === 'hpRegen' ? stats.maxHp - f.hp : maxMp - f.mp
+  const low =
+    kind === 'hp'
+      ? f.hp < stats.maxHp * HP_POTION_BELOW
+      : kind === 'mp'
+        ? f.mp < maxMp * MP_POTION_BELOW
+        : missing > 0
+  if (!low) return null
+  const owned = f.potions
+    .filter((p) => p.potion.kind === kind && potionsLeft(f, p) > 0)
+    .sort((a, b) => potionValue(a.potion) - potionValue(b.potion))
+  if (owned.length === 0) return null
+  if (kind === 'hpRegen' || kind === 'mpRegen') return owned[owned.length - 1]!
+  return owned.find((p) => potionValue(p.potion) >= missing) ?? owned[owned.length - 1]!
+}
+
+const POTION_KINDS: PotionKind[] = ['hp', 'mp', 'hpRegen', 'mpRegen']
+
+/** The hero drinks the potions it needs (not while stunned). */
+function drinkPotions(f: Fighter, events: CombatEvent[]): void {
+  if (!f.potions || f.potions.length === 0 || isStunned(f)) return
+  const stats = effectiveStats(f)
+  for (const kind of POTION_KINDS) {
+    const supply = choosePotion(f, kind, stats)
+    if (!supply) continue
+    const { itemId, name, potion } = supply
+    f.potionsUsed[itemId] = (f.potionsUsed[itemId] ?? 0) + 1
+    f.potionCooldowns[kind] = potion.cooldown
+    const regenStat = kind === 'hpRegen' ? 'hpRegen' : kind === 'mpRegen' ? 'mpRegen' : null
+    f.effects = [
+      ...f.effects,
+      {
+        skillId: 0,
+        itemId,
+        potion: kind,
+        name,
+        remaining: potion.duration,
+        stats: regenStat
+          ? [{ kind: 'stat', stat: regenStat, value: potion.power, percent: false }]
+          : [],
+        stun: false,
+        poison: 0,
+        nextTick: POISON_TICK,
+        hpPerSecond: kind === 'hp' ? potion.power : 0,
+        mpPerSecond: kind === 'mp' ? potion.power : 0,
+      },
+    ]
+    events.push({ type: 'potion', itemId, name, kind })
+  }
 }
 
 /** Strongest damage first. */

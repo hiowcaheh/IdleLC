@@ -27,7 +27,10 @@ export interface GameService {
   setActiveCharacter(characterId: string | null): Promise<void>
   /** Moves the character to another hunting spot. */
   travel(characterId: string, location: CharacterLocation): Promise<CharacterData>
-  /** Outcome of the fights since the last report; the service checks it and pays out. */
+  /**
+   * Outcome of the fights since the last report; the service checks it, pays out and takes the
+   * potions drunk out of the bag.
+   */
   reportCombat(characterId: string, report: CombatReport): Promise<CombatResult>
   /** Sends the character on an AFK expedition to its current hunting spot. */
   startAfk(characterId: string): Promise<CharacterData>

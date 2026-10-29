@@ -2,11 +2,12 @@
  * Combat rewards. The browser only animates the fight and reports its outcome; the service
  * (later: a Supabase function) checks the report against the clock and pays out. Pure.
  */
+import { getItem } from '../data/items.ts'
 import type { MonsterDef } from '../data/types.ts'
 import { clamp } from './balance.ts'
 import type { CharacterData } from './character.ts'
 import { TIMINGS } from './combat.ts'
-import { addToInventory, lootTable, rollDrops, type ItemStack } from './loot.ts'
+import { addToInventory, lootTable, rollDrops, takeFromInventory, type ItemStack } from './loot.ts'
 import { gainExp } from './progression.ts'
 import type { Rng } from './rng.ts'
 
@@ -26,6 +27,8 @@ export interface CombatReport {
   monsterId: string
   kills: number
   deaths: number
+  /** Potions drunk in the fights (taken from the inventory, at most what it holds). */
+  potions?: ItemStack[]
 }
 
 export interface CombatResult {
@@ -39,6 +42,8 @@ export interface CombatResult {
   levelsGained: number
   /** Items that dropped (already added to the inventory). */
   drops: ItemStack[]
+  /** Potions taken from the inventory. */
+  potionsUsed: ItemStack[]
 }
 
 /** Most kills a report may hold after `elapsedSeconds` of real time at a given game speed. */
@@ -55,7 +60,10 @@ export function killReward(monster: MonsterDef): { exp: number; gold: number; sp
   return { exp: monster.exp, gold: monster.gold, sp: monster.sp ?? 0 }
 }
 
-/** Pays out a combat report, accepting at most `allowedKills` kills; rolls the drops. */
+/**
+ * Pays out a combat report, accepting at most `allowedKills` kills; rolls the drops and takes the
+ * potions drunk out of the inventory.
+ */
 export function applyCombatReport(
   character: CharacterData,
   monster: MonsterDef,
@@ -71,6 +79,8 @@ export function applyCombatReport(
   const sp = reward.sp * kills
   const progress = gainExp(character.level, character.exp, exp)
   const drops = rollDrops(lootTable(monster), kills, rng)
+  const potions = (report.potions ?? []).filter((p) => getItem(p.itemId).potion)
+  const { inventory, taken } = takeFromInventory(character.inventory, potions)
   return {
     character: {
       ...character,
@@ -79,7 +89,7 @@ export function applyCombatReport(
       gold: character.gold + gold,
       sp: character.sp + sp,
       stats: { kills: character.stats.kills + kills, deaths: character.stats.deaths + deaths },
-      inventory: addToInventory(character.inventory, drops),
+      inventory: addToInventory(inventory, drops),
     },
     kills,
     exp,
@@ -87,5 +97,6 @@ export function applyCombatReport(
     sp,
     levelsGained: progress.levelsGained,
     drops,
+    potionsUsed: taken,
   }
 }

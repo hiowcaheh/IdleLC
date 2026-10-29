@@ -54,6 +54,8 @@ export type SkillEffect =
   | { kind: 'poison'; perSecond: number }
   | { kind: 'heal'; amount: number }
   | { kind: 'mana'; amount: number }
+  /** HP or MP restored every second while the effect lasts (like healing and mana potions). */
+  | { kind: 'regen'; resource: 'hp' | 'mp'; perSecond: number }
 
 /** t_magic.a_type 0 (stat change): subtype → the stat it changes. */
 const STAT_SUBTYPES: Record<number, StatKey> = {
@@ -88,7 +90,9 @@ export function interpretEffect(e: SkillEffectDef): SkillEffect | null {
       }
       if (e.subtype === 16)
         return { kind: 'stat', stat: 'attackSpeed', value: e.power, percent: true }
-      if (e.subtype === 10) return { kind: 'stat', stat: 'mpRegen', value: e.power, percent: false }
+      // 9 / 10: HP / MP per second — the states of the healing and mana potions
+      if (e.subtype === 9) return { kind: 'regen', resource: 'hp', perSecond: e.power }
+      if (e.subtype === 10) return { kind: 'regen', resource: 'mp', perSecond: e.power }
       if (e.subtype === 0) return { kind: 'poison', perSecond: e.power }
       return null
     case 3:

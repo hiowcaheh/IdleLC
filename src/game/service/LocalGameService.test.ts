@@ -225,6 +225,20 @@ describe('LocalGameService', () => {
     await expect(game.learnSkill(hero.id, 1)).rejects.toThrow('on-expedition')
   })
 
+  it('takes reported potions out of the bag', async () => {
+    const { game, hero } = await withKnight()
+    await game.dev.addGold(hero.id, 2000)
+    await game.buyItem(hero.id, 43, 3)
+    const result = await game.reportCombat(hero.id, {
+      monsterId: hero.location.monsterId,
+      kills: 0,
+      deaths: 0,
+      potions: [{ itemId: 43, count: 2 }],
+    })
+    expect(result.potionsUsed).toEqual([{ itemId: 43, count: 2 }])
+    expect(result.character.inventory).toContainEqual({ itemId: 43, count: 1 })
+  })
+
   it('buys, wears and upgrades gear, and keeps it after a reload', async () => {
     const { game, clock, hero, storage } = await withKnight()
     await game.dev.addGold(hero.id, 1000)

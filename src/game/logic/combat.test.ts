@@ -1,17 +1,23 @@
 import { describe, expect, it } from 'vitest'
 import type { CombatStats } from '../data/types.ts'
 import {
+  HP_POTION_BELOW,
+  MP_POTION_BELOW,
   TIMINGS,
   changeMonster,
+  choosePotion,
   combatTick,
   createCombat,
   healPlayer,
   killMonster,
   effectiveStats,
+  potionsLeft,
+  takePotionsUsed,
   updatePlayer,
   type CombatEvent,
   type CombatState,
   type FighterInit,
+  type PotionSupply,
 } from './combat.ts'
 import { createRng, type Rng } from './rng.ts'
 import type { SkillRank } from './skills.ts'
@@ -410,5 +416,115 @@ describe('skills in combat', () => {
     const copy = structuredClone(s)
     combatTick(s, 3, createRng(13))
     expect(s).toEqual(copy)
+  })
+})
+
+const potion = (
+  itemId: number,
+  kind: PotionSupply['potion']['kind'],
+  power: number,
+  count = 5,
+  duration = 15,
+): PotionSupply => ({
+  itemId,
+  name: `Potion ${itemId}`,
+  count,
+  potion: { kind, power, duration, cooldown: 5 },
+})
+
+/** A hero at `hp` HP (of 1000) and `mp` MP (of 100) in a fight that has just started. */
+const drinker = (potions: PotionSupply[], hp = 1000, mp = 100): CombatState => {
+  const s = engaged({ level: 10, stats: stats({ maxHp: 1000, maxMp: 100 }), potions })
+  return { ...s, player: { ...s.player, hp, mp } }
+}
+
+describe('potions in combat', () => {
+  it('drinks a healing potion below the HP threshold; it heals every second while it lasts', () => {
+    const small = potion(43, 'hp', 16)
+    expect(combatTick(drinker([small], 600), 0.01, createRng(1)).events).not.toContainEqual(
+      expect.objectContaining({ type: 'potion' }),
+    )
+    const low = 1000 * HP_POTION_BELOW - 100
+    const r = combatTick(drinker([small], low), 0.01, createRng(1))
+    expect(r.events).toContainEqual({ type: 'potion', itemId: 43, name: 'Potion 43', kind: 'hp' })
+    expect(r.state.player.potionsUsed).toEqual({ 43: 1 })
+    expect(potionsLeft(r.state.player, small)).toBe(4)
+    expect(r.state.player.effects[0]).toMatchObject({ itemId: 43, potion: 'hp', hpPerSecond: 16 })
+
+    // no monster damage: the hero gains 16 HP per second
+    const calm = { ...r.state, monster: { ...r.state.monster, cooldown: 99, stats: stats() } }
+    const later = combatTick(calm, 2, createRng(1)).state
+    expect(later.player.hp).toBeCloseTo(r.state.player.hp + 32, 0)
+  })
+
+  it('does not drink another of the kind while one works or during its cooldown', () => {
+    const small = potion(43, 'hp', 16, 5, 1)
+    const r = combatTick(drinker([small], 100), 0.01, createRng(1))
+    expect(r.state.player.potionCooldowns.hp).toBe(5)
+    expect(choosePotion(r.state.player, 'hp')).toBeNull()
+    // the effect is over after 1 s, the cooldown is not
+    const after = { ...r.state.player, effects: [], hp: 100 }
+    expect(choosePotion(after, 'hp')).toBeNull()
+    expect(choosePotion({ ...after, potionCooldowns: {} }, 'hp')).toBe(small)
+  })
+
+  it('picks the smallest potion that covers the missing HP, else the strongest', () => {
+    const small = potion(43, 'hp', 16) // 240 HP
+    const great = potion(45, 'hp', 50) // 750 HP
+    const s = drinker([great, small], 400)
+    expect(choosePotion(s.player, 'hp')).toBe(great) // 600 missing
+    expect(choosePotion({ ...s.player, hp: 790 }, 'hp')).toBeNull() // not low enough
+    expect(choosePotion({ ...s.player, hp: 480 }, 'hp')).toBe(great) // 520 missing
+    expect(choosePotion({ ...s.player, potionsUsed: { 45: 5 } }, 'hp')).toBe(small) // none left
+    const frail = { ...s.player, stats: stats({ maxHp: 400 }), hp: 190 } // 210 missing
+    expect(choosePotion(frail, 'hp')).toBe(small)
+  })
+
+  it('drinks a mana potion below the MP threshold and recovery potions while hurt', () => {
+    const mana = potion(484, 'mp', 8)
+    const recovery = potion(490, 'hpRegen', 2, 5, 600)
+    const full = combatTick(drinker([mana, recovery]), 0.01, createRng(1))
+    expect(full.events.filter((e) => e.type === 'potion')).toEqual([])
+
+    const low = combatTick(
+      drinker([mana, recovery], 900, 100 * MP_POTION_BELOW - 1),
+      0.01,
+      createRng(1),
+    )
+    const drunk = low.events.filter((e) => e.type === 'potion').map((e) => e.itemId)
+    expect(drunk).toEqual([484, 490])
+    expect(effectiveStats(low.state.player).hpRegen).toBe(2)
+  })
+
+  it('a stunned hero drinks nothing; monsters carry no potions', () => {
+    const s = drinker([potion(43, 'hp', 16)], 100)
+    s.player.effects = [
+      { skillId: 9, name: 'Stun', remaining: 2, stats: [], stun: true, poison: 0, nextTick: 1 },
+    ]
+    expect(combatTick(s, 0.01, createRng(1)).state.player.potionsUsed).toEqual({})
+  })
+
+  it('takePotionsUsed moves the drunk potions off the supply; updatePlayer keeps the pending ones', () => {
+    const small = potion(43, 'hp', 16)
+    const r = combatTick(drinker([small], 100), 0.01, createRng(1))
+    const taken = takePotionsUsed(r.state)
+    expect(taken.used).toEqual([{ itemId: 43, count: 1 }])
+    expect(taken.state.player.potionsUsed).toEqual({})
+    expect(taken.state.player.potions).toEqual([{ ...small, count: 4 }])
+    expect(takePotionsUsed(taken.state).used).toEqual([])
+
+    // potions bought while one is still pending: 10 in the bag, 1 drunk → 9 left
+    const bought = updatePlayer(r.state, {
+      level: 10,
+      stats: stats({ maxHp: 1000, maxMp: 100 }),
+      potions: [{ ...small, count: 10 }],
+    })
+    expect(potionsLeft(bought.player, bought.player.potions![0]!)).toBe(9)
+  })
+
+  it('updatePlayer keeps a fallen hero at 0 HP', () => {
+    const s = drinker([], 0)
+    const next = updatePlayer({ ...s, phase: 'defeat' }, { level: 11, stats: stats() })
+    expect(next.player.hp).toBe(0)
   })
 })

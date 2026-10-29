@@ -53,3 +53,28 @@ export function addToInventory(
   }
   return next
 }
+
+/**
+ * Takes stacks out of an inventory — as many of each as there are (none when there are none).
+ * Returns the inventory and what was really taken.
+ */
+export function takeFromInventory(
+  inventory: readonly ItemStack[],
+  items: readonly ItemStack[],
+): { inventory: ItemStack[]; taken: ItemStack[] } {
+  const next = inventory.map((s) => ({ ...s }))
+  const taken = new Map<number, number>()
+  for (const item of items) {
+    const stack = next.find((s) => s.itemId === item.itemId)
+    const count = Math.min(stack?.count ?? 0, Math.max(0, Math.floor(item.count)))
+    if (!stack || count <= 0) continue
+    stack.count -= count
+    taken.set(item.itemId, (taken.get(item.itemId) ?? 0) + count)
+  }
+  return {
+    inventory: next.filter((s) => s.count > 0),
+    taken: [...taken]
+      .map(([itemId, count]) => ({ itemId, count }))
+      .sort((a, b) => a.itemId - b.itemId),
+  }
+}

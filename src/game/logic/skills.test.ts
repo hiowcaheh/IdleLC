@@ -72,6 +72,17 @@ describe('interpretEffect', () => {
       kind: 'mana',
       amount: 100,
     })
+    // the states of the healing / mana potions (Mana Recovery uses the MP one)
+    expect(interpretEffect({ type: 2, subtype: 9, damageType: 1, power: 16 })).toEqual({
+      kind: 'regen',
+      resource: 'hp',
+      perSecond: 16,
+    })
+    expect(interpretEffect({ type: 2, subtype: 10, damageType: 1, power: 2 })).toEqual({
+      kind: 'regen',
+      resource: 'mp',
+      perSecond: 2,
+    })
   })
 
   it('returns null for effects IdleLC does not have (summons, movement speed…)', () => {

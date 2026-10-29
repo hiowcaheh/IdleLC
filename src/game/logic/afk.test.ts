@@ -82,6 +82,36 @@ describe('simulateAfk', () => {
     expect(estimate.goldPerHour).toBeCloseTo(estimate.killsPerHour * golem.gold)
   })
 
+  it('drinks the potions it carries against a tough monster, never more than it has', () => {
+    const sentinel = { zoneId: 'glade', monsterId: 'stone-sentinel', startedAt: 0 }
+    const stocked = {
+      ...hero,
+      expedition: sentinel,
+      inventory: [
+        { itemId: 43, count: 50 },
+        { itemId: 490, count: 50 },
+      ],
+    }
+    const plenty = simulateAfk(stocked, 3600, createRng(1))
+    const drunk = (id: number) => plenty.potionsUsed.find((p) => p.itemId === id)?.count ?? 0
+    expect(drunk(43)).toBeGreaterThan(0)
+    expect(drunk(490)).toBeGreaterThan(0)
+    const left = (id: number) => plenty.character.inventory.find((s) => s.itemId === id)?.count
+    expect(left(43)).toBe(50 - drunk(43))
+    expect(left(490)).toBe(50 - drunk(490))
+
+    const scarce = simulateAfk(
+      { ...stocked, inventory: [{ itemId: 43, count: 1 }] },
+      8 * 3600,
+      createRng(1),
+    )
+    expect(scarce.potionsUsed).toEqual([{ itemId: 43, count: 1 }])
+    expect(scarce.character.inventory.some((s) => s.itemId === 43)).toBe(false)
+
+    const off = simulateAfk({ ...stocked, potionAuto: { hp: false, mp: true } }, 3600, createRng(1))
+    expect(off.potionsUsed).toEqual([])
+  })
+
   it('pays nothing for no time', () => {
     const none = simulateAfk(hero, 0, createRng(1))
     expect(none).toMatchObject({ kills: 0, exp: 0, gold: 0, drops: [], levelsGained: 0 })

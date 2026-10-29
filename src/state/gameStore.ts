@@ -150,19 +150,31 @@ export const useGameStore = create<GameStore>((set, get) => {
     }
   }
 
-  /** Fight outcomes go to the service, which decides the rewards. */
-  combatEvents.subscribe((event) => {
-    if (event.type !== 'death') return
+  /**
+   * Fight outcomes and the potions drunk go to the service, which decides the rewards and takes the
+   * potions from the bag.
+   */
+  const reportCombat = (kills: number, deaths: number) => {
     const character = get().character
     if (!character) return
-    const report = {
-      monsterId: combatSession.state.monsterId,
-      kills: event.who === 'monster' ? 1 : 0,
-      deaths: event.who === 'player' ? 1 : 0,
-    }
+    const potions = combatSession.takePotionsUsed()
+    if (kills === 0 && deaths === 0 && potions.length === 0) return
+    const report = { monsterId: combatSession.state.monsterId, kills, deaths, potions }
     enqueue(() => gameService.reportCombat(character.id, report))
       .then(applyResult)
       .catch(logError)
+      .finally(() => {
+        if (potions.length === 0) return
+        combatSession.settlePotions(potions)
+        const played = get().character
+        if (played?.id === character.id) combatSession.setPlayer(played)
+      })
+  }
+
+  combatEvents.subscribe((event) => {
+    if (event.type === 'death') {
+      reportCombat(event.who === 'monster' ? 1 : 0, event.who === 'player' ? 1 : 0)
+    }
   })
 
   const travel = (zoneId: string, monsterId: string) => {
@@ -260,6 +272,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     async leaveGame() {
+      reportCombat(0, 0)
       set({
         character: null,
         timeScale: 1,
@@ -274,6 +287,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     async startExpedition() {
       const character = get().character
       if (!character || character.expedition) return
+      reportCombat(0, 0)
       try {
         applyCharacter(await enqueue(() => gameService.startAfk(character.id)))
         combatEvents.emit([{ type: 'reset' }])

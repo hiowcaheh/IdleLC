@@ -107,9 +107,9 @@ Odpowiednik w kodzie: `CharacterData` w `src/game/logic/character.ts`, `SaveData
 | `createCharacter`    | funkcja `create_character`                                  | max 4 postacie, imię (wzór, unikalność), klasa                                                                      |
 | `deleteCharacter`    | funkcja `delete_character`                                  | właściciel postaci                                                                                                  |
 | `travel`             | funkcja `travel`                                            | strefa i potwór istnieją; od M6 wymagany poziom                                                                     |
-| `reportCombat`       | Edge Function `report-combat`                               | poluje na tego potwora; limit zabić wg czasu serwera; drop                                                          |
+| `reportCombat`       | Edge Function `report-combat`                               | poluje na tego potwora; limit zabić wg czasu serwera; drop; zdejmuje zgłoszone mikstury (najwyżej tyle, ile ma)     |
 | `startAfk`           | funkcja `start_afk`                                         | postać nie jest już na wyprawie; zapisuje miejsce i czas startu                                                     |
-| `claimAfk`           | Edge Function `claim-afk`                                   | czas od `expedition_started_at` wg zegara serwera, max 8 h                                                          |
+| `claimAfk`           | Edge Function `claim-afk`                                   | czas od `expedition_started_at` wg zegara serwera, max 8 h; zużycie mikstur liczy serwer                            |
 | `sellItems`          | funkcja `sell_items`                                        | postać ma te przedmioty; cena z danych gry × stawka sklepu                                                          |
 | `learnSkill`         | funkcja `learn_skill`                                       | klasa, poziom postaci, wymagane skille, SP; nie w trakcie wyprawy                                                   |
 | `setSkillAuto`       | funkcja `set_skill_auto`                                    | skill jest nauczony; nie w trakcie wyprawy                                                                          |

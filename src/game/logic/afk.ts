@@ -7,7 +7,7 @@ import { getMonster } from '../data/monsters.ts'
 import type { CharacterData } from './character.ts'
 import { combatTick, createCombat, type FighterInit } from './combat.ts'
 import { monsterFighter, playerFighter, type Hero } from './fighters.ts'
-import { addToInventory, lootTable, rollDrops, type ItemStack } from './loot.ts'
+import { addToInventory, lootTable, rollDrops, takeFromInventory, type ItemStack } from './loot.ts'
 import { gainExp } from './progression.ts'
 import { killReward } from './rewards.ts'
 import type { Rng } from './rng.ts'
@@ -22,23 +22,40 @@ export const AFK_EFFICIENCY = 1
 /** Length of the fight sample used to measure the hunting rate, in game seconds. */
 export const HUNT_SAMPLE_SECONDS = 1200
 
+/** Potions the hero is given when its hunting rate is measured (as many as it wants). */
+const SAMPLE_POTIONS = 1e9
+
 export interface HuntRate {
   killsPerHour: number
   deathsPerHour: number
+  /** Potions drunk per hour, by item id. */
+  potionsPerHour: Record<number, number>
 }
 
-/** Kills and deaths per hour of `player` hunting `monster`, measured on the real auto-combat. */
+/**
+ * Kills, deaths and potions per hour of `player` hunting `monster`, measured on the real auto-combat
+ * (the hero has as many of its potions as it wants).
+ */
 export function measureHuntRate(
   player: FighterInit,
   monster: FighterInit,
   rng: Rng,
   sampleSeconds = HUNT_SAMPLE_SECONDS,
 ): HuntRate {
-  let state = createCombat(player, 'sample', monster)
+  const potions = player.potions?.map((p) => ({ ...p, count: SAMPLE_POTIONS }))
+  let state = createCombat({ ...player, potions }, 'sample', monster)
   const step = 0.1
   for (let t = 0; t < sampleSeconds; t += step) state = combatTick(state, step, rng).state
   const perHour = 3600 / sampleSeconds
-  return { killsPerHour: state.kills * perHour, deathsPerHour: state.deaths * perHour }
+  const potionsPerHour: Record<number, number> = {}
+  for (const [id, count] of Object.entries(state.player.potionsUsed)) {
+    potionsPerHour[Number(id)] = count * perHour
+  }
+  return {
+    killsPerHour: state.kills * perHour,
+    deathsPerHour: state.deaths * perHour,
+    potionsPerHour,
+  }
 }
 
 /** Rounds down or up at random so that the average stays exact. */
@@ -62,6 +79,8 @@ export interface AfkResult {
   levelBefore: number
   levelsGained: number
   drops: ItemStack[]
+  /** Potions drunk (taken from the inventory). */
+  potionsUsed: ItemStack[]
   character: CharacterData
 }
 
@@ -86,7 +105,7 @@ export function estimateHourly(hero: Hero, monsterId: string, rng: Rng): HourlyE
 
 /**
  * Pays `awaySeconds` of AFK hunting (capped at 8 h) of the expedition's monster — or the current
- * one — and returns the character with the rewards added.
+ * one — and returns the character with the rewards added and the potions it drank taken away.
  */
 export function simulateAfk(character: CharacterData, awaySeconds: number, rng: Rng): AfkResult {
   const seconds = Math.min(Math.max(0, Math.floor(awaySeconds)), AFK_MAX_SECONDS)
@@ -95,16 +114,18 @@ export function simulateAfk(character: CharacterData, awaySeconds: number, rng: 
   let { level, exp } = character
   let kills = 0
   let deaths = 0
-  const rates = new Map<number, HuntRate>()
+  // potions left in the bag; the hunting rate changes when a kind runs out
+  const stock = new Map(character.inventory.map((s) => [s.itemId, s.count]))
+  const used = new Map<number, number>()
+  const rates = new Map<string, HuntRate>()
   const rateAt = (lvl: number) => {
-    let rate = rates.get(lvl)
+    const inventory = [...stock].map(([itemId, count]) => ({ itemId, count }))
+    const player = playerFighter({ ...character, level: lvl, inventory })
+    const key = `${lvl}/${player.potions?.map((p) => p.itemId).join(',') ?? ''}`
+    let rate = rates.get(key)
     if (!rate) {
-      rate = measureHuntRate(
-        playerFighter({ ...character, level: lvl }),
-        monsterFighter(monster.id),
-        rng,
-      )
-      rates.set(lvl, rate)
+      rate = measureHuntRate(player, monsterFighter(monster.id), rng)
+      rates.set(key, rate)
     }
     return rate
   }
@@ -116,8 +137,20 @@ export function simulateAfk(character: CharacterData, awaySeconds: number, rng: 
     deaths += roundRandom((rate.deathsPerHour * slice) / 3600, rng)
     kills += sliceKills
     ;({ level, exp } = gainExp(level, exp, sliceKills * reward.exp))
+    for (const [id, perHour] of Object.entries(rate.potionsPerHour)) {
+      const itemId = Number(id)
+      const left = stock.get(itemId) ?? 0
+      const drunk = Math.min(left, roundRandom((perHour * slice) / 3600, rng))
+      if (drunk <= 0) continue
+      stock.set(itemId, left - drunk)
+      used.set(itemId, (used.get(itemId) ?? 0) + drunk)
+    }
   }
 
+  const potions = takeFromInventory(
+    character.inventory,
+    [...used].map(([itemId, count]) => ({ itemId, count })),
+  )
   const drops = rollDrops(lootTable(monster), kills, rng)
   const gold = kills * reward.gold
   const sp = kills * reward.sp
@@ -133,6 +166,7 @@ export function simulateAfk(character: CharacterData, awaySeconds: number, rng: 
     levelBefore: character.level,
     levelsGained: level - character.level,
     drops,
+    potionsUsed: potions.taken,
     character: {
       ...character,
       level,
@@ -140,7 +174,7 @@ export function simulateAfk(character: CharacterData, awaySeconds: number, rng: 
       gold: character.gold + gold,
       sp: character.sp + sp,
       stats: { kills: character.stats.kills + kills, deaths: character.stats.deaths + deaths },
-      inventory: addToInventory(character.inventory, drops),
+      inventory: addToInventory(potions.inventory, drops),
     },
   }
 }

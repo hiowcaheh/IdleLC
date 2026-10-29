@@ -92,6 +92,8 @@ export function describeEffect(effect: SkillEffect, rank: SkillRank): string {
       return `Restores ${effect.amount} HP`
     case 'mana':
       return `Restores ${effect.amount} MP`
+    case 'regen':
+      return `Restores ${effect.perSecond} ${effect.resource === 'hp' ? 'HP' : 'MP'} per second${lasting}`
   }
 }
 

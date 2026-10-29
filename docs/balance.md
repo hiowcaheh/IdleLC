@@ -69,8 +69,8 @@ Przykład: Knight (atak 11) vs Rust Golem (obrona 3): `121 / 14 ≈ 8,6` obraże
 
 Poza walką (szukanie potwora, podbieganie, po zwycięstwie) gracz odzyskuje **3% maks. HP i 2% maks. MP na
 sekundę**. W trakcie walki: HP nie wraca, MP wraca 0,5% maks. na sekundę. Do tego premie z umiejętności
-(`hpRegen` / `mpRegen` — wartość z bazy na 5 s, nasze odczytanie). Po śmierci postać wstaje z pełnym HP i MP,
-a buffy znikają.
+(`hpRegen` / `mpRegen` — wartość z bazy na 5 s, nasze odczytanie) i z mikstur (patrz „Mikstury”). Po śmierci
+postać wstaje z pełnym HP i MP, a buffy i działające mikstury znikają.
 
 ## Przebieg walki (czasy)
 
@@ -132,7 +132,10 @@ dojdą w M5). Ekwipunek nie ma na razie limitu miejsc.
   wzorami co na ekranie) osobno dla każdego poziomu postaci. Czas wyprawy dzielimy na 10-minutowe odcinki,
   więc awans w trakcie wyprawy wzmacnia postać. Wynik: zabicia (z losowym zaokrągleniem), śmierci, exp,
   złoto, SP i drop jak za zwykłe zabicia. Symulacja używa nauczonych umiejętności postaci. `AFK_EFFICIENCY = 1` (wartość własna: wyprawa daje tyle co gra przy
-  włączonym ekranie). Okno przed wysłaniem pokazuje oczekiwane zabicia, exp i złoto na godzinę.
+  włączonym ekranie). Okno przed wysłaniem pokazuje oczekiwane zabicia, exp, złoto i mikstury na godzinę.
+- **Mikstury na wyprawie**: pomiar tempa daje postaci tyle mikstur z torby, ile chce, i liczy, ile wypiła na
+  godzinę; każdy 10-minutowy odcinek zabiera z torby tyle sztuk (najwyżej tyle, ile zostało). Gdy rodzaj się
+  skończy, tempo jest mierzone od nowa bez niego. Zużyte mikstury są w oknie „While you were away…”.
 - Jedno zgłoszenie walki obejmuje najwyżej 10 minut (`MAX_REPORT_WINDOW`), więc czas poza grą może zapłacić
   tylko wyprawa.
 
@@ -155,7 +158,8 @@ Interpretacja efektów jest **nasza** (`src/game/logic/skills.ts`) do czasu kodu
   - typ 0 — zmiana statystyki: 0 atak, 1 obrona, 2 atak magiczny → atak, 3 obrona magiczna → obrona, 4 celność,
     5 unik, 6 szansa krytyka (power/10 %), 7 i 23 szybkość ataku, 8 czas rzucania, 10/11 regeneracja HP/MP,
     12/13 maks. HP/MP, 14 obrażenia krytyczne (power %), 22 atak %; `a_damagetype` 2 = procent;
-  - typ 2 — stany: 2, 5, 7 ogłuszenie (power > 0 = szansa %), 16 spowolnienie ataku, 10 regeneracja MP,
+  - typ 2 — stany: 2, 5, 7 ogłuszenie (power > 0 = szansa %), 16 spowolnienie ataku, 9 / 10 HP / MP na
+    sekundę przez czas trwania (te same stany mają mikstury leczenia i many; np. Mana Recovery maga),
     0 trucizna (power obrażeń na sekundę);
   - typ 4 — 0 leczenie (power HP), 1 przywrócenie many (power MP);
   - reszta (przywołania, prędkość ruchu, wskrzeszenie, oczyszczanie) — w IdleLC jeszcze nie działa; takie
@@ -219,9 +223,31 @@ cenie z bazy (decyzja własna).
   przedmiotów w bazie (zwykłe przedmioty, flaga ulepszania, cena ≥ 100, najczęstsza cena w progu; bez poziomu 1 —
   każdy ma zestaw startowy). Broń co 4 poziomy, zbroja co 5;
 - **akcesoria** z losowymi opcjami;
-- **towary** sklepów NPC strefy (`t_shopitem`): kamienie (mikstury — gdy dojdzie ich użycie w walce).
+- **towary** sklepów NPC strefy (`t_shopitem`): mikstury i kamienie (Heaven Stone).
 
 Cena = `a_price × a_buy_rate %` (100%).
+
+## Mikstury
+
+Dane 1:1 z bazy: mikstura w LC to umiejętność (`t_item.a_num_0` → `t_skill`): stan z `t_magic` i moc
+z `t_magiclevel` (typ 2 podtyp 9 / 10 — HP / MP na sekundę; typ 0 podtyp 10 / 11 — regeneracja HP / MP),
+czas trwania `a_durtime / 10` s, odnowienie `a_reuseTime / 10` s. Przykłady: Small Healing Potion 16 HP/s
+przez 15 s (240 HP), Small Mana Potion 8 MP/s przez 15 s, Small HP Recovery Potion regeneracja HP +2 przez
+10 min, Platinum (od 60 poz.) z odnowieniem 25 s. Kupno w sklepie strefy (Juno), cena `a_price`.
+
+Picie (zasady **własne**, `src/game/logic/combat.ts`):
+
+- tylko w walce, sam z siebie, mikstury z torby, do których postać ma poziom; nie pije ogłuszona;
+- leczenie, gdy HP < **50%**; mana, gdy MP < **30%**; regeneracja HP / MP, gdy HP / MP nie jest pełne;
+- naraz działa jedna mikstura danego rodzaju, a po wypiciu rodzaj czeka na odnowienie (`a_reuseTime`);
+- wybór: najmniejsza mikstura, która pokryje brakujące HP / MP (cała moc × czas), a gdy żadna — najmocniejsza;
+  z regeneracji — najmocniejsza;
+- przełączniki AUTO (sloty HP i MP przy pasku życia): HP = leczenie i regeneracja HP, MP = mana i regeneracja
+  MP; wyłączone — postać nie pije tego rodzaju (także na wyprawie).
+
+Zużycie liczy walka w przeglądarce, a serwis zdejmuje mikstury z torby przy zgłoszeniu walki
+(`reportCombat`, pole `potions`, najwyżej tyle, ile jest w torbie). Zgłoszenie idzie po każdej walce, przy
+wysłaniu na wyprawę i przy wyjściu z gry.
 
 ## Pasek umiejętności
 
