@@ -11,6 +11,7 @@ import { useGameStore } from '../state/gameStore.ts'
 import { Character, type CharacterHandle } from './Character.tsx'
 import { DamageNumbers } from './DamageNumbers.tsx'
 import { HpBar3D } from './HpBar3D.tsx'
+import { LevelUpEffect } from './LevelUpEffect.tsx'
 import { ARENA_RADIUS, smoothstep } from './terrain.ts'
 import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
@@ -166,7 +167,6 @@ export function Battle() {
         case 'reward':
           if (e.exp > 0) rewardText(`+${e.exp.toLocaleString('en-US')} EXP`, 'exp', 0)
           if (e.gold > 0) rewardText(`+${e.gold.toLocaleString('en-US')} gold`, 'gold', -0.35)
-          if (e.levelsGained > 0) rewardText('LEVEL UP!', 'level', 0.45)
           break
         case 'reset':
           resetView()
@@ -273,6 +273,7 @@ export function Battle() {
         }}
       />
       <DamageNumbers />
+      <LevelUpEffect />
     </>
   )
 }

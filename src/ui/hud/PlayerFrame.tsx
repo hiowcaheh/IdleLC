@@ -1,5 +1,4 @@
 import { CLASSES } from '../../game/data/classes.ts'
-import { expToNextLevel } from '../../game/logic/progression.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { Bar } from './Bar.tsx'
 
@@ -10,9 +9,7 @@ export function PlayerFrame() {
   const maxHp = useGameStore((s) => s.hud.playerMaxHp)
   const character = useGameStore((s) => s.character)
   if (!character) return null
-  const { level, exp, gold } = character
-  const needed = expToNextLevel(level)
-  const percent = needed > 0 ? Math.min(99.99, (exp / needed) * 100) : 100
+  const { level, gold } = character
 
   return (
     <section className="unit-frame unit-frame--player" aria-label="Your character">
@@ -31,13 +28,6 @@ export function PlayerFrame() {
           <span className="unit-frame__sub">{CLASSES[character.classId].name}</span>
         </div>
         <Bar value={hp} max={maxHp} variant="hp" label="Health" />
-        <Bar
-          value={exp}
-          max={needed}
-          variant="exp"
-          label="Experience"
-          text={needed > 0 ? `${percent.toFixed(2)}%` : 'Max level'}
-        />
         <p className="unit-frame__gold" aria-label={`${formatGold(gold)} gold`}>
           <span className="coin" aria-hidden="true" />
           {formatGold(gold)}

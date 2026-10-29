@@ -5,6 +5,7 @@ export type ViewEvent =
   | CombatEvent
   | { type: 'reset' }
   | { type: 'reward'; exp: number; gold: number; levelsGained: number }
+  | { type: 'levelUp'; level: number }
 
 type Listener = (event: ViewEvent) => void
 

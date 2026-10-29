@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { GameCanvas } from '../scene/GameCanvas.tsx'
 import { DevPanel } from './dev/DevPanel.tsx'
 import { useDevTools } from './dev/devMode.ts'
+import { ExpBar } from './hud/ExpBar.tsx'
 import { HuntPanel } from './hud/HuntPanel.tsx'
+import { LevelUpBanner } from './hud/LevelUpBanner.tsx'
 import { PlayerFrame } from './hud/PlayerFrame.tsx'
 import { StatusLine } from './hud/StatusLine.tsx'
 import { TargetFrame } from './hud/TargetFrame.tsx'
@@ -35,10 +37,14 @@ export function GameScreen() {
         <div className="hud__center">
           <TargetFrame />
           <StatusLine />
+          <LevelUpBanner />
         </div>
         <div className="hud__bottom">
           <HuntPanel />
           {devTools && <DevPanel />}
+        </div>
+        <div className="hud__exp">
+          <ExpBar />
         </div>
       </div>
 

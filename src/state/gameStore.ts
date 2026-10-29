@@ -29,6 +29,8 @@ interface GameStore {
   hud: CombatHud
   /** Dev-only simulation speed multiplier. */
   timeScale: number
+  /** Latest level up of the played character (`key` changes every time). */
+  levelUp: { level: number; key: number } | null
 
   init(): Promise<void>
   createCharacter(input: NewCharacter): Promise<CharacterData>
@@ -92,6 +94,10 @@ export const useGameStore = create<GameStore>((set, get) => {
     if (current?.id === character.id && current.level !== character.level) {
       combatSession.setPlayer(character.classId, character.level)
       set({ hud: toHud(combatSession.state) })
+      if (character.level > current.level) {
+        set({ levelUp: { level: character.level, key: Date.now() } })
+        combatEvents.emit([{ type: 'levelUp', level: character.level }])
+      }
     }
   }
 
@@ -146,6 +152,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     character: null,
     hud: toHud(combatSession.state),
     timeScale: 1,
+    levelUp: null,
 
     init() {
       initializing ??= (async () => {
@@ -189,7 +196,12 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     async leaveGame() {
-      set({ character: null, timeScale: 1, save: { ...get().save, activeCharacterId: null } })
+      set({
+        character: null,
+        timeScale: 1,
+        levelUp: null,
+        save: { ...get().save, activeCharacterId: null },
+      })
       gameService.dev?.setTimeScale(1)
       await enqueue(() => gameService.setActiveCharacter(null))
     },
