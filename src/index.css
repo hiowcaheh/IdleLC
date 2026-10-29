@@ -1166,6 +1166,75 @@ a.button {
   stroke: #b9e86a;
 }
 
+/* ---------- Expedition ---------- */
+
+.hunt__header {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.hunt__expedition {
+  margin-left: auto;
+  min-height: 30px;
+  padding: 2px 12px;
+  border-radius: 15px;
+  border: 1px solid var(--gilt);
+  background: linear-gradient(180deg, #4a3620, #2a1d12);
+  color: var(--gilt-bright);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.expedition__track {
+  position: relative;
+  height: 22px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #0e0a07;
+  box-shadow:
+    0 0 0 1px var(--bronze-dim),
+    inset 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.expedition__fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background: linear-gradient(180deg, var(--gilt-bright), var(--gilt) 50%, #8a6a3a);
+  transition: transform 1s linear;
+}
+
+.expedition__time {
+  position: relative;
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 22px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  text-shadow:
+    0 0 2px #000,
+    0 1px 1px #000;
+}
+
+.expedition__estimate {
+  margin: 8px 0 10px;
+  font-size: 14px;
+  color: var(--parchment-dim);
+  text-align: center;
+}
+
+.expedition__return {
+  width: 100%;
+}
+
+.expedition-dialog__warning {
+  margin-bottom: 12px;
+  color: #ffb3a6;
+  text-align: center;
+}
+
 /* ---------- AFK summary ---------- */
 
 .afk__title {

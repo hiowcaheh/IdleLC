@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useGameStore } from '../state/gameStore.ts'
 import { GameCanvas } from '../scene/GameCanvas.tsx'
 import { AfkSummary } from './AfkSummary.tsx'
 import { DevPanel } from './dev/DevPanel.tsx'
+import { ExpeditionPanel } from './expedition/ExpeditionPanel.tsx'
 import { useDevTools } from './dev/devMode.ts'
 import { ExpBar } from './hud/ExpBar.tsx'
 import { HuntPanel } from './hud/HuntPanel.tsx'
@@ -18,15 +19,8 @@ export function GameScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [inventoryOpen, setInventoryOpen] = useState(false)
   const devTools = useDevTools((s) => s.enabled)
-
-  // coming back to the tab or app (e.g. after locking the phone) pays the time away as AFK
-  useEffect(() => {
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible') useGameStore.getState().resume()
-    }
-    document.addEventListener('visibilitychange', onVisibility)
-    return () => document.removeEventListener('visibilitychange', onVisibility)
-  }, [])
+  const character = useGameStore((s) => s.character)
+  const expedition = character?.expedition ?? null
 
   return (
     <div className="game">
@@ -60,12 +54,16 @@ export function GameScreen() {
           </div>
         </div>
         <div className="hud__center">
-          <TargetFrame />
-          <StatusLine />
+          {!expedition && <TargetFrame />}
+          {!expedition && <StatusLine />}
           <LevelUpBanner />
         </div>
         <div className="hud__bottom">
-          <HuntPanel />
+          {character && expedition ? (
+            <ExpeditionPanel character={character} expedition={expedition} />
+          ) : (
+            <HuntPanel />
+          )}
           {devTools && <DevPanel />}
         </div>
         <div className="hud__exp">

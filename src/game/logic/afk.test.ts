@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getMonster } from '../data/monsters.ts'
-import { AFK_MAX_SECONDS, measureHuntRate, simulateAfk } from './afk.ts'
+import { AFK_MAX_SECONDS, estimateHourly, measureHuntRate, simulateAfk } from './afk.ts'
 import { createCharacterData } from './character.ts'
 import { combatTick, createCombat, type FighterInit } from './combat.ts'
 import { expToNextLevel } from './progression.ts'
@@ -68,6 +68,18 @@ describe('simulateAfk', () => {
     expect(long.seconds).toBe(AFK_MAX_SECONDS)
     expect(long.awaySeconds).toBe(30 * 3600)
     expect(long.kills).toBeGreaterThan(one.kills * 6)
+  })
+
+  it('hunts the expedition monster and estimates an hour of it', () => {
+    const away = {
+      ...hero,
+      expedition: { zoneId: 'glade', monsterId: 'stone-sentinel', startedAt: 0 },
+    }
+    expect(simulateAfk(away, 3600, createRng(1)).monsterId).toBe('stone-sentinel')
+    const estimate = estimateHourly('knight', 1, 'rust-golem', createRng(1))
+    const golem = getMonster('rust-golem')
+    expect(estimate.expPerHour).toBeCloseTo(estimate.killsPerHour * golem.exp)
+    expect(estimate.goldPerHour).toBeCloseTo(estimate.killsPerHour * golem.gold)
   })
 
   it('pays nothing for no time', () => {

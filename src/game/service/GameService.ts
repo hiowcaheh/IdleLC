@@ -24,11 +24,12 @@ export interface GameService {
   travel(characterId: string, location: CharacterLocation): Promise<CharacterData>
   /** Outcome of the fights since the last report; the service checks it and pays out. */
   reportCombat(characterId: string, report: CombatReport): Promise<CombatResult>
+  /** Sends the character on an AFK expedition to its current hunting spot. */
+  startAfk(characterId: string): Promise<CharacterData>
   /**
-   * Pays the time the character spent away from the game (AFK, up to 8 h) — call when the game
-   * shows the character again. Resolves to null when the break was too short to count.
+   * Ends the expedition and pays the time it lasted (up to 8 h; under a minute pays nothing).
    */
-  claimAfk(characterId: string): Promise<AfkResult | null>
+  claimAfk(characterId: string): Promise<AfkResult>
   updateSettings(patch: Partial<Settings>): Promise<Settings>
   /** Deletes the whole save (all characters) and starts over. */
   resetSave(): Promise<SaveData>
@@ -43,8 +44,8 @@ export interface DevCommands {
   addGold(characterId: string, amount: number): Promise<CharacterData>
   /** Game speed — allows proportionally more kills per report. */
   setTimeScale(scale: number): void
-  /** Pretends the character has been away for `seconds` (claim it with claimAfk). */
-  simulateAfk(characterId: string, seconds: number): Promise<void>
+  /** Moves the expedition start `seconds` into the past (starting one if needed); claim it after. */
+  simulateAfk(characterId: string, seconds: number): Promise<CharacterData>
 }
 
 /** Subset of the Web Storage API — lets tests use an in-memory store. */

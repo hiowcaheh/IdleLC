@@ -1,9 +1,10 @@
 /**
- * AFK hunting: time away from the game (up to 8 h) becomes kills at the rate the hero really
- * achieves against the monster — measured by running the same auto-combat for a sample period —
- * and is then paid out like real fights. Pure; the server will run it too.
+ * AFK expeditions: the time a character spends on an expedition (up to 8 h) becomes kills at the
+ * rate the hero really achieves against the monster — measured by running the same auto-combat for
+ * a sample period — and is then paid out like real fights. Pure; the server will run it too.
  */
 import { getMonster } from '../data/monsters.ts'
+import type { ClassId } from '../data/types.ts'
 import type { CharacterData } from './character.ts'
 import { combatTick, createCombat, type FighterInit } from './combat.ts'
 import { monsterFighter, playerFighter } from './fighters.ts'
@@ -13,7 +14,7 @@ import { killReward } from './rewards.ts'
 import type { Rng } from './rng.ts'
 
 export const AFK_MAX_SECONDS = 8 * 3600
-/** Shorter breaks are not worth a summary. */
+/** Expeditions shorter than this pay nothing. */
 export const AFK_MIN_SECONDS = 60
 /** Stats are recomputed after every slice, so level ups while away make the hero stronger. */
 export const AFK_SLICE_SECONDS = 600
@@ -63,10 +64,34 @@ export interface AfkResult {
   character: CharacterData
 }
 
-/** Hunts the character's current monster for the time away and pays out the result. */
+export interface HourlyEstimate extends HuntRate {
+  expPerHour: number
+  goldPerHour: number
+}
+
+/** What an hour of hunting `monsterId` is worth at the character's current level. */
+export function estimateHourly(
+  classId: ClassId,
+  level: number,
+  monsterId: string,
+  rng: Rng,
+): HourlyEstimate {
+  const rate = measureHuntRate(playerFighter(classId, level), monsterFighter(monsterId), rng)
+  const reward = killReward(getMonster(monsterId))
+  return {
+    ...rate,
+    expPerHour: rate.killsPerHour * AFK_EFFICIENCY * reward.exp,
+    goldPerHour: rate.killsPerHour * AFK_EFFICIENCY * reward.gold,
+  }
+}
+
+/**
+ * Pays `awaySeconds` of AFK hunting (capped at 8 h) of the expedition's monster — or the current
+ * one — and returns the character with the rewards added.
+ */
 export function simulateAfk(character: CharacterData, awaySeconds: number, rng: Rng): AfkResult {
   const seconds = Math.min(Math.max(0, Math.floor(awaySeconds)), AFK_MAX_SECONDS)
-  const monster = getMonster(character.location.monsterId)
+  const monster = getMonster(character.expedition?.monsterId ?? character.location.monsterId)
   const reward = killReward(monster)
   let { level, exp } = character
   let kills = 0

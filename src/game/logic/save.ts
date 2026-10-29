@@ -14,11 +14,12 @@ import {
   startLocation,
   type CharacterData,
   type CharacterLocation,
+  type Expedition,
 } from './character.ts'
 import { newId } from './id.ts'
 import { addToInventory, type ItemStack } from './loot.ts'
 
-export const SAVE_VERSION = 3
+export const SAVE_VERSION = 4
 
 export type GraphicsQuality = 'auto' | 'low' | 'high'
 
@@ -65,13 +66,20 @@ export const MIGRATIONS: Record<number, Migration> = {
       activeCharacterId: id,
     }
   },
-  // v3: characters get an inventory
+  // v3: characters get an inventory (v4: and an AFK expedition slot, see below)
   2: (save) => ({
     ...save,
     characters: Array.isArray(save.characters)
       ? save.characters.map((c: unknown) =>
           isRecord(c) ? { ...c, inventory: Array.isArray(c.inventory) ? c.inventory : [] } : c,
         )
+      : [],
+  }),
+  // v4: AFK became an expedition the player starts; nobody is on one yet
+  3: (save) => ({
+    ...save,
+    characters: Array.isArray(save.characters)
+      ? save.characters.map((c: unknown) => (isRecord(c) ? { ...c, expedition: null } : c))
       : [],
   }),
 }
@@ -164,7 +172,20 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     location: sanitizeLocation(raw.location),
     stats: { kills: int(stats.kills, 0), deaths: int(stats.deaths, 0) },
     inventory: sanitizeInventory(raw.inventory),
+    expedition: sanitizeExpedition(raw.expedition),
   }
+}
+
+/** A running expedition, if its hunting spot still exists. */
+function sanitizeExpedition(raw: unknown): Expedition | null {
+  if (!isRecord(raw) || typeof raw.startedAt !== 'number' || !Number.isFinite(raw.startedAt)) {
+    return null
+  }
+  const zone = typeof raw.zoneId === 'string' ? ZONES[raw.zoneId] : undefined
+  if (!zone || typeof raw.monsterId !== 'string' || !zone.monsterIds.includes(raw.monsterId)) {
+    return null
+  }
+  return { zoneId: zone.id, monsterId: raw.monsterId, startedAt: raw.startedAt }
 }
 
 /** Valid stacks only, merged per item. */

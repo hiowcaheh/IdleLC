@@ -72,6 +72,18 @@ describe('loadSave', () => {
     expect(r.save.activeCharacterId).toBe(hero!.id)
   })
 
+  it('keeps a running expedition and drops one whose spot no longer exists', () => {
+    const save = withCharacter()
+    save.characters[0]!.expedition = { zoneId: 'glade', monsterId: 'rust-golem', startedAt: NOW }
+    expect(loadSave(serializeSave(save), NOW).save.characters[0]!.expedition).toEqual({
+      zoneId: 'glade',
+      monsterId: 'rust-golem',
+      startedAt: NOW,
+    })
+    save.characters[0]!.expedition = { zoneId: 'glade', monsterId: 'dragon', startedAt: NOW }
+    expect(loadSave(serializeSave(save), NOW).save.characters[0]!.expedition).toBeNull()
+  })
+
   it('gives version 2 characters an empty inventory', () => {
     const v2 = { ...withCharacter(), saveVersion: 2 }
     const hero: Record<string, unknown> = { ...v2.characters[0]! }

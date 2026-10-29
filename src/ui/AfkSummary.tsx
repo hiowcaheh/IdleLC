@@ -4,17 +4,10 @@ import { getMonster } from '../game/data/monsters.ts'
 import { ZONES } from '../game/data/zones.ts'
 import { AFK_MAX_SECONDS } from '../game/logic/afk.ts'
 import { useGameStore } from '../state/gameStore.ts'
+import { duration, fmt } from './expedition/format.ts'
 import { ItemList } from './items/ItemList.tsx'
 
-const fmt = (n: number) => n.toLocaleString('en-US')
-
-function duration(seconds: number): string {
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  return h > 0 ? `${h} h ${m} min` : `${m} min`
-}
-
-/** "While you were away…" — what the character earned hunting during the time away. */
+/** "While you were away…" — what the character brought back from the expedition. */
 export function AfkSummary() {
   const result = useGameStore((s) => s.afkResult)
   const dismiss = useGameStore((s) => s.dismissAfk)
@@ -38,10 +31,9 @@ export function AfkSummary() {
           While you were away…
         </h2>
         <p className="afk__subtitle">
-          You were away for {duration(result.awaySeconds)}
-          {capped ? ` — rewards count up to ${duration(AFK_MAX_SECONDS)}` : ''}. Your hero kept
-          hunting {monster.name}
-          {zone ? ` in ${zone.name}` : ''}.
+          {result.character.name} spent {duration(result.awaySeconds)} hunting {monster.name}
+          {zone ? ` in ${zone.name}` : ''}
+          {capped ? ` — expeditions pay up to ${duration(AFK_MAX_SECONDS)}` : ''}.
         </p>
 
         <dl className="afk__stats">

@@ -36,6 +36,9 @@ function engageDistance(monsterId: string, playerModel: string): number {
   return Math.min(6, Math.max(1.5, heroRadius + monsterRadius + 0.5))
 }
 
+/** The played character is away on an AFK expedition: no fight on screen. */
+const isAway = () => useGameStore.getState().character?.expedition != null
+
 function yawTowards(from: Vector3, to: Vector3): number {
   return Math.atan2(to.x - from.x, to.z - from.z)
 }
@@ -189,6 +192,12 @@ export function Battle() {
   }, [])
 
   useFrame((_, delta) => {
+    const away = isAway()
+    if (playerGroup.current) playerGroup.current.visible = !away
+    if (away) {
+      if (monsterGroup.current) monsterGroup.current.visible = false
+      return
+    }
     const realDt = Math.min(delta, 0.1)
     const dt = realDt * useGameStore.getState().timeScale
     const events = combatSession.tick(dt)
@@ -263,7 +272,7 @@ export function Battle() {
             y: view.playerHeight + 0.22,
             z: view.player.z,
             ratio: c.player.hp / c.player.stats.maxHp,
-            visible: c.phase !== 'defeat',
+            visible: c.phase !== 'defeat' && !isAway(),
           }
         }}
       />
@@ -276,7 +285,8 @@ export function Battle() {
             y: view.monsterHeight * (motion.current.appear || 0) + 0.22,
             z: view.monster.z,
             ratio: c.monster.hp / c.monster.stats.maxHp,
-            visible: view.monsterVisible && c.monster.hp > 0 && motion.current.sink < 0,
+            visible:
+              view.monsterVisible && c.monster.hp > 0 && motion.current.sink < 0 && !isAway(),
           }
         }}
       />

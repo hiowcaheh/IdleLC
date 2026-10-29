@@ -32,7 +32,7 @@ interface GameStore {
   timeScale: number
   /** Latest level up of the played character (`key` changes every time). */
   levelUp: { level: number; key: number } | null
-  /** Rewards for the time away, shown until dismissed. */
+  /** Rewards of the expedition the character just came back from, shown until dismissed. */
   afkResult: AfkResult | null
 
   init(): Promise<void>
@@ -40,8 +40,10 @@ interface GameStore {
   deleteCharacter(characterId: string): Promise<void>
   enterGame(characterId: string): Promise<void>
   leaveGame(): Promise<void>
-  /** The game is visible again (tab/app brought back): pays the time away, if long enough. */
-  resume(): void
+  /** Sends the played character on an AFK expedition (the fight on screen stops). */
+  startExpedition(): Promise<void>
+  /** Brings the character back and pays the expedition. */
+  returnFromExpedition(): Promise<void>
   dismissAfk(): void
   selectMonster(monsterId: string): void
   selectZone(zoneId: string, monsterId?: string): void
@@ -140,7 +142,7 @@ export const useGameStore = create<GameStore>((set, get) => {
 
   const travel = (zoneId: string, monsterId: string) => {
     const character = get().character
-    if (!character) return
+    if (!character || character.expedition) return
     combatEvents.emit(combatSession.setMonster(monsterId))
     const location = { zoneId, monsterId }
     applyCharacter({ ...character, location })
@@ -150,17 +152,23 @@ export const useGameStore = create<GameStore>((set, get) => {
       .catch(logError)
   }
 
-  /** Asks the service for the AFK rewards of the played character. */
-  const claimAfk = () => {
+  /** Ends the expedition of the played character, shows the rewards and restarts the fight. */
+  const claimAfk = async () => {
     const character = get().character
-    if (!character) return Promise.resolve()
-    return enqueue(() => gameService.claimAfk(character.id))
-      .then((result) => {
-        if (!result) return
-        applyCharacter(result.character)
-        set({ afkResult: result })
-      })
-      .catch(logError)
+    if (!character?.expedition) return
+    try {
+      const result = await enqueue(() => gameService.claimAfk(character.id))
+      applyCharacter(result.character)
+      combatSession.start(
+        result.character.classId,
+        result.character.level,
+        result.character.location.monsterId,
+      )
+      combatEvents.emit([{ type: 'reset' }])
+      set({ hud: toHud(combatSession.state), afkResult: result.seconds > 0 ? result : null })
+    } catch (error) {
+      logError(error)
+    }
   }
 
   const dev = (command: (characterId: string) => Promise<CharacterData> | undefined) => {
@@ -212,22 +220,14 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     async enterGame(characterId) {
       await enqueue(() => gameService.setActiveCharacter(characterId))
-      const afk = await enqueue(() => gameService.claimAfk(characterId)).catch((error) => {
-        logError(error)
-        return null
-      })
       const save = get().save
-      const character = afk?.character ?? save.characters.find((c) => c.id === characterId)
+      const character = save.characters.find((c) => c.id === characterId)
       if (!character) return
       combatSession.start(character.classId, character.level, character.location.monsterId)
       set({
         character,
-        afkResult: afk,
-        save: {
-          ...save,
-          activeCharacterId: characterId,
-          characters: save.characters.map((c) => (c.id === characterId ? character : c)),
-        },
+        afkResult: null,
+        save: { ...save, activeCharacterId: characterId },
         hud: toHud(combatSession.state),
       })
     },
@@ -244,8 +244,19 @@ export const useGameStore = create<GameStore>((set, get) => {
       await enqueue(() => gameService.setActiveCharacter(null))
     },
 
-    resume() {
-      void claimAfk()
+    async startExpedition() {
+      const character = get().character
+      if (!character || character.expedition) return
+      try {
+        applyCharacter(await enqueue(() => gameService.startAfk(character.id)))
+        combatEvents.emit([{ type: 'reset' }])
+      } catch (error) {
+        logError(error)
+      }
+    },
+
+    returnFromExpedition() {
+      return claimAfk()
     },
 
     dismissAfk() {
@@ -300,6 +311,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     devKillTarget() {
+      if (get().character?.expedition) return
       combatEvents.emit(combatSession.killTarget())
       set({ hud: toHud(combatSession.state) })
     },
@@ -314,7 +326,10 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (!character || !gameService.dev) return
       const dev = gameService.dev
       enqueue(() => dev.simulateAfk(character.id, seconds))
-        .then(claimAfk)
+        .then((c) => {
+          applyCharacter(c)
+          return claimAfk()
+        })
         .catch(logError)
     },
   }

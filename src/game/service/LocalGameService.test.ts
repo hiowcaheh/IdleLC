@@ -125,28 +125,56 @@ describe('LocalGameService', () => {
     expect(result.character.inventory).toEqual(result.drops)
   })
 
-  it('pays the time away as AFK, at most 8 hours, and only once', async () => {
+  it('pays an expedition for the time it lasted, at most 8 hours', async () => {
     const { game, clock, hero, storage } = await withKnight()
-    clock.now += (AFK_MIN_SECONDS - 1) * 1000
-    expect(await game.claimAfk(hero.id)).toBeNull()
+    const away = await game.startAfk(hero.id)
+    expect(away.expedition).toEqual({ ...hero.location, startedAt: clock.now })
+    expect(stored(storage).characters[0].expedition).not.toBeNull()
 
     clock.now += 10 * 3600 * 1000
     const afk = await game.claimAfk(hero.id)
-    expect(afk).not.toBeNull()
-    expect(afk!.seconds).toBe(AFK_MAX_SECONDS)
-    expect(afk!.kills).toBeGreaterThan(0)
-    expect(afk!.character.level).toBeGreaterThan(1)
-    expect(afk!.character.inventory.length).toBeGreaterThan(0)
-    expect(stored(storage).characters[0].gold).toBe(afk!.gold)
+    expect(afk.awaySeconds).toBe(10 * 3600)
+    expect(afk.seconds).toBe(AFK_MAX_SECONDS)
+    expect(afk.kills).toBeGreaterThan(0)
+    expect(afk.character.expedition).toBeNull()
+    expect(afk.character.level).toBeGreaterThan(1)
+    expect(afk.character.inventory.length).toBeGreaterThan(0)
+    expect(stored(storage).characters[0]).toMatchObject({ gold: afk.gold, expedition: null })
 
-    expect(await game.claimAfk(hero.id)).toBeNull()
+    await expect(game.claimAfk(hero.id)).rejects.toThrow('no-expedition')
   })
 
-  it('simulates time away with a dev command', async () => {
-    const { game, hero } = await withKnight()
-    await game.dev.simulateAfk(hero.id, 3600)
+  it('pays nothing for an expedition shorter than a minute', async () => {
+    const { game, clock, hero } = await withKnight()
+    await game.startAfk(hero.id)
+    clock.now += (AFK_MIN_SECONDS - 1) * 1000
     const afk = await game.claimAfk(hero.id)
-    expect(afk!.seconds).toBe(3600)
+    expect(afk).toMatchObject({ seconds: 0, kills: 0, exp: 0, gold: 0, drops: [] })
+    expect(afk.character.expedition).toBeNull()
+  })
+
+  it('keeps an expedition across reloads and blocks fights and travel meanwhile', async () => {
+    const { game, clock, hero, storage } = await withKnight()
+    await game.startAfk(hero.id)
+    await expect(game.startAfk(hero.id)).rejects.toThrow('on-expedition')
+    await expect(
+      game.reportCombat(hero.id, { monsterId: hero.location.monsterId, kills: 1, deaths: 0 }),
+    ).rejects.toThrow('on-expedition')
+    await expect(
+      game.travel(hero.id, { zoneId: 'glade', monsterId: 'stone-sentinel' }),
+    ).rejects.toThrow('on-expedition')
+
+    clock.now += 3600 * 1000
+    const reloaded = new LocalGameService(storage, { now: () => clock.now, rng: createRng(9) })
+    await reloaded.load()
+    expect((await reloaded.claimAfk(hero.id)).seconds).toBe(3600)
+  })
+
+  it('simulates a long expedition with a dev command', async () => {
+    const { game, hero } = await withKnight()
+    const away = await game.dev.simulateAfk(hero.id, 3600)
+    expect(away.expedition).not.toBeNull()
+    expect((await game.claimAfk(hero.id)).seconds).toBe(3600)
   })
 
   it('caps kills that come faster than a fight can take', async () => {

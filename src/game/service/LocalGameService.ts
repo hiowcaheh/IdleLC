@@ -86,6 +86,7 @@ export class LocalGameService implements GameService {
   }
 
   async travel(characterId: string, location: CharacterLocation): Promise<CharacterData> {
+    this.notOnExpedition(characterId)
     const zone = ZONES[location.zoneId]
     if (!zone) throw new GameError('unknown-zone', `Unknown zone: ${location.zoneId}`)
     if (!zone.monsterIds.includes(location.monsterId)) {
@@ -95,7 +96,7 @@ export class LocalGameService implements GameService {
   }
 
   async reportCombat(characterId: string, report: CombatReport): Promise<CombatResult> {
-    const character = this.character(characterId)
+    const character = this.notOnExpedition(characterId)
     if (report.monsterId !== character.location.monsterId) {
       throw new GameError('wrong-monster', `${characterId} is not hunting ${report.monsterId}`)
     }
@@ -107,17 +108,30 @@ export class LocalGameService implements GameService {
     return copy({ ...result, character: updated })
   }
 
-  async claimAfk(characterId: string): Promise<AfkResult | null> {
-    const character = this.character(characterId)
+  async startAfk(characterId: string): Promise<CharacterData> {
+    const character = this.notOnExpedition(characterId)
     const now = this.now()
-    const away = Math.max(0, (now - character.lastPlayedAt) / 1000)
-    if (away < AFK_MIN_SECONDS) {
-      this.update(characterId, (c) => ({ ...c, lastPlayedAt: now }))
-      return null
-    }
-    const result = simulateAfk(character, away, this.rng)
-    const updated = this.update(characterId, () => ({ ...result.character, lastPlayedAt: now }))
-    return copy({ ...result, character: updated })
+    return copy(
+      this.update(characterId, (c) => ({
+        ...c,
+        expedition: { ...character.location, startedAt: now },
+        lastPlayedAt: now,
+      })),
+    )
+  }
+
+  async claimAfk(characterId: string): Promise<AfkResult> {
+    const character = this.character(characterId)
+    if (!character.expedition) throw new GameError('no-expedition', `${characterId} is not away`)
+    const now = this.now()
+    const away = Math.max(0, (now - character.expedition.startedAt) / 1000)
+    const result = simulateAfk(character, away >= AFK_MIN_SECONDS ? away : 0, this.rng)
+    const updated = this.update(characterId, () => ({
+      ...result.character,
+      expedition: null,
+      lastPlayedAt: now,
+    }))
+    return copy({ ...result, awaySeconds: away, character: updated })
   }
 
   async updateSettings(patch: Partial<Settings>): Promise<Settings> {
@@ -163,17 +177,24 @@ export class LocalGameService implements GameService {
     setTimeScale: (scale) => {
       this.timeScale = Math.max(1, scale)
     },
-    simulateAfk: async (characterId, seconds) => {
-      this.update(characterId, (c) => ({
-        ...c,
-        lastPlayedAt: this.now() - Math.max(0, seconds) * 1000,
-      }))
-    },
+    simulateAfk: async (characterId, seconds) =>
+      copy(
+        this.update(characterId, (c) => {
+          const start = (c.expedition?.startedAt ?? this.now()) - Math.max(0, seconds) * 1000
+          return { ...c, expedition: { ...(c.expedition ?? c.location), startedAt: start } }
+        }),
+      ),
   }
 
   private character(characterId: string): CharacterData {
     const character = this.save.characters.find((c) => c.id === characterId)
     if (!character) throw new GameError('unknown-character', `No character ${characterId}`)
+    return character
+  }
+
+  private notOnExpedition(characterId: string): CharacterData {
+    const character = this.character(characterId)
+    if (character.expedition) throw new GameError('on-expedition', `${characterId} is away`)
     return character
   }
 

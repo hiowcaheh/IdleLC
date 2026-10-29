@@ -16,6 +16,13 @@ export interface CharacterLocation {
   monsterId: string
 }
 
+/** An AFK expedition: the character hunts this spot while the player is away. */
+export interface Expedition {
+  zoneId: string
+  monsterId: string
+  startedAt: number
+}
+
 export interface CharacterData {
   id: string
   name: string
@@ -30,6 +37,8 @@ export interface CharacterData {
   location: CharacterLocation
   stats: { kills: number; deaths: number }
   inventory: ItemStack[]
+  /** Set while the character is away on an AFK expedition. */
+  expedition: Expedition | null
 }
 
 export interface NewCharacter {
@@ -83,6 +92,7 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     location: startLocation(),
     stats: { kills: 0, deaths: 0 },
     inventory: [],
+    expedition: null,
   }
 }
 

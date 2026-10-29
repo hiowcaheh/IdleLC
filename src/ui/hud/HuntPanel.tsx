@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
 import { useGameStore } from '../../state/gameStore.ts'
+import { ExpeditionDialog } from '../expedition/ExpeditionDialog.tsx'
 import { levelTone } from './levelColor.ts'
 
 /** Zone name, the monsters you can hunt here, and the kill count. */
@@ -11,8 +12,10 @@ export function HuntPanel() {
   const kills = useGameStore((s) => s.character?.stats.kills ?? 0)
   const playerLevel = useGameStore((s) => s.character?.level ?? 1)
   const selectMonster = useGameStore((s) => s.selectMonster)
+  const character = useGameStore((s) => s.character)
   const zone = ZONES[zoneId]
   const list = useRef<HTMLDivElement>(null)
+  const [expeditionOpen, setExpeditionOpen] = useState(false)
 
   // keep the hunted monster visible when it was picked elsewhere (dev tools, zone change)
   useEffect(() => {
@@ -30,6 +33,9 @@ export function HuntPanel() {
         <p className="hunt__kills">
           Kills: <strong>{kills}</strong>
         </p>
+        <button type="button" className="hunt__expedition" onClick={() => setExpeditionOpen(true)}>
+          Expedition
+        </button>
       </header>
       <div ref={list} className="hunt__targets" role="radiogroup" aria-label="Choose your target">
         {zone.monsterIds.map((id) => {
@@ -52,6 +58,9 @@ export function HuntPanel() {
           )
         })}
       </div>
+      {expeditionOpen && character && (
+        <ExpeditionDialog character={character} onClose={() => setExpeditionOpen(false)} />
+      )}
     </section>
   )
 }
