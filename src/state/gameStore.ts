@@ -206,7 +206,11 @@ export const useGameStore = create<GameStore>((set, get) => {
     try {
       const result = await enqueue(() => gameService.claimAfk(character.id))
       applyCharacter(result.character)
-      combatSession.start(result.character, result.character.location.monsterId)
+      combatSession.resume(
+        result.character,
+        result.character.location.monsterId,
+        result.awaySeconds,
+      )
       combatEvents.emit([{ type: 'reset' }])
       set({ hud: toHud(combatSession.state), afkResult: result.seconds > 0 ? result : null })
     } catch (error) {

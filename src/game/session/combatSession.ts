@@ -3,6 +3,7 @@
  * its outcome is reported to the GameService, which decides the rewards.
  */
 import {
+  carryVitals,
   changeMonster,
   combatTick,
   createCombat,
@@ -42,6 +43,12 @@ export class CombatSession {
   /** Starts a fresh fight for a character against a monster (entering the game). */
   start(hero: Hero, monsterId: string): void {
     this.combat = createCombat(this.fighter(hero), monsterId, monsterFighter(monsterId))
+  }
+
+  /** A fresh fight after `awaySeconds` away (expedition), keeping the hero's HP and MP. */
+  resume(hero: Hero, monsterId: string, awaySeconds: number): void {
+    const next = createCombat(this.fighter(hero), monsterId, monsterFighter(monsterId))
+    this.combat = carryVitals(this.combat, next, awaySeconds)
   }
 
   tick(dt: number): CombatEvent[] {

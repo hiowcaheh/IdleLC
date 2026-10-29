@@ -5,6 +5,7 @@ import {
   MP_POTION_BELOW,
   TIMINGS,
   approachTime,
+  carryVitals,
   changeMonster,
   choosePotion,
   combatTick,
@@ -571,5 +572,24 @@ describe('rare options in combat', () => {
     const step = TIMINGS.spawning + TIMINGS.approach / 1.3 + 0.02
     expect(combatTick(quick, step, createRng(1)).state.phase).toBe('fighting')
     expect(combatTick(plain, step, createRng(1)).state.phase).toBe('approach')
+  })
+})
+
+describe('carryVitals', () => {
+  it('keeps HP and MP after an instant return and regenerates them over time away', () => {
+    const fighter = { level: 10, stats: stats({ maxHp: 1000, maxMp: 200 }) }
+    const hurt = createCombat(fighter, 'm', weakMonster)
+    hurt.player = { ...hurt.player, hp: 300, mp: 50 }
+    const next = createCombat(fighter, 'm', weakMonster)
+    const now = carryVitals(hurt, next, 0)
+    expect(now.player.hp).toBe(300)
+    expect(now.player.mp).toBe(50)
+    expect(now.phase).toBe('spawning')
+    const later = carryVitals(hurt, next, 10) // 3% HP and 2% MP per second out of combat
+    expect(later.player.hp).toBe(600)
+    expect(later.player.mp).toBe(90)
+    expect(carryVitals(hurt, next, 3600).player.hp).toBe(1000)
+    const dead = { ...hurt, player: { ...hurt.player, hp: 0 } }
+    expect(carryVitals(dead, next, 0).player.hp).toBe(1)
   })
 })

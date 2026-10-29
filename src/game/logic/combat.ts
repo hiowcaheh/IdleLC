@@ -324,6 +324,34 @@ export function takePotionsUsed(state: CombatState): {
   }
 }
 
+/**
+ * A new fight after time away from the screen (an expedition): the hero keeps the share of HP and MP
+ * it had in `previous` and regenerates as out of combat for `awaySeconds` — leaving and coming back
+ * at once heals nothing.
+ */
+export function carryVitals(
+  previous: CombatState,
+  next: CombatState,
+  awaySeconds: number,
+): CombatState {
+  const before = previous.player
+  const beforeStats = effectiveStats(before)
+  const stats = next.player.stats
+  const maxMp = stats.maxMp ?? 0
+  const share = (value: number, max: number) => (max > 0 ? Math.max(0, value) / max : 1)
+  const seconds = Math.max(0, awaySeconds)
+  const hp = stats.maxHp * (share(before.hp, beforeStats.maxHp) + OUT_OF_COMBAT_REGEN * seconds)
+  const mp = maxMp * (share(before.mp, beforeStats.maxMp ?? 0) + OUT_OF_COMBAT_MP_REGEN * seconds)
+  return {
+    ...next,
+    player: {
+      ...next.player,
+      hp: Math.max(1, Math.min(stats.maxHp, Math.round(hp))),
+      mp: Math.min(maxMp, Math.round(mp)),
+    },
+  }
+}
+
 /** Dev tool: the current monster dies at once (only while it is on the field). */
 export function killMonster(state: CombatState): TickResult {
   if (state.phase !== 'approach' && state.phase !== 'fighting') return { state, events: [] }
