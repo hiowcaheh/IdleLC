@@ -20,6 +20,7 @@ import { SettingsPanel } from './SettingsPanel.tsx'
 import { CharacterPanel } from './gear/CharacterPanel.tsx'
 import { SkillBar } from './skills/SkillBar.tsx'
 import { SkillsPanel } from './skills/SkillsPanel.tsx'
+import { Toasts } from './Toasts.tsx'
 
 export function GameScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -90,9 +91,13 @@ export function GameScreen() {
                 <path d="M6 11 C6 6.5 8.5 4 12 4 C15.5 4 18 6.5 18 11 V15 H14.5 V12 H9.5 V15 H6 Z M8 15 V20 M16 15 V20 M12 12 V20" />
               </svg>
             </button>
-            {!expedition && <PotionSlots />}
           </div>
         </div>
+        {!expedition && (
+          <div className="hud__side">
+            <PotionSlots />
+          </div>
+        )}
         <div className="hud__center">
           {!expedition && <StatusLine />}
           <LevelUpBanner />
@@ -116,6 +121,7 @@ export function GameScreen() {
       {skillsOpen && <SkillsPanel onClose={() => setSkillsOpen(false)} />}
       {characterOpen && <CharacterPanel onClose={() => setCharacterOpen(false)} />}
       <AfkSummary />
+      <Toasts />
     </div>
   )
 }

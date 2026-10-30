@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { CLASSES } from '../../game/data/classes.ts'
-import { classSlots, getItem } from '../../game/data/items.ts'
+import { HEAVEN_STONE_ID, classSlots, getItem } from '../../game/data/items.ts'
 import type { EquipSlot } from '../../game/data/types.ts'
 import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
 import {
@@ -10,23 +10,15 @@ import {
 } from '../../game/logic/combat.ts'
 import { GameError } from '../../game/logic/character.ts'
 import { MAX_PLUS, stonesOwned, upgradeChance, type GearPiece } from '../../game/logic/equipment.ts'
-import { OPTION_PLAY_SECONDS } from '../../game/logic/options.ts'
+import { rewardBonuses } from '../../game/logic/rewards.ts'
 import { useGameStore } from '../../state/gameStore.ts'
+import { toast } from '../../state/toasts.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
+import { ItemInfo } from '../items/ItemInfo.tsx'
 import { ItemSlot } from '../items/ItemSlot.tsx'
 import { useCombatTicker } from '../skills/useCombatTicker.ts'
 import { Sheet } from '../Sheet.tsx'
-import {
-  SLOT_LABELS,
-  fmt,
-  gearLine,
-  heroStats,
-  nameTone,
-  optionTotals,
-  pieceName,
-  rareLabel,
-} from './format.ts'
-import { OptionList } from './OptionList.tsx'
+import { SLOT_LABELS, fmt, heroStats, nameTone, pieceName } from './format.ts'
 
 type Tab = 'stats' | 'equipment'
 
@@ -62,7 +54,6 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   const upgradeItem = useGameStore((s) => s.upgradeItem)
   const [tab, setTab] = useState<Tab>('stats')
   const [selected, setSelected] = useState<EquipSlot | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const combat = useCombatTicker(500)
   if (!character) return null
@@ -71,15 +62,22 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   // the fight's stats include the buffs on the hero right now; the gear-only ones are the base
   const base = heroStats(character)
   const stats = away ? base : effectiveStats(combat.player)
-  const buffs = away ? [] : combat.player.effects.map((e) => e.name)
-  const options = optionTotals(character.equipment, character.classId)
-  const nextOption = OPTION_PLAY_SECONDS - character.optionProgress
+  const effects = away ? [] : combat.player.effects
+  const buffs = effects.map((e) => e.name)
   const castTime = stats.castTime ?? 0
   /** What the buffs on the hero change in a stat ("+25"), or nothing. */
   const change = (now: number, before: number, digits = 0) => {
     const d = Number((now - before).toFixed(digits))
     return d === 0 ? undefined : `${d > 0 ? '+' : '−'}${Math.abs(d).toFixed(digits)}`
   }
+  // recovery buffs and potions restore HP / MP per second: shown per regeneration tick too
+  const perTick = (key: 'hpPerSecond' | 'mpPerSecond') =>
+    effects.reduce((sum, e) => sum + (e[key] ?? 0), 0) * REGEN_TICK_SECONDS
+  const hpRecovery = (stats.hpRegen ?? 0) + perTick('hpPerSecond')
+  const mpRecovery = (stats.mpRegen ?? 0) + perTick('mpPerSecond')
+  const signed = (value: number) => `${value < 0 ? '−' : '+'}${percent(Math.abs(value))}`
+  // rare options with the caps combat applies
+  const capped = (value: number | undefined, cap: number) => Math.min(cap * 100, value ?? 0)
   const statRows: [string, string, string?][] = [
     ['Health', fmt(stats.maxHp), change(stats.maxHp, base.maxHp)],
     ['Mana', fmt(stats.maxMp ?? 0), change(stats.maxMp ?? 0, base.maxMp ?? 0)],
@@ -102,21 +100,29 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
     ['Critical damage', `×${stats.critMultiplier.toFixed(2)}`],
     ['Accuracy', `+${percent(stats.hit ?? 0)}`, change(stats.hit ?? 0, base.hit ?? 0, 1)],
     ['Evasion', `+${percent(stats.dodge ?? 0)}`, change(stats.dodge ?? 0, base.dodge ?? 0, 1)],
-    ['HP recovery', `+${fmt(stats.hpRegen ?? 0)} / ${REGEN_TICK_SECONDS} s`],
-    ['MP recovery', `+${fmt(stats.mpRegen ?? 0)} / ${REGEN_TICK_SECONDS} s`],
+    [
+      'HP recovery',
+      `+${fmt(Math.round(hpRecovery))} / ${REGEN_TICK_SECONDS} s`,
+      change(hpRecovery, base.hpRegen ?? 0),
+    ],
+    [
+      'MP recovery',
+      `+${fmt(Math.round(mpRecovery))} / ${REGEN_TICK_SECONDS} s`,
+      change(mpRecovery, base.mpRegen ?? 0),
+    ],
+    ['Skill cooldown', signed(-capped(stats.cooldownReduction, MAX_COOLDOWN_REDUCTION))],
+    ['Skill MP cost', signed(-capped(stats.mpCostReduction, MAX_MP_COST_REDUCTION))],
+    ['HP steal', signed(stats.hpSteal ?? 0)],
+    ['MP steal', signed(stats.mpSteal ?? 0)],
+    ['Move speed', signed(stats.moveSpeed ?? 0)],
   ]
-  // rare options: shown when the gear has them (with the caps combat applies)
-  const capped = (value: number | undefined, cap: number) => Math.min(cap * 100, value ?? 0)
-  const extras: [string, number][] = [
-    ['Skill cooldown', -capped(stats.cooldownReduction, MAX_COOLDOWN_REDUCTION)],
-    ['Skill MP cost', -capped(stats.mpCostReduction, MAX_MP_COST_REDUCTION)],
-    ['HP steal', stats.hpSteal ?? 0],
-    ['MP steal', stats.mpSteal ?? 0],
-    ['Move speed', stats.moveSpeed ?? 0],
+  const bonuses = rewardBonuses(character)
+  const bonusRows: [string, number][] = [
+    ['EXP', bonuses.exp],
+    ['Skill points', bonuses.sp],
+    ['Gold', bonuses.gold],
+    ['Drop chance', bonuses.drop],
   ]
-  for (const [label, value] of extras) {
-    if (value !== 0) statRows.push([label, `${value > 0 ? '+' : '−'}${percent(Math.abs(value))}`])
-  }
   const stones = stonesOwned(character)
   const slots = classSlots(character.classId)
 
@@ -124,10 +130,11 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
     if (busy) return
     setBusy(true)
     try {
-      setMessage(await action())
+      toast(await action())
     } catch (error) {
-      setMessage(
+      toast(
         error instanceof GameError ? 'That is not possible right now.' : 'Something went wrong.',
+        'error',
       )
     } finally {
       setBusy(false)
@@ -149,21 +156,13 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
     const item = getItem(piece.itemId)
     return (
       <>
-        <div className="bag-details__head">
-          <ItemIcon item={item} />
-          <span className="item-row__body">
-            <span className="gear-slot__label">{SLOT_LABELS[slot]}</span>
-            <span className={`item-row__name${nameTone(piece)}`}>
-              {pieceName(piece.itemId, piece.plus, piece.rare)}
-            </span>
-            <span className="item-row__meta">
-              {[rareLabel(piece), gearLine(piece.itemId, piece.plus, piece.rare)]
-                .filter(Boolean)
-                .join(' · ')}
-            </span>
-            <OptionList options={piece.options} classId={character.classId} />
-          </span>
-        </div>
+        <ItemInfo
+          character={character}
+          itemId={piece.itemId}
+          plus={piece.plus}
+          options={piece.options}
+          rare={piece.rare}
+        />
         <div className="item-row__actions">
           {item.upgradeable && (
             <button
@@ -192,13 +191,18 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
             Take off
           </button>
           {item.upgradeable ? (
-            <p className="item-row__note">
-              Heaven Stones: {stones}
-              {stones < 1
-                ? ' — the shop sells them; 10 Smelting Stones from monsters make one (Inventory).'
-                : '.'}
-              {piece.plus >= 3 && piece.plus < MAX_PLUS ? ' A failure takes one + away.' : ''}
-            </p>
+            <>
+              <span
+                className={`stone-count${stones < 1 ? ' is-none' : ''}`}
+                title={`Heaven Stones in your bag: ${fmt(stones)}`}
+              >
+                <ItemIcon item={getItem(HEAVEN_STONE_ID)} size={28} />
+                <span className="stone-count__value">×{fmt(stones)}</span>
+              </span>
+              {piece.plus >= 3 && piece.plus < MAX_PLUS && (
+                <p className="item-row__note">A failed upgrade takes one + away.</p>
+              )}
+            </>
           ) : (
             <p className="item-row__note">Accessories can't be upgraded.</p>
           )}
@@ -247,22 +251,15 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
               Active now: {buffs.join(', ')} (in brackets: what they add).
             </p>
           )}
-          <h3 className="inventory__heading">Options on your gear</h3>
-          <p className="sheet__meta">
-            Next option on a worn piece in {Math.max(1, Math.ceil(nextOption / 60))} min of play
-            (not on expeditions).
-          </p>
-          {options.length > 0 ? (
-            <span className="option-list option-list--totals">
-              {options.map((line) => (
-                <span key={line.text} className="option-list__item" title={line.note}>
-                  {line.text}
-                </span>
-              ))}
-            </span>
-          ) : (
-            <p className="sheet__empty">None of your worn pieces has options.</p>
-          )}
+          <h3 className="inventory__heading">Bonuses</h3>
+          <dl className="hero-stats">
+            {bonusRows.map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{signed(value)}</dd>
+              </div>
+            ))}
+          </dl>
           <h3 className="inventory__heading">Hunting record</h3>
           <dl className="hero-stats">
             <div>
@@ -283,9 +280,6 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
           id="character-panel-equipment"
           aria-labelledby="character-tab-equipment"
         >
-          <p className="inventory__status" role="status">
-            {message ?? ''}
-          </p>
           <div
             className="equip-board"
             style={{
@@ -313,10 +307,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
                     selected={selected === slot}
 
                     label={`${SLOT_LABELS[slot]}: ${name}`}
-                    onClick={() => {
-                      setSelected(selected === slot ? null : slot)
-                      setMessage(null)
-                    }}
+                    onClick={() => setSelected(selected === slot ? null : slot)}
                   />
                 </div>
               )
@@ -334,11 +325,6 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
               titleId="worn-piece-title"
               onClose={() => setSelected(null)}
             >
-              {message && (
-                <p className="inventory__status" role="status">
-                  {message}
-                </p>
-              )}
               <div className="item-details">{details(selected, character.equipment[selected])}</div>
             </Sheet>
           )}

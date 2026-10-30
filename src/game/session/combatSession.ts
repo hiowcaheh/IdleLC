@@ -7,16 +7,20 @@ import {
   changeMonster,
   combatTick,
   createCombat,
+  drinkPotion,
   healPlayer,
   killMonster,
   takePotionsUsed,
   updatePlayer,
   type CombatEvent,
   type CombatState,
+  type DrinkProblem,
   type FighterInit,
 } from '../logic/combat.ts'
+import { getItem } from '../data/items.ts'
 import { monsterFighter, playerFighter, type Hero } from '../logic/fighters.ts'
 import type { ItemStack } from '../logic/loot.ts'
+import { countOwned } from '../logic/potions.ts'
 import { createRng, type Rng } from '../logic/rng.ts'
 
 /** Stand-in fighter before a character enters the game. */
@@ -67,6 +71,22 @@ export class CombatSession {
   /** New level, skills, gear or potions, keeping the HP and MP ratios. */
   setPlayer(hero: Hero): void {
     this.combat = updatePlayer(this.combat, this.fighter(hero))
+  }
+
+  /**
+   * The player has the hero drink a potion from the bag (any potion it owns, slot or not); it is
+   * reported like the ones drunk by itself. Events for the scene, or why it can't.
+   */
+  drink(hero: Hero, itemId: number): { events: CombatEvent[]; problem: DrinkProblem | null } {
+    const item = getItem(itemId)
+    if (!item.potion) return { events: [], problem: 'none-left' }
+    if (hero.level < item.level) return { events: [], problem: 'level-too-low' }
+    // the bag still holds the potions reported but not settled
+    const count = countOwned(hero.inventory ?? [], itemId) - (this.reported.get(itemId) ?? 0)
+    const supply = { itemId, name: item.name, count, potion: item.potion }
+    const { state, events, problem } = drinkPotion(this.combat, supply)
+    this.combat = state
+    return { events, problem }
   }
 
   /** The potions drunk since the last call, to report; they stay off the supply until settled. */

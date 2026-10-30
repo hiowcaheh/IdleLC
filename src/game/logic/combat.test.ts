@@ -8,6 +8,7 @@ import {
   carryVitals,
   changeMonster,
   choosePotion,
+  drinkPotion,
   combatTick,
   createCombat,
   healPlayer,
@@ -528,6 +529,30 @@ describe('potions in combat', () => {
     const s = drinker([], 0)
     const next = updatePlayer({ ...s, phase: 'defeat' }, { level: 11, stats: stats() })
     expect(next.player.hp).toBe(0)
+  })
+})
+
+describe('drinking a potion from the bag', () => {
+  it('works at any HP and counts like a potion drunk by itself', () => {
+    const s = drinker([], 1000) // full HP, no quick slot potions
+    const r = drinkPotion(s, potion(43, 'hp', 16, 2))
+    expect(r.problem).toBeNull()
+    expect(r.events).toEqual([{ type: 'potion', itemId: 43, name: 'Potion 43', kind: 'hp' }])
+    expect(r.state.player.potionsUsed).toEqual({ 43: 1 })
+    expect(r.state.player.potionCooldowns.hp).toBe(5)
+    expect(s.player.potionsUsed).toEqual({}) // pure
+  })
+
+  it('says why not: cooling down or working, none left, dead', () => {
+    const s = drinker([])
+    const drunk = drinkPotion(s, potion(43, 'hp', 16, 2)).state
+    expect(drinkPotion(drunk, potion(44, 'hp', 30)).problem).toBe('cooldown')
+    const cooled = { ...drunk, player: { ...drunk.player, potionCooldowns: {} } }
+    expect(drinkPotion(cooled, potion(44, 'hp', 30)).problem).toBe('working')
+    expect(drinkPotion(drunk, potion(46, 'mp', 10)).problem).toBeNull()
+    expect(drinkPotion(drunk, potion(43, 'mpRegen', 3, 1)).problem).toBe('none-left')
+    const dead = { ...s, player: { ...s.player, hp: 0 } }
+    expect(drinkPotion(dead, potion(43, 'hp', 16)).problem).toBe('dead')
   })
 })
 

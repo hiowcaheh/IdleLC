@@ -121,6 +121,9 @@ w kodzie serwera LC (tam mogą być dodatkowe zasady: mnożnik dropu serwera, r�
 Przedmioty trafiają do ekwipunku jako stosy (jeden stos na rodzaj; osobne egzemplarze sprzętu z ulepszeniem
 dojdą w M5). Ekwipunek nie ma na razie limitu miejsc.
 
+Sprzęt, którego nie może nosić żadna z 6 klas IdleLC (w bazie: Night Shadow, `a_job_flag` 64), **nie
+wypada** — wpisy takich przedmiotów są pomijane w tabelach dropu (decyzja właściciela, `monsters.ts`).
+
 ## AFK — wyprawy
 
 - Powrót z wyprawy nie odnawia HP i MP: postać ma ich tyle (proporcjonalnie), ile przed wyprawą, plus
@@ -306,7 +309,9 @@ Picie (zasady **własne**, `src/game/logic/combat.ts`):
 - leczenie, gdy HP < **50%**; mana, gdy MP < **30%**; regeneracja HP / MP, gdy HP / MP nie jest pełne;
 - naraz działa jedna mikstura danego rodzaju, a po wypiciu rodzaj czeka na odnowienie (`a_reuseTime`);
 - przełączniki AUTO slotów: wyłączone — postać nie pije mikstury ze slotu (także na wyprawie);
-- zapis v9 przeniósł starsze postacie: do slotu trafiła mikstura danego rodzaju, której torba ma najwięcej.
+- zapis v9 przeniósł starsze postacie: do slotu trafiła mikstura danego rodzaju, której torba ma najwięcej;
+- gracz może też wypić miksturę ręcznie z torby (Inventory → mikstura → Drink, `drinkPotion`): przy dowolnym
+  HP / MP i także spoza slotów, ale z tymi samymi zasadami odnowienia i „jedna naraz” (nie w czasie wyprawy).
 
 Zużycie liczy walka w przeglądarce, a serwis zdejmuje mikstury z torby przy zgłoszeniu walki
 (`reportCombat`, pole `potions`, najwyżej tyle, ile jest w torbie). Zgłoszenie idzie po każdej walce, przy

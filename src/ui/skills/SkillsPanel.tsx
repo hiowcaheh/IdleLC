@@ -10,6 +10,7 @@ import {
   type SkillRank,
 } from '../../game/logic/skills.ts'
 import { useGameStore } from '../../state/gameStore.ts'
+import { toast } from '../../state/toasts.ts'
 import { wielded } from '../../game/logic/equipment.ts'
 import {
   KIND_LABELS,
@@ -54,7 +55,6 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
   const setSkillBar = useGameStore((s) => s.setSkillBar)
   const [tab, setTab] = useState<Tab>('active')
   const [selected, setSelected] = useState<number | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   const classId = character?.classId
@@ -72,10 +72,11 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
     setBusy(true)
     try {
       await action()
-      setMessage(done)
+      toast(done)
     } catch (error) {
-      setMessage(
+      toast(
         error instanceof GameError ? 'That is not possible right now.' : 'Something went wrong.',
+        'error',
       )
     } finally {
       setBusy(false)
@@ -227,28 +228,22 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
   }
 
   return (
-    <Sheet
-      title="Skills"
-      titleId="skills-title"
-      onClose={onClose}
-      extra={
-        <p className="skills__sp">
-          <span aria-label="Skills on the bar">
-            Bar <strong>{character.skillBar.length}</strong>/{SKILL_BAR_SIZE}
-          </span>
-          {' · '}
-          <span aria-label="Skill points">
-            <strong>{formatSp(character.sp)}</strong> SP
-          </span>
-        </p>
-      }
-    >
+    <Sheet title="Skills" titleId="skills-title" onClose={onClose}>
+      <dl className="hero-stats">
+        <div>
+          <dt>Skill bar</dt>
+          <dd>
+            {character.skillBar.length} / {SKILL_BAR_SIZE}
+          </dd>
+        </div>
+        <div>
+          <dt>Skill points</dt>
+          <dd>{formatSp(character.sp)}</dd>
+        </div>
+      </dl>
       <p className="sheet__meta">
         Monsters give skill points (SP). Learned skills fire on their own when they are ready and
         you have the mana.
-      </p>
-      <p className="inventory__status" role="status">
-        {message ?? ''}
       </p>
       <div className="tabs" role="tablist" aria-label="Skill kinds">
         {TABS.map((t) => (

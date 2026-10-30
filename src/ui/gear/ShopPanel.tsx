@@ -1,10 +1,11 @@
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { EQUIP_SLOTS, HEAVEN_STONE_ID, getItem } from '../../game/data/items.ts'
 import type { EquipSlot, GearSlot, ItemDef } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
 import { isRare } from '../../game/logic/rare.ts'
 import { buyPrice, shopOffer } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
+import { toast } from '../../state/toasts.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { TYPE_LABELS } from '../items/itemTypes.ts'
 import { potionLine, potionText } from '../items/potionText.ts'
@@ -30,7 +31,6 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)
   const buyItem = useGameStore((s) => s.buyItem)
   const [selected, setSelected] = useState<number | null>(null)
-  const [message, setMessage] = useState<ReactNode>(null)
   const [busy, setBusy] = useState(false)
   if (!character) return null
 
@@ -55,16 +55,17 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
           .map((o) => o.text)
           .join(', '),
       )
-      setMessage(
+      toast(
         pieces.length === 0
           ? `Bought ${count > 1 ? `${count}× ` : ''}${name}.`
           : `Bought ${name}: ${options.join(' / ')}.`,
       )
     } catch (error) {
-      setMessage(
+      toast(
         error instanceof GameError && error.code === 'not-enough-gold'
           ? 'Not enough gold.'
           : 'That is not possible right now.',
+        'error',
       )
     } finally {
       setBusy(false)
@@ -184,10 +185,6 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
         </p>
       }
     >
-      <p className="inventory__status" role="status">
-        {message ?? ''}
-      </p>
-
       <h3 className="inventory__heading">Weapons and armor</h3>
       <p className="sheet__meta">
         For your level: the tier you are in, the one before and the next one.

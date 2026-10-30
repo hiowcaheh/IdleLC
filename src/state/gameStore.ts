@@ -3,7 +3,12 @@ import { ZONES } from '../game/data/zones.ts'
 import type { AfkResult } from '../game/logic/afk.ts'
 import type { CharacterData, NewCharacter } from '../game/logic/character.ts'
 import type { PotionGroup, PotionSlot } from '../game/logic/potions.ts'
-import { effectiveStats, type CombatPhase, type CombatState } from '../game/logic/combat.ts'
+import {
+  effectiveStats,
+  type CombatPhase,
+  type CombatState,
+  type DrinkProblem,
+} from '../game/logic/combat.ts'
 import { heroKey } from '../game/logic/fighters.ts'
 import type { EquipSlot } from '../game/data/types.ts'
 import type { GearSource, UpgradeResult } from '../game/logic/equipment.ts'
@@ -69,6 +74,8 @@ interface GameStore {
   sellGear(uids: string[]): Promise<PieceSale>
   identifyItems(magnifierId: number, targets: IdentifyTarget[]): Promise<IdentifyResult>
   setPotionSlot(group: PotionGroup, slot: PotionSlot): Promise<void>
+  /** The hero drinks a potion from the bag now (the bag updates with the next report). */
+  drinkPotion(itemId: number): DrinkProblem | 'away' | null
   selectMonster(monsterId: string): void
   selectZone(zoneId: string, monsterId?: string): void
   syncCombat(combat: CombatState): void
@@ -377,6 +384,18 @@ export const useGameStore = create<GameStore>((set, get) => {
     async setPotionSlot(group, slot) {
       const id = playedId()
       applyCharacter(await enqueue(() => gameService.setPotionSlot(id, group, slot)))
+    },
+
+    drinkPotion(itemId) {
+      const character = get().character
+      if (!character || character.expedition) return 'away'
+      const { events, problem } = combatSession.drink(character, itemId)
+      if (problem) return problem
+      combatEvents.emit(events)
+      set({ hud: toHud(combatSession.state) })
+      // the service takes it from the bag right away, so the bag shows one less
+      reportCombat(0, 0)
+      return null
     },
 
     async sellGear(uids) {

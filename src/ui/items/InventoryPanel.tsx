@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   GOLDEN_MAGNIFIER_ID,
   HEAVEN_STONE_ID,
@@ -8,25 +8,23 @@ import {
 } from '../../game/data/items.ts'
 import type { ItemDef, ItemType } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
-import { STONES_PER_HEAVEN, type GearPiece, type GearSource } from '../../game/logic/equipment.ts'
+import {
+  STONES_PER_HEAVEN,
+  checkWear,
+  type GearPiece,
+  type GearSource,
+} from '../../game/logic/equipment.ts'
 import type { ItemOption } from '../../game/logic/options.ts'
 import { isRare, type IdentifyTarget } from '../../game/logic/rare.ts'
+import type { DrinkProblem } from '../../game/logic/combat.ts'
 import type { ItemStack } from '../../game/logic/loot.ts'
 import { sellPrice, stacksValue } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
-import {
-  compareText,
-  gearLine,
-  nameTone,
-  pieceName,
-  rareLabel,
-  wearProblem,
-} from '../gear/format.ts'
-import { OptionList } from '../gear/OptionList.tsx'
+import { toast } from '../../state/toasts.ts'
+import { compareText, nameTone, pieceName, rareLabel, wearProblem } from '../gear/format.ts'
 import { potionText } from './potionText.ts'
 import { Sheet } from '../Sheet.tsx'
-import { ItemIcon } from './ItemIcon.tsx'
-import { ItemRowContent } from './ItemList.tsx'
+import { ItemInfo } from './ItemInfo.tsx'
 import { ItemSlot } from './ItemSlot.tsx'
 
 const TYPE_ORDER: ItemType[] = [
@@ -66,8 +64,21 @@ const categoryOf = (item: ItemDef): Category =>
     ? item.type
     : 'other'
 
+/** By type; weapons and armor from the highest required level down. */
 const byType = (a: ItemDef, b: ItemDef) =>
-  TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type) || a.name.localeCompare(b.name)
+  TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type) ||
+  (a.gear && b.gear ? b.level - a.level : 0) ||
+  a.name.localeCompare(b.name)
+
+/** What the bag says when the hero can't drink a potion now. */
+const DRINK_PROBLEMS: Record<DrinkProblem | 'away', string> = {
+  away: 'Your hero is on an expedition.',
+  dead: 'Your hero is down — wait for the revival.',
+  'level-too-low': 'Your level is too low for this potion.',
+  'none-left': 'None left.',
+  cooldown: 'A potion of this kind is cooling down.',
+  working: 'A potion of this kind is still working.',
+}
 
 /**
  * The character's bag like the client's: a grid of slots (single pieces first, then stacks); the
@@ -82,37 +93,31 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   const identifyItems = useGameStore((s) => s.identifyItems)
   const [selected, setSelected] = useState<string | null>(null)
   const [category, setCategory] = useState<Category>('all')
-  const [message, setMessage] = useState<string | null>(null)
   const [confirmAll, setConfirmAll] = useState(false)
+  const drinkPotion = useGameStore((s) => s.drinkPotion)
   const [busy, setBusy] = useState(false)
-
-  useEffect(() => {
-    if (!confirmAll) return
-    const timer = setTimeout(() => setConfirmAll(false), 4000)
-    return () => clearTimeout(timer)
-  }, [confirmAll])
 
   if (!character) return null
   const inventory = character.inventory
   const away = character.expedition !== null
   const entries: BagEntry[] = [
-    ...character.gear
-      .map((piece) => ({ key: `piece-${piece.uid}`, item: getItem(piece.itemId), piece }))
-      .sort((a, b) => byType(a.item, b.item) || b.piece.plus - a.piece.plus),
+    ...character.gear.map((piece): BagEntry => ({
+      key: `piece-${piece.uid}`,
+      item: getItem(piece.itemId),
+      piece,
+    })),
     // weapons and armor never stack: one slot per piece, like in the client
-    ...inventory
-      .map((stack) => ({ item: getItem(stack.itemId), stack }))
-      .sort((a, b) => byType(a.item, b.item))
-      .flatMap(({ item, stack }) =>
-        item.gear
-          ? Array.from({ length: stack.count }, (_, i) => ({
-              key: `item-${stack.itemId}-${i}`,
-              item,
-              stack,
-            }))
-          : [{ key: `item-${stack.itemId}`, item, stack }],
-      ),
-  ]
+    ...inventory.flatMap((stack): BagEntry[] => {
+      const item = getItem(stack.itemId)
+      return item.gear
+        ? Array.from({ length: stack.count }, (_, i) => ({
+            key: `item-${stack.itemId}-${i}`,
+            item,
+            stack,
+          }))
+        : [{ key: `item-${stack.itemId}`, item, stack }]
+    }),
+  ].sort((a, b) => byType(a.item, b.item) || (b.piece?.plus ?? 0) - (a.piece?.plus ?? 0))
   const shown = entries.filter((e) => category === 'all' || categoryOf(e.item) === category)
   const chosen = entries.find((e) => e.key === selected)
   const total = inventory.reduce((sum, s) => sum + s.count, 0) + character.gear.length
@@ -134,10 +139,11 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
     if (busy) return
     setBusy(true)
     try {
-      setMessage(await action())
+      toast(await action())
     } catch (error) {
-      setMessage(
+      toast(
         error instanceof GameError ? 'That is not possible right now.' : 'Something went wrong.',
+        'error',
       )
     } finally {
       setBusy(false)
@@ -161,13 +167,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
       return `You are wearing ${name}.`
     })
 
-  const onSellEverything = () => {
-    if (!confirmAll) {
-      setConfirmAll(true)
-      return
-    }
-    void sell(sellable.map(({ itemId, count }) => ({ itemId, count })))
-  }
+  const sellEverything = () => sell(sellable.map(({ itemId, count }) => ({ itemId, count })))
 
   /** "Wear" button (or why not) for a piece of gear. */
   const wearActions = (
@@ -177,6 +177,8 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
     options?: ItemOption[],
     rare?: number,
   ) => {
+    // gear of another class: nothing to wear (its class shows in the item's card)
+    if (checkWear(character, itemId, options) === 'wrong-class') return null
     const problem = wearProblem(character, itemId, options)
     return (
       <>
@@ -242,20 +244,13 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
     if (piece) {
       return (
         <>
-          <div className="bag-details__head">
-            <ItemIcon item={item} />
-            <span className="item-row__body">
-              <span className={`item-row__name${nameTone(piece)}`}>
-                {pieceName(piece.itemId, piece.plus, piece.rare)}
-              </span>
-              <span className="item-row__meta">
-                {[rareLabel(piece), gearLine(piece.itemId, piece.plus, piece.rare)]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </span>
-              <OptionList options={piece.options} classId={character.classId} />
-            </span>
-          </div>
+          <ItemInfo
+            character={character}
+            itemId={piece.itemId}
+            plus={piece.plus}
+            options={piece.options}
+            rare={piece.rare}
+          />
           <div className="item-row__actions">
             {isRare(piece.itemId) &&
               piece.rare === undefined &&
@@ -283,13 +278,29 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
     const price = sellPrice(stack.itemId)
     return (
       <>
-        <div className="bag-details__head">
-          <ItemRowContent itemId={stack.itemId} count={stack.count} item={item} />
-        </div>
+        <ItemInfo character={character} itemId={stack.itemId} count={stack.count} />
         <div className="item-row__actions">
           {isRare(stack.itemId) && identifyActions({ itemId: stack.itemId, count: 1 })}
           {item.gear && wearActions(stack.itemId, 0, { itemId: stack.itemId })}
-          {item.potion && <p className="item-row__note">{potionText(item.potion)}</p>}
+          {item.potion && (
+            <>
+              <p className="item-row__note">{potionText(item.potion)}</p>
+              <button
+                type="button"
+                className="button button--gold"
+                disabled={busy || away}
+                onClick={() => {
+                  const problem = drinkPotion(stack.itemId)
+                  toast(
+                    problem ? DRINK_PROBLEMS[problem] : `You drink ${item.name}.`,
+                    problem ? 'error' : 'info',
+                  )
+                }}
+              >
+                Drink
+              </button>
+            </>
+          )}
           {stack.itemId === SMELTING_STONE_ID && (
             <>
               <p className="item-row__note">
@@ -352,93 +363,103 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
         </p>
       }
     >
-      <p className="inventory__status" role="status">
-        {message ?? ''}
-      </p>
-
-      {entries.length === 0 ? (
-        <p className="sheet__empty">Your bag is empty. Monsters drop items as you hunt.</p>
+      <div className="tabs tabs--small" role="tablist" aria-label="Item types">
+        {CATEGORIES.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            role="tab"
+            aria-selected={category === c.id}
+            className={`tabs__tab${category === c.id ? ' is-active' : ''}`}
+            onClick={() => setCategory(c.id)}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+      {shown.length > 0 ? (
+        <ul className="bag-grid" aria-label="Bag">
+          {shown.map((entry) => {
+            const { key, item, piece, stack } = entry
+            const name = piece ? pieceName(piece.itemId, piece.plus, piece.rare) : item.name
+            const count = stack && !item.gear ? stack.count : 1
+            return (
+              <li key={key}>
+                <ItemSlot
+                  item={item}
+                  count={count}
+                  plus={piece?.plus}
+                  tone={nameTone(piece ?? { itemId: item.id })}
+                  selected={key === selected}
+                  label={count > 1 ? `${name} ×${fmt(count)}` : name}
+                  onClick={() => setSelected(key === selected ? null : key)}
+                />
+              </li>
+            )
+          })}
+        </ul>
       ) : (
+        <p className="bag-empty">
+          {category === 'all' ? 'Your bag is empty.' : 'No items of this type.'}
+        </p>
+      )}
+      <p className="sheet__meta">
+        {entries.length} slots · {fmt(total)} items · tap an item to see it
+      </p>
+      {chosen && (
+        <Sheet
+          centered
+          title={
+            chosen.piece
+              ? pieceName(chosen.piece.itemId, chosen.piece.plus, chosen.piece.rare)
+              : chosen.item.name
+          }
+          titleId="bag-item-title"
+          onClose={() => setSelected(null)}
+        >
+          <div className="item-details">{details(chosen)}</div>
+        </Sheet>
+      )}
+      {sellable.length > 0 && (
         <>
-          <div className="tabs tabs--small" role="tablist" aria-label="Item types">
-            {CATEGORIES.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                role="tab"
-                aria-selected={category === c.id}
-                className={`tabs__tab${category === c.id ? ' is-active' : ''}`}
-                onClick={() => setCategory(c.id)}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
-          <ul className="bag-grid" aria-label="Bag">
-            {shown.map((entry) => {
-              const { key, item, piece, stack } = entry
-              const name = piece ? pieceName(piece.itemId, piece.plus, piece.rare) : item.name
-              const count = stack && !item.gear ? stack.count : 1
-              return (
-                <li key={key}>
-                  <ItemSlot
-                    item={item}
-                    count={count}
-                    plus={piece?.plus}
-                    tone={nameTone(piece ?? { itemId: item.id })}
-                    selected={key === selected}
-
-                    label={count > 1 ? `${name} ×${fmt(count)}` : name}
-                    onClick={() => {
-                      setSelected(key === selected ? null : key)
-                      setMessage(null)
-                    }}
-                  />
-                </li>
-              )
-            })}
-          </ul>
-          {shown.length === 0 && <p className="sheet__empty">Nothing of this kind in your bag.</p>}
-          <p className="sheet__meta">
-            {entries.length} slots · {fmt(total)} items · tap an item to see it
+          <button
+            type="button"
+            className="button button--wide inventory__sell-all"
+            disabled={busy}
+            onClick={() => setConfirmAll(true)}
+          >
+            Sell all loot · +{fmt(value)} gold
+          </button>
+          <p className="sheet__meta inventory__keep-note">
+            Kept: gear your class can wear, potions, upgrade stones and magnifying glasses.
           </p>
-          {chosen && (
-            <Sheet
-              centered
-              title={
-                chosen.piece
-                  ? pieceName(chosen.piece.itemId, chosen.piece.plus, chosen.piece.rare)
-                  : chosen.item.name
-              }
-              titleId="bag-item-title"
-              onClose={() => setSelected(null)}
-            >
-              {message && (
-                <p className="inventory__status" role="status">
-                  {message}
-                </p>
-              )}
-              <div className="item-details">{details(chosen)}</div>
-            </Sheet>
-          )}
-          {sellable.length > 0 && (
+        </>
+      )}
+      {confirmAll && (
+        <Sheet
+          centered
+          title="Sell all loot"
+          titleId="sell-all-title"
+          onClose={() => setConfirmAll(false)}
+        >
+          <p className="confirm__text">
+            Sell {fmt(sellable.reduce((n, s) => n + s.count, 0))} items for{' '}
+            <strong>{fmt(value)}</strong> gold?
+          </p>
+          <div className="item-row__actions">
             <button
               type="button"
-              className={`button button--wide inventory__sell-all${confirmAll ? ' is-armed' : ''}`}
+              className="button button--gold"
               disabled={busy}
-              onClick={onSellEverything}
+              onClick={() => void sellEverything()}
             >
-              {confirmAll
-                ? `Sell the loot for ${fmt(value)} gold? Tap again`
-                : `Sell all loot · +${fmt(value)} gold`}
+              Sell
             </button>
-          )}
-          {sellable.length > 0 && (
-            <p className="sheet__meta inventory__keep-note">
-              Kept: gear your class can wear, potions, upgrade stones and magnifying glasses.
-            </p>
-          )}
-        </>
+            <button type="button" className="button" onClick={() => setConfirmAll(false)}>
+              Cancel
+            </button>
+          </div>
+        </Sheet>
       )}
     </Sheet>
   )

@@ -764,31 +764,68 @@ function drinkPotions(f: Fighter, events: CombatEvent[]): void {
   const stats = effectiveStats(f)
   for (const kind of POTION_KINDS) {
     const supply = choosePotion(f, kind, stats)
-    if (!supply) continue
-    const { itemId, name, potion } = supply
-    f.potionsUsed[itemId] = (f.potionsUsed[itemId] ?? 0) + 1
-    f.potionCooldowns[kind] = potion.cooldown
-    const regenStat = kind === 'hpRegen' ? 'hpRegen' : kind === 'mpRegen' ? 'mpRegen' : null
-    f.effects = [
-      ...f.effects,
-      {
-        skillId: 0,
-        itemId,
-        potion: kind,
-        name,
-        remaining: potion.duration,
-        stats: regenStat
-          ? [{ kind: 'stat', stat: regenStat, value: potion.power, percent: false }]
-          : [],
-        stun: false,
-        poison: 0,
-        nextTick: POISON_TICK,
-        hpPerSecond: kind === 'hp' ? potion.power : 0,
-        mpPerSecond: kind === 'mp' ? potion.power : 0,
-      },
-    ]
-    events.push({ type: 'potion', itemId, name, kind })
+    if (supply) applyPotion(f, supply, events)
   }
+}
+
+/** A potion takes effect: counted as drunk, its kind's cooldown starts. */
+function applyPotion(f: Fighter, { itemId, name, potion }: PotionSupply, events: CombatEvent[]) {
+  const kind = potion.kind
+  f.potionsUsed[itemId] = (f.potionsUsed[itemId] ?? 0) + 1
+  f.potionCooldowns[kind] = potion.cooldown
+  const regenStat = kind === 'hpRegen' ? 'hpRegen' : kind === 'mpRegen' ? 'mpRegen' : null
+  f.effects = [
+    ...f.effects,
+    {
+      skillId: 0,
+      itemId,
+      potion: kind,
+      name,
+      remaining: potion.duration,
+      stats: regenStat
+        ? [{ kind: 'stat', stat: regenStat, value: potion.power, percent: false }]
+        : [],
+      stun: false,
+      poison: 0,
+      nextTick: POISON_TICK,
+      hpPerSecond: kind === 'hp' ? potion.power : 0,
+      mpPerSecond: kind === 'mp' ? potion.power : 0,
+    },
+  ]
+  events.push({ type: 'potion', itemId, name, kind })
+}
+
+/**
+ * Why the hero can't drink a potion now: dead, level too low, none left, its kind cooling down or
+ * still working.
+ */
+export type DrinkProblem = 'dead' | 'level-too-low' | 'none-left' | 'cooldown' | 'working'
+
+/**
+ * The player has the hero drink a potion from the bag (`supply.count`: how many the bag holds). Same
+ * rules as drinking by itself, but at any HP / MP; the state stays as it was when it can't.
+ */
+export function drinkPotion(
+  state: CombatState,
+  supply: PotionSupply,
+): { state: CombatState; events: CombatEvent[]; problem: DrinkProblem | null } {
+  const f = state.player
+  const kind = supply.potion.kind
+  const problem: DrinkProblem | null =
+    f.hp <= 0 || state.phase === 'defeat'
+      ? 'dead'
+      : potionsLeft(f, supply) <= 0
+        ? 'none-left'
+        : f.potionCooldowns[kind]
+          ? 'cooldown'
+          : f.effects.some((e) => e.potion === kind)
+            ? 'working'
+            : null
+  if (problem) return { state, events: [], problem }
+  const next = copyState(state)
+  const events: CombatEvent[] = []
+  applyPotion(next.player, supply, events)
+  return { state: next, events, problem: null }
 }
 
 /** Strongest damage first. */

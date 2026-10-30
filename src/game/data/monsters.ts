@@ -1,4 +1,5 @@
 import { hasModel } from '../assets/manifest.ts'
+import { getItem } from './items.ts'
 import { lcData } from './lcSource.ts'
 import type { LcMonster } from './lcTypes.ts'
 import type { MonsterDef } from './types.ts'
@@ -74,7 +75,10 @@ export function fromLc(m: LcMonster): MonsterDef {
     modelId: hasModel(m.model) ? m.model : FALLBACK_MODEL,
     scale: m.scale,
     elite: m.elite,
-    drops: m.drops.map((d) => ({ itemId: d.item, chance: d.chance })),
+    // gear only classes IdleLC does not have can wear (Night Shadow) never drops
+    drops: m.drops
+      .filter((d) => getItem(d.item).gear?.classes.length !== 0)
+      .map((d) => ({ itemId: d.item, chance: d.chance })),
     sp: m.sp ?? 0,
   }
 }

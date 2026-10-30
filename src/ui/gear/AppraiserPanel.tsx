@@ -13,6 +13,7 @@ import {
 } from '../../game/logic/rare.ts'
 import { buyPrice, sellPrice } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
+import { toast } from '../../state/toasts.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { Sheet } from '../Sheet.tsx'
 import { SLOT_LABELS, fmt, gearLine, nameTone, pieceName } from './format.ts'
@@ -43,7 +44,6 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
   const buyItem = useGameStore((s) => s.buyItem)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [fresh, setFresh] = useState<Set<string>>(new Set())
-  const [message, setMessage] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   if (!character) return null
 
@@ -73,12 +73,13 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
     if (busy) return
     setBusy(true)
     try {
-      setMessage(await action())
+      toast(await action())
     } catch (error) {
-      setMessage(
+      toast(
         error instanceof GameError && error.code === 'not-enough-gold'
           ? 'Not enough gold.'
           : 'That is not possible right now.',
+        'error',
       )
     } finally {
       setBusy(false)
@@ -137,9 +138,6 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
       <p className="sheet__meta">
         Rare weapons and armor come unidentified. A magnifying glass reveals one piece's rare
         options and grade.
-      </p>
-      <p className="inventory__status" role="status">
-        {message ?? ''}
       </p>
 
       <ul className="appraiser__glasses">

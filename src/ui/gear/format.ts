@@ -52,10 +52,10 @@ export function rareLabel(piece: { itemId: number; rare?: number }): string | nu
   return set ? `Grade ${GRADES[set.grade] ?? '?'}` : 'Unidentified'
 }
 
-/** What a piece gives, with its upgrades ("Attack 16 (+3) · 1.0 s per hit"). */
-export function gearLine(itemId: number, plus = 0, rare?: number): string {
+/** What a piece gives, row by row, with its upgrades ([["Attack", "16 (+3)"], ["Attack speed", "1.0 s per hit"]]). */
+export function gearStats(itemId: number, plus = 0, rare?: number): [string, string][] {
   const gear = getItem(itemId).gear
-  if (!gear) return ''
+  if (!gear) return []
   // the rare set's flat bonuses count like the item's own stats
   const set = rare === undefined ? undefined : getRareSet(rare)
   const attack = gear.attack + (set?.attack ?? 0)
@@ -66,13 +66,21 @@ export function gearLine(itemId: number, plus = 0, rare?: number): string {
     const bonus = Math.round(value * PLUS_BONUS * plus)
     return bonus > 0 ? `${fmt(value)} (+${fmt(bonus)})` : fmt(value)
   }
-  const parts: string[] = []
-  if (attack > 0) parts.push(`Attack ${withPlus(attack)}`)
-  if (magicAttack > 0) parts.push(`Magic attack ${withPlus(magicAttack)}`)
-  if (defense > 0) parts.push(`Defense ${withPlus(defense)}`)
-  if (magicDefense > 0) parts.push(`Magic defense ${withPlus(magicDefense)}`)
-  if (gear.attackInterval) parts.push(`${gear.attackInterval.toFixed(1)} s per hit`)
-  return parts.join(' · ')
+  const rows: [string, string][] = []
+  if (attack > 0) rows.push(['Attack', withPlus(attack)])
+  if (magicAttack > 0) rows.push(['Magic attack', withPlus(magicAttack)])
+  if (defense > 0) rows.push(['Defense', withPlus(defense)])
+  if (magicDefense > 0) rows.push(['Magic defense', withPlus(magicDefense)])
+  if (gear.attackInterval)
+    rows.push(['Attack speed', `${gear.attackInterval.toFixed(1)} s per hit`])
+  return rows
+}
+
+/** What a piece gives on one line ("Attack 16 (+3) · 1.0 s per hit"). */
+export function gearLine(itemId: number, plus = 0, rare?: number): string {
+  return gearStats(itemId, plus, rare)
+    .map(([label, value]) => (label === 'Attack speed' ? value : `${label} ${value}`))
+    .join(' · ')
 }
 
 /** Why the character can't wear an item, or null. */
@@ -128,32 +136,6 @@ function optionAmount(type: number, value: number): string {
     return `${name} +${tenths(value)}`
   }
   return `${name} +${fmt(value)}`
-}
-
-/**
- * The options of all worn pieces added up by type ("Strength +9"), with whether they help the class.
- */
-export function optionTotals(
-  equipment: CharacterData['equipment'],
-  classId: CharacterData['classId'],
-): { text: string; helps: boolean; note?: string }[] {
-  const totals = new Map<number, number>()
-  for (const piece of Object.values(equipment)) {
-    for (const option of piece?.options ?? []) {
-      totals.set(option.type, (totals.get(option.type) ?? 0) + optionValue(option))
-    }
-  }
-  return [...totals]
-    .sort(([a], [b]) => a - b)
-    .map(([type, value]) => {
-      const helps = optionHelps({ type }, classId)
-      const works = type === LEVEL_OPTION || OPTION_EFFECTS[type] !== undefined
-      return {
-        text: optionAmount(type, value),
-        helps,
-        ...(helps ? {} : { note: works ? 'No effect for your class' : 'No effect in IdleLC yet' }),
-      }
-    })
 }
 
 /** The options of a piece with whether they help the class (and why not). */

@@ -1201,14 +1201,6 @@ a.button {
   vertical-align: -1px;
 }
 
-.inventory__status {
-  min-height: 1.4em;
-  margin-bottom: 4px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--gilt-bright);
-}
-
 .inventory__sell-all {
   margin-top: 12px;
   border-color: var(--gilt);
@@ -1830,12 +1822,18 @@ a.button {
   margin-bottom: calc(-1 * var(--gutter));
 }
 
-/* the potion slots under the menu buttons */
-.hud__buttons .potion-slots {
+/* the potion slots on the left edge, halfway down the screen */
+.hud__side {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--gutter) + var(--safe-left));
+  transform: translateY(-50%);
+}
+
+.hud__side .potion-slots {
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 12px;
 }
 
 .skill-bar {
@@ -1926,20 +1924,23 @@ a.button {
   position: relative;
 }
 
+/* a counter on a button: the client's round button with a bronze rim */
 .icon-button__badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border-radius: 9px;
-  font-size: 11px;
+  top: -7px;
+  right: -8px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
   font-weight: 800;
-  line-height: 18px;
-  color: #1a120a;
-  background: linear-gradient(180deg, #c6f08a, #7bc25a);
-  box-shadow: 0 0 0 1px #0f0a07;
+  line-height: 1;
+  color: var(--gilt-bright);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 1px #000;
+  background: url('/ui/lc/badge.webp') center / 100% 100% no-repeat;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
 }
 
 .skill-icon {
@@ -2025,19 +2026,6 @@ a.button {
   text-shadow:
     0 0 2px #000,
     0 0 2px #000;
-}
-
-.skills__sp {
-  margin-left: auto;
-  margin-right: 12px;
-  font-size: 15px;
-  color: var(--parchment-dim);
-}
-
-.skills__sp strong {
-  font-size: 18px;
-  color: #b8d8ff;
-  font-variant-numeric: tabular-nums;
 }
 
 .skill-list {
@@ -2499,10 +2487,6 @@ a.button {
   outline-offset: -2px;
 }
 
-.option-list--totals {
-  margin-bottom: 8px;
-}
-
 /* Rare items: unidentified red, identified by grade (owner's colours) */
 .item-row__name.name--unidentified,
 .name--unidentified {
@@ -2631,7 +2615,7 @@ a.button {
 }
 
 .scene-label--player {
-  color: #bfe7ff;
+  color: #e9e6e0;
 }
 
 .scene-label__level {
@@ -3207,7 +3191,7 @@ a.button {
     0 0 1px #000;
 }
 
-/* buffs right under the frame (their row keeps its place), gold and potions below */
+/* buffs right under the frame (their row keeps its place) */
 .player-frame__effects {
   min-height: 26px;
   padding: 2px 6px 0;
@@ -3215,12 +3199,6 @@ a.button {
 
 .player-frame__effects .effect-row {
   margin: 0;
-}
-
-.player-frame__below {
-  width: min(66vw, 256px);
-  margin-top: 0;
-  padding: 0 6px;
 }
 
 /* ---------- Bag and equipment slots (the client's slot frames) ---------- */
@@ -3337,4 +3315,191 @@ a.button {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+/* ---------- Item card (ui/items/ItemInfo.tsx): like the client's item tooltip ---------- */
+
+.item-info__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.item-info__title {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.item-info__name {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--parchment);
+}
+
+.item-info__kind {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--parchment-dim);
+}
+
+.hero-stats--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.item-info__stats {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: rgba(8, 10, 13, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(150, 120, 80, 0.35);
+}
+
+.item-info__stats dd {
+  min-width: 96px;
+}
+
+.item-info__stats .is-unmet {
+  color: #ff6b5e;
+}
+
+.item-info__options {
+  display: grid;
+  gap: 3px;
+  margin: 8px 0 0;
+  padding: 0 2px;
+  list-style: none;
+}
+
+.item-info__options li {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #8fd2ff;
+}
+
+.item-info__options li.is-idle {
+  color: var(--parchment-dim);
+}
+
+.item-info__note {
+  font-size: 11.5px;
+  font-weight: 400;
+}
+
+/* the Heaven Stones in the bag (upgrades), dark when there are none */
+.stone-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--parchment);
+  font-variant-numeric: tabular-nums;
+}
+
+.stone-count.is-none .item-icon {
+  filter: grayscale(0.9) brightness(0.45);
+}
+
+.stone-count.is-none .stone-count__value {
+  color: var(--parchment-dim);
+}
+
+/* an empty bag tab */
+.bag-empty {
+  margin: 0 0 6px;
+  padding: 22px 8px;
+  border-radius: 2px;
+  font-size: 14px;
+  text-align: center;
+  color: var(--parchment-dim);
+  background: #1b2027;
+  box-shadow:
+    inset 0 0 0 1px rgba(150, 120, 80, 0.45),
+    inset 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.confirm__text {
+  margin: 4px 0 12px;
+  font-size: 15px;
+  text-align: center;
+}
+
+/* ---------- Toasts (ui/Toasts.tsx): messages sliding across the screen ---------- */
+
+.toasts {
+  position: fixed;
+  top: 34%;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+.toast {
+  max-width: min(100%, 420px);
+  margin: 0;
+  padding: 8px 18px;
+  border-radius: 3px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--gilt-bright);
+  text-shadow: 0 1px 2px #000;
+  background: linear-gradient(
+    90deg,
+    rgba(14, 12, 10, 0),
+    rgba(14, 12, 10, 0.88) 18%,
+    rgba(14, 12, 10, 0.88) 82%,
+    rgba(14, 12, 10, 0)
+  );
+  border-top: 1px solid rgba(226, 184, 100, 0.55);
+  border-bottom: 1px solid rgba(226, 184, 100, 0.55);
+  /* keep in step with TOAST_MS (state/toasts.ts) */
+  animation: toast-slide 2.8s ease-in-out both;
+}
+
+.toast--error {
+  color: #ff8a7a;
+}
+
+@keyframes toast-slide {
+  0% {
+    transform: translateX(110vw);
+    opacity: 0;
+  }
+  12% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  85% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-110vw);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation-name: toast-fade;
+  }
+
+  @keyframes toast-fade {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    10%,
+    90% {
+      opacity: 1;
+    }
+  }
 }

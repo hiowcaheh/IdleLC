@@ -5,12 +5,9 @@ import { EffectRow } from '../skills/EffectRow.tsx'
 import { Bar } from './Bar.tsx'
 import { ClassPortrait } from './ClassPortrait.tsx'
 
-const formatGold = (gold: number) => gold.toLocaleString('en-US')
-
 /**
  * The hero's frame from the client's interface (TopUI): portrait in the ring, level in the small
- * ring, name in the name box, HP, MP and EXP in the three bar slots; buffs right under it, then
- * gold.
+ * ring, name in the name box, HP, MP and EXP in the three bar slots; buffs right under it.
  */
 export function PlayerFrame() {
   const hp = useGameStore((s) => s.hud.playerHp)
@@ -19,7 +16,7 @@ export function PlayerFrame() {
   const maxMp = useGameStore((s) => s.hud.playerMaxMp)
   const character = useGameStore((s) => s.character)
   if (!character) return null
-  const { level, gold, exp } = character
+  const { level, exp } = character
   const needed = expToNextLevel(level)
   const expShare = needed > 0 ? (exp / needed) * 100 : 100
 
@@ -59,12 +56,6 @@ export function PlayerFrame() {
       </div>
       <div className="player-frame__effects">
         {!character.expedition && <EffectRow side="player" />}
-      </div>
-      <div className="unit-frame__row player-frame__below">
-        <p className="unit-frame__gold" aria-label={`${formatGold(gold)} gold`}>
-          <span className="coin" aria-hidden="true" />
-          {formatGold(gold)}
-        </p>
       </div>
     </section>
   )

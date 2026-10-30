@@ -55,6 +55,22 @@ export interface CombatResult {
   optionsGained: OptionGain[]
 }
 
+/** Extra rewards in % on top of the database's: EXP, skill points, gold and drop chances. */
+export interface RewardBonuses {
+  exp: number
+  sp: number
+  gold: number
+  drop: number
+}
+
+/**
+ * The character's reward bonuses. Nothing raises them yet: items and events that do (LC options
+ * such as "EXP(%)") come later, and the payouts will apply them here.
+ */
+export function rewardBonuses(_character: CharacterData): RewardBonuses {
+  return { exp: 0, sp: 0, gold: 0, drop: 0 }
+}
+
 /** Most kills a report may hold after `elapsedSeconds` of real time at a given game speed. */
 export function maxKills(elapsedSeconds: number, timeScale = 1): number {
   const window = Math.min(Math.max(0, elapsedSeconds), MAX_REPORT_WINDOW)

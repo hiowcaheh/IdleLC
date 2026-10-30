@@ -11,7 +11,8 @@ const atlas = (name) => `Data\\Interface\\${name}.tex`
 
 /**
  * name → [atlas, x, y, width, height, options?] (rectangles measured on the atlases); options:
- * `scale` (upscaled once here), `quality` (lossy WebP for pictures; the rest is lossless).
+ * `scale` (upscaled once here, sharpened so small icons stay crisp on phone screens), `quality`
+ * (lossy WebP for pictures; the rest is lossless).
  */
 export const UI_PARTS = {
   window: [atlas('NewInventory'), 0, 0, 256, 408],
@@ -26,11 +27,13 @@ export const UI_PARTS = {
   'bar-hp': [atlas('TopUI'), 112, 31, 118, 8],
   'bar-mp': [atlas('TopUI'), 112, 44, 118, 8],
   'bar-exp': [atlas('TopUI'), 112, 57, 118, 8],
-  // the client's menu buttons (22 × 22, drawn twice as large on phones: upscaled here once)
-  'menu-character': [atlas('TopUI'), 0, 222, 22, 22, { scale: 2 }],
-  'menu-inventory': [atlas('TopUI'), 26, 222, 22, 22, { scale: 2 }],
-  'menu-skills': [atlas('TopUI'), 52, 222, 22, 22, { scale: 2 }],
-  'menu-system': [atlas('TopUI'), 156, 222, 22, 22, { scale: 2 }],
+  // the client's menu buttons (22 × 22, drawn about 4× as large on phone screens: upscaled here once)
+  'menu-character': [atlas('TopUI'), 0, 222, 22, 22, { scale: 4 }],
+  'menu-inventory': [atlas('TopUI'), 26, 222, 22, 22, { scale: 4 }],
+  'menu-skills': [atlas('TopUI'), 52, 222, 22, 22, { scale: 4 }],
+  'menu-system': [atlas('TopUI'), 156, 222, 22, 22, { scale: 4 }],
+  // a round button with a bronze rim and a black middle: the counter badge on buttons
+  badge: [atlas('TopUI'), 734, 711, 25, 25, { scale: 3 }],
   // the character window's value box
   'value-box': [atlas('NewCharacterInfo'), 100, 47, 129, 15],
   // equipment boards: each class's silhouette with the slot frames (LC job order)
@@ -45,19 +48,20 @@ export const UI_PARTS = {
 /**
  * Pieces put together from rows of their rectangle: [first row, rows, times]. The inventory window
  * has its item preview (black) and bag slots next to the side borders; the frames the game stretches
- * keep only a clean row of the sides (y 380: outline, gilt line, steel), so no black strip shows.
+ * keep only a clean row of the sides (y 380: outline, gilt line, steel), so no black strip shows. The
+ * bottom edge starts below the bag's outline (y 400), which would show as a line inside the frame.
  * window: the title edge (37 rows) and the bottom; panel: a thin top edge.
  */
 const ROWS = {
   window: [
     [0, 37, 1],
-    [380, 1, 16],
-    [398, 10, 1],
+    [380, 1, 19],
+    [401, 7, 1],
   ],
   panel: [
     [0, 10, 1],
-    [380, 1, 16],
-    [398, 10, 1],
+    [380, 1, 19],
+    [401, 7, 1],
   ],
 }
 
@@ -104,7 +108,9 @@ export async function buildUiParts(files) {
     }
     let image = sharp(pixels, { raw: { width, height, channels: 4 } })
     if (scale !== 1) {
-      image = image.resize(width * scale, height * scale, { kernel: 'lanczos3' })
+      image = image
+        .resize(width * scale, height * scale, { kernel: 'mitchell' })
+        .sharpen({ sigma: 1.2, m1: 1, m2: 3 })
     }
     out[name] = await image.webp(quality ? { quality } : { lossless: true }).toBuffer()
   }
