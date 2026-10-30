@@ -287,8 +287,7 @@ p {
 .bar__fill {
   position: absolute;
   inset: 0;
-  transform-origin: left center;
-  transition: transform 0.25s ease-out;
+  transition: clip-path 0.25s ease-out;
 }
 
 .bar__fill::after {
@@ -2866,6 +2865,97 @@ a.button {
   display: none;
 }
 
+/* the HUD menu buttons: the client's menu icons */
+.icon-button.hud__menu {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 2px;
+  background: center / 100% 100% no-repeat;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.55);
+}
+
+.icon-button.hud__menu svg {
+  display: none;
+}
+
+.icon-button.hud__menu:hover,
+.icon-button.hud__menu:active {
+  filter: brightness(1.2);
+}
+
+.icon-button.hud__menu--character {
+  background-image: url('/ui/lc/menu-character.webp');
+}
+
+.icon-button.hud__menu--inventory {
+  background-image: url('/ui/lc/menu-inventory.webp');
+}
+
+.icon-button.hud__menu--skills {
+  background-image: url('/ui/lc/menu-skills.webp');
+}
+
+.icon-button.hud__menu--system {
+  background-image: url('/ui/lc/menu-system.webp');
+}
+
+/* windows (ui/Sheet.tsx): like the client, the title sits in the recess of the frame's top edge and
+   the close button on its right corner; only the body scrolls */
+.sheet--framed {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  padding: 0;
+}
+
+.sheet--framed .sheet__header {
+  position: absolute;
+  top: -28px;
+  left: 0;
+  right: 0;
+  height: 23px;
+  min-height: 0;
+  margin: 0;
+  padding: 0 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  border-image: none;
+}
+
+.sheet--framed .sheet__title {
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sheet--framed .icon-button.sheet__close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 17px;
+  height: 17px;
+}
+
+.sheet__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 12px calc(16px + var(--safe-bottom));
+}
+
+.sheet__extra {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
 .button {
   border-style: solid;
   border-width: 5px 9px;
@@ -2939,26 +3029,29 @@ a.button {
     0 0 8px rgba(226, 184, 100, 0.25);
 }
 
-/* The hero's frame from the client (TopUI): positions in % of the 277 × 93 frame picture */
+/* The hero's frame from the client (TopUI), pinned to the top left corner: positions in % of the
+   277 × 93 frame picture (measured on the atlas) */
 .unit-frame--player {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  margin: calc(-1 * var(--gutter)) 0 0 calc(-1 * var(--gutter));
 }
 
 .player-frame {
   position: relative;
-  width: min(76vw, 300px);
+  width: min(66vw, 256px);
   aspect-ratio: 277 / 93;
   background: url('/ui/lc/player-frame.webp') center / 100% 100% no-repeat;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
+/* the portrait ring: 78 px circle at (2, 8) */
 .player-frame__portrait {
   position: absolute;
-  left: 1.6%;
-  top: 9%;
-  width: 26.5%;
+  left: 0.72%;
+  top: 8.6%;
+  width: 28.16%;
   aspect-ratio: 1;
   display: grid;
   place-items: center;
@@ -2973,31 +3066,32 @@ a.button {
   stroke-width: 1.6;
 }
 
+/* the small ring under the portrait: 20 px circle centred at (83.5, 77.5) */
 .player-frame__level {
   position: absolute;
-  left: 25.5%;
-  top: 74%;
-  min-width: 22px;
-  height: 20px;
-  padding: 0 4px;
+  left: 30.14%;
+  top: 83.33%;
+  width: 7.22%;
+  aspect-ratio: 1;
   display: grid;
   place-items: center;
-  transform: translate(-50%, 0);
-  border-radius: 10px;
-  background: #17110c;
-  box-shadow: 0 0 0 1px var(--bronze);
-  font-size: 11px;
+  transform: translate(-50%, -50%);
+  font-size: 9px;
   font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
   color: var(--gilt-bright);
+  text-shadow: 0 0 2px #000;
   font-variant-numeric: tabular-nums;
 }
 
+/* the name box: 99 × 14 at (118, 5) */
 .player-frame__name {
   position: absolute;
-  left: 42.5%;
-  top: 4%;
-  width: 36%;
-  height: 25%;
+  left: 42.6%;
+  top: 5.38%;
+  width: 35.74%;
+  height: 15.05%;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -3005,48 +3099,83 @@ a.button {
   text-overflow: ellipsis;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 12px;
+  font-size: 10px;
+  line-height: 1;
   color: var(--gilt-bright);
   text-shadow: 0 1px 2px #000;
 }
 
+/* the bars: 118 × 8 at x 112; HP at y 31, MP at 44, EXP at 57 */
 .player-frame__bar {
   position: absolute;
-  left: 39%;
-  width: 45.5%;
+  left: 40.43%;
+  width: 42.6%;
+  height: 8.6%;
 }
 
 .player-frame__bar--hp {
-  top: 35.5%;
+  top: 33.33%;
 }
 
 .player-frame__bar--mp {
-  top: 49.5%;
+  top: 47.31%;
 }
 
 .player-frame__bar--exp {
-  top: 63.5%;
+  top: 61.29%;
 }
 
+/* the empty tracks are part of the frame picture; the fills are the client's bars */
 .player-frame__bar .bar {
-  height: 11px;
+  height: 100%;
   margin: 0;
-  border-radius: 1px;
-  background: rgba(0, 0, 0, 0.55);
+  overflow: visible;
+  border-radius: 0;
+  background: none;
   box-shadow: none;
 }
 
-.player-frame__bar .bar__text {
-  font-size: 8.5px;
-  line-height: 11px;
+.player-frame__bar .bar__fill::after {
+  content: none;
 }
 
-.bar--exp .bar__fill {
-  background: linear-gradient(180deg, #f6df7a, #c99a2e 55%, #7d5a17);
+.player-frame__bar--hp .bar__fill {
+  background: url('/ui/lc/bar-hp.webp') 0 0 / 100% 100%;
+}
+
+.player-frame__bar--mp .bar__fill {
+  background: url('/ui/lc/bar-mp.webp') 0 0 / 100% 100%;
+}
+
+.player-frame__bar--exp .bar__fill {
+  background: url('/ui/lc/bar-exp.webp') 0 0 / 100% 100%;
+}
+
+.player-frame__bar .bar__text {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 8px;
+  line-height: 1;
+  color: #fff;
+  text-shadow:
+    0 0 2px #000,
+    0 0 1px #000;
+}
+
+/* buffs right under the frame (their row keeps its place), gold and potions below */
+.player-frame__effects {
+  min-height: 26px;
+  padding: 2px 6px 0;
+}
+
+.player-frame__effects .effect-row {
+  margin: 0;
 }
 
 .player-frame__below {
-  width: min(76vw, 300px);
-  margin-top: 2px;
-  padding: 2px 8px;
+  width: min(66vw, 256px);
+  margin-top: 0;
+  padding: 0 6px;
 }

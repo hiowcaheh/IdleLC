@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { skillsForClass } from '../../game/data/skills.ts'
 import type { SkillDef } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
 import { SKILL_BAR_SIZE, isAvailable, skillRank, type SkillRank } from '../../game/logic/skills.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { KIND_LABELS, describeEffect, formatSp, learnState, rankCosts } from './format.ts'
+import { Sheet } from '../Sheet.tsx'
 import { SkillIcon } from './SkillIcon.tsx'
 
 function RankDetails({ title, rank }: { title: string; rank: SkillRank }) {
@@ -27,17 +28,9 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
   const learnSkill = useGameStore((s) => s.learnSkill)
   const setSkillAuto = useGameStore((s) => s.setSkillAuto)
   const setSkillBar = useGameStore((s) => s.setSkillBar)
-  const dialog = useRef<HTMLDivElement>(null)
   const [selected, setSelected] = useState<number | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    dialog.current?.focus()
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
 
   const classId = character?.classId
   const skills = useMemo(() => {
@@ -183,38 +176,24 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
   }
 
   return (
-    <div className="sheet-backdrop" onClick={onClose}>
-      <div
-        ref={dialog}
-        className="sheet"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="skills-title"
-        tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <header className="sheet__header">
-          <h2 id="skills-title" className="sheet__title">
-            Skills
-          </h2>
-          <p className="skills__sp" aria-label="Skill points">
-            <strong>{formatSp(character.sp)}</strong> SP
-          </p>
-          <button type="button" className="icon-button" onClick={onClose} aria-label="Close">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M6 6 L18 18 M18 6 L6 18" />
-            </svg>
-          </button>
-        </header>
-        <p className="sheet__meta">
-          Monsters give skill points (SP). Learned skills fire on their own when they are ready and
-          you have the mana.
+    <Sheet
+      title="Skills"
+      titleId="skills-title"
+      onClose={onClose}
+      extra={
+        <p className="skills__sp" aria-label="Skill points">
+          <strong>{formatSp(character.sp)}</strong> SP
         </p>
-        <p className="inventory__status" role="status">
-          {message ?? ''}
-        </p>
-        <ul className="skill-list">{skills.map(row)}</ul>
-      </div>
-    </div>
+      }
+    >
+      <p className="sheet__meta">
+        Monsters give skill points (SP). Learned skills fire on their own when they are ready and
+        you have the mana.
+      </p>
+      <p className="inventory__status" role="status">
+        {message ?? ''}
+      </p>
+      <ul className="skill-list">{skills.map(row)}</ul>
+    </Sheet>
   )
 }

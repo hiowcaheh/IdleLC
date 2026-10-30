@@ -9,8 +9,9 @@ import { PotionSlots } from './PotionSlots.tsx'
 const formatGold = (gold: number) => gold.toLocaleString('en-US')
 
 /**
- * The hero's frame from the client's interface (TopUI): portrait in the ring, name in the name box,
- * HP, MP and EXP in the three bar slots; gold, potions and buffs below it.
+ * The hero's frame from the client's interface (TopUI): portrait in the ring, level in the small
+ * ring, name in the name box, HP, MP and EXP in the three bar slots; buffs right under it, then gold
+ * and potions.
  */
 export function PlayerFrame() {
   const hp = useGameStore((s) => s.hud.playerHp)
@@ -28,7 +29,7 @@ export function PlayerFrame() {
       <div className="player-frame">
         <div className="player-frame__portrait" aria-hidden="true">
           {classPortrait(character.classId) ? (
-            <ClassPortrait classId={character.classId} size={78} />
+            <ClassPortrait classId={character.classId} size={72} />
           ) : (
             <svg viewBox="0 0 40 40">
               <path d="M20 4 L32 9 V19 C32 27 26 33 20 36 C14 33 8 27 8 19 V9 Z" />
@@ -57,6 +58,9 @@ export function PlayerFrame() {
           />
         </div>
       </div>
+      <div className="player-frame__effects">
+        {!character.expedition && <EffectRow side="player" />}
+      </div>
       <div className="unit-frame__row player-frame__below">
         <p className="unit-frame__gold" aria-label={`${formatGold(gold)} gold`}>
           <span className="coin" aria-hidden="true" />
@@ -64,7 +68,6 @@ export function PlayerFrame() {
         </p>
         <PotionSlots />
       </div>
-      {!character.expedition && <EffectRow side="player" />}
     </section>
   )
 }

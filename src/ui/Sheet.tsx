@@ -1,6 +1,10 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 
-/** Bottom sheet (centered dialog on wide screens) that closes on Escape and backdrop taps. */
+/**
+ * A window in the client's frame: bottom sheet (centered dialog on wide screens) with the title in
+ * the frame's top edge and the close button on its corner; only the body scrolls. Closes on Escape
+ * and backdrop taps.
+ */
 export function Sheet({
   title,
   titleId,
@@ -10,7 +14,7 @@ export function Sheet({
 }: {
   title: string
   titleId: string
-  /** Shown in the header between the title and the close button. */
+  /** Shown at the top of the window, on the right (e.g. the gold or skill points to spend). */
   extra?: ReactNode
   onClose(): void
   children: ReactNode
@@ -27,7 +31,7 @@ export function Sheet({
     <div className="sheet-backdrop" onClick={onClose}>
       <div
         ref={dialog}
-        className="sheet"
+        className="sheet sheet--framed"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
@@ -38,7 +42,6 @@ export function Sheet({
           <h2 id={titleId} className="sheet__title">
             {title}
           </h2>
-          {extra}
           <button
             type="button"
             className="icon-button sheet__close"
@@ -50,7 +53,10 @@ export function Sheet({
             </svg>
           </button>
         </header>
-        {children}
+        <div className="sheet__body">
+          {extra && <div className="sheet__extra">{extra}</div>}
+          {children}
+        </div>
       </div>
     </div>
   )

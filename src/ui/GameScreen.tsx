@@ -50,7 +50,7 @@ export function GameScreen() {
           <div className="hud__buttons">
             <button
               type="button"
-              className="icon-button hud__settings"
+              className="icon-button hud__settings hud__menu hud__menu--system"
               onClick={() => setSettingsOpen(true)}
               aria-label="Settings"
             >
@@ -61,7 +61,7 @@ export function GameScreen() {
             </button>
             <button
               type="button"
-              className="icon-button"
+              className="icon-button hud__menu hud__menu--inventory"
               onClick={() => setInventoryOpen(true)}
               aria-label="Inventory"
             >
@@ -71,7 +71,7 @@ export function GameScreen() {
             </button>
             <button
               type="button"
-              className="icon-button"
+              className="icon-button hud__menu hud__menu--skills"
               onClick={() => setSkillsOpen(true)}
               aria-label={learnable > 0 ? `Skills (${learnable} to learn)` : 'Skills'}
             >
@@ -82,7 +82,7 @@ export function GameScreen() {
             </button>
             <button
               type="button"
-              className="icon-button"
+              className="icon-button hud__menu hud__menu--character"
               onClick={() => setCharacterOpen(true)}
               aria-label="Character and gear"
             >
