@@ -54,6 +54,8 @@ export interface ZoneDef {
   monsterIds: string[]
   /** Raid bosses of the zone, kept for a boss system to come (not hunting spots). */
   bossIds: string[]
+  /** The client's terrain drawn around the fights (public/maps/<map>/), when converted. */
+  map?: string
   environment: {
     skyTop: string
     skyBottom: string

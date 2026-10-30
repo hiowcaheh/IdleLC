@@ -179,6 +179,29 @@ skilla (`src/scene/SkillEffects.tsx`).
 ## Świat `.wld` (jeszcze nie rozpracowany)
 
 Plik świata Serious Engine: bryły (`BR3D`, sektory, wielokąty), encje, światła, modele rozstawione na mapie
-(`MESH`, `MITS`, …). Teren mapy otwartej jest w osobnym pliku `.wtr` (`TRAR`) — w otrzymanej mapie
-`ox_Event` (zamknięta sala quizu OX) jest pusty. Rekwizyty map (`Data\World\…\Ska\*.smc`) konwertują się
-tak jak modele. Do sprawdzenia na mapie otwartej (np. strefa startowa).
+(`MESH`, `MITS`, …). Rekwizyty map (`Data\World\…\Ska\*.smc`) konwertują się tak jak modele. Drzewa
+i budynki stoją w `.wld` — jeszcze nie czytamy (na terenie gry stoją na razie proceduralne drzewa i kamienie).
+
+## Teren `.wtr` (`TRAR`)
+
+`npm run convert-lc -- --client <klient> --only terrain` (`scripts/lc/terrain.mjs`, lista map `MAPS`
+w `convert-lc.mjs`) zapisuje `public/maps/<mapa>/`: `terrain.json`, `heights.bin`, `layer-<n>.webp`,
+`masks-<n>.webp`. Układ pliku (little endian):
+
+- `TRAR` u32 1, `TRVR` u32 wersja (19/20), `TRGD`: u32 szerokość i wysokość siatki wysokości (np. 257 × 257
+  = 256 komórek), u32 ×2 rozmiar mapy cieni, kilka u32, potem 7 floatów: współczynnik odległości, rozciągnięcie
+  x / wysokość / z (np. 6 m na komórkę, 255/65535 m na jednostkę wysokości), rozmiar mapy w metrach (x, max
+  wysokość, z).
+- `TRHM`: wysokości u16, wiersz po wierszu wzdłuż osi z (indeks `j * szerokość + i`, x = i · 6 m).
+- `TREM`: mapa krawędzi (komórki), `DFNM` + `TRSM`: mapy cieni pór dnia (`<mapa>_s0…s7.tex`), `TRTM`: mała mapa
+  koloru (`<mapa>_t.tex`).
+- Warstwy po kolei: `TRLT`, `DFNM` <tekstura warstwy>, `TRLV` u32, `TRLG` (148 bajtów; float nr 11 =
+  rozciągnięcie: tekstura powtarza się co `rozciągnięcie × komórka` metrów), `TRLM` maska kwadratowa 256…2048
+  bajtów na bok (255 = warstwa na wierzchu), po niej `DFNM` maski następnej warstwy (`<mapa>_a<n>.tex`, ta sama
+  maska jako tekstura) albo koniec `TRDE`. Warstwa 0 to podłoże; każda następna kładzie się na poprzednie wg
+  maski (`src/scene/LcTerrain.tsx` robi to w shaderze).
+- **Pozycje spawnu** (`t_npc_regen`: `a_pos_x`, `a_pos_z`, `a_pos_h`) leżą wprost na terenie mapy: Dratan
+  `Dratan.wtr` — wysokości zgadzają się co do 0,7 m (r = 1,000). Juno (strefa 0) **nie pasuje** do żadnego
+  terenu klienta (`StartZone/startzone.wtr` i starszy `juno.wtr` mają ten sam kształt, korelacja ≈ 0), więc
+  miejsca walk na Juno są dobrane przez konwerter (`pickArenas`: równy, suchy teren poza miastem, najbliższe
+  miasta dla pierwszych spotów) — **własne**.

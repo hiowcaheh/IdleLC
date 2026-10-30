@@ -9,6 +9,7 @@ import { buildModel, inverseBindMatrix, outwardIndices } from './model.mjs'
 import { parseAnimSet, parseSkeleton } from './ska.mjs'
 import { parseSkillAnims } from './skill-anims.mjs'
 import { parseSmc } from './smc.mjs'
+import { heightAt, parseTerrain } from './terrain.mjs'
 import { decodeDxt, parseTexture } from './texture.mjs'
 import {
   animSetFile,
@@ -493,5 +494,67 @@ describe('outwardIndices', () => {
     const indices = new Uint32Array([0, 1, 2])
     expect([...outwardIndices(indices, positions, down)]).toEqual([0, 2, 1])
     expect([...indices]).toEqual([0, 1, 2])
+  })
+})
+
+describe('terrain', () => {
+  /** A 3×3 terrain with one extra layer (256 × 256 mask), as the client writes it. */
+  function terrainFile() {
+    const parts = []
+    const ascii = (s) => parts.push(Buffer.from(s, 'latin1'))
+    const u32 = (v) => {
+      const b = Buffer.alloc(4)
+      b.writeUInt32LE(v >>> 0)
+      parts.push(b)
+    }
+    const f32 = (v) => {
+      const b = Buffer.alloc(4)
+      b.writeFloatLE(v)
+      parts.push(b)
+    }
+    ascii('TRAR')
+    u32(1)
+    ascii('TRVR')
+    u32(20)
+    ascii('TRGD')
+    for (const v of [3, 3, 16, 16, 1, 0, 2, -1, 2, 2]) u32(v)
+    for (const v of [200, 6, 0.5, 6, 12, 255, 12]) f32(v)
+    ascii('TRHM')
+    for (let i = 0; i < 9; i++) parts.push(Buffer.from([i * 2, 0]))
+    for (const [name, stretch, fill] of [
+      ['Data\\World\\Test\\grass.tex', 1.7, 255],
+      ['Data\\World\\Test\\road.tex', 2, 128],
+    ]) {
+      ascii('TRLT')
+      ascii('DFNM')
+      u32(name.length)
+      ascii(name)
+      ascii('TRLV')
+      u32(15)
+      ascii('TRLG')
+      const params = Buffer.alloc(148)
+      params.writeFloatLE(stretch, 11 * 4)
+      parts.push(params)
+      ascii('TRLM')
+      parts.push(Buffer.alloc(256 * 256, fill))
+      ascii('DFNM')
+      u32(4)
+      ascii('next')
+    }
+    ascii('TRDEEOTA')
+    return Buffer.concat(parts)
+  }
+
+  it('reads the size, cell, height scale, heights and layers with their masks', () => {
+    const t = parseTerrain(terrainFile())
+    expect([t.width, t.height, t.cellX, t.cellZ, t.heightScale]).toEqual([3, 3, 6, 6, 0.5])
+    expect([...t.heights]).toEqual([0, 2, 4, 6, 8, 10, 12, 14, 16])
+    expect(t.layers.map((l) => [l.texture, Math.round(l.repeat * 10) / 10, l.mask.size])).toEqual([
+      ['Data\\World\\Test\\grass.tex', 1.7, 256],
+      ['Data\\World\\Test\\road.tex', 2, 256],
+    ])
+    expect(t.layers[1].mask.data[1000]).toBe(128)
+    // bilinear between vertices: (3, 3) m is the middle of the first cell
+    expect(heightAt(t, 3, 3)).toBeCloseTo(((0 + 2 + 6 + 8) / 4) * 0.5)
   })
 })

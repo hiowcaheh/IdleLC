@@ -40,6 +40,7 @@ import { buildGearManifest, buildModelManifest, modelIdFromSmc } from './manifes
 import { buildModel } from './model.mjs'
 import { parseSkillAnims } from './skill-anims.mjs'
 import { parseSmc } from './smc.mjs'
+import { buildTerrain } from './terrain.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const GENERATED = path.join(ROOT, 'src/game/data/generated')
@@ -59,6 +60,19 @@ const GEAR_GREY = [0.3, 0.3, 0.32]
 const MONSTER_SMC_STANDINS = {
   cusedrich: 'Data\\Monster\\CusedRich2\\cusedrich2.smc',
   cused_wever: 'Data\\Monster\\CusedWever2\\cused_wever2.smc',
+}
+/**
+ * Open-world maps drawn in the game (public/maps/<map>/): the terrain file, the town (no fights
+ * there) and the layers that are water or road. Juno's spawn points in the database don't fit the
+ * client's map, so its hunting grounds are picked on level ground (scripts/lc/terrain.mjs).
+ */
+const MAPS = {
+  juno: {
+    wtr: 'Data\\World\\StartZone\\startzone.wtr',
+    town: [1170, 1015],
+    townRadius: 280,
+    avoidLayers: [2, 8],
+  },
 }
 /** Class portraits sheet (relative to public/). */
 const PORTRAITS_FILE = 'icons/lc/portraits.webp'
@@ -241,9 +255,10 @@ async function main() {
   fs.mkdirSync(args.out, { recursive: true })
 
   // `--only icons` rebuilds just the item icons
-  // `--only icons` / `--only ui` (or both) convert no models
+  // `--only icons` / `--only ui` / `--only terrain` (or several) convert no models
   const iconsOnly =
-    args.only !== undefined && [...args.only].every((o) => ['icons', 'ui', 'fx'].includes(o))
+    args.only !== undefined &&
+    [...args.only].every((o) => ['icons', 'ui', 'fx', 'terrain'].includes(o))
   const skillAnims = readSkillAnims(files, data)
   const jobs = iconsOnly
     ? []
@@ -307,6 +322,24 @@ async function main() {
     console.log(
       `ui: ${Object.keys(parts).join(', ') || 'no interface atlases in the client folder(s)'}`,
     )
+  }
+
+  if (!args.smc && args.only?.has('terrain')) {
+    for (const [map, def] of Object.entries(MAPS)) {
+      if (!files.resolve(def.wtr)) {
+        console.log(`terrain ${map}: ${def.wtr} is not in the client folder(s)`)
+        continue
+      }
+      const out = await buildTerrain(files, def.wtr, def)
+      const dir = path.join(ROOT, 'public', 'maps', map)
+      fs.mkdirSync(dir, { recursive: true })
+      for (const [name, content] of Object.entries(out))
+        fs.writeFileSync(path.join(dir, name), content)
+      const { arenas } = JSON.parse(out['terrain.json'].toString())
+      console.log(
+        `terrain ${map}: ${Object.keys(out).length} files, ${arenas.length} hunting grounds`,
+      )
+    }
   }
 
   if (!args.smc && (!args.only || args.only.has('fx'))) {

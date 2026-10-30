@@ -6,6 +6,7 @@ import { getMonster } from '../game/data/monsters.ts'
 import type { ClassId } from '../game/data/types.ts'
 import { ZONES } from '../game/data/zones.ts'
 import type { GraphicsQuality } from '../game/logic/save.ts'
+import { zoneSpots } from '../game/logic/spots.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { Battle } from './Battle.tsx'
 import { CameraRig } from './CameraRig.tsx'
@@ -43,6 +44,8 @@ function QualityCanvas({
   classId: ClassId
 }) {
   const [dpr, setDpr] = useState(() => maxDpr(quality))
+  const monsterId = useGameStore((s) => s.character?.location.monsterId ?? '')
+  const spot = zoneSpots(zone.id).indexOf(monsterId)
   const shadows = quality !== 'low'
 
   useEffect(() => {
@@ -68,7 +71,7 @@ function QualityCanvas({
       )}
       {/* ultra: soft shadow edges that widen away from what casts them */}
       {quality === 'ultra' && <SoftShadows size={14} samples={10} focus={0.4} />}
-      <World zone={zone} shadows={shadows} ultra={quality === 'ultra'} />
+      <World zone={zone} spot={spot} shadows={shadows} ultra={quality === 'ultra'} />
       <Suspense fallback={null}>
         <Battle />
       </Suspense>

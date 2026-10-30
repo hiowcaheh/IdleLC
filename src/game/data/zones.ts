@@ -61,6 +61,9 @@ function huntingOrder(ids: string[]): string[] {
     .map((x) => x.id)
 }
 
+/** Zones drawn on the client's terrain (`npm run convert-lc -- --only terrain`). */
+const ZONE_MAPS: Record<string, string> = { 'lc-zone-0': 'juno' }
+
 export const ZONES: Record<string, ZoneDef> = lcData
   ? Object.fromEntries(
       lcData.zones.map((z) => [
@@ -73,6 +76,7 @@ export const ZONES: Record<string, ZoneDef> = lcData
             z.monsterIds.filter((id) => !EVENT_MONSTERS.has(id) && !RAID_BOSSES.has(id)),
           ),
           bossIds: z.monsterIds.filter((id) => RAID_BOSSES.has(id)),
+          ...(ZONE_MAPS[z.id] ? { map: ZONE_MAPS[z.id] } : {}),
           environment: GLADE_ENVIRONMENT,
         },
       ]),

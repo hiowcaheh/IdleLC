@@ -5,3 +5,4 @@ assets-src
 package-lock.json
 # written by scripts/lc (import-lc-db, convert-lc)
 src/game/data/generated
+public/maps

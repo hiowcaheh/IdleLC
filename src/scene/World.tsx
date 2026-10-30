@@ -1,6 +1,6 @@
 import { Sparkles } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { useLayoutEffect, useMemo, useRef } from 'react'
+import { Suspense, use, useCallback, useLayoutEffect, useMemo, useRef } from 'react'
 import {
   BackSide,
   BufferAttribute,
@@ -16,6 +16,8 @@ import {
 } from 'three'
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import type { ZoneDef } from '../game/data/types.ts'
+import { LcTerrain } from './LcTerrain.tsx'
+import { groundHeight, loadMap } from './lcMap.ts'
 import { ROCKS, TERRAIN_SIZE, TREES, smoothstep, terrainHeight, type Prop } from './terrain.ts'
 import { view } from './viewState.ts'
 
@@ -132,18 +134,22 @@ function Ground({ env }: { env: Env }) {
   )
 }
 
+/** Ground height under a prop (the procedural hills unless a map's terrain is drawn). */
+type HeightAt = (x: number, z: number) => number
+
 function useInstances(
   ref: React.RefObject<InstancedMesh | null>,
   props: Prop[],
   colorFor: (i: number) => Color,
   yScale = 1,
+  heightAt?: HeightAt,
 ) {
   useLayoutEffect(() => {
     const mesh = ref.current
     if (!mesh) return
     const dummy = new Object3D()
     props.forEach((p, i) => {
-      dummy.position.set(p.x, p.y, p.z)
+      dummy.position.set(p.x, heightAt ? heightAt(p.x, p.z) : p.y, p.z)
       dummy.rotation.set(0, p.rotation, 0)
       dummy.scale.set(p.scale, p.scale * yScale, p.scale)
       dummy.updateMatrix()
@@ -153,10 +159,10 @@ function useInstances(
     mesh.instanceMatrix.needsUpdate = true
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
     mesh.computeBoundingSphere()
-  }, [ref, props, colorFor, yScale])
+  }, [ref, props, colorFor, yScale, heightAt])
 }
 
-function Trees() {
+function Trees({ heightAt }: { heightAt?: HeightAt }) {
   const trunks = useRef<InstancedMesh>(null)
   const crowns = useRef<InstancedMesh>(null)
   const geometries = useMemo(() => {
@@ -176,8 +182,8 @@ function Trees() {
     const palette = ['#2f4a26', '#3a5a2a', '#28402a', '#4a5f2c'].map((h) => new Color(h))
     return (i: number) => palette[i % palette.length]!
   }, [])
-  useInstances(trunks, TREES, trunkColor)
-  useInstances(crowns, TREES, crownColor)
+  useInstances(trunks, TREES, trunkColor, 1, heightAt)
+  useInstances(crowns, TREES, crownColor, 1, heightAt)
   return (
     <>
       <instancedMesh
@@ -200,14 +206,14 @@ function Trees() {
   )
 }
 
-function Rocks() {
+function Rocks({ heightAt }: { heightAt?: HeightAt }) {
   const rocks = useRef<InstancedMesh>(null)
   const geometry = useMemo(() => new DodecahedronGeometry(1, 0).translate(0, 0.25, 0), [])
   const color = useMemo(() => {
     const palette = ['#7b766c', '#68645c', '#8a8274', '#5c5952'].map((h) => new Color(h))
     return (i: number) => palette[i % palette.length]!
   }, [])
-  useInstances(rocks, ROCKS, color, 0.6)
+  useInstances(rocks, ROCKS, color, 0.6, heightAt)
   return (
     <instancedMesh ref={rocks} args={[geometry, undefined, ROCKS.length]} castShadow receiveShadow>
       <meshStandardMaterial flatShading roughness={1} />
@@ -215,12 +221,33 @@ function Rocks() {
   )
 }
 
+/**
+ * A zone drawn on the client's terrain: the hunting ground of the spot (the map's arenas, nearest the
+ * town for the first spots), with the trees and rocks standing on it.
+ */
+function MapGround({ map, spot }: { map: string; spot: number }) {
+  const data = use(loadMap(map))
+  const { arenas } = data.meta
+  const centre = arenas[Math.max(0, spot) % arenas.length]!
+  const heightAt = useCallback<HeightAt>((x, z) => groundHeight(data, centre, x, z), [data, centre])
+  return (
+    <>
+      <LcTerrain map={map} centre={centre} />
+      <Trees heightAt={heightAt} />
+      <Rocks heightAt={heightAt} />
+    </>
+  )
+}
+
 export function World({
   zone,
+  spot = 0,
   shadows,
   ultra = false,
 }: {
   zone: ZoneDef
+  /** The hunting spot's place among the zone's spots (picks the map's hunting ground). */
+  spot?: number
   shadows: boolean
   /** Ultra graphics: finer shadows and motes of light drifting over the hunting ground. */
   ultra?: boolean
@@ -233,9 +260,17 @@ export function World({
       <SkyDome env={env} />
       <hemisphereLight args={[env.skyTop, env.groundLow, 1.15]} />
       <Sun shadows={shadows} ultra={ultra} />
-      <Ground env={env} />
-      <Trees />
-      <Rocks />
+      {zone.map ? (
+        <Suspense fallback={<Ground env={env} />}>
+          <MapGround map={zone.map} spot={spot} />
+        </Suspense>
+      ) : (
+        <>
+          <Ground env={env} />
+          <Trees />
+          <Rocks />
+        </>
+      )}
       {ultra && (
         <Sparkles
           count={70}
