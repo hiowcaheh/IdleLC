@@ -8,6 +8,7 @@ import sharp from 'sharp'
 import { parseTexture } from './texture.mjs'
 
 const atlas = (name) => `Data\\Interface\\${name}.tex`
+const loading = (name) => `Data\\Interface\\Loading\\${name}.tex`
 
 /**
  * name → [atlas, x, y, width, height, options?] (rectangles measured on the atlases); options:
@@ -40,6 +41,14 @@ export const UI_PARTS = {
   coin: [atlas('ItemBtn0'), 2, 2, 28, 28, { scale: 4, keyOut: true }],
   // a round button with a bronze rim and a black middle: the counter badge on buttons
   badge: [atlas('TopUI'), 734, 711, 25, 25, { scale: 3 }],
+  // loading screens of the zones in the game (Data\Interface\Loading\F_0n), cut inside their ragged
+  // black border and above the publisher's emblem; the bar's track and fill
+  'loading-juno': [loading('F_01'), 40, 16, 944, 344, { quality: 78 }],
+  'loading-dratan': [loading('F_02'), 40, 16, 944, 344, { quality: 78 }],
+  'loading-merac': [loading('F_03'), 40, 16, 944, 344, { quality: 78 }],
+  'loading-egeha': [loading('F_04'), 40, 16, 944, 344, { quality: 78 }],
+  'loading-track': [loading('LoadingBar'), 0, 0, 729, 13],
+  'loading-fill': [loading('ProgressBar'), 0, 0, 927, 17],
   // the character window's value box
   'value-box': [atlas('NewCharacterInfo'), 100, 47, 129, 15],
   // equipment boards: each class's silhouette with the slot frames (LC job order)

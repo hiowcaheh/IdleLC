@@ -22,6 +22,7 @@ import { SkillBar } from './skills/SkillBar.tsx'
 import { SkillsPanel } from './skills/SkillsPanel.tsx'
 import { TitlesPanel } from './titles/TitlesPanel.tsx'
 import { Toasts } from './Toasts.tsx'
+import { ZoneLoading } from './ZoneLoading.tsx'
 
 export function GameScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -129,6 +130,7 @@ export function GameScreen() {
       </div>
 
       <LoadingOverlay />
+      <ZoneLoading />
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
       {inventoryOpen && <InventoryPanel onClose={() => setInventoryOpen(false)} />}
       {skillsOpen && <SkillsPanel onClose={() => setSkillsOpen(false)} />}
