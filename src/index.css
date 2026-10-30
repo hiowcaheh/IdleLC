@@ -36,6 +36,8 @@
   background: var(--umber);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 *,
@@ -55,7 +57,18 @@ body,
 
 body {
   background: var(--umber);
-  touch-action: manipulation;
+  /* the game is an app, not a page: no pinch or double-tap zoom (see ui/lockZoom.ts for iOS), no text
+     selection or long-press callouts */
+  touch-action: pan-x pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 button,
@@ -2354,7 +2367,7 @@ a.button {
   border: 0;
   background: none;
   cursor: pointer;
-  touch-action: manipulation;
+  touch-action: pan-x pan-y;
 }
 
 .potion-slot .item-icon {
@@ -2434,7 +2447,7 @@ a.button {
   font: inherit;
   font-weight: 700;
   cursor: pointer;
-  touch-action: manipulation;
+  touch-action: pan-x pan-y;
 }
 
 .tabs__tab.is-active {
@@ -2531,7 +2544,7 @@ a.button {
   font: inherit;
   font-weight: 800;
   cursor: pointer;
-  touch-action: manipulation;
+  touch-action: pan-x pan-y;
 }
 
 .grade-chip.is-active {
@@ -2636,7 +2649,7 @@ a.button {
   color: inherit;
   text-shadow: inherit;
   cursor: pointer;
-  touch-action: manipulation;
+  touch-action: pan-x pan-y;
 }
 
 .hunt__zone-chevron {
@@ -2665,7 +2678,7 @@ a.button {
   font: inherit;
   text-align: left;
   cursor: pointer;
-  touch-action: manipulation;
+  touch-action: pan-x pan-y;
 }
 
 .world-map__zone.is-current {
