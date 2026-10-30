@@ -237,7 +237,10 @@ function buildData(tables) {
     .filter((r) => usedItems.has(int(r.a_index)))
     .map((r) => ({
       id: int(r.a_index),
-      name: String(r.a_name_usa ?? '').trim() || `Item ${r.a_index}`,
+      // a title item is called like its title (some have no English name of their own)
+      name: titleOfItem.has(int(r.a_index))
+        ? titles.find((t) => t.id === titleOfItem.get(int(r.a_index))).name
+        : String(r.a_name_usa ?? '').trim() || `Item ${r.a_index}`,
       type: int(r.a_type_idx),
       subtype: int(r.a_subtype_idx),
       slot: int(r.a_wearing),
@@ -308,16 +311,48 @@ const rgb = (rgba) =>
     .padEnd(6, '0')}`
 
 /**
- * Titles 1:1 from t_title (enabled ones whose item has an English name): the item that gives the
- * title, its name and description (t_item a_name_usa / a_descr_usa), days it lasts (null =
- * permanent), text and outline colours, up to five t_option options and the client effect's name.
+ * English names of the titles whose item has none (t_title.a_name is Korean or a short English
+ * name) — own translations.
+ */
+const TITLE_NAMES = {
+  1: 'G.M.F',
+  2: '2009 Korea Champion',
+  3: '2009 World Tournament Champion',
+  4: '2009 World Tournament Runner-up',
+  5: '2009 World Tournament Third Place',
+  7: '2009 Korea Second Place',
+  52: 'Requested Title',
+  68: 'Sparta',
+  74: 'The Last One',
+  75: 'King of Enchant (7 days)',
+  76: 'King of Enchant (3 days)',
+  77: 'King of Enchant (1 day)',
+  78: 'King of Enchant (30 days)',
+  82: 'Greatest Benefactor',
+  96: 'The Winner of Level Hunting',
+}
+
+/** The game's name stays out of the UI ("LastChaos Newbie" → "Newbie"). */
+const withoutGameName = (text) =>
+  text
+    .replace(/\s*(?:to|in|of|for)?\s*Last ?Chaos\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+
+/** Only English text (the Korean descriptions of a few titles are left out). */
+const english = (text) => (/^[\x20-\x7e]*$/.test(text) ? text : '')
+
+/**
+ * Titles 1:1 from t_title (all enabled ones): the item that gives the title, its name and
+ * description (t_item a_name_usa / a_descr_usa; TITLE_NAMES when the item has none), days it lasts
+ * (null = permanent), text and outline colours, up to five t_option options and the client effect.
  */
 function buildTitles(rows, itemRows) {
   const titles = new Map()
   for (const r of rows) {
     const id = int(r.a_index)
     const item = itemRows.get(int(r.a_item_index))
-    const name = String(item?.a_name_usa ?? '').trim()
+    const name = withoutGameName(String(item?.a_name_usa ?? '').trim() || TITLE_NAMES[id] || '')
     if (titles.has(id) || int(r.a_enable) !== 1 || !item || !name) continue
     const options = []
     for (let k = 0; k < 5; k++) {
@@ -329,7 +364,7 @@ function buildTitles(rows, itemRows) {
       id,
       item: int(r.a_item_index),
       name,
-      description: String(item.a_descr_usa ?? '').trim(),
+      description: withoutGameName(english(String(item.a_descr_usa ?? '').trim())),
       days: int(r.a_time) > 0 ? int(r.a_time) : null,
       color: rgb(r.a_color),
       outline: rgb(r.a_bgcolor),

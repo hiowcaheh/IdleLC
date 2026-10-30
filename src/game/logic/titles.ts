@@ -47,6 +47,46 @@ export function titleOptions(activeTitle: number | null | undefined): ItemOption
     : (getTitle(activeTitle)?.options ?? [])
 }
 
+/** Titles the game gives by itself (t_title ids): "Newbie" to a new character for 7 days. */
+export const NEWBIE_TITLE = 23
+/** "Rising Star" when the character reaches level 50 (more milestones later: rankings…). */
+export const LEVEL_TITLES: readonly { level: number; titleId: number }[] = [
+  { level: 50, titleId: 22 },
+]
+
+/**
+ * Adds a title for its days (an owned one gets its days added on top; a permanent one stays), worn
+ * when no other title is. Titles missing from the data are skipped.
+ */
+export function grantTitle<C extends Titled>(character: C, titleId: number, now: number): C {
+  const title = getTitle(titleId)
+  if (!title) return character
+  const owned = character.titles.find((t) => t.id === titleId)
+  if (owned && owned.expiresAt === null) return character
+  const expiresAt =
+    title.days === null ? null : Math.max(owned?.expiresAt ?? now, now) + title.days * DAY_MS
+  return {
+    ...character,
+    titles: [...character.titles.filter((t) => t.id !== titleId), { id: titleId, expiresAt }],
+    activeTitle: character.activeTitle ?? titleId,
+  }
+}
+
+/**
+ * Titles for levels reached (each given once: `titlesEarned` keeps them from coming back after
+ * they run out).
+ */
+export function applyLevelTitles(character: CharacterData, now: number): CharacterData {
+  let next = character
+  for (const { level, titleId } of LEVEL_TITLES) {
+    if (character.level < level || next.titlesEarned.includes(titleId) || !getTitle(titleId)) {
+      continue
+    }
+    next = grantTitle({ ...next, titlesEarned: [...next.titlesEarned, titleId] }, titleId, now)
+  }
+  return next
+}
+
 export interface TitleUse {
   character: CharacterData
   title: TitleDef
@@ -67,16 +107,8 @@ export function applyUseTitleItem(character: CharacterData, itemId: number, now:
   if (owned && owned.expiresAt === null) throw new GameError('title-owned', `title ${title.id}`)
   const { inventory, taken } = takeFromInventory(current.inventory, [{ itemId, count: 1 }])
   if (taken.length === 0) throw new GameError('no-item', `item ${itemId}`)
-  const expiresAt =
-    title.days === null ? null : Math.max(owned?.expiresAt ?? now, now) + title.days * DAY_MS
-  const titles = [...current.titles.filter((t) => t.id !== title.id), { id: title.id, expiresAt }]
   return {
-    character: {
-      ...current,
-      inventory,
-      titles,
-      activeTitle: current.activeTitle ?? title.id,
-    },
+    character: grantTitle({ ...current, inventory }, title.id, now),
     title,
     extended: owned !== undefined,
   }

@@ -3,6 +3,8 @@ import { createCharacterData } from './character.ts'
 import { playerFighter } from './fighters.ts'
 import {
   DAY_MS,
+  NEWBIE_TITLE,
+  applyLevelTitles,
   applyUseTitleItem,
   applyWearTitle,
   pruneTitles,
@@ -12,8 +14,11 @@ import {
 
 // placeholder data: item 900 gives title 1 "Brave Hunter" for 7 days (Strength +6, Attack +3)
 const NOW = 1_000_000
+// heroes without the Newbie title of a new character
 const hero = (count = 2) => ({
   ...createCharacterData({ name: 'Brom', classId: 'knight' }, 'a', 0),
+  titles: [],
+  activeTitle: null,
   inventory: [{ itemId: 900, count }],
 })
 
@@ -65,5 +70,19 @@ describe('titles', () => {
     const withTitle = playerFighter(owned).stats
     const without = playerFighter({ ...owned, activeTitle: null }).stats
     expect(withTitle.attack).toBeGreaterThan(without.attack)
+  })
+
+  it('a new character wears Newbie for 7 days; level 50 gives Rising Star once', () => {
+    const fresh = createCharacterData({ name: 'Ann', classId: 'mage' }, 'b', NOW)
+    expect(fresh.titles).toEqual([{ id: NEWBIE_TITLE, expiresAt: NOW + 7 * DAY_MS }])
+    expect(fresh.activeTitle).toBe(NEWBIE_TITLE)
+    expect(applyLevelTitles({ ...fresh, level: 49 }, NOW)).toEqual({ ...fresh, level: 49 })
+    const star = applyLevelTitles({ ...fresh, level: 50 }, NOW)
+    expect(star.titles.map((t) => t.id)).toEqual([NEWBIE_TITLE, 22])
+    expect(star.titlesEarned).toEqual([NEWBIE_TITLE, 22])
+    expect(star.activeTitle).toBe(NEWBIE_TITLE)
+    // run out: it does not come back
+    const later = applyLevelTitles(pruneTitles(star, NOW + 8 * DAY_MS), NOW + 8 * DAY_MS)
+    expect(later.titles).toEqual([])
   })
 })

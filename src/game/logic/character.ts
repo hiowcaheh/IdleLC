@@ -9,7 +9,7 @@ import { starterEquipment, type Equipment, type GearPiece } from './equipment.ts
 import type { ItemStack } from './loot.ts'
 import { EMPTY_POTION_SLOTS, type PotionSlots } from './potions.ts'
 import { defaultBar, starterSkills, type LearnedSkill } from './skills.ts'
-import type { OwnedTitle } from './titles.ts'
+import { NEWBIE_TITLE, grantTitle, type OwnedTitle } from './titles.ts'
 
 export { GameError } from './errors.ts'
 
@@ -78,6 +78,8 @@ export interface CharacterData {
   /** Titles the character has (logic/titles.ts), and the worn one (shown under the name). */
   titles: OwnedTitle[]
   activeTitle: number | null
+  /** Titles the game gave by itself (logic/titles.ts), so they are not given again. */
+  titlesEarned: number[]
 }
 
 export interface NewCharacter {
@@ -119,7 +121,7 @@ export function startLocation(): CharacterLocation {
 
 /** A level 1 character in the starting zone. Validate with checkNewCharacter first. */
 export function createCharacterData(input: NewCharacter, id: string, now: number): CharacterData {
-  return {
+  const character: CharacterData = {
     id,
     name: input.name.trim(),
     classId: input.classId,
@@ -148,6 +150,13 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     potionSlots: EMPTY_POTION_SLOTS,
     titles: [],
     activeTitle: null,
+    titlesEarned: [],
     optionProgress: 0,
+  }
+  // a new character wears "Newbie" for its first days (when the data has it)
+  const welcomed = grantTitle(character, NEWBIE_TITLE, now)
+  return {
+    ...welcomed,
+    titlesEarned: welcomed.titles.map((t) => t.id),
   }
 }

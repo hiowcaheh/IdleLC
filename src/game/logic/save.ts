@@ -48,7 +48,7 @@ import {
   type LearnedSkill,
 } from './skills.ts'
 
-export const SAVE_VERSION = 12
+export const SAVE_VERSION = 13
 
 export type GraphicsQuality = 'auto' | 'low' | 'high' | 'ultra'
 
@@ -183,6 +183,8 @@ export const MIGRATIONS: Record<number, Migration> = {
   10: (save) => save,
   // v12: monster book rewards claimed (none yet; sanitizeCharacter fills the empty record)
   11: (save) => save,
+  // v13: titles the game gave by itself (none yet; level titles come with the next change)
+  12: (save) => save,
 }
 
 export const DEFAULT_SETTINGS: Settings = { quality: 'auto', showDamageNumbers: true }
@@ -294,6 +296,9 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     potionSlots: sanitizePotionSlots(raw.potionSlots),
     optionProgress: Math.min(OPTION_PLAY_SECONDS, Math.max(0, num(raw.optionProgress, 0))),
     ...sanitizeTitles(raw.titles, raw.activeTitle),
+    titlesEarned: (Array.isArray(raw.titlesEarned) ? raw.titlesEarned : [])
+      .map((id: unknown) => int(id, -1))
+      .filter((id, i, all) => getTitle(id) !== undefined && all.indexOf(id) === i),
   })
 }
 

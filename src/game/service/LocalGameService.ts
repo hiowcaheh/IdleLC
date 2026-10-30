@@ -36,7 +36,13 @@ import {
 import { SP_UNIT, applyAuto, applyBar, applyLearn } from '../logic/skills.ts'
 import { isSpotOpen, zoneSpots } from '../logic/spots.ts'
 import { applyClaimBookReward, type BookClaim } from '../logic/book.ts'
-import { applyUseTitleItem, applyWearTitle, pruneTitles, type TitleUse } from '../logic/titles.ts'
+import {
+  applyLevelTitles,
+  applyUseTitleItem,
+  applyWearTitle,
+  pruneTitles,
+  type TitleUse,
+} from '../logic/titles.ts'
 import type { EquipSlot } from '../data/types.ts'
 import {
   applyEquip,
@@ -82,7 +88,9 @@ export class LocalGameService implements GameService {
     const { save, status } = loadSave(this.read(), this.now())
     this.save = {
       ...save,
-      characters: save.characters.map((c) => pruneTitles(c, this.now())),
+      characters: save.characters.map((c) =>
+        applyLevelTitles(pruneTitles(c, this.now()), this.now()),
+      ),
     }
     if (status !== 'loaded') this.persist()
     return { save: copy(this.save), status }
@@ -370,8 +378,9 @@ export class LocalGameService implements GameService {
     characterId: string,
     change: (character: CharacterData) => CharacterData,
   ): CharacterData {
-    // run-out titles go with every change
-    const next = pruneTitles(change(this.character(characterId)), this.now())
+    // run-out titles go and level titles come with every change
+    const now = this.now()
+    const next = applyLevelTitles(pruneTitles(change(this.character(characterId)), now), now)
     this.save = {
       ...this.save,
       characters: this.save.characters.map((c) => (c.id === characterId ? next : c)),
