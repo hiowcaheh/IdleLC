@@ -11,22 +11,23 @@ import {
 } from 'three'
 import { groundHeight, loadMap, mapBase, type LcMap, type TerrainMeta } from './lcMap.ts'
 
-/** Half the side of the terrain drawn around the fight, and its grid step (metres). */
-const REACH = 150
-const STEP = 2
-
-function useGeometry(map: LcMap, centre: [number, number]): BufferGeometry {
+/**
+ * The whole map as the client draws it: one vertex per height-map point (6 m apart), in map
+ * coordinates (x, height, z).
+ */
+function useGeometry(map: LcMap): BufferGeometry {
   return useMemo(() => {
-    const segments = (REACH * 2) / STEP
-    const geo = new PlaneGeometry(REACH * 2, REACH * 2, segments, segments)
+    const { width, height, cell } = map.meta
+    const geo = new PlaneGeometry((width - 1) * cell, (height - 1) * cell, width - 1, height - 1)
     geo.rotateX(-Math.PI / 2)
+    geo.translate(((width - 1) * cell) / 2, 0, ((height - 1) * cell) / 2)
     const pos = geo.attributes.position!
     for (let i = 0; i < pos.count; i++) {
-      pos.setY(i, groundHeight(map, centre, pos.getX(i), pos.getZ(i)))
+      pos.setY(i, groundHeight(map, pos.getX(i), pos.getZ(i)))
     }
     geo.computeVertexNormals()
     return geo
-  }, [map, centre])
+  }, [map])
 }
 
 const LAYERS = 9
@@ -35,7 +36,7 @@ const LAYERS = 9
  * The standard material with its colour from the map's layers: each layer's texture, repeated over
  * the ground, laid over the ones before it by its mask.
  */
-function useSplatMaterial(map: string, meta: TerrainMeta, centre: [number, number]) {
+function useSplatMaterial(map: string, meta: TerrainMeta) {
   const urls = useMemo(
     () => [
       ...meta.layers.slice(0, LAYERS).map((l) => mapBase(map) + l.texture),
@@ -61,7 +62,6 @@ function useSplatMaterial(map: string, meta: TerrainMeta, centre: [number, numbe
     const size = (meta.width - 1) * meta.cell
     const material = new MeshStandardMaterial({ roughness: 1, metalness: 0 })
     material.onBeforeCompile = (shader) => {
-      shader.uniforms.uMapOrigin = { value: centre }
       shader.uniforms.uMapSize = { value: size }
       layers.forEach((t, i) => {
         shader.uniforms[`uLayer${i}`] = { value: t }
@@ -73,14 +73,8 @@ function useSplatMaterial(map: string, meta: TerrainMeta, centre: [number, numbe
       // layer k ≥ 1: its mask is channel (k - 1) % 4 of sheet (k - 1) / 4
       const maskOf = (k: number) => `mask${Math.floor((k - 1) / 4)}.${'rgba'[(k - 1) % 4]}`
       shader.vertexShader = shader.vertexShader
-        .replace(
-          '#include <common>',
-          '#include <common>\nvarying vec2 vMapPos;\nuniform vec2 uMapOrigin;',
-        )
-        .replace(
-          '#include <begin_vertex>',
-          '#include <begin_vertex>\nvMapPos = uMapOrigin + (modelMatrix * vec4(position, 1.0)).xz;',
-        )
+        .replace('#include <common>', '#include <common>\nvarying vec2 vMapPos;')
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvMapPos = position.xz;')
       shader.fragmentShader = shader.fragmentShader
         .replace(
           '#include <common>',
@@ -112,13 +106,13 @@ function useSplatMaterial(map: string, meta: TerrainMeta, centre: [number, numbe
     // one shader per layer count
     material.customProgramCacheKey = () => `lc-terrain-${layers.length}-${masks.length}`
     return material
-  }, [textures, meta, centre])
+  }, [textures, meta])
 }
 
-/** The client's terrain of a map around a hunting ground, its centre at the scene's origin. */
-export function LcTerrain({ map, centre }: { map: string; centre: [number, number] }) {
+/** The client's terrain of a map (map coordinates; the caller moves it under the fight). */
+export function LcTerrain({ map }: { map: string }) {
   const data = use(loadMap(map))
-  const geometry = useGeometry(data, centre)
-  const material = useSplatMaterial(map, data.meta, centre)
+  const geometry = useGeometry(data)
+  const material = useSplatMaterial(map, data.meta)
   return <mesh geometry={geometry} material={material} receiveShadow />
 }

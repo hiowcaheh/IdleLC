@@ -5,7 +5,8 @@ import { createRng } from '../game/logic/rng.ts'
 export const ARENA_RADIUS = 11
 const FLAT_RADIUS = 14
 const HILLS_RADIUS = 32
-export const TERRAIN_SIZE = 140
+/** Wide enough that the ground's edge stays in the fog while it slides during a trip. */
+export const TERRAIN_SIZE = 200
 
 function hash(x: number, z: number): number {
   const s = Math.sin(x * 127.1 + z * 311.7) * 43758.5453

@@ -74,6 +74,10 @@ postać wstaje z pełnym HP i MP, a buffy i działające mikstury znikają.
 
 ## Przebieg walki (czasy)
 
+Zmiana spotu: faza **traveling** (`TIMINGS.travel` = 2,5 s, własne) — potwór znika, postać biegnie do nowego
+spotu (na Juno teren mapy przesuwa się z jednego miejsca walki do drugiego, w innych strefach podłoże przesuwa
+się pod postacią), potem zwykłe `spawning`. W tym czasie nie ma walki ani zabić.
+
 | Faza       | Czas  | Co się dzieje                                            |
 | ---------- | ----- | -------------------------------------------------------- |
 | `spawning` | 1,0 s | brak potwora, potem pojawia się nowy (pełne HP)          |

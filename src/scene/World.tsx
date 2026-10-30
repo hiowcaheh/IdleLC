@@ -1,6 +1,6 @@
 import { Sparkles } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
-import { Suspense, use, useCallback, useLayoutEffect, useMemo, useRef } from 'react'
+import { useFrame, useThree } from '@react-three/fiber'
+import { Suspense, use, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   BackSide,
   BufferAttribute,
@@ -12,14 +12,20 @@ import {
   InstancedMesh,
   Object3D,
   PlaneGeometry,
+  Vector3,
   type BufferGeometry,
+  type Group,
+  type Mesh,
+  type MeshBasicMaterial,
 } from 'three'
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import type { ZoneDef } from '../game/data/types.ts'
 import { LcTerrain } from './LcTerrain.tsx'
-import { groundHeight, loadMap } from './lcMap.ts'
+import { groundHeight, loadMap, type LcMap } from './lcMap.ts'
+import { TIMINGS } from '../game/logic/combat.ts'
+import { combatSession } from '../game/session/combatSession.ts'
 import { ROCKS, TERRAIN_SIZE, TREES, smoothstep, terrainHeight, type Prop } from './terrain.ts'
-import { view } from './viewState.ts'
+import { SCREEN_RIGHT, view } from './viewState.ts'
 
 type Env = ZoneDef['environment']
 
@@ -99,7 +105,7 @@ function Sun({ shadows, ultra }: { shadows: boolean; ultra: boolean }) {
 
 function useGroundGeometry(env: Env): BufferGeometry {
   return useMemo(() => {
-    const geo = new PlaneGeometry(TERRAIN_SIZE, TERRAIN_SIZE, 110, 110)
+    const geo = new PlaneGeometry(TERRAIN_SIZE, TERRAIN_SIZE, 150, 150)
     geo.rotateX(-Math.PI / 2)
     const pos = geo.attributes.position!
     const colors = new Float32Array(pos.count * 3)
@@ -221,23 +227,112 @@ function Rocks({ heightAt }: { heightAt?: HeightAt }) {
   )
 }
 
+/** Travel progress 0…1 while the hero goes to another spot (combat phase "traveling"), else 1. */
+function travelProgress(): number {
+  const c = combatSession.state
+  return c.phase === 'traveling' ? Math.min(1, c.phaseTime / TIMINGS.travel) : 1
+}
+
+const easeInOut = (t: number) => t * t * (3 - 2 * t)
+
+/** Trees and rocks around a hunting ground of a map, standing on the map's ground. */
+function ArenaProps({ data, centre }: { data: LcMap; centre: [number, number] }) {
+  const heightAt = useCallback<HeightAt>(
+    (x, z) => groundHeight(data, centre[0] + x, centre[1] + z),
+    [data, centre],
+  )
+  return (
+    <group position={[centre[0], 0, centre[1]]}>
+      <Trees heightAt={heightAt} />
+      <Rocks heightAt={heightAt} />
+    </group>
+  )
+}
+
 /**
- * A zone drawn on the client's terrain: the hunting ground of the spot (the map's arenas, nearest the
- * town for the first spots), with the trees and rocks standing on it.
+ * A zone drawn on the client's terrain: the map moves under the hero so the spot's hunting ground
+ * (the map's arenas, nearest the town for the first spots) is where the fight is. Going to another
+ * spot, the map slides from the old ground to the new one while the hero runs.
  */
 function MapGround({ map, spot }: { map: string; spot: number }) {
   const data = use(loadMap(map))
   const { arenas } = data.meta
-  const centre = arenas[Math.max(0, spot) % arenas.length]!
-  const heightAt = useCallback<HeightAt>((x, z) => groundHeight(data, centre, x, z), [data, centre])
+  const target = arenas[Math.max(0, spot) % arenas.length]!
+  const group = useRef<Group>(null)
+  // the grounds whose trees stand (the one being left stays during the trip)
+  const [grounds, setGrounds] = useState({ from: target, to: target })
+  if (grounds.to !== target) setGrounds({ from: grounds.to, to: target })
+  const trip = useRef({ from: target, to: target, shown: target })
+  useFrame(() => {
+    const m = trip.current
+    if (m.to !== target) {
+      // a new spot: the trip starts where the map is now
+      m.from = m.shown
+      m.to = target
+    }
+    const t = easeInOut(travelProgress())
+    const x = m.from[0] + (m.to[0] - m.from[0]) * t
+    const z = m.from[1] + (m.to[1] - m.from[1]) * t
+    m.shown = [x, z]
+    group.current?.position.set(-x, -groundHeight(data, x, z), -z)
+    if (m.from !== m.to) view.travelYaw = Math.atan2(m.to[0] - m.from[0], m.to[1] - m.from[1])
+  })
+  return (
+    <group ref={group}>
+      <LcTerrain map={map} />
+      <ArenaProps data={data} centre={grounds.to} />
+      {grounds.from !== grounds.to && <ArenaProps data={data} centre={grounds.from} />}
+    </group>
+  )
+}
+
+/** Metres the procedural ground slides by while the hero runs to another spot. */
+const RUN_DISTANCE = 26
+
+/**
+ * The procedural ground of zones without a map: while the hero runs to another spot it slides away
+ * under them, and a short fade hides its return to the start.
+ */
+function ProceduralGround({ env }: { env: Env }) {
+  const group = useRef<Group>(null)
+  const veil = useRef<Mesh>(null)
+  const { camera } = useThree()
+  useFrame(() => {
+    const t = travelProgress()
+    const slide = t < 1 ? RUN_DISTANCE * t : 0
+    group.current?.position.set(-SCREEN_RIGHT.x * slide, 0, -SCREEN_RIGHT.z * slide)
+    view.travelYaw = Math.atan2(SCREEN_RIGHT.x, SCREEN_RIGHT.z)
+    const v = veil.current
+    if (v) {
+      const opacity = t < 1 ? smoothstep(0.78, 1, t) : 0
+      ;(v.material as MeshBasicMaterial).opacity = opacity
+      v.visible = opacity > 0.01
+      v.position.copy(camera.position).add(camera.getWorldDirection(VEIL_AHEAD).multiplyScalar(0.5))
+      v.quaternion.copy(camera.quaternion)
+    }
+  })
   return (
     <>
-      <LcTerrain map={map} centre={centre} />
-      <Trees heightAt={heightAt} />
-      <Rocks heightAt={heightAt} />
+      <group ref={group}>
+        <Ground env={env} />
+        <Trees />
+        <Rocks />
+      </group>
+      <mesh ref={veil} renderOrder={10} visible={false}>
+        <planeGeometry args={[4, 4]} />
+        <meshBasicMaterial
+          color={env.fog}
+          transparent
+          depthTest={false}
+          depthWrite={false}
+          fog={false}
+        />
+      </mesh>
     </>
   )
 }
+
+const VEIL_AHEAD = new Vector3()
 
 export function World({
   zone,
@@ -265,11 +360,7 @@ export function World({
           <MapGround map={zone.map} spot={spot} />
         </Suspense>
       ) : (
-        <>
-          <Ground env={env} />
-          <Trees />
-          <Rocks />
-        </>
+        <ProceduralGround env={env} />
       )}
       {ultra && (
         <Sparkles

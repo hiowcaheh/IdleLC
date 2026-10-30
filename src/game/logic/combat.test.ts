@@ -145,14 +145,17 @@ describe('combatTick', () => {
 })
 
 describe('changeMonster', () => {
-  it('resets to spawning with the new monster and emits despawn', () => {
+  it('travels to the new monster: despawn, a run of TIMINGS.travel, then it spawns', () => {
     const fighting = combatTick(createCombat(strongPlayer, 'a', weakMonster), 3, createRng(1))
     const other = { level: 2, stats: stats({ maxHp: 77 }) }
     const r = changeMonster(fighting.state, 'b', other)
-    expect(r.state.phase).toBe('spawning')
+    expect(r.state.phase).toBe('traveling')
     expect(r.state.monsterId).toBe('b')
     expect(r.state.monster.hp).toBe(77)
-    expect(r.events).toEqual([{ type: 'despawn' }])
+    expect(r.events).toEqual([{ type: 'despawn' }, { type: 'travel' }])
+    const there = combatTick(r.state, TIMINGS.travel + 0.01, createRng(1))
+    expect(there.state.phase).toBe('spawning')
+    expect(there.events).toEqual([{ type: 'arrive' }])
   })
 
   it('revives the player when switching during defeat', () => {
@@ -160,7 +163,7 @@ describe('changeMonster', () => {
     const dead: CombatState = { ...s, phase: 'defeat', player: { ...s.player, hp: 0 } }
     const r = changeMonster(dead, 'b', weakMonster)
     expect(r.state.player.hp).toBe(strongPlayer.stats.maxHp)
-    expect(r.events).toEqual([{ type: 'revive' }, { type: 'despawn' }])
+    expect(r.events).toEqual([{ type: 'revive' }, { type: 'despawn' }, { type: 'travel' }])
   })
 })
 

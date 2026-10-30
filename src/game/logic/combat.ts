@@ -22,10 +22,12 @@ import { chance, type Rng } from './rng.ts'
 import { applyStats, type SkillKind, type SkillRank, type StatEffect } from './skills.ts'
 
 export type Side = 'player' | 'monster'
-export type CombatPhase = 'spawning' | 'approach' | 'fighting' | 'victory' | 'defeat'
+export type CombatPhase = 'traveling' | 'spawning' | 'approach' | 'fighting' | 'victory' | 'defeat'
 
 /** Phase durations and swing timing, in seconds. */
 export const TIMINGS = {
+  /** Going to another hunting spot (the hero runs there; no monster). */
+  travel: 2.5,
   spawning: 1.0,
   approach: 1.3,
   victory: 2.2,
@@ -151,6 +153,9 @@ export type CombatEvent =
   | { type: 'death'; who: Side }
   | { type: 'despawn' }
   | { type: 'revive' }
+  /** The hero sets off to another hunting spot / gets there. */
+  | { type: 'travel' }
+  | { type: 'arrive' }
 
 export interface TickResult {
   state: CombatState
@@ -250,16 +255,18 @@ export function changeMonster(
   monsterId: string,
   monster: FighterInit,
 ): TickResult {
-  const events: CombatEvent[] = state.phase === 'spawning' ? [] : [{ type: 'despawn' }]
+  const events: CombatEvent[] =
+    state.phase === 'spawning' || state.phase === 'traveling' ? [] : [{ type: 'despawn' }]
   let player: Fighter = { ...copyFighter(state.player), cooldown: 0, impactIn: null, casting: null }
   if (state.phase === 'defeat') {
     player = revived(player)
     events.unshift({ type: 'revive' })
   }
+  events.push({ type: 'travel' })
   return {
     state: {
       ...state,
-      phase: 'spawning',
+      phase: 'traveling',
       phaseTime: 0,
       player,
       monster: freshFighter(monster),
@@ -450,6 +457,14 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
   if (s.phase !== 'fighting') tickEffects(s.player, dt)
 
   switch (s.phase) {
+    case 'traveling':
+      regen(s.player, dt, false)
+      if (s.phaseTime >= TIMINGS.travel) {
+        enter(s, 'spawning')
+        events.push({ type: 'arrive' })
+      }
+      return
+
     case 'spawning':
       regen(s.player, dt, false)
       if (s.phaseTime >= TIMINGS.spawning) {

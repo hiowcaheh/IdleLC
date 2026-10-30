@@ -27,6 +27,7 @@ const TURN_SPEED = 10
 const HUD_SYNC_INTERVAL = 0.1
 
 const UP = new Vector3(0, 1, 0)
+const ORIGIN = new Vector3()
 
 /** Distance between fighters' centers while trading blows, from the models' sizes. */
 function engageDistance(monsterId: string, playerModel: string): number {
@@ -231,6 +232,15 @@ export function Battle() {
           player.current?.revive()
           player.current?.setBase('idle')
           break
+        case 'travel':
+          // the monster stays behind at once (the next one spawns at the new spot)
+          view.monsterVisible = false
+          m.sink = -1
+          player.current?.setBase('run')
+          break
+        case 'arrive':
+          player.current?.setBase('idle')
+          break
         case 'reset':
           resetView()
           m.sink = -1
@@ -259,6 +269,11 @@ export function Battle() {
     const combat = combatSession.state
     const m = motion.current
 
+    if (combat.phase === 'traveling') {
+      // the hero runs on the spot (the ground moves under it), back at the arena's centre
+      view.player.lerp(ORIGIN, Math.min(1, realDt * 3))
+    }
+
     if (combat.phase === 'approach') {
       const t = smoothstep(0, 1, combat.phaseTime / approachTime(combat))
       view.player.lerpVectors(m.approachFrom, m.engageAt, t)
@@ -286,7 +301,8 @@ export function Battle() {
     if (pg) {
       pg.position.copy(view.player)
       const target = combat.phase === 'approach' ? m.engageAt : view.monster
-      if (view.monsterVisible && view.player.distanceToSquared(target) > 0.01)
+      if (combat.phase === 'traveling') turn(pg, view.travelYaw, realDt)
+      else if (view.monsterVisible && view.player.distanceToSquared(target) > 0.01)
         turn(pg, yawTowards(view.player, target), dt)
     }
 

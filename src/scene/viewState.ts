@@ -10,6 +10,8 @@ export const view = {
   monsterVisible: false,
   playerHeight: 1.8,
   monsterHeight: 1.8,
+  /** Where the hero runs while going to another hunting spot (yaw, radians). */
+  travelYaw: 0,
 }
 
 /** Camera position relative to what it looks at (scaled up on narrow screens). */
