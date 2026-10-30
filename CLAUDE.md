@@ -91,7 +91,21 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 
 ## Stan prac (aktualizuj na koniec każdej sesji)
 
-**Stan na 2026-10-30 (sesja 2, koniec dnia):**
+**Stan na 2026-10-30 (sesja 2, wieczór):**
+
+- **Ostatnia partia (wieczór):** drzewa/płoty/mury/domy Juno z `.wld` (wyżej); pasek skilli znów ma 7 pól
+  (kurczył się do kropek); nick i tytuł w ramce nad postacią, wyśrodkowane i przyklejone do paska HP (kamera
+  liczona przed etykietami); po zabiciu bohater od razu idzie dalej (victory 1,2 s, spawning 0,5 s, bez
+  „Looking for a target” i pozy zwycięstwa); w grze tylko **Juno, Dratan, Merac, Egeha** i **max poziom 100**
+  (`PLAYABLE_ZONES`, `MAX_LEVEL`, import do 100); Księga: SP za potwora, nagrody pod statystykami; ikona
+  książki (TopUI) na Skills; równe przyciski w oknie ulepszania; **ekran ładowania** przy zmianie strefy
+  (grafiki `Loading/F_01–04` bez logo wydawcy, nazwa strefy, pasek klienta — `ZoneLoading.tsx`); **efekt
+  ulepszenia broni** +4/+6/+8/+10/+15 (wróżki w kolorze klasy + pierścienie run z klienta — `UpgradeAura.tsx`,
+  także w podglądzie postaci); **efekty tytułów** (pulsujący napis; tytuły z `a_effect_name` — poświata
+  i gwiazdki u stóp, `TitleAura.tsx`) — wygląd efektów **własny** (`Effect.dat` zaszyfrowany).
+- Ikona Titles z panelu akcji klienta (`ActionBtn0/1.tex`) jest w Nemesis zaszyfrowana i nie ma jej
+  w wyborach z klienta 2015 — na razie zostaje zwój z `TopUI`; **poprosić właściciela o `ActionBtn*.tex`**
+  (np. z jawnego klienta). Ramka nicku z `NamePopup.tex` też zaszyfrowana — ramka zrobiona w CSS.
 
 - M0 i M1 gotowe. Gra na Pages (https://hiowcaheh.github.io/IdleLC/) działa na danych i modelach LC
   (6 klas: ciało nowej postaci + założony sprzęt; wszystkie potwory Juno oprócz Elder Drake — jego `.smc` wskazuje

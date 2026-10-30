@@ -16,6 +16,8 @@ import { LevelUpEffect } from './LevelUpEffect.tsx'
 import { ModelBoundary } from './ModelBoundary.tsx'
 import { placeLabel, type SceneLabelId } from './labelAnchors.ts'
 import { SkillEffects } from './SkillEffects.tsx'
+import { TitleAura } from './TitleAura.tsx'
+import { UpgradeAura } from './UpgradeAura.tsx'
 import { ARENA_RADIUS, smoothstep } from './terrain.ts'
 import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
@@ -352,6 +354,12 @@ export function Battle() {
       <group ref={playerGroup}>
         <ModelBoundary resetKey={playerModel}>
           <Character key={playerModel} ref={player} modelId={playerModel} gear={gear} />
+        </ModelBoundary>
+        <ModelBoundary resetKey="upgrade-aura" fallback={null}>
+          <Suspense fallback={null}>
+            <UpgradeAura classId={classId} plus={equipment?.weapon?.plus ?? 0} />
+            <TitleAura />
+          </Suspense>
         </ModelBoundary>
       </group>
       <group ref={monsterGroup} visible={false}>

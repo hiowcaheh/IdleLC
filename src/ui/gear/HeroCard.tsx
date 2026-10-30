@@ -24,7 +24,11 @@ export function HeroCard({ character }: { character: CharacterData }) {
   return (
     <header className="hero-card">
       <div className="hero-card__preview">
-        <ClassPreview classId={character.classId} items={worn} />
+        <ClassPreview
+          classId={character.classId}
+          items={worn}
+          weaponPlus={equipment.weapon?.plus ?? 0}
+        />
       </div>
       <div className="hero-card__info">
         <h3 className="hero-card__name">{character.name}</h3>

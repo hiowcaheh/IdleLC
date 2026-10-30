@@ -1,6 +1,7 @@
 /**
  * Effect textures from the client (`Data\Effect\Texture`, `Data\Effect\Particle`) for the skill
- * effects of the game (src/scene/SkillEffects.tsx): magic circles, shock waves, flashes, sparks.
+ * effects of the game (src/scene/SkillEffects.tsx): magic circles, shock waves, flashes, sparks;
+ * and the upgraded gear's lights and rune rings (src/scene/UpgradeAura.tsx).
  * The effect definitions themselves (Effect.dat) are encrypted in the Nemesis client, so the game
  * puts these pieces together by skill kind. Drawn with additive blending: black is transparent.
  */
@@ -23,6 +24,14 @@ export const FX_TEXTURES = {
   'spark-red': tex('Particle', 'FX_p_red'),
   'spark-blue': tex('Particle', 'FX_p_blue'),
   'spark-yellow': tex('Particle', 'FX_p_yellow'),
+  // upgraded gear (src/scene/UpgradeAura.tsx): the glow of the lights circling the hero and the
+  // classes' rune rings (the Sorcerer has none of its own)
+  'plus-glow': tex('Texture', 'Common_weapon_plus_glow'),
+  'plus-ring-titan': tex('Texture', 'Titan_weapon_plus_ring'),
+  'plus-ring-knight': tex('Texture', 'Knight_weapon_plus_ring'),
+  'plus-ring-healer': tex('Texture', 'Healer_weapon_plus_ring'),
+  'plus-ring-mage': tex('Texture', 'Mage_weapon_plus_ring'),
+  'plus-ring-rogue': tex('Texture', 'rogue_weapon_plus_ring'),
 }
 
 /** Longest side of an effect texture (they are small on screen). */

@@ -90,7 +90,7 @@ export interface LcData {
   /** Magnifying glasses (normal, golden). */
   magnifiers?: number[]
   /** Titles (t_title) with the client effect's name. */
-  titles?: (TitleDef & { effect: string })[]
+  titles?: TitleDef[]
   /** The free level-1 set of each class, by class id. */
   starterGear?: Record<string, number[]>
   /** Typical gear power of each class per level (index 0 = level 1), see import-db buildGearReference. */

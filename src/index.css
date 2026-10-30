@@ -4150,6 +4150,24 @@ a.button {
   font-size: 11px;
   font-weight: 800;
   text-align: center;
+  /* a worn title glows softly in its colour (or its effect's: ui/titles/format.ts) */
+  animation: title-glow 2.6s ease-in-out infinite;
+}
+
+@keyframes title-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    filter: drop-shadow(0 0 4px var(--title-glow)) brightness(1.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-label__title {
+    animation: none;
+  }
 }
 
 .hero-card__title {

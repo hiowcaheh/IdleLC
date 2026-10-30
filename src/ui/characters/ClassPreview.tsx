@@ -7,6 +7,7 @@ import { starterGear } from '../../game/data/items.ts'
 import type { ClassId } from '../../game/data/types.ts'
 import { Character } from '../../scene/Character.tsx'
 import { ModelBoundary } from '../../scene/ModelBoundary.tsx'
+import { UpgradeAura } from '../../scene/UpgradeAura.tsx'
 
 const realTime = () => 1
 
@@ -14,7 +15,16 @@ const realTime = () => 1
  * Turntable view of a class model (drag to rotate) wearing the given items — by default the set a
  * new character of the class starts with.
  */
-export function ClassPreview({ classId, items }: { classId: ClassId; items?: readonly number[] }) {
+export function ClassPreview({
+  classId,
+  items,
+  weaponPlus = 0,
+}: {
+  classId: ClassId
+  items?: readonly number[]
+  /** The worn weapon's +: its lights circle the model (scene/UpgradeAura.tsx). */
+  weaponPlus?: number
+}) {
   const modelId = playerModelId(classId)
   const placeholder = modelId !== `class-${classId}`
   const worn = items ?? starterGear(classId)
@@ -33,6 +43,11 @@ export function ClassPreview({ classId, items }: { classId: ClassId; items?: rea
         <ModelBoundary resetKey={modelId}>
           <Suspense fallback={null}>
             <Character key={modelId} modelId={modelId} timeScale={realTime} gear={gear} />
+          </Suspense>
+        </ModelBoundary>
+        <ModelBoundary resetKey="upgrade-aura" fallback={null}>
+          <Suspense fallback={null}>
+            <UpgradeAura classId={classId} plus={weaponPlus} />
           </Suspense>
         </ModelBoundary>
         <OrbitControls

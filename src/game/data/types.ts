@@ -193,6 +193,11 @@ export interface TitleDef {
   outline: string
   /** t_option options it gives while worn. */
   options: { type: number; level: number }[]
+  /**
+   * The client's effect for the title (t_title a_effect_name, e.g. `eff_nameSKY`); its look is in
+   * the encrypted Effect.dat, so the game draws its own (ui/titles/format.ts titleEffectColor).
+   */
+  effect?: string
 }
 
 /** One effect of a skill level: t_magic (type, subtype, damage type) + t_magiclevel.a_power. */

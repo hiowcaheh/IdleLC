@@ -80,10 +80,10 @@ się pod postacią), potem zwykłe `spawning`. W tym czasie nie ma walki ani zab
 
 | Faza       | Czas  | Co się dzieje                                            |
 | ---------- | ----- | -------------------------------------------------------- |
-| `spawning` | 1,0 s | brak potwora, potem pojawia się nowy (pełne HP)          |
+| `spawning` | 0,5 s | pokonany potwór zapada się, pojawia się nowy (pełne HP)  |
 | `approach` | 1,3 s | gracz podbiega do potwora                                |
 | `fighting` | —     | wymiana ciosów aż ktoś zginie                            |
-| `victory`  | 2,2 s | animacja śmierci potwora, potem znika                    |
+| `victory`  | 1,2 s | animacja śmierci potwora (bez pozy zwycięstwa gracza)    |
 | `defeat`   | 3,0 s | gracz leży, potem wstaje z pełnym HP i szuka nowego celu |
 
 - Gracz atakuje pierwszy. Potwór zaczyna po połowie swojego interwału.
@@ -303,9 +303,14 @@ poziom według wag `a_prob`. Akcesoria też mogą dostać opcję. Czas liczy ser
 odstęp między zgłoszeniami, najwyżej 2 minuty (dłuższa przerwa = gra była zamknięta). Gdy żadna część nie
 może dostać opcji, licznik czeka pełny. W karcie postaci (Stats) widać, za ile minut następna opcja.
 
+Po zabiciu bohater od razu idzie dalej (prośba właściciela, 2026-10-30): przerwa między potworami to
+1,2 + 0,5 s zamiast 2,2 + 1,0 s, bez napisu „Looking for a target” — **własne** czasy; limit zabić w
+`reportCombat` (`MIN_KILL_CYCLE`) liczy się z nich.
+
 ## Mapa świata
 
-Każda z 9 stref z bazy da się wybrać od razu (prośba właściciela — bez blokady poziomu). Mapa pokazuje
+W grze są na razie tylko Juno, Dratan, Merac i Egeha (decyzja właściciela; `PLAYABLE_ZONES` w `zones.ts`),
+każda do wybrania od razu (bez blokady poziomu). Mapa pokazuje
 najniższy i najwyższy poziom spotów strefy i ile z nich jest otwartych. Po wyborze postać idzie na najdalszy
 otwarty spot strefy (nowa strefa: pierwszy spot).
 
@@ -319,6 +324,25 @@ otwarty spot strefy (nowa strefa: pierwszy spot).
 - Założony jest jeden tytuł; jego opcje działają jak opcje sprzętu. Czas płynie realnie (także na wyprawie
   i z zamkniętą grą); po końcu tytuł znika i spada z postaci.
 - Skąd gracz dostaje przedmioty tytułów — **decyzja właściciela** (na razie tylko narzędzie dev).
+- Efekty (**własne** — `Effect.dat` klienta jest zaszyfrowany): napis założonego tytułu nad bohaterem
+  pulsuje poświatą; tytuły z efektem w bazie (`a_effect_name`, 24 tytuły, np. `eff_nameSKY`) mają też
+  poświatę i wznoszące się gwiazdki u stóp bohatera w kolorze z nazwy efektu (SKY błękit, GREEN zielony,
+  INDIGO, ORANGE, PURPLE, RVIOLET, YELLOW…; inne efekty — kolor tytułu). `TitleAura.tsx`, `titleEffectColor`.
+
+## Ulepszenie broni — efekt na postaci (własne)
+
+Broń od +4 pokazuje się na bohaterze (`UpgradeAura.tsx`; tekstury z klienta: `Common_weapon_plus_glow`
+i pierścienie run `<Klasa>_weapon_plus_ring`): świecące „wróżki” w kolorze klasy krążą wokół postaci
+(Titan czerwony, Knight niebieski, Healer złoty, Mage fioletowy, Rogue pomarańczowy, Sorcerer szmaragdowy —
+pierścień Knighta w jego kolorze, bo Sorcerer nie ma własnego).
+
+| Broń | Wróżki | Pierścienie run          |
+| ---- | ------ | ------------------------ |
+| +4   | 1 mała | —                        |
+| +6   | 1      | —                        |
+| +8   | 2      | —                        |
+| +10  | 2      | przy stopach             |
+| +15  | 3      | przy stopach i na piersi |
 
 ## Księga potworów — nagrody
 
