@@ -9,7 +9,10 @@ import { parseTexture } from './texture.mjs'
 
 const atlas = (name) => `Data\\Interface\\${name}.tex`
 
-/** name → [atlas, x, y, width, height, scale?] (rectangles measured on the atlases). */
+/**
+ * name → [atlas, x, y, width, height, options?] (rectangles measured on the atlases); options:
+ * `scale` (upscaled once here), `quality` (lossy WebP for pictures; the rest is lossless).
+ */
 export const UI_PARTS = {
   window: [atlas('NewInventory'), 0, 0, 256, 408],
   panel: [atlas('NewInventory'), 0, 0, 256, 408],
@@ -24,10 +27,19 @@ export const UI_PARTS = {
   'bar-mp': [atlas('TopUI'), 112, 44, 118, 8],
   'bar-exp': [atlas('TopUI'), 112, 57, 118, 8],
   // the client's menu buttons (22 × 22, drawn twice as large on phones: upscaled here once)
-  'menu-character': [atlas('TopUI'), 0, 222, 22, 22, 2],
-  'menu-inventory': [atlas('TopUI'), 26, 222, 22, 22, 2],
-  'menu-skills': [atlas('TopUI'), 52, 222, 22, 22, 2],
-  'menu-system': [atlas('TopUI'), 156, 222, 22, 22, 2],
+  'menu-character': [atlas('TopUI'), 0, 222, 22, 22, { scale: 2 }],
+  'menu-inventory': [atlas('TopUI'), 26, 222, 22, 22, { scale: 2 }],
+  'menu-skills': [atlas('TopUI'), 52, 222, 22, 22, { scale: 2 }],
+  'menu-system': [atlas('TopUI'), 156, 222, 22, 22, { scale: 2 }],
+  // the character window's value box
+  'value-box': [atlas('NewCharacterInfo'), 100, 47, 129, 15],
+  // equipment boards: each class's silhouette with the slot frames (LC job order)
+  'equip-titan': [atlas('NewInventory'), 257, 0, 246, 155, { quality: 90 }],
+  'equip-knight': [atlas('NewInventory'), 504, 0, 246, 155, { quality: 90 }],
+  'equip-healer': [atlas('NewInventory'), 751, 0, 246, 155, { quality: 90 }],
+  'equip-mage': [atlas('NewInventory'), 257, 156, 246, 155, { quality: 90 }],
+  'equip-rogue': [atlas('NewInventory'), 504, 156, 246, 155, { quality: 90 }],
+  'equip-sorcerer': [atlas('NewInventory'), 751, 156, 246, 155, { quality: 90 }],
 }
 
 /**
@@ -64,7 +76,8 @@ const EMPTY_SHADE = 0.22
 export async function buildUiParts(files) {
   const textures = new Map()
   const out = {}
-  for (const [name, [path, x, y, width, rectHeight, scale = 1]] of Object.entries(UI_PARTS)) {
+  for (const [name, [path, x, y, width, rectHeight, options = {}]] of Object.entries(UI_PARTS)) {
+    const { scale = 1, quality } = options
     let height = rectHeight
     if (!textures.has(path)) {
       textures.set(path, files.resolve(path) ? parseTexture(files.read(path)) : null)
@@ -93,7 +106,7 @@ export async function buildUiParts(files) {
     if (scale !== 1) {
       image = image.resize(width * scale, height * scale, { kernel: 'lanczos3' })
     }
-    out[name] = await image.webp({ lossless: true }).toBuffer()
+    out[name] = await image.webp(quality ? { quality } : { lossless: true }).toBuffer()
   }
   return out
 }

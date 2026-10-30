@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { HEAVEN_STONE_ID, SMELTING_STONE_ID, getItem } from '../../game/data/items.ts'
-import type { ItemType } from '../../game/data/types.ts'
+import type { ItemDef, ItemType } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
-import { STONES_PER_HEAVEN, type GearSource } from '../../game/logic/equipment.ts'
+import { STONES_PER_HEAVEN, type GearPiece, type GearSource } from '../../game/logic/equipment.ts'
 import type { ItemOption } from '../../game/logic/options.ts'
 import { isRare } from '../../game/logic/rare.ts'
 import type { ItemStack } from '../../game/logic/loot.ts'
@@ -20,7 +20,8 @@ import { OptionList } from '../gear/OptionList.tsx'
 import { potionText } from './potionText.ts'
 import { Sheet } from '../Sheet.tsx'
 import { ItemIcon } from './ItemIcon.tsx'
-import { ItemRowContent, type ListedItem } from './ItemList.tsx'
+import { ItemRowContent } from './ItemList.tsx'
+import { ItemSlot } from './ItemSlot.tsx'
 
 const TYPE_ORDER: ItemType[] = [
   'weapon',
@@ -34,9 +35,17 @@ const TYPE_ORDER: ItemType[] = [
 
 const fmt = (n: number) => n.toLocaleString('en-US')
 
+/** What a bag slot holds: a single piece (upgraded, with options…) or a stack. */
+type BagEntry =
+  | { key: string; item: ItemDef; piece: GearPiece; stack?: undefined }
+  | { key: string; item: ItemDef; stack: ItemStack; piece?: undefined }
+
+const byType = (a: ItemDef, b: ItemDef) =>
+  TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type) || a.name.localeCompare(b.name)
+
 /**
- * The character's bag: drops and bought items stacked, upgraded pieces one by one. Gear can be worn
- * from here; items sell for their database price.
+ * The character's bag like the client's: a grid of slots (single pieces first, then stacks); the
+ * item tapped shows below with what can be done with it — wear, sell, exchange stones.
  */
 export function InventoryPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)
@@ -58,14 +67,16 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   if (!character) return null
   const inventory = character.inventory
   const away = character.expedition !== null
-  const items: ListedItem[] = inventory
-    .map((stack) => ({ ...stack, item: getItem(stack.itemId) }))
-    .sort(
-      (a, b) =>
-        TYPE_ORDER.indexOf(a.item.type) - TYPE_ORDER.indexOf(b.item.type) ||
-        a.item.name.localeCompare(b.item.name),
-    )
-  const total = inventory.reduce((sum, s) => sum + s.count, 0)
+  const entries: BagEntry[] = [
+    ...character.gear
+      .map((piece) => ({ key: `piece-${piece.uid}`, item: getItem(piece.itemId), piece }))
+      .sort((a, b) => byType(a.item, b.item) || b.piece.plus - a.piece.plus),
+    ...inventory
+      .map((stack) => ({ key: `item-${stack.itemId}`, item: getItem(stack.itemId), stack }))
+      .sort((a, b) => byType(a.item, b.item)),
+  ]
+  const chosen = entries.find((e) => e.key === selected)
+  const total = inventory.reduce((sum, s) => sum + s.count, 0) + character.gear.length
   // "sell all" keeps what the hero uses: its class's gear, potions, upgrade stones and glasses
   const keep = (itemId: number) => {
     const item = getItem(itemId)
@@ -85,7 +96,6 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
     setBusy(true)
     try {
       setMessage(await action())
-      setSelected(null)
     } catch (error) {
       setMessage(
         error instanceof GameError ? 'That is not possible right now.' : 'Something went wrong.',
@@ -149,161 +159,155 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
     )
   }
 
+  /** What can be done with the piece or stack in the slot tapped. */
+  const details = (entry: BagEntry) => {
+    const { item, piece, stack } = entry
+    if (piece) {
+      return (
+        <>
+          <div className="bag-details__head">
+            <ItemIcon item={item} />
+            <span className="item-row__body">
+              <span className={`item-row__name${nameTone(piece)}`}>
+                {pieceName(piece.itemId, piece.plus, piece.rare)}
+              </span>
+              <span className="item-row__meta">
+                {[rareLabel(piece), gearLine(piece.itemId, piece.plus, piece.rare)]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
+              <OptionList options={piece.options} classId={character.classId} />
+            </span>
+          </div>
+          <div className="item-row__actions">
+            {wearActions(piece.itemId, piece.plus, { uid: piece.uid }, piece.options, piece.rare)}
+            {sellPrice(piece.itemId) > 0 && (
+              <button
+                type="button"
+                className="button"
+                disabled={busy}
+                onClick={() =>
+                  run(async () => {
+                    await sellGear([piece.uid])
+                    return `Sold ${pieceName(piece.itemId, piece.plus, piece.rare)} for ${fmt(sellPrice(piece.itemId))} gold.`
+                  })
+                }
+              >
+                Sell · +{fmt(sellPrice(piece.itemId))}
+              </button>
+            )}
+          </div>
+        </>
+      )
+    }
+    const price = sellPrice(stack.itemId)
+    return (
+      <>
+        <div className="bag-details__head">
+          <ItemRowContent itemId={stack.itemId} count={stack.count} item={item} />
+        </div>
+        <div className="item-row__actions">
+          {item.gear && wearActions(stack.itemId, 0, { itemId: stack.itemId })}
+          {item.potion && <p className="item-row__note">{potionText(item.potion)}</p>}
+          {stack.itemId === SMELTING_STONE_ID && (
+            <>
+              <p className="item-row__note">
+                Only Heaven Stones upgrade gear: {STONES_PER_HEAVEN} Smelting Stones make one.
+              </p>
+              <button
+                type="button"
+                className="button button--gold"
+                disabled={busy || away || stack.count < STONES_PER_HEAVEN}
+                onClick={() =>
+                  run(async () => {
+                    const count = Math.floor(stack.count / STONES_PER_HEAVEN)
+                    await exchangeStones(count)
+                    return `Exchanged ${fmt(count * STONES_PER_HEAVEN)} Smelting Stones for ${fmt(count)} Heaven ${count === 1 ? 'Stone' : 'Stones'}.`
+                  })
+                }
+              >
+                Exchange for {fmt(Math.floor(stack.count / STONES_PER_HEAVEN))} Heaven Stone
+                {Math.floor(stack.count / STONES_PER_HEAVEN) === 1 ? '' : 's'}
+              </button>
+            </>
+          )}
+          {price > 0 ? (
+            <>
+              <button
+                type="button"
+                className="button"
+                disabled={busy}
+                onClick={() => sell([{ itemId: stack.itemId, count: 1 }])}
+              >
+                Sell 1 · +{fmt(price)}
+              </button>
+              {stack.count > 1 && (
+                <button
+                  type="button"
+                  className="button"
+                  disabled={busy}
+                  onClick={() => sell([{ itemId: stack.itemId, count: stack.count }])}
+                >
+                  Sell all ×{fmt(stack.count)} · +{fmt(price * stack.count)}
+                </button>
+              )}
+            </>
+          ) : (
+            <p className="item-row__note">The shop does not buy this item.</p>
+          )}
+        </div>
+      </>
+    )
+  }
+
   return (
-    <Sheet title="Inventory" titleId="inventory-title" onClose={onClose}>
+    <Sheet
+      title="Inventory"
+      titleId="inventory-title"
+      onClose={onClose}
+      extra={
+        <p className="shop__gold" aria-label={`${fmt(character.gold)} gold`}>
+          <span className="coin" aria-hidden="true" /> {fmt(character.gold)}
+        </p>
+      }
+    >
       <p className="inventory__status" role="status">
         {message ?? ''}
       </p>
 
-      {character.gear.length > 0 && (
-        <>
-          <h3 className="inventory__heading">Single pieces</h3>
-          <ul className="item-list">
-            {character.gear.map((piece) => {
-              const item = getItem(piece.itemId)
-              const open = selected === piece.uid
-              return (
-                <li
-                  key={piece.uid}
-                  className={`item-row item-row--${item.type} item-row--button${open ? ' is-open' : ''}`}
-                >
-                  <button
-                    type="button"
-                    className="item-row__main"
-                    aria-expanded={open}
-                    onClick={() => setSelected(open ? null : piece.uid)}
-                  >
-                    <ItemIcon item={item} />
-                    <span className="item-row__body">
-                      <span className={`item-row__name${nameTone(piece)}`}>
-                        {pieceName(piece.itemId, piece.plus, piece.rare)}
-                      </span>
-                      <span className="item-row__meta">
-                        {[rareLabel(piece), gearLine(piece.itemId, piece.plus, piece.rare)]
-                          .filter(Boolean)
-                          .join(' · ')}
-                      </span>
-                      <OptionList options={piece.options} classId={character.classId} />
-                    </span>
-                  </button>
-                  {open && (
-                    <div className="item-row__actions">
-                      {wearActions(
-                        piece.itemId,
-                        piece.plus,
-                        { uid: piece.uid },
-                        piece.options,
-                        piece.rare,
-                      )}
-                      {sellPrice(piece.itemId) > 0 && (
-                        <button
-                          type="button"
-                          className="button"
-                          disabled={busy}
-                          onClick={() =>
-                            run(async () => {
-                              await sellGear([piece.uid])
-                              return `Sold ${pieceName(piece.itemId, piece.plus, piece.rare)} for ${fmt(sellPrice(piece.itemId))} gold.`
-                            })
-                          }
-                        >
-                          Sell · +{fmt(sellPrice(piece.itemId))}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-          <h3 className="inventory__heading">Bag</h3>
-        </>
-      )}
-
-      {items.length === 0 ? (
+      {entries.length === 0 ? (
         <p className="sheet__empty">Your bag is empty. Monsters drop items as you hunt.</p>
       ) : (
         <>
-          <p className="sheet__meta">
-            {items.length} kinds · {fmt(total)} items
-          </p>
-          <ul className="item-list">
-            {items.map((entry) => {
-              const key = `item-${entry.itemId}`
-              const open = selected === key
-              const price = sellPrice(entry.itemId)
+          <ul className="bag-grid" aria-label="Bag">
+            {entries.map((entry) => {
+              const { key, item, piece, stack } = entry
+              const name = piece ? pieceName(piece.itemId, piece.plus, piece.rare) : item.name
+              const count = stack?.count ?? 1
               return (
-                <li
-                  key={entry.itemId}
-                  className={`item-row item-row--${entry.item.type} item-row--button${open ? ' is-open' : ''}`}
-                >
-                  <button
-                    type="button"
-                    className="item-row__main"
-                    aria-expanded={open}
-                    onClick={() => setSelected(open ? null : key)}
-                  >
-                    <ItemRowContent {...entry} />
-                  </button>
-                  {open && (
-                    <div className="item-row__actions">
-                      {entry.item.gear && wearActions(entry.itemId, 0, { itemId: entry.itemId })}
-                      {entry.item.potion && (
-                        <p className="item-row__note">{potionText(entry.item.potion)}</p>
-                      )}
-                      {entry.itemId === SMELTING_STONE_ID && (
-                        <>
-                          <p className="item-row__note">
-                            Only Heaven Stones upgrade gear: {STONES_PER_HEAVEN} Smelting Stones
-                            make one.
-                          </p>
-                          <button
-                            type="button"
-                            className="button button--gold"
-                            disabled={busy || away || entry.count < STONES_PER_HEAVEN}
-                            onClick={() =>
-                              run(async () => {
-                                const count = Math.floor(entry.count / STONES_PER_HEAVEN)
-                                await exchangeStones(count)
-                                return `Exchanged ${fmt(count * STONES_PER_HEAVEN)} Smelting Stones for ${fmt(count)} Heaven ${count === 1 ? 'Stone' : 'Stones'}.`
-                              })
-                            }
-                          >
-                            Exchange for {fmt(Math.floor(entry.count / STONES_PER_HEAVEN))} Heaven
-                            Stone{Math.floor(entry.count / STONES_PER_HEAVEN) === 1 ? '' : 's'}
-                          </button>
-                        </>
-                      )}
-                      {price > 0 ? (
-                        <>
-                          <button
-                            type="button"
-                            className="button"
-                            disabled={busy}
-                            onClick={() => sell([{ itemId: entry.itemId, count: 1 }])}
-                          >
-                            Sell 1 · +{fmt(price)}
-                          </button>
-                          {entry.count > 1 && (
-                            <button
-                              type="button"
-                              className="button"
-                              disabled={busy}
-                              onClick={() => sell([{ itemId: entry.itemId, count: entry.count }])}
-                            >
-                              Sell all ×{fmt(entry.count)} · +{fmt(price * entry.count)}
-                            </button>
-                          )}
-                        </>
-                      ) : (
-                        <p className="item-row__note">The shop does not buy this item.</p>
-                      )}
-                    </div>
-                  )}
+                <li key={key}>
+                  <ItemSlot
+                    item={item}
+                    count={count}
+                    plus={piece?.plus}
+                    tone={nameTone(piece ?? { itemId: item.id })}
+                    selected={key === selected}
+                    size={36}
+                    label={count > 1 ? `${name} ×${fmt(count)}` : name}
+                    onClick={() => setSelected(key === selected ? null : key)}
+                  />
                 </li>
               )
             })}
           </ul>
+          <p className="sheet__meta">
+            {entries.length} slots · {fmt(total)} items
+          </p>
+          {chosen ? (
+            <div className="bag-details">{details(chosen)}</div>
+          ) : (
+            <p className="sheet__meta">Tap an item to see it.</p>
+          )}
           {sellable.length > 0 && (
             <button
               type="button"

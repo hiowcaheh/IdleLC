@@ -156,7 +156,10 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   wyprawy + regeneracja za czas nieobecności).
 - **UI z klienta:** ramka gracza z `TopUI` przypięta w lewym górnym rogu (paski HP/MP/EXP to grafiki klienta,
   EXP szary), buffy pod nią; okna z tytułem we wgłębieniu ramki i X na narożniku (`Sheet.tsx`); ikony menu
-  (System, Inventory, Skills, Character). Strona bez zoomu i zaznaczania (`lockZoom.ts`). Czcionka klienta to
+  (System, Inventory, Skills, Character). Strona bez zoomu i zaznaczania (`lockZoom.ts`). Okno Inventory = siatka
+  slotów torby + szczegóły wybranego; Character: Stats w polach wartości z `NewCharacterInfo`, Equipment na planszy
+  sylwetki klasy z `NewInventory` (`equip-<klasa>.webp`, ramki slotów zmierzone w `CharacterPanel.tsx`). Mikstury
+  przy pasku umiejętności; dolny pasek EXP usunięty (jest w ramce). Czcionka klienta to
   tylko bitmapy 7–8 px (`FontGerman0.tex`, DXT; w Nemesis zaszyfrowane) — czekamy na decyzję właściciela.
 - Skille trafiają po `a_readyTime` + 0,4 s (`a_fireTime` to animacja po wystrzale — bez blokady, dopóki nie ma
   animacji skilli z klienta: `TIMINGS.skillAnimationLock = 0`).

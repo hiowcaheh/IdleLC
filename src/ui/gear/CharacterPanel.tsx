@@ -13,6 +13,7 @@ import { MAX_PLUS, stonesOwned, upgradeChance, type GearPiece } from '../../game
 import { OPTION_PLAY_SECONDS } from '../../game/logic/options.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
+import { ItemSlot } from '../items/ItemSlot.tsx'
 import { useCombatTicker } from '../skills/useCombatTicker.ts'
 import { Sheet } from '../Sheet.tsx'
 import {
@@ -36,9 +37,24 @@ const TABS: { id: Tab; label: string }[] = [
 
 const percent = (value: number) => `${Number(value.toFixed(1))}%`
 
+/** The client's equipment board (246 × 155 px): top left corner of each slot frame (34 px). */
+const BOARD = { width: 246, height: 155, frame: 34 }
+const FRAMES: Record<EquipSlot, [number, number]> = {
+  accessory1: [30, 8],
+  accessory2: [30, 43],
+  accessory3: [30, 78],
+  helmet: [106, 8],
+  armor: [106, 43],
+  pants: [106, 78],
+  boots: [106, 113],
+  weapon: [71, 61],
+  gloves: [71, 96],
+  shield: [142, 26],
+}
+
 /**
  * The character card: every combat stat with the options of the worn gear added up, and the worn
- * gear (take pieces off, upgrade them with stones).
+ * gear on the client's equipment board of the class (tap a slot: take it off, upgrade it).
  */
 export function CharacterPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)
@@ -128,6 +144,69 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
         : `The upgrade failed. ${name} stays +${r.plusAfter}.`
     })
 
+  /** The worn piece of a slot: what it gives, upgrade and take off. */
+  const details = (slot: EquipSlot, piece: GearPiece) => {
+    const item = getItem(piece.itemId)
+    return (
+      <>
+        <div className="bag-details__head">
+          <ItemIcon item={item} />
+          <span className="item-row__body">
+            <span className="gear-slot__label">{SLOT_LABELS[slot]}</span>
+            <span className={`item-row__name${nameTone(piece)}`}>
+              {pieceName(piece.itemId, piece.plus, piece.rare)}
+            </span>
+            <span className="item-row__meta">
+              {[rareLabel(piece), gearLine(piece.itemId, piece.plus, piece.rare)]
+                .filter(Boolean)
+                .join(' · ')}
+            </span>
+            <OptionList options={piece.options} classId={character.classId} />
+          </span>
+        </div>
+        <div className="item-row__actions">
+          {item.upgradeable && (
+            <button
+              type="button"
+              className="button button--gold"
+              disabled={busy || away || stones < 1 || piece.plus >= MAX_PLUS}
+              onClick={() => upgrade(slot, piece)}
+            >
+              {piece.plus >= MAX_PLUS
+                ? `+${MAX_PLUS} — maximum`
+                : `Upgrade to +${piece.plus + 1} · ${Math.round(upgradeChance(piece.plus) * 100)}%`}
+            </button>
+          )}
+          <button
+            type="button"
+            className="button"
+            disabled={busy || away}
+            onClick={() =>
+              run(async () => {
+                await unequipItem(slot)
+                setSelected(null)
+                return `${pieceName(piece.itemId, piece.plus, piece.rare)} is back in your bag.`
+              })
+            }
+          >
+            Take off
+          </button>
+          {item.upgradeable ? (
+            <p className="item-row__note">
+              Heaven Stones: {stones}
+              {stones < 1
+                ? ' — the shop sells them; 10 Smelting Stones from monsters make one (Inventory).'
+                : '.'}
+              {piece.plus >= 3 && piece.plus < MAX_PLUS ? ' A failure takes one + away.' : ''}
+            </p>
+          ) : (
+            <p className="item-row__note">Accessories can't be upgraded.</p>
+          )}
+        </div>
+      </>
+    )
+  }
+
   return (
     <Sheet title="Character" titleId="character-title" onClose={onClose}>
       <p className="sheet__meta">
@@ -207,90 +286,48 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
           <p className="inventory__status" role="status">
             {message ?? ''}
           </p>
-          <ul className="item-list">
+          <div
+            className="equip-board"
+            style={{
+              backgroundImage: `url(${import.meta.env.BASE_URL}ui/lc/equip-${character.classId}.webp)`,
+            }}
+          >
             {slots.map((slot) => {
               const piece = character.equipment[slot]
-              const open = selected === slot && piece
-              const item = piece ? getItem(piece.itemId) : null
+              const [x, y] = FRAMES[slot]
+              const name = piece ? pieceName(piece.itemId, piece.plus, piece.rare) : 'empty'
               return (
-                <li
+                <div
                   key={slot}
-                  className={`item-row item-row--button gear-slot${open ? ' is-open' : ''}${piece ? '' : ' is-empty'}`}
+                  className="equip-board__slot"
+                  style={{
+                    left: `${(x / BOARD.width) * 100}%`,
+                    top: `${(y / BOARD.height) * 100}%`,
+                    width: `${(BOARD.frame / BOARD.width) * 100}%`,
+                  }}
                 >
-                  <button
-                    type="button"
-                    className="item-row__main"
-                    aria-expanded={Boolean(open)}
-                    disabled={!piece}
-                    onClick={() => setSelected(open ? null : slot)}
-                  >
-                    {item ? (
-                      <ItemIcon item={item} />
-                    ) : (
-                      <span className="item-icon" aria-hidden="true" />
-                    )}
-                    <span className="item-row__body">
-                      <span className="gear-slot__label">{SLOT_LABELS[slot]}</span>
-                      <span className={`item-row__name${piece ? nameTone(piece) : ''}`}>
-                        {piece ? pieceName(piece.itemId, piece.plus, piece.rare) : 'Empty'}
-                      </span>
-                      {piece && (
-                        <span className="item-row__meta">
-                          {[rareLabel(piece), gearLine(piece.itemId, piece.plus, piece.rare)]
-                            .filter(Boolean)
-                            .join(' · ')}
-                        </span>
-                      )}
-                      {piece && <OptionList options={piece.options} classId={character.classId} />}
-                    </span>
-                  </button>
-                  {open && piece && (
-                    <div className="item-row__actions">
-                      {item?.upgradeable && (
-                        <button
-                          type="button"
-                          className="button button--gold"
-                          disabled={busy || away || stones < 1 || piece.plus >= MAX_PLUS}
-                          onClick={() => upgrade(slot, piece)}
-                        >
-                          {piece.plus >= MAX_PLUS
-                            ? `+${MAX_PLUS} — maximum`
-                            : `Upgrade to +${piece.plus + 1} · ${Math.round(upgradeChance(piece.plus) * 100)}%`}
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        className="button"
-                        disabled={busy || away}
-                        onClick={() =>
-                          run(async () => {
-                            await unequipItem(slot)
-                            setSelected(null)
-                            return `${pieceName(piece.itemId, piece.plus, piece.rare)} is back in your bag.`
-                          })
-                        }
-                      >
-                        Take off
-                      </button>
-                      {item?.upgradeable ? (
-                        <p className="item-row__note">
-                          Heaven Stones: {stones}
-                          {stones < 1
-                            ? ' — the shop sells them; 10 Smelting Stones from monsters make one (Inventory).'
-                            : '.'}
-                          {piece.plus >= 3 && piece.plus < MAX_PLUS
-                            ? ' A failure takes one + away.'
-                            : ''}
-                        </p>
-                      ) : (
-                        <p className="item-row__note">Accessories can't be upgraded.</p>
-                      )}
-                    </div>
-                  )}
-                </li>
+                  <ItemSlot
+                    item={piece ? getItem(piece.itemId) : undefined}
+                    plus={piece?.plus}
+                    tone={piece ? nameTone(piece) : ''}
+                    selected={selected === slot}
+                    size={36}
+                    label={`${SLOT_LABELS[slot]}: ${name}`}
+                    onClick={() => setSelected(selected === slot ? null : slot)}
+                  />
+                </div>
               )
             })}
-          </ul>
+          </div>
+          {selected && character.equipment[selected] ? (
+            <div className="bag-details">{details(selected, character.equipment[selected])}</div>
+          ) : (
+            <p className="sheet__meta">
+              {selected
+                ? `${SLOT_LABELS[selected]}: nothing worn.`
+                : 'Tap a slot to see the piece.'}
+            </p>
+          )}
           {away && <p className="sheet__meta">Gear can't be changed during an expedition.</p>}
         </div>
       )}
