@@ -130,7 +130,9 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   każda broń/zbroja ma GLB z `t_item.a_file_smc` (`public/models/lc/gear/`, `lc-gear.json`, WebP, tylko
   używane kości), a `Character.tsx` podpina siatki pod szkielet ciała i chowa zastąpione części (zbroja `bu`,
   spodnie `bd`/`bs`, rękawice `hn`, buty `ft`, hełm `hair`). Ekran tworzenia pokazuje zestaw startowy.
-  869/1146 modeli; 277 (głównie 60–109 poz.) ma w Nemesis zaszyfrowane tekstury/siatki — jawne są w kliencie 2015.
+  1127/1146 modeli; 258 z nich (głównie 60–109 poz.) ma w Nemesis zaszyfrowane tekstury — kształt prawdziwy,
+  kolor z ikony przedmiotu; 19 przedmiotów z zaszyfrowaną siatką pokazuje najbliższy niższy model (jawne tekstury
+  są w kliencie 2015).
 - **Wymagany sprzęt skilli:** 1:1 z `t_skill` (`a_useWeaponType0/1`, bity `a_useState` 2 = broń, 16 = tarcza;
   pasywne `a_app*`); skill bez sprzętu nie działa (szary na pasku). Podwójne miecze zdejmują tarczę (reguła
   właściciela).

@@ -345,6 +345,38 @@ describe('buildModel', () => {
     )
   })
 
+  it('colours surfaces whose texture is encrypted, and finds a texture named differently', async () => {
+    const plain = new MemoryFiles({
+      'Data\\Item\\plate.bm': meshFile({
+        ...TRIANGLE,
+        surfaces: [
+          {
+            first: 0,
+            indices: [0, 1, 2],
+            name: 'plate',
+            shader: 'Shaders\\Default.sha',
+            textures: ['plate_1_gold'],
+          },
+        ],
+      }),
+      // no TVER header: stored encrypted
+      'Data\\Item\\plate_1.tex': Buffer.from('not a texture'),
+    })
+    const smc = {
+      name: 'plate',
+      meshes: [{ file: 'Data\\Item\\plate.bm', textures: { plate_1: 'Data\\Item\\plate_1.tex' } }],
+      skeleton: null,
+      animSets: [],
+    }
+    await expect(buildModel(plain, smc)).rejects.toThrow()
+    const { document, stats } = await buildModel(plain, smc, { fallbackColor: [0.1, 0.2, 0.3] })
+    expect(stats.unreadable).toEqual(['Data\\Item\\plate_1.tex'])
+    const material = document.getRoot().listMaterials()[0]
+    expect(material.getBaseColorTexture()).toBeNull()
+    // named *_gold: gold trim instead of the item's colour
+    expect(material.getBaseColorFactor()[0]).toBeGreaterThan(material.getBaseColorFactor()[2])
+  })
+
   it('builds gear models with only the bones they are weighted to, and WebP textures', async () => {
     const at = (y) => [1, 0, 0, 0, 0, 1, 0, y, 0, 0, 1, 0]
     const gearFiles = new MemoryFiles({

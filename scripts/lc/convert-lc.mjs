@@ -30,9 +30,10 @@ import { Logger, NodeIO } from '@gltf-transform/core'
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
 import { dedup, meshopt, prune, resample, weld } from '@gltf-transform/functions'
 import { MeshoptDecoder, MeshoptEncoder } from 'meshoptimizer'
+import sharp from 'sharp'
 import { CLASS_MODELS, gearClass } from './classes.mjs'
 import { ClientFiles } from './client.mjs'
-import { ICON_KINDS, buildIconSheet, buildPortraitSheet } from './icons.mjs'
+import { ICON_KINDS, buildIconSheet, buildPortraitSheet, iconColor } from './icons.mjs'
 import { buildUiParts } from './ui.mjs'
 import { buildGearManifest, buildModelManifest, modelIdFromSmc } from './manifest.mjs'
 import { buildModel } from './model.mjs'
@@ -45,6 +46,8 @@ const DEFAULT_OUT = path.join(ROOT, 'public/models/lc')
 const ITEM_MODELS = path.join(GENERATED, 'lc-item-models.json')
 /** Longest texture side of weapon and armor models (WebP): small on screen, and there are many. */
 const GEAR_MAX_TEXTURE = 512
+/** Colour of gear whose texture and icon can't be read (linear RGB). */
+const GEAR_GREY = [0.3, 0.3, 0.32]
 /** Class portraits sheet (relative to public/). */
 const PORTRAITS_FILE = 'icons/lc/portraits.webp'
 
@@ -78,7 +81,7 @@ function parseArgs(argv) {
  * Conversion jobs: { id, smc (client path or parsed), animations (clip names or null), override
  * (fields replacing the .smc's: skeleton, animation sets), gear, starter }.
  */
-function listJobs(args, data, files, itemModels) {
+function listJobs(args, data, files, itemModels, icons) {
   if (args.smc) {
     const smc = fs.existsSync(args.smc) ? path.resolve(args.smc) : args.smc
     return [{ id: modelIdFromSmc(args.smc), smc, animations: args.anims ?? null }]
@@ -118,6 +121,10 @@ function listJobs(args, data, files, itemModels) {
       animations: [],
       override: { skeleton: CLASS_MODELS[classId].skeleton, animSets: [] },
       maxTextureSize: GEAR_MAX_TEXTURE,
+      // textures the Nemesis client stores encrypted: the item's colour from its icon instead
+      fallbackColor: () =>
+        (icons && items.map((id) => iconColor(icons.sheet, icons.pixels, id)).find(Boolean)) ??
+        GEAR_GREY,
       webp: true,
       usedBonesOnly: true,
       gear: true,
@@ -131,6 +138,17 @@ function listJobs(args, data, files, itemModels) {
       (j.gear && args.only.has('gear')) ||
       (j.starter && args.only.has('starter')),
   )
+}
+
+/** The game's item icon sheet (raw RGBA) and its lc-icons.json entry, or null. */
+async function readItemIcons() {
+  const manifestFile = path.join(GENERATED, 'lc-icons.json')
+  if (!fs.existsSync(manifestFile)) return null
+  const sheet = JSON.parse(fs.readFileSync(manifestFile, 'utf8')).items
+  const image = sheet && path.join(ROOT, 'public', sheet.file.replace(/\?.*$/, ''))
+  if (!image || !fs.existsSync(image)) return null
+  const pixels = await sharp(image).ensureAlpha().raw().toBuffer()
+  return { sheet, pixels }
 }
 
 function readSmc(job, files) {
@@ -186,7 +204,7 @@ async function main() {
   // `--only icons` / `--only ui` (or both) convert no models
   const iconsOnly =
     args.only !== undefined && [...args.only].every((o) => o === 'icons' || o === 'ui')
-  const jobs = iconsOnly ? [] : listJobs(args, data, files, itemModels)
+  const jobs = iconsOnly ? [] : listJobs(args, data, files, itemModels, await readItemIcons())
   const textureCache = new Map()
   const shaders = new Set()
   let converted = 0
@@ -199,6 +217,7 @@ async function main() {
         maxTextureSize: job.maxTextureSize ?? args.maxTexture,
         webp: job.webp,
         usedBonesOnly: job.usedBonesOnly,
+        fallbackColor: job.fallbackColor?.(),
         textureCache,
       }
       let { document, stats } = await buildModel(files, smc, options)
@@ -223,7 +242,8 @@ async function main() {
       console.log(
         `ok    ${job.id}  ${size} KB  meshes ${stats.meshes}, bones ${stats.bones}, ` +
           `clips ${stats.animations.length}` +
-          (stats.missing.length ? `  (missing: ${stats.missing.join(', ')})` : ''),
+          (stats.missing.length ? `  (missing: ${stats.missing.join(', ')})` : '') +
+          (stats.unreadable.length ? `  (plain colour: ${stats.unreadable.length} encrypted)` : ''),
       )
       converted++
     } catch (error) {
@@ -297,9 +317,13 @@ async function main() {
     fs.writeFileSync(path.join(GENERATED, 'lc-models.json'), JSON.stringify(manifest, null, 2))
     console.log(`lc-models.json: ${manifest.models.length} models`)
     if (itemModels) {
-      const gear = buildGearManifest(itemModels, args.out)
-      fs.writeFileSync(path.join(GENERATED, 'lc-gear.json'), JSON.stringify(gear))
-      console.log(`lc-gear.json: ${Object.keys(gear.models).length} weapon and armor models`)
+      const gear = buildGearManifest(itemModels, args.out, data)
+      const { standIns, ...manifest } = gear
+      fs.writeFileSync(path.join(GENERATED, 'lc-gear.json'), JSON.stringify(manifest))
+      console.log(
+        `lc-gear.json: ${Object.keys(gear.models).length} weapon and armor models, ` +
+          `${standIns} items shown with a stand-in`,
+      )
     }
   }
   console.log(

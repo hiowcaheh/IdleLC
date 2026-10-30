@@ -32,6 +32,9 @@ export function inverseBindMatrix(m) {
 const colorFactor = (c) =>
   [(c >>> 24) & 255, (c >>> 16) & 255, (c >>> 8) & 255].map((v) => v / 255).concat(1)
 
+/** Plain colour (linear RGB) of an unreadable texture named as gold trim (`ni_bu_017_1_gold`). */
+const GOLD = [0.62, 0.42, 0.12]
+
 /** Alpha handling by shader name; SE shaders seen so far (Default, Detail, NormalMap) are opaque. */
 function alphaMode(shader = '') {
   if (/translucent|transparent|blend|add/i.test(shader)) return 'BLEND'
@@ -91,6 +94,8 @@ async function encodeTexture(texture, withAlpha, maxSize, webp) {
  * @param options.webp            WebP textures (EXT_texture_webp) instead of JPEG / PNG
  * @param options.usedBonesOnly   keep only the bones the meshes are weighted to (and their parents):
  *                                gear models worn on a class body that has the whole skeleton
+ * @param options.fallbackColor   linear RGB for surfaces whose texture can't be read (encrypted);
+ *                                without it such a texture fails the model
  * @param options.textureCache    Map shared between models of one run
  * @returns {{ document: Document, stats: object }}
  */
@@ -104,6 +109,7 @@ export async function buildModel(files, smc, options = {}) {
     bones: 0,
     animations: [],
     missing: [],
+    unreadable: [],
     shaders: new Set(),
   }
 
@@ -169,7 +175,12 @@ export async function buildModel(files, smc, options = {}) {
   async function material(surface, textures) {
     const mode = alphaMode(surface.shader)
     const textureName = surface.textures?.[0]
-    const texturePath = textureName ? textures[textureName] : undefined
+    // a surface may name its texture differently from the .smc (`ni_bu_017_1_gold` / `ni_bu_017_1`):
+    // a mesh with a single texture uses that one
+    const own = Object.values(textures)
+    const texturePath = textureName
+      ? (textures[textureName] ?? (own.length === 1 ? own[0] : undefined))
+      : undefined
     const color = surface.shader?.endsWith('Color.sha') ? surface.shaderFlags : surface.colors?.[0]
     const matKey = `${texturePath ?? ''}|${color ?? ''}|${mode}`
     if (materials.has(matKey)) return materials.get(matKey)
@@ -177,18 +188,26 @@ export async function buildModel(files, smc, options = {}) {
     const mat = doc.createMaterial(name).setMetallicFactor(0).setRoughnessFactor(0.9)
     if (color !== undefined && color >>> 0 !== 0xffffffff)
       mat.setBaseColorFactor(colorFactor(color))
-    if (texturePath && files.resolve(texturePath)) {
-      const file = files.resolve(texturePath)
-      const cacheKey = `${file}|${mode !== 'OPAQUE'}|${maxTextureSize}|${webp}`
-      if (!textureCache.has(cacheKey)) {
-        const decoded = parseTexture(files.read(texturePath))
-        const withAlpha = mode !== 'OPAQUE' && decoded.alpha
-        textureCache.set(cacheKey, {
+    const file = texturePath ? files.resolve(texturePath) : null
+    const cacheKey = `${file}|${mode !== 'OPAQUE'}|${maxTextureSize}|${webp}`
+    if (file && !textureCache.has(cacheKey)) {
+      let decoded = null
+      try {
+        decoded = parseTexture(files.read(texturePath))
+      } catch (error) {
+        if (!options.fallbackColor) throw error
+      }
+      const withAlpha = decoded !== null && mode !== 'OPAQUE' && decoded.alpha
+      textureCache.set(
+        cacheKey,
+        decoded && {
           ...(await encodeTexture(decoded, withAlpha, maxTextureSize, webp)),
           withAlpha,
-        })
-      }
-      const encoded = textureCache.get(cacheKey)
+        },
+      )
+    }
+    const encoded = file ? textureCache.get(cacheKey) : undefined
+    if (encoded) {
       mat.setBaseColorTexture(
         doc.createTexture(name).setImage(encoded.data).setMimeType(encoded.mimeType),
       )
@@ -196,6 +215,14 @@ export async function buildModel(files, smc, options = {}) {
         mat.setAlphaMode(mode)
         if (mode === 'MASK') mat.setAlphaCutoff(0.5)
       }
+    } else if (file) {
+      // stored encrypted: the surface gets a plain colour
+      if (!options.fallbackColor) throw new Error(`unreadable texture ${texturePath}`)
+      stats.unreadable.push(texturePath)
+      const gold = /gold/i.test(textureName ?? '')
+      mat
+        .setBaseColorFactor([...(gold ? GOLD : options.fallbackColor), 1])
+        .setMetallicFactor(gold ? 0.6 : 0.25)
     } else if (texturePath) {
       stats.missing.push(texturePath)
     }

@@ -114,10 +114,15 @@ część ciała swojego slotu (zbroja `bu`, spodnie `bd` + ewentualnie `bs`, rę
 do pokazania przedmiotu na ziemi / efektów). Hełmy poniżej 97 poz. wskazują pudełko z dropem
 `Data\Item\Common\ITEM_treasure02.smc` — na postaci nic nie widać.
 
-W kliencie Nemesis część plików jest zaszyfrowana w całości (bez nagłówka `TVER`, z datą 2025):
-tekstury i siatki m.in. zestawów 60–109 poz. (277 z 1146 modeli sprzętu) i animacje klas w wersji 254
-(`ni.ba`, `ro.ba`, `so.ba` — zamiast nich `ni_ep1.ba`, `ro_ep1.ba` i `so.ba` nieumarłego czarownika). Tych
-modeli sprzętu na razie nie ma — postać pokazuje wtedy część ciała. Jawne kopie są w kliencie 2015.
+W kliencie Nemesis część plików jest zaszyfrowana w całości (bez nagłówka `TVER`, z datą 2025): tekstury
+m.in. zestawów 60–109 poz., kilka siatek broni (`*_017`, `ni_shield_019`), atlasy interfejsu (także
+`ItemBtn*.tex`) i animacje klas w wersji 254 (`ni.ba`, `ro.ba`, `so.ba` — zamiast nich `ni_ep1.ba`,
+`ro_ep1.ba` i `so.ba` nieumarłego czarownika). Konwerter robi wtedy model sprzętu z prawdziwym kształtem
+w jednolitym kolorze — średnim kolorze ikony przedmiotu z `public/icons/lc/items.webp` (tekstury `*_gold`
+złote); 258 z 1146 modeli. Przedmiot z nieczytelną siatką (19) pokazuje najbliższy niższy model tego samego
+rodzaju (`ni_sword_017` → `ni_sword_*`). Powierzchnia może nazywać teksturę inaczej niż `.smc`
+(`ni_bu_017_1_gold` / `ni_bu_017_1`) — siatka z jedną teksturą bierze wtedy ją. Jawne kopie tekstur są
+w kliencie 2015 (drugi `--client` po Nemesis je podmieni).
 
 ## Tekstura `.tex`
 

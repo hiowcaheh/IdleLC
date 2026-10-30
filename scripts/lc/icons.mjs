@@ -70,6 +70,40 @@ export async function buildIconSheet(files, entries, atlasPath, file) {
   return { image, sheet, missingAtlases }
 }
 
+/** sRGB 0…255 → linear 0…1 (glTF base colours are linear). */
+const linear = (c) => {
+  const v = c / 255
+  return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4
+}
+
+/**
+ * The average colour of an item icon's lit pixels (the item, not its dark background) as a linear
+ * RGB glTF base colour, or null. Gear whose texture can't be read is tinted with it.
+ * @param sheet   the items sheet of lc-icons.json
+ * @param pixels  that sheet's image as raw RGBA
+ */
+export function iconColor(sheet, pixels, itemId) {
+  const cell = sheet.icons[itemId]
+  if (cell === undefined) return null
+  const x0 = (cell % sheet.columns) * sheet.size
+  const y0 = Math.floor(cell / sheet.columns) * sheet.size
+  const sum = [0, 0, 0]
+  let count = 0
+  for (let y = 0; y < sheet.size; y++) {
+    for (let x = 0; x < sheet.size; x++) {
+      const i = ((y0 + y) * sheet.width + x0 + x) * 4
+      const [r, g, b, a] = pixels.subarray(i, i + 4)
+      const light = (r + g + b) / 3
+      if (a < 128 || light < 40 || light > 235) continue
+      sum[0] += r
+      sum[1] += g
+      sum[2] += b
+      count++
+    }
+  }
+  return count ? sum.map((v) => linear(v / count)) : null
+}
+
 export const ICON_KINDS = [
   {
     kind: 'items',

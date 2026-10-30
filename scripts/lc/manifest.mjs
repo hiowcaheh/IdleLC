@@ -93,14 +93,43 @@ export async function buildModelManifest(data, modelsDir) {
 
 /**
  * Weapon and armor models converted into `<modelsDir>/gear/`: model name → versioned file and the
- * item ids that wear it.
+ * item ids that wear it. Items whose model could not be converted (a mesh the client stores
+ * encrypted) show a stand-in: the converted model of the same kind (`ni_sword_017` → `ni_sword_*`,
+ * `ni_ja_bu_001` → `ni_bu_*`) nearest below their level, else the nearest above.
+ * @returns {{ baseUrl: string, models: object, standIns: number }} (standIns: items shown so)
  */
-export function buildGearManifest(itemModels, modelsDir) {
+export function buildGearManifest(itemModels, modelsDir, data) {
+  const itemLevels = new Map((data?.items ?? []).map((item) => [item.id, item.level]))
+  const levelOf = (items) => Math.min(...items.map((id) => itemLevels.get(id) ?? 0))
+  const kindOf = (name) => name.replace(/_\d\w*$/, '')
   const models = {}
+  const levels = new Map()
+  const unconverted = []
   for (const [smc, items] of Object.entries(itemModels)) {
     const name = modelIdFromSmc(smc)
     const full = path.join(modelsDir, GEAR_DIR, `${name}.glb`)
-    if (fs.existsSync(full)) models[name] = { file: versioned(full, `${name}.glb`), items }
+    if (!fs.existsSync(full)) {
+      unconverted.push({ name, items })
+      continue
+    }
+    models[name] = { file: versioned(full, `${name}.glb`), items: [...items] }
+    levels.set(name, levelOf(items))
   }
-  return { baseUrl: `${MODELS_BASE_URL}${GEAR_DIR}/`, models }
+  let standIns = 0
+  for (const { name, items } of unconverted) {
+    const kind = kindOf(name)
+    const parts = kind.split('_')
+    const plainKind = `${parts[0]}_${parts.at(-1)}`
+    const level = levelOf(items)
+    const nearest = (k) => {
+      const same = [...levels].filter(([n]) => kindOf(n) === k)
+      const below = same.filter(([, l]) => l <= level).sort((a, b) => b[1] - a[1])[0]
+      return (below ?? same.sort((a, b) => a[1] - b[1])[0])?.[0]
+    }
+    const standIn = nearest(kind) ?? nearest(plainKind)
+    if (!standIn) continue
+    models[standIn].items.push(...items)
+    standIns += items.length
+  }
+  return { baseUrl: `${MODELS_BASE_URL}${GEAR_DIR}/`, models, standIns }
 }

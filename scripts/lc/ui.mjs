@@ -37,8 +37,8 @@ const EMPTY_AREAS = {
     [112, 57, 118, 8],
   ],
 }
-/** Brightness left in an empty bar track. */
-const EMPTY_SHADE = 0.15
+/** Brightness left in an empty bar track (grey, so it never looks like a dark fill). */
+const EMPTY_SHADE = 0.22
 
 /** The pieces as lossless WebP images: { name: Buffer }; pieces whose atlas is missing are left out. */
 export async function buildUiParts(files) {
@@ -59,7 +59,8 @@ export async function buildUiParts(files) {
       for (let row = ey; row < ey + eh; row++) {
         for (let col = ex; col < ex + ew; col++) {
           const i = (row * width + col) * 4
-          for (let c = 0; c < 3; c++) pixels[i + c] = Math.round(pixels[i + c] * EMPTY_SHADE)
+          const grey = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3
+          for (let c = 0; c < 3; c++) pixels[i + c] = Math.round(grey * EMPTY_SHADE)
         }
       }
     }

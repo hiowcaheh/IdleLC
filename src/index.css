@@ -2888,8 +2888,8 @@ a.button {
 
 /* the HUD menu buttons: the client's menu icons */
 .icon-button.hud__menu {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border: none;
   border-radius: 2px;
   background: center / 100% 100% no-repeat;
@@ -2949,7 +2949,9 @@ a.button {
 
 .sheet--framed .sheet__title {
   overflow: hidden;
-  font-size: 13px;
+  /* capitals only: nudged down to sit in the middle of the recess */
+  padding-top: 3px;
+  font-size: 12px;
   line-height: 1;
   letter-spacing: 0.04em;
   white-space: nowrap;
@@ -3162,14 +3164,18 @@ a.button {
 
 .player-frame__bar--hp .bar__fill {
   background: url('/ui/lc/bar-hp.webp') 0 0 / 100% 100%;
+  filter: brightness(1.25) saturate(1.1);
 }
 
 .player-frame__bar--mp .bar__fill {
   background: url('/ui/lc/bar-mp.webp') 0 0 / 100% 100%;
+  filter: brightness(1.3) saturate(1.1);
 }
 
+/* the client's grey-steel EXP bar, lifted so the filled part stands out from the empty track */
 .player-frame__bar--exp .bar__fill {
   background: url('/ui/lc/bar-exp.webp') 0 0 / 100% 100%;
+  filter: brightness(2.2) saturate(0.8);
 }
 
 .player-frame__bar .bar__text {
