@@ -16,7 +16,7 @@ export interface TerrainMeta {
   layers: { texture: string; tile: number }[]
   /** Masks of layers 1…, four per RGBA sheet. */
   masks: string[]
-  /** Hunting grounds [x, z] in map metres, nearest the town first. */
+  /** Hunting grounds [x, z] in map metres in spot order: the first nearest the town, each next close by. */
   arenas: [number, number][]
 }
 
@@ -24,6 +24,18 @@ export interface LcMap {
   meta: TerrainMeta
   /** Heights in metres, row by row along z, the hunting grounds levelled. */
   ground: Float32Array
+  /** The client's own heights in metres (what the world file's props stand on). */
+  raw: Float32Array
+}
+
+/**
+ * public/maps/<map>/props.json (scripts/lc/props.mjs): the models of props.glb (node names; `low`:
+ * grass and flowers) and where the world file places them: [model, x, y, z, heading, pitch, banking,
+ * stretch (one number when even, else x, y, z)], angles in degrees.
+ */
+export interface MapProps {
+  models: { id: string; low: boolean }[]
+  instances: number[][]
 }
 
 export const mapBase = (map: string) => `${import.meta.env.BASE_URL}maps/${map}/`
@@ -67,20 +79,48 @@ export function loadMap(map: string): Promise<LcMap> {
     promise = Promise.all([
       fetch(`${mapBase(map)}terrain.json`).then((r) => r.json() as Promise<TerrainMeta>),
       fetch(`${mapBase(map)}heights.bin`).then((r) => r.arrayBuffer()),
-    ]).then(([meta, buffer]) => ({ meta, ground: levelledGround(meta, new Uint16Array(buffer)) }))
+    ]).then(([meta, buffer]) => {
+      const heights = new Uint16Array(buffer)
+      return {
+        meta,
+        ground: levelledGround(meta, heights),
+        raw: Float32Array.from(heights, (h) => h * meta.heightScale),
+      }
+    })
     maps.set(map, promise)
   }
   return promise
 }
 
-/** Ground height in metres at a point of the map (bilinear between the height map's vertices). */
-export function groundHeight({ meta, ground }: LcMap, x: number, z: number): number {
+const props = new Map<string, Promise<MapProps | null>>()
+
+/** The map's props (null when the map has none), fetched once. */
+export function loadProps(map: string): Promise<MapProps | null> {
+  let promise = props.get(map)
+  if (!promise) {
+    promise = fetch(`${mapBase(map)}props.json`)
+      .then((r) => (r.ok ? (r.json() as Promise<MapProps>) : null))
+      .catch(() => null)
+    props.set(map, promise)
+  }
+  return promise
+}
+
+/** Height in metres at a point of the map (bilinear between the height map's vertices). */
+function sample(meta: TerrainMeta, heights: Float32Array, x: number, z: number): number {
   const fx = Math.min(meta.width - 1.001, Math.max(0, x / meta.cell))
   const fz = Math.min(meta.height - 1.001, Math.max(0, z / meta.cell))
   const i = Math.floor(fx)
   const j = Math.floor(fz)
-  const h = (a: number, b: number) => ground[b * meta.width + a]!
+  const h = (a: number, b: number) => heights[b * meta.width + a]!
   const top = h(i, j) + (h(i + 1, j) - h(i, j)) * (fx - i)
   const bottom = h(i, j + 1) + (h(i + 1, j + 1) - h(i, j + 1)) * (fx - i)
   return top + (bottom - top) * (fz - j)
 }
+
+/** Ground height in metres at a point of the map (the hunting grounds levelled). */
+export const groundHeight = (map: LcMap, x: number, z: number) => sample(map.meta, map.ground, x, z)
+
+/** How far a hunting ground's levelling raised (+) or lowered (−) the client's ground here. */
+export const levelShift = (map: LcMap, x: number, z: number) =>
+  sample(map.meta, map.ground, x, z) - sample(map.meta, map.raw, x, z)

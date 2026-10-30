@@ -1,6 +1,6 @@
 import { Sparkles } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Suspense, use, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, use, useLayoutEffect, useMemo, useRef } from 'react'
 import {
   BackSide,
   BufferAttribute,
@@ -21,7 +21,9 @@ import {
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
 import type { ZoneDef } from '../game/data/types.ts'
 import { LcTerrain } from './LcTerrain.tsx'
-import { groundHeight, loadMap, type LcMap } from './lcMap.ts'
+import { groundHeight, loadMap } from './lcMap.ts'
+import { MapPropsLayer } from './MapProps.tsx'
+import { ModelBoundary } from './ModelBoundary.tsx'
 import { TIMINGS } from '../game/logic/combat.ts'
 import { combatSession } from '../game/session/combatSession.ts'
 import { ROCKS, TERRAIN_SIZE, TREES, smoothstep, terrainHeight, type Prop } from './terrain.ts'
@@ -140,22 +142,18 @@ function Ground({ env }: { env: Env }) {
   )
 }
 
-/** Ground height under a prop (the procedural hills unless a map's terrain is drawn). */
-type HeightAt = (x: number, z: number) => number
-
 function useInstances(
   ref: React.RefObject<InstancedMesh | null>,
   props: Prop[],
   colorFor: (i: number) => Color,
   yScale = 1,
-  heightAt?: HeightAt,
 ) {
   useLayoutEffect(() => {
     const mesh = ref.current
     if (!mesh) return
     const dummy = new Object3D()
     props.forEach((p, i) => {
-      dummy.position.set(p.x, heightAt ? heightAt(p.x, p.z) : p.y, p.z)
+      dummy.position.set(p.x, p.y, p.z)
       dummy.rotation.set(0, p.rotation, 0)
       dummy.scale.set(p.scale, p.scale * yScale, p.scale)
       dummy.updateMatrix()
@@ -165,10 +163,10 @@ function useInstances(
     mesh.instanceMatrix.needsUpdate = true
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
     mesh.computeBoundingSphere()
-  }, [ref, props, colorFor, yScale, heightAt])
+  }, [ref, props, colorFor, yScale])
 }
 
-function Trees({ heightAt }: { heightAt?: HeightAt }) {
+function Trees() {
   const trunks = useRef<InstancedMesh>(null)
   const crowns = useRef<InstancedMesh>(null)
   const geometries = useMemo(() => {
@@ -188,8 +186,8 @@ function Trees({ heightAt }: { heightAt?: HeightAt }) {
     const palette = ['#2f4a26', '#3a5a2a', '#28402a', '#4a5f2c'].map((h) => new Color(h))
     return (i: number) => palette[i % palette.length]!
   }, [])
-  useInstances(trunks, TREES, trunkColor, 1, heightAt)
-  useInstances(crowns, TREES, crownColor, 1, heightAt)
+  useInstances(trunks, TREES, trunkColor)
+  useInstances(crowns, TREES, crownColor)
   return (
     <>
       <instancedMesh
@@ -212,14 +210,14 @@ function Trees({ heightAt }: { heightAt?: HeightAt }) {
   )
 }
 
-function Rocks({ heightAt }: { heightAt?: HeightAt }) {
+function Rocks() {
   const rocks = useRef<InstancedMesh>(null)
   const geometry = useMemo(() => new DodecahedronGeometry(1, 0).translate(0, 0.25, 0), [])
   const color = useMemo(() => {
     const palette = ['#7b766c', '#68645c', '#8a8274', '#5c5952'].map((h) => new Color(h))
     return (i: number) => palette[i % palette.length]!
   }, [])
-  useInstances(rocks, ROCKS, color, 0.6, heightAt)
+  useInstances(rocks, ROCKS, color, 0.6)
   return (
     <instancedMesh ref={rocks} args={[geometry, undefined, ROCKS.length]} castShadow receiveShadow>
       <meshStandardMaterial flatShading roughness={1} />
@@ -235,33 +233,17 @@ function travelProgress(): number {
 
 const easeInOut = (t: number) => t * t * (3 - 2 * t)
 
-/** Trees and rocks around a hunting ground of a map, standing on the map's ground. */
-function ArenaProps({ data, centre }: { data: LcMap; centre: [number, number] }) {
-  const heightAt = useCallback<HeightAt>(
-    (x, z) => groundHeight(data, centre[0] + x, centre[1] + z),
-    [data, centre],
-  )
-  return (
-    <group position={[centre[0], 0, centre[1]]}>
-      <Trees heightAt={heightAt} />
-      <Rocks heightAt={heightAt} />
-    </group>
-  )
-}
-
 /**
- * A zone drawn on the client's terrain: the map moves under the hero so the spot's hunting ground
- * (the map's arenas, nearest the town for the first spots) is where the fight is. Going to another
- * spot, the map slides from the old ground to the new one while the hero runs.
+ * A zone drawn on the client's terrain with the trees, walls and houses of its world file: the map
+ * moves under the hero so the spot's hunting ground (the map's arenas in spot order) is where the
+ * fight is. Going to another spot, the map slides from the old ground to the new one while the hero
+ * runs.
  */
 function MapGround({ map, spot }: { map: string; spot: number }) {
   const data = use(loadMap(map))
   const { arenas } = data.meta
   const target = arenas[Math.max(0, spot) % arenas.length]!
   const group = useRef<Group>(null)
-  // the grounds whose trees stand (the one being left stays during the trip)
-  const [grounds, setGrounds] = useState({ from: target, to: target })
-  if (grounds.to !== target) setGrounds({ from: grounds.to, to: target })
   const trip = useRef({ from: target, to: target, shown: target })
   useFrame(() => {
     const m = trip.current
@@ -280,8 +262,11 @@ function MapGround({ map, spot }: { map: string; spot: number }) {
   return (
     <group ref={group}>
       <LcTerrain map={map} />
-      <ArenaProps data={data} centre={grounds.to} />
-      {grounds.from !== grounds.to && <ArenaProps data={data} centre={grounds.from} />}
+      <ModelBoundary resetKey={map} fallback={null}>
+        <Suspense fallback={null}>
+          <MapPropsLayer map={map} data={data} at={trip} />
+        </Suspense>
+      </ModelBoundary>
     </group>
   )
 }
@@ -351,7 +336,8 @@ export function World({
   return (
     <>
       <color attach="background" args={[env.fog]} />
-      <fog attach="fog" args={[env.fog, 26, 90]} />
+      {/* a map's trees and buildings are worth seeing further off */}
+      <fog attach="fog" args={zone.map ? [env.fog, 30, 120] : [env.fog, 26, 90]} />
       <SkyDome env={env} />
       <hemisphereLight args={[env.skyTop, env.groundLow, 1.15]} />
       <Sun shadows={shadows} ultra={ultra} />

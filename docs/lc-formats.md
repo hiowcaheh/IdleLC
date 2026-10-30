@@ -176,11 +176,27 @@ Nazwy efektów z rekordu wskazują definicje w `Data\Effect\Effect.dat`, który 
 zapisuje wybrane (`scripts/lc/fx.mjs`) do `public/fx/*.webp`, a gra składa z nich efekty według rodzaju
 skilla (`src/scene/SkillEffects.tsx`).
 
-## Świat `.wld` (jeszcze nie rozpracowany)
+## Świat `.wld` (modele na mapie)
 
-Plik świata Serious Engine: bryły (`BR3D`, sektory, wielokąty), encje, światła, modele rozstawione na mapie
-(`MESH`, `MITS`, …). Rekwizyty map (`Data\World\…\Ska\*.smc`) konwertują się tak jak modele. Drzewa
-i budynki stoją w `.wld` — jeszcze nie czytamy (na terenie gry stoją na razie proceduralne drzewa i kamienie).
+Plik świata Serious Engine: bryły (`BR3D`, sektory, wielokąty), encje, światła i modele rozstawione na mapie.
+`scripts/lc/world.mjs` czyta tylko modele (ModelHolder3: drzewa, trawa, płoty, mury, domy):
+
+- `ENs2`: u32 liczba encji, potem rekordy po 32 bajty: u32 id, u32 klasa, f32 x, y, z (metry mapy — te same co
+  w terenie `.wtr`), f32 heading, pitch, banking (stopnie; obrót = Ry(heading) · Rx(pitch) · Rz(banking), jak
+  `Euler(pitch, heading, banking, 'YXZ')` w three.js — sprawdzone na płotach, których końce się stykają).
+- `ENT5`: stany encji w tej samej kolejności (u32 id na +4). Plik modelu to właściwość `08 01 f2 00` + u32 indeks
+  w słowniku; instancja modelu: `MI03MISF` u32 0x18, u32 długość nazwy, nazwa, 4 bajty zer, 3 floaty skali
+  (`stretch`).
+- Ostatni `DICT` (u32 liczba + wpisy `DFNM`): klasy i ścieżki plików (`.smc`, `.ecl`…).
+
+Juno (`StartZone\startzone.wld`): 8 246 modeli ze 128 plików `.smc`. Pomijane: niebo (`skybox`), znacznik
+osi edytora. W Nemesis **zaszyfrowane są siatki trawy** (`grassani*`, `grass_0*`, `young_stgrass*`…) i kilku
+drobiazgów (latarnia, wiadro, ławka) — tych nie ma. `scripts/lc/props.mjs` składa resztę w jeden
+`public/maps/<mapa>/props.glb` (każdy model pod węzłem o swojej nazwie, bez szkieletu, tekstury 256 px WebP,
+liście wycięte z kanału alfa) i `props.json` (`models`, `instances`: model, x, y, z, kąty, skala). Do gry trafiają
+tylko modele do 125 m od miejsc walk i drogi między kolejnymi (reszta jest za mgłą); gra rysuje te do 120 m od
+bohatera jako instancje (`src/scene/MapProps.tsx`), podnosi je razem z wyrównanym terenem miejsca walki
+i pomija wysokie modele między kamerą a walką.
 
 ## Teren `.wtr` (`TRAR`)
 
@@ -203,5 +219,6 @@ w `convert-lc.mjs`) zapisuje `public/maps/<mapa>/`: `terrain.json`, `heights.bin
 - **Pozycje spawnu** (`t_npc_regen`: `a_pos_x`, `a_pos_z`, `a_pos_h`) leżą wprost na terenie mapy: Dratan
   `Dratan.wtr` — wysokości zgadzają się co do 0,7 m (r = 1,000). Juno (strefa 0) **nie pasuje** do żadnego
   terenu klienta (`StartZone/startzone.wtr` i starszy `juno.wtr` mają ten sam kształt, korelacja ≈ 0), więc
-  miejsca walk na Juno są dobrane przez konwerter (`pickArenas`: równy, suchy teren poza miastem, najbliższe
-  miasta dla pierwszych spotów) — **własne**.
+  miejsca walk na Juno są dobrane przez konwerter (`pickArenas`: równy, suchy teren poza miastem, 14 m wolne
+  od drzew i budynków z `.wld`, co najmniej 3 drzewa lub budynki przed kamerą w 18–80 m; pierwsze najbliżej
+  miasta, każde następne najbliższe poprzedniemu) — **własne**.

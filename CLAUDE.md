@@ -213,7 +213,10 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 - **Teren Juno z klienta:** `--only terrain` czyta `.wtr` (opis w `docs/lc-formats.md`) → `public/maps/juno/`;
   scena rysuje 300 m terenu wokół walki z 9 warstwami tekstur w shaderze (`LcTerrain.tsx`, `lcMap.ts`).
   Spawny Juno z `t_npc_regen` nie pasują do żadnego terenu klienta (Dratan pasuje 1:1), więc miejsca walk
-  na Juno wybiera konwerter (`pickArenas`) — **własne**. Drzewa/budynki z `.wld` jeszcze nie czytane.
+  na Juno wybiera konwerter (`pickArenas`) — **własne**. Drzewa, płoty, mury i domy z `startzone.wld`
+  (`scripts/lc/world.mjs`, `props.mjs` → `props.glb` + `props.json`, rysowane jako instancje w `MapProps.tsx`);
+  siatki trawy są w Nemesis zaszyfrowane (brak trawy). Miejsca walk: 14 m wolne od drzew, drzewa przed kamerą,
+  kolejne spoty blisko siebie; mgła na mapach 30–120 m.
 - **Nagrody księgi potworów (zapis v12):** za 10 / 100 / 1 000 / 10 000 zabić potwora — na razie 1 / 2 / 5 / 10
   Heaven Stone (ilości własne; `data/bookRewards.ts`, `MONSTER_REWARDS` na nagrody indywidualne), odbierane po
   kolei przyciskiem Claim pod podglądem (`stats.bookClaims`); licznik nagród do odebrania na przycisku Book.
@@ -244,8 +247,8 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
    potworów, rzadki drop, sklep?) i czy wszystkie 184 (wiele eventowych). Nagrody księgi: właściciel ustawi
    je indywidualnie (`MONSTER_REWARDS`).
 2. Plan klienta krok po kroku (zrobione: 1 spis, 2 klasy, 3 potwory Juno, Dratan, Merac, Egeha, 4 wygląd
-   sprzętu, 6 animacje i efekty skilli, teren Juno): teren Dratan i kolejnych stref (spawny z bazy pasują —
-   walki w prawdziwych miejscach), drzewa/budynki z `.wld`, potwory pozostałych stref
+   sprzętu, 6 animacje i efekty skilli, teren Juno z drzewami i budynkami): teren Dratan i kolejnych stref (spawny
+   z bazy pasują — walki w prawdziwych miejscach) z ich `.wld`, potwory pozostałych stref
    (`npm run convert-lc -- --client "assets-src/client-full/LastChaos Nemesis" --only <model ids>`),
    brakujące ikony z `ItemBtn19.tex` (`--only icons`), modele sprzętu zaszyfrowane w Nemesis (z klienta 2015),
    efekty 1:1 z `Effect.dat` (jeśli w kliencie od właściciela jest jawny). Kod serwera LC (statystyki

@@ -86,21 +86,48 @@ const ARENA_RADIUS = 12
 /** Steepest rise allowed inside an arena (metres). */
 const ARENA_RISE = 1.6
 /** Fewest metres between two arenas. */
-const ARENA_SPACING = 70
+const ARENA_SPACING = 50
+/** Free ground around an arena's centre: no tree, wall or house this close (metres). */
+const ARENA_CLEAR = 14
+/**
+ * Something to see from an arena: at least this many trees or buildings ahead of the camera
+ * (`options.view`), between these distances (metres), within this cone (cosine of its half angle).
+ */
+const VIEW_PROPS = 3
+const VIEW_NEAR = 18
+const VIEW_FAR = 80
+const VIEW_COS = Math.cos((60 * Math.PI) / 180)
 
 /**
  * Hunting grounds when the database's spawn points don't fit the map: level, dry ground away from
- * the map's edge and its town, nearest the town first (where the weakest monsters live).
- * `options`: town [x, z] and its radius, layers that are water or road.
+ * the map's edge and its town, clear of the map's trees and buildings, starting nearest the town
+ * (where the weakest monsters live), each next one the nearest left, with trees or buildings to
+ * see ahead of the camera. `options`: town [x, z] and its radius, layers that are water or road,
+ * obstacles [x, z, radius] (scripts/lc/props.mjs), the camera's view along the ground [x, z], how
+ * many arenas at most.
  */
 export function pickArenas(terrain, options) {
   const size = (terrain.width - 1) * terrain.cellX
-  const margin = 160
+  const margin = 120
   const [tx, tz] = options.town
   const candidates = []
   for (let x = margin; x <= size - margin; x += 12) {
     for (let z = margin; z <= size - margin; z += 12) {
       if (Math.hypot(x - tx, z - tz) < options.townRadius) continue
+      const blocked = (options.obstacles ?? []).some(
+        ([ox, oz, r]) => Math.hypot(ox - x, oz - z) < r + ARENA_CLEAR,
+      )
+      if (blocked) continue
+      if (options.view && options.obstacles) {
+        const [vx, vz] = options.view
+        let inView = 0
+        for (const [ox, oz] of options.obstacles) {
+          const d = Math.hypot(ox - x, oz - z)
+          if (d >= VIEW_NEAR && d <= VIEW_FAR && ((ox - x) * vx + (oz - z) * vz) / d >= VIEW_COS)
+            inView++
+        }
+        if (inView < VIEW_PROPS) continue
+      }
       const centre = heightAt(terrain, x, z)
       let rise = 0
       let wet = 0
@@ -119,9 +146,21 @@ export function pickArenas(terrain, options) {
   candidates.sort((a, b) => a[2] - b[2])
   const arenas = []
   for (const [x, z] of candidates) {
+    if (arenas.length >= (options.count ?? Infinity)) break
     if (arenas.every(([ax, az]) => Math.hypot(ax - x, az - z) >= ARENA_SPACING)) arenas.push([x, z])
   }
-  return arenas
+  // spot after spot: each next ground is the nearest one left, so the run between them is short
+  const chain = arenas.splice(0, 1)
+  while (arenas.length) {
+    const [cx, cz] = chain[chain.length - 1]
+    let best = 0
+    arenas.forEach(([x, z], i) => {
+      const [bx, bz] = arenas[best]
+      if (Math.hypot(x - cx, z - cz) < Math.hypot(bx - cx, bz - cz)) best = i
+    })
+    chain.push(...arenas.splice(best, 1))
+  }
+  return chain
 }
 
 /**

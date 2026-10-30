@@ -38,6 +38,7 @@ import { buildFxTextures } from './fx.mjs'
 import { buildUiParts } from './ui.mjs'
 import { buildGearManifest, buildModelManifest, modelIdFromSmc } from './manifest.mjs'
 import { buildModel } from './model.mjs'
+import { buildProps, obstacles, placedModels } from './props.mjs'
 import { parseSkillAnims } from './skill-anims.mjs'
 import { parseSmc } from './smc.mjs'
 import { buildTerrain } from './terrain.mjs'
@@ -62,13 +63,19 @@ const MONSTER_SMC_STANDINS = {
   cused_wever: 'Data\\Monster\\CusedWever2\\cused_wever2.smc',
 }
 /**
- * Open-world maps drawn in the game (public/maps/<map>/): the terrain file, the town (no fights
- * there) and the layers that are water or road. Juno's spawn points in the database don't fit the
- * client's map, so its hunting grounds are picked on level ground (scripts/lc/terrain.mjs).
+ * Open-world maps drawn in the game (public/maps/<map>/): the terrain and world files, the town (no
+ * fights there), the layers that are water or road, how many hunting grounds (one per spot) and
+ * which way the camera looks (each ground has trees or buildings in view).
+ * Juno's spawn points in the database don't fit the client's map, so its hunting grounds are picked
+ * on level ground clear of trees and buildings (scripts/lc/terrain.mjs).
  */
 const MAPS = {
   juno: {
     wtr: 'Data\\World\\StartZone\\startzone.wtr',
+    wld: 'Data\\World\\StartZone\\startzone.wld',
+    count: 40,
+    // the game's camera looks this way along the ground (src/scene/viewState.ts, CAMERA_OFFSET)
+    view: [-0.354, -0.935],
     town: [1170, 1015],
     townRadius: 280,
     avoidLayers: [2, 8],
@@ -330,7 +337,9 @@ async function main() {
         console.log(`terrain ${map}: ${def.wtr} is not in the client folder(s)`)
         continue
       }
-      const out = await buildTerrain(files, def.wtr, def)
+      // the world file's trees, walls and houses: hunting grounds keep clear of them
+      const world = def.wld && files.resolve(def.wld) ? placedModels(files, def.wld).placed : []
+      const out = await buildTerrain(files, def.wtr, { ...def, obstacles: obstacles(world) })
       const dir = path.join(ROOT, 'public', 'maps', map)
       fs.mkdirSync(dir, { recursive: true })
       for (const [name, content] of Object.entries(out))
@@ -339,6 +348,16 @@ async function main() {
       console.log(
         `terrain ${map}: ${Object.keys(out).length} files, ${arenas.length} hunting grounds`,
       )
+      if (world.length) {
+        const props = await buildProps(files, def.wld, { arenas })
+        await io.write(path.join(dir, 'props.glb'), props.document)
+        fs.writeFileSync(path.join(dir, 'props.json'), JSON.stringify(props.json))
+        const size = (fs.statSync(path.join(dir, 'props.glb')).size / 1024).toFixed(0)
+        console.log(
+          `props ${map}: ${props.json.models.length} models, ` +
+            `${props.json.instances.length} placed, ${size} KB`,
+        )
+      }
     }
   }
 

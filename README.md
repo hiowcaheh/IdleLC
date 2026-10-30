@@ -161,7 +161,8 @@ i zrzut bazy trzymamy poza repo, w `assets-src/`. Żeby odświeżyć dane albo d
    `--smc "Data\Monster\Animals\Fox.smc"`, wybrane modele: `--only fox,class-knight,gear/ni_bu_001`.
    Animacje umiejętności czyta z `Data\skills.lod` (`lc-skill-anims.json`, klipy trafiają do modeli klas),
    tekstury efektów skilli z `Data\Effect` → `public/fx/` (same efekty: `--only fx`). Teren map
-   (`.wtr`: wysokości, warstwy tekstur, maski) → `public/maps/<mapa>/` przez `--only terrain` (na razie Juno).
+   (`.wtr`: wysokości, warstwy tekstur, maski) i jej drzewa, płoty i budynki z pliku świata (`.wld`) →
+   `public/maps/<mapa>/` przez `--only terrain` (na razie Juno).
    Formaty plików: [`docs/lc-formats.md`](docs/lc-formats.md).
 
 3. `npm run dev` i commit zmienionych plików.

@@ -124,6 +124,8 @@ export function outwardIndices(indices, positions, normals) {
  * @param options.fallbackColor   linear RGB for surfaces whose texture can't be read (encrypted);
  *                                without it such a texture fails the model
  * @param options.textureCache    Map shared between models of one run
+ * @param options.cutout          textures with transparent pixels are cut out (alpha MASK) even under
+ *                                an opaque shader: the leaves and grass of world models
  * @returns {{ document: Document, stats: object }}
  */
 export async function buildModel(files, smc, options = {}) {
@@ -209,7 +211,8 @@ export async function buildModel(files, smc, options = {}) {
   // materials: one per texture file (or flat color)
   const materials = new Map()
   async function material(surface, textures) {
-    const mode = alphaMode(surface.shader)
+    const shaderMode = alphaMode(surface.shader)
+    const mode = options.cutout && shaderMode === 'OPAQUE' ? 'MASK' : shaderMode
     const textureName = surface.textures?.[0]
     // a surface may name its texture differently from the .smc (`ni_bu_017_1_gold` / `ni_bu_017_1`):
     // a mesh with a single texture uses that one

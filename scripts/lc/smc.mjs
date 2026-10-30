@@ -16,6 +16,8 @@ export function parseSmc(text) {
     skeleton: null,
     animSets: [],
     offset: [0, 0, 0, 0, 0, 0],
+    /** Box around every frame: min x, y, z, max x, y, z (metres), when the file has one. */
+    bbox: null,
   }
   let current = null
   for (const raw of text.replace(/[{}]/g, '\n').split(/\r?\n/)) {
@@ -32,6 +34,8 @@ export function parseSmc(text) {
       model.animSets.push(m[1])
     } else if ((m = /^OFFSET\s+([-\d.,\s]+);/.exec(line))) {
       model.offset = m[1].split(',').map(Number)
+    } else if ((m = /^ALLFRAMESBBOX\s+([-\d.,\se]+);/.exec(line))) {
+      model.bbox = m[1].split(',').map(Number)
     }
   }
   return model
