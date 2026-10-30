@@ -294,9 +294,18 @@ może dostać opcji, licznik czeka pełny. W karcie postaci (Stats) widać, za i
 ## Mapa świata
 
 Każda z 9 stref z bazy da się wybrać od razu (prośba właściciela — bez blokady poziomu). Mapa pokazuje
-typowe poziomy potworów strefy: bez najniższych 15% i najwyższych 10%, bo w każdej strefie są potwory
-eventowe (np. Triangle ball 1, Pumpkin 20, poziom 100). Po wyborze polowanie zaczyna się na zwykłym potworze
-strefy najbliższym poziomowi postaci.
+najniższy i najwyższy poziom spotów strefy i ile z nich jest otwartych. Po wyborze postać idzie na najdalszy
+otwarty spot strefy (nowa strefa: pierwszy spot).
+
+## Spoty (własne)
+
+- Spoty strefy to jej potwory w kolejności: poziom, zwykłe przed elitami, mniej HP i ataku przed silniejszymi
+  (`zones.ts`). Bez potworów eventowych i bossów rajdowych (`EVENT_MONSTERS`, `RAID_BOSSES`).
+- Na start otwarty jest tylko pierwszy spot strefy; zabicie (w walce albo na wyprawie) potwora najdalszego
+  otwartego spotu otwiera kolejny (`logic/spots.ts`). Podróż do zamkniętego spotu serwis odrzuca (`spot-locked`).
+- Czas gry: suma przerw między raportami walki, każda najwyżej `MAX_PLAY_GAP` (120 s); wyprawa się nie liczy.
+  Wyprawa liczy się do statystyki, gdy trwała co najmniej `AFK_MIN_SECONDS`.
+- Heaven Stone w każdym sklepie po cenie z bazy (1 000) — tymczasowo, na prośbę właściciela.
 
 ## Mikstury
 

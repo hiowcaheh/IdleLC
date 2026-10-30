@@ -84,11 +84,12 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 - `npm run pwa-icons` — ikony aplikacji (PWA) do `public/pwa/`
 - `npm run import-lc-db -- --dump <newproject_data.sql>` — dane gry z bazy LC → `src/game/data/generated/`
 - `npm run convert-lc -- --client <folder klienta>` — modele LC → `public/models/lc/` + manifest, ikony
-  przedmiotów → `public/icons/lc/items.webp` (same ikony: `--only icons`)
+  przedmiotów → `public/icons/lc/items.webp` (same ikony: `--only icons`), teren map → `public/maps/`
+  (`--only terrain`)
 
 ## Stan prac (aktualizuj na koniec każdej sesji)
 
-**Stan na 2026-10-30 (sesja 2):**
+**Stan na 2026-10-30 (sesja 2, koniec dnia):**
 
 - M0 i M1 gotowe. Gra na Pages (https://hiowcaheh.github.io/IdleLC/) działa na danych i modelach LC
   (6 klas: ciało nowej postaci + założony sprzęt; wszystkie potwory Juno oprócz Elder Drake — jego `.smc` wskazuje
@@ -191,6 +192,29 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   Brak modelu nie wywraca gry (`ModelBoundary` → zastępcza figura).
 - Statystyki klas i wzory walki są **własne, tymczasowe** (`classes.ts`, `lcBalance.ts`) — czekają na kod
   serwera LC od właściciela.
+- **Spoty (zapis v10):** każda strefa zaczyna się od pierwszego spotu (kolejność: poziom, zwykłe przed elitami,
+  słabsze przed silniejszymi — `zones.ts`); zabicie potwora najdalszego otwartego spotu otwiera następny
+  (`logic/spots.ts`, `reachedSpots`). Panel polowania: spot między strzałkami ‹ › (kłódka na zamkniętym),
+  mapa świata przenosi na najdalszy otwarty spot strefy. Ukryte: potwory eventowe (Triangle ball, Pumpkin,
+  Giant Pumpkin Head) i **bossy rajdowe** (`RAID_BOSSES`: Grand Balrog, Baal — w bazie nie ma „Kamiry”, Grand
+  Red/Golden Dragon, Gatekeeper Abaddon, Shadow Dragons, Brainwashed Balrog) — **zapytać właściciela o jego
+  pomysł na walki z bossami** (prosił, żeby przypomnieć). Dev: wybór potwora otwiera wszystkie spoty.
+- **Księga potworów** (przycisk Book): zabicia każdego potwora wg strefy (`stats.monsterKills`), podgląd 3D;
+  nagrody za progi — później (właściciel). Statystyki: wyprawy i czas aktywnej gry (`stats.expeditions`,
+  `stats.playSeconds`, liczone w `reportCombat` / `claimAfk`).
+- **Appraiser:** zakładki Unidentified / Identified, gracz zaznacza przedmioty do odkrycia (All), pasek
+  z ocenami i przyciskiem sprzedaży przyklejony u góry, opcje jedna pod drugą w kolorze oceny.
+  **Kupowanie ilości:** okno `BuyDialog` (wpisz / suwak / 1·10·100·Max, do 999 i tyle, ile starczy złota).
+  **Heaven Stone w każdym sklepie za 1 000** — tymczasowe na prośbę właściciela (`EVERYWHERE` w `shop.ts`).
+- **Potwory Dratan, Merac, Egeha:** 44 modele z klienta; Cursed Lich/Weaver z wersji „2” modelu (`MONSTER_SMC_STANDINS`),
+  zaszyfrowane części siatek są pomijane (miecz Weavera).
+- **Teren Juno z klienta:** `--only terrain` czyta `.wtr` (opis w `docs/lc-formats.md`) → `public/maps/juno/`;
+  scena rysuje 300 m terenu wokół walki z 9 warstwami tekstur w shaderze (`LcTerrain.tsx`, `lcMap.ts`).
+  Spawny Juno z `t_npc_regen` nie pasują do żadnego terenu klienta (Dratan pasuje 1:1), więc miejsca walk
+  na Juno wybiera konwerter (`pickArenas`) — **własne**. Drzewa/budynki z `.wld` jeszcze nie czytane.
+- **Hełm „B6 Cast” 77 dla Knighta:** w bazie Reidon Helm (Cursed Lich) ma tylko oceny E/D/C bez castingu;
+  ocenę B (Impervious/Energetic/Powerful, ~10%) ma Riset Helm (Scorpionmantis, Egeha), a „Casting-Up” (A)
+  dopiero hełmy od 107 poziomu — czeka na decyzję właściciela, czy coś zmieniać.
 
 **Cel końcowy (właściciel):** cała gra w **prywatnym repo**, hostowana tak, żeby dało się grać na telefonie
 i komputerze w dowolnej chwili; na końcu **Supabase** (konta, logowanie, zapis w chmurze, logika po stronie
@@ -202,19 +226,21 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
 
 **Następne kroki:**
 
-1. Plan klienta krok po kroku (zrobione: 1 spis, 2 klasy, 3 potwory Juno, 4 wygląd sprzętu, 6 animacje
-   i efekty skilli): potwory Dratan i kolejnych stref
+1. **System tytułów** — plan przedstawiony właścicielowi (t_title 1:1: 199 tytułów, czas, opcje, kolory,
+   przedmiot „Other”, okno Titles, tytuł pod nickiem), czeka na akceptację i decyzję, skąd gracz je dostaje.
+2. Plan klienta krok po kroku (zrobione: 1 spis, 2 klasy, 3 potwory Juno, Dratan, Merac, Egeha, 4 wygląd
+   sprzętu, 6 animacje i efekty skilli, teren Juno): teren Dratan i kolejnych stref (spawny z bazy pasują —
+   walki w prawdziwych miejscach), drzewa/budynki z `.wld`, potwory pozostałych stref
    (`npm run convert-lc -- --client "assets-src/client-full/LastChaos Nemesis" --only <model ids>`),
    brakujące ikony z `ItemBtn19.tex` (`--only icons`), modele sprzętu zaszyfrowane w Nemesis (z klienta 2015),
-   teren stref z map (`.wld`/`.wtr`, najpierw `juno`), efekty 1:1 z `Effect.dat` (jeśli w kliencie
-   od właściciela jest jawny). Kod serwera LC (statystyki
+   efekty 1:1 z `Effect.dat` (jeśli w kliencie od właściciela jest jawny). Kod serwera LC (statystyki
    klas, wzory walki, szanse ulepszeń) — nadal brak; czekamy na właściciela.
-2. Dalej: M6 do końca (osobne tło / teren każdej strefy, gdy będą mapy z klienta; ewentualny wymagany poziom
+3. Dalej: M6 do końca (osobne tło / teren każdej strefy, gdy będą mapy z klienta; ewentualny wymagany poziom
    strefy — na razie właściciel chce swobodnego wyboru), żywioły, opcje specjalne, które jeszcze nie działają.
-3. Etap 2 (Supabase) według `docs/supabase.md` — dopiero po zgodzie właściciela.
+4. Etap 2 (Supabase) według `docs/supabase.md` — dopiero po zgodzie właściciela.
 
-**Otwarte kwestie:** czcionka (bitmapy klienta są nieczytelne na telefonie — pytanie do właściciela); brak mapy
-z otwartym terenem (`.wld` + `.wtr`); brak w bazie statystyk startowych klas (także many) i wzorów walki
+**Otwarte kwestie:** czcionka (bitmapy klienta są nieczytelne na telefonie — pytanie do właściciela); bossy
+rajdowe (pomysł właściciela); nagrody księgi potworów; spawny Juno niepasujące do mapy klienta; brak w bazie statystyk startowych klas (także many) i wzorów walki
 (w tym jak `a_power` umiejętności przekłada się na obrażenia, czym są podtypy `t_magic`, jednostki regeneracji)
 — źródło: kod serwera (właściciel go ma). Klient z jawnymi teksturami (zapowiedziany przez właściciela):
 przepuścić przez `convert-lc` jako drugi `--client` (tekstury sprzętu 60–109, `ItemBtn19`, `Effect.dat`?).
