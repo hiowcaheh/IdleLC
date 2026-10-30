@@ -88,10 +88,10 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 
 ## Stan prac (aktualizuj na koniec każdej sesji)
 
-**Stan na 2026-10-29 (wieczór, sesja 2):**
+**Stan na 2026-10-30 (rano, sesja 2):**
 
 - M0 i M1 gotowe. Gra na Pages (https://hiowcaheh.github.io/IdleLC/) działa na danych i modelach LC
-  (6 klas w zbrojach z ekranu logowania; wszystkie potwory Juno oprócz Elder Drake — jego `.smc` wskazuje
+  (6 klas: ciało nowej postaci + założony sprzęt; wszystkie potwory Juno oprócz Elder Drake — jego `.smc` wskazuje
   brakujący folder `Data\Monster\Wyvern`; potwory innych stref na razie na modelu zastępczym). UI po angielsku.
 - **Pełny klient** leży lokalnie w `assets-src/client-full/LastChaos Nemesis/` (8 GB, poza repo; pobrany
   z Google Drive właściciela). Spis: modele wszystkich 212 potworów z bazy, foldery wszystkich klas, 53 mapy
@@ -120,19 +120,27 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   klątwy, ogłuszenie, trucizna, leczenie, pasywne w statystykach; ta sama logika w wyprawach AFK. UI: pasek MP,
   pasek skilli, buffy, okno Skills. Interpretacja efektów `t_magic` i mnożnik obrażeń są **własne**
   (`skills.ts`, opis w `docs/balance.md`); przywołania, ruch i wskrzeszenie jeszcze nie działają.
-- **M5 (ekwipunek) — bez wyglądu na postaci:** sloty, klasy, poziomy i statystyki 1:1 z `t_item`, szybkość
+- **M5 (ekwipunek):** sloty, klasy, poziomy i statystyki 1:1 z `t_item`, szybkość
   ataku z broni (`a_num_2`), darmowy zestaw startowy klasy, sklepy stref 1:1 (`t_shopitem`, kupno ×100%),
   zakładanie z torby z porównaniem, okno Character, ulepszanie +0…+15 tylko Heaven Stone (sklep Juno;
   10 Smelting Stone z dropu 1% — własne — wymienia się na 1 Heaven Stone), zapis v6. Wpływ sprzętu na walkę, szanse ulepszeń i bonus
   za „+” są **własne** (`equipment.ts`, `docs/balance.md`): sprzęt mierzony względem typowego dla poziomu
-  (`gearReference` z importu). Wygląd sprzętu na modelu — gdy będą siatki broni/zbroi z klienta.
+  (`gearReference` z importu).
+- **Wygląd sprzętu na postaci (krok 4):** modele klas = ciało nowej postaci z `Data\Character\<klasa>\xx.smc`;
+  każda broń/zbroja ma GLB z `t_item.a_file_smc` (`public/models/lc/gear/`, `lc-gear.json`, WebP, tylko
+  używane kości), a `Character.tsx` podpina siatki pod szkielet ciała i chowa zastąpione części (zbroja `bu`,
+  spodnie `bd`/`bs`, rękawice `hn`, buty `ft`, hełm `hair`). Ekran tworzenia pokazuje zestaw startowy.
+  869/1146 modeli; 277 (głównie 60–109 poz.) ma w Nemesis zaszyfrowane tekstury/siatki — jawne są w kliencie 2015.
+- **Wymagany sprzęt skilli:** 1:1 z `t_skill` (`a_useWeaponType0/1`, bity `a_useState` 2 = broń, 16 = tarcza;
+  pasywne `a_app*`); skill bez sprzętu nie działa (szary na pasku). Podwójne miecze zdejmują tarczę (reguła
+  właściciela).
 - **Akcesoria i opcje (zapis v7):** 3 sloty akcesoriów, opcje 1:1 z `t_option` (maski podtypów, wagi
   poziomów `a_prob`, wartości `a_level`); liczba opcji 1–5 i ich działanie w walce są **własne**
   (`options.ts`). Sklep: broń i zbroje klasy z progu poprzedniego / obecnego / następnego (`shopGear`),
   akcesoria z losowymi opcjami, towary strefy. Pasek umiejętności: max 7, ataki z lewej, buffy z prawej.
 - **Mikstury:** dane 1:1 (mikstura = skill: HP/MP na sekundę lub regeneracja, czas, odnowienie), sklep Juno.
-  Auto-picie w walce i na wyprawach (progi 50% HP / 30% MP i wybór mikstury — **własne**), sloty HP/MP
-  z przełącznikiem AUTO w ramce postaci, zużycie zgłaszane w `reportCombat` (`potions`) i liczone w `simulateAfk`.
+  Auto-picie w walce i na wyprawach (progi 50% HP / 30% MP — **własne**) tylko mikstur ze slotów HP/MP,
+  które gracz wybiera z torby (zapis v9, `potions.ts`, `setPotionSlot`; slot ma przełącznik AUTO), zużycie zgłaszane w `reportCombat` (`potions`) i liczone w `simulateAfk`.
   Stany `t_magic` 2/9 i 2/10 = HP/MP na sekundę także w skillach (Mana Recovery).
 - **Karta postaci** z zakładkami Stats (wszystkie statystyki + suma opcji) i Equipment; „+N” za nazwą.
 - **Rzadkie przedmioty (zapis v8):** `t_rareoption` 1:1 (klasy A–E, prefiksy, premie, opcje z szansami),
@@ -144,6 +152,10 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   potwora; górna ramka celu usunięta), portrety klas z `TopUI.tex` (`npm run convert-lc -- --only icons`),
   mapa świata (9 stref, bez blokady poziomu — prośba właściciela), powrót z wyprawy nie leczy (HP/MP sprzed
   wyprawy + regeneracja za czas nieobecności).
+- **UI z klienta:** ramka gracza z `TopUI` przypięta w lewym górnym rogu (paski HP/MP/EXP to grafiki klienta,
+  EXP szary), buffy pod nią; okna z tytułem we wgłębieniu ramki i X na narożniku (`Sheet.tsx`); ikony menu
+  (System, Inventory, Skills, Character). Strona bez zoomu i zaznaczania (`lockZoom.ts`). Czcionka klienta to
+  tylko bitmapy 7–8 px (`FontGerman0.tex`, DXT; w Nemesis zaszyfrowane) — czekamy na decyzję właściciela.
 - Skille trafiają po `a_readyTime` + 0,4 s (`a_fireTime` to animacja po wystrzale — bez blokady, dopóki nie ma
   animacji skilli z klienta: `TIMINGS.skillAnimationLock = 0`).
 - Narzędzia dev włączane w Settings (bez `?dev=1`): prędkość ×20, dowolny potwór, poziom, exp, złoto, SP,
@@ -165,16 +177,17 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
 
 **Następne kroki:**
 
-1. Plan klienta krok po kroku (zrobione: 1 spis, 2 klasy, 3 potwory Juno): potwory kolejnych stref
+1. Plan klienta krok po kroku (zrobione: 1 spis, 2 klasy, 3 potwory Juno, 4 wygląd sprzętu): 6 animacje
+   i efekty skilli, potwory Dratan i kolejnych stref
    (`npm run convert-lc -- --client "assets-src/client-full/LastChaos Nemesis" --only <model ids>`),
-   brakujące ikony z `ItemBtn19.tex` (`--only icons`), wygląd sprzętu na postaci (siatki broni/zbroi),
+   brakujące ikony z `ItemBtn19.tex` (`--only icons`), modele sprzętu zaszyfrowane w Nemesis (z klienta 2015),
    teren stref z map (`.wld`/`.wtr`, najpierw `juno`), animacje i efekty skilli. Kod serwera LC (statystyki
    klas, wzory walki, szanse ulepszeń) — nadal brak; czekamy na właściciela.
 2. Dalej: M6 do końca (osobne tło / teren każdej strefy, gdy będą mapy z klienta; ewentualny wymagany poziom
    strefy — na razie właściciel chce swobodnego wyboru), żywioły, opcje specjalne, które jeszcze nie działają.
 3. Etap 2 (Supabase) według `docs/supabase.md` — dopiero po zgodzie właściciela.
 
-**Otwarte kwestie:** brak siatek broni z `Data\Item\Weapon` (przyszły tylko tekstury i tagi); brak mapy
+**Otwarte kwestie:** czcionka (bitmapy klienta są nieczytelne na telefonie — pytanie do właściciela); brak mapy
 z otwartym terenem (`.wld` + `.wtr`); brak w bazie statystyk startowych klas (także many) i wzorów walki
 (w tym jak `a_power` umiejętności przekłada się na obrażenia, czym są podtypy `t_magic`, jednostki regeneracji)
 — źródło: kod serwera (właściciel go ma). Animacje rzucania skilli z klienta — do podpięcia, gdy będzie
