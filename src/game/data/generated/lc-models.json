@@ -405,6 +405,27 @@
       "tint": {}
     },
     {
+      "id": "harpy",
+      "file": "harpy.glb?v=f36db2d25e",
+      "scale": 1,
+      "animations": {
+        "idle": "w2harpy",
+        "idle2": "w2harpy_idle02",
+        "walk": "w2harpy_wak",
+        "run": "w2harpy_run",
+        "attack": [
+          "w2harpy_att01",
+          "w2harpy_att02"
+        ],
+        "hit": "w2harpy_da",
+        "die": "w2harpy_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.2775048066652426,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "halloween_mon",
       "file": "halloween_mon.glb?v=ea13b5dfa4",
       "scale": 1,
@@ -443,6 +464,26 @@
       "tint": {}
     },
     {
+      "id": "m_ramian",
+      "file": "m_ramian.glb?v=1824ef3595",
+      "scale": 1,
+      "animations": {
+        "idle": "m_ramian_idle01",
+        "walk": "m_ramian_walk",
+        "run": "m_ramian_run",
+        "attack": [
+          "m_ramian_att01",
+          "m_ramian_att02"
+        ],
+        "hit": "m_ramian_da",
+        "die": "m_ramian_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "yeti_red",
       "file": "yeti_red.glb?v=6ca8fbc907",
       "scale": 1,
@@ -460,6 +501,26 @@
       "attackImpact": 0.6,
       "height": 2,
       "radius": 0.9691152684102908,
+      "tint": {}
+    },
+    {
+      "id": "m_harpyboss",
+      "file": "m_harpyboss.glb?v=333084287c",
+      "scale": 1,
+      "animations": {
+        "idle": "m_harpyboss_idle01",
+        "walk": "m_harpyboss_walk",
+        "run": "m_harpyboss_run",
+        "attack": [
+          "m_harpyboss_att01",
+          "m_harpyboss_att02"
+        ],
+        "hit": "m_harpyboss_da",
+        "die": "m_harpyboss_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.4376659443952757,
+      "radius": 1,
       "tint": {}
     },
     {
@@ -503,6 +564,69 @@
       "tint": {}
     },
     {
+      "id": "sandgolem",
+      "file": "sandgolem.glb?v=355652bfb6",
+      "scale": 1,
+      "animations": {
+        "idle": "w2send",
+        "idle2": "w2send_idle02",
+        "walk": "w2send_wak",
+        "run": "w2send_run",
+        "attack": [
+          "w2send_att01",
+          "w2send_att02"
+        ],
+        "hit": "w2send_da",
+        "die": "w2send_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 0.7659840693380535,
+      "tint": {}
+    },
+    {
+      "id": "scamp",
+      "file": "scamp.glb?v=c23401f0f6",
+      "scale": 1,
+      "animations": {
+        "idle": "scamp_idle01",
+        "idle2": "scamp_idle02",
+        "walk": "scamp_walk",
+        "run": "scamp_run",
+        "attack": [
+          "scamp_att01",
+          "scamp_att02"
+        ],
+        "hit": "scamp_dam",
+        "die": "scamp_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "dryspider",
+      "file": "dryspider.glb?v=3474d77e22",
+      "scale": 1,
+      "animations": {
+        "idle": "dryspider_idle01",
+        "idle2": "dryspider_idle02",
+        "walk": "dryspider_walk",
+        "run": "dryspider_run",
+        "attack": [
+          "dryspider_att01",
+          "dryspider_att02"
+        ],
+        "hit": "dryspider_dam",
+        "die": "dryspider_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.1022064882351146,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "balrog",
       "file": "balrog.glb?v=5e2c3264f2",
       "scale": 1,
@@ -523,6 +647,68 @@
       "tint": {}
     },
     {
+      "id": "basilisk",
+      "file": "basilisk.glb?v=816a1c778d",
+      "scale": 1,
+      "animations": {
+        "idle": "m_barsil_idle01",
+        "idle2": "m_barsil_idle02",
+        "walk": "m_barsil_wak",
+        "run": "m_barsil_run",
+        "attack": [
+          "m_barsil_att01",
+          "m_barsil_att02"
+        ],
+        "hit": "m_barsil_da",
+        "die": "m_barsil_die"
+      },
+      "attackImpact": 0.6,
+      "height": 0.9175695059053316,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "redspider",
+      "file": "redspider.glb?v=3b9ae85124",
+      "scale": 1,
+      "animations": {
+        "idle": "redspider_idle01",
+        "idle2": "redspider_idle02",
+        "walk": "redspider_walk",
+        "run": "redspider_run",
+        "attack": [
+          "redspider_att01",
+          "redspider_att02"
+        ],
+        "hit": "redspider_dam",
+        "die": "redspider_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.0917081209753716,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "snatcher",
+      "file": "snatcher.glb?v=c1a2c3e846",
+      "scale": 1,
+      "animations": {
+        "idle": "snatcher_idle01",
+        "walk": "snatcher_walk",
+        "run": "snatcher_run",
+        "attack": [
+          "snatcher_att01",
+          "snatcher_att02"
+        ],
+        "hit": "snatcher_dam",
+        "die": "snatcher_die"
+      },
+      "attackImpact": 0.5999939918518067,
+      "height": 2,
+      "radius": 0.3815118869594409,
+      "tint": {}
+    },
+    {
       "id": "fox_sand",
       "file": "fox_sand.glb?v=f202eb16c1",
       "scale": 1,
@@ -538,6 +724,151 @@
       },
       "attackImpact": 0.6,
       "height": 1.0690023499252297,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "berseker",
+      "file": "berseker.glb?v=27b50aedde",
+      "scale": 1,
+      "animations": {
+        "idle": "berseker_idle01",
+        "idle2": "berseker_idle02",
+        "walk": "berseker_walk",
+        "run": "berseker_run",
+        "attack": [
+          "berseker_att01",
+          "berseker_att02"
+        ],
+        "hit": "berseker_dam",
+        "die": "berseker_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "ramianqueen",
+      "file": "ramianqueen.glb?v=e89bd9f946",
+      "scale": 1,
+      "animations": {
+        "idle": "ramianqueen_idle01",
+        "walk": "ramianqueen_walk",
+        "run": "ramianqueen_run",
+        "attack": [
+          "ramianqueen_att_01",
+          "ramianqueen_att_02"
+        ],
+        "hit": "ramianqueen_dam_01",
+        "die": "ramianqueen_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "bandits",
+      "file": "bandits.glb?v=952274bead",
+      "scale": 1,
+      "animations": {
+        "idle": "bandits_idle01",
+        "walk": "bandits_walk",
+        "run": "bandits_run",
+        "attack": [
+          "bandits_att01",
+          "bandits_att02"
+        ],
+        "hit": "bandits_dam",
+        "die": "bandits_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "gnoll",
+      "file": "gnoll.glb?v=2139aa7793",
+      "scale": 1,
+      "animations": {
+        "idle": "gnoll_idle01",
+        "idle2": "gnoll_idle02",
+        "walk": "gnoll_walk",
+        "run": "gnoll_run",
+        "attack": [
+          "gnoll_att01",
+          "gnoll_att02"
+        ],
+        "hit": "gnoll_dam",
+        "die": "gnoll_die"
+      },
+      "attackImpact": 0.41332921981811527,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "bloodyout",
+      "file": "bloodyout.glb?v=05b6443639",
+      "scale": 1,
+      "animations": {
+        "idle": "Bloodyout_idle01",
+        "idle2": "Bloodyout_idle02",
+        "walk": "Bloodyout_walk",
+        "run": "Bloodyout_run",
+        "attack": [
+          "Bloodyout_att01",
+          "Bloodyout_att02"
+        ],
+        "hit": "Bloodyout_dam",
+        "die": "Bloodyout_die"
+      },
+      "attackImpact": 0.5333280086517335,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "goblin",
+      "file": "goblin.glb?v=68b4f80e95",
+      "scale": 1,
+      "animations": {
+        "idle": "mgoblin_idle01",
+        "idle2": "mgoblin_idle02",
+        "walk": "mgoblin_wak",
+        "run": "mgoblin_run",
+        "attack": [
+          "mgoblin_att01",
+          "mgoblin_att02"
+        ],
+        "hit": "mgoblin_da",
+        "die": "mgoblin_die"
+      },
+      "attackImpact": 0.41332921981811527,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "doomslayer",
+      "file": "doomslayer.glb?v=cfc8f9d861",
+      "scale": 1,
+      "animations": {
+        "idle": "doomslayer_idle01",
+        "idle2": "doomslayer_idle02",
+        "walk": "doomslayer_walk",
+        "run": "doomslayer_run",
+        "attack": [
+          "doomslayer_att01",
+          "doomslayer_att02"
+        ],
+        "hit": "doomslayer_dam",
+        "die": "doomslayer_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
       "radius": 1,
       "tint": {}
     },
@@ -561,6 +892,152 @@
       "tint": {}
     },
     {
+      "id": "gnoll_sp",
+      "file": "gnoll_sp.glb?v=7d908787e7",
+      "scale": 1,
+      "animations": {
+        "idle": "gnoll_idle01",
+        "idle2": "gnoll_idle02",
+        "walk": "gnoll_walk",
+        "run": "gnoll_run",
+        "attack": [
+          "gnoll_sp_att01",
+          "gnoll_sp_att02"
+        ],
+        "hit": "gnoll_dam",
+        "die": "gnoll_die"
+      },
+      "attackImpact": 0.5599944114685059,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "mist_gr",
+      "file": "mist_gr.glb?v=566418a6de",
+      "scale": 1,
+      "animations": {
+        "idle": "w2mist_idle01",
+        "idle2": "w2mist_idle02",
+        "walk": "w2mist_wak",
+        "run": "w2mist_run",
+        "attack": [
+          "w2mist_att01",
+          "m_mist_att02"
+        ],
+        "hit": "w2mist_da",
+        "die": "w2mist_die"
+      },
+      "attackImpact": 0.5333280086517335,
+      "height": 1.2911770989104892,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "frenziedber",
+      "file": "frenziedber.glb?v=cfe96b24ce",
+      "scale": 1,
+      "animations": {
+        "idle": "Frenziedber_idle01",
+        "idle2": "Frenziedber_idle02",
+        "walk": "Frenziedber_walk",
+        "run": "Frenziedber_run",
+        "attack": [
+          "Frenziedber_att01",
+          "Frenziedber_att02"
+        ],
+        "hit": "Frenziedber_dam",
+        "die": "Frenziedber_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.8759727774895474,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "gnoll_sw",
+      "file": "gnoll_sw.glb?v=59e82dad40",
+      "scale": 1,
+      "animations": {
+        "idle": "gnoll_sw_idle01",
+        "idle2": "gnoll_sw_idle02",
+        "walk": "gnoll_sw_walk",
+        "run": "gnoll_sw_run",
+        "attack": [
+          "gnoll_sw_att01",
+          "gnoll_sw_att02"
+        ],
+        "hit": "gnoll_sw_dam",
+        "die": "gnoll_sw_die"
+      },
+      "attackImpact": 0.4799952030181885,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "basilisk_01",
+      "file": "basilisk_01.glb?v=91ac72e7f0",
+      "scale": 1,
+      "animations": {
+        "idle": "m_barsil_idle01",
+        "idle2": "m_barsil_idle02",
+        "walk": "m_barsil_wak",
+        "run": "m_barsil_run",
+        "attack": [
+          "m_barsil_att01",
+          "m_barsil_att02"
+        ],
+        "die": "m_barsil_die"
+      },
+      "attackImpact": 0.6,
+      "height": 0.9175695059053316,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "raba",
+      "file": "raba.glb?v=781ef701d4",
+      "scale": 1,
+      "animations": {
+        "idle": "m_raba_idle01",
+        "idle2": "m_raba_idle02",
+        "walk": "m_raba_walk",
+        "run": "m_raba_run",
+        "attack": [
+          "m_raba_att01",
+          "m_raba_att02"
+        ],
+        "hit": "m_raba_da",
+        "die": "m_raba_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "kel",
+      "file": "kel.glb?v=a6f4d193e3",
+      "scale": 1,
+      "animations": {
+        "idle": "kel_idle_01",
+        "idle2": "kel_idle_02",
+        "walk": "kel_walk",
+        "run": "kel_run",
+        "attack": [
+          "kel_att_01",
+          "kel_att_02"
+        ],
+        "hit": "kel_dam",
+        "die": "kel_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.1666615802484206,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "jaguar_sand",
       "file": "jaguar_sand.glb?v=3aad5d5b0f",
       "scale": 1,
@@ -577,6 +1054,171 @@
       "attackImpact": 0.5199947834014893,
       "height": 0.8033082064271981,
       "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "golem02",
+      "file": "golem02.glb?v=de314abe67",
+      "scale": 1,
+      "animations": {
+        "idle": "golem02_idle_01",
+        "idle2": "golem02_idle_02",
+        "walk": "golem02_walk",
+        "run": "golem02_run",
+        "attack": [
+          "golem02_att_01",
+          "golem02_att_02"
+        ],
+        "hit": "golem02_dam",
+        "die": "golem02_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "golem01",
+      "file": "golem01.glb?v=62577d465b",
+      "scale": 1,
+      "animations": {
+        "idle": "golem01_idle_01",
+        "idle2": "golem01_idle_02",
+        "walk": "golem01_walk",
+        "run": "golem01_run",
+        "attack": [
+          "golem01_att_01",
+          "golem01_att_02"
+        ],
+        "hit": "golem01_dam",
+        "die": "golem01_die"
+      },
+      "attackImpact": 0.5333280086517335,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "dragon",
+      "file": "dragon.glb?v=2f24a0db51",
+      "scale": 1,
+      "animations": {
+        "idle": "dragon_idle_01",
+        "idle2": "dragon_idle_02",
+        "walk": "dragon_walk",
+        "run": "dragon_run",
+        "attack": [
+          "dragon_att_01"
+        ],
+        "hit": "dragon_dam",
+        "die": "dragon_die"
+      },
+      "attackImpact": 0.6,
+      "height": 0.7227393414105655,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "m_bossgobiln",
+      "file": "m_bossgobiln.glb?v=2070f7a133",
+      "scale": 1,
+      "animations": {
+        "idle": "m_bossgobiln_idle01",
+        "walk": "m_bossgobiln_walk",
+        "run": "m_bossgobiln_run",
+        "attack": [
+          "m_bossgobiln_att01",
+          "m_bossgobiln_att02"
+        ],
+        "hit": "m_bossgobiln_da",
+        "die": "m_bossgobiln_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "mist",
+      "file": "mist.glb?v=f81f7cf586",
+      "scale": 1,
+      "animations": {
+        "idle": "w2mist_idle01",
+        "idle2": "w2mist_idle02",
+        "walk": "w2mist_wak",
+        "run": "w2mist_run",
+        "attack": [
+          "w2mist_att01"
+        ],
+        "hit": "w2mist_da",
+        "die": "w2mist_die"
+      },
+      "attackImpact": 0.5333280086517335,
+      "height": 1.2911770989104892,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "tronk",
+      "file": "tronk.glb?v=1fe8797047",
+      "scale": 1,
+      "animations": {
+        "idle": "tronK_idle_00",
+        "idle2": "tronK_idle_01",
+        "walk": "tronK_walk",
+        "run": "tronK_run",
+        "attack": [
+          "tronK_att_01",
+          "tronK_att_02"
+        ],
+        "hit": "tronK_dam",
+        "die": "tronK_die"
+      },
+      "attackImpact": 0.4666619777679444,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "tronw",
+      "file": "tronw.glb?v=0329deba1b",
+      "scale": 1,
+      "animations": {
+        "idle": "tronW_idle_00",
+        "idle2": "tronW_idle_01",
+        "walk": "tronW_walk",
+        "run": "tronW_run",
+        "attack": [
+          "tronW_att_00",
+          "tronW_att_01"
+        ],
+        "hit": "tronW_dam",
+        "die": "tronW_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "trona",
+      "file": "trona.glb?v=1e007e66e3",
+      "scale": 1,
+      "animations": {
+        "idle": "tronA_idle_01",
+        "idle2": "tronA_idle_02",
+        "walk": "tronA_walk",
+        "run": "tronA_run",
+        "attack": [
+          "tronA_att_01",
+          "tronA_att_02"
+        ],
+        "hit": "tronA_dam",
+        "die": "tronA_die"
+      },
+      "attackImpact": 0.5333280086517335,
+      "height": 2,
+      "radius": 0.9073458052308725,
       "tint": {}
     },
     {
@@ -617,6 +1259,277 @@
         "die": "sphinx_sp_die"
       },
       "attackImpact": 0.453328800201416,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "bogle",
+      "file": "bogle.glb?v=f156e83c38",
+      "scale": 1,
+      "animations": {
+        "idle": "bogle_idle2",
+        "idle2": "bogle_idle",
+        "walk": "bogle_walk",
+        "run": "bogle_run",
+        "attack": [
+          "bogle_att01",
+          "bogle_att02"
+        ],
+        "hit": "bogle_dam",
+        "die": "bogle_die"
+      },
+      "attackImpact": 0.42666239738464357,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "darkbogle",
+      "file": "darkbogle.glb?v=d5d691de30",
+      "scale": 1,
+      "animations": {
+        "idle": "darkbogle_idle",
+        "idle2": "darkbogle_idle2",
+        "walk": "darkbogle_walk",
+        "run": "darkbogle_run",
+        "attack": [
+          "darkbogle_att01",
+          "darkbogle_att02"
+        ],
+        "hit": "darkbogle_dam",
+        "die": "darkbogle_die"
+      },
+      "attackImpact": 0.42666239738464357,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "hydeis",
+      "file": "hydeis.glb?v=bf4df52402",
+      "scale": 1,
+      "animations": {
+        "idle": "hydeis_idle01",
+        "idle2": "hydeis_idle02",
+        "walk": "hydeis_walk",
+        "run": "hydeis_run",
+        "attack": [
+          "hydeis_att01",
+          "hydeis_att02"
+        ],
+        "die": "hydeis_die"
+      },
+      "attackImpact": 0.5333280086517335,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "assassinbug_m",
+      "file": "assassinbug_m.glb?v=b9863a7f5b",
+      "scale": 1,
+      "animations": {
+        "idle": "assassinbug_idle",
+        "idle2": "assassinbug_idle2",
+        "walk": "assassinbug_walk",
+        "run": "assassinbug_run",
+        "attack": [
+          "assassinbug_att01",
+          "assassinbug_att02"
+        ],
+        "hit": "assassinbug_dam",
+        "die": "assassinbug_die"
+      },
+      "attackImpact": 0.42666239738464357,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "assassinbug_q",
+      "file": "assassinbug_q.glb?v=51e2080a5a",
+      "scale": 1,
+      "animations": {
+        "idle": "assassinbug_q_idle",
+        "idle2": "assassinbug_q_idle2",
+        "walk": "assassinbug_q_walk",
+        "run": "assassinbug_q_run",
+        "attack": [
+          "assassinbug_q_att01",
+          "assassinbug_q_att02"
+        ],
+        "hit": "assassinbug_q_dam",
+        "die": "assassinbug_q_die"
+      },
+      "attackImpact": 0.42666239738464357,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "ape",
+      "file": "ape.glb?v=253c95353a",
+      "scale": 1,
+      "animations": {
+        "idle": "ape_idle",
+        "idle2": "ape_idle2",
+        "walk": "ape_walk",
+        "run": "ape_run",
+        "attack": [
+          "ape_att01",
+          "ape_att02"
+        ],
+        "hit": "ape_dam",
+        "die": "ape_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "azer",
+      "file": "azer.glb?v=0833377343",
+      "scale": 1,
+      "animations": {
+        "idle": "azer_idle2",
+        "idle2": "azer_idle",
+        "walk": "azer_walk",
+        "run": "azer_run",
+        "attack": [
+          "azer_att01",
+          "azer_att02"
+        ],
+        "hit": "azer_dam",
+        "die": "azer_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "scorpionmantis",
+      "file": "scorpionmantis.glb?v=112c9fc69a",
+      "scale": 1,
+      "animations": {
+        "idle": "scorpionmantis_idle",
+        "idle2": "scorpionmantis_idle2",
+        "walk": "scorpionmantis_walk",
+        "run": "scorpionmantis_run",
+        "attack": [
+          "scorpionmantis_att01",
+          "scorpionmantis_att02"
+        ],
+        "hit": "scorpionmantis_dam",
+        "die": "scorpionmantis_die"
+      },
+      "attackImpact": 0.4666619777679444,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "encordemon",
+      "file": "encordemon.glb?v=ec05e22891",
+      "scale": 1,
+      "animations": {
+        "idle": "encordemon_idle",
+        "idle2": "encordemon_idle2",
+        "walk": "encordemon_walk",
+        "run": "encordemon_run",
+        "attack": [
+          "encordemon_att01",
+          "encordemon_att02"
+        ],
+        "hit": "encordemon_dam",
+        "die": "encordemon_dle"
+      },
+      "attackImpact": 0.4666619777679444,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "bocordemon",
+      "file": "bocordemon.glb?v=664d7f64c4",
+      "scale": 1,
+      "animations": {
+        "idle": "bocordemon_idle2",
+        "idle2": "bocordemon_idle",
+        "walk": "bocordemon_walk",
+        "run": "bocordemon_run",
+        "attack": [
+          "bocordemon_att01",
+          "bocordemon_att02"
+        ],
+        "hit": "bocordemon_dam",
+        "die": "bocordemon_die"
+      },
+      "attackImpact": 0.42666239738464357,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "endemicdemon",
+      "file": "endemicdemon.glb?v=e851015b3d",
+      "scale": 1,
+      "animations": {
+        "idle": "endemicdemon_idle2",
+        "idle2": "endemicdemon_idle",
+        "walk": "endemicdemon_walk",
+        "run": "endemicdemon_run",
+        "attack": [
+          "endemicdemon_att01",
+          "endemicdemon_att02"
+        ],
+        "hit": "endemicdemon_dam",
+        "die": "endemicdemon_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "cused_wever",
+      "file": "cused_wever.glb?v=7a84ee9cdd",
+      "scale": 1,
+      "animations": {
+        "idle": "cusedwever_idle2",
+        "idle2": "cusedwever_idle",
+        "walk": "cusedwever_walk",
+        "run": "cusedwever_run",
+        "attack": [
+          "cusedwever_att01",
+          "cusedwever_att02"
+        ],
+        "hit": "cusedwever_dam",
+        "die": "cusedwever_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "cusedrich",
+      "file": "cusedrich.glb?v=383a4530ff",
+      "scale": 1,
+      "animations": {
+        "idle": "cusedrich_idle",
+        "walk": "cusedrich_walk",
+        "run": "cusedrich_run",
+        "attack": [
+          "cusedrich_att01",
+          "cusedrich_att02"
+        ],
+        "hit": "cusedrich_dam",
+        "die": "cusedrich_die"
+      },
+      "attackImpact": 0.6,
       "height": 2,
       "radius": 1,
       "tint": {}

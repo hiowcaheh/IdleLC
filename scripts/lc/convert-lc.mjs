@@ -52,6 +52,14 @@ const ITEM_MODELS = path.join(GENERATED, 'lc-item-models.json')
 const GEAR_MAX_TEXTURE = 512
 /** Colour of gear whose texture and icon can't be read (linear RGB). */
 const GEAR_GREY = [0.3, 0.3, 0.32]
+/**
+ * Monsters whose model in the Nemesis client can't be read (the .smc the database names points at
+ * unreadable meshes); the client's second version of the model has the same skeleton and clips.
+ */
+const MONSTER_SMC_STANDINS = {
+  cusedrich: 'Data\\Monster\\CusedRich2\\cusedrich2.smc',
+  cused_wever: 'Data\\Monster\\CusedWever2\\cused_wever2.smc',
+}
 /** Class portraits sheet (relative to public/). */
 const PORTRAITS_FILE = 'icons/lc/portraits.webp'
 
@@ -104,7 +112,8 @@ function listJobs(args, data, files, itemModels, icons, skillAnims) {
   }))
   const monsters = new Map()
   for (const m of data?.monsters ?? []) {
-    const job = monsters.get(m.model) ?? { id: m.model, smc: m.smc, animations: new Set() }
+    const smc = MONSTER_SMC_STANDINS[m.model] ?? m.smc
+    const job = monsters.get(m.model) ?? { id: m.model, smc, animations: new Set() }
     for (const clip of Object.values(m.animations).flat())
       if (clip) job.animations.add(String(clip))
     monsters.set(m.model, job)
@@ -278,7 +287,7 @@ async function main() {
           `clips ${stats.animations.length}` +
           (stats.missing.length ? `  (missing: ${stats.missing.join(', ')})` : '') +
           (stats.unreadable.length
-            ? `  (plain colour: ${stats.unreadable.length} encrypted)`
+            ? `  (encrypted: ${stats.unreadable.length} — textures in plain colour, meshes left out)`
             : '') +
           (stats.flipped ? `  (turned: ${stats.flipped})` : ''),
       )

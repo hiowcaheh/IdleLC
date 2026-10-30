@@ -159,7 +159,14 @@ export async function buildModel(files, smc, options = {}) {
       stats.missing.push(desc.file)
       continue
     }
-    const lod = parseMesh(files.read(desc.file)).lods[0]
+    let lod
+    try {
+      lod = parseMesh(files.read(desc.file)).lods[0]
+    } catch {
+      // an encrypted part (e.g. a monster's weapon): the model goes without it
+      stats.unreadable.push(desc.file)
+      continue
+    }
     if (lod) parts.push({ desc, lod })
   }
 
