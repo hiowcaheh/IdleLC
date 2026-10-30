@@ -5,11 +5,11 @@ import { lcData } from '../data/lcSource.ts'
 import { getMonster } from '../data/monsters.ts'
 import type { ClassId } from '../data/types.ts'
 import { statsForLevel } from './balance.ts'
-import type { PotionAuto } from './character.ts'
 import type { FighterInit, PotionSupply } from './combat.ts'
 import { applyGear, type Equipment } from './equipment.ts'
 import { lcPlayerStats } from './lcBalance.ts'
 import type { ItemStack } from './loot.ts'
+import { POTION_GROUPS, countOwned, potionGroup, type PotionSlots } from './potions.ts'
 import { applyStats, learnedRanks, passiveEffects, type LearnedSkill } from './skills.ts'
 
 /** What the hero's fighter depends on (a CharacterData fits). */
@@ -21,22 +21,25 @@ export interface Hero {
   equipment?: Equipment
   /** Skills used in fights; left out = every learned active skill. */
   skillBar?: readonly number[]
-  /** The bag: potions in it are drunk in fights when their kind is set to automatic. */
+  /** The bag: the potions of the quick slots come from it. */
   inventory?: readonly ItemStack[]
-  potionAuto?: PotionAuto
+  potionSlots?: PotionSlots
 }
 
 /**
- * Potions the hero drinks by itself: those in the bag it is high enough level for, healing and HP
- * recovery potions when `potionAuto.hp` is on, mana and MP recovery potions when `potionAuto.mp` is.
+ * Potions the hero drinks by itself: the ones in the HP and MP quick slots whose automatic use is
+ * on, while the bag has them and the hero is high enough level for them.
  */
-export function potionSupply({ level, inventory = [], potionAuto }: Hero): PotionSupply[] {
-  return inventory.flatMap(({ itemId, count }) => {
+export function potionSupply({ level, inventory = [], potionSlots }: Hero): PotionSupply[] {
+  if (!potionSlots) return []
+  return POTION_GROUPS.flatMap((group) => {
+    const { itemId, auto } = potionSlots[group]
+    if (!auto || itemId === null) return []
     const item = getItem(itemId)
     const potion = item.potion
-    if (!potion || count <= 0 || level < item.level) return []
-    const auto = potion.kind === 'hp' || potion.kind === 'hpRegen' ? potionAuto?.hp : potionAuto?.mp
-    return auto === false ? [] : [{ itemId, name: item.name, count, potion }]
+    const count = countOwned(inventory, itemId)
+    if (!potion || potionGroup(potion.kind) !== group || count <= 0 || level < item.level) return []
+    return [{ itemId, name: item.name, count, potion }]
   })
 }
 

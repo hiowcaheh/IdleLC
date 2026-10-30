@@ -140,13 +140,47 @@ describe('loadSave', () => {
         3: { level: 1, auto: true },
       },
     }
-    delete old.potionAuto
+    delete old.potionSlots
     delete old.skillBar
     const r = loadSave(JSON.stringify({ ...v6, characters: [old] }), NOW)
     expect(r.status).toBe('migrated')
     expect(r.save.characters[0]).toMatchObject({
-      potionAuto: { hp: true, mp: true },
+      potionSlots: { hp: { itemId: null, auto: true }, mp: { itemId: null, auto: true } },
       skillBar: [1, 2],
+    })
+  })
+
+  it('puts the potion the bag holds most of in each quick slot of version 8 characters', () => {
+    const v8 = { ...withCharacter(), saveVersion: 8 }
+    const old: Record<string, unknown> = {
+      ...createCharacterData({ name: 'Brom', classId: 'knight' }, 'id-4', NOW),
+      inventory: [
+        { itemId: 43, count: 3 }, // Small Healing Potion
+        { itemId: 490, count: 9 }, // Small HP Recovery Potion
+        { itemId: 484, count: 2 }, // Small Mana Potion
+      ],
+      potionAuto: { hp: true, mp: false },
+    }
+    delete old.potionSlots
+    const r = loadSave(JSON.stringify({ ...v8, characters: [old] }), NOW)
+    expect(r.status).toBe('migrated')
+    expect(r.save.characters[0]!.potionSlots).toEqual({
+      hp: { itemId: 490, auto: true },
+      mp: { itemId: 484, auto: false },
+    })
+    expect(r.save.characters[0]).not.toHaveProperty('potionAuto')
+  })
+
+  it('empties quick slots holding something that is not a potion of their kind', () => {
+    const save = withCharacter()
+    const broken = {
+      ...save.characters[0]!,
+      potionSlots: { hp: { itemId: 484, auto: true }, mp: { itemId: 'x', auto: false } },
+    }
+    const r = loadSave(JSON.stringify({ ...save, characters: [broken] }), NOW)
+    expect(r.save.characters[0]!.potionSlots).toEqual({
+      hp: { itemId: null, auto: true },
+      mp: { itemId: null, auto: false },
     })
   })
 

@@ -1,7 +1,7 @@
 import type { AfkResult } from '../logic/afk.ts'
 import type { EquipSlot } from '../data/types.ts'
 import type { CharacterData, CharacterLocation, NewCharacter } from '../logic/character.ts'
-import type { PotionAuto } from '../logic/character.ts'
+import type { PotionGroup, PotionSlot } from '../logic/potions.ts'
 import type { GearSource, UpgradeResult } from '../logic/equipment.ts'
 import type { ItemStack } from '../logic/loot.ts'
 import type { CombatReport, CombatResult } from '../logic/rewards.ts'
@@ -70,8 +70,8 @@ export interface GameService {
     magnifierId: number,
     targets: IdentifyTarget[],
   ): Promise<IdentifyResult>
-  /** Turns the automatic use of HP / MP potions in fights on or off. */
-  setPotionAuto(characterId: string, auto: PotionAuto): Promise<CharacterData>
+  /** Puts a potion the character owns (or nothing) in the HP or MP quick slot, with its automatic use. */
+  setPotionSlot(characterId: string, group: PotionGroup, slot: PotionSlot): Promise<CharacterData>
   updateSettings(patch: Partial<Settings>): Promise<Settings>
   /** Deletes the whole save (all characters) and starts over. */
   resetSave(): Promise<SaveData>

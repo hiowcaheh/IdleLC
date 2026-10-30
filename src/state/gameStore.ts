@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { ZONES } from '../game/data/zones.ts'
 import type { AfkResult } from '../game/logic/afk.ts'
-import type { CharacterData, NewCharacter, PotionAuto } from '../game/logic/character.ts'
+import type { CharacterData, NewCharacter } from '../game/logic/character.ts'
+import type { PotionGroup, PotionSlot } from '../game/logic/potions.ts'
 import { effectiveStats, type CombatPhase, type CombatState } from '../game/logic/combat.ts'
 import { heroKey } from '../game/logic/fighters.ts'
 import type { EquipSlot } from '../game/data/types.ts'
@@ -67,7 +68,7 @@ interface GameStore {
   buyItem(itemId: number, count: number): Promise<PurchaseResult>
   sellGear(uids: string[]): Promise<PieceSale>
   identifyItems(magnifierId: number, targets: IdentifyTarget[]): Promise<IdentifyResult>
-  setPotionAuto(auto: PotionAuto): Promise<void>
+  setPotionSlot(group: PotionGroup, slot: PotionSlot): Promise<void>
   selectMonster(monsterId: string): void
   selectZone(zoneId: string, monsterId?: string): void
   syncCombat(combat: CombatState): void
@@ -373,9 +374,9 @@ export const useGameStore = create<GameStore>((set, get) => {
       return purchase
     },
 
-    async setPotionAuto(auto) {
+    async setPotionSlot(group, slot) {
       const id = playedId()
-      applyCharacter(await enqueue(() => gameService.setPotionAuto(id, auto)))
+      applyCharacter(await enqueue(() => gameService.setPotionSlot(id, group, slot)))
     },
 
     async sellGear(uids) {

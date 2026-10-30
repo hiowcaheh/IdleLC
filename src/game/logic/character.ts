@@ -7,6 +7,7 @@ import type { ClassId } from '../data/types.ts'
 import { DEFAULT_ZONE_ID, ZONES } from '../data/zones.ts'
 import { starterEquipment, type Equipment, type GearPiece } from './equipment.ts'
 import type { ItemStack } from './loot.ts'
+import { EMPTY_POTION_SLOTS, type PotionSlots } from './potions.ts'
 import { defaultBar, starterSkills, type LearnedSkill } from './skills.ts'
 
 export { GameError } from './errors.ts'
@@ -53,15 +54,10 @@ export interface CharacterData {
   equipment: Equipment
   /** Single pieces in the bag: upgraded, with options, accessories (plain ones stack in `inventory`). */
   gear: GearPiece[]
-  /** Potions are used automatically in fights (HP / MP). */
-  potionAuto: PotionAuto
+  /** The potions in the HP and MP quick slots (logic/potions.ts). */
+  potionSlots: PotionSlots
   /** Seconds of active play toward the next option on a worn piece (logic/options.ts). */
   optionProgress: number
-}
-
-export interface PotionAuto {
-  hp: boolean
-  mp: boolean
 }
 
 export interface NewCharacter {
@@ -121,7 +117,7 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     skillBar: defaultBar(input.classId, starterSkills(input.classId)),
     equipment: starterEquipment(input.classId),
     gear: [],
-    potionAuto: { hp: true, mp: true },
+    potionSlots: EMPTY_POTION_SLOTS,
     optionProgress: 0,
   }
 }

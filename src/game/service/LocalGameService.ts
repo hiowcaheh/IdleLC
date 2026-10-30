@@ -9,10 +9,10 @@ import {
   type CharacterData,
   type CharacterLocation,
   type NewCharacter,
-  type PotionAuto,
 } from '../logic/character.ts'
 import { AFK_MIN_SECONDS, simulateAfk, type AfkResult } from '../logic/afk.ts'
 import { newId } from '../logic/id.ts'
+import { applyPotionSlot, type PotionGroup, type PotionSlot } from '../logic/potions.ts'
 import { gainExp } from '../logic/progression.ts'
 import {
   MAX_PLAY_GAP,
@@ -210,11 +210,12 @@ export class LocalGameService implements GameService {
     return copy({ ...purchase, character: updated })
   }
 
-  async setPotionAuto(characterId: string, auto: PotionAuto): Promise<CharacterData> {
-    const changed = {
-      ...this.notOnExpedition(characterId),
-      potionAuto: { hp: auto.hp, mp: auto.mp },
-    }
+  async setPotionSlot(
+    characterId: string,
+    group: PotionGroup,
+    slot: PotionSlot,
+  ): Promise<CharacterData> {
+    const changed = applyPotionSlot(this.notOnExpedition(characterId), group, slot)
     return copy(this.update(characterId, () => changed))
   }
 

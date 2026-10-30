@@ -291,13 +291,13 @@ przez 15 s (240 HP), Small Mana Potion 8 MP/s przez 15 s, Small HP Recovery Poti
 
 Picie (zasady **własne**, `src/game/logic/combat.ts`):
 
-- tylko w walce, sam z siebie, mikstury z torby, do których postać ma poziom; nie pije ogłuszona;
+- tylko w walce, sam z siebie, tylko mikstury ze slotów HP i MP (gracz wybiera je z torby — slot HP:
+  leczenie lub regeneracja HP, slot MP: mana lub regeneracja MP), jeśli postać ma do nich poziom;
+  nie pije ogłuszona;
 - leczenie, gdy HP < **50%**; mana, gdy MP < **30%**; regeneracja HP / MP, gdy HP / MP nie jest pełne;
 - naraz działa jedna mikstura danego rodzaju, a po wypiciu rodzaj czeka na odnowienie (`a_reuseTime`);
-- wybór: najmniejsza mikstura, która pokryje brakujące HP / MP (cała moc × czas), a gdy żadna — najmocniejsza;
-  z regeneracji — najmocniejsza;
-- przełączniki AUTO (sloty HP i MP przy pasku życia): HP = leczenie i regeneracja HP, MP = mana i regeneracja
-  MP; wyłączone — postać nie pije tego rodzaju (także na wyprawie).
+- przełączniki AUTO slotów: wyłączone — postać nie pije mikstury ze slotu (także na wyprawie);
+- zapis v9 przeniósł starsze postacie: do slotu trafiła mikstura danego rodzaju, której torba ma najwięcej.
 
 Zużycie liczy walka w przeglądarce, a serwis zdejmuje mikstury z torby przy zgłoszeniu walki
 (`reportCombat`, pole `potions`, najwyżej tyle, ile jest w torbie). Zgłoszenie idzie po każdej walce, przy

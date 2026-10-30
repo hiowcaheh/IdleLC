@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { heroKey, playerFighter, potionSupply } from './fighters.ts'
 
-const knight = { classId: 'knight' as const, level: 1 }
+const slots = (hp: number | null, mp: number | null, auto = { hp: true, mp: true }) => ({
+  hp: { itemId: hp, auto: auto.hp },
+  mp: { itemId: mp, auto: auto.mp },
+})
+const knight = { classId: 'knight' as const, level: 1, potionSlots: slots(43, 484) }
 const bag = [
   { itemId: 43, count: 3 }, // Small Healing Potion
   { itemId: 484, count: 2 }, // Small Mana Potion
@@ -10,20 +14,26 @@ const bag = [
 ]
 
 describe('potionSupply', () => {
-  it('carries the potions of the bag into fights', () => {
+  it('carries the potions of the quick slots into fights, not the rest of the bag', () => {
     expect(potionSupply({ ...knight, inventory: bag }).map((p) => [p.itemId, p.count])).toEqual([
       [43, 3],
       [484, 2],
-      [490, 1],
     ])
-    expect(playerFighter({ ...knight, inventory: bag }).potions).toHaveLength(3)
+    expect(playerFighter({ ...knight, inventory: bag }).potions).toHaveLength(2)
+    const regen = { ...knight, potionSlots: slots(490, null), inventory: bag }
+    expect(potionSupply(regen).map((p) => p.itemId)).toEqual([490])
   })
 
-  it('leaves out the kinds whose automatic use is off', () => {
-    const hpOff = potionSupply({ ...knight, inventory: bag, potionAuto: { hp: false, mp: true } })
-    expect(hpOff.map((p) => p.itemId)).toEqual([484])
-    const mpOff = potionSupply({ ...knight, inventory: bag, potionAuto: { hp: true, mp: false } })
-    expect(mpOff.map((p) => p.itemId)).toEqual([43, 490])
+  it('leaves out slots whose automatic use is off, empty or used up', () => {
+    const hpOff = {
+      ...knight,
+      inventory: bag,
+      potionSlots: slots(43, 484, { hp: false, mp: true }),
+    }
+    expect(potionSupply(hpOff).map((p) => p.itemId)).toEqual([484])
+    const none = { ...knight, inventory: bag.slice(1), potionSlots: slots(43, null) }
+    expect(potionSupply(none)).toEqual([])
+    expect(potionSupply({ ...knight, inventory: bag, potionSlots: undefined })).toEqual([])
   })
 
   it('changes the hero key when potions are used up or bought', () => {
@@ -32,8 +42,7 @@ describe('potionSupply', () => {
     expect(heroKey({ ...knight, inventory: [{ itemId: 43, count: 2 }, ...bag.slice(1)] })).not.toBe(
       key,
     )
-    expect(heroKey({ ...knight, inventory: bag, potionAuto: { hp: false, mp: true } })).not.toBe(
-      key,
-    )
+    const hpOff = slots(43, 484, { hp: false, mp: true })
+    expect(heroKey({ ...knight, inventory: bag, potionSlots: hpOff })).not.toBe(key)
   })
 })

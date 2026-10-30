@@ -67,9 +67,10 @@ A niebieski), premie i opcje. Odkryte są posortowane od najlepszych; „E ×5�
 sprzedaje. Zwykły sprzęt dostaje opcje z gry: co 10 minut aktywnej walki jedna opcja na losową założoną część
 (karta postaci → Stats pokazuje, kiedy następna).
 
-**Mikstury:** w sklepie Juno (dane 1:1: leczenie i mana przez 15 s, regeneracja przez 10 min). Postać pije je
-sama w walce i na wyprawach (leczenie poniżej 50% HP, mana poniżej 30% MP, regeneracja, gdy brakuje HP / MP).
-Dwa sloty obok złota w ramce postaci pokazują, ile zostało; dotknięcie włącza / wyłącza AUTO (litera „A”).
+**Mikstury:** w sklepie Juno (dane 1:1: leczenie i mana przez 15 s, regeneracja przez 10 min). Gracz wkłada
+miksturę do slotu HP i slotu MP (pod ramką postaci; dotknięcie slotu otwiera wybór z torby, przełącznik AUTO
+i opróżnianie). Postać pije sama tylko te dwie — w walce i na wyprawach (leczenie poniżej 50% HP, mana poniżej
+30% MP, regeneracja, gdy brakuje HP / MP); slot pokazuje, ile zostało, a „A” — że AUTO jest włączone.
 Działająca mikstura jest wśród efektów pod paskami, a zużyte na wyprawie — w podsumowaniu.
 
 **Wyprawy AFK:** przycisk **Expedition** w panelu polowania wysyła postać na polowanie bez ciebie (do 8 h, także

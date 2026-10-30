@@ -23,6 +23,14 @@ import { newId } from './id.ts'
 import { addToInventory, type ItemStack } from './loot.ts'
 import { OPTION_PLAY_SECONDS } from './options.ts'
 import {
+  POTION_GROUPS,
+  fitsSlot,
+  fullestPotion,
+  type PotionGroup,
+  type PotionSlot,
+  type PotionSlots,
+} from './potions.ts'
+import {
   SKILL_BAR_SIZE,
   defaultBar,
   skillRank,
@@ -30,7 +38,7 @@ import {
   type LearnedSkill,
 } from './skills.ts'
 
-export const SAVE_VERSION = 8
+export const SAVE_VERSION = 9
 
 export type GraphicsQuality = 'auto' | 'low' | 'high'
 
@@ -140,6 +148,24 @@ export const MIGRATIONS: Record<number, Migration> = {
       ? save.characters.map((c: unknown) => (isRecord(c) ? { ...c, optionProgress: 0 } : c))
       : [],
   }),
+  // v9: the player chooses the potion of each quick slot; until now the hero drank every potion it
+  // had, so each slot gets the potion of its kind the bag holds most of
+  8: (save) => ({
+    ...save,
+    characters: Array.isArray(save.characters)
+      ? save.characters.map((c: unknown) => {
+          if (!isRecord(c)) return c
+          const { potionAuto, ...rest } = c
+          const inventory = sanitizeInventory(c.inventory)
+          const level = int(c.level, 1)
+          const slot = (group: PotionGroup): PotionSlot => ({
+            itemId: fullestPotion(inventory, level, group),
+            auto: !isRecord(potionAuto) || potionAuto[group] !== false,
+          })
+          return { ...rest, potionSlots: { hp: slot('hp'), mp: slot('mp') } }
+        })
+      : [],
+  }),
 }
 
 export const DEFAULT_SETTINGS: Settings = { quality: 'auto', showDamageNumbers: true }
@@ -238,10 +264,7 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     gear: (Array.isArray(raw.gear) ? raw.gear : [])
       .map((p: unknown) => sanitizePiece(p))
       .filter((p): p is GearPiece => p !== null),
-    potionAuto: {
-      hp: !isRecord(raw.potionAuto) || raw.potionAuto.hp !== false,
-      mp: !isRecord(raw.potionAuto) || raw.potionAuto.mp !== false,
-    },
+    potionSlots: sanitizePotionSlots(raw.potionSlots),
     optionProgress: Math.min(OPTION_PLAY_SECONDS, Math.max(0, num(raw.optionProgress, 0))),
   }
 }
@@ -332,6 +355,20 @@ function sanitizeInventory(raw: unknown): ItemStack[] {
     if (itemId > 0 && count > 0) stacks.push({ itemId, count })
   }
   return addToInventory([], stacks)
+}
+
+/** A potion of the slot's kind (or nothing) in each quick slot. */
+function sanitizePotionSlots(raw: unknown): PotionSlots {
+  const slots = isRecord(raw) ? raw : {}
+  const slot = (group: PotionGroup): PotionSlot => {
+    const entry = isRecord(slots[group]) ? slots[group] : {}
+    const itemId = int(entry.itemId, 0)
+    return {
+      itemId: itemId > 0 && fitsSlot(itemId, group) ? itemId : null,
+      auto: entry.auto !== false,
+    }
+  }
+  return Object.fromEntries(POTION_GROUPS.map((g) => [g, slot(g)])) as PotionSlots
 }
 
 /** Fills missing/invalid fields with defaults so a partly broken save still loads. */

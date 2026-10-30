@@ -82,7 +82,7 @@ describe('simulateAfk', () => {
     expect(estimate.goldPerHour).toBeCloseTo(estimate.killsPerHour * golem.gold)
   })
 
-  it('drinks the potions it carries against a tough monster, never more than it has', () => {
+  it('drinks the potions of its quick slots against a tough monster, never more than it has', () => {
     const sentinel = { zoneId: 'glade', monsterId: 'stone-sentinel', startedAt: 0 }
     const stocked = {
       ...hero,
@@ -91,14 +91,23 @@ describe('simulateAfk', () => {
         { itemId: 43, count: 50 },
         { itemId: 490, count: 50 },
       ],
+      potionSlots: { hp: { itemId: 43, auto: true }, mp: { itemId: null, auto: true } },
     }
     const plenty = simulateAfk(stocked, 3600, createRng(1))
-    const drunk = (id: number) => plenty.potionsUsed.find((p) => p.itemId === id)?.count ?? 0
-    expect(drunk(43)).toBeGreaterThan(0)
-    expect(drunk(490)).toBeGreaterThan(0)
+    const drunk = (r: typeof plenty, id: number) =>
+      r.potionsUsed.find((p) => p.itemId === id)?.count ?? 0
+    expect(drunk(plenty, 43)).toBeGreaterThan(0)
+    expect(drunk(plenty, 490)).toBe(0) // not in a slot
     const left = (id: number) => plenty.character.inventory.find((s) => s.itemId === id)?.count
-    expect(left(43)).toBe(50 - drunk(43))
-    expect(left(490)).toBe(50 - drunk(490))
+    expect(left(43)).toBe(50 - drunk(plenty, 43))
+    expect(left(490)).toBe(50)
+
+    const regen = simulateAfk(
+      { ...stocked, potionSlots: { ...stocked.potionSlots, hp: { itemId: 490, auto: true } } },
+      3600,
+      createRng(1),
+    )
+    expect(drunk(regen, 490)).toBeGreaterThan(0)
 
     const scarce = simulateAfk(
       { ...stocked, inventory: [{ itemId: 43, count: 1 }] },
@@ -108,7 +117,11 @@ describe('simulateAfk', () => {
     expect(scarce.potionsUsed).toEqual([{ itemId: 43, count: 1 }])
     expect(scarce.character.inventory.some((s) => s.itemId === 43)).toBe(false)
 
-    const off = simulateAfk({ ...stocked, potionAuto: { hp: false, mp: true } }, 3600, createRng(1))
+    const off = simulateAfk(
+      { ...stocked, potionSlots: { ...stocked.potionSlots, hp: { itemId: 43, auto: false } } },
+      3600,
+      createRng(1),
+    )
     expect(off.potionsUsed).toEqual([])
   })
 
