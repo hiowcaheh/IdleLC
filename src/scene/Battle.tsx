@@ -22,7 +22,8 @@ import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
 /** How far the player runs to reach a newly spawned monster. */
 const RUN_DISTANCE = 3.8
 const APPEAR_TIME = 0.45
-const SINK_TIME = 0.7
+/** The fallen monster sinks into the ground before the next one comes (TIMINGS.spawning). */
+const SINK_TIME = 0.5
 const TURN_SPEED = 10
 const HUD_SYNC_INTERVAL = 0.1
 
@@ -218,8 +219,8 @@ export function Battle() {
         case 'death':
           m.swingIn = { player: -1, monster: -1 }
           if (e.who === 'monster') {
+            // the hero stays in its fighting stance and goes on to the next monster
             monster.current?.die()
-            player.current?.victory()
           } else {
             player.current?.die()
             monster.current?.setBase('idle')
@@ -329,6 +330,9 @@ export function Battle() {
   // the HTML labels (ui/hud/SceneLabels.tsx) follow the HP bars
   const labelPoint = useRef(new Vector3())
   useFrame(({ camera, size }) => {
+    // the camera has moved this frame (CameraRig): project with where it is now, not where the last
+    // frame drew it, so the labels stay on the bars
+    camera.updateMatrixWorld()
     const place = (
       id: SceneLabelId,
       bar: { x: number; y: number; z: number; visible: boolean },

@@ -2,7 +2,6 @@ import { useGameStore } from '../../state/gameStore.ts'
 
 const MESSAGES: Partial<Record<string, string>> = {
   traveling: 'Moving to another spot…',
-  spawning: 'Looking for a target…',
   victory: 'Victory!',
   defeat: 'Defeated. Back in the fight shortly.',
 }

@@ -2653,11 +2653,23 @@ a.button {
 
 .scene-label__text {
   display: block;
+  text-align: center;
   transform: translate(-50%, calc(-100% - 7px));
 }
 
 .scene-label--player {
   color: #e9e6e0;
+}
+
+/* the hero's name plate: a dark see-through box with a thin bronze rim, like the client's */
+.scene-label--player .scene-label__text {
+  padding: 3px 7px 3px;
+  border: 1px solid rgba(176, 134, 78, 0.75);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(28, 22, 16, 0.72), rgba(8, 6, 4, 0.72));
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .scene-label__level {

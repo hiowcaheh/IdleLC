@@ -57,7 +57,9 @@ export function CameraRig() {
     // look higher too, so a tall monster's head and name stay in view
     const lookHeight = LOOK_HEIGHT * (1 + (zoom.current - 1) * 1.6)
     camera.lookAt(focus.current.x, focus.current.y + lookHeight, focus.current.z)
-  })
+    // before every other frame callback: the names over the fighters (Battle.tsx) are placed with
+    // this frame's camera, so they stay on the HP bars
+  }, -1)
 
   return null
 }

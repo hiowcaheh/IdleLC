@@ -111,7 +111,6 @@ export function GameScreen() {
           </div>
         )}
         <div className="hud__center">
-          {!expedition && <StatusLine />}
           <LevelUpBanner />
         </div>
         <div className="hud__bottom">
@@ -119,6 +118,8 @@ export function GameScreen() {
             <ExpeditionPanel character={character} expedition={expedition} />
           ) : (
             <div className="hud__dock">
+              {/* over the skill bar, clear of the names over the fighters */}
+              <StatusLine />
               <SkillBar />
               <HuntPanel />
             </div>

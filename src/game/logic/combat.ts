@@ -28,9 +28,10 @@ export type CombatPhase = 'traveling' | 'spawning' | 'approach' | 'fighting' | '
 export const TIMINGS = {
   /** Going to another hunting spot (the hero runs there; no monster). */
   travel: 2.5,
-  spawning: 1.0,
+  /** After a kill the hero goes straight on: the fallen monster sinks while the next one comes. */
+  spawning: 0.5,
   approach: 1.3,
-  victory: 2.2,
+  victory: 1.2,
   defeat: 3.0,
   /** Time from the start of a swing to the moment the hit lands. */
   impactDelay: 0.4,
@@ -58,6 +59,9 @@ export const MAX_MP_COST_REDUCTION = 0.75
 
 /** Largest simulated step; bigger dt values are split so event order stays correct. */
 const MAX_STEP = 0.05
+
+/** A phase has lasted its time (steps of 0.05 s add up to a hair under round numbers). */
+const reached = (phaseTime: number, length: number) => phaseTime >= length - 1e-9
 /** Tolerance for timers that add up many small steps. */
 const EPSILON = 1e-6
 
@@ -459,7 +463,7 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
   switch (s.phase) {
     case 'traveling':
       regen(s.player, dt, false)
-      if (s.phaseTime >= TIMINGS.travel) {
+      if (reached(s.phaseTime, TIMINGS.travel)) {
         enter(s, 'spawning')
         events.push({ type: 'arrive' })
       }
@@ -467,7 +471,7 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
 
     case 'spawning':
       regen(s.player, dt, false)
-      if (s.phaseTime >= TIMINGS.spawning) {
+      if (reached(s.phaseTime, TIMINGS.spawning)) {
         s.monster = freshFighter(s.monster)
         enter(s, 'approach')
         events.push({ type: 'spawn', monsterId: s.monsterId })
@@ -476,7 +480,7 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
 
     case 'approach':
       regen(s.player, dt, false)
-      if (s.phaseTime >= approachTime(s)) {
+      if (reached(s.phaseTime, approachTime(s))) {
         s.player.cooldown = 0
         s.player.impactIn = null
         s.player.casting = null
@@ -498,14 +502,14 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
 
     case 'victory':
       regen(s.player, dt, false)
-      if (s.phaseTime >= TIMINGS.victory) {
+      if (reached(s.phaseTime, TIMINGS.victory)) {
         enter(s, 'spawning')
         events.push({ type: 'despawn' })
       }
       return
 
     case 'defeat':
-      if (s.phaseTime >= TIMINGS.defeat) {
+      if (reached(s.phaseTime, TIMINGS.defeat)) {
         s.player = revived(s.player)
         enter(s, 'spawning')
         events.push({ type: 'revive' }, { type: 'despawn' })
