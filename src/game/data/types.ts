@@ -50,7 +50,10 @@ export interface ZoneDef {
   id: string
   name: string
   minLevel: number
+  /** The hunting spots in order, lowest level first (event monsters and raid bosses left out). */
   monsterIds: string[]
+  /** Raid bosses of the zone, kept for a boss system to come (not hunting spots). */
+  bossIds: string[]
   environment: {
     skyTop: string
     skyBottom: string

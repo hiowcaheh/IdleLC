@@ -171,6 +171,26 @@ describe('loadSave', () => {
     expect(r.save.characters[0]).not.toHaveProperty('potionAuto')
   })
 
+  it('opens the spots up to where version 9 characters hunt; new stats start at zero', () => {
+    const v9 = { ...withCharacter(), saveVersion: 9 }
+    const old: Record<string, unknown> = {
+      ...createCharacterData({ name: 'Brom', classId: 'knight' }, 'id-5', NOW),
+      location: { zoneId: 'glade', monsterId: 'stone-sentinel' },
+      stats: { kills: 12, deaths: 1 },
+    }
+    delete old.reachedSpots
+    const r = loadSave(JSON.stringify({ ...v9, characters: [old] }), NOW)
+    expect(r.status).toBe('migrated')
+    expect(r.save.characters[0]!.reachedSpots).toEqual({ glade: 'stone-sentinel' })
+    expect(r.save.characters[0]!.stats).toEqual({
+      kills: 12,
+      deaths: 1,
+      expeditions: 0,
+      playSeconds: 0,
+      monsterKills: {},
+    })
+  })
+
   it('empties quick slots holding something that is not a potion of their kind', () => {
     const save = withCharacter()
     const broken = {

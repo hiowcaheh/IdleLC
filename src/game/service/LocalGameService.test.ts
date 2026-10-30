@@ -142,6 +142,10 @@ describe('LocalGameService', () => {
     expect(afk.character.level).toBeGreaterThan(1)
     expect(afk.character.inventory.length).toBeGreaterThan(0)
     expect(stored(storage).characters[0]).toMatchObject({ gold: afk.gold, expedition: null })
+    // a finished expedition counts; its kills go to the monster book and open the next spot
+    expect(afk.character.stats).toMatchObject({ expeditions: 1, playSeconds: 0 })
+    expect(afk.character.stats.monsterKills[hero.location.monsterId]).toBe(afk.kills)
+    expect(afk.character.reachedSpots.glade).toBe('stone-sentinel')
 
     await expect(game.claimAfk(hero.id)).rejects.toThrow('no-expedition')
   })
@@ -153,6 +157,17 @@ describe('LocalGameService', () => {
     const afk = await game.claimAfk(hero.id)
     expect(afk).toMatchObject({ seconds: 0, kills: 0, exp: 0, gold: 0, drops: [] })
     expect(afk.character.expedition).toBeNull()
+    expect(afk.character.stats.expeditions).toBe(0)
+  })
+
+  it('counts active play between reports, at most MAX_PLAY_GAP per report', async () => {
+    const { game, clock, hero } = await withKnight()
+    const report = { monsterId: hero.location.monsterId, kills: 0, deaths: 0 }
+    clock.now += 30_000
+    await game.reportCombat(hero.id, report)
+    clock.now += 3600_000
+    const { character } = await game.reportCombat(hero.id, report)
+    expect(character.stats.playSeconds).toBe(30 + MAX_PLAY_GAP)
   })
 
   it('keeps an expedition across reloads and blocks fights and travel meanwhile', async () => {
@@ -336,8 +351,16 @@ describe('LocalGameService', () => {
     ).rejects.toThrow('unknown-character')
   })
 
-  it('travels only to existing spots', async () => {
-    const { game, hero } = await withKnight()
+  it('travels only to existing, open spots; a kill opens the next spot', async () => {
+    const { game, hero, clock } = await withKnight()
+    await expect(
+      game.travel(hero.id, { zoneId: 'glade', monsterId: 'stone-sentinel' }),
+    ).rejects.toThrow('spot-locked')
+    clock.now += 10_000
+    const report = { monsterId: hero.location.monsterId, kills: 1, deaths: 0 }
+    const { character } = await game.reportCombat(hero.id, report)
+    expect(character.reachedSpots).toEqual({ glade: 'stone-sentinel' })
+    expect(character.stats.monsterKills).toEqual({ [hero.location.monsterId]: 1 })
     const moved = await game.travel(hero.id, { zoneId: 'glade', monsterId: 'stone-sentinel' })
     expect(moved.location.monsterId).toBe('stone-sentinel')
     await expect(game.travel(hero.id, { zoneId: 'glade', monsterId: 'dragon' })).rejects.toThrow(

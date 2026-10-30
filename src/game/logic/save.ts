@@ -36,6 +36,7 @@ import {
   type PotionSlot,
   type PotionSlots,
 } from './potions.ts'
+import { zoneSpots } from './spots.ts'
 import {
   SKILL_BAR_SIZE,
   defaultBar,
@@ -44,7 +45,7 @@ import {
   type LearnedSkill,
 } from './skills.ts'
 
-export const SAVE_VERSION = 9
+export const SAVE_VERSION = 10
 
 export type GraphicsQuality = 'auto' | 'low' | 'high' | 'ultra'
 
@@ -172,6 +173,9 @@ export const MIGRATIONS: Record<number, Migration> = {
         })
       : [],
   }),
+  // v10: hunting spots open one by one, expeditions, play time and kills per monster; the new fields
+  // start at their defaults (sanitizeCharacter) and the spot a character is at counts as reached
+  9: (save) => save,
 }
 
 export const DEFAULT_SETTINGS: Settings = { quality: 'auto', showDamageNumbers: true }
@@ -250,6 +254,7 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
   if (typeof raw.classId !== 'string' || !Object.hasOwn(CLASSES, raw.classId)) return null
   const stats = isRecord(raw.stats) ? raw.stats : {}
   const createdAt = num(raw.createdAt, now)
+  const location = sanitizeLocation(raw.location)
   // dual swords and a shield together (saves from before that rule): the shield goes to the bag
   return freeHands({
     id: raw.id,
@@ -260,8 +265,15 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     gold: int(raw.gold, 0),
     createdAt,
     lastPlayedAt: num(raw.lastPlayedAt, createdAt),
-    location: sanitizeLocation(raw.location),
-    stats: { kills: int(stats.kills, 0), deaths: int(stats.deaths, 0) },
+    location,
+    reachedSpots: sanitizeReached(raw.reachedSpots, location),
+    stats: {
+      kills: int(stats.kills, 0),
+      deaths: int(stats.deaths, 0),
+      expeditions: int(stats.expeditions, 0),
+      playSeconds: num(stats.playSeconds, 0),
+      monsterKills: sanitizeMonsterKills(stats.monsterKills),
+    },
     inventory: sanitizeInventory(raw.inventory),
     expedition: sanitizeExpedition(raw.expedition),
     sp: int(raw.sp, 0),
@@ -274,6 +286,36 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     potionSlots: sanitizePotionSlots(raw.potionSlots),
     optionProgress: Math.min(OPTION_PLAY_SECONDS, Math.max(0, num(raw.optionProgress, 0))),
   })
+}
+
+/**
+ * The farthest open spot per zone, where the spot still exists; the spot the character is at counts
+ * as reached (saves from before spots: everything up to it is open).
+ */
+function sanitizeReached(raw: unknown, location: CharacterLocation): Record<string, string> {
+  const reached: Record<string, string> = {}
+  for (const [zoneId, monsterId] of Object.entries(isRecord(raw) ? raw : {})) {
+    if (typeof monsterId === 'string' && zoneSpots(zoneId).includes(monsterId)) {
+      reached[zoneId] = monsterId
+    }
+  }
+  const spots = zoneSpots(location.zoneId)
+  const here = spots.indexOf(location.monsterId)
+  const farthest = reached[location.zoneId]
+  if (here > 0 && (farthest === undefined || spots.indexOf(farthest) < here)) {
+    reached[location.zoneId] = location.monsterId
+  }
+  return reached
+}
+
+/** Kill counts of monsters that still exist. */
+function sanitizeMonsterKills(raw: unknown): Record<string, number> {
+  const kills: Record<string, number> = {}
+  for (const [monsterId, count] of Object.entries(isRecord(raw) ? raw : {})) {
+    const n = int(count, 0)
+    if (MONSTERS[monsterId] && n > 0) kills[monsterId] = n
+  }
+  return kills
 }
 
 /** Learned active skills on the bar, each once, at most SKILL_BAR_SIZE. */

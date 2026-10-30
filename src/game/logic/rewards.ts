@@ -11,6 +11,7 @@ import { lootTable, rollDrops, stowDrops, takeFromInventory, type ItemStack } fr
 import { applyPlayTime, type OptionGain } from './options.ts'
 import { gainExp } from './progression.ts'
 import type { Rng } from './rng.ts'
+import { recordKills } from './spots.ts'
 
 /** Shortest possible time between two kills (victory pause + respawn), in game seconds. */
 export const MIN_KILL_CYCLE = TIMINGS.victory + TIMINGS.spawning
@@ -117,7 +118,7 @@ export function applyCombatReport(
       exp: progress.exp,
       gold: character.gold + gold,
       sp: character.sp + sp,
-      stats: { kills: character.stats.kills + kills, deaths: character.stats.deaths + deaths },
+      ...recordKills(character, character.location, kills, deaths),
     },
     kills,
     exp,

@@ -33,6 +33,7 @@ import {
   type SaleResult,
 } from '../logic/shop.ts'
 import { SP_UNIT, applyAuto, applyBar, applyLearn } from '../logic/skills.ts'
+import { isSpotOpen, zoneSpots } from '../logic/spots.ts'
 import type { EquipSlot } from '../data/types.ts'
 import {
   applyEquip,
@@ -114,6 +115,9 @@ export class LocalGameService implements GameService {
     if (!zone.monsterIds.includes(location.monsterId)) {
       throw new GameError('wrong-monster', `${location.monsterId} is not in ${location.zoneId}`)
     }
+    if (!isSpotOpen(this.character(characterId), location)) {
+      throw new GameError('spot-locked', `${location.monsterId} is not open yet`)
+    }
     return copy(this.update(characterId, (c) => ({ ...c, location: { ...location } })))
   }
 
@@ -128,7 +132,13 @@ export class LocalGameService implements GameService {
     const allowed = maxKills(elapsed, this.timeScale)
     const played = Math.min(elapsed, MAX_PLAY_GAP) * this.timeScale
     const result = applyCombatReport(character, monster, report, allowed, this.rng, played)
-    const updated = this.update(characterId, () => ({ ...result.character, lastPlayedAt: now }))
+    // active play in real seconds (dev speed-up aside)
+    const playSeconds = character.stats.playSeconds + Math.min(elapsed, MAX_PLAY_GAP)
+    const updated = this.update(characterId, () => ({
+      ...result.character,
+      stats: { ...result.character.stats, playSeconds },
+      lastPlayedAt: now,
+    }))
     return copy({ ...result, character: updated })
   }
 
@@ -149,9 +159,14 @@ export class LocalGameService implements GameService {
     if (!character.expedition) throw new GameError('no-expedition', `${characterId} is not away`)
     const now = this.now()
     const away = Math.max(0, (now - character.expedition.startedAt) / 1000)
-    const result = simulateAfk(character, away >= AFK_MIN_SECONDS ? away : 0, this.rng)
+    const counts = away >= AFK_MIN_SECONDS
+    const result = simulateAfk(character, counts ? away : 0, this.rng)
     const updated = this.update(characterId, () => ({
       ...result.character,
+      stats: {
+        ...result.character.stats,
+        expeditions: result.character.stats.expeditions + (counts ? 1 : 0),
+      },
       expedition: null,
       lastPlayedAt: now,
     }))
@@ -291,6 +306,18 @@ export class LocalGameService implements GameService {
           const start = (c.expedition?.startedAt ?? this.now()) - Math.max(0, seconds) * 1000
           return { ...c, expedition: { ...(c.expedition ?? c.location), startedAt: start } }
         }),
+      ),
+    openAllSpots: async (characterId) =>
+      copy(
+        this.update(characterId, (c) => ({
+          ...c,
+          reachedSpots: Object.fromEntries(
+            Object.keys(ZONES).flatMap((zoneId) => {
+              const last = zoneSpots(zoneId).at(-1)
+              return last ? [[zoneId, last]] : []
+            }),
+          ),
+        })),
       ),
   }
 

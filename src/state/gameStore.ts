@@ -18,6 +18,7 @@ import type { LoadResult, SaveData, Settings } from '../game/logic/save.ts'
 import type { IdentifyResult, IdentifyTarget } from '../game/logic/rare.ts'
 import type { PieceSale, PurchaseResult, SaleResult } from '../game/logic/shop.ts'
 import { createDefaultSave } from '../game/logic/save.ts'
+import { farthestSpot, isSpotOpen } from '../game/logic/spots.ts'
 import { gameService } from '../game/service/index.ts'
 import { combatSession } from '../game/session/combatSession.ts'
 import { combatEvents } from './combatEvents.ts'
@@ -90,6 +91,8 @@ interface GameStore {
   devKillTarget(): void
   devHeal(): void
   devSimulateAfk(seconds: number): void
+  /** Opens every hunting spot, then goes to the one given. */
+  devTravel(zoneId: string, monsterId: string): void
 }
 
 function toHud(c: CombatState): CombatHud {
@@ -199,8 +202,9 @@ export const useGameStore = create<GameStore>((set, get) => {
   const travel = (zoneId: string, monsterId: string) => {
     const character = get().character
     if (!character || character.expedition) return
-    combatEvents.emit(combatSession.setMonster(monsterId))
     const location = { zoneId, monsterId }
+    if (!isSpotOpen(character, location)) return
+    combatEvents.emit(combatSession.setMonster(monsterId))
     applyCharacter({ ...character, location })
     set({ hud: toHud(combatSession.state) })
     enqueue(() => gameService.travel(character.id, location))
@@ -418,8 +422,9 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     selectZone(zoneId, monsterId) {
-      const zone = ZONES[zoneId]
-      if (zone) travel(zoneId, monsterId ?? zone.monsterIds[0]!)
+      const character = get().character
+      const target = monsterId ?? (character && farthestSpot(character, zoneId))
+      if (ZONES[zoneId] && target) travel(zoneId, target)
     },
 
     syncCombat(combat) {
@@ -472,6 +477,18 @@ export const useGameStore = create<GameStore>((set, get) => {
     devHeal() {
       combatSession.heal()
       set({ hud: toHud(combatSession.state) })
+    },
+
+    devTravel(zoneId, monsterId) {
+      const character = get().character
+      if (!character || !gameService.dev) return
+      const dev = gameService.dev
+      enqueue(() => dev.openAllSpots(character.id))
+        .then((c) => {
+          applyCharacter(c)
+          travel(zoneId, monsterId)
+        })
+        .catch(logError)
     },
 
     devSimulateAfk(seconds) {

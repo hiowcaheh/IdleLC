@@ -48,6 +48,16 @@ const FRAMES: Record<EquipSlot, [number, number]> = {
  * The character card: every combat stat with the options of the worn gear added up, and the worn
  * gear on the client's equipment board of the class (tap a slot: take it off, upgrade it).
  */
+/** Active play time: "45m", "12h 05m", "3d 4h". */
+function playTime(seconds: number): string {
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+  if (days > 0) return `${days}d ${hours % 24}h`
+  if (hours > 0) return `${hours}h ${String(minutes % 60).padStart(2, '0')}m`
+  return `${minutes}m`
+}
+
 export function CharacterPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)
   const unequipItem = useGameStore((s) => s.unequipItem)
@@ -266,6 +276,14 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
             <div>
               <dt>Deaths</dt>
               <dd>{fmt(character.stats.deaths)}</dd>
+            </div>
+            <div>
+              <dt>Expeditions</dt>
+              <dd>{fmt(character.stats.expeditions)}</dd>
+            </div>
+            <div>
+              <dt>Play time</dt>
+              <dd>{playTime(character.stats.playSeconds)}</dd>
             </div>
           </dl>
         </div>

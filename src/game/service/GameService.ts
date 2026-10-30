@@ -90,6 +90,8 @@ export interface DevCommands {
   setTimeScale(scale: number): void
   /** Moves the expedition start `seconds` into the past (starting one if needed); claim it after. */
   simulateAfk(characterId: string, seconds: number): Promise<CharacterData>
+  /** Opens every hunting spot of every zone. */
+  openAllSpots(characterId: string): Promise<CharacterData>
 }
 
 /** Subset of the Web Storage API — lets tests use an in-memory store. */

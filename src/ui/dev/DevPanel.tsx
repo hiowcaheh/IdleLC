@@ -16,7 +16,7 @@ export function DevPanel() {
   const setTimeScale = useGameStore((s) => s.setTimeScale)
   const zoneId = useGameStore((s) => s.character?.location.zoneId ?? '')
   const monsterId = useGameStore((s) => s.character?.location.monsterId ?? '')
-  const selectZone = useGameStore((s) => s.selectZone)
+  const devTravel = useGameStore((s) => s.devTravel)
   const level = useGameStore((s) => s.character?.level ?? 1)
   const devSetLevel = useGameStore((s) => s.devSetLevel)
   const devAddExp = useGameStore((s) => s.devAddExp)
@@ -69,7 +69,7 @@ export function DevPanel() {
           value={`${zoneId}|${monsterId}`}
           onChange={(e) => {
             const [zone, monster] = e.target.value.split('|')
-            selectZone(zone!, monster)
+            devTravel(zone!, monster!)
           }}
         >
           {Object.values(ZONES).map((zone) => (

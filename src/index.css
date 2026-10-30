@@ -3857,3 +3857,250 @@ a.button {
   font-size: 13px;
   color: var(--parchment-dim);
 }
+
+/* the hunting spot between its arrows (ui/hud/HuntPanel.tsx) */
+.hunt__spot {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.hunt__arrow {
+  flex: none;
+  width: 44px;
+  min-height: 48px;
+  padding: 0;
+  border-style: solid;
+  border-width: 5px 9px;
+  border-image: url('/ui/lc/button.webp') 5 9 fill / 5px 9px stretch;
+  background: none;
+  font: inherit;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--gilt-bright);
+  text-shadow: 0 1px 2px #000;
+  cursor: pointer;
+  touch-action: pan-x pan-y;
+}
+
+.hunt__arrow:disabled {
+  filter: grayscale(0.8) brightness(0.65);
+  cursor: default;
+}
+
+.hunt__lock {
+  display: block;
+  width: 16px;
+  height: 16px;
+  margin: 0 auto;
+  fill: none;
+  stroke: var(--parchment-dim);
+  stroke-width: 2.2;
+}
+
+.hunt__spot-info {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  padding: 4px 10px;
+  border-radius: 2px;
+  background: rgba(8, 10, 13, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(150, 120, 80, 0.45);
+}
+
+.hunt__spot-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 15px;
+  font-weight: 800;
+  color: #f4ead6;
+}
+
+.hunt__spot-meta {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--parchment-dim);
+}
+
+/* the monster book (ui/hud/MonsterBookPanel.tsx) */
+.sheet.sheet--book {
+  height: min(90%, 880px);
+}
+
+.book__zones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.book__zone {
+  min-height: 30px;
+  padding: 3px 10px;
+  font-size: 13px;
+  color: var(--parchment);
+}
+
+.book__zone.is-active {
+  color: var(--gilt-bright);
+}
+
+.book {
+  display: grid;
+  grid-template-columns: minmax(0, 46fr) minmax(0, 54fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.book__list {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.book__monster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 34px;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 2px;
+  background: rgba(8, 10, 13, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(150, 120, 80, 0.3);
+  font: inherit;
+  color: #e6edf5;
+  text-align: left;
+  cursor: pointer;
+  touch-action: pan-x pan-y;
+}
+
+.book__monster.is-active {
+  box-shadow: inset 0 0 0 1px var(--gilt);
+  background: rgba(70, 55, 30, 0.6);
+}
+
+.book__monster.is-locked {
+  opacity: 0.5;
+}
+
+.book__monster .level-tag {
+  flex: none;
+}
+
+.book__monster-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.book__monster-kills {
+  flex: none;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--parchment-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.book__page {
+  position: sticky;
+  top: 0;
+  display: grid;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 2px;
+  background: rgba(8, 10, 13, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(150, 120, 80, 0.45);
+}
+
+.book__preview {
+  height: 150px;
+  border-radius: 2px;
+  background: radial-gradient(circle at 50% 60%, rgba(120, 100, 70, 0.35), rgba(0, 0, 0, 0.5));
+}
+
+.book__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+  font-size: 15px;
+  color: var(--gilt-bright);
+}
+
+.book__elite {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ff9d6b;
+  text-transform: uppercase;
+}
+
+.book__kills {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+}
+
+.book__kills-count {
+  font-size: 26px;
+  font-weight: 800;
+  color: #f4ead6;
+  font-variant-numeric: tabular-nums;
+}
+
+.book__kills-label {
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+
+.book__page {
+  /* the preview's canvas must not widen the page (grid items default to their content width) */
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.book__facts {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+
+.book__facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(150, 120, 80, 0.2);
+  font-size: 13px;
+}
+
+.book__facts dt {
+  color: var(--parchment-dim);
+}
+
+.book__facts dd {
+  margin: 0;
+  font-weight: 800;
+  color: #e6edf5;
+  font-variant-numeric: tabular-nums;
+}

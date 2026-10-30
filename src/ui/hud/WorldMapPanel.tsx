@@ -1,37 +1,20 @@
 import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
+import { openSpotCount } from '../../game/logic/spots.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { Sheet } from '../Sheet.tsx'
 import { levelTone } from './levelColor.ts'
 
-/**
- * The zone's regular monster closest to the hero's level (the best hunt to start with); event
- * monsters outside the zone's typical levels are not picked.
- */
-function startingMonster(monsterIds: readonly string[], level: number): string {
-  const { low, high } = levelRange(monsterIds)
-  const regular = monsterIds.filter((id) => {
-    const l = getMonster(id).level
-    return l >= low && l <= high
-  })
-  const pool = regular.length ? regular : [...monsterIds]
-  return pool.reduce((best, id) =>
-    Math.abs(getMonster(id).level - level) < Math.abs(getMonster(best).level - level) ? id : best,
-  )
-}
-
-/**
- * Typical monster levels of a zone: every zone also holds a few event monsters (level 1, 20, 100),
- * so the lowest 15% and the highest 10% are left out.
- */
+/** Lowest and highest monster level of a zone's hunting spots. */
 function levelRange(monsterIds: readonly string[]): { low: number; high: number } {
-  const levels = monsterIds.map((id) => getMonster(id).level).sort((a, b) => a - b)
-  const at = (share: number) =>
-    levels[Math.min(levels.length - 1, Math.floor(levels.length * share))]!
-  return { low: Math.max(1, at(0.15)), high: Math.max(at(0.15), at(0.9)) }
+  const levels = monsterIds.map((id) => getMonster(id).level)
+  return { low: Math.min(...levels), high: Math.max(...levels) }
 }
 
-/** World map: every hunting zone with its monster levels; picking one travels there. */
+/**
+ * World map: every hunting zone with its monster levels and how many of its spots are open; picking
+ * one travels to its farthest open spot.
+ */
 export function WorldMapPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)
   const selectZone = useGameStore((s) => s.selectZone)
@@ -45,8 +28,9 @@ export function WorldMapPanel({ onClose }: { onClose(): void }) {
   return (
     <Sheet title="World map" titleId="world-map-title" onClose={onClose}>
       <p className="sheet__meta">
-        Pick a zone to hunt its monsters and their drops. The colour shows how hard its monsters are
-        for your level.
+        Pick a zone to hunt its monsters and their drops. Every zone starts at its first spot; kill a
+        spot's monster to open the next one. The colour shows how hard its monsters are for your
+        level.
       </p>
       <ul className="world-map">
         {zones.map(({ zone, low, high }) => {
@@ -59,7 +43,7 @@ export function WorldMapPanel({ onClose }: { onClose(): void }) {
                 aria-current={current ? 'location' : undefined}
                 disabled={away || current}
                 onClick={() => {
-                  selectZone(zone.id, startingMonster(zone.monsterIds, character.level))
+                  selectZone(zone.id)
                   onClose()
                 }}
               >
@@ -72,7 +56,9 @@ export function WorldMapPanel({ onClose }: { onClose(): void }) {
                   <span className={`level-tag level-tag--${levelTone(character.level, high)}`}>
                     {high}
                   </span>
-                  <span>{zone.monsterIds.length} monsters</span>
+                  <span>
+                    Spots {openSpotCount(character, zone.id)} / {zone.monsterIds.length}
+                  </span>
                   {current && <span className="world-map__here">You are here</span>}
                 </span>
               </button>

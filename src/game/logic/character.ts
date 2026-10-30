@@ -28,6 +28,18 @@ export interface Expedition {
   startedAt: number
 }
 
+/** What the character has done: kills and deaths, expeditions, active play time, kills per monster. */
+export interface CharacterStats {
+  kills: number
+  deaths: number
+  /** Expeditions finished (claimed after at least AFK_MIN_SECONDS). */
+  expeditions: number
+  /** Seconds of active play (fights reported; not expeditions or time with the game closed). */
+  playSeconds: number
+  /** Kills by monster id — the monster book. */
+  monsterKills: Record<string, number>
+}
+
 export interface CharacterData {
   id: string
   name: string
@@ -40,7 +52,9 @@ export interface CharacterData {
   /** Last time the game heard from this character; time away since then counts as AFK. */
   lastPlayedAt: number
   location: CharacterLocation
-  stats: { kills: number; deaths: number }
+  /** The farthest open hunting spot per zone id (logic/spots.ts); a zone not here: its first spot. */
+  reachedSpots: Record<string, string>
+  stats: CharacterStats
   inventory: ItemStack[]
   /** Set while the character is away on an AFK expedition. */
   expedition: Expedition | null
@@ -109,7 +123,8 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     createdAt: now,
     lastPlayedAt: now,
     location: startLocation(),
-    stats: { kills: 0, deaths: 0 },
+    reachedSpots: {},
+    stats: { kills: 0, deaths: 0, expeditions: 0, playSeconds: 0, monsterKills: {} },
     inventory: [],
     expedition: null,
     sp: 0,

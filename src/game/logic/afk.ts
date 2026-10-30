@@ -10,6 +10,7 @@ import { monsterFighter, playerFighter, type Hero } from './fighters.ts'
 import { lootTable, rollDrops, stowDrops, takeFromInventory, type ItemStack } from './loot.ts'
 import { gainExp } from './progression.ts'
 import { killReward } from './rewards.ts'
+import { recordKills } from './spots.ts'
 import type { Rng } from './rng.ts'
 
 export const AFK_MAX_SECONDS = 8 * 3600
@@ -173,7 +174,7 @@ export function simulateAfk(character: CharacterData, awaySeconds: number, rng: 
       exp,
       gold: character.gold + gold,
       sp: character.sp + sp,
-      stats: { kills: character.stats.kills + kills, deaths: character.stats.deaths + deaths },
+      ...recordKills(character, character.expedition ?? character.location, kills, deaths),
       ...stowDrops({ inventory: potions.inventory, gear: character.gear }, drops, rng),
     },
   }
