@@ -87,6 +87,33 @@ async function encodeTexture(texture, withAlpha, maxSize, webp) {
 }
 
 /**
+ * LC meshes don't share one winding: some surfaces list their triangles the other way round, while
+ * their normals still point outward. A surface whose triangles mostly face against their normals is
+ * turned around — otherwise it is culled from the outside (a face, an armor shown inside out).
+ */
+export function outwardIndices(indices, positions, normals) {
+  let along = 0
+  let against = 0
+  const at = (array, i, k) => array[i * 3 + k]
+  for (let t = 0; t + 2 < indices.length; t += 3) {
+    const [a, b, c] = [indices[t], indices[t + 1], indices[t + 2]]
+    const u = [0, 1, 2].map((k) => at(positions, b, k) - at(positions, a, k))
+    const v = [0, 1, 2].map((k) => at(positions, c, k) - at(positions, a, k))
+    const face = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]]
+    const normal = [0, 1, 2].map((k) => at(normals, a, k) + at(normals, b, k) + at(normals, c, k))
+    if (face[0] * normal[0] + face[1] * normal[1] + face[2] * normal[2] < 0) against++
+    else along++
+  }
+  if (against <= along) return indices
+  const turned = indices.slice()
+  for (let t = 0; t + 2 < turned.length; t += 3) {
+    turned[t + 1] = indices[t + 2]
+    turned[t + 2] = indices[t + 1]
+  }
+  return turned
+}
+
+/**
  * @param files      ClientFiles / MemoryFiles
  * @param smc        parsed .smc (see smc.mjs)
  * @param options.animations  clip names to keep (case-insensitive); all clips when omitted
@@ -106,6 +133,8 @@ export async function buildModel(files, smc, options = {}) {
   const stats = {
     meshes: 0,
     primitives: 0,
+    /** Surfaces whose triangles were turned around to face along their normals. */
+    flipped: 0,
     bones: 0,
     animations: [],
     missing: [],
@@ -251,7 +280,9 @@ export async function buildModel(files, smc, options = {}) {
     const mesh = doc.createMesh(baseName(desc.file))
     for (const surface of surfaces) {
       if (surface.shader) stats.shaders.add(surface.shader)
-      const indices = vertexCount > 65535 ? surface.indices : Uint16Array.from(surface.indices)
+      const outward = outwardIndices(surface.indices, lod.positions, lod.normals)
+      if (outward !== surface.indices) stats.flipped++
+      const indices = vertexCount > 65535 ? outward : Uint16Array.from(outward)
       const primitive = doc
         .createPrimitive()
         .setIndices(accessor('SCALAR', indices))

@@ -70,7 +70,7 @@
     },
     {
       "id": "class-mage",
-      "file": "class-mage.glb?v=9e60bae9f7",
+      "file": "class-mage.glb?v=df69e1e0c9",
       "scale": 1,
       "animations": {
         "idle": "ma_idle_01",
@@ -91,7 +91,7 @@
     },
     {
       "id": "class-rogue",
-      "file": "class-rogue.glb?v=47e9ce5ebc",
+      "file": "class-rogue.glb?v=d23056f130",
       "scale": 1,
       "animations": {
         "idle": "ro_idle_01",
@@ -113,7 +113,7 @@
     },
     {
       "id": "class-sorcerer",
-      "file": "class-sorcerer.glb?v=75cd4072c2",
+      "file": "class-sorcerer.glb?v=cd601a40b4",
       "scale": 1,
       "animations": {
         "idle": "so_idle_01",
@@ -154,7 +154,7 @@
     },
     {
       "id": "deer",
-      "file": "deer.glb?v=2c58ef591f",
+      "file": "deer.glb?v=30f957743c",
       "scale": 1,
       "animations": {
         "idle": "m_de",
@@ -192,7 +192,7 @@
     },
     {
       "id": "wolf",
-      "file": "wolf.glb?v=8153efa362",
+      "file": "wolf.glb?v=4513016503",
       "scale": 1,
       "animations": {
         "idle": "m_wolf_stand",
@@ -211,7 +211,7 @@
     },
     {
       "id": "wolf01",
-      "file": "wolf01.glb?v=65aaf0a788",
+      "file": "wolf01.glb?v=25e89ead21",
       "scale": 1,
       "animations": {
         "idle": "m_wolf_stand",
@@ -230,7 +230,7 @@
     },
     {
       "id": "wolf02",
-      "file": "wolf02.glb?v=4da898e77a",
+      "file": "wolf02.glb?v=7463d39071",
       "scale": 1,
       "animations": {
         "idle": "m_wolf_stand",
@@ -249,7 +249,7 @@
     },
     {
       "id": "jaguar",
-      "file": "jaguar.glb?v=53360c86c2",
+      "file": "jaguar.glb?v=2c21653289",
       "scale": 1,
       "animations": {
         "idle": "jaguar_idle",
@@ -268,7 +268,7 @@
     },
     {
       "id": "deer_dk",
-      "file": "deer_dk.glb?v=84c2baaa03",
+      "file": "deer_dk.glb?v=1e8c24e2f0",
       "scale": 1,
       "animations": {
         "idle": "m_de",
@@ -287,7 +287,7 @@
     },
     {
       "id": "yeti",
-      "file": "yeti.glb?v=cd611b8a97",
+      "file": "yeti.glb?v=5c425f3138",
       "scale": 1,
       "animations": {
         "idle": "m_yeti",
@@ -307,7 +307,7 @@
     },
     {
       "id": "wolfman",
-      "file": "wolfman.glb?v=ecbf7837e3",
+      "file": "wolfman.glb?v=3936509978",
       "scale": 1,
       "animations": {
         "idle": "anubisstop",
@@ -326,7 +326,7 @@
     },
     {
       "id": "treeghost",
-      "file": "treeghost.glb?v=d816ec9864",
+      "file": "treeghost.glb?v=3e8a826a92",
       "scale": 1,
       "animations": {
         "idle": "Trant_idle",
@@ -385,7 +385,7 @@
     },
     {
       "id": "treeghost_red",
-      "file": "treeghost_red.glb?v=9c66166381",
+      "file": "treeghost_red.glb?v=b750116e84",
       "scale": 1,
       "animations": {
         "idle": "Trant_idle",
@@ -406,7 +406,7 @@
     },
     {
       "id": "halloween_mon",
-      "file": "halloween_mon.glb?v=37c194d9d5",
+      "file": "halloween_mon.glb?v=ea13b5dfa4",
       "scale": 1,
       "animations": {
         "idle": "halloween_mon_idle",
@@ -425,7 +425,7 @@
     },
     {
       "id": "jaguar_dk",
-      "file": "jaguar_dk.glb?v=aea0c34cae",
+      "file": "jaguar_dk.glb?v=41e6ac8e58",
       "scale": 1,
       "animations": {
         "idle": "jaguar_idle",
@@ -444,7 +444,7 @@
     },
     {
       "id": "yeti_red",
-      "file": "yeti_red.glb?v=025be5384a",
+      "file": "yeti_red.glb?v=6ca8fbc907",
       "scale": 1,
       "animations": {
         "idle": "m_yeti",
@@ -483,7 +483,7 @@
     },
     {
       "id": "anubis",
-      "file": "anubis.glb?v=10e352c94e",
+      "file": "anubis.glb?v=2aaf876e5b",
       "scale": 1,
       "animations": {
         "idle": "anubis_idle01",
@@ -504,7 +504,7 @@
     },
     {
       "id": "balrog",
-      "file": "balrog.glb?v=3d9560bdd2",
+      "file": "balrog.glb?v=5e2c3264f2",
       "scale": 1,
       "animations": {
         "idle": "idle",
@@ -543,7 +543,7 @@
     },
     {
       "id": "deer_sand",
-      "file": "deer_sand.glb?v=fb11707299",
+      "file": "deer_sand.glb?v=d3c380520f",
       "scale": 1,
       "animations": {
         "idle": "m_de",
@@ -562,7 +562,7 @@
     },
     {
       "id": "jaguar_sand",
-      "file": "jaguar_sand.glb?v=54af46e1ff",
+      "file": "jaguar_sand.glb?v=3aad5d5b0f",
       "scale": 1,
       "animations": {
         "idle": "jaguar_idle",

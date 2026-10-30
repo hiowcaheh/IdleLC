@@ -1103,8 +1103,6 @@ a.button {
 
 .sheet-backdrop--center .sheet {
   width: min(100%, 420px);
-  border-bottom: var(--panel-border);
-  border-radius: 8px;
 }
 
 .hud__buttons {
@@ -2874,6 +2872,8 @@ a.button {
   border-image: url('/ui/lc/window.webp') 37 8 10 8 / 28px 9px 10px stretch;
   border-radius: 0;
   background: #35393f;
+  /* the client's frame: no inner line of the old panel style along its edges */
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
   padding: 6px 12px calc(16px + var(--safe-bottom));
 }
 

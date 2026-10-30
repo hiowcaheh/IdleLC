@@ -56,6 +56,12 @@ dla każdego LOD:
 Do glTF bierzemy wagi z `weightMaps` (nazwa kości → wierzchołek, waga): top 4 wpływy na wierzchołek,
 znormalizowane.
 
+**Kierunek trójkątów nie jest jednolity:** w części plików (np. twarz Sorcerera `so_face_000`, wilki, jelenie,
+jaguary, ok. 160 modeli sprzętu) trójkąty są zapisane odwrotnie, a normalne i tak wskazują na zewnątrz. Klient
+rysuje je poprawnie, ale w glTF (odrzucanie tylnych ścian) taka powierzchnia znika od przodu albo wygląda „od
+środka”. Konwerter (`outwardIndices` w `model.mjs`) odwraca trójkąty powierzchni, której większość trójkątów
+jest skierowana przeciwnie do swoich normalnych (log: `turned: N`).
+
 ## Szkielet `.bs` (SKEL v6, jawny)
 
 ```

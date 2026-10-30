@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { MESH_KEY, Reader } from './binary.mjs'
 import { ClientFiles, MemoryFiles } from './client.mjs'
 import { parseMesh } from './mesh.mjs'
-import { buildModel, inverseBindMatrix } from './model.mjs'
+import { buildModel, inverseBindMatrix, outwardIndices } from './model.mjs'
 import { parseAnimSet, parseSkeleton } from './ska.mjs'
 import { parseSkillAnims } from './skill-anims.mjs'
 import { parseSmc } from './smc.mjs'
@@ -475,5 +475,23 @@ describe('parseSkillAnims', () => {
   it("takes a clip only for a skill of the clip's class", () => {
     const buffer = record(14, 102, ['hw_skill_01'])
     expect(parseSkillAnims(buffer, [{ id: 14, classId: 'knight' }], prefixes).size).toBe(0)
+  })
+})
+
+describe('outwardIndices', () => {
+  // one triangle in the z = 0 plane; counter-clockwise from +z
+  const positions = new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0])
+  const up = new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1])
+  const down = new Float32Array([0, 0, -1, 0, 0, -1, 0, 0, -1])
+
+  it('keeps triangles that face along their normals', () => {
+    const indices = new Uint32Array([0, 1, 2])
+    expect(outwardIndices(indices, positions, up)).toBe(indices)
+  })
+
+  it('turns around a surface whose triangles face against their normals', () => {
+    const indices = new Uint32Array([0, 1, 2])
+    expect([...outwardIndices(indices, positions, down)]).toEqual([0, 2, 1])
+    expect([...indices]).toEqual([0, 1, 2])
   })
 })

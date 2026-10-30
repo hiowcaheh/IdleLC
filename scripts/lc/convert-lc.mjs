@@ -277,7 +277,10 @@ async function main() {
         `ok    ${job.id}  ${size} KB  meshes ${stats.meshes}, bones ${stats.bones}, ` +
           `clips ${stats.animations.length}` +
           (stats.missing.length ? `  (missing: ${stats.missing.join(', ')})` : '') +
-          (stats.unreadable.length ? `  (plain colour: ${stats.unreadable.length} encrypted)` : ''),
+          (stats.unreadable.length
+            ? `  (plain colour: ${stats.unreadable.length} encrypted)`
+            : '') +
+          (stats.flipped ? `  (turned: ${stats.flipped})` : ''),
       )
       converted++
     } catch (error) {
