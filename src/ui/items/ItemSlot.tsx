@@ -4,8 +4,9 @@ import { ItemIcon } from './ItemIcon.tsx'
 const fmt = (n: number) => n.toLocaleString('en-US')
 
 /**
- * A slot of the client's bag or equipment board: the item's icon with its stack count and "+N",
- * framed in the colour of its name (rare grades, unidentified). Empty without an item.
+ * A slot of the client's bag or equipment board: the item's icon filling it, with "+N" and the
+ * stack count on the icon, framed in the colour of its name (rare grades, unidentified). Empty
+ * without an item.
  */
 export function ItemSlot({
   item,
@@ -14,7 +15,6 @@ export function ItemSlot({
   tone = '',
   selected = false,
   label,
-  size = 32,
   onClick,
 }: {
   item?: ItemDef
@@ -25,7 +25,6 @@ export function ItemSlot({
   selected?: boolean
   /** What a screen reader says (name, count…). */
   label: string
-  size?: number
   onClick(): void
 }) {
   return (
@@ -37,9 +36,13 @@ export function ItemSlot({
       title={label}
       onClick={onClick}
     >
-      {item && <ItemIcon item={item} size={size} />}
-      {item && plus > 0 && <span className="item-slot__plus">+{plus}</span>}
-      {item && count > 1 && <span className="item-slot__count">{fmt(count)}</span>}
+      {item && (
+        <span className="item-slot__icon">
+          <ItemIcon item={item} fluid />
+          {plus > 0 && <span className="item-slot__plus">+{plus}</span>}
+          {count > 1 && <span className="item-slot__count">{fmt(count)}</span>}
+        </span>
+      )}
     </button>
   )
 }

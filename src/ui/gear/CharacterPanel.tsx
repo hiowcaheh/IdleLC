@@ -311,22 +311,36 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
                     plus={piece?.plus}
                     tone={piece ? nameTone(piece) : ''}
                     selected={selected === slot}
-                    size={36}
+
                     label={`${SLOT_LABELS[slot]}: ${name}`}
-                    onClick={() => setSelected(selected === slot ? null : slot)}
+                    onClick={() => {
+                      setSelected(selected === slot ? null : slot)
+                      setMessage(null)
+                    }}
                   />
                 </div>
               )
             })}
           </div>
-          {selected && character.equipment[selected] ? (
-            <div className="bag-details">{details(selected, character.equipment[selected])}</div>
-          ) : (
-            <p className="sheet__meta">
-              {selected
-                ? `${SLOT_LABELS[selected]}: nothing worn.`
-                : 'Tap a slot to see the piece.'}
-            </p>
+          <p className="sheet__meta">
+            {selected && !character.equipment[selected]
+              ? `${SLOT_LABELS[selected]}: nothing worn — the Inventory has your gear.`
+              : 'Tap a piece to see it.'}
+          </p>
+          {selected && character.equipment[selected] && (
+            <Sheet
+              centered
+              title={SLOT_LABELS[selected]}
+              titleId="worn-piece-title"
+              onClose={() => setSelected(null)}
+            >
+              {message && (
+                <p className="inventory__status" role="status">
+                  {message}
+                </p>
+              )}
+              <div className="item-details">{details(selected, character.equipment[selected])}</div>
+            </Sheet>
           )}
           {away && <p className="sheet__meta">Gear can't be changed during an expedition.</p>}
         </div>

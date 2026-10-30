@@ -70,15 +70,16 @@ sprzedaje. Zwykły sprzęt dostaje opcje z gry: co 10 minut aktywnej walki jedna
 (karta postaci → Stats pokazuje, kiedy następna).
 
 **Mikstury:** w sklepie Juno (dane 1:1: leczenie i mana przez 15 s, regeneracja przez 10 min). Gracz wkłada
-miksturę do slotu HP i slotu MP (pod ramką postaci; dotknięcie slotu otwiera wybór z torby, przełącznik AUTO
+miksturę do slotu HP i slotu MP (pod przyciskami menu po prawej; dotknięcie slotu otwiera wybór z torby, przełącznik AUTO
 i opróżnianie). Postać pije sama tylko te dwie — w walce i na wyprawach (leczenie poniżej 50% HP, mana poniżej
 30% MP, regeneracja, gdy brakuje HP / MP); slot pokazuje, ile zostało, a „A” — że AUTO jest włączone.
 Działająca mikstura jest wśród efektów pod paskami, a zużyte na wyprawie — w podsumowaniu.
 
 **Wyprawy AFK:** przycisk **Expedition** w panelu polowania wysyła postać na polowanie bez ciebie (do 8 h, także
 przy zamkniętej grze). **Return now** kończy wyprawę i otwiera okno „While you were away…” z zabiciami, expem,
-złotem, awansem i dropem. Drop (1:1 z bazy) trafia do ekwipunku (ikona torby w HUD) z ikonami z klienta;
-przedmioty sprzedaje się tam za cenę z bazy × stawkę skupu sklepu (40%). Szczegóły w
+złotem, awansem i dropem. Drop (1:1 z bazy) trafia do ekwipunku (ikona torby w HUD): siatka slotów z zakładkami
+typów (All, Weapons, Armor, Jewelry, Potions, Other), każda broń i zbroja w osobnym slocie; dotknięcie przedmiotu
+otwiera okienko z informacją i akcjami. Przedmioty sprzedaje się za cenę z bazy × stawkę skupu sklepu (40%). Szczegóły w
 [`docs/balance.md`](docs/balance.md).
 **Settings → Change character** wraca do wyboru postaci, **Reset save** kasuje wszystkie postacie.
 Zapisy ze starszej wersji gry są przenoszone automatycznie (postać „Hero”; od wersji 5 postacie dostają

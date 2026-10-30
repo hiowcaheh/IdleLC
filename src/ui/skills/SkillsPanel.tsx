@@ -36,12 +36,23 @@ function RankDetails({ title, rank }: { title: string; rank: SkillRank }) {
   )
 }
 
-/** Class skills 1:1 from the database: learn them for SP and choose which ones fire automatically. */
+type Tab = 'active' | 'passive'
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'active', label: 'Active' },
+  { id: 'passive', label: 'Passive' },
+]
+
+/**
+ * Class skills 1:1 from the database, active and passive on their own tabs: learn them for SP,
+ * put active ones on the bar and choose which of them fire automatically.
+ */
 export function SkillsPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)
   const learnSkill = useGameStore((s) => s.learnSkill)
   const setSkillAuto = useGameStore((s) => s.setSkillAuto)
   const setSkillBar = useGameStore((s) => s.setSkillBar)
+  const [tab, setTab] = useState<Tab>('active')
   const [selected, setSelected] = useState<number | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -103,11 +114,25 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
               {learned
                 ? ` · Lv ${learned.level}/${max}`
                 : ` · from level ${skill.levels[0]!.learnLevel}`}
-              {current && current.kind !== 'passive' && !current.auto ? ' · auto off' : ''}
               {learned && !fits ? ' · needs other gear' : ''}
             </span>
           </span>
-          {state.canLearn && <span className="skill-row__badge">{learned ? 'Up' : 'New'}</span>}
+          <span className="skill-row__tags">
+            {state.canLearn && <span className="skill-row__badge">{learned ? 'Up' : 'New'}</span>}
+            {onBar && (
+              <span className="skill-tag skill-tag--bar" title="On the skill bar">
+                Bar
+              </span>
+            )}
+            {current && current.kind !== 'passive' && (
+              <span
+                className={`skill-tag ${current.auto ? 'skill-tag--auto' : 'skill-tag--off'}`}
+                title={current.auto ? 'Fires on its own' : 'Automatic use off'}
+              >
+                {current.auto ? 'Auto' : 'Off'}
+              </span>
+            )}
+          </span>
         </button>
         {open && (
           <div className="skill-row__details">
@@ -216,7 +241,30 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
       <p className="inventory__status" role="status">
         {message ?? ''}
       </p>
-      <ul className="skill-list">{skills.map(row)}</ul>
+      <div className="tabs" role="tablist" aria-label="Skill kinds">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            id={`skills-tab-${t.id}`}
+            aria-selected={tab === t.id}
+            aria-controls="skills-list"
+            className={`tabs__tab${tab === t.id ? ' is-active' : ''}`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <ul
+        className="skill-list"
+        id="skills-list"
+        role="tabpanel"
+        aria-labelledby={`skills-tab-${tab}`}
+      >
+        {skills.filter((s) => (s.type === 3) === (tab === 'passive')).map(row)}
+      </ul>
     </Sheet>
   )
 }

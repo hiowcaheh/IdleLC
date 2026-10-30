@@ -13,10 +13,31 @@ const GLYPHS: Record<ItemType, string> = {
   other: 'M8 8 H16 V16 H8 Z',
 }
 
-/** The item's icon from the LC atlases (sprite sheet), or a glyph for its type; `size` in px. */
-export function ItemIcon({ item, size }: { item: ItemDef; size?: number }) {
+/**
+ * The item's icon from the LC atlases (sprite sheet), or a glyph for its type: `size` px, or
+ * `fluid` to fill its box (slots of any size).
+ */
+export function ItemIcon({ item, size, fluid }: { item: ItemDef; size?: number; fluid?: boolean }) {
   const sprite = itemIcon(item.id)
-  const box = size ? { width: size + 2, height: size + 2 } : undefined
+  const box = fluid ? undefined : size ? { width: size + 2, height: size + 2 } : undefined
+  if (sprite && fluid) {
+    // positions and sizes in % of the cell: the sheet scales with the box
+    const free = (sheet: number) => Math.max(1, sheet - sprite.size)
+    return (
+      <span className="item-icon item-icon--fluid" aria-hidden="true">
+        <span
+          className="item-icon__sprite"
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundImage: `url(${sprite.url})`,
+            backgroundPosition: `${(sprite.x / free(sprite.sheetWidth)) * 100}% ${(sprite.y / free(sprite.sheetHeight)) * 100}%`,
+            backgroundSize: `${(sprite.sheetWidth / sprite.size) * 100}% ${(sprite.sheetHeight / sprite.size) * 100}%`,
+          }}
+        />
+      </span>
+    )
+  }
   if (sprite) {
     const px = size ?? sprite.size
     const k = px / sprite.size
@@ -36,7 +57,11 @@ export function ItemIcon({ item, size }: { item: ItemDef; size?: number }) {
     )
   }
   return (
-    <span className={`item-icon item-icon--${item.type}`} style={box} aria-hidden="true">
+    <span
+      className={`item-icon item-icon--${item.type}${fluid ? ' item-icon--fluid' : ''}`}
+      style={box}
+      aria-hidden="true"
+    >
       <svg
         viewBox="0 0 24 24"
         style={size ? { width: size * 0.75, height: size * 0.75 } : undefined}

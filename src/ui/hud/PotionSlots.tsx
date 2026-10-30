@@ -56,7 +56,7 @@ export function PotionSlots() {
         disabled={away}
         onClick={() => setOpen(group)}
       >
-        <ItemIcon item={item} size={32} />
+        <ItemIcon item={item} size={28} />
         {itemId !== null && <span className="potion-slot__count">{count}</span>}
         {itemId !== null && auto && <span className="potion-slot__auto">A</span>}
       </button>

@@ -40,6 +40,26 @@ type BagEntry =
   | { key: string; item: ItemDef; piece: GearPiece; stack?: undefined }
   | { key: string; item: ItemDef; stack: ItemStack; piece?: undefined }
 
+type Category = 'all' | 'weapon' | 'armor' | 'accessory' | 'potion' | 'other'
+
+/** The bag's tabs, by item type. */
+const CATEGORIES: { id: Category; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'weapon', label: 'Weapons' },
+  { id: 'armor', label: 'Armor' },
+  { id: 'accessory', label: 'Jewelry' },
+  { id: 'potion', label: 'Potions' },
+  { id: 'other', label: 'Other' },
+]
+
+const categoryOf = (item: ItemDef): Category =>
+  item.type === 'weapon' ||
+  item.type === 'armor' ||
+  item.type === 'accessory' ||
+  item.type === 'potion'
+    ? item.type
+    : 'other'
+
 const byType = (a: ItemDef, b: ItemDef) =>
   TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type) || a.name.localeCompare(b.name)
 
@@ -54,6 +74,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   const equipItem = useGameStore((s) => s.equipItem)
   const exchangeStones = useGameStore((s) => s.exchangeStones)
   const [selected, setSelected] = useState<string | null>(null)
+  const [category, setCategory] = useState<Category>('all')
   const [message, setMessage] = useState<string | null>(null)
   const [confirmAll, setConfirmAll] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -71,10 +92,21 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
     ...character.gear
       .map((piece) => ({ key: `piece-${piece.uid}`, item: getItem(piece.itemId), piece }))
       .sort((a, b) => byType(a.item, b.item) || b.piece.plus - a.piece.plus),
+    // weapons and armor never stack: one slot per piece, like in the client
     ...inventory
-      .map((stack) => ({ key: `item-${stack.itemId}`, item: getItem(stack.itemId), stack }))
-      .sort((a, b) => byType(a.item, b.item)),
+      .map((stack) => ({ item: getItem(stack.itemId), stack }))
+      .sort((a, b) => byType(a.item, b.item))
+      .flatMap(({ item, stack }) =>
+        item.gear
+          ? Array.from({ length: stack.count }, (_, i) => ({
+              key: `item-${stack.itemId}-${i}`,
+              item,
+              stack,
+            }))
+          : [{ key: `item-${stack.itemId}`, item, stack }],
+      ),
   ]
+  const shown = entries.filter((e) => category === 'all' || categoryOf(e.item) === category)
   const chosen = entries.find((e) => e.key === selected)
   const total = inventory.reduce((sum, s) => sum + s.count, 0) + character.gear.length
   // "sell all" keeps what the hero uses: its class's gear, potions, upgrade stones and glasses
@@ -279,11 +311,25 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
         <p className="sheet__empty">Your bag is empty. Monsters drop items as you hunt.</p>
       ) : (
         <>
+          <div className="tabs tabs--small" role="tablist" aria-label="Item types">
+            {CATEGORIES.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="tab"
+                aria-selected={category === c.id}
+                className={`tabs__tab${category === c.id ? ' is-active' : ''}`}
+                onClick={() => setCategory(c.id)}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
           <ul className="bag-grid" aria-label="Bag">
-            {entries.map((entry) => {
+            {shown.map((entry) => {
               const { key, item, piece, stack } = entry
               const name = piece ? pieceName(piece.itemId, piece.plus, piece.rare) : item.name
-              const count = stack?.count ?? 1
+              const count = stack && !item.gear ? stack.count : 1
               return (
                 <li key={key}>
                   <ItemSlot
@@ -292,21 +338,39 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                     plus={piece?.plus}
                     tone={nameTone(piece ?? { itemId: item.id })}
                     selected={key === selected}
-                    size={36}
+
                     label={count > 1 ? `${name} ×${fmt(count)}` : name}
-                    onClick={() => setSelected(key === selected ? null : key)}
+                    onClick={() => {
+                      setSelected(key === selected ? null : key)
+                      setMessage(null)
+                    }}
                   />
                 </li>
               )
             })}
           </ul>
+          {shown.length === 0 && <p className="sheet__empty">Nothing of this kind in your bag.</p>}
           <p className="sheet__meta">
-            {entries.length} slots · {fmt(total)} items
+            {entries.length} slots · {fmt(total)} items · tap an item to see it
           </p>
-          {chosen ? (
-            <div className="bag-details">{details(chosen)}</div>
-          ) : (
-            <p className="sheet__meta">Tap an item to see it.</p>
+          {chosen && (
+            <Sheet
+              centered
+              title={
+                chosen.piece
+                  ? pieceName(chosen.piece.itemId, chosen.piece.plus, chosen.piece.rare)
+                  : chosen.item.name
+              }
+              titleId="bag-item-title"
+              onClose={() => setSelected(null)}
+            >
+              {message && (
+                <p className="inventory__status" role="status">
+                  {message}
+                </p>
+              )}
+              <div className="item-details">{details(chosen)}</div>
+            </Sheet>
           )}
           {sellable.length > 0 && (
             <button
