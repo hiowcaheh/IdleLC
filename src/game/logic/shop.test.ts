@@ -89,6 +89,14 @@ describe('buying', () => {
     expect(character.inventory).toEqual([{ itemId: 7, count: 2 }])
   })
 
+  it('sells Heaven Stones in every zone for now, up to 999 at once', () => {
+    const elsewhere = knight({ location: { zoneId: 'nowhere', monsterId: 'x' }, gold: 2_000_000 })
+    expect(shopOffer(elsewhere).goods).toContain(85)
+    expect(buyPrice(85)).toBe(1000)
+    expect(applyBuy(elsewhere, 85, 999).character.inventory).toEqual([{ itemId: 85, count: 999 }])
+    expect(() => applyBuy(elsewhere, 85, 1000)).toThrowError(/bad-count/)
+  })
+
   it('refuses what is not on offer, too expensive or a bad count', () => {
     expect(() => applyBuy(knight(), 1, 1)).toThrowError(/not-in-shop/)
     expect(() => applyBuy(knight(), 5, 1)).toThrowError(/not-in-shop/) // starter sword

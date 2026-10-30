@@ -3,6 +3,7 @@
  * upgrade stones. Pure — the server will run the same checks.
  */
 import {
+  HEAVEN_STONE_ID,
   SHOP_BUY_RATE,
   SHOP_SELL_RATE,
   getItem,
@@ -121,6 +122,12 @@ export function tierWindow(tiers: readonly ShopTier[], level: number): ShopTier[
   return tiers.slice(Math.max(0, current - 1), current + 2)
 }
 
+/**
+ * Sold in every zone for now (owner's request, 2026-10-30; to be removed): Heaven Stones at their
+ * database price (1,000 gold) — otherwise only Juno's merchant has them.
+ */
+const EVERYWHERE = [HEAVEN_STONE_ID]
+
 export function shopOffer(
   character: Pick<CharacterData, 'classId' | 'level' | 'location'>,
 ): ShopOffer {
@@ -133,6 +140,7 @@ export function shopOffer(
     goods: [
       ...new Set([
         ...shopItems(character.location.zoneId).filter((id) => !getItem(id).gear),
+        ...EVERYWHERE,
         ...shopMagnifiers(),
       ]),
     ],
@@ -154,9 +162,12 @@ export interface PurchaseResult {
   character: CharacterData
 }
 
+/** The most of one item bought at once. */
+export const MAX_BUY = 999
+
 /** Buys from the shop: the items go to the bag. */
 export function applyBuy(character: CharacterData, itemId: number, count: number): PurchaseResult {
-  if (!Number.isInteger(count) || count < 1 || count > 999) {
+  if (!Number.isInteger(count) || count < 1 || count > MAX_BUY) {
     throw new GameError('bad-count', `${count}`)
   }
   if (!canBuy(character, itemId)) throw new GameError('not-in-shop', `item ${itemId}`)

@@ -6,6 +6,7 @@ import { isRare } from '../../game/logic/rare.ts'
 import { buyPrice, shopOffer } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { toast } from '../../state/toasts.ts'
+import { BuyDialog } from '../items/BuyDialog.tsx'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { TYPE_LABELS } from '../items/itemTypes.ts'
 import { potionLine, potionText } from '../items/potionText.ts'
@@ -34,6 +35,7 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
   const [selected, setSelected] = useState<number | null>(null)
   const [tab, setTab] = useState<Tab>('weapons')
   const [busy, setBusy] = useState(false)
+  const [buying, setBuying] = useState<number | null>(null)
   if (!character) return null
 
   const offer = shopOffer(character)
@@ -145,10 +147,10 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
               <button
                 type="button"
                 className="button"
-                disabled={busy || away || character.gold < price * 10}
-                onClick={() => buy(item.id, 10)}
+                disabled={busy || away || character.gold < price * 2}
+                onClick={() => setBuying(item.id)}
               >
-                Buy 10 · {fmt(price * 10)}
+                Buy more…
               </button>
             )}
           </div>
@@ -208,6 +210,7 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
           <p className="sheet__empty">The merchants here have nothing else to sell.</p>
         ))}
       {away && <p className="sheet__meta">The shop is closed while you are on an expedition.</p>}
+      {buying !== null && <BuyDialog itemId={buying} onClose={() => setBuying(null)} />}
     </Sheet>
   )
 }

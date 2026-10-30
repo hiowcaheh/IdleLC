@@ -2346,16 +2346,25 @@ a.button {
 /* ---------- Item options ---------- */
 
 .option-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 8px;
-  margin-top: 2px;
+  display: grid;
+  gap: 1px;
+  margin-top: 4px;
+  /* plain options are blue; identified rare pieces: the colour of their grade (name--grade-X) */
+  color: #8fd2ff;
 }
 
 .option-list__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
   font-size: 12.5px;
   font-weight: 700;
-  color: #8fd2ff;
+}
+
+.option-list__amount {
+  flex: none;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
 }
 
 .shop__slot {
@@ -2512,6 +2521,7 @@ a.button {
 .item-row__name.name--grade-A,
 .item-info__name.name--grade-A,
 .item-info__options.name--grade-A,
+.option-list.name--grade-A,
 .name--grade-A {
   color: #4f8bff;
 }
@@ -2519,6 +2529,7 @@ a.button {
 .item-row__name.name--grade-B,
 .item-info__name.name--grade-B,
 .item-info__options.name--grade-B,
+.option-list.name--grade-B,
 .name--grade-B {
   color: #5fd36a;
 }
@@ -2526,6 +2537,7 @@ a.button {
 .item-row__name.name--grade-C,
 .item-info__name.name--grade-C,
 .item-info__options.name--grade-C,
+.option-list.name--grade-C,
 .name--grade-C {
   color: #8fe3ff;
 }
@@ -2533,6 +2545,7 @@ a.button {
 .item-row__name.name--grade-D,
 .item-info__name.name--grade-D,
 .item-info__options.name--grade-D,
+.option-list.name--grade-D,
 .name--grade-D {
   color: #f2d45c;
 }
@@ -2540,6 +2553,7 @@ a.button {
 .item-row__name.name--grade-E,
 .item-info__name.name--grade-E,
 .item-info__options.name--grade-E,
+.option-list.name--grade-E,
 .name--grade-E {
   color: #f4efe4;
 }
@@ -3743,4 +3757,103 @@ a.button {
   font-weight: 600;
   line-height: 1.2;
   opacity: 0.85;
+}
+
+/* how many to buy (ui/items/BuyDialog.tsx) */
+.buy-dialog__amount {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0 6px;
+}
+
+.buy-dialog__step {
+  min-width: 44px;
+  min-height: 40px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.buy-dialog__input {
+  width: 96px;
+  padding: 4px 6px;
+  border-style: solid;
+  border-width: 3px 5px;
+  border-image: url('/ui/lc/value-box.webp') 3 5 fill / 3px 5px stretch;
+  font: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  text-align: center;
+  color: #e6edf5;
+  background: none;
+  font-variant-numeric: tabular-nums;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.buy-dialog__input:focus {
+  outline: 1px solid var(--gilt);
+}
+
+.buy-dialog__slider {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  accent-color: var(--gilt);
+}
+
+.buy-dialog__quick {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 4px 0 10px;
+}
+
+.buy-dialog__quick .grade-chip {
+  color: var(--parchment);
+}
+
+.buy-dialog__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* the Appraiser's bar over a list: select all / by grade, and the action for the selection */
+.appraiser__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+.appraiser__bar .appraiser__select {
+  margin: 0;
+}
+
+/* stays at the top of the window while the list scrolls under it */
+.appraiser__bar--sticky {
+  position: sticky;
+  top: -10px;
+  z-index: 2;
+  margin: 0 -12px 8px;
+  padding: 8px 12px;
+  background: #3c3f42;
+  box-shadow: 0 6px 8px -6px rgba(0, 0, 0, 0.7);
+}
+
+.appraiser__bar--sticky .button {
+  flex: 1 1 100%;
+}
+
+.appraiser__all {
+  color: var(--parchment);
+}
+
+.appraiser__picked {
+  font-size: 13px;
+  color: var(--parchment-dim);
 }
