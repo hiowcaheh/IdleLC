@@ -146,6 +146,14 @@ export interface LcIconSheet {
   icons: Record<string, number>
 }
 
+/** Weapon and armor models written by `npm run convert-lc` (lc-gear.json). */
+export interface LcGearManifest {
+  /** Relative to the app base URL, e.g. "models/lc/gear/". */
+  baseUrl: string
+  /** Model name → GLB file (with a content hash) and the items that show it. */
+  models: Record<string, { file: string; items: number[] }>
+}
+
 export interface LcIconManifest {
   items?: LcIconSheet
   skills?: LcIconSheet

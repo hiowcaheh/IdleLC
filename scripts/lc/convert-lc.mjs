@@ -5,15 +5,18 @@
  *
  *   npm run convert-lc -- --client <client folder> [--client <another>] [options]
  *
- * Without --smc it converts the player class models (classes.mjs) and every monster model listed
+ * Without --smc it converts the player class bodies (classes.mjs), every monster model listed
  * in src/game/data/generated/lc-data.json (run `npm run import-lc-db` first), keeping only the
- * clips the database uses, then refreshes lc-models.json. It also cuts the item and skill icons out
- * of the ItemBtn*.tex / SkillBtn*.tex atlases into public/icons/lc/ (+ lc-icons.json).
+ * clips the database uses, and the weapon and armor models of lc-item-models.json (into gear/, skinned
+ * to their class skeleton), then refreshes lc-models.json and lc-gear.json. It also cuts the item and
+ * skill icons out of the ItemBtn*.tex / SkillBtn*.tex atlases into public/icons/lc/ (+ lc-icons.json).
  *
  * Options:
  *   --out <dir>            output folder (default public/models/lc)
  *   --data <lc-data.json>  generated game data (default src/game/data/generated/lc-data.json)
- *   --only <id,id>         convert only these model ids (e.g. fox,class-knight); `icons` = item and skill icons, `ui` = interface pieces
+ *   --only <id,id>         convert only these model ids (e.g. fox,class-knight,gear/ni_bu_001); `gear` = all
+ *                          weapon and armor models, `starter` = the classes' starting sets,
+ *                          `icons` = item and skill icons, `ui` = interface pieces
  *   --smc <path>           convert one .smc (client path or file); with --anims <a,b> to pick clips
  *   --max-texture <px>     longest texture side (default 1024)
  *
@@ -27,17 +30,21 @@ import { Logger, NodeIO } from '@gltf-transform/core'
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
 import { dedup, meshopt, prune, resample, weld } from '@gltf-transform/functions'
 import { MeshoptDecoder, MeshoptEncoder } from 'meshoptimizer'
-import { CLASS_MODELS } from './classes.mjs'
+import { CLASS_MODELS, gearClass } from './classes.mjs'
 import { ClientFiles } from './client.mjs'
 import { ICON_KINDS, buildIconSheet, buildPortraitSheet } from './icons.mjs'
 import { buildUiParts } from './ui.mjs'
-import { buildModelManifest, modelIdFromSmc } from './manifest.mjs'
+import { buildGearManifest, buildModelManifest, modelIdFromSmc } from './manifest.mjs'
 import { buildModel } from './model.mjs'
 import { parseSmc } from './smc.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const GENERATED = path.join(ROOT, 'src/game/data/generated')
 const DEFAULT_OUT = path.join(ROOT, 'public/models/lc')
+/** Gear .smc → item ids (written by `npm run import-lc-db`). */
+const ITEM_MODELS = path.join(GENERATED, 'lc-item-models.json')
+/** Longest texture side of weapon and armor models (WebP): small on screen, and there are many. */
+const GEAR_MAX_TEXTURE = 512
 /** Class portraits sheet (relative to public/). */
 const PORTRAITS_FILE = 'icons/lc/portraits.webp'
 
@@ -67,8 +74,11 @@ function parseArgs(argv) {
   return args
 }
 
-/** Conversion jobs: { id, smc (client path or parsed), animations (clip names or null) }. */
-function listJobs(args, data, files) {
+/**
+ * Conversion jobs: { id, smc (client path or parsed), animations (clip names or null), override
+ * (fields replacing the .smc's: skeleton, animation sets), gear, starter }.
+ */
+function listJobs(args, data, files, itemModels) {
   if (args.smc) {
     const smc = fs.existsSync(args.smc) ? path.resolve(args.smc) : args.smc
     return [{ id: modelIdFromSmc(args.smc), smc, animations: args.anims ?? null }]
@@ -77,6 +87,7 @@ function listJobs(args, data, files) {
     id,
     smc: def.smc,
     animations: Object.values(def.animations).flat(),
+    override: def.animSets ? { animSets: def.animSets } : undefined,
   }))
   const monsters = new Map()
   for (const m of data?.monsters ?? []) {
@@ -95,7 +106,31 @@ function listJobs(args, data, files) {
   }
   if (absent)
     console.log(`${absent} of ${monsters.size} monster models are not in the client folder(s)`)
-  return args.only ? jobs.filter((j) => args.only.has(j.id)) : jobs
+
+  // weapons and armor: meshes only, skinned to the skeleton of the class that wears them
+  const starter = new Set(Object.values(data?.starterGear ?? {}).flat())
+  for (const [smc, items] of Object.entries(itemModels ?? {})) {
+    const classId = gearClass(smc)
+    if (!classId || !files.resolve(smc)) continue
+    jobs.push({
+      id: `gear/${modelIdFromSmc(smc)}`,
+      smc,
+      animations: [],
+      override: { skeleton: CLASS_MODELS[classId].skeleton, animSets: [] },
+      maxTextureSize: GEAR_MAX_TEXTURE,
+      webp: true,
+      usedBonesOnly: true,
+      gear: true,
+      starter: items.some((id) => starter.has(id)),
+    })
+  }
+  if (!args.only) return jobs
+  return jobs.filter(
+    (j) =>
+      args.only.has(j.id) ||
+      (j.gear && args.only.has('gear')) ||
+      (j.starter && args.only.has('starter')),
+  )
 }
 
 function readSmc(job, files) {
@@ -103,7 +138,7 @@ function readSmc(job, files) {
   const text = fs.existsSync(job.smc)
     ? fs.readFileSync(job.smc, 'latin1')
     : files.read(job.smc).toString('latin1')
-  return parseSmc(text)
+  return { ...parseSmc(text), ...job.override }
 }
 
 const USAGE =
@@ -131,6 +166,9 @@ async function main() {
   const files = new ClientFiles(args.clients)
   console.log(`client: ${files.size} files in ${args.clients.join(', ')}`)
   const data = fs.existsSync(args.data) ? JSON.parse(fs.readFileSync(args.data, 'utf8')) : null
+  const itemModels = fs.existsSync(ITEM_MODELS)
+    ? JSON.parse(fs.readFileSync(ITEM_MODELS, 'utf8'))
+    : null
   if (!data && !args.smc)
     console.warn(
       `no ${path.relative(ROOT, args.data)} — monsters skipped (run npm run import-lc-db first)`,
@@ -148,7 +186,7 @@ async function main() {
   // `--only icons` / `--only ui` (or both) convert no models
   const iconsOnly =
     args.only !== undefined && [...args.only].every((o) => o === 'icons' || o === 'ui')
-  const jobs = iconsOnly ? [] : listJobs(args, data, files)
+  const jobs = iconsOnly ? [] : listJobs(args, data, files, itemModels)
   const textureCache = new Map()
   const shaders = new Set()
   let converted = 0
@@ -156,7 +194,13 @@ async function main() {
   for (const job of jobs) {
     try {
       const smc = readSmc(job, files)
-      const options = { animations: job.animations, maxTextureSize: args.maxTexture, textureCache }
+      const options = {
+        animations: job.animations,
+        maxTextureSize: job.maxTextureSize ?? args.maxTexture,
+        webp: job.webp,
+        usedBonesOnly: job.usedBonesOnly,
+        textureCache,
+      }
       let { document, stats } = await buildModel(files, smc, options)
       if (job.animations?.length && stats.animations.length === 0 && stats.bones > 0) {
         // none of the requested clip names exist: keep every clip rather than none
@@ -173,6 +217,7 @@ async function main() {
         meshopt({ encoder: MeshoptEncoder, level: 'medium' }),
       )
       const outFile = path.join(args.out, `${job.id}.glb`)
+      fs.mkdirSync(path.dirname(outFile), { recursive: true })
       await io.write(outFile, document)
       const size = (fs.statSync(outFile).size / 1024).toFixed(0)
       console.log(
@@ -251,6 +296,11 @@ async function main() {
     fs.mkdirSync(GENERATED, { recursive: true })
     fs.writeFileSync(path.join(GENERATED, 'lc-models.json'), JSON.stringify(manifest, null, 2))
     console.log(`lc-models.json: ${manifest.models.length} models`)
+    if (itemModels) {
+      const gear = buildGearManifest(itemModels, args.out)
+      fs.writeFileSync(path.join(GENERATED, 'lc-gear.json'), JSON.stringify(gear))
+      console.log(`lc-gear.json: ${Object.keys(gear.models).length} weapon and armor models`)
+    }
   }
   console.log(
     `\nDone: ${converted} converted, ${failed} failed -> ${path.relative(ROOT, args.out)}` +

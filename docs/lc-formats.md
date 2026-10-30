@@ -102,8 +102,22 @@ NAME "Fox";
 konwerter szuka pliku po samej nazwie, gdy pełna ścieżka nie istnieje. Wielkość liter w ścieżkach jest dowolna.
 
 Postacie graczy składają się z części: `bd` (nogi), `bu` (tors), `ft` (stopy), `hn` (dłonie), `face`, `hair`
-plus broń i tarcza — wszystkie na jednym szkielecie klasy (Knight: `ni.bs`, 115 kości, `ni.ba` 137 animacji).
-Zbroja podmienia części ciała (np. `ni_bu_L.bm` zamiast `ni_bu_000.bm`), broń ma własną kość w szkielecie.
+(u Healer i Mage także `bs` — dół szaty) plus broń i tarcza — wszystkie na jednym szkielecie klasy
+(Knight: `ni.bs`, 115 kości, `ni.ba` 137 animacji). Ciało nowej postaci opisuje
+`Data\Character\<klasa>\<ni|ti|hw|ma|ro|so>.smc` (części `*_000`).
+
+Każdy przedmiot z bazy ma swój model: `t_item.a_file_smc` (np. `Data\Item\Shield\Knight\ni_bu_001.smc`).
+Takie `.smc` ma same siatki (bez szkieletu), zważone na kości szkieletu klasy (nazwy kości się zgadzają) —
+konwerter dokłada szkielet klasy z przedrostka nazwy pliku i zostawia tylko używane kości. Zbroja zastępuje
+część ciała swojego slotu (zbroja `bu`, spodnie `bd` + ewentualnie `bs`, rękawice `hn`, buty `ft`, hełm
+`hair`), broń i tarcza dochodzą jako nowe siatki (zważone na kość dłoni; `OFFSET` i siatki `_TAG_*` służą
+do pokazania przedmiotu na ziemi / efektów). Hełmy poniżej 97 poz. wskazują pudełko z dropem
+`Data\Item\Common\ITEM_treasure02.smc` — na postaci nic nie widać.
+
+W kliencie Nemesis część plików jest zaszyfrowana w całości (bez nagłówka `TVER`, z datą 2025):
+tekstury i siatki m.in. zestawów 60–109 poz. (277 z 1146 modeli sprzętu) i animacje klas w wersji 254
+(`ni.ba`, `ro.ba`, `so.ba` — zamiast nich `ni_ep1.ba`, `ro_ep1.ba` i `so.ba` nieumarłego czarownika). Tych
+modeli sprzętu na razie nie ma — postać pokazuje wtedy część ciała. Jawne kopie są w kliencie 2015.
 
 ## Tekstura `.tex`
 

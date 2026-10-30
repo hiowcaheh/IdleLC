@@ -59,7 +59,10 @@ export function CharacterSelectScreen() {
         </header>
 
         {selected ? (
-          <ClassPreview classId={selected.classId} />
+          <ClassPreview
+            classId={selected.classId}
+            items={Object.values(selected.equipment).map((piece) => piece.itemId)}
+          />
         ) : (
           <div className="class-preview class-preview--empty">
             <p>Create your first character to begin the hunt.</p>

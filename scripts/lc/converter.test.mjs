@@ -344,4 +344,60 @@ describe('buildModel', () => {
       'animation attack',
     )
   })
+
+  it('builds gear models with only the bones they are weighted to, and WebP textures', async () => {
+    const at = (y) => [1, 0, 0, 0, 0, 1, 0, y, 0, 0, 1, 0]
+    const gearFiles = new MemoryFiles({
+      'Data\\Item\\glove.bm': meshFile({
+        ...TRIANGLE,
+        surfaces: [
+          {
+            first: 0,
+            indices: [0, 1, 2],
+            name: 'glove',
+            shader: 'Shaders\\Default.sha',
+            textures: ['skin'],
+          },
+        ],
+        weightMaps: [
+          {
+            bone: 'Hand',
+            pairs: [
+              [0, 1],
+              [1, 1],
+              [2, 1],
+            ],
+          },
+        ],
+      }),
+      'Data\\Test\\skin.tex': files.read('Data\\Test\\skin.tex'),
+      'Data\\Test\\body.bs': skeletonFile([
+        { name: 'root', abs: IDENTITY, pos: [0, 0, 0], rot: [1, 0, 0, 0] },
+        { name: 'leg', parent: 'root', abs: at(-1), pos: [0, -1, 0], rot: [1, 0, 0, 0] },
+        { name: 'arm', parent: 'root', abs: at(1), pos: [0, 1, 0], rot: [1, 0, 0, 0] },
+        { name: 'hand', parent: 'arm', abs: at(2), pos: [0, 1, 0], rot: [1, 0, 0, 0] },
+      ]),
+    })
+    const glove = {
+      name: 'glove',
+      meshes: [{ file: 'Data\\Item\\glove.bm', textures: { skin: 'Data\\Test\\skin.tex' } }],
+      skeleton: 'Data\\Test\\body.bs',
+      animSets: [],
+    }
+    const { document, stats } = await buildModel(gearFiles, glove, {
+      animations: [],
+      usedBonesOnly: true,
+      webp: true,
+    })
+    expect(stats).toMatchObject({ meshes: 1, bones: 3, animations: [] })
+    const root = document.getRoot()
+    const [skin] = root.listSkins()
+    // the hand and its parents: the unused leg is left out
+    expect(skin.listJoints().map((j) => j.getName())).toEqual(['root', 'arm', 'hand'])
+    expect(skin.getInverseBindMatrices().getCount()).toBe(3)
+    const [primitive] = root.listMeshes()[0].listPrimitives()
+    expect(Array.from(primitive.getAttribute('JOINTS_0').getElement(0, []))).toEqual([2, 0, 0, 0])
+    expect(primitive.getMaterial().getBaseColorTexture().getMimeType()).toBe('image/webp')
+    expect(root.listExtensionsUsed().map((e) => e.extensionName)).toContain('EXT_texture_webp')
+  })
 })

@@ -1,8 +1,10 @@
 /**
  * Builds the LC model manifest (src/game/data/generated/lc-models.json) for the converted GLBs:
  * logical animation → clip names (from the database motions or CLASS_MODELS), attack impact time
- * and bind-pose size.
+ * and bind-pose size; and the gear manifest (lc-gear.json): weapon and armor model → item ids.
+ * File names carry a content hash (`?v=`), so a new conversion is never mixed with cached copies.
  */
+import { createHash } from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { NodeIO } from '@gltf-transform/core'
@@ -12,6 +14,11 @@ import { MeshoptDecoder } from 'meshoptimizer'
 import { CLASS_MODELS } from './classes.mjs'
 
 export const MODELS_BASE_URL = 'models/lc/'
+export const GEAR_DIR = 'gear'
+
+/** `name.glb?v=<content hash>` for a converted file. */
+const versioned = (full, file) =>
+  `${file}?v=${createHash('sha1').update(fs.readFileSync(full)).digest('hex').slice(0, 10)}`
 
 /** Model id from an .smc path (`Data\monster\Animals\Fox.smc` → `fox`). */
 export const modelIdFromSmc = (smc) =>
@@ -71,7 +78,7 @@ export async function buildModelManifest(data, modelsDir) {
     }
     models.push({
       id,
-      file,
+      file: versioned(full, file),
       scale: 1,
       animations,
       // the blow lands roughly 40% into the attack clip
@@ -82,4 +89,18 @@ export async function buildModelManifest(data, modelsDir) {
     })
   }
   return { baseUrl: MODELS_BASE_URL, models }
+}
+
+/**
+ * Weapon and armor models converted into `<modelsDir>/gear/`: model name → versioned file and the
+ * item ids that wear it.
+ */
+export function buildGearManifest(itemModels, modelsDir) {
+  const models = {}
+  for (const [smc, items] of Object.entries(itemModels)) {
+    const name = modelIdFromSmc(smc)
+    const full = path.join(modelsDir, GEAR_DIR, `${name}.glb`)
+    if (fs.existsSync(full)) models[name] = { file: versioned(full, `${name}.glb`), items }
+  }
+  return { baseUrl: `${MODELS_BASE_URL}${GEAR_DIR}/`, models }
 }

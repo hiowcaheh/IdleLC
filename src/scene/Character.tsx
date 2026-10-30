@@ -1,6 +1,14 @@
 import { useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { useEffect, useImperativeHandle, useMemo, useRef, type Ref } from 'react'
+import {
+  Suspense,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  type Ref,
+} from 'react'
 import {
   AnimationClip,
   AnimationMixer,
@@ -8,15 +16,20 @@ import {
   Color,
   LoopOnce,
   LoopRepeat,
+  Skeleton,
   Vector3,
   type AnimationAction,
+  type Bone,
   type Group,
   type Material,
   type Mesh,
   type MeshStandardMaterial,
   type Object3D,
+  type SkinnedMesh,
 } from 'three'
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js'
+import { bodyPart, coveredParts, type GearLook } from '../game/assets/gear.ts'
+import { ModelBoundary } from './ModelBoundary.tsx'
 import {
   getModel,
   modelUrl,
@@ -71,44 +84,131 @@ interface Props {
   scale?: number
   /** Animation speed multiplier source; defaults to the dev time scale. */
   timeScale?: () => number
+  /** Worn weapons and armor shown on a class body (see game/assets/gear.ts). */
+  gear?: readonly GearLook[]
 }
 
 /** Share of a model's texture that shines on its own (see prepareModel). */
 const SELF_LIGHT = 0.35
 
-function prepareModel(source: Object3D, model: ModelEntry) {
-  const object = cloneSkinned(source)
-  const materials: { material: MeshStandardMaterial; emissive: Color }[] = []
-  const cloneMaterial = (m: Material) => {
-    const copy = m.clone() as MeshStandardMaterial
-    const tint = model.tint[m.name]
-    if (tint && copy.color) copy.color.set(tint)
-    // LC lit its models with a strong ambient light; a share of the texture shining on its own
-    // keeps darker monster textures readable under our physical lighting
-    if (copy.map && copy.emissive) {
-      copy.emissiveMap = copy.map
-      copy.emissive.setScalar(SELF_LIGHT)
-    }
-    if (copy.emissive) materials.push({ material: copy, emissive: copy.emissive.clone() })
-    return copy
-  }
-  object.traverse((child) => {
-    const mesh = child as Mesh
-    if (!mesh.isMesh) return
-    mesh.castShadow = true
-    // Skinned meshes move away from their bind-pose bounds; avoid popping out of view.
-    mesh.frustumCulled = false
-    mesh.material = Array.isArray(mesh.material)
-      ? mesh.material.map(cloneMaterial)
-      : cloneMaterial(mesh.material)
-  })
-  return { object, materials }
+interface Tinted {
+  material: MeshStandardMaterial
+  emissive: Color
 }
 
-export function Character({ modelId, ref, timeScale, scale = 1 }: Props) {
+/** A material of our own for a model copy: tint, self light, and a slot in the hit flash list. */
+function ownMaterial(m: Material, model: ModelEntry | null, materials: Tinted[]): Material {
+  const copy = m.clone() as MeshStandardMaterial
+  const tint = model?.tint[m.name]
+  if (tint && copy.color) copy.color.set(tint)
+  // LC lit its models with a strong ambient light; a share of the texture shining on its own
+  // keeps darker monster textures readable under our physical lighting
+  if (copy.map && copy.emissive) {
+    copy.emissiveMap = copy.map
+    copy.emissive.setScalar(SELF_LIGHT)
+  }
+  if (copy.emissive) materials.push({ material: copy, emissive: copy.emissive.clone() })
+  return copy
+}
+
+function prepareMesh(mesh: Mesh, model: ModelEntry | null, materials: Tinted[]) {
+  mesh.castShadow = true
+  // Skinned meshes move away from their bind-pose bounds; avoid popping out of view.
+  mesh.frustumCulled = false
+  mesh.material = Array.isArray(mesh.material)
+    ? mesh.material.map((m) => ownMaterial(m, model, materials))
+    : ownMaterial(mesh.material, model, materials)
+}
+
+/** Class body meshes by part (`bu` → the shirt) and how many worn pieces cover each. */
+interface BodyParts {
+  meshes: { part: string; mesh: Mesh }[]
+  covers: Map<Mesh, number>
+  bones: Map<string, Bone>
+}
+
+function prepareModel(source: Object3D, model: ModelEntry) {
+  const object = cloneSkinned(source)
+  const materials: Tinted[] = []
+  const body: BodyParts = { meshes: [], covers: new Map(), bones: new Map() }
+  object.traverse((child) => {
+    if ((child as Bone).isBone) body.bones.set(child.name, child as Bone)
+    const mesh = child as Mesh
+    if (!mesh.isMesh) return
+    prepareMesh(mesh, model, materials)
+    const part = bodyPart(mesh.name)
+    if (part) body.meshes.push({ part, mesh })
+  })
+  return { object, materials, body }
+}
+
+/**
+ * Puts one worn piece on a class body: its meshes are skinned to the body's skeleton (bones of the
+ * same names) and the body parts it replaces are hidden while it is worn.
+ */
+function WornPiece({
+  object,
+  body,
+  materials,
+  url,
+  slot,
+}: {
+  object: Object3D
+  body: BodyParts
+  materials: Tinted[]
+  url: string
+  slot: GearLook['slot']
+}) {
+  const gltf = useGLTF(url)
+
+  useLayoutEffect(() => {
+    const meshes: SkinnedMesh[] = []
+    cloneSkinned(gltf.scene).traverse((child) => {
+      if ((child as SkinnedMesh).isSkinnedMesh) meshes.push(child as SkinnedMesh)
+    })
+    const own: Tinted[] = []
+    for (const mesh of meshes) {
+      const { bones, boneInverses } = mesh.skeleton
+      const joints = bones.map((b) => body.bones.get(b.name) ?? b)
+      mesh.bind(new Skeleton(joints, boneInverses), mesh.bindMatrix)
+      prepareMesh(mesh, null, own)
+      object.add(mesh)
+    }
+    materials.push(...own)
+    const covered = coveredParts(
+      slot,
+      meshes.map((m) => m.name),
+    )
+    const hidden = body.meshes.filter((p) => covered.has(p.part)).map((p) => p.mesh)
+    for (const mesh of hidden) {
+      body.covers.set(mesh, (body.covers.get(mesh) ?? 0) + 1)
+      mesh.visible = false
+    }
+    return () => {
+      meshes.forEach((mesh) => mesh.removeFromParent())
+      for (const mesh of hidden) {
+        const left = (body.covers.get(mesh) ?? 1) - 1
+        body.covers.set(mesh, left)
+        if (left === 0) mesh.visible = true
+      }
+      for (const tinted of own) {
+        const at = materials.indexOf(tinted)
+        if (at >= 0) materials.splice(at, 1)
+        tinted.material.dispose()
+      }
+    }
+  }, [object, body, materials, gltf, slot])
+
+  return null
+}
+
+export function Character({ modelId, ref, timeScale, gear, scale = 1 }: Props) {
   const model = getModel(modelId)
   const gltf = useGLTF(modelUrl(model))
-  const { object, materials } = useMemo(() => prepareModel(gltf.scene, model), [gltf.scene, model])
+  const { object, materials, body } = useMemo(
+    () => prepareModel(gltf.scene, model),
+    [gltf.scene, model],
+  )
   const mixer = useMemo(() => new AnimationMixer(object), [object])
 
   const { actions, attacks } = useMemo(() => {
@@ -259,6 +359,15 @@ export function Character({ modelId, ref, timeScale, scale = 1 }: Props) {
   return (
     <group ref={flinchRef}>
       <primitive object={object} scale={model.scale * scale} />
+      {gear?.map(({ url, slot }) => (
+        // each piece loads on its own: the body and the other pieces stay on screen meanwhile,
+        // and a piece that fails to load shows nothing
+        <ModelBoundary key={`${slot}:${url}`} resetKey={url} fallback={null}>
+          <Suspense fallback={null}>
+            <WornPiece object={object} body={body} materials={materials} url={url} slot={slot} />
+          </Suspense>
+        </ModelBoundary>
+      ))}
     </group>
   )
 }

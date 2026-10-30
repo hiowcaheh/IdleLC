@@ -14,6 +14,8 @@ interface Props {
   children: ReactNode
   /** Another model (a new key) gets a fresh try. */
   resetKey: string
+  /** What to show instead (default: a stand-in figure). */
+  fallback?: ReactNode
 }
 
 /**
@@ -36,6 +38,7 @@ export class ModelBoundary extends Component<Props, { failed: boolean }> {
   }
 
   render() {
-    return this.state.failed ? <ModelFallback /> : this.props.children
+    if (!this.state.failed) return this.props.children
+    return this.props.fallback !== undefined ? this.props.fallback : <ModelFallback />
   }
 }

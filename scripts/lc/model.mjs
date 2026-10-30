@@ -4,6 +4,7 @@
  * the .smc OFFSET heading (180) only turns them for the SE camera and is ignored.
  */
 import { Document } from '@gltf-transform/core'
+import { EXTTextureWebP } from '@gltf-transform/extensions'
 import sharp from 'sharp'
 import { parseMesh } from './mesh.mjs'
 import { parseAnimSet, parseSkeleton } from './ska.mjs'
@@ -63,15 +64,19 @@ function skinAttributes(lod, boneIndex, vertexCount) {
 }
 
 /**
- * Encodes a decoded texture as JPEG (opaque) or PNG (with alpha), downscaled to `maxSize`.
- * Results are cached per source file and alpha usage.
+ * Encodes a decoded texture as JPEG (opaque) or PNG (with alpha) — or WebP, about a third smaller
+ * (EXT_texture_webp) — downscaled to `maxSize`. Results are cached per source file and alpha usage.
  */
-async function encodeTexture(texture, withAlpha, maxSize) {
+async function encodeTexture(texture, withAlpha, maxSize, webp) {
   let image = sharp(Buffer.from(texture.rgba), {
     raw: { width: texture.width, height: texture.height, channels: 4 },
   })
   if (Math.max(texture.width, texture.height) > maxSize) {
     image = image.resize({ width: maxSize, height: maxSize, fit: 'inside' })
+  }
+  if (webp) {
+    if (!withAlpha) image = image.removeAlpha()
+    return { data: await image.webp({ quality: 82 }).toBuffer(), mimeType: 'image/webp' }
   }
   if (withAlpha) return { data: await image.png().toBuffer(), mimeType: 'image/png' }
   const data = await image.removeAlpha().jpeg({ quality: 85, mozjpeg: true }).toBuffer()
@@ -83,11 +88,15 @@ async function encodeTexture(texture, withAlpha, maxSize) {
  * @param smc        parsed .smc (see smc.mjs)
  * @param options.animations  clip names to keep (case-insensitive); all clips when omitted
  * @param options.maxTextureSize  longest texture side (default 1024)
+ * @param options.webp            WebP textures (EXT_texture_webp) instead of JPEG / PNG
+ * @param options.usedBonesOnly   keep only the bones the meshes are weighted to (and their parents):
+ *                                gear models worn on a class body that has the whole skeleton
  * @param options.textureCache    Map shared between models of one run
  * @returns {{ document: Document, stats: object }}
  */
 export async function buildModel(files, smc, options = {}) {
   const maxTextureSize = options.maxTextureSize ?? 1024
+  const webp = options.webp ?? false
   const textureCache = options.textureCache ?? new Map()
   const stats = {
     meshes: 0,
@@ -99,6 +108,7 @@ export async function buildModel(files, smc, options = {}) {
   }
 
   const doc = new Document()
+  if (webp) doc.createExtension(EXTTextureWebP).setRequired(true)
   const buffer = doc.createBuffer()
   const scene = doc.createScene(smc.name || 'Scene')
   const root = doc.createNode('Root')
@@ -106,24 +116,48 @@ export async function buildModel(files, smc, options = {}) {
   const accessor = (type, array) =>
     doc.createAccessor().setType(type).setArray(array).setBuffer(buffer)
 
+  // meshes to draw (tags are attachment points only), each read once
+  const parts = []
+  for (const desc of smc.meshes) {
+    if (/^_tag/i.test(baseName(desc.file))) continue
+    if (!files.resolve(desc.file)) {
+      stats.missing.push(desc.file)
+      continue
+    }
+    const lod = parseMesh(files.read(desc.file)).lods[0]
+    if (lod) parts.push({ desc, lod })
+  }
+
   // skeleton
   const bones = []
   const boneIndex = new Map()
   let skin = null
   if (smc.skeleton && files.resolve(smc.skeleton)) {
-    const skeleton = parseSkeleton(files.read(smc.skeleton)).lods[0]
-    skeleton.bones.forEach((b, i) => boneIndex.set(b.name.toLowerCase(), i))
-    for (const b of skeleton.bones) {
+    let skeletonBones = parseSkeleton(files.read(smc.skeleton)).lods[0].bones
+    if (options.usedBonesOnly) {
+      const byName = new Map(skeletonBones.map((b) => [b.name.toLowerCase(), b]))
+      const keep = new Set()
+      for (const { lod } of parts) {
+        for (const map of lod.weightMaps) {
+          let bone = byName.get(map.bone.toLowerCase())
+          for (; bone && !keep.has(bone); bone = byName.get(bone.parent.toLowerCase()))
+            keep.add(bone)
+        }
+      }
+      skeletonBones = skeletonBones.filter((b) => keep.has(b))
+    }
+    skeletonBones.forEach((b, i) => boneIndex.set(b.name.toLowerCase(), i))
+    for (const b of skeletonBones) {
       bones.push(doc.createNode(b.name).setTranslation(b.relPos).setRotation(toGltfQuat(b.relRot)))
     }
-    skeleton.bones.forEach((b, i) => {
+    skeletonBones.forEach((b, i) => {
       const parent = boneIndex.get(b.parent.toLowerCase())
       ;(parent === undefined ? root : bones[parent]).addChild(bones[i])
     })
     skin = doc.createSkin('Skin')
     bones.forEach((node) => skin.addJoint(node))
     skin.setInverseBindMatrices(
-      accessor('MAT4', new Float32Array(skeleton.bones.flatMap((b) => inverseBindMatrix(b.abs)))),
+      accessor('MAT4', new Float32Array(skeletonBones.flatMap((b) => inverseBindMatrix(b.abs)))),
     )
     stats.bones = bones.length
   } else if (smc.skeleton) {
@@ -145,12 +179,12 @@ export async function buildModel(files, smc, options = {}) {
       mat.setBaseColorFactor(colorFactor(color))
     if (texturePath && files.resolve(texturePath)) {
       const file = files.resolve(texturePath)
-      const cacheKey = `${file}|${mode !== 'OPAQUE'}|${maxTextureSize}`
+      const cacheKey = `${file}|${mode !== 'OPAQUE'}|${maxTextureSize}|${webp}`
       if (!textureCache.has(cacheKey)) {
         const decoded = parseTexture(files.read(texturePath))
         const withAlpha = mode !== 'OPAQUE' && decoded.alpha
         textureCache.set(cacheKey, {
-          ...(await encodeTexture(decoded, withAlpha, maxTextureSize)),
+          ...(await encodeTexture(decoded, withAlpha, maxTextureSize, webp)),
           withAlpha,
         })
       }
@@ -170,14 +204,7 @@ export async function buildModel(files, smc, options = {}) {
   }
 
   // meshes: one glTF mesh per .bm file, one primitive per surface
-  for (const desc of smc.meshes) {
-    if (/^_tag/i.test(baseName(desc.file))) continue // attachment points only
-    if (!files.resolve(desc.file)) {
-      stats.missing.push(desc.file)
-      continue
-    }
-    const lod = parseMesh(files.read(desc.file)).lods[0]
-    if (!lod) continue
+  for (const { desc, lod } of parts) {
     const vertexCount = lod.positions.length / 3
     const surfaces = lod.surfaces.filter(
       (s) => s.indices.length && !/invisible/i.test(s.shader ?? ''),

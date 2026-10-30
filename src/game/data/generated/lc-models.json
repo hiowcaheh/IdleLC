@@ -3,7 +3,7 @@
   "models": [
     {
       "id": "class-knight",
-      "file": "class-knight.glb",
+      "file": "class-knight.glb?v=599d6abf0e",
       "scale": 1,
       "animations": {
         "idle": "ni_idle_01",
@@ -26,7 +26,7 @@
     },
     {
       "id": "class-titan",
-      "file": "class-titan.glb",
+      "file": "class-titan.glb?v=8117b7af74",
       "scale": 1,
       "animations": {
         "idle": "ti_idle_01",
@@ -49,7 +49,7 @@
     },
     {
       "id": "class-healer",
-      "file": "class-healer.glb",
+      "file": "class-healer.glb?v=f68bde92f5",
       "scale": 1,
       "animations": {
         "idle": "hw_idle_01",
@@ -70,7 +70,7 @@
     },
     {
       "id": "class-mage",
-      "file": "class-mage.glb",
+      "file": "class-mage.glb?v=91d06239f5",
       "scale": 1,
       "animations": {
         "idle": "ma_idle_01",
@@ -91,7 +91,7 @@
     },
     {
       "id": "class-rogue",
-      "file": "class-rogue.glb",
+      "file": "class-rogue.glb?v=9dec676cdb",
       "scale": 1,
       "animations": {
         "idle": "ro_idle_01",
@@ -113,7 +113,7 @@
     },
     {
       "id": "class-sorcerer",
-      "file": "class-sorcerer.glb",
+      "file": "class-sorcerer.glb?v=7e624ebaa9",
       "scale": 1,
       "animations": {
         "idle": "so_idle_01",
@@ -135,7 +135,7 @@
     },
     {
       "id": "fox",
-      "file": "fox.glb",
+      "file": "fox.glb?v=201d4eb356",
       "scale": 1,
       "animations": {
         "idle": "m_fo",
@@ -154,7 +154,7 @@
     },
     {
       "id": "deer",
-      "file": "deer.glb",
+      "file": "deer.glb?v=2c58ef591f",
       "scale": 1,
       "animations": {
         "idle": "m_de",
@@ -173,7 +173,7 @@
     },
     {
       "id": "sball",
-      "file": "sball.glb",
+      "file": "sball.glb?v=1cb69db768",
       "scale": 1,
       "animations": {
         "idle": "idle01",
@@ -192,7 +192,7 @@
     },
     {
       "id": "wolf",
-      "file": "wolf.glb",
+      "file": "wolf.glb?v=8153efa362",
       "scale": 1,
       "animations": {
         "idle": "m_wolf_stand",
@@ -211,7 +211,7 @@
     },
     {
       "id": "wolf01",
-      "file": "wolf01.glb",
+      "file": "wolf01.glb?v=65aaf0a788",
       "scale": 1,
       "animations": {
         "idle": "m_wolf_stand",
@@ -230,7 +230,7 @@
     },
     {
       "id": "wolf02",
-      "file": "wolf02.glb",
+      "file": "wolf02.glb?v=4da898e77a",
       "scale": 1,
       "animations": {
         "idle": "m_wolf_stand",
@@ -249,7 +249,7 @@
     },
     {
       "id": "jaguar",
-      "file": "jaguar.glb",
+      "file": "jaguar.glb?v=53360c86c2",
       "scale": 1,
       "animations": {
         "idle": "jaguar_idle",
@@ -268,7 +268,7 @@
     },
     {
       "id": "deer_dk",
-      "file": "deer_dk.glb",
+      "file": "deer_dk.glb?v=84c2baaa03",
       "scale": 1,
       "animations": {
         "idle": "m_de",
@@ -287,7 +287,7 @@
     },
     {
       "id": "yeti",
-      "file": "yeti.glb",
+      "file": "yeti.glb?v=cd611b8a97",
       "scale": 1,
       "animations": {
         "idle": "m_yeti",
@@ -307,7 +307,7 @@
     },
     {
       "id": "wolfman",
-      "file": "wolfman.glb",
+      "file": "wolfman.glb?v=ecbf7837e3",
       "scale": 1,
       "animations": {
         "idle": "anubisstop",
@@ -326,7 +326,7 @@
     },
     {
       "id": "treeghost",
-      "file": "treeghost.glb",
+      "file": "treeghost.glb?v=d816ec9864",
       "scale": 1,
       "animations": {
         "idle": "Trant_idle",
@@ -347,7 +347,7 @@
     },
     {
       "id": "rhino",
-      "file": "rhino.glb",
+      "file": "rhino.glb?v=ce44f48abb",
       "scale": 1,
       "animations": {
         "idle": "m_bear",
@@ -366,7 +366,7 @@
     },
     {
       "id": "wyvernhigh",
-      "file": "wyvernhigh.glb",
+      "file": "wyvernhigh.glb?v=c9446f3fed",
       "scale": 1,
       "animations": {
         "idle": "m_wm02",
@@ -385,7 +385,7 @@
     },
     {
       "id": "treeghost_red",
-      "file": "treeghost_red.glb",
+      "file": "treeghost_red.glb?v=9c66166381",
       "scale": 1,
       "animations": {
         "idle": "Trant_idle",
@@ -406,7 +406,7 @@
     },
     {
       "id": "halloween_mon",
-      "file": "halloween_mon.glb",
+      "file": "halloween_mon.glb?v=37c194d9d5",
       "scale": 1,
       "animations": {
         "idle": "halloween_mon_idle",
@@ -425,7 +425,7 @@
     },
     {
       "id": "jaguar_dk",
-      "file": "jaguar_dk.glb",
+      "file": "jaguar_dk.glb?v=aea0c34cae",
       "scale": 1,
       "animations": {
         "idle": "jaguar_idle",
@@ -444,7 +444,7 @@
     },
     {
       "id": "yeti_red",
-      "file": "yeti_red.glb",
+      "file": "yeti_red.glb?v=025be5384a",
       "scale": 1,
       "animations": {
         "idle": "m_yeti",
@@ -464,7 +464,7 @@
     },
     {
       "id": "fox01",
-      "file": "fox01.glb",
+      "file": "fox01.glb?v=f0d1928336",
       "scale": 1,
       "animations": {
         "idle": "m_fo",
@@ -483,7 +483,7 @@
     },
     {
       "id": "anubis",
-      "file": "anubis.glb",
+      "file": "anubis.glb?v=10e352c94e",
       "scale": 1,
       "animations": {
         "idle": "anubis_idle01",
@@ -504,7 +504,7 @@
     },
     {
       "id": "balrog",
-      "file": "balrog.glb",
+      "file": "balrog.glb?v=3d9560bdd2",
       "scale": 1,
       "animations": {
         "idle": "idle",
@@ -524,7 +524,7 @@
     },
     {
       "id": "fox_sand",
-      "file": "fox_sand.glb",
+      "file": "fox_sand.glb?v=f202eb16c1",
       "scale": 1,
       "animations": {
         "idle": "m_fo",
@@ -543,7 +543,7 @@
     },
     {
       "id": "deer_sand",
-      "file": "deer_sand.glb",
+      "file": "deer_sand.glb?v=fb11707299",
       "scale": 1,
       "animations": {
         "idle": "m_de",
@@ -562,7 +562,7 @@
     },
     {
       "id": "jaguar_sand",
-      "file": "jaguar_sand.glb",
+      "file": "jaguar_sand.glb?v=54af46e1ff",
       "scale": 1,
       "animations": {
         "idle": "jaguar_idle",
@@ -581,7 +581,7 @@
     },
     {
       "id": "sphinx_ft",
-      "file": "sphinx_ft.glb",
+      "file": "sphinx_ft.glb?v=18e76fb399",
       "scale": 1,
       "animations": {
         "idle": "sphinx_ft_idle",
@@ -602,7 +602,7 @@
     },
     {
       "id": "sphinx_sp",
-      "file": "sphinx_sp.glb",
+      "file": "sphinx_sp.glb?v=6ea7010100",
       "scale": 1,
       "animations": {
         "idle": "sphinx_sp_idle",
@@ -623,7 +623,7 @@
     },
     {
       "id": "whitedeer",
-      "file": "whitedeer.glb",
+      "file": "whitedeer.glb?v=395137047e",
       "scale": 1,
       "animations": {
         "idle": "whitedeer_idle",
@@ -642,7 +642,7 @@
     },
     {
       "id": "blackdeer",
-      "file": "blackdeer.glb",
+      "file": "blackdeer.glb?v=996ac2d252",
       "scale": 1,
       "animations": {
         "idle": "blackdeer_idle",

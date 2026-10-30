@@ -7,6 +7,7 @@
  * Writes (committed by the owner's decision; the dump itself stays out of the repo):
  *   src/game/data/generated/lc-data.json    monsters, field zones, drops, items, exp table, shop rates
  *   src/game/data/generated/lc-models.json  model manifest for the LC GLBs that exist in --models
+ *   src/game/data/generated/lc-item-models.json  gear .smc → item ids, for `npm run convert-lc`
  *
  * The game uses them whenever they exist (see README). See docs/lc-database.md.
  */
@@ -61,6 +62,12 @@ const MIN_SHOP_PRICE = 100
 const FLAG_MAGIC_ACCESSORY = 134217754
 /** a_job_flag bits of the six base classes (bit = t_skill.a_job). */
 const BASE_CLASS_BITS = 0b111111
+
+/**
+ * The drop box: pieces without a model of their own (helmets below level 97) point at it and show
+ * nothing on the character.
+ */
+const INVISIBLE_MODEL = /item_treasure/i
 
 /** t_npc.a_flag: bit 2 = can be attacked (monsters), bit 27 = elite. */
 const FLAG_ATTACKABLE = 1 << 2
@@ -598,6 +605,23 @@ function buildSkills(tables) {
   return skills.sort((a, b) => a.levels[0].learnLevel - b.levels[0].learnLevel || a.id - b.id)
 }
 
+/**
+ * The model (t_item.a_file_smc) of every weapon and armor piece the six classes wear in the game
+ * data: .smc path → item ids. `npm run convert-lc` turns each into a GLB shown on the character.
+ */
+function buildGearModels(items, itemRows) {
+  const rows = new Map(itemRows.map((r) => [int(r.a_index), r]))
+  const models = {}
+  for (const item of items) {
+    const gear = (item.type === 0 || item.type === 1) && GEAR_SLOTS.includes(item.slot)
+    if (!gear || (item.jobFlag & BASE_CLASS_BITS) === 0) continue
+    const smc = String(rows.get(item.id)?.a_file_smc ?? '').trim()
+    if (!smc || INVISIBLE_MODEL.test(smc)) continue
+    ;(models[smc] ??= []).push(item.id)
+  }
+  return models
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2))
   if (!args.dump || !fs.existsSync(args.dump)) {
@@ -623,11 +647,13 @@ async function main() {
     't_rareoption',
   ])
   const data = buildData(tables)
+  const gearModels = buildGearModels(data.items, tables.t_item)
   const manifest = await buildModelManifest(data, args.models)
 
   fs.mkdirSync(args.out, { recursive: true })
   fs.writeFileSync(path.join(args.out, 'lc-data.json'), JSON.stringify(data))
   fs.writeFileSync(path.join(args.out, 'lc-models.json'), JSON.stringify(manifest, null, 2))
+  fs.writeFileSync(path.join(args.out, 'lc-item-models.json'), JSON.stringify(gearModels, null, 1))
 
   const withModel = new Set(manifest.models.map((m) => m.id))
   console.log(

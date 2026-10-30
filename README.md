@@ -137,7 +137,8 @@ i zrzut bazy trzymamy poza repo, w `assets-src/`. Żeby odświeżyć dane albo d
    npm run import-lc-db -- --dump <folder zrzutu>/newproject_data.sql
    ```
 
-   Powstanie `src/game/data/generated/lc-data.json` (potwory, strefy, drop, przedmioty, exp).
+   Powstanie `src/game/data/generated/lc-data.json` (potwory, strefy, drop, przedmioty, exp)
+   i `lc-item-models.json` (model każdej broni i zbroi — dla konwertera).
 
 2. Skonwertuj modele z klienta (folder z `Data/`; może być kilka `--client`):
 
@@ -145,12 +146,15 @@ i zrzut bazy trzymamy poza repo, w `assets-src/`. Żeby odświeżyć dane albo d
    npm run convert-lc -- --client <folder klienta>
    ```
 
-   Konwerter bierze modele klas (`scripts/lc/classes.mjs`) i wszystkich potworów z `lc-data.json`
-   (tylko animacje używane w bazie), zapisuje GLB do `public/models/lc/` (np. `fox.glb`,
-   `class-knight.glb`) i odświeża manifest `src/game/data/generated/lc-models.json`. Wycina też ikony
-   przedmiotów z atlasów `ItemBtn*.tex` do `public/icons/lc/items.webp` (same ikony: `--only icons`).
-   Pojedynczy model:
-   `--smc "Data\Monster\Animals\Fox.smc"`, wybrane modele: `--only fox,class-knight`.
+   Konwerter bierze ciała klas (`scripts/lc/classes.mjs`: twarz, włosy, koszula, spodnie, dłonie, stopy
+   nowej postaci) i wszystkie potwory z `lc-data.json` (tylko animacje używane w bazie), zapisuje GLB do
+   `public/models/lc/` (np. `fox.glb`, `class-knight.glb`) i odświeża manifest
+   `src/game/data/generated/lc-models.json`. Konwertuje też modele broni i zbroi
+   (`lc-item-models.json` z importu → `public/models/lc/gear/`, manifest `lc-gear.json`): gra zakłada je
+   na ciało klasy i chowa części, które zastępują (koszula pod zbroją, włosy pod hełmem). Same zestawy
+   startowe: `--only starter`, cały sprzęt: `--only gear`. Wycina też ikony przedmiotów z atlasów
+   `ItemBtn*.tex` do `public/icons/lc/items.webp` (same ikony: `--only icons`). Pojedynczy model:
+   `--smc "Data\Monster\Animals\Fox.smc"`, wybrane modele: `--only fox,class-knight,gear/ni_bu_001`.
    Formaty plików: [`docs/lc-formats.md`](docs/lc-formats.md).
 
 3. `npm run dev` i commit zmienionych plików.

@@ -1,6 +1,7 @@
 import { useFrame } from '@react-three/fiber'
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useEffect, useMemo, useRef } from 'react'
 import { Vector3, type Group } from 'three'
+import { gearLooks } from '../game/assets/gear.ts'
 import { getModel, playerModelId } from '../game/assets/manifest.ts'
 import { getMonster } from '../game/data/monsters.ts'
 import { TIMINGS, approachTime, effectiveStats, type Side } from '../game/logic/combat.ts'
@@ -65,7 +66,12 @@ export function Battle() {
   const monsterModel = monsterDef.modelId
   const showNumbers = useGameStore((s) => s.save.settings.showDamageNumbers)
   const classId = useGameStore((s) => s.character?.classId ?? 'knight')
+  const equipment = useGameStore((s) => s.character?.equipment)
   const playerModel = playerModelId(classId)
+  const gear = useMemo(
+    () => gearLooks(Object.values(equipment ?? {}).map((piece) => piece.itemId)),
+    [equipment],
+  )
   const playerModelRef = useRef(playerModel)
   useEffect(() => {
     playerModelRef.current = playerModel
@@ -323,7 +329,7 @@ export function Battle() {
     <>
       <group ref={playerGroup}>
         <ModelBoundary resetKey={playerModel}>
-          <Character key={playerModel} ref={player} modelId={playerModel} />
+          <Character key={playerModel} ref={player} modelId={playerModel} gear={gear} />
         </ModelBoundary>
       </group>
       <group ref={monsterGroup} visible={false}>

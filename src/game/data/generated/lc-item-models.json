@@ -1,0 +1,3786 @@
+{
+ "Data\\Item\\shield\\mage\\ma_bd_001.smc": [
+  18
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_001.smc": [
+  2
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_001.smc": [
+  3
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_001.smc": [
+  4
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_003.smc": [
+  5
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_002.smc": [
+  6
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_002.smc": [
+  7
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_001.smc": [
+  8
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_002.smc": [
+  9
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_000.smc": [
+  12
+ ],
+ "Data\\Item\\shield\\mage\\ma_ft_001.smc": [
+  20
+ ],
+ "Data\\Item\\shield\\mage\\ma_ft_002.smc": [
+  21
+ ],
+ "Data\\Item\\shield\\mage\\ma_hn_001.smc": [
+  22
+ ],
+ "Data\\Item\\shield\\mage\\ma_hn_002.smc": [
+  23
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_001.smc": [
+  26
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_003.smc": [
+  27
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_001.smc": [
+  28
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_002.smc": [
+  29
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_001.smc": [
+  30
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_002.smc": [
+  31
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_001.smc": [
+  32
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_002.smc": [
+  33
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_001.smc": [
+  34
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_002.smc": [
+  37
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_003.smc": [
+  36
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_001.smc": [
+  38
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_001.smc": [
+  39
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_002.smc": [
+  40
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_001.smc": [
+  41
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_002.smc": [
+  42
+ ],
+ "Data\\Item\\Weapon\\ni_sword_000.smc": [
+  48
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_000.smc": [
+  49
+ ],
+ "Data\\Item\\Weapon\\hw_bow_000.smc": [
+  50
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_001.smc": [
+  51
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_002.smc": [
+  52
+ ],
+ "Data\\Item\\Weapon\\ni_sword_001.smc": [
+  53
+ ],
+ "Data\\Item\\Weapon\\hw_bow_001.smc": [
+  56
+ ],
+ "Data\\Item\\Weapon\\ni_sword_002.smc": [
+  55
+ ],
+ "Data\\Item\\Weapon\\hw_bow_002.smc": [
+  57
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_004.smc": [
+  58
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_004.smc": [
+  59
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_004.smc": [
+  60
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_003.smc": [
+  61
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_003.smc": [
+  62
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_003.smc": [
+  63
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_003.smc": [
+  64
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_003.smc": [
+  65
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_003.smc": [
+  66
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_003.smc": [
+  67
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_003.smc": [
+  68
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_003.smc": [
+  69
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_001.smc": [
+  70
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_002.smc": [
+  71
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_002.smc": [
+  93
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_002.smc": [
+  94
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_002.smc": [
+  95
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_004.smc": [
+  96
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_004.smc": [
+  97
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_004.smc": [
+  98
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_004.smc": [
+  99
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_004.smc": [
+  100
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_004.smc": [
+  101
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_004.smc": [
+  102
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_004.smc": [
+  103
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_004.smc": [
+  104
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_003.smc": [
+  105
+ ],
+ "Data\\Item\\Weapon\\hw_bow_003.smc": [
+  106
+ ],
+ "Data\\Item\\Weapon\\ni_sword_003.smc": [
+  107
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_005.smc": [
+  176
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_005.smc": [
+  177
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_005.smc": [
+  178
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_005.smc": [
+  179
+ ],
+ "Data\\Item\\Weapon\\ni_sword_004.smc": [
+  180
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_005.smc": [
+  181
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_005.smc": [
+  182
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_005.smc": [
+  183
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_005.smc": [
+  184
+ ],
+ "Data\\Item\\Weapon\\hw_bow_004.smc": [
+  185
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_005.smc": [
+  186
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_005.smc": [
+  187
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_005.smc": [
+  188
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_005.smc": [
+  189
+ ],
+ "Data\\Item\\Shield\\mage\\ma_bu_001.smc": [
+  266
+ ],
+ "Data\\Item\\Shield\\mage\\ma_bu_002.smc": [
+  267
+ ],
+ "Data\\Item\\shield\\mage\\ma_bd_002.smc": [
+  268
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_003.smc": [
+  337
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_004.smc": [
+  306
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_005.smc": [
+  307
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_006.smc": [
+  308
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_007.smc": [
+  309
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_008.smc": [
+  310
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_009.smc": [
+  311
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_006.smc": [
+  312
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_007.smc": [
+  313
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_006.smc": [
+  314
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_007.smc": [
+  315
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_006.smc": [
+  316
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_007.smc": [
+  317
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_006.smc": [
+  318
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_007.smc": [
+  319
+ ],
+ "Data\\Item\\Weapon\\ni_sword_005.smc": [
+  322
+ ],
+ "Data\\Item\\Weapon\\ni_sword_006.smc": [
+  323
+ ],
+ "Data\\Item\\Weapon\\ni_sword_007.smc": [
+  324
+ ],
+ "Data\\Item\\Weapon\\ni_sword_008.smc": [
+  325
+ ],
+ "Data\\Item\\Weapon\\ni_sword_009.smc": [
+  326
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_006.smc": [
+  327
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_007.smc": [
+  328
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_006.smc": [
+  329
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_007.smc": [
+  330
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_006.smc": [
+  331
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_007.smc": [
+  332
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_006.smc": [
+  333
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_007.smc": [
+  334
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_004.smc": [
+  338
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_005.smc": [
+  339
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_006.smc": [
+  340
+ ],
+ "Data\\Item\\Weapon\\hw_bow_005.smc": [
+  341
+ ],
+ "Data\\Item\\Weapon\\hw_bow_006.smc": [
+  342
+ ],
+ "Data\\Item\\Weapon\\hw_bow_007.smc": [
+  343
+ ],
+ "Data\\Item\\Weapon\\hw_bow_008.smc": [
+  344
+ ],
+ "Data\\Item\\Weapon\\hw_bow_009.smc": [
+  345
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_006.smc": [
+  346
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_007.smc": [
+  347
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_006.smc": [
+  348
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_007.smc": [
+  349
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_006.smc": [
+  350
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_007.smc": [
+  351
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_006.smc": [
+  352
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_007.smc": [
+  353
+ ],
+ "Data\\Item\\Weapon\\ma_wand_001.smc": [
+  357
+ ],
+ "Data\\Item\\Weapon\\ma_wand_002.smc": [
+  358
+ ],
+ "Data\\Item\\Weapon\\ma_wand_003.smc": [
+  359
+ ],
+ "Data\\Item\\Weapon\\ma_wand_004.smc": [
+  360
+ ],
+ "Data\\Item\\Weapon\\ma_wand_005.smc": [
+  361
+ ],
+ "Data\\Item\\Weapon\\ma_wand_006.smc": [
+  362
+ ],
+ "Data\\Item\\Weapon\\ma_wand_007.smc": [
+  363
+ ],
+ "Data\\Item\\Weapon\\ma_wand_008.smc": [
+  364
+ ],
+ "Data\\Item\\Weapon\\ma_wand_009.smc": [
+  365
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_003.smc": [
+  366
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_004.smc": [
+  367
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_005.smc": [
+  368
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_006.smc": [
+  369
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_007.smc": [
+  370
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_003.smc": [
+  371
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_004.smc": [
+  372
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_005.smc": [
+  373
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_006.smc": [
+  374
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_007.smc": [
+  375
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_003.smc": [
+  376
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_004.smc": [
+  377
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_005.smc": [
+  378
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_006.smc": [
+  379
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_007.smc": [
+  380
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_003.smc": [
+  381
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_004.smc": [
+  382
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_005.smc": [
+  383
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_006.smc": [
+  384
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_007.smc": [
+  385
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_007.smc": [
+  392
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_008.smc": [
+  393
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_009.smc": [
+  394
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_008.smc": [
+  464
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_008.smc": [
+  465
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_008.smc": [
+  466
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_008.smc": [
+  467
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_008.smc": [
+  470
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_008.smc": [
+  471
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_008.smc": [
+  472
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_008.smc": [
+  473
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_008.smc": [
+  475
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_008.smc": [
+  476
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_008.smc": [
+  477
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_008.smc": [
+  478
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_008.smc": [
+  480
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_008.smc": [
+  481
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_008.smc": [
+  482
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_008.smc": [
+  483
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_001.smc": [
+  524
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_001.smc": [
+  525
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_001.smc": [
+  526
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_001.smc": [
+  527
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_001.smc": [
+  529
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_000.smc": [
+  530
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_002.smc": [
+  532
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_003.smc": [
+  533
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_004.smc": [
+  534
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_005.smc": [
+  535
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_006.smc": [
+  536
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_007.smc": [
+  537
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_008.smc": [
+  538
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_009.smc": [
+  539
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_002.smc": [
+  540
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_003.smc": [
+  541
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_004.smc": [
+  542
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_002.smc": [
+  543
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_003.smc": [
+  544
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_004.smc": [
+  545
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_002.smc": [
+  546
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_003.smc": [
+  547
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_004.smc": [
+  548
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_002.smc": [
+  549
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_003.smc": [
+  550
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_004.smc": [
+  551
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_005.smc": [
+  561
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_006.smc": [
+  562
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_005.smc": [
+  563
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_006.smc": [
+  564
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_005.smc": [
+  565
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_006.smc": [
+  566
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_005.smc": [
+  567
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_006.smc": [
+  568
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_007.smc": [
+  571
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_008.smc": [
+  572
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_007.smc": [
+  573
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_008.smc": [
+  574
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_007.smc": [
+  575
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_008.smc": [
+  576
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_007.smc": [
+  577
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_008.smc": [
+  578
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_00s.smc": [
+  579
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_00s.smc": [
+  580
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_00s.smc": [
+  581
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_00s.smc": [
+  582
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_00s.smc": [
+  583
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_00s.smc": [
+  584
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_00s.smc": [
+  585
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_00s.smc": [
+  586
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_00s.smc": [
+  587
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_00s.smc": [
+  588
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_00s.smc": [
+  589
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_00s.smc": [
+  590
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_00s.smc": [
+  591
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_00s.smc": [
+  592
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_00s.smc": [
+  593
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_00s.smc": [
+  594
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_00s.smc": [
+  595
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_00s.smc": [
+  596
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_00s.smc": [
+  597
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_00s.smc": [
+  598
+ ],
+ "Data\\Item\\Weapon\\ma_staff_000.smc": [
+  600
+ ],
+ "Data\\Item\\Weapon\\ti_axe_001.smc": [
+  601
+ ],
+ "Data\\Item\\Weapon\\ti_axe_002.smc": [
+  602
+ ],
+ "Data\\Item\\Weapon\\ti_axe_003.smc": [
+  603
+ ],
+ "Data\\Item\\Weapon\\ti_axe_004.smc": [
+  604
+ ],
+ "Data\\Item\\Weapon\\ti_axe_005.smc": [
+  605
+ ],
+ "Data\\Item\\Weapon\\ti_axe_006.smc": [
+  606
+ ],
+ "Data\\Item\\Weapon\\ti_axe_007.smc": [
+  607
+ ],
+ "Data\\Item\\Weapon\\ti_axe_008.smc": [
+  608
+ ],
+ "Data\\Item\\Weapon\\ti_axe_009.smc": [
+  609
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_001.smc": [
+  610
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_002.smc": [
+  611
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_003.smc": [
+  612
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_004.smc": [
+  613
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_005.smc": [
+  614
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_006.smc": [
+  615
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_007.smc": [
+  616
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_008.smc": [
+  617
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_009.smc": [
+  618
+ ],
+ "Data\\Item\\Weapon\\hw_staff_001.smc": [
+  619
+ ],
+ "Data\\Item\\Weapon\\hw_staff_002.smc": [
+  620
+ ],
+ "Data\\Item\\Weapon\\hw_staff_003.smc": [
+  621
+ ],
+ "Data\\Item\\Weapon\\hw_staff_004.smc": [
+  622
+ ],
+ "Data\\Item\\Weapon\\hw_staff_005.smc": [
+  623
+ ],
+ "Data\\Item\\Weapon\\hw_staff_006.smc": [
+  624
+ ],
+ "Data\\Item\\Weapon\\hw_staff_007.smc": [
+  625
+ ],
+ "Data\\Item\\Weapon\\hw_staff_008.smc": [
+  626
+ ],
+ "Data\\Item\\Weapon\\hw_staff_009.smc": [
+  627
+ ],
+ "Data\\Item\\Weapon\\ma_staff_001.smc": [
+  628
+ ],
+ "Data\\Item\\Weapon\\ma_staff_002.smc": [
+  629
+ ],
+ "Data\\Item\\Weapon\\ma_staff_003.smc": [
+  630
+ ],
+ "Data\\Item\\Weapon\\ma_staff_004.smc": [
+  631
+ ],
+ "Data\\Item\\Weapon\\ma_staff_005.smc": [
+  632
+ ],
+ "Data\\Item\\Weapon\\ma_staff_006.smc": [
+  633
+ ],
+ "Data\\Item\\Weapon\\ma_staff_007.smc": [
+  634
+ ],
+ "Data\\Item\\Weapon\\ma_staff_008.smc": [
+  635
+ ],
+ "Data\\Item\\Weapon\\ma_staff_009.smc": [
+  636
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_002.smc": [
+  637
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_003.smc": [
+  638
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_004.smc": [
+  639
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_005.smc": [
+  640
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_006.smc": [
+  641
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_007.smc": [
+  642
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_008.smc": [
+  643
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_009.smc": [
+  644
+ ],
+ "Data\\Item\\Weapon\\ti_axe_010.smc": [
+  645
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_001.smc": [
+  666
+ ],
+ "Data\\Item\\Weapon\\ni_sword_010.smc": [
+  681
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_009.smc": [
+  682
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_009.smc": [
+  683
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_009.smc": [
+  684
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_009.smc": [
+  685
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_010.smc": [
+  686
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_009.smc": [
+  688
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_009.smc": [
+  689
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_009.smc": [
+  690
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_009.smc": [
+  691
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_009.smc": [
+  693
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_009.smc": [
+  694
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_009.smc": [
+  695
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_009.smc": [
+  696
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_009.smc": [
+  698
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_009.smc": [
+  699
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_009.smc": [
+  700
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_009.smc": [
+  701
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_009.smc": [
+  703
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_009.smc": [
+  704
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_009.smc": [
+  705
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_009.smc": [
+  706
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_010.smc": [
+  715
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_010.smc": [
+  716
+ ],
+ "Data\\Item\\Weapon\\hw_staff_010.smc": [
+  717
+ ],
+ "Data\\Item\\Weapon\\hw_bow_010.smc": [
+  718
+ ],
+ "Data\\Item\\Weapon\\ma_staff_010.smc": [
+  719
+ ],
+ "Data\\Item\\Weapon\\ma_wand_010.smc": [
+  720
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_010.smc": [
+  721
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_010.smc": [
+  722
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_011.smc": [
+  793
+ ],
+ "Data\\Item\\Weapon\\ti_axe_011.smc": [
+  794
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_010.smc": [
+  795
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_010.smc": [
+  796
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_010.smc": [
+  797
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_010.smc": [
+  798
+ ],
+ "Data\\Item\\Weapon\\ni_sword_011.smc": [
+  800
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_011.smc": [
+  801
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_010.smc": [
+  802
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_010.smc": [
+  803
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_010.smc": [
+  804
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_010.smc": [
+  805
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_011.smc": [
+  807
+ ],
+ "Data\\Item\\Weapon\\hw_bow_011.smc": [
+  808
+ ],
+ "Data\\Item\\Weapon\\hw_staff_011.smc": [
+  809
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_010.smc": [
+  810
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_010.smc": [
+  811
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_010.smc": [
+  812
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_010.smc": [
+  813
+ ],
+ "Data\\Item\\Weapon\\ma_wand_011.smc": [
+  815
+ ],
+ "Data\\Item\\Weapon\\ma_staff_011.smc": [
+  816
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_010.smc": [
+  817
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_010.smc": [
+  818
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_010.smc": [
+  819
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_010.smc": [
+  820
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_011.smc": [
+  822
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_011.smc": [
+  823
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_010.smc": [
+  824
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_010.smc": [
+  825
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_010.smc": [
+  826
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_010.smc": [
+  827
+ ],
+ "Data\\Item\\Weapon\\so_scythe_000.smc": [
+  976
+ ],
+ "Data\\Item\\Weapon\\so_scythe_001.smc": [
+  977
+ ],
+ "Data\\Item\\Weapon\\so_scythe_002.smc": [
+  978
+ ],
+ "Data\\Item\\Weapon\\so_scythe_003.smc": [
+  979
+ ],
+ "Data\\Item\\Weapon\\so_scythe_004.smc": [
+  980
+ ],
+ "Data\\Item\\Weapon\\so_scythe_005.smc": [
+  981
+ ],
+ "Data\\Item\\Weapon\\so_scythe_006.smc": [
+  982
+ ],
+ "Data\\Item\\Weapon\\so_scythe_007.smc": [
+  983
+ ],
+ "Data\\Item\\Weapon\\so_scythe_008.smc": [
+  984
+ ],
+ "Data\\Item\\Weapon\\so_scythe_009.smc": [
+  985
+ ],
+ "Data\\Item\\Weapon\\so_scythe_010.smc": [
+  986
+ ],
+ "Data\\Item\\Weapon\\so_scythe_011.smc": [
+  987
+ ],
+ "Data\\Item\\Weapon\\so_staff_001.smc": [
+  989
+ ],
+ "Data\\Item\\Weapon\\so_staff_002.smc": [
+  990
+ ],
+ "Data\\Item\\Weapon\\so_staff_003.smc": [
+  991
+ ],
+ "Data\\Item\\Weapon\\so_staff_004.smc": [
+  992
+ ],
+ "Data\\Item\\Weapon\\so_staff_005.smc": [
+  993
+ ],
+ "Data\\Item\\Weapon\\so_staff_006.smc": [
+  994
+ ],
+ "Data\\Item\\Weapon\\so_staff_007.smc": [
+  995
+ ],
+ "Data\\Item\\Weapon\\so_staff_008.smc": [
+  996
+ ],
+ "Data\\Item\\Weapon\\so_staff_009.smc": [
+  997
+ ],
+ "Data\\Item\\Weapon\\so_staff_010.smc": [
+  998
+ ],
+ "Data\\Item\\Weapon\\so_staff_011.smc": [
+  999
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_001.smc": [
+  1000
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_002.smc": [
+  1001
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_003.smc": [
+  1002
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_004.smc": [
+  1003
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_005.smc": [
+  1004
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_006.smc": [
+  1005
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_007.smc": [
+  1006
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_008.smc": [
+  1007
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_009.smc": [
+  1008
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_010.smc": [
+  1009
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_001.smc": [
+  1010
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_002.smc": [
+  1011
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_003.smc": [
+  1012
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_004.smc": [
+  1013
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_005.smc": [
+  1014
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_006.smc": [
+  1015
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_007.smc": [
+  1016
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_008.smc": [
+  1017
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_009.smc": [
+  1018
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_010.smc": [
+  1019
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_001.smc": [
+  1020
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_002.smc": [
+  1021
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_003.smc": [
+  1022
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_004.smc": [
+  1023
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_005.smc": [
+  1024
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_006.smc": [
+  1025
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_007.smc": [
+  1026
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_008.smc": [
+  1027
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_009.smc": [
+  1028
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_010.smc": [
+  1029
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_001.smc": [
+  1030
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_002.smc": [
+  1031
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_003.smc": [
+  1032
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_004.smc": [
+  1033
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_005.smc": [
+  1034
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_006.smc": [
+  1035
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_007.smc": [
+  1036
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_008.smc": [
+  1037
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_009.smc": [
+  1038
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_010.smc": [
+  1039
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_014.smc": [
+  1148
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ja_bd_001.smc": [
+  1230
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ja_bu_001.smc": [
+  1229
+ ],
+ "Data\\Item\\Weapon\\so_scythe_016.smc": [
+  1072
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_012.smc": [
+  1077
+ ],
+ "Data\\Item\\Weapon\\ti_axe_012.smc": [
+  1078
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_011.smc": [
+  1079
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_011.smc": [
+  1080
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_011.smc": [
+  1081
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_011.smc": [
+  1082
+ ],
+ "Data\\Item\\Weapon\\ni_sword_012.smc": [
+  1084
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_012.smc": [
+  1085
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_011.smc": [
+  1086
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_011.smc": [
+  1087
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_011.smc": [
+  1088
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_011.smc": [
+  1089
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_012.smc": [
+  1091
+ ],
+ "Data\\Item\\Weapon\\hw_bow_012.smc": [
+  1092
+ ],
+ "Data\\Item\\Weapon\\hw_staff_012.smc": [
+  1093
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_011.smc": [
+  1094
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_011.smc": [
+  1095
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_011.smc": [
+  1096
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_011.smc": [
+  1097
+ ],
+ "Data\\Item\\Weapon\\ma_wand_012.smc": [
+  1099
+ ],
+ "Data\\Item\\Weapon\\ma_staff_012.smc": [
+  1100
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_011.smc": [
+  1101
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_011.smc": [
+  1102
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_011.smc": [
+  1103
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_011.smc": [
+  1104
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_012.smc": [
+  1106
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_012.smc": [
+  1107
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_011.smc": [
+  1108
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_011.smc": [
+  1109
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_011.smc": [
+  1110
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_011.smc": [
+  1111
+ ],
+ "Data\\Item\\Weapon\\so_scythe_012.smc": [
+  1113
+ ],
+ "Data\\Item\\Weapon\\so_staff_012.smc": [
+  1114
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_011.smc": [
+  1116
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_011.smc": [
+  1117
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_011.smc": [
+  1118
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_011.smc": [
+  1119
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_00s.smc": [
+  1122
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_00s.smc": [
+  1123
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_00s.smc": [
+  1124
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_00s.smc": [
+  1125
+ ],
+ "Data\\Item\\Weapon\\ti_axe_016.smc": [
+  1136
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_016.smc": [
+  1137
+ ],
+ "Data\\Item\\Weapon\\ni_sword_016.smc": [
+  1138
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_016.smc": [
+  1139
+ ],
+ "Data\\Item\\Weapon\\hw_bow_016.smc": [
+  1140
+ ],
+ "Data\\Item\\Weapon\\hw_staff_016.smc": [
+  1141
+ ],
+ "Data\\Item\\Weapon\\ma_staff_016.smc": [
+  1142
+ ],
+ "Data\\Item\\Weapon\\ma_wand_016.smc": [
+  1143
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_016.smc": [
+  1144
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_016.smc": [
+  1145
+ ],
+ "Data\\Item\\Weapon\\so_staff_016.smc": [
+  1146
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_016.smc": [
+  1147
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_014.smc": [
+  1150
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_014.smc": [
+  1151
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_014.smc": [
+  1152
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_014.smc": [
+  1154
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_014.smc": [
+  1155
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_014.smc": [
+  1156
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_014.smc": [
+  1157
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_014.smc": [
+  1158
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_014.smc": [
+  1159
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_014.smc": [
+  1160
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_014.smc": [
+  1161
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_014.smc": [
+  1163
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_014.smc": [
+  1164
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_014.smc": [
+  1165
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_014.smc": [
+  1166
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_014.smc": [
+  1168
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_014.smc": [
+  1169
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_014.smc": [
+  1170
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_014.smc": [
+  1171
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ja_hn_001.smc": [
+  1231
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_012.smc": [
+  1174
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_012.smc": [
+  1175
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_012.smc": [
+  1176
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_012.smc": [
+  1177
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_013.smc": [
+  1178
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_012.smc": [
+  1179
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_012.smc": [
+  1180
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_012.smc": [
+  1181
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_012.smc": [
+  1182
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_012.smc": [
+  1184
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_012.smc": [
+  1185
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_012.smc": [
+  1186
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_012.smc": [
+  1187
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_012.smc": [
+  1189
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_012.smc": [
+  1190
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_012.smc": [
+  1191
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_012.smc": [
+  1192
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_012.smc": [
+  1194
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_012.smc": [
+  1195
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_012.smc": [
+  1196
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_012.smc": [
+  1197
+ ],
+ "Data\\Item\\Weapon\\ni_sword_013.smc": [
+  1213
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_013.smc": [
+  1214
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_013.smc": [
+  1215
+ ],
+ "Data\\Item\\Weapon\\ti_axe_013.smc": [
+  1216
+ ],
+ "Data\\Item\\Weapon\\hw_bow_013.smc": [
+  1217
+ ],
+ "Data\\Item\\Weapon\\hw_staff_013.smc": [
+  1218
+ ],
+ "Data\\Item\\Weapon\\ma_staff_013.smc": [
+  1219
+ ],
+ "Data\\Item\\Weapon\\ma_wand_013.smc": [
+  1220
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_013.smc": [
+  1221
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_013.smc": [
+  1222
+ ],
+ "Data\\Item\\Weapon\\so_scythe_013.smc": [
+  1223
+ ],
+ "Data\\Item\\Weapon\\so_staff_013.smc": [
+  1224
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ja_ft_001.smc": [
+  1232
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ja_bu_001.smc": [
+  1234
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ja_bd_001.smc": [
+  1235
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ja_hn_001.smc": [
+  1236
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ja_ft_001.smc": [
+  1237
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_014.smc": [
+  1238
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ja_bu_001.smc": [
+  1240
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ja_bd_001.smc": [
+  1241
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ja_hn_001.smc": [
+  1242
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ja_ft_001.smc": [
+  1243
+ ],
+ "Data\\Item\\Shield\\mage\\ma_ja_bu_001.smc": [
+  1245
+ ],
+ "Data\\Item\\shield\\mage\\ma_ja_bd_001.smc": [
+  1246
+ ],
+ "Data\\Item\\shield\\mage\\ma_ja_hn_001.smc": [
+  1247
+ ],
+ "Data\\Item\\shield\\mage\\ma_ja_ft_001.smc": [
+  1248
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ja_bu_001.smc": [
+  1250
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ja_bd_001.smc": [
+  1251
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ja_hn_001.smc": [
+  1252
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ja_ft_001.smc": [
+  1253
+ ],
+ "Data\\Item\\Weapon\\ni_sword_014.smc": [
+  1319
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_014.smc": [
+  1320
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_014.smc": [
+  1321
+ ],
+ "Data\\Item\\Weapon\\ti_axe_014.smc": [
+  1322
+ ],
+ "Data\\Item\\Weapon\\hw_bow_014.smc": [
+  1323
+ ],
+ "Data\\Item\\Weapon\\hw_staff_014.smc": [
+  1324
+ ],
+ "Data\\Item\\Weapon\\ma_wand_014.smc": [
+  1326
+ ],
+ "Data\\Item\\Weapon\\ma_staff_014.smc": [
+  1325
+ ],
+ "Data\\Item\\Weapon\\ma_staff_015.smc": [
+  1337
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_014.smc": [
+  1327
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_014.smc": [
+  1328
+ ],
+ "Data\\Item\\Weapon\\so_scythe_014.smc": [
+  1329
+ ],
+ "Data\\Item\\Weapon\\so_staff_014.smc": [
+  1330
+ ],
+ "Data\\Item\\Weapon\\ni_sword_015.smc": [
+  1331
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_015.smc": [
+  1332
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_015.smc": [
+  1333
+ ],
+ "Data\\Item\\Weapon\\ti_axe_015.smc": [
+  1334
+ ],
+ "Data\\Item\\Weapon\\hw_bow_015.smc": [
+  1335
+ ],
+ "Data\\Item\\Weapon\\hw_staff_015.smc": [
+  1336
+ ],
+ "Data\\Item\\Weapon\\ma_wand_015.smc": [
+  1338
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_015.smc": [
+  1339
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_015.smc": [
+  1340
+ ],
+ "Data\\Item\\Weapon\\so_scythe_015.smc": [
+  1341
+ ],
+ "Data\\Item\\Weapon\\so_staff_015.smc": [
+  1342
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_013.smc": [
+  1343
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_013.smc": [
+  1344
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_013.smc": [
+  1345
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_013.smc": [
+  1346
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_015.smc": [
+  1348
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_013.smc": [
+  1349
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_013.smc": [
+  1350
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_013.smc": [
+  1351
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_013.smc": [
+  1352
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_013.smc": [
+  1354
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_013.smc": [
+  1355
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_013.smc": [
+  1356
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_013.smc": [
+  1357
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_013.smc": [
+  1359
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_013.smc": [
+  1360
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_013.smc": [
+  1361
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_013.smc": [
+  1362
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_013.smc": [
+  1364
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_013.smc": [
+  1365
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_013.smc": [
+  1366
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_013.smc": [
+  1367
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_012.smc": [
+  1369
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_012.smc": [
+  1370
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_012.smc": [
+  1371
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_012.smc": [
+  1372
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_013.smc": [
+  1374
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_013.smc": [
+  1375
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_013.smc": [
+  1376
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_013.smc": [
+  1377
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_014.smc": [
+  1379
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_014.smc": [
+  1380
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_014.smc": [
+  1381
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_014.smc": [
+  1382
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_015.smc": [
+  1541
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_015.smc": [
+  1542
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_015.smc": [
+  1543
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_015.smc": [
+  1544
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_015.smc": [
+  1546
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_015.smc": [
+  1547
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_015.smc": [
+  1548
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_015.smc": [
+  1549
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_015.smc": [
+  1551
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_015.smc": [
+  1552
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_015.smc": [
+  1553
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_015.smc": [
+  1554
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_015.smc": [
+  1556
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_015.smc": [
+  1557
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_015.smc": [
+  1558
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_015.smc": [
+  1559
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_015.smc": [
+  1561
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_015.smc": [
+  1562
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_015.smc": [
+  1563
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_015.smc": [
+  1564
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_015.smc": [
+  1566
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_015.smc": [
+  1567
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_015.smc": [
+  1568
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_015.smc": [
+  1569
+ ],
+ "Data\\Item\\Weapon\\ni_sword_017.smc": [
+  1614
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_017.smc": [
+  1615
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_017.smc": [
+  1616
+ ],
+ "Data\\Item\\Weapon\\ti_axe_017.smc": [
+  1617
+ ],
+ "Data\\Item\\Weapon\\hw_bow_017.smc": [
+  1618
+ ],
+ "Data\\Item\\Weapon\\hw_staff_017.smc": [
+  1619
+ ],
+ "Data\\Item\\Weapon\\ma_staff_017.smc": [
+  1620
+ ],
+ "Data\\Item\\Weapon\\ma_wand_017.smc": [
+  1621
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_017.smc": [
+  1622
+ ],
+ "Data\\Item\\Weapon\\so_scythe_017.smc": [
+  1623
+ ],
+ "Data\\Item\\Weapon\\so_staff_017.smc": [
+  1624
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_017.smc": [
+  1625
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_017.smc": [
+  1631
+ ],
+ "Data\\Item\\Weapon\\ni_sword_018.smc": [
+  1845,
+  1888,
+  1900
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_018.smc": [
+  1847,
+  1890,
+  1902
+ ],
+ "Data\\Item\\Weapon\\hw_staff_018.smc": [
+  1850,
+  1893,
+  1905
+ ],
+ "Data\\Item\\Weapon\\ma_wand_018.smc": [
+  1852,
+  1895,
+  1907
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_018.smc": [
+  1854,
+  1897,
+  1909
+ ],
+ "Data\\Item\\Weapon\\so_staff_018.smc": [
+  1856,
+  1899,
+  1911
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_016.smc": [
+  1858,
+  1914,
+  1945
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_016.smc": [
+  1859,
+  1915,
+  1946
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_016.smc": [
+  1860,
+  1916,
+  1947
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_016.smc": [
+  1861,
+  1917,
+  1948
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_016.smc": [
+  1863,
+  1919,
+  1950
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_016.smc": [
+  1864,
+  1920,
+  1951
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_016.smc": [
+  1865,
+  1921,
+  1952
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_016.smc": [
+  1866,
+  1922,
+  1953
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_018.smc": [
+  1867,
+  1923,
+  1954
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_016.smc": [
+  1869,
+  1925,
+  1956
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_016.smc": [
+  1870,
+  1926,
+  1957
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_016.smc": [
+  1871,
+  1927,
+  1958
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_016.smc": [
+  1872,
+  1928,
+  1959
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_016.smc": [
+  1874,
+  1930,
+  1961
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_016.smc": [
+  1875,
+  1931,
+  1962
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_016.smc": [
+  1876,
+  1932,
+  1963
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_016.smc": [
+  1877,
+  1933,
+  1964
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_016.smc": [
+  1879,
+  1935,
+  1966
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_016.smc": [
+  1880,
+  1936,
+  1967
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_016.smc": [
+  1881,
+  1937,
+  1968
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_016.smc": [
+  1882,
+  1938,
+  1969
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_016.smc": [
+  1884,
+  1940,
+  1971
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_016.smc": [
+  1885,
+  1941,
+  1972
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_016.smc": [
+  1886,
+  1942,
+  1973
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_016.smc": [
+  1887,
+  1943,
+  1974
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_018.smc": [
+  1889,
+  1901
+ ],
+ "Data\\Item\\Weapon\\ti_axe_018.smc": [
+  1891,
+  1903
+ ],
+ "Data\\Item\\Weapon\\hw_bow_018.smc": [
+  1892,
+  1904
+ ],
+ "Data\\Item\\Weapon\\ma_staff_018.smc": [
+  1894,
+  1906
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_018.smc": [
+  1896,
+  1908
+ ],
+ "Data\\Item\\Weapon\\so_scythe_018.smc": [
+  1898,
+  1910
+ ],
+ "Data\\Item\\Weapon\\ni_sword_019.smc": [
+  2501
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_019.smc": [
+  2503
+ ],
+ "Data\\Item\\Weapon\\hw_staff_019.smc": [
+  2506
+ ],
+ "Data\\Item\\Weapon\\ma_wand_019.smc": [
+  2508
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_019.smc": [
+  2510
+ ],
+ "Data\\Item\\Weapon\\so_staff_019.smc": [
+  2512
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_017.smc": [
+  2514
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_017.smc": [
+  2515
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_017.smc": [
+  2516
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_017.smc": [
+  2517
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_017.smc": [
+  2519
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_017.smc": [
+  2520
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_017.smc": [
+  2521
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_017.smc": [
+  2522
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_019.smc": [
+  2523
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_017.smc": [
+  2525
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_017.smc": [
+  2526
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_017.smc": [
+  2527
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_017.smc": [
+  2528
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_017.smc": [
+  2530
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_017.smc": [
+  2531
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_017.smc": [
+  2532
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_017.smc": [
+  2533
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_017.smc": [
+  2535
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_017.smc": [
+  2536
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_017.smc": [
+  2537
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_017.smc": [
+  2538
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_017.smc": [
+  2540
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_017.smc": [
+  2541
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_017.smc": [
+  2542
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_017.smc": [
+  2543
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ja_bu_001.smc": [
+  2643
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ja_bd_001.smc": [
+  2644
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ja_hn_001.smc": [
+  2645
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ja_ft_001.smc": [
+  2646
+ ],
+ "Data\\Item\\Weapon\\ni_sword_020.smc": [
+  3018
+ ],
+ "Data\\Item\\Weapon\\ti_gsowrd_020.smc": [
+  3020
+ ],
+ "Data\\Item\\Weapon\\hw_staff_020.smc": [
+  3023
+ ],
+ "Data\\Item\\Weapon\\ma_wand_020.smc": [
+  3025
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_020.smc": [
+  3027
+ ],
+ "Data\\Item\\Weapon\\so_staff_020.smc": [
+  3029
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hel_018.smc": [
+  3030
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_018.smc": [
+  3031
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_018.smc": [
+  3032
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_018.smc": [
+  3033
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_018.smc": [
+  3034
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hel_018.smc": [
+  3035
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_018.smc": [
+  3036
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_018.smc": [
+  3037
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_018.smc": [
+  3038
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_018.smc": [
+  3039
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_020.smc": [
+  3040
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hel_018.smc": [
+  3041
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_018.smc": [
+  3042
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_018.smc": [
+  3043
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_018.smc": [
+  3044
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_018.smc": [
+  3045
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hel_018.smc": [
+  3046
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_018.smc": [
+  3047
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_018.smc": [
+  3048
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_018.smc": [
+  3049
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_018.smc": [
+  3050
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hel_018.smc": [
+  3051
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_018.smc": [
+  3052
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_018.smc": [
+  3053
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_018.smc": [
+  3054
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_018.smc": [
+  3055
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hel_018.smc": [
+  3056
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_018.smc": [
+  3057
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_018.smc": [
+  3058
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_018.smc": [
+  3059
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_018.smc": [
+  3060
+ ],
+ "Data\\Item\\Weapon\\ni_sword_phynix.smc": [
+  3219
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_phynix.smc": [
+  3221
+ ],
+ "Data\\Item\\Weapon\\hw_staff_phynix.smc": [
+  3224
+ ],
+ "Data\\Item\\Weapon\\ma_wand_phynix.smc": [
+  3226
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_phynix.smc": [
+  3228
+ ],
+ "Data\\Item\\Weapon\\so_staff_phynix.smc": [
+  3230
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_phynix.smc": [
+  3231
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_phynix.smc": [
+  3232
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_phynix.smc": [
+  3233
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_phynix.smc": [
+  3234
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_phynix.smc": [
+  3236
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_phynix.smc": [
+  3237
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_phynix.smc": [
+  3238
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_phynix.smc": [
+  3239
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_phynix.smc": [
+  3241
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_phynix.smc": [
+  3242
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_phynix.smc": [
+  3243
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_phynix.smc": [
+  3244
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_phynix.smc": [
+  3245
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_phynix.smc": [
+  3247
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_phynix.smc": [
+  3248
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_phynix.smc": [
+  3249
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_phynix.smc": [
+  3250
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_phynix.smc": [
+  3252
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_phynix.smc": [
+  3253
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_phynix.smc": [
+  3254
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_phynix.smc": [
+  3255
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_phynix.smc": [
+  3258
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_phynix.smc": [
+  3259
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_phynix.smc": [
+  3260
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_phynix.smc": [
+  3261
+ ],
+ "Data\\Item\\Weapon\\ni_sword_021.smc": [
+  3314,
+  3357
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_021.smc": [
+  3315,
+  3358
+ ],
+ "Data\\Item\\Weapon\\ti_gsowrd_021.smc": [
+  3316,
+  3359
+ ],
+ "Data\\Item\\Weapon\\ti_axe_021.smc": [
+  3317,
+  3360
+ ],
+ "Data\\Item\\Weapon\\hw_bow_021.smc": [
+  3318,
+  3361
+ ],
+ "Data\\Item\\Weapon\\hw_staff_021.smc": [
+  3319,
+  3362
+ ],
+ "Data\\Item\\Weapon\\ma_staff_021.smc": [
+  3320,
+  3363
+ ],
+ "Data\\Item\\Weapon\\ma_wand_021.smc": [
+  3321,
+  3364
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_021.smc": [
+  3322,
+  3365
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_021.smc": [
+  3323,
+  3366
+ ],
+ "Data\\Item\\Weapon\\so_scythe_021.smc": [
+  3324,
+  3367
+ ],
+ "Data\\Item\\Weapon\\so_staff_021.smc": [
+  3325,
+  3368
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hel_019.smc": [
+  3326,
+  3369
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_019.smc": [
+  3327,
+  3370
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_019.smc": [
+  3328,
+  3371
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_019.smc": [
+  3329,
+  3372
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_019.smc": [
+  3330,
+  3373
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hel_019.smc": [
+  3331,
+  3374
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_019.smc": [
+  3332,
+  3375
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_019.smc": [
+  3333,
+  3376
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_019.smc": [
+  3334,
+  3377
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_019.smc": [
+  3335,
+  3378
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_021.smc": [
+  3336,
+  3379
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hel_019.smc": [
+  3337,
+  3380
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_019.smc": [
+  3338,
+  3381
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_019.smc": [
+  3339,
+  3382
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_019.smc": [
+  3340,
+  3383
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_019.smc": [
+  3341,
+  3384
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hel_019.smc": [
+  3342,
+  3385
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_019.smc": [
+  3343,
+  3386
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_019.smc": [
+  3344,
+  3387
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_019.smc": [
+  3345,
+  3388
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_019.smc": [
+  3346,
+  3389
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hel_019.smc": [
+  3347,
+  3390
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_019.smc": [
+  3348,
+  3391
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_019.smc": [
+  3349,
+  3392
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_019.smc": [
+  3350,
+  3393
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_019.smc": [
+  3351,
+  3394
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hel_019.smc": [
+  3352,
+  3395
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_019.smc": [
+  3353,
+  3396
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_019.smc": [
+  3354,
+  3397
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_019.smc": [
+  3355,
+  3398
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_019.smc": [
+  3356,
+  3399
+ ],
+ "Data\\Item\\Weapon\\ni_sword_021-1.smc": [
+  3400,
+  3443,
+  3486
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_021-1.smc": [
+  3401,
+  3444,
+  3487
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_021-1.smc": [
+  3402,
+  3445,
+  3488
+ ],
+ "Data\\Item\\Weapon\\ti_axe_021-1.smc": [
+  3403,
+  3446,
+  3489
+ ],
+ "Data\\Item\\Weapon\\hw_bow_021-1.smc": [
+  3404,
+  3447,
+  3490
+ ],
+ "Data\\Item\\Weapon\\hw_staff_021-1.smc": [
+  3405,
+  3448,
+  3491
+ ],
+ "Data\\Item\\Weapon\\ma_staff_021-1.smc": [
+  3406,
+  3449,
+  3492
+ ],
+ "Data\\Item\\Weapon\\ma_wand_021-1.smc": [
+  3407,
+  3450,
+  3493
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_021-1.smc": [
+  3408,
+  3451,
+  3494
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_021-1.smc": [
+  3409,
+  3452,
+  3495
+ ],
+ "Data\\Item\\Weapon\\so_scythe_021-1.smc": [
+  3410,
+  3453,
+  3496
+ ],
+ "Data\\Item\\Weapon\\so_staff_021-1.smc": [
+  3411,
+  3454,
+  3497
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hel_019-1.smc": [
+  3412,
+  3455,
+  3498
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_019-1.smc": [
+  3413,
+  3456,
+  3499
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_019-1.smc": [
+  3414,
+  3457,
+  3500
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_019-1.smc": [
+  3415,
+  3458,
+  3501
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_019-1.smc": [
+  3416,
+  3459,
+  3502
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hel_019-1.smc": [
+  3417,
+  3460,
+  3503
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_019-1.smc": [
+  3418,
+  3461,
+  3504
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_019-1.smc": [
+  3419,
+  3462,
+  3505
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_019-1.smc": [
+  3420,
+  3463,
+  3506
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_019-1.smc": [
+  3421,
+  3464,
+  3507
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hel_019-1.smc": [
+  3423,
+  3466,
+  3509
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_019-1.smc": [
+  3424,
+  3467,
+  3510
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_019-1.smc": [
+  3425,
+  3468,
+  3511
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_019-1.smc": [
+  3426,
+  3469,
+  3512
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_019-1.smc": [
+  3427,
+  3470,
+  3513
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hel_019-1.smc": [
+  3428,
+  3471,
+  3514
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_019-1.smc": [
+  3429,
+  3472,
+  3515
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_019-1.smc": [
+  3430,
+  3473,
+  3516
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_019-1.smc": [
+  3431,
+  3474,
+  3517
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_019-1.smc": [
+  3432,
+  3475,
+  3518
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hel_019-1.smc": [
+  3433,
+  3476,
+  3519
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_019-1.smc": [
+  3434,
+  3477,
+  3520
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_019-1.smc": [
+  3435,
+  3478,
+  3521
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_019-1.smc": [
+  3436,
+  3479,
+  3522
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_019-1.smc": [
+  3437,
+  3480,
+  3523
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hel_019-1.smc": [
+  3438,
+  3481,
+  3524
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_019-1.smc": [
+  3439,
+  3482,
+  3525
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_019-1.smc": [
+  3440,
+  3483,
+  3526
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_019-1.smc": [
+  3441,
+  3484,
+  3527
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_019-1.smc": [
+  3442,
+  3485,
+  3528
+ ],
+ "Data\\Item\\Weapon\\ti_gsowrd_023.smc": [
+  3770
+ ],
+ "Data\\Item\\Weapon\\ti_axe_023.smc": [
+  3873
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_023.smc": [
+  3876,
+  3878
+ ],
+ "Data\\Item\\Weapon\\ni_sword_023.smc": [
+  3879,
+  3881
+ ],
+ "Data\\Item\\Weapon\\hw_bow_023.smc": [
+  3882
+ ],
+ "Data\\Item\\Weapon\\hw_staff_023.smc": [
+  3885
+ ],
+ "Data\\Item\\Weapon\\ma_staff_023.smc": [
+  3890
+ ],
+ "Data\\Item\\Weapon\\ma_wand_023.smc": [
+  3893
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_023.smc": [
+  3896
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_023.smc": [
+  3899
+ ],
+ "Data\\Item\\Weapon\\so_staff_023.smc": [
+  3902
+ ],
+ "Data\\Item\\Weapon\\so_scythe_023.smc": [
+  3905
+ ],
+ "Data\\Item\\Weapon\\ti_gsowrd_023-1.smc": [
+  3910,
+  3911
+ ],
+ "Data\\Item\\Weapon\\ti_axe_023-1.smc": [
+  3915
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_023-1.smc": [
+  3918
+ ],
+ "Data\\Item\\Weapon\\ni_sword_023-1.smc": [
+  3920,
+  3922
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hel_021.smc": [
+  3992
+ ],
+ "Data\\Item\\Weapon\\hw_bow_023-1.smc": [
+  3926
+ ],
+ "Data\\Item\\Weapon\\hw_staff_023-1.smc": [
+  3930
+ ],
+ "Data\\Item\\Weapon\\ma_staff_023-1.smc": [
+  3934
+ ],
+ "Data\\Item\\Weapon\\ma_wand_023-1.smc": [
+  3938
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_023-1.smc": [
+  3942
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_023-1.smc": [
+  3946
+ ],
+ "Data\\Item\\Weapon\\so_staff_023-1.smc": [
+  3950
+ ],
+ "Data\\Item\\Weapon\\so_scythe_023-1.smc": [
+  3952
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_021.smc": [
+  3993
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_021.smc": [
+  3994
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_021.smc": [
+  3995
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_021.smc": [
+  3996
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hel_021.smc": [
+  4007,
+  4019
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_021.smc": [
+  4008,
+  4020
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_021.smc": [
+  4009,
+  4021
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_021.smc": [
+  4010,
+  4022
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_021.smc": [
+  4011,
+  4023
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_023.smc": [
+  4012,
+  4024
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hel_021.smc": [
+  4025
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_021.smc": [
+  4026
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_021.smc": [
+  4027
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_021.smc": [
+  4028
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_021.smc": [
+  4029
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hel_021.smc": [
+  4040
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_021.smc": [
+  4041
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_021.smc": [
+  4042
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_021.smc": [
+  4043
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_021.smc": [
+  4044
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hel_021.smc": [
+  4055
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_021.smc": [
+  4056
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_021.smc": [
+  4057
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_021.smc": [
+  4058
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_021.smc": [
+  4059
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hel_021.smc": [
+  4070
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_021.smc": [
+  4071
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_021.smc": [
+  4072,
+  4082
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_021.smc": [
+  4073
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_021.smc": [
+  4074
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hel_021-1.smc": [
+  4085,
+  4095,
+  4100
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_021-1.smc": [
+  4086,
+  4096,
+  4101
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_021-1.smc": [
+  4097,
+  4102
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_021-1.smc": [
+  4098,
+  4103
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_021-1.smc": [
+  4099,
+  4104
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_023-1.smc": [
+  4110,
+  4122
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hel_021-1.smc": [
+  4117
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_021-1.smc": [
+  4118
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_021-1.smc": [
+  4119
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_021-1.smc": [
+  4120
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_021-1.smc": [
+  4121
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_021-1.smc": [
+  4132,
+  4142
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hel_021-1.smc": [
+  4139
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_021-1.smc": [
+  4140
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_021-1.smc": [
+  4141
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_021-1.smc": [
+  4143
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_021-1.smc": [
+  4151,
+  4161
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hel_021-1.smc": [
+  4159
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_021-1.smc": [
+  4160
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_021-1.smc": [
+  4162
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_021-1.smc": [
+  4163
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_021-1.smc": [
+  4172,
+  4182
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hel_021-1.smc": [
+  4179
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_021-1.smc": [
+  4180
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_021-1.smc": [
+  4181
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_021-1.smc": [
+  4183
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hel_021-1.smc": [
+  4199
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_021-1.smc": [
+  4200
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_021-1.smc": [
+  4201
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_021-1.smc": [
+  4202
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_021-1.smc": [
+  4203
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_oubli.smc": [
+  7065
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hm_oubli.smc": [
+  7067
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_oubli.smc": [
+  7068
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_oubli.smc": [
+  7069
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_oubli.smc": [
+  7071
+ ],
+ "Data\\Item\\Weapon\\ni_sword_oubli.smc": [
+  7072
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hm_oubli.smc": [
+  7074
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_oubli.smc": [
+  7075
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_oubli.smc": [
+  7076
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_oubli.smc": [
+  7078
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_oubli.smc": [
+  7079
+ ],
+ "Data\\Item\\Weapon\\hw_staff_oubli.smc": [
+  7081
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hm_oubli.smc": [
+  7082
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_oubli.smc": [
+  7083
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_oubli.smc": [
+  7084
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_oubli.smc": [
+  7086
+ ],
+ "Data\\Item\\Weapon\\ma_wand_oubli.smc": [
+  7088
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hm_oubli.smc": [
+  7089
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_oubli.smc": [
+  7090
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_oubli.smc": [
+  7091
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_oubli.smc": [
+  7093
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_oubli.smc": [
+  7094
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hm_oubli.smc": [
+  7096
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_oubli.smc": [
+  7097
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_oubli.smc": [
+  7098
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_oubli.smc": [
+  7100
+ ],
+ "Data\\Item\\Weapon\\so_staff_oubli.smc": [
+  7102
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hm_oubli.smc": [
+  7103
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_oubli.smc": [
+  7104
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_oubli.smc": [
+  7105
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_oubli.smc": [
+  7107
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hm_023.smc": [
+  7159,
+  7211
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_023.smc": [
+  7160,
+  7212
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_023.smc": [
+  7161,
+  7213
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_023.smc": [
+  7162,
+  7214
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_023.smc": [
+  7163,
+  7215
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hm_023.smc": [
+  7164,
+  7216
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_023.smc": [
+  7165,
+  7217
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_023.smc": [
+  7166,
+  7218
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_023.smc": [
+  7167,
+  7219
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_023.smc": [
+  7168,
+  7220
+ ],
+ "Data\\Item\\Weapon\\ni_shield_025.smc": [
+  7169,
+  7221
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hm_023.smc": [
+  7170,
+  7222
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_023.smc": [
+  7171,
+  7223
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_023.smc": [
+  7172,
+  7224
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_023.smc": [
+  7173,
+  7225
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_023.smc": [
+  7174,
+  7226
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hm_023.smc": [
+  7175,
+  7227
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_023.smc": [
+  7176,
+  7228
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_023.smc": [
+  7177,
+  7229
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_023.smc": [
+  7178,
+  7230
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_023.smc": [
+  7179,
+  7231
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hm_023.smc": [
+  7180,
+  7232
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_023.smc": [
+  7181,
+  7233
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_023.smc": [
+  7182,
+  7234
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_023.smc": [
+  7183,
+  7235
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_023.smc": [
+  7184,
+  7236
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hm_023.smc": [
+  7185,
+  7237
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_023.smc": [
+  7186,
+  7238
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_023.smc": [
+  7187,
+  7239
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_023.smc": [
+  7188,
+  7240
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_023.smc": [
+  7189,
+  7241
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_025.smc": [
+  7196
+ ],
+ "Data\\Item\\Weapon\\ti_axe_025.smc": [
+  7197
+ ],
+ "Data\\Item\\Weapon\\ni_sword_025.smc": [
+  7198
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_025.smc": [
+  7199
+ ],
+ "Data\\Item\\Weapon\\hw_bow_025.smc": [
+  7200
+ ],
+ "Data\\Item\\Weapon\\hw_staff_025.smc": [
+  7201
+ ],
+ "Data\\Item\\Weapon\\ma_staff_025.smc": [
+  7202
+ ],
+ "Data\\Item\\Weapon\\ma_wand_025.smc": [
+  7203
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_025.smc": [
+  7204
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_025.smc": [
+  7205
+ ],
+ "Data\\Item\\Weapon\\so_scythe_025.smc": [
+  7206
+ ],
+ "Data\\Item\\Weapon\\so_staff_025.smc": [
+  7207
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hm_023-1.smc": [
+  7956
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bu_023-1.smc": [
+  7957
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_bd_023-1.smc": [
+  7958
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_023-1.smc": [
+  7959
+ ],
+ "Data\\Item\\Shield\\Titan\\ti_ft_023-1.smc": [
+  7960
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hm_023-1.smc": [
+  7976
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bu_023-1.smc": [
+  7977
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_bd_023-1.smc": [
+  7978
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_023-1.smc": [
+  7979
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_ft_023-1.smc": [
+  7980
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_shield_025-1.smc": [
+  7981
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hm_023-1.smc": [
+  8000
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bu_023-1.smc": [
+  8001
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_bd_023-1.smc": [
+  8002
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_023-1.smc": [
+  8003
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_ft_023-1.smc": [
+  8004
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hm_023-1.smc": [
+  8020
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bu_023-1.smc": [
+  8021
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_bd_023-1.smc": [
+  8022
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_hn_023-1.smc": [
+  8023
+ ],
+ "Data\\Item\\Shield\\Mage\\ma_ft_023-1.smc": [
+  8024
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hm_023-1.smc": [
+  8040
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bu_023-1.smc": [
+  8041
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_bd_023-1.smc": [
+  8042
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_023-1.smc": [
+  8043
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_ft_023-1.smc": [
+  8044
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hm_023-1.smc": [
+  8060
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bu_023-1.smc": [
+  8061
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_bd_023-1.smc": [
+  8062
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_023-1.smc": [
+  8063
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_ft_023-1.smc": [
+  8064
+ ],
+ "Data\\Item\\Weapon\\ti_gsword_025-1.smc": [
+  8104,
+  8106
+ ],
+ "Data\\Item\\Weapon\\ti_axe_025-1.smc": [
+  8105,
+  8107
+ ],
+ "Data\\Item\\Weapon\\ni_sword_025-1.smc": [
+  8112,
+  8114
+ ],
+ "Data\\Item\\Weapon\\ni_dsword_025-1.smc": [
+  8113,
+  8115
+ ],
+ "Data\\Item\\Weapon\\hw_bow_025-1.smc": [
+  8120,
+  8122
+ ],
+ "Data\\Item\\Weapon\\hw_staff_025-1.smc": [
+  8121,
+  8123
+ ],
+ "Data\\Item\\Weapon\\ma_staff_025-1.smc": [
+  8128,
+  8130
+ ],
+ "Data\\Item\\Weapon\\ma_wand_025-1.smc": [
+  8129,
+  8131
+ ],
+ "Data\\Item\\Weapon\\ro_dagger_025-1.smc": [
+  8136,
+  8138
+ ],
+ "Data\\Item\\Weapon\\ro_crossbow_025-1.smc": [
+  8137,
+  8139
+ ],
+ "Data\\Item\\Weapon\\so_scythe_025-1.smc": [
+  8144,
+  8146
+ ],
+ "Data\\Item\\Weapon\\so_staff_025-1.smc": [
+  8145,
+  8147
+ ],
+ "Data\\item\\Shield\\titan\\ti_cos_volcan_hm.smc": [
+  10029,
+  10134
+ ],
+ "Data\\item\\Shield\\titan\\ti_cos_volcan_bu.smc": [
+  10030,
+  10135
+ ],
+ "Data\\item\\Shield\\titan\\ti_cos_volcan_bd.smc": [
+  10031,
+  10136
+ ],
+ "Data\\item\\Shield\\titan\\ti_cos_volcan_hn.smc": [
+  10032,
+  10137
+ ],
+ "Data\\item\\Shield\\titan\\ti_cos_volcan_ft.smc": [
+  10033,
+  10138
+ ],
+ "Data\\item\\weapon\\ti_gsword_volcan_01.smc": [
+  10034,
+  10206
+ ],
+ "Data\\item\\weapon\\ti_axe_volcan_01.smc": [
+  10035,
+  10207
+ ],
+ "Data\\item\\Shield\\titan\\ti_cos_dessert_hm.smc": [
+  10036,
+  10139
+ ],
+ "Data\\item\\Shield\\titan\\ti_cos_dessert_bu.smc": [
+  10037,
+  10140
+ ],
+ "Data\\item\\Shield\\titan\\ti_cos_dessert_bd.smc": [
+  10038,
+  10141
+ ],
+ "Data\\item\\Shield\\titan\\ti_cos_dessert_hn.smc": [
+  10039,
+  10142
+ ],
+ "Data\\item\\Shield\\titan\\ti_cos_dessert_ft.smc": [
+  10040,
+  10143
+ ],
+ "Data\\item\\weapon\\ti_gsword_dessert_01.smc": [
+  10041,
+  10208
+ ],
+ "Data\\item\\weapon\\ti_axe_dessert_01.smc": [
+  10042,
+  10209
+ ],
+ "Data\\item\\Shield\\knight\\ni_cos_volcan_hm.smc": [
+  10043,
+  10144
+ ],
+ "Data\\item\\Shield\\knight\\ni_cos_volcan_bu.smc": [
+  10044,
+  10145
+ ],
+ "Data\\item\\Shield\\knight\\ni_cos_volcan_bd.smc": [
+  10045,
+  10146
+ ],
+ "Data\\item\\Shield\\knight\\ni_cos_volcan_hn.smc": [
+  10046,
+  10147
+ ],
+ "Data\\item\\Shield\\knight\\ni_cos_volcan_ft.smc": [
+  10047,
+  10148
+ ],
+ "Data\\item\\Shield\\knight\\ni_shield_volcan_01.smc": [
+  10048,
+  10149
+ ],
+ "Data\\item\\weapon\\ni_sword_volcan_01.smc": [
+  10049,
+  10210
+ ],
+ "Data\\item\\weapon\\ni_dsword_volcan_01.smc": [
+  10050,
+  10211
+ ],
+ "Data\\item\\Shield\\knight\\Ni_cos_dessert_hm.smc": [
+  10051,
+  10150
+ ],
+ "Data\\item\\Shield\\knight\\Ni_cos_dessert_hn.smc": [
+  10054,
+  10153
+ ],
+ "Data\\item\\Shield\\knight\\Ni_cos_dessert_bu.smc": [
+  10052,
+  10151
+ ],
+ "Data\\item\\Shield\\knight\\Ni_cos_dessert_bd.smc": [
+  10053,
+  10152
+ ],
+ "Data\\item\\Shield\\knight\\Ni_cos_dessert_ft.smc": [
+  10055,
+  10154
+ ],
+ "Data\\item\\Shield\\knight\\ni_shield_dessert_01.smc": [
+  10056,
+  10155
+ ],
+ "Data\\item\\weapon\\ni_sword_dessert_01.smc": [
+  10057,
+  10212
+ ],
+ "Data\\item\\weapon\\ni_dsword_dessert_01.smc": [
+  10058,
+  10213
+ ],
+ "Data\\item\\Shield\\healer\\hw_cos_volcan_hm.smc": [
+  10059,
+  10156
+ ],
+ "Data\\item\\Shield\\healer\\hw_cos_volcan_bu.smc": [
+  10060,
+  10157
+ ],
+ "Data\\item\\Shield\\healer\\hw_cos_volcan_bd.smc": [
+  10061,
+  10158
+ ],
+ "Data\\item\\Shield\\healer\\hw_cos_volcan_hn.smc": [
+  10062,
+  10159
+ ],
+ "Data\\item\\Shield\\healer\\hw_cos_volcan_ft.smc": [
+  10063,
+  10160
+ ],
+ "Data\\item\\weapon\\hw_staff_volcan_01.smc": [
+  10064,
+  10214
+ ],
+ "Data\\item\\weapon\\hw_bow_volcan_01.smc": [
+  10065,
+  10215
+ ],
+ "Data\\item\\Shield\\healer\\Hw_cos_dessert_hm.smc": [
+  10066,
+  10161
+ ],
+ "Data\\item\\Shield\\healer\\Hw_cos_dessert_bu.smc": [
+  10067,
+  10162
+ ],
+ "Data\\item\\Shield\\healer\\Hw_cos_dessert_bd.smc": [
+  10068,
+  10163
+ ],
+ "Data\\item\\Shield\\healer\\Hw_cos_dessert_hn.smc": [
+  10069,
+  10164
+ ],
+ "Data\\item\\Shield\\healer\\Hw_cos_dessert_ft.smc": [
+  10070,
+  10165
+ ],
+ "Data\\item\\weapon\\hw_staff_dessert_01.smc": [
+  10071,
+  10216
+ ],
+ "Data\\item\\weapon\\hw_bow_dessert_01.smc": [
+  10072,
+  10217
+ ],
+ "Data\\item\\Shield\\mage\\ma_cos_volcan_hm.smc": [
+  10073,
+  10166
+ ],
+ "Data\\item\\Shield\\mage\\ma_cos_volcan_bu.smc": [
+  10074,
+  10167
+ ],
+ "Data\\item\\Shield\\mage\\ma_cos_volcan_bd.smc": [
+  10075,
+  10168
+ ],
+ "Data\\item\\Shield\\mage\\ma_cos_volcan_hn.smc": [
+  10076,
+  10169
+ ],
+ "Data\\item\\Shield\\mage\\ma_cos_volcan_ft.smc": [
+  10077,
+  10170
+ ],
+ "Data\\item\\weapon\\ma_staff_volcan_01.smc": [
+  10078,
+  10218
+ ],
+ "Data\\item\\weapon\\ma_wand_volcan_01.smc": [
+  10079,
+  10219
+ ],
+ "Data\\item\\Shield\\mage\\Ma_cos_dessert_hm.smc": [
+  10080,
+  10171
+ ],
+ "Data\\item\\Shield\\mage\\Ma_cos_dessert_bu.smc": [
+  10081,
+  10172
+ ],
+ "Data\\item\\Shield\\mage\\Ma_cos_dessert_bd.smc": [
+  10082,
+  10173
+ ],
+ "Data\\item\\Shield\\mage\\Ma_cos_dessert_hn.smc": [
+  10083,
+  10174
+ ],
+ "Data\\item\\Shield\\mage\\Ma_cos_dessert_ft.smc": [
+  10084,
+  10175
+ ],
+ "Data\\item\\weapon\\ma_staff_dessert_01.smc": [
+  10085,
+  10220
+ ],
+ "Data\\item\\weapon\\ma_wand_dessert_01.smc": [
+  10086,
+  10221
+ ],
+ "Data\\item\\Shield\\rogue\\ro_cos_volcan_hm.smc": [
+  10087,
+  10176
+ ],
+ "Data\\item\\Shield\\rogue\\ro_cos_volcan_bu.smc": [
+  10088,
+  10177
+ ],
+ "Data\\item\\Shield\\rogue\\ro_cos_volcan_bd.smc": [
+  10089,
+  10178
+ ],
+ "Data\\item\\Shield\\rogue\\ro_cos_volcan_hn.smc": [
+  10090,
+  10179
+ ],
+ "Data\\item\\Shield\\rogue\\ro_cos_volcan_ft.smc": [
+  10091,
+  10180
+ ],
+ "Data\\item\\weapon\\ro_dagger_volcan_01.smc": [
+  10092,
+  10222
+ ],
+ "Data\\item\\weapon\\ro_crossbow_volcan_01.smc": [
+  10093,
+  10223
+ ],
+ "Data\\item\\Shield\\rogue\\Ro_cos_dessert_hm.smc": [
+  10094,
+  10181
+ ],
+ "Data\\item\\Shield\\rogue\\Ro_cos_dessert_bu.smc": [
+  10095,
+  10182
+ ],
+ "Data\\item\\Shield\\rogue\\Ro_cos_dessert_bd.smc": [
+  10096,
+  10183
+ ],
+ "Data\\item\\Shield\\rogue\\Ro_cos_dessert_hn.smc": [
+  10097,
+  10184
+ ],
+ "Data\\item\\Shield\\rogue\\Ro_cos_dessert_ft.smc": [
+  10098,
+  10185
+ ],
+ "Data\\item\\weapon\\ro_dagger_dessert_01.smc": [
+  10099,
+  10224
+ ],
+ "Data\\item\\weapon\\ro_crossbow_dessert_01.smc": [
+  10100,
+  10225
+ ],
+ "Data\\item\\Shield\\sorcerer\\so_cos_volcan_hm.smc": [
+  10101,
+  10186
+ ],
+ "Data\\item\\Shield\\sorcerer\\so_cos_volcan_bu.smc": [
+  10102,
+  10187
+ ],
+ "Data\\item\\Shield\\sorcerer\\so_cos_volcan_bd.smc": [
+  10103,
+  10188
+ ],
+ "Data\\item\\Shield\\sorcerer\\so_cos_volcan_hn.smc": [
+  10104,
+  10189
+ ],
+ "Data\\item\\Shield\\sorcerer\\so_cos_volcan_ft.smc": [
+  10105,
+  10190
+ ],
+ "Data\\item\\weapon\\so_staff_volcan_01.smc": [
+  10106,
+  10226
+ ],
+ "Data\\item\\weapon\\so_scythe_volcan_01.smc": [
+  10107,
+  10227
+ ],
+ "Data\\item\\Shield\\sorcerer\\So_cos_dessert_hm.smc": [
+  10108,
+  10191
+ ],
+ "Data\\item\\Shield\\sorcerer\\So_cos_dessert_bu.smc": [
+  10109,
+  10192
+ ],
+ "Data\\item\\Shield\\sorcerer\\So_cos_dessert_bd.smc": [
+  10110,
+  10193
+ ],
+ "Data\\item\\Shield\\sorcerer\\So_cos_dessert_hn.smc": [
+  10111,
+  10194
+ ],
+ "Data\\item\\Shield\\sorcerer\\So_cos_dessert_ft.smc": [
+  10112,
+  10195
+ ],
+ "Data\\item\\weapon\\so_staff_dessert_01.smc": [
+  10113,
+  10228
+ ],
+ "Data\\item\\weapon\\so_scythe_dessert_01.smc": [
+  10114,
+  10229
+ ]
+}
