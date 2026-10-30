@@ -205,7 +205,7 @@ export class LocalGameService implements GameService {
   }
 
   async buyItem(characterId: string, itemId: number, count: number): Promise<PurchaseResult> {
-    const purchase = applyBuy(this.notOnExpedition(characterId), itemId, count, this.rng)
+    const purchase = applyBuy(this.notOnExpedition(characterId), itemId, count)
     const updated = this.update(characterId, () => purchase.character)
     return copy({ ...purchase, character: updated })
   }

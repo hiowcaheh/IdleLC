@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { SHOP_SELL_RATE, getItem } from '../data/items.ts'
 import { createCharacterData } from './character.ts'
-import { createRng } from './rng.ts'
 import {
   applyBuy,
   applySale,
@@ -61,15 +60,12 @@ describe('shop', () => {
 
 describe('buying', () => {
   // placeholder data: knight tiers — weapon Sentinel Blade (4, level 3), helmet Iron Helm (7, level 2);
-  // accessories Blue Stone (172) and Magical Ring (166); the glade shop's goods: stones and potions
+  // the glade shop's goods: stones and potions
   const knight = (over = {}) => ({
     ...createCharacterData({ name: 'Brom', classId: 'knight' }, 'k', 0),
     gold: 5000,
     ...over,
   })
-  let ids = 0
-  const makeId = () => `b${++ids}`
-
   it('offers the previous, current and next gear tier of every slot', () => {
     const tiers = [5, 9, 13, 17].map((level) => ({ level, items: [level] }))
     const levels = (level: number) => tierWindow(tiers, level).map((t) => t.level)
@@ -79,39 +75,27 @@ describe('buying', () => {
     expect(levels(30)).toEqual([13, 17])
   })
 
-  it('sells gear of the window, accessories and the zone goods for price × buy rate', () => {
+  it('sells gear of the window and the zone goods for price × buy rate', () => {
     const offer = shopOffer(knight())
     expect(offer.gear).toEqual([
       { slot: 'weapon', tiers: [{ level: 3, items: [4] }] },
       { slot: 'helmet', tiers: [{ level: 2, items: [7] }] },
     ])
-    expect(offer.accessories).toEqual([172, 166])
     // the zone's goods, then the magnifying glasses every shop sells
     expect(offer.goods).toEqual([85, 43, 44, 484, 490, 1838, 1839])
     expect(buyPrice(7)).toBe(200)
-    const { character } = applyBuy(knight({ gold: 500 }), 7, 2, createRng(1), makeId)
+    const { character } = applyBuy(knight({ gold: 500 }), 7, 2)
     expect(character.gold).toBe(100)
     expect(character.inventory).toEqual([{ itemId: 7, count: 2 }])
   })
 
   it('refuses what is not on offer, too expensive or a bad count', () => {
-    const rng = createRng(1)
-    expect(() => applyBuy(knight(), 1, 1, rng)).toThrowError(/not-in-shop/)
-    expect(() => applyBuy(knight(), 5, 1, rng)).toThrowError(/not-in-shop/) // starter sword
-    expect(() => applyBuy(knight({ gold: 150 }), 7, 1, rng)).toThrowError(/not-enough-gold/)
-    expect(() => applyBuy(knight(), 7, 0, rng)).toThrowError(/bad-count/)
-  })
-
-  it('rolls fresh options on every accessory bought', () => {
-    const purchase = applyBuy(knight({ gold: 10000 }), 166, 3, createRng(7), makeId)
-    expect(purchase.character.gold).toBe(10000 - 3 * 2000)
-    expect(purchase.pieces).toHaveLength(3)
-    expect(purchase.character.gear).toEqual(purchase.pieces)
-    for (const piece of purchase.pieces) {
-      expect(piece.options!.length).toBeGreaterThanOrEqual(1)
-      // a ring can only roll the ring options of the placeholder data: Attack and Hit Rate
-      for (const o of piece.options!) expect([20, 21]).toContain(o.type)
-    }
+    expect(() => applyBuy(knight(), 1, 1)).toThrowError(/not-in-shop/)
+    expect(() => applyBuy(knight(), 5, 1)).toThrowError(/not-in-shop/) // starter sword
+    // accessories drop from monsters (logic/loot.ts), the shop doesn't sell them
+    expect(() => applyBuy(knight({ gold: 10000 }), 166, 1)).toThrowError(/not-in-shop/)
+    expect(() => applyBuy(knight({ gold: 150 }), 7, 1)).toThrowError(/not-enough-gold/)
+    expect(() => applyBuy(knight(), 7, 0)).toThrowError(/bad-count/)
   })
 
   it('buys upgraded pieces back at the plain price, many at once', () => {

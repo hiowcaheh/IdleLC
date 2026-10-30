@@ -138,8 +138,10 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   właściciela).
 - **Akcesoria i opcje (zapis v7):** 3 sloty akcesoriów, opcje 1:1 z `t_option` (maski podtypów, wagi
   poziomów `a_prob`, wartości `a_level`); liczba opcji 1–5 i ich działanie w walce są **własne**
-  (`options.ts`). Sklep: broń i zbroje klasy z progu poprzedniego / obecnego / następnego (`shopGear`),
-  akcesoria z losowymi opcjami, towary strefy. Pasek umiejętności: max 7, ataki z lewej, buffy z prawej.
+  (`options.ts`). Sklep (zakładki Weapons / Armors / Goods): broń i zbroje klasy z progu poprzedniego /
+  obecnego / następnego (`shopGear`, bez eventowego Phoenix), towary strefy. Akcesoria z opcjami **wypadają
+  z potworów** (0,5% na zabicie — własne, `loot.ts`), sklep ich nie sprzedaje. Pasek umiejętności: zawsze
+  7 slotów, ataki od lewej, buffy od prawej.
 - **Mikstury:** dane 1:1 (mikstura = skill: HP/MP na sekundę lub regeneracja, czas, odnowienie), sklep Juno.
   Auto-picie w walce i na wyprawach (progi 50% HP / 30% MP — **własne**) tylko mikstur ze slotów HP/MP,
   które gracz wybiera z torby (zapis v9, `potions.ts`, `setPotionSlot`; slot ma przełącznik AUTO), zużycie zgłaszane w `reportCombat` (`potions`) i liczone w `simulateAfk`.

@@ -380,8 +380,8 @@ export function shopMagnifiers(): number[] {
   return [MAGNIFIER_ID, GOLDEN_MAGNIFIER_ID].filter((id) => ITEMS[id])
 }
 
-/** Plain accessories the shop sells (options are rolled when one is bought). */
-export function shopAccessories(): number[] {
+/** Plain accessories: monsters drop them with rolled options (logic/loot.ts). */
+export function plainAccessories(): number[] {
   return lcData ? (lcData.accessories ?? []) : PLACEHOLDER_ACCESSORIES
 }
 

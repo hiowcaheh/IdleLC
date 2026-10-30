@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { getItem } from '../data/items.ts'
 import { getMonster } from '../data/monsters.ts'
 import { AFK_MAX_SECONDS, estimateHourly, measureHuntRate, simulateAfk } from './afk.ts'
 import { createCharacterData } from './character.ts'
@@ -59,7 +60,12 @@ describe('simulateAfk', () => {
     expect(one.character.gold).toBe(one.gold)
     expect(one.character.stats.kills).toBe(one.kills)
     expect(one.drops.length).toBeGreaterThan(0)
-    expect(one.character.inventory).toEqual(one.drops)
+    // accessories come as single pieces with options, everything else stacks in the bag
+    const accessory = (itemId: number) => getItem(itemId).gear?.slot === 'accessory'
+    expect(one.character.inventory).toEqual(one.drops.filter((d) => !accessory(d.itemId)))
+    expect(one.character.gear.map((p) => p.itemId).sort((a, b) => a - b)).toEqual(
+      one.drops.filter((d) => accessory(d.itemId)).flatMap((d) => Array(d.count).fill(d.itemId)),
+    )
     expect(one.levelsGained).toBeGreaterThan(0)
     expect(one.character.level).toBe(1 + one.levelsGained)
     expect(one.character.exp).toBeLessThan(expToNextLevel(one.character.level))

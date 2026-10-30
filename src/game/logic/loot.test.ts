@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { addToInventory, rollDrops } from './loot.ts'
+import {
+  ACCESSORY_DROP_CHANCE,
+  accessoryDrops,
+  addToInventory,
+  lootTable,
+  rollDrops,
+  stowDrops,
+} from './loot.ts'
 import { createRng } from './rng.ts'
 
 describe('loot', () => {
@@ -36,5 +43,36 @@ describe('loot', () => {
       { itemId: 9, count: 1 },
     ])
     expect(bag).toEqual([{ itemId: 1, count: 2 }])
+  })
+})
+
+describe('accessory drops', () => {
+  // placeholder data: Blue Stone (172, 1300 gold) and Magical Ring (166, 2000 gold)
+  it('give every monster a small chance at a plain accessory, cheaper ones more often', () => {
+    const drops = accessoryDrops()
+    expect(drops.map((d) => d.itemId)).toEqual([172, 166])
+    const total = drops.reduce((sum, d) => sum + d.chance, 0)
+    expect(total).toBeCloseTo(ACCESSORY_DROP_CHANCE)
+    expect(drops[0]!.chance).toBeGreaterThan(drops[1]!.chance)
+    expect(lootTable({ drops: [] })).toEqual(expect.arrayContaining(drops))
+  })
+
+  it('come as single pieces with rolled options; the rest stacks in the bag', () => {
+    let ids = 0
+    const bag = stowDrops(
+      { inventory: [{ itemId: 43, count: 2 }], gear: [] },
+      [
+        { itemId: 43, count: 3 },
+        { itemId: 166, count: 2 },
+      ],
+      createRng(3),
+      () => `p${++ids}`,
+    )
+    expect(bag.inventory).toEqual([{ itemId: 43, count: 5 }])
+    expect(bag.gear.map((p) => [p.uid, p.itemId, p.plus])).toEqual([
+      ['p1', 166, 0],
+      ['p2', 166, 0],
+    ])
+    for (const piece of bag.gear) expect(piece.options!.length).toBeGreaterThanOrEqual(1)
   })
 })

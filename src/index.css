@@ -3279,8 +3279,8 @@ a.button {
 }
 
 .item-slot__plus {
-  left: 2px;
-  top: 2px;
+  right: 2px;
+  bottom: 2px;
   color: var(--gilt-bright);
 }
 
@@ -3600,4 +3600,22 @@ a.button {
 .hero-card__stats dd {
   width: auto;
   min-width: 76px;
+}
+
+/* the hero's effects under the frame open their window (ui/skills/EffectWindow.tsx) */
+.effect-row__button {
+  position: relative;
+  display: grid;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  touch-action: pan-x pan-y;
+}
+
+.effect-window__text {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--parchment-dim);
 }

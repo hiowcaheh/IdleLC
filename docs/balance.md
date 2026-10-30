@@ -121,6 +121,11 @@ w kodzie serwera LC (tam mogą być dodatkowe zasady: mnożnik dropu serwera, r�
 Przedmioty trafiają do ekwipunku jako stosy (jeden stos na rodzaj; osobne egzemplarze sprzętu z ulepszeniem
 dojdą w M5). Ekwipunek nie ma na razie limitu miejsc.
 
+**Akcesoria** (decyzja właściciela: wypadają z potworów, sklep ich nie sprzedaje; reguła **własna**): każde zabicie
+ma **0,5%** szansy na zwykłe akcesorium (`ACCESSORY_DROP_CHANCE`, `loot.ts`), podzielone między 10 akcesoriów
+proporcjonalnie do 1 / ceny (tańsze częściej). Akcesorium trafia do torby jako osobna sztuka z wylosowanymi
+opcjami (1–5), także z wypraw AFK.
+
 Sprzęt, którego nie może nosić żadna z 6 klas IdleLC (w bazie: Night Shadow, `a_job_flag` 64), **nie
 wypada** — wpisy takich przedmiotów są pomijane w tabelach dropu (decyzja właściciela, `monsters.ts`).
 
@@ -225,7 +230,7 @@ sznury, kamienie, oczy, kolczyki, pierścienie) nie mają własnych statystyk �
 (`t_option`, 1:1): na jakim przedmiocie opcja może się pojawić (maski `a_weapon_type` / `a_wear_type` /
 `a_accessory_type` po podtypie przedmiotu), z jaką wagą wypada każdy poziom (`a_prob`; poziom z wagą 0 nie wypada)
 i jaką ma wartość (`a_level`). Np. pierścień (podtyp 4) może dostać opcje ataku i celności, kamień (podtyp 1) —
-Strength/Dexterity/Intelligence/Constitution, obronę i unik. **Własne:** liczba opcji przy zakupie 1–5 (wagi
+Strength/Dexterity/Intelligence/Constitution, obronę i unik. **Własne:** liczba opcji przy dropie 1–5 (wagi
 40/30/18/9/3), typy wybierane równo spośród pasujących, i to, co opcja robi w IdleLC (`OPTION_EFFECTS`):
 Strength → atak Titana i Knighta, Dexterity → Healera i Rogue, Intelligence → Mage i Sorcerera, Constitution →
 +5 HP za punkt, ataki fizyczne/magiczne/wręcz/dystansowe → atak klas, których dotyczą, obrony → obrona, celność
@@ -240,7 +245,6 @@ cenie z bazy (decyzja własna).
   złota nie jest w sklepie, decyzja właściciela; najczęstsza cena w progu; bez poziomu 1 —
   każdy ma zestaw startowy), w każdym progu **jeden, najsłabszy** przedmiot (najmniej ataku / obrony; prośba
   właściciela — bez duplikatów i mocniejszych odmian). Broń co 4 poziomy, zbroja co 5;
-- **akcesoria** z losowymi opcjami;
 - **towary** sklepów NPC strefy (`t_shopitem`): mikstury i kamienie (Heaven Stone), plus lupy.
 
 Cena = `a_price × a_buy_rate %` (100%).

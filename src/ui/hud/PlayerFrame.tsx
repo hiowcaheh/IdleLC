@@ -1,7 +1,9 @@
+import { useCallback, useState } from 'react'
 import { classPortrait } from '../../game/data/classes.ts'
 import { expToNextLevel } from '../../game/logic/progression.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { EffectRow } from '../skills/EffectRow.tsx'
+import { EffectWindow } from '../skills/EffectWindow.tsx'
 import { Bar } from './Bar.tsx'
 import { ClassPortrait } from './ClassPortrait.tsx'
 
@@ -15,6 +17,8 @@ export function PlayerFrame() {
   const mp = useGameStore((s) => s.hud.playerMp)
   const maxMp = useGameStore((s) => s.hud.playerMaxMp)
   const character = useGameStore((s) => s.character)
+  const [picked, setPicked] = useState<string | null>(null)
+  const closeEffect = useCallback(() => setPicked(null), [])
   if (!character) return null
   const { level, exp } = character
   const needed = expToNextLevel(level)
@@ -55,8 +59,9 @@ export function PlayerFrame() {
         </div>
       </div>
       <div className="player-frame__effects">
-        {!character.expedition && <EffectRow side="player" />}
+        {!character.expedition && <EffectRow side="player" onPick={setPicked} />}
       </div>
+      {picked && <EffectWindow side="player" id={picked} onClose={closeEffect} />}
     </section>
   )
 }

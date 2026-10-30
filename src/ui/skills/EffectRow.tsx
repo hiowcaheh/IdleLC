@@ -3,6 +3,7 @@ import { getSkill } from '../../game/data/skills.ts'
 import type { ActiveEffect, Side } from '../../game/logic/combat.ts'
 import { skillRank } from '../../game/logic/skills.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
+import { effectKey } from './format.ts'
 import { SkillIcon } from './SkillIcon.tsx'
 import { useCombatTicker } from './useCombatTicker.ts'
 
@@ -23,9 +24,17 @@ const LABELS: Record<Look, string> = {
 
 /**
  * Effects on a fighter (the hero's buffs and potions, the monster's curses) with the seconds they
- * have left.
+ * have left; with `onPick`, tapping one opens it.
  */
-export function EffectRow({ side, size = 20 }: { side: Side; size?: number }) {
+export function EffectRow({
+  side,
+  size = 20,
+  onPick,
+}: {
+  side: Side
+  size?: number
+  onPick?(id: string): void
+}) {
   const effects = useCombatTicker(250)[side].effects
   if (effects.length === 0) return null
   return (
@@ -39,13 +48,8 @@ export function EffectRow({ side, size = 20 }: { side: Side; size?: number }) {
         const left = Math.ceil(effect.remaining)
         const style = look(effect, side)
         const label = [effect.name, LABELS[style]].filter(Boolean).join(' — ')
-        return (
-          <li
-            key={effect.itemId === undefined ? effect.skillId : `item-${effect.itemId}`}
-            className={`effect-row__item effect-row__item--${style}`}
-            title={`${label} · ${left} s`}
-            aria-label={`${label}, ${left} seconds left`}
-          >
+        const content = (
+          <>
             {effect.itemId === undefined ? (
               <SkillIcon id={effect.skillId} kind={kind} size={size} />
             ) : (
@@ -54,6 +58,27 @@ export function EffectRow({ side, size = 20 }: { side: Side; size?: number }) {
             <span className="effect-row__time">
               {left >= 60 ? `${Math.floor(left / 60)}m` : left}
             </span>
+          </>
+        )
+        return (
+          <li
+            key={effectKey(effect)}
+            className={`effect-row__item effect-row__item--${style}`}
+            title={`${label} · ${left} s`}
+            aria-label={onPick ? undefined : `${label}, ${left} seconds left`}
+          >
+            {onPick ? (
+              <button
+                type="button"
+                className="effect-row__button"
+                aria-label={`${label}, ${left} seconds left — details`}
+                onClick={() => onPick(effectKey(effect))}
+              >
+                {content}
+              </button>
+            ) : (
+              content
+            )}
           </li>
         )
       })}

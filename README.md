@@ -55,8 +55,8 @@ mieści się 7 umiejętności (ataki z lewej, buffy z prawej) i tylko one są u�
 bar” / „Remove from bar”.
 
 **Ekwipunek:** postać zaczyna w darmowym zestawie swojej klasy z bazy. **Shop** (panel polowania) sprzedaje
-broń i zbroje twojej klasy z progu poprzedniego, obecnego i następnego, akcesoria (z losowymi opcjami z bazy,
-1–5 na sztukę; trzy sloty) i kamienie (ceny 1:1). Sprzęt zakłada się z torby (podgląd zmiany ataku
+broń i zbroje twojej klasy z progu poprzedniego, obecnego i następnego oraz towary (mikstury, kamienie, lupy;
+ceny 1:1). Akcesoria (z losowymi opcjami z bazy, 1–5 na sztukę; trzy sloty) wypadają z potworów. Sprzęt zakłada się z torby (podgląd zmiany ataku
 i obrony), a w oknie **Character** (ikona hełmu) widać statystyki i sloty, można zdjąć sprzęt i ulepszać go
 +0…+15 Heaven Stone'ami (sklep; 10 Smelting Stone z dropu wymienia się w torbie na 1 Heaven Stone; porażka
 od +3 zabiera jeden „+”). Lepszy

@@ -2,6 +2,7 @@ import { WEAPON_KINDS } from '../../game/data/items.ts'
 import type { SkillDef, SkillLevelDef } from '../../game/data/types.ts'
 import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
 import type { CharacterData } from '../../game/logic/character.ts'
+import type { ActiveEffect } from '../../game/logic/combat.ts'
 import {
   SP_UNIT,
   checkLearn,
@@ -88,6 +89,31 @@ function statValue(stat: StatKey, value: number, percent: boolean): string {
     default:
       return signed(value)
   }
+}
+
+/** What an effect on a fighter does right now, one line each ("Attack +25", "Restores 33 HP per second"). */
+export function activeEffectLines(effect: ActiveEffect): string[] {
+  const lines = effect.stats.map(
+    (s) => `${STAT_LABELS[s.stat]} ${statValue(s.stat, s.value, s.percent)}`,
+  )
+  if (effect.hpPerSecond) lines.push(`Restores ${effect.hpPerSecond} HP per second`)
+  if (effect.mpPerSecond) lines.push(`Restores ${effect.mpPerSecond} MP per second`)
+  if (effect.poison > 0) lines.push(`Poison: ${effect.poison} damage at a time`)
+  if (effect.stun) lines.push('Stunned: can neither attack nor cast')
+  return lines
+}
+
+/** Which effect of a fighter: the skill's or the potion's. */
+export const effectKey = (effect: ActiveEffect) =>
+  effect.itemId === undefined ? `skill-${effect.skillId}` : `item-${effect.itemId}`
+
+/** Time left on an effect: "35 s", "4 min 12 s". */
+export function timeLeft(secondsLeft: number): string {
+  const total = Math.max(0, Math.ceil(secondsLeft))
+  const minutes = Math.floor(total / 60)
+  const rest = total % 60
+  if (minutes === 0) return `${rest} s`
+  return rest === 0 ? `${minutes} min` : `${minutes} min ${rest} s`
 }
 
 export function describeEffect(effect: SkillEffect, rank: SkillRank): string {

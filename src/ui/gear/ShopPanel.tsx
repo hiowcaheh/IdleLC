@@ -10,27 +10,29 @@ import { ItemIcon } from '../items/ItemIcon.tsx'
 import { TYPE_LABELS } from '../items/itemTypes.ts'
 import { potionLine, potionText } from '../items/potionText.ts'
 import { Sheet } from '../Sheet.tsx'
-import {
-  SLOT_LABELS,
-  compareText,
-  fmt,
-  gearLine,
-  nameTone,
-  optionLines,
-  wearProblem,
-} from './format.ts'
+import { SLOT_LABELS, compareText, fmt, gearLine, nameTone, wearProblem } from './format.ts'
 
 /** The display slot of a shop slot (the accessory places share one label). */
 const slotKey = (slot: GearSlot): EquipSlot => (slot === 'accessory' ? 'accessory1' : slot)
 
+type Tab = 'weapons' | 'armors' | 'goods'
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'weapons', label: 'Weapons' },
+  { id: 'armors', label: 'Armors' },
+  { id: 'goods', label: 'Goods' },
+]
+
 /**
- * The shop: weapons and armor of the hero's class around its level (previous, current and next
- * tier), accessories with random options, and the zone merchants' goods (potions, stones).
+ * The shop on three tabs: weapons, and armor of the hero's class around its level (previous,
+ * current and next tier), and the zone merchants' goods (potions, stones, magnifying glasses).
+ * Accessories don't sell here: monsters drop them.
  */
 export function ShopPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)
   const buyItem = useGameStore((s) => s.buyItem)
   const [selected, setSelected] = useState<number | null>(null)
+  const [tab, setTab] = useState<Tab>('weapons')
   const [busy, setBusy] = useState(false)
   if (!character) return null
 
@@ -48,18 +50,8 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
     if (busy) return
     setBusy(true)
     try {
-      const { pieces } = await buyItem(itemId, count)
-      const name = getItem(itemId).name
-      const options = pieces.map((p) =>
-        optionLines(p.options, character.classId)
-          .map((o) => o.text)
-          .join(', '),
-      )
-      toast(
-        pieces.length === 0
-          ? `Bought ${count > 1 ? `${count}× ` : ''}${name}.`
-          : `Bought ${name}: ${options.join(' / ')}.`,
-      )
+      await buyItem(itemId, count)
+      toast(`Bought ${count > 1 ? `${count}× ` : ''}${getItem(itemId).name}.`)
     } catch (error) {
       toast(
         error instanceof GameError && error.code === 'not-enough-gold'
@@ -75,8 +67,7 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
   const row = (item: ItemDef, tier?: number) => {
     const price = buyPrice(item.id)
     const open = selected === item.id
-    const accessory = item.gear?.slot === 'accessory'
-    const problem = item.gear && !accessory ? wearProblem(character, item.id) : null
+    const problem = item.gear ? wearProblem(character, item.id) : null
     const afford = character.gold >= price
     return (
       <li
@@ -93,13 +84,11 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
           <span className="item-row__body">
             <span className={`item-row__name${nameTone({ itemId: item.id })}`}>{item.name}</span>
             <span className="item-row__meta">
-              {accessory
-                ? 'Accessory · random options'
-                : item.gear
-                  ? gearLine(item.id)
-                  : item.potion
-                    ? potionLine(item.potion)
-                    : TYPE_LABELS[item.type]}
+              {item.gear
+                ? gearLine(item.id)
+                : item.potion
+                  ? potionLine(item.potion)
+                  : TYPE_LABELS[item.type]}
               {!item.gear && item.level > 1 && (
                 <span className={character.level < item.level ? 'shop__locked' : ''}>
                   {' '}
@@ -117,16 +106,10 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
         </button>
         {open && (
           <div className="item-row__actions">
-            {item.gear && !accessory && (
+            {item.gear && (
               <p className="item-row__note">
                 {problem ??
                   `If you wear it: ${compareText(character, { itemId: item.id, plus: 0 })}`}
-              </p>
-            )}
-            {accessory && (
-              <p className="item-row__note">
-                Comes with 1–5 random options from its option list. Up to three accessories can be
-                worn.
               </p>
             )}
             {item.potion && <p className="item-row__note">{potionText(item.potion)}</p>}
@@ -185,28 +168,45 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
         </p>
       }
     >
-      <h3 className="inventory__heading">Weapons and armor</h3>
-      <p className="sheet__meta">
-        For your level: the tier you are in, the one before and the next one.
-      </p>
-      {gear.map(({ slot, tiers }) => (
-        <section key={slot} className="shop__slot">
-          <h4 className="shop__slot-title">{SLOT_LABELS[slotKey(slot)]}</h4>
-          <ul className="item-list">
-            {tiers.flatMap((t) => t.items.map((id) => row(getItem(id), t.level)))}
-          </ul>
-        </section>
-      ))}
-
-      <h3 className="inventory__heading">Accessories</h3>
-      <ul className="item-list">{offer.accessories.map((id) => row(getItem(id)))}</ul>
-
-      {goods.length > 0 && (
-        <>
-          <h3 className="inventory__heading">Goods</h3>
-          <ul className="item-list">{goods.map((id) => row(getItem(id)))}</ul>
-        </>
+      <div className="tabs" role="tablist" aria-label="Shop">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            className={`tabs__tab${tab === t.id ? ' is-active' : ''}`}
+            onClick={() => {
+              setTab(t.id)
+              setSelected(null)
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {tab !== 'goods' && (
+        <p className="sheet__meta">
+          For your level: the tier you are in, the one before and the next one.
+        </p>
       )}
+      {tab !== 'goods' &&
+        gear
+          .filter(({ slot }) => (slot === 'weapon') === (tab === 'weapons'))
+          .map(({ slot, tiers }) => (
+            <section key={slot} className="shop__slot">
+              <h4 className="shop__slot-title">{SLOT_LABELS[slotKey(slot)]}</h4>
+              <ul className="item-list">
+                {tiers.flatMap((t) => t.items.map((id) => row(getItem(id), t.level)))}
+              </ul>
+            </section>
+          ))}
+      {tab === 'goods' &&
+        (goods.length > 0 ? (
+          <ul className="item-list">{goods.map((id) => row(getItem(id)))}</ul>
+        ) : (
+          <p className="sheet__empty">The merchants here have nothing else to sell.</p>
+        ))}
       {away && <p className="sheet__meta">The shop is closed while you are on an expedition.</p>}
     </Sheet>
   )

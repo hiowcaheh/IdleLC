@@ -7,7 +7,7 @@ import { getMonster } from '../data/monsters.ts'
 import type { CharacterData } from './character.ts'
 import { combatTick, createCombat, type FighterInit } from './combat.ts'
 import { monsterFighter, playerFighter, type Hero } from './fighters.ts'
-import { addToInventory, lootTable, rollDrops, takeFromInventory, type ItemStack } from './loot.ts'
+import { lootTable, rollDrops, stowDrops, takeFromInventory, type ItemStack } from './loot.ts'
 import { gainExp } from './progression.ts'
 import { killReward } from './rewards.ts'
 import type { Rng } from './rng.ts'
@@ -174,7 +174,7 @@ export function simulateAfk(character: CharacterData, awaySeconds: number, rng: 
       gold: character.gold + gold,
       sp: character.sp + sp,
       stats: { kills: character.stats.kills + kills, deaths: character.stats.deaths + deaths },
-      inventory: addToInventory(potions.inventory, drops),
+      ...stowDrops({ inventory: potions.inventory, gear: character.gear }, drops, rng),
     },
   }
 }

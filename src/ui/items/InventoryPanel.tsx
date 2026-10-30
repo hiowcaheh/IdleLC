@@ -132,7 +132,18 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
       itemId === HEAVEN_STONE_ID
     )
   }
-  const sellable = inventory.filter((s) => sellPrice(s.itemId) > 0 && !keep(s.itemId))
+  // "sell all" sells the loot of the tab open
+  const sellable = inventory.filter(
+    (s) =>
+      sellPrice(s.itemId) > 0 &&
+      !keep(s.itemId) &&
+      (category === 'all' || categoryOf(getItem(s.itemId)) === category),
+  )
+  const tabName = CATEGORIES.find((c) => c.id === category)?.label.toLowerCase() ?? ''
+  const sellAllLabel =
+    category === 'all'
+      ? 'Sell all loot'
+      : `Sell all ${category === 'other' ? 'other items' : tabName}`
   const value = stacksValue(sellable)
 
   const run = async (action: () => Promise<string>) => {
@@ -428,7 +439,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
             disabled={busy}
             onClick={() => setConfirmAll(true)}
           >
-            Sell all loot · +{fmt(value)} gold
+            {sellAllLabel} · +{fmt(value)} gold
           </button>
           <p className="sheet__meta inventory__keep-note">
             Kept: gear your class can wear, potions, upgrade stones and magnifying glasses.
@@ -438,7 +449,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
       {confirmAll && (
         <Sheet
           centered
-          title="Sell all loot"
+          title={sellAllLabel}
           titleId="sell-all-title"
           onClose={() => setConfirmAll(false)}
         >

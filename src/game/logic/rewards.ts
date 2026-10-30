@@ -7,7 +7,7 @@ import type { MonsterDef } from '../data/types.ts'
 import { clamp } from './balance.ts'
 import type { CharacterData } from './character.ts'
 import { TIMINGS } from './combat.ts'
-import { addToInventory, lootTable, rollDrops, takeFromInventory, type ItemStack } from './loot.ts'
+import { lootTable, rollDrops, stowDrops, takeFromInventory, type ItemStack } from './loot.ts'
 import { applyPlayTime, type OptionGain } from './options.ts'
 import { gainExp } from './progression.ts'
 import type { Rng } from './rng.ts'
@@ -108,15 +108,16 @@ export function applyCombatReport(
   const potions = (report.potions ?? []).filter((p) => getItem(p.itemId).potion)
   const { inventory, taken } = takeFromInventory(character.inventory, potions)
   const played = applyPlayTime(character, playSeconds, rng)
+  const bag = stowDrops({ inventory, gear: played.character.gear }, drops, rng)
   return {
     character: {
       ...played.character,
+      ...bag,
       level: progress.level,
       exp: progress.exp,
       gold: character.gold + gold,
       sp: character.sp + sp,
       stats: { kills: character.stats.kills + kills, deaths: character.stats.deaths + deaths },
-      inventory: addToInventory(inventory, drops),
     },
     kills,
     exp,

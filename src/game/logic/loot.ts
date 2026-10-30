@@ -1,6 +1,10 @@
 /** Drops and the inventory. Pure. */
-import { SMELTING_STONE_ID } from '../data/items.ts'
+import { SMELTING_STONE_ID, getItem, plainAccessories } from '../data/items.ts'
 import type { MonsterDef, MonsterDrop } from '../data/types.ts'
+import type { CharacterData } from './character.ts'
+import type { GearPiece } from './equipment.ts'
+import { newId } from './id.ts'
+import { rollOptions } from './options.ts'
 import { chance, type Rng } from './rng.ts'
 
 /**
@@ -9,9 +13,58 @@ import { chance, type Rng } from './rng.ts'
  */
 export const GENERAL_DROPS: MonsterDrop[] = [{ itemId: SMELTING_STONE_ID, chance: 0.01 }]
 
+/**
+ * Chance per kill that a plain accessory drops (own rule — owner's decision: accessories with options
+ * come from monsters, not the shop). Split between them by 1 / price: cheaper ones drop more often.
+ */
+export const ACCESSORY_DROP_CHANCE = 0.005
+
+/** The plain accessories' entries of every loot table. */
+export function accessoryDrops(): MonsterDrop[] {
+  const ids = plainAccessories()
+  const weights = ids.map((id) => 1 / Math.max(1, getItem(id).price))
+  const total = weights.reduce((sum, w) => sum + w, 0)
+  return ids.map((itemId, i) => ({
+    itemId,
+    chance: (ACCESSORY_DROP_CHANCE * weights[i]!) / total,
+  }))
+}
+
 /** Everything a kill of the monster can drop. */
 export function lootTable(monster: Pick<MonsterDef, 'drops'>): MonsterDrop[] {
-  return [...(monster.drops ?? []), ...GENERAL_DROPS]
+  return [...(monster.drops ?? []), ...GENERAL_DROPS, ...accessoryDrops()]
+}
+
+/**
+ * Puts drops in the bag: accessories as single pieces with freshly rolled options, everything else
+ * in stacks.
+ */
+export function stowDrops(
+  character: Pick<CharacterData, 'inventory' | 'gear'>,
+  drops: readonly ItemStack[],
+  rng: Rng,
+  makeId: () => string = newId,
+): Pick<CharacterData, 'inventory' | 'gear'> {
+  const stacks: ItemStack[] = []
+  const pieces: GearPiece[] = []
+  for (const drop of drops) {
+    if (getItem(drop.itemId).gear?.slot !== 'accessory') {
+      stacks.push(drop)
+      continue
+    }
+    for (let i = 0; i < drop.count; i++) {
+      pieces.push({
+        uid: makeId(),
+        itemId: drop.itemId,
+        plus: 0,
+        options: rollOptions(drop.itemId, rng),
+      })
+    }
+  }
+  return {
+    inventory: addToInventory(character.inventory, stacks),
+    gear: pieces.length > 0 ? [...character.gear, ...pieces] : [...character.gear],
+  }
 }
 
 export interface ItemStack {
