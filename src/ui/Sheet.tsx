@@ -12,6 +12,7 @@ export function Sheet({
   titleId,
   extra,
   centered = false,
+  className = '',
   onClose,
   children,
 }: {
@@ -20,6 +21,8 @@ export function Sheet({
   /** Shown at the top of the window, on the right (e.g. the gold or skill points to spend). */
   extra?: ReactNode
   centered?: boolean
+  /** Extra class of the window (e.g. a fixed height). */
+  className?: string
   onClose(): void
   children: ReactNode
 }) {
@@ -38,7 +41,7 @@ export function Sheet({
     <div className={`sheet-backdrop${centered ? ' sheet-backdrop--center' : ''}`} onClick={onClose}>
       <div
         ref={dialog}
-        className="sheet sheet--framed"
+        className={`sheet sheet--framed${className ? ` ${className}` : ''}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

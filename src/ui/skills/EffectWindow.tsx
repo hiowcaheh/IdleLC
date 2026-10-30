@@ -5,7 +5,7 @@ import type { Side } from '../../game/logic/combat.ts'
 import { skillRank } from '../../game/logic/skills.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { Sheet } from '../Sheet.tsx'
-import { KIND_LABELS, activeEffectLines, effectKey, timeLeft } from './format.ts'
+import { KIND_LABELS, activeEffectRows, effectKey, timeLeft } from './format.ts'
 import { SkillIcon } from './SkillIcon.tsx'
 import { useCombatTicker } from './useCombatTicker.ts'
 
@@ -23,7 +23,7 @@ export function EffectWindow({ side, id, onClose }: { side: Side; id: string; on
   const skill = effect.itemId === undefined ? getSkill(effect.skillId) : undefined
   const kind = skill ? skillRank(skill, 1).kind : 'buff'
   const what = effect.itemId !== undefined ? 'Potion' : effect.stun ? 'Stun' : KIND_LABELS[kind]
-  const lines = activeEffectLines(effect)
+  const rows = activeEffectRows(effect)
 
   return (
     <Sheet centered title={effect.name} titleId="effect-title" onClose={onClose}>
@@ -38,19 +38,21 @@ export function EffectWindow({ side, id, onClose }: { side: Side; id: string; on
             <span className="item-info__name">{effect.name}</span>
             <span className="item-info__kind">{what}</span>
           </span>
+          <span className="effect-window__time" aria-label="Ends in">
+            {timeLeft(effect.remaining)}
+          </span>
         </div>
-        <dl className="hero-stats hero-stats--single item-info__stats">
-          <div>
-            <dt>Ends in</dt>
-            <dd>{timeLeft(effect.remaining)}</dd>
-          </div>
-        </dl>
-        {lines.length > 0 && (
-          <ul className="item-info__options" aria-label="What it does">
-            {lines.map((line) => (
-              <li key={line}>{line}</li>
+        {rows.length > 0 && (
+          <dl className="hero-stats hero-stats--single item-info__stats" aria-label="What it does">
+            {rows.map(({ label, value, bad }) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>
+                  <span className={bad ? 'is-bad' : 'is-good'}>{value}</span>
+                </dd>
+              </div>
             ))}
-          </ul>
+          </dl>
         )}
         {skill?.description && <p className="effect-window__text">{skill.description}</p>}
       </div>

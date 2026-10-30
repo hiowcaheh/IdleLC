@@ -91,16 +91,27 @@ function statValue(stat: StatKey, value: number, percent: boolean): string {
   }
 }
 
-/** What an effect on a fighter does right now, one line each ("Attack +25", "Restores 33 HP per second"). */
-export function activeEffectLines(effect: ActiveEffect): string[] {
-  const lines = effect.stats.map(
-    (s) => `${STAT_LABELS[s.stat]} ${statValue(s.stat, s.value, s.percent)}`,
-  )
-  if (effect.hpPerSecond) lines.push(`Restores ${effect.hpPerSecond} HP per second`)
-  if (effect.mpPerSecond) lines.push(`Restores ${effect.mpPerSecond} MP per second`)
-  if (effect.poison > 0) lines.push(`Poison: ${effect.poison} damage at a time`)
-  if (effect.stun) lines.push('Stunned: can neither attack nor cast')
-  return lines
+/**
+ * What an effect on a fighter does right now, row by row (["Attack", "+25"], ["HP per second", "+33"]);
+ * `bad` marks what weakens the fighter (less defense, longer casting, poison, a stun).
+ */
+export function activeEffectRows(
+  effect: ActiveEffect,
+): { label: string; value: string; bad: boolean }[] {
+  const rows = effect.stats.map((s) => ({
+    label: STAT_LABELS[s.stat],
+    value: statValue(s.stat, s.value, s.percent),
+    // casting takes longer with a positive change; every other stat is worse when it drops
+    bad: s.stat === 'castTime' ? s.value > 0 : s.value < 0,
+  }))
+  if (effect.hpPerSecond)
+    rows.push({ label: 'HP per second', value: `+${effect.hpPerSecond}`, bad: false })
+  if (effect.mpPerSecond)
+    rows.push({ label: 'MP per second', value: `+${effect.mpPerSecond}`, bad: false })
+  if (effect.poison > 0)
+    rows.push({ label: 'Poison damage', value: `−${effect.poison}`, bad: true })
+  if (effect.stun) rows.push({ label: 'Stunned', value: 'No attacks', bad: true })
+  return rows
 }
 
 /** Which effect of a fighter: the skill's or the potion's. */

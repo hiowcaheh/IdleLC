@@ -126,28 +126,37 @@ const PERCENT_STATS = new Set([
 ])
 
 function optionAmount(type: number, value: number): string {
+  const [name, amount] = optionParts(type, value)
+  return `${name} ${amount}`
+}
+
+/** An option's name and amount apart: ["Hit Rate", "+3.7%"]. */
+function optionParts(type: number, value: number): [string, string] {
   const name = getOption(type)?.name ?? `Option ${type}`
   const effect = OPTION_EFFECTS[type]
   const tenths = (v: number) => `${Number((v / 10).toFixed(1))}%`
-  if (type === LEVEL_OPTION) return `${name} −${fmt(value)}`
+  if (type === LEVEL_OPTION) return [name, `−${fmt(value)}`]
   if (effect?.percent || (effect && PERCENT_STATS.has(effect.stat)))
-    return `${name} +${fmt(value)}%`
+    return [name, `+${fmt(value)}%`]
   if (effect?.stat === 'hit' || effect?.stat === 'dodge' || effect?.stat === 'critChance') {
-    return `${name} +${tenths(value)}`
+    return [name, `+${tenths(value)}`]
   }
-  return `${name} +${fmt(value)}`
+  return [name, `+${fmt(value)}`]
 }
 
 /** The options of a piece with whether they help the class (and why not). */
 export function optionLines(
   options: readonly ItemOption[] | undefined,
   classId: CharacterData['classId'],
-): { text: string; helps: boolean; note?: string }[] {
+): { text: string; name: string; amount: string; helps: boolean; note?: string }[] {
   return (options ?? []).map((o) => {
     const helps = optionHelps(o, classId)
     const works = o.type === LEVEL_OPTION || OPTION_EFFECTS[o.type] !== undefined
+    const [name, amount] = optionParts(o.type, optionValue(o))
     return {
-      text: optionText(o),
+      text: `${name} ${amount}`,
+      name,
+      amount,
       helps,
       ...(helps ? {} : { note: works ? 'No effect for your class' : 'No effect in IdleLC yet' }),
     }

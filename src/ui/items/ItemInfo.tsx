@@ -95,14 +95,18 @@ export function ItemInfo({
         </dl>
       )}
       {lines.length > 0 && (
-        <ul className="item-info__options" aria-label="Options">
+        // in the colour of the piece's grade (plain options: the options' blue)
+        <dl className={`item-info__options${nameTone({ itemId, rare })}`} aria-label="Options">
           {lines.map((line, i) => (
-            <li key={i} className={line.helps ? undefined : 'is-idle'} title={line.note}>
-              {line.text}
-              {line.note ? <span className="item-info__note"> — {line.note}</span> : null}
-            </li>
+            <div key={i} className={line.helps ? undefined : 'is-idle'} title={line.note}>
+              <dt>
+                {line.name}
+                {line.note && <span className="item-info__note">{line.note}</span>}
+              </dt>
+              <dd>{line.amount}</dd>
+            </div>
           ))}
-        </ul>
+        </dl>
       )}
     </div>
   )

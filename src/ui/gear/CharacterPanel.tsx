@@ -211,7 +211,12 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   }
 
   return (
-    <Sheet title="Character" titleId="character-title" onClose={onClose}>
+    <Sheet
+      title="Character"
+      titleId="character-title"
+      className="sheet--character"
+      onClose={onClose}
+    >
       <HeroCard character={character} />
       <div className="tabs" role="tablist" aria-label="Character card">
         {TABS.map((t) => (
