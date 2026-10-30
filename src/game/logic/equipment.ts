@@ -6,6 +6,7 @@
  */
 import {
   ARMOR_SLOTS,
+  DUAL_SWORDS,
   HEAVEN_STONE_ID,
   SMELTING_STONE_ID,
   gearPower,
@@ -22,7 +23,7 @@ import { newId } from './id.ts'
 import { addToInventory } from './loot.ts'
 import { levelReduction, optionEffects, type ItemOption } from './options.ts'
 import { chance, type Rng } from './rng.ts'
-import { applyStats } from './skills.ts'
+import { applyStats, type Wielded } from './skills.ts'
 
 export const MAX_PLUS = 15
 
@@ -64,6 +65,7 @@ export type EquipError =
   | 'not-upgradeable'
   | 'max-plus'
   | 'no-stone'
+  | 'hands-full'
 
 /**
  * Power of a piece including its upgrades and the flat bonus of its rare set (weapons: attack + magic
@@ -133,9 +135,15 @@ export function requiredLevel(itemId: number, options?: readonly ItemOption[]): 
   return Math.max(0, getItem(itemId).level - levelReduction(options))
 }
 
-/** Whether the character could wear the item (class and level), or why not. */
+/** What the worn gear holds: the weapon's kind and whether there is a shield. */
+export function wielded(equipment: Equipment): Wielded {
+  const weapon = equipment.weapon ? getItem(equipment.weapon.itemId).gear : undefined
+  return { weapon: weapon?.subtype ?? null, shield: equipment.shield !== undefined }
+}
+
+/** Whether the character could wear the item (class, level, a free hand for a shield), or why not. */
 export function checkWear(
-  character: Pick<CharacterData, 'classId' | 'level'>,
+  character: Pick<CharacterData, 'classId' | 'level'> & { equipment?: Equipment },
   itemId: number,
   options?: readonly ItemOption[],
 ): EquipError | null {
@@ -143,7 +151,18 @@ export function checkWear(
   if (!item.gear) return 'not-gear'
   if (!item.gear.classes.includes(character.classId)) return 'wrong-class'
   if (character.level < requiredLevel(itemId, options)) return 'level-too-low'
+  if (item.gear.slot === 'shield' && wielded(character.equipment ?? {}).weapon === DUAL_SWORDS)
+    return 'hands-full'
   return null
+}
+
+/** Dual swords leave no hand for a shield: a shield worn with them goes back to the bag. */
+export function freeHands(character: CharacterData): CharacterData {
+  const shield = character.equipment.shield
+  if (!shield || wielded(character.equipment).weapon !== DUAL_SWORDS) return character
+  const equipment = { ...character.equipment }
+  delete equipment.shield
+  return stow({ ...character, equipment }, shield)
 }
 
 /**
@@ -207,7 +226,7 @@ export function applyEquip(
   const target = slot ?? slots.find((s) => !next.equipment[s]) ?? slots[0]!
   const previous = next.equipment[target]
   next = { ...next, equipment: { ...next.equipment, [target]: piece } }
-  return previous ? stow(next, previous) : next
+  return freeHands(previous ? stow(next, previous) : next)
 }
 
 export function applyUnequip(character: CharacterData, slot: EquipSlot): CharacterData {

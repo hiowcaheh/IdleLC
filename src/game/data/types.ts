@@ -208,5 +208,19 @@ export interface SkillDef {
   readyTime: number
   fireTime: number
   reuseTime: number
+  /** What the hero must wear to use it (t_skill.a_useWeaponType0/1, a_useState). */
+  needs?: SkillNeeds
+  /** Passives: what the hero must wear for them to work (a_appWeaponType0/1, a_appState). */
+  passiveNeeds?: SkillNeeds
   levels: SkillLevelDef[]
+}
+
+/** Gear a skill needs, 1:1 from t_skill. */
+export interface SkillNeeds {
+  /** Weapon kinds it works with (t_item.a_subtype_idx); empty = any. */
+  weapons: number[]
+  /** A weapon must be worn. */
+  weapon: boolean
+  /** A shield must be worn. */
+  shield: boolean
 }

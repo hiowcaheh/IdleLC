@@ -6,11 +6,17 @@ import { getMonster } from '../data/monsters.ts'
 import type { ClassId } from '../data/types.ts'
 import { statsForLevel } from './balance.ts'
 import type { FighterInit, PotionSupply } from './combat.ts'
-import { applyGear, type Equipment } from './equipment.ts'
+import { applyGear, wielded, type Equipment } from './equipment.ts'
 import { lcPlayerStats } from './lcBalance.ts'
 import type { ItemStack } from './loot.ts'
 import { POTION_GROUPS, countOwned, potionGroup, type PotionSlots } from './potions.ts'
-import { applyStats, learnedRanks, passiveEffects, type LearnedSkill } from './skills.ts'
+import {
+  applyStats,
+  learnedRanks,
+  passiveEffects,
+  wieldableRanks,
+  type LearnedSkill,
+} from './skills.ts'
 
 /** What the hero's fighter depends on (a CharacterData fits). */
 export interface Hero {
@@ -49,7 +55,9 @@ export function playerFighter(hero: Hero): FighterInit {
   // LC data: class stats are not in the LC database yet — scale against LC monsters instead
   const levelStats = lcData ? lcPlayerStats(level, lcData.monsters, base) : base
   const stats = applyGear(levelStats, classId, level, equipment)
-  const ranks = learnedRanks(classId, skills)
+  // skills that need other gear (a shield, another weapon) are left out; estimates assume the gear fits
+  const learned = learnedRanks(classId, skills)
+  const ranks = equipment ? wieldableRanks(learned, wielded(equipment)) : learned
   return {
     level,
     stats: applyStats(stats, passiveEffects(ranks)),

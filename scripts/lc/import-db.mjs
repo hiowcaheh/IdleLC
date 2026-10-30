@@ -60,6 +60,9 @@ const isRegularGear = (flag) =>
 const MIN_SHOP_PRICE = 100
 /** t_item.a_flag of the plain "Magical Accessory" pieces (cords, stones, eyes, earrings, rings). */
 const FLAG_MAGIC_ACCESSORY = 134217754
+/** t_skill.a_useState / a_appState bits IdleLC checks: a weapon worn, a shield worn. */
+const SKILL_NEEDS_WEAPON = 1 << 1
+const SKILL_NEEDS_SHIELD = 1 << 4
 /** a_job_flag bits of the six base classes (bit = t_skill.a_job). */
 const BASE_CLASS_BITS = 0b111111
 
@@ -533,6 +536,17 @@ const SKILL_CLASSES = ['titan', 'knight', 'healer', 'mage', 'rogue', 'sorcerer']
  * t_skilllevel (mana, learn level, SP, duration, prerequisites) and its effects from t_magic /
  * t_magiclevel (type, subtype, damage type, power). How the game uses them: src/game/logic/skills.ts.
  */
+/**
+ * What a skill needs worn, 1:1 from t_skill: weapon kinds (a_use/appWeaponType0/1 = t_item.a_subtype_idx),
+ * a weapon at all and a shield (a_useState / a_appState bits); nothing when it needs nothing.
+ */
+function gearNeeds(key, type0, type1, state) {
+  const weapons = [int(type0), int(type1)].filter((t) => t >= 0)
+  const weapon = (int(state) & SKILL_NEEDS_WEAPON) !== 0
+  const shield = (int(state) & SKILL_NEEDS_SHIELD) !== 0
+  return weapons.length || weapon || shield ? { [key]: { weapons, weapon, shield } } : {}
+}
+
 function buildSkills(tables) {
   const magics = new Map(tables.t_magic.map((r) => [int(r.a_index), r]))
   const magicPower = new Map(
@@ -594,6 +608,8 @@ function buildSkills(tables) {
       readyTime: int(r.a_readyTime),
       fireTime: int(r.a_fireTime),
       reuseTime: int(r.a_reuseTime),
+      ...gearNeeds('needs', r.a_useWeaponType0, r.a_useWeaponType1, r.a_useState),
+      ...gearNeeds('passiveNeeds', r.a_appWeaponType0, r.a_appWeaponType1, r.a_appState),
       icon: {
         atlas: int(r.a_client_icon_texid),
         row: int(r.a_client_icon_row),

@@ -74,9 +74,14 @@ describe('options from play time', () => {
   })
 
   it('stops at MAX_OPTIONS (or the options a piece can get) and keeps the time waiting', () => {
-    // the starter sword can roll Attack and Hit Rate, the tunic Physical Defense and Attack
+    // each starter piece gets every option it can roll (sword: Attack and Hit Rate, tunic: Physical
+    // Defense and Attack…), at most MAX_OPTIONS
     const r = applyPlayTime(knight(), 100 * OPTION_PLAY_SECONDS, createRng(2))
-    expect(r.gained).toHaveLength(4)
+    const possible = Object.values(knight().equipment).reduce(
+      (n, piece) => n + Math.min(MAX_OPTIONS, optionsFor(getItem(piece!.itemId).gear!).length),
+      0,
+    )
+    expect(r.gained).toHaveLength(possible)
     expect(r.character.optionProgress).toBe(OPTION_PLAY_SECONDS)
     for (const piece of Object.values(r.character.equipment)) {
       expect(piece!.options!.length).toBeLessThanOrEqual(MAX_OPTIONS)

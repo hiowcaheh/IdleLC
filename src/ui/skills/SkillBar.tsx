@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
-import { learnedRanks, type SkillRank } from '../../game/logic/skills.ts'
+import { getSkill } from '../../game/data/skills.ts'
+import { wielded } from '../../game/logic/equipment.ts'
+import { learnedRanks, worksWith, type SkillRank } from '../../game/logic/skills.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { SkillIcon } from './SkillIcon.tsx'
 import { useCombatTicker } from './useCombatTicker.ts'
@@ -12,6 +14,7 @@ export function SkillBar() {
   const classId = useGameStore((s) => s.character?.classId)
   const skills = useGameStore((s) => s.character?.skills)
   const bar = useGameStore((s) => s.character?.skillBar)
+  const equipment = useGameStore((s) => s.character?.equipment)
   const setSkillAuto = useGameStore((s) => s.setSkillAuto)
   const combat = useCombatTicker()
   const ranks = useMemo(() => {
@@ -21,6 +24,7 @@ export function SkillBar() {
   }, [classId, skills, bar])
   if (ranks.length === 0) return null
   const player = combat.player
+  const hands = wielded(equipment ?? {})
 
   return (
     <div
@@ -35,14 +39,17 @@ export function SkillBar() {
         const ratio = cooldown > 0 ? Math.min(1, cooldown / rank.cooldown) : 0
         const dry = player.mp < rank.mpCost
         const casting = player.casting?.id === rank.id
+        // needs other gear (a shield, another weapon): not used until it is worn
+        const skill = getSkill(rank.id)
+        const blocked = skill !== undefined && !worksWith(skill, hands)
         return (
           <button
             key={rank.id}
             type="button"
-            className={`skill-slot${rank.auto ? '' : ' is-off'}${dry ? ' is-dry' : ''}${casting ? ' is-casting' : ''}${firstSupport ? ' is-first-support' : ''}`}
+            className={`skill-slot${rank.auto ? '' : ' is-off'}${dry ? ' is-dry' : ''}${blocked ? ' is-blocked' : ''}${casting ? ' is-casting' : ''}${firstSupport ? ' is-first-support' : ''}`}
             aria-pressed={rank.auto}
-            aria-label={`${rank.name} — automatic use ${rank.auto ? 'on' : 'off'}`}
-            title={`${rank.name} (Lv ${rank.level}) · ${rank.mpCost} MP`}
+            aria-label={`${rank.name} — automatic use ${rank.auto ? 'on' : 'off'}${blocked ? ', needs other gear' : ''}`}
+            title={`${rank.name} (Lv ${rank.level}) · ${rank.mpCost} MP${blocked ? ' · needs other gear' : ''}`}
             onClick={() => setSkillAuto(rank.id, !rank.auto).catch(() => undefined)}
           >
             <SkillIcon id={rank.id} kind={rank.kind} size={38} />

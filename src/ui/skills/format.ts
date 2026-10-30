@@ -1,3 +1,4 @@
+import { WEAPON_KINDS } from '../../game/data/items.ts'
 import type { SkillDef, SkillLevelDef } from '../../game/data/types.ts'
 import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
 import type { CharacterData } from '../../game/logic/character.ts'
@@ -11,6 +12,18 @@ import {
   type SkillRank,
   type StatKey,
 } from '../../game/logic/skills.ts'
+
+/** What a skill needs worn ("sword or dual swords, shield"), or null when it needs nothing. */
+export function needsText(skill: SkillDef): string | null {
+  const needs = skill.type === 3 ? skill.passiveNeeds : skill.needs
+  if (!needs) return null
+  const kinds = needs.weapons.map((k) => WEAPON_KINDS[k] ?? `weapon ${k}`)
+  const parts = [
+    kinds.length ? kinds.join(' or ') : needs.weapon ? 'a weapon' : null,
+    needs.shield ? 'a shield' : null,
+  ].filter(Boolean)
+  return parts.length ? parts.join(', ') : null
+}
 
 /** Skill points with one decimal (they come in tenths of a point per kill). */
 export function formatSp(units: number): string {

@@ -2420,6 +2420,20 @@ a.button {
   border-radius: 2px;
 }
 
+.skill-row__needs {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+
+.skill-row__needs.is-unmet {
+  color: #e8836f;
+}
+
+.skill-slot.is-blocked {
+  filter: grayscale(1) brightness(0.55);
+}
+
 .potion-picker__actions {
   display: flex;
   flex-wrap: wrap;

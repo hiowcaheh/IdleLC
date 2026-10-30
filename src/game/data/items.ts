@@ -52,6 +52,28 @@ export function slotsFor(gear: Pick<GearDef, 'slot'>): EquipSlot[] {
  * t_item 84 "Smelting Stone": drops from monsters (logic/loot.ts); 10 are exchanged for a Heaven Stone
  * (owner's rule, logic/equipment.ts).
  */
+/** Weapon kinds (t_item.a_subtype_idx of weapons) by name: what skills ask for. */
+export const WEAPON_KINDS: Record<number, string> = {
+  0: 'sword',
+  1: 'crossbow',
+  2: 'staff',
+  3: 'greatsword',
+  4: 'axe',
+  5: 'wand',
+  6: 'bow',
+  7: 'dagger',
+  11: 'dual swords',
+  12: 'healing staff',
+  13: 'scythe',
+  14: 'polearm',
+}
+
+/**
+ * The knight's dual swords take both hands: no shield with them (owner's rule; the database has no
+ * flag for it).
+ */
+export const DUAL_SWORDS = 11
+
 export const SMELTING_STONE_ID = 84
 /** t_item 85 "Heaven Stone": the only stone that upgrades weapons and armor; the Juno shop sells it. */
 export const HEAVEN_STONE_ID = 85
@@ -154,6 +176,24 @@ const PLACEHOLDER_ITEMS: Record<number, ItemDef> = {
     price: 0,
     upgradeable: true,
     gear: knightGear({ slot: 'armor', subtype: 1, defense: 10 }),
+  },
+  49: {
+    id: 49,
+    name: 'Scale Shield',
+    type: 'armor',
+    level: 1,
+    price: 0,
+    upgradeable: true,
+    gear: knightGear({ slot: 'shield', subtype: 5, defense: 24 }),
+  },
+  610: {
+    id: 610,
+    name: 'Arthur Dual Sword',
+    type: 'weapon',
+    level: 5,
+    price: 1066,
+    upgradeable: true,
+    gear: knightGear({ slot: 'weapon', subtype: DUAL_SWORDS, attack: 30, attackInterval: 1 }),
   },
   7: {
     id: 7,
@@ -309,7 +349,7 @@ export function itemIcon(id: number): IconSprite | null {
 const PLACEHOLDER_SHOPS: Record<string, number[]> = {
   glade: [7, 4, HEAVEN_STONE_ID, 43, 44, 484, 490],
 }
-const PLACEHOLDER_STARTER: Partial<Record<ClassId, number[]>> = { knight: [5, 6] }
+const PLACEHOLDER_STARTER: Partial<Record<ClassId, number[]>> = { knight: [5, 6, 49] }
 const PLACEHOLDER_SHOP_GEAR: Partial<Record<ClassId, Partial<Record<GearSlot, ShopTier[]>>>> = {
   knight: { weapon: [{ level: 3, items: [4] }], helmet: [{ level: 2, items: [7] }] },
 }

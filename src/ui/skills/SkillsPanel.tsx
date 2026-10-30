@@ -2,9 +2,23 @@ import { useMemo, useState } from 'react'
 import { skillsForClass } from '../../game/data/skills.ts'
 import type { SkillDef } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
-import { SKILL_BAR_SIZE, isAvailable, skillRank, type SkillRank } from '../../game/logic/skills.ts'
+import {
+  SKILL_BAR_SIZE,
+  isAvailable,
+  skillRank,
+  worksWith,
+  type SkillRank,
+} from '../../game/logic/skills.ts'
 import { useGameStore } from '../../state/gameStore.ts'
-import { KIND_LABELS, describeEffect, formatSp, learnState, rankCosts } from './format.ts'
+import { wielded } from '../../game/logic/equipment.ts'
+import {
+  KIND_LABELS,
+  describeEffect,
+  formatSp,
+  learnState,
+  needsText,
+  rankCosts,
+} from './format.ts'
 import { Sheet } from '../Sheet.tsx'
 import { SkillIcon } from './SkillIcon.tsx'
 
@@ -68,6 +82,8 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
     const open = selected === skill.id
     const onBar = character.skillBar.includes(skill.id)
     const max = skill.levels.length
+    const needs = needsText(skill)
+    const fits = worksWith(skill, wielded(character.equipment))
     return (
       <li
         key={skill.id}
@@ -88,6 +104,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
                 ? ` · Lv ${learned.level}/${max}`
                 : ` · from level ${skill.levels[0]!.learnLevel}`}
               {current && current.kind !== 'passive' && !current.auto ? ' · auto off' : ''}
+              {learned && !fits ? ' · needs other gear' : ''}
             </span>
           </span>
           {state.canLearn && <span className="skill-row__badge">{learned ? 'Up' : 'New'}</span>}
@@ -95,6 +112,12 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
         {open && (
           <div className="skill-row__details">
             <p className="skill-row__desc">{skill.description}</p>
+            {needs && (
+              <p className={`skill-row__needs${fits ? '' : ' is-unmet'}`}>
+                {shown.kind === 'passive' ? 'Works with' : 'Needs'}: {needs}
+                {fits ? '' : ' — not with the gear you wear now'}
+              </p>
+            )}
             {!available && (
               <p className="skill-row__note">
                 Its effects (summons, movement, resurrection…) do not exist in IdleLC yet.

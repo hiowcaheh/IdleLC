@@ -48,7 +48,9 @@ przenosi polowanie tam (potwór najbliższy poziomem), więc widać inne potwory
 punkty umiejętności (SP); w oknie **Skills** (ikona księgi w HUD, zielona liczba = ile można się nauczyć)
 uczy się ich i podnosi poziomy. Nauczone umiejętności działają same w walce (pasek nad panelem polowania:
 odnowienie, AUTO / OFF po dotknięciu), zużywają manę (niebieski pasek) i działają też na wyprawach.
-Umiejętności, których efektów jeszcze nie mamy (przywołania, prędkość ruchu, wskrzeszenie), są szare. Na pasku
+Umiejętności, których efektów jeszcze nie mamy (przywołania, prędkość ruchu, wskrzeszenie), są szare.
+Umiejętność potrzebująca innego sprzętu (np. Shield Strike — tarczy i miecza; podwójne miecze zdejmują tarczę) nie
+działa, dopóki go nie założysz — okno Skills pisze, czego brakuje. Na pasku
 mieści się 7 umiejętności (ataki z lewej, buffy z prawej) i tylko one są używane w walce — w oknie Skills „Add to
 bar” / „Remove from bar”.
 

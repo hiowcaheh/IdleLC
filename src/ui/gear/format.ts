@@ -91,6 +91,8 @@ export function wearProblem(
     }
     case 'level-too-low':
       return `Requires level ${requiredLevel(itemId, options)}`
+    case 'hands-full':
+      return 'Dual swords leave no hand for a shield'
     default:
       return 'Cannot be worn'
   }

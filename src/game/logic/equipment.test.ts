@@ -12,14 +12,17 @@ import {
   applyUnequip,
   applyUpgrade,
   checkWear,
+  freeHands,
   starterEquipment,
   stonesOwned,
+  wielded,
 } from './equipment.ts'
 import type { Rng } from './rng.ts'
 
 // Placeholder items (src/game/data/items.ts): 4 Sentinel Blade (knight weapon, level 3, attack 14),
 // 5 Training Sword (starter, attack 8), 6 Squire Tunic (starter armor, defense 10),
-// 7 Iron Helm (level 2, defense 6); the glade shop sells 7, 4 and the Smelting Stone.
+// 7 Iron Helm (level 2, defense 6), 49 Scale Shield (starter), 610 Arthur Dual Sword (level 5);
+// the glade shop sells 7, 4 and the Smelting Stone.
 let ids = 0
 const makeId = () => `p${++ids}`
 const knight = (over: Partial<CharacterData> = {}): CharacterData => ({
@@ -99,6 +102,23 @@ describe('equip and unequip', () => {
     expect(back.equipment.weapon).toEqual(sword)
     expect(back.gear).toEqual([])
     expect(back.inventory).toEqual([{ itemId: 4, count: 1 }])
+  })
+
+  it('dual swords leave no hand for a shield', () => {
+    const start = knight({ level: 5, inventory: [{ itemId: 610, count: 1 }] })
+    expect(wielded(start.equipment)).toEqual({ weapon: 0, shield: true })
+    const dual = applyEquip(start, { itemId: 610 }, makeId)
+    expect(wielded(dual.equipment)).toEqual({ weapon: 11, shield: false })
+    expect(dual.inventory).toEqual([
+      { itemId: 5, count: 1 },
+      { itemId: 49, count: 1 },
+    ])
+    expect(checkWear(dual, 49)).toBe('hands-full')
+    expect(() => applyEquip(dual, { itemId: 49 }, makeId)).toThrowError(/hands-full/)
+    // an older save wearing both keeps the swords
+    const both = { ...dual, equipment: { ...dual.equipment, shield: start.equipment.shield! } }
+    expect(freeHands(both).equipment.shield).toBeUndefined()
+    expect(freeHands(start)).toBe(start)
   })
 
   it('takes a piece off into the bag', () => {

@@ -175,6 +175,14 @@ Interpretacja efektów jest **nasza** (`src/game/logic/skills.ts`) do czasu kodu
   na potworze, 4) najsilniejszy atak; inaczej zwykły cios. Ogłuszony nie atakuje (ogłuszenie przerywa
   rzucanie). Klątwy znikają z potworem; buffy trwają między walkami.
 - Ten sam kod liczy walkę na ekranie i tempo wypraw AFK, więc umiejętności przyspieszają też wyprawy.
+- **Wymagany sprzęt** (1:1 z `t_skill`): aktywna umiejętność działa tylko z bronią swojego rodzaju
+  (`a_useWeaponType0/1` = `t_item.a_subtype_idx`, np. rycerz: miecz 0 lub podwójne miecze 11), z bronią
+  w ogóle, gdy `a_useState` ma bit 2, i z tarczą, gdy ma bit 16 (Shield Strike). Pasywne — według
+  `a_appWeaponType0/1` i `a_appState`. Rodzaj broni sprawdzamy, gdy jakaś jest założona. Pozostałe bity stanu
+  (siedzenie — Quick Recovery, śmierć celu — Resurrection) pomijamy. Umiejętność bez wymaganego sprzętu nie
+  jest używana ani w walce, ani na wyprawie (szara na pasku, opis w oknie Skills).
+- **Podwójne miecze zajmują obie ręce** (reguła właściciela; baza nie ma takiej flagi): założenie ich
+  odkłada tarczę do torby, a tarczy nie da się założyć do podwójnych mieczy.
 
 ## Ekwipunek (M5)
 

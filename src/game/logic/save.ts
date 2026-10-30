@@ -18,7 +18,13 @@ import {
   type CharacterLocation,
   type Expedition,
 } from './character.ts'
-import { MAX_PLUS, starterEquipment, type Equipment, type GearPiece } from './equipment.ts'
+import {
+  MAX_PLUS,
+  freeHands,
+  starterEquipment,
+  type Equipment,
+  type GearPiece,
+} from './equipment.ts'
 import { newId } from './id.ts'
 import { addToInventory, type ItemStack } from './loot.ts'
 import { OPTION_PLAY_SECONDS } from './options.ts'
@@ -244,7 +250,8 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
   if (typeof raw.classId !== 'string' || !Object.hasOwn(CLASSES, raw.classId)) return null
   const stats = isRecord(raw.stats) ? raw.stats : {}
   const createdAt = num(raw.createdAt, now)
-  return {
+  // dual swords and a shield together (saves from before that rule): the shield goes to the bag
+  return freeHands({
     id: raw.id,
     name: raw.name.trim().slice(0, NAME_MAX),
     classId: raw.classId as ClassId,
@@ -266,7 +273,7 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
       .filter((p): p is GearPiece => p !== null),
     potionSlots: sanitizePotionSlots(raw.potionSlots),
     optionProgress: Math.min(OPTION_PLAY_SECONDS, Math.max(0, num(raw.optionProgress, 0))),
-  }
+  })
 }
 
 /** Learned active skills on the bar, each once, at most SKILL_BAR_SIZE. */

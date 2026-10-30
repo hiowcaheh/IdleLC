@@ -14,8 +14,10 @@ import {
   interpretEffect,
   isAvailable,
   learnedRanks,
+  meetsNeeds,
   skillRank,
   starterSkills,
+  worksWith,
 } from './skills.ts'
 
 // The tests run on the placeholder skills (src/game/data/skills.ts): knight 1 Power Strike,
@@ -196,6 +198,34 @@ describe('learning', () => {
   it('toggles automatic use of learned skills only', () => {
     expect(applyAuto(knight(), 1, false).skills[1]).toEqual({ level: 1, auto: false })
     expect(() => applyAuto(knight(), 2, true)).toThrowError(/not-learned/)
+  })
+})
+
+describe('gear a skill needs (t_skill)', () => {
+  // Shield Strike: a sword or dual swords (a_useWeaponType 0 / 11) and a shield (a_useState 16)
+  const shieldStrike = { weapons: [0, 11], weapon: false, shield: true }
+  const sword = { weapon: 0, shield: false }
+
+  it('needs the shield and a weapon of its kinds', () => {
+    expect(meetsNeeds(shieldStrike, { weapon: 0, shield: true })).toBe(true)
+    expect(meetsNeeds(shieldStrike, sword)).toBe(false)
+    expect(
+      meetsNeeds({ weapons: [0, 11], weapon: true, shield: false }, { weapon: 3, shield: false }),
+    ).toBe(false)
+    expect(
+      meetsNeeds({ weapons: [], weapon: true, shield: false }, { weapon: null, shield: true }),
+    ).toBe(false)
+    expect(meetsNeeds(undefined, { weapon: null, shield: false })).toBe(true)
+  })
+
+  it('checks actives by their use needs, passives by what they need to work', () => {
+    const base = { id: 9, classId: 'knight', name: 'X', description: '', targetType: 0 }
+    const timings = { readyTime: 0, fireTime: 0, reuseTime: 0, levels: [] }
+    const active = { ...base, ...timings, type: 0, needs: shieldStrike } as SkillDef
+    const passive = { ...base, ...timings, type: 3, needs: shieldStrike } as SkillDef
+    expect(worksWith(active, sword)).toBe(false)
+    expect(worksWith(passive, sword)).toBe(true) // no passiveNeeds
+    expect(worksWith({ ...passive, passiveNeeds: shieldStrike }, sword)).toBe(false)
   })
 })
 

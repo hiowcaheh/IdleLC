@@ -11,6 +11,7 @@ import type {
   SkillDef,
   SkillEffectDef,
   SkillLevelDef,
+  SkillNeeds,
 } from '../data/types.ts'
 import type { CharacterData } from './character.ts'
 import { GameError } from './errors.ts'
@@ -340,6 +341,38 @@ export function learnedRanks(
   return skillsForClass(classId)
     .filter((s) => learned[s.id] && isAvailable(s))
     .map((s) => skillRank(s, learned[s.id]!.level, learned[s.id]!.auto))
+}
+
+/** What the hero holds: the weapon's kind (t_item.a_subtype_idx) or null, and a shield or not. */
+export interface Wielded {
+  weapon: number | null
+  shield: boolean
+}
+
+/**
+ * Whether the worn gear meets a skill's needs (t_skill): a weapon and a shield when it asks for
+ * them, and a worn weapon of one of its kinds.
+ */
+export function meetsNeeds(needs: SkillNeeds | undefined, wielded: Wielded): boolean {
+  if (!needs) return true
+  if (needs.weapon && wielded.weapon === null) return false
+  if (needs.shield && !wielded.shield) return false
+  return (
+    wielded.weapon === null || needs.weapons.length === 0 || needs.weapons.includes(wielded.weapon)
+  )
+}
+
+/** Whether a skill works with the worn gear: actives by what using them needs, passives by theirs. */
+export function worksWith(skill: SkillDef, wielded: Wielded): boolean {
+  return meetsNeeds(skill.type === 3 ? skill.passiveNeeds : skill.needs, wielded)
+}
+
+/** The learned skills that work with the worn gear. */
+export function wieldableRanks(ranks: readonly SkillRank[], wielded: Wielded): SkillRank[] {
+  return ranks.filter((r) => {
+    const skill = getSkill(r.id)
+    return !skill || worksWith(skill, wielded)
+  })
 }
 
 /** Combat stats after a set of stat changes (flat values or percent). */
