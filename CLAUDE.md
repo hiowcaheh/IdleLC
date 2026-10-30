@@ -144,7 +144,9 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   Auto-picie w walce i na wyprawach (progi 50% HP / 30% MP — **własne**) tylko mikstur ze slotów HP/MP,
   które gracz wybiera z torby (zapis v9, `potions.ts`, `setPotionSlot`; slot ma przełącznik AUTO), zużycie zgłaszane w `reportCombat` (`potions`) i liczone w `simulateAfk`.
   Stany `t_magic` 2/9 i 2/10 = HP/MP na sekundę także w skillach (Mana Recovery).
-- **Karta postaci** z zakładkami Stats (wszystkie statystyki zawsze widoczne, regeneracja z buffami i miksturami,
+- **Karta postaci**: nagłówek (`HeroCard.tsx`) z podglądem 3D postaci w założonym sprzęcie (obrót, animacja
+  idle), nick, klasa, poziom, pasek EXP z liczbami, SP, złoto; grafika podglądu z ItemShopu klienta
+  (`Cashshop.tex`, `CostumeInventory.tex`) jest w Nemesis zaszyfrowana. Zakładki Stats (wszystkie statystyki zawsze widoczne, regeneracja z buffami i miksturami,
   premie EXP/SP/Gold/Drop — `rewardBonuses`, na razie 0) i Equipment; „+N” za nazwą.
 - **Okno przedmiotu** (`ItemInfo.tsx`): karta jak tooltip klienta — rodzaj, ocena, atak, szybkość, wymagany
   poziom, klasa (niespełnione na czerwono), opcje jedna pod drugą; brak „Wear” dla sprzętu innej klasy.

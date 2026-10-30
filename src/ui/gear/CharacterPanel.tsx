@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { CLASSES } from '../../game/data/classes.ts'
 import { HEAVEN_STONE_ID, classSlots, getItem } from '../../game/data/items.ts'
 import type { EquipSlot } from '../../game/data/types.ts'
 import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
@@ -19,6 +18,7 @@ import { ItemSlot } from '../items/ItemSlot.tsx'
 import { useCombatTicker } from '../skills/useCombatTicker.ts'
 import { Sheet } from '../Sheet.tsx'
 import { SLOT_LABELS, fmt, heroStats, nameTone, pieceName } from './format.ts'
+import { HeroCard } from './HeroCard.tsx'
 
 type Tab = 'stats' | 'equipment'
 
@@ -63,7 +63,6 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   const base = heroStats(character)
   const stats = away ? base : effectiveStats(combat.player)
   const effects = away ? [] : combat.player.effects
-  const buffs = effects.map((e) => e.name)
   const castTime = stats.castTime ?? 0
   /** What the buffs on the hero change in a stat ("+25"), or nothing. */
   const change = (now: number, before: number, digits = 0) => {
@@ -213,9 +212,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
 
   return (
     <Sheet title="Character" titleId="character-title" onClose={onClose}>
-      <p className="sheet__meta">
-        {character.name} · {CLASSES[character.classId].name} · Level {character.level}
-      </p>
+      <HeroCard character={character} />
       <div className="tabs" role="tablist" aria-label="Character card">
         {TABS.map((t) => (
           <button
@@ -246,9 +243,6 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
               </div>
             ))}
           </dl>
-          {buffs.length > 0 && (
-            <p className="sheet__meta">Active now: {buffs.join(', ')} (in green: what they add).</p>
-          )}
           <h3 className="inventory__heading">Bonuses</h3>
           <dl className="hero-stats">
             {bonusRows.map(([label, value]) => (
