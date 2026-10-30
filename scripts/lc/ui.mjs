@@ -33,6 +33,8 @@ export const UI_PARTS = {
   'menu-inventory': [atlas('TopUI'), 26, 222, 22, 22, { scale: 4 }],
   'menu-skills': [atlas('TopUI'), 52, 222, 22, 22, { scale: 4 }],
   'menu-system': [atlas('TopUI'), 156, 222, 22, 22, { scale: 4 }],
+  // the scroll with red writing: the Titles window
+  'menu-titles': [atlas('TopUI'), 130, 222, 22, 22, { scale: 4 }],
   // the Gold Coin item's icon (t_item 19: ItemBtn0, row 0, column 0) without its frame and background
   coin: [atlas('ItemBtn0'), 2, 2, 28, 28, { scale: 4, keyOut: true }],
   // a round button with a bronze rim and a black middle: the counter badge on buttons

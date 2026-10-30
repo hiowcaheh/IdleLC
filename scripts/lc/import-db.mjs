@@ -212,6 +212,9 @@ function buildData(tables) {
       usedItems.add(int(r.a_index))
   }
   UPGRADE_STONES.forEach((id) => usedItems.add(id))
+  const titles = buildTitles(tables.t_title, itemRows)
+  titles.forEach((t) => usedItems.add(t.item))
+  const titleOfItem = new Map(titles.map((t) => [t.item, t.id]))
   const shopItems = new Set(Object.values(shops).flat())
   shopItems.forEach((id) => usedItems.add(id))
   MAGNIFIERS.forEach((id) => usedItems.add(id))
@@ -246,6 +249,7 @@ function buildData(tables) {
       icon: { atlas: int(r.a_texture_id), row: int(r.a_texture_row), col: int(r.a_texture_col) },
       ...(potions.has(int(r.a_index)) ? { potion: potions.get(int(r.a_index)) } : {}),
       ...(rareOf(r).length > 0 ? { rare: rareOf(r) } : {}),
+      ...(titleOfItem.has(int(r.a_index)) ? { title: titleOfItem.get(int(r.a_index)) } : {}),
     }))
   const rareSets = buildRareSets(
     tables.t_rareoption,
@@ -282,6 +286,7 @@ function buildData(tables) {
     options: buildOptions(tables.t_option),
     rareSets,
     magnifiers: MAGNIFIERS,
+    titles,
     starterGear,
     gearReference,
     skills,
@@ -294,6 +299,46 @@ const numbers = (text) =>
     .split(/\s+/)
     .filter(Boolean)
     .map(Number)
+
+/** "FF8000FF" (RRGGBBAA) → "#ff8000". */
+const rgb = (rgba) =>
+  `#${String(rgba ?? '000000')
+    .slice(0, 6)
+    .toLowerCase()
+    .padEnd(6, '0')}`
+
+/**
+ * Titles 1:1 from t_title (enabled ones whose item has an English name): the item that gives the
+ * title, its name and description (t_item a_name_usa / a_descr_usa), days it lasts (null =
+ * permanent), text and outline colours, up to five t_option options and the client effect's name.
+ */
+function buildTitles(rows, itemRows) {
+  const titles = new Map()
+  for (const r of rows) {
+    const id = int(r.a_index)
+    const item = itemRows.get(int(r.a_item_index))
+    const name = String(item?.a_name_usa ?? '').trim()
+    if (titles.has(id) || int(r.a_enable) !== 1 || !item || !name) continue
+    const options = []
+    for (let k = 0; k < 5; k++) {
+      const type = int(r[`a_option_index${k}`])
+      const level = int(r[`a_option_level${k}`])
+      if (type >= 0 && level > 0) options.push({ type, level })
+    }
+    titles.set(id, {
+      id,
+      item: int(r.a_item_index),
+      name,
+      description: String(item.a_descr_usa ?? '').trim(),
+      days: int(r.a_time) > 0 ? int(r.a_time) : null,
+      color: rgb(r.a_color),
+      outline: rgb(r.a_bgcolor),
+      options,
+      effect: String(r.a_effect_name ?? '').trim(),
+    })
+  }
+  return [...titles.values()].sort((a, b) => a.id - b.id)
+}
 
 /**
  * Item options 1:1 from t_option: per option level the value (a_level list) and the roll weight
@@ -676,6 +721,7 @@ async function main() {
     't_magiclevel',
     't_option',
     't_rareoption',
+    't_title',
   ])
   const data = buildData(tables)
   const gearModels = buildGearModels(data.items, tables.t_item)

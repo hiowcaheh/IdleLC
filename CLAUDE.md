@@ -212,6 +212,13 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   scena rysuje 300 m terenu wokół walki z 9 warstwami tekstur w shaderze (`LcTerrain.tsx`, `lcMap.ts`).
   Spawny Juno z `t_npc_regen` nie pasują do żadnego terenu klienta (Dratan pasuje 1:1), więc miejsca walk
   na Juno wybiera konwerter (`pickArenas`) — **własne**. Drzewa/budynki z `.wld` jeszcze nie czytane.
+- **Tytuły (zapis v11):** `t_title` 1:1 (184 z angielską nazwą przedmiotu: czas w dniach / na stałe, kolor
+  napisu i poświaty, do 5 opcji `t_option`) w `lc-data.json` (`titles`), przedmioty tytułów typu Other
+  (`item.title`). „Use” w torbie dodaje tytuł (ponownie: dni się dodają), pierwszy zakłada się sam;
+  okno **Titles** (przycisk z ikoną zwoju z `TopUI`): założony tytuł, lista z czasem i opcjami, Wear / Take off.
+  Założony tytuł pod nickiem w scenie i w karcie Character; jego opcje liczą się jak opcje sprzętu
+  (`playerFighter`). Wygasłe tytuły znikają przy każdej komendzie i wczytaniu (`pruneTitles`). Na razie tytuły
+  daje tylko narzędzie dev („Title item”). Efekty tytułów (`a_effect_name`) — jeszcze nie.
 - **Hełm „B6 Cast” 77 dla Knighta:** w bazie Reidon Helm (Cursed Lich) ma tylko oceny E/D/C bez castingu;
   ocenę B (Impervious/Energetic/Powerful, ~10%) ma Riset Helm (Scorpionmantis, Egeha), a „Casting-Up” (A)
   dopiero hełmy od 107 poziomu — czeka na decyzję właściciela, czy coś zmieniać.
@@ -226,8 +233,8 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
 
 **Następne kroki:**
 
-1. **System tytułów** — plan przedstawiony właścicielowi (t_title 1:1: 199 tytułów, czas, opcje, kolory,
-   przedmiot „Other”, okno Titles, tytuł pod nickiem), czeka na akceptację i decyzję, skąd gracz je dostaje.
+1. **Tytuły — źródło:** zapytać właściciela, skąd gracz ma dostawać przedmioty tytułów (próg w księdze
+   potworów, rzadki drop, sklep?) i czy wszystkie 184 (wiele eventowych).
 2. Plan klienta krok po kroku (zrobione: 1 spis, 2 klasy, 3 potwory Juno, Dratan, Merac, Egeha, 4 wygląd
    sprzętu, 6 animacje i efekty skilli, teren Juno): teren Dratan i kolejnych stref (spawny z bazy pasują —
    walki w prawdziwych miejscach), drzewa/budynki z `.wld`, potwory pozostałych stref

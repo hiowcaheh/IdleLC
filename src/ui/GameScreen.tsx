@@ -20,6 +20,7 @@ import { SettingsPanel } from './SettingsPanel.tsx'
 import { CharacterPanel } from './gear/CharacterPanel.tsx'
 import { SkillBar } from './skills/SkillBar.tsx'
 import { SkillsPanel } from './skills/SkillsPanel.tsx'
+import { TitlesPanel } from './titles/TitlesPanel.tsx'
 import { Toasts } from './Toasts.tsx'
 
 export function GameScreen() {
@@ -27,6 +28,7 @@ export function GameScreen() {
   const [inventoryOpen, setInventoryOpen] = useState(false)
   const [skillsOpen, setSkillsOpen] = useState(false)
   const [characterOpen, setCharacterOpen] = useState(false)
+  const [titlesOpen, setTitlesOpen] = useState(false)
   const devTools = useDevTools((s) => s.enabled)
   const character = useGameStore((s) => s.character)
   const expedition = character?.expedition ?? null
@@ -83,6 +85,16 @@ export function GameScreen() {
             </button>
             <button
               type="button"
+              className="icon-button hud__menu hud__menu--titles"
+              onClick={() => setTitlesOpen(true)}
+              aria-label="Titles"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 4 H18 V20 H6 Z M9 8 H15 M9 12 H15 M9 16 H13" />
+              </svg>
+            </button>
+            <button
+              type="button"
               className="icon-button hud__menu hud__menu--character"
               onClick={() => setCharacterOpen(true)}
               aria-label="Character and gear"
@@ -120,6 +132,7 @@ export function GameScreen() {
       {inventoryOpen && <InventoryPanel onClose={() => setInventoryOpen(false)} />}
       {skillsOpen && <SkillsPanel onClose={() => setSkillsOpen(false)} />}
       {characterOpen && <CharacterPanel onClose={() => setCharacterOpen(false)} />}
+      {titlesOpen && <TitlesPanel onClose={() => setTitlesOpen(false)} />}
       <AfkSummary />
       <Toasts />
     </div>

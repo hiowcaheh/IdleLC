@@ -175,6 +175,24 @@ export interface ItemDef {
   rare?: { set: number; weight: number }[]
   /** Magnifying glasses: chance that an identification works. */
   magnifier?: { chance: number }
+  /** Title items (type Other): the title using it adds (data/titles.ts). */
+  title?: number
+}
+
+/** A title 1:1 from t_title, shown under the hero's name while worn. */
+export interface TitleDef {
+  id: number
+  /** The item (type Other) that gives the title. */
+  item: number
+  name: string
+  description: string
+  /** Days it lasts once added; null = permanent. */
+  days: number | null
+  /** Text colour and outline colour (#rrggbb, t_title a_color / a_bgcolor). */
+  color: string
+  outline: string
+  /** t_option options it gives while worn. */
+  options: { type: number; level: number }[]
 }
 
 /** One effect of a skill level: t_magic (type, subtype, damage type) + t_magiclevel.a_power. */

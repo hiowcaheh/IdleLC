@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 import { getMonster } from '../../game/data/monsters.ts'
+import { TITLES } from '../../game/data/titles.ts'
 import { ZONES } from '../../game/data/zones.ts'
 import { expToNextLevel } from '../../game/logic/progression.ts'
 import { useGameStore } from '../../state/gameStore.ts'
@@ -17,6 +18,7 @@ export function DevPanel() {
   const zoneId = useGameStore((s) => s.character?.location.zoneId ?? '')
   const monsterId = useGameStore((s) => s.character?.location.monsterId ?? '')
   const devTravel = useGameStore((s) => s.devTravel)
+  const devAddTitleItem = useGameStore((s) => s.devAddTitleItem)
   const level = useGameStore((s) => s.character?.level ?? 1)
   const devSetLevel = useGameStore((s) => s.devSetLevel)
   const devAddExp = useGameStore((s) => s.devAddExp)
@@ -85,6 +87,26 @@ export function DevPanel() {
               })}
             </optgroup>
           ))}
+        </select>
+      </label>
+
+      <label className="dev-panel__field">
+        Title item
+        <select
+          className="dev-chip"
+          value=""
+          onChange={(e) => {
+            if (e.target.value) devAddTitleItem(Number(e.target.value))
+          }}
+        >
+          <option value="">Give a title item…</option>
+          {Object.values(TITLES)
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name} ({t.days === null ? 'permanent' : `${t.days} d`})
+              </option>
+            ))}
         </select>
       </label>
 

@@ -91,6 +91,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   const sellGear = useGameStore((s) => s.sellGear)
   const equipItem = useGameStore((s) => s.equipItem)
   const exchangeStones = useGameStore((s) => s.exchangeStones)
+  const redeemTitleItem = useGameStore((s) => s.redeemTitleItem)
   const identifyItems = useGameStore((s) => s.identifyItems)
   const [selected, setSelected] = useState<string | null>(null)
   const [category, setCategory] = useState<Category>('all')
@@ -154,7 +155,11 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
       toast(await action())
     } catch (error) {
       toast(
-        error instanceof GameError ? 'That is not possible right now.' : 'Something went wrong.',
+        error instanceof GameError
+          ? error.code === 'title-owned'
+            ? 'You already have this title for good.'
+            : 'That is not possible right now.'
+          : 'Something went wrong.',
         'error',
       )
     } finally {
@@ -320,6 +325,23 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                 Drink
               </button>
             </>
+          )}
+          {item.title !== undefined && (
+            <button
+              type="button"
+              className="button button--gold"
+              disabled={busy}
+              onClick={() =>
+                run(async () => {
+                  const use = await redeemTitleItem(stack.itemId)
+                  return use.extended
+                    ? `${use.title.name}: its time is extended.`
+                    : `New title: ${use.title.name}. See it in the Titles window.`
+                })
+              }
+            >
+              Use
+            </button>
           )}
           {stack.itemId === SMELTING_STONE_ID && (
             <>

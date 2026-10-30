@@ -26,7 +26,13 @@ export async function buildIconSheet(files, entries, atlasPath, file) {
   const atlasAt = (id) => {
     if (!atlases.has(id)) {
       const path = atlasPath(id)
-      atlases.set(id, files.resolve(path) ? parseTexture(files.read(path)) : null)
+      let texture = null
+      try {
+        texture = files.resolve(path) ? parseTexture(files.read(path)) : null
+      } catch {
+        // an encrypted atlas: its icons are left out (listed as missing)
+      }
+      atlases.set(id, texture)
     }
     return atlases.get(id)
   }

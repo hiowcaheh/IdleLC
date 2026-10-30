@@ -1,4 +1,4 @@
-import type { OptionDef, PotionDef, RareSetDef } from './types.ts'
+import type { OptionDef, PotionDef, RareSetDef, TitleDef } from './types.ts'
 
 /** Shape of the files written by scripts/lc/import-db.mjs (src/game/data/generated/). */
 
@@ -61,6 +61,8 @@ export interface LcItem {
   potion?: PotionDef
   /** Rare items: [t_rareoption index, weight] pairs. */
   rare?: [number, number][]
+  /** Title items: the t_title index the item gives. */
+  title?: number
 }
 
 export interface LcData {
@@ -87,6 +89,8 @@ export interface LcData {
   rareSets?: RareSetDef[]
   /** Magnifying glasses (normal, golden). */
   magnifiers?: number[]
+  /** Titles (t_title) with the client effect's name. */
+  titles?: (TitleDef & { effect: string })[]
   /** The free level-1 set of each class, by class id. */
   starterGear?: Record<string, number[]>
   /** Typical gear power of each class per level (index 0 = level 1), see import-db buildGearReference. */

@@ -191,6 +191,26 @@ describe('loadSave', () => {
     })
   })
 
+  it('keeps titles that exist (each once) and the worn one only when owned', () => {
+    const save = withCharacter()
+    const titled = {
+      ...save.characters[0]!,
+      titles: [
+        { id: 1, expiresAt: NOW + 1000 },
+        { id: 1, expiresAt: null },
+        { id: 999, expiresAt: null },
+        { id: 1 },
+      ],
+      activeTitle: 1,
+    }
+    const r = loadSave(JSON.stringify({ ...save, characters: [titled] }), NOW)
+    expect(r.save.characters[0]!.titles).toEqual([{ id: 1, expiresAt: NOW + 1000 }])
+    expect(r.save.characters[0]!.activeTitle).toBe(1)
+    const unowned = { ...titled, titles: [], activeTitle: 1 }
+    const r2 = loadSave(JSON.stringify({ ...save, characters: [unowned] }), NOW)
+    expect(r2.save.characters[0]!.activeTitle).toBeNull()
+  })
+
   it('empties quick slots holding something that is not a potion of their kind', () => {
     const save = withCharacter()
     const broken = {

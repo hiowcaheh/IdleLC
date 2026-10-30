@@ -17,6 +17,7 @@ import type { CombatResult } from '../game/logic/rewards.ts'
 import type { LoadResult, SaveData, Settings } from '../game/logic/save.ts'
 import type { IdentifyResult, IdentifyTarget } from '../game/logic/rare.ts'
 import type { PieceSale, PurchaseResult, SaleResult } from '../game/logic/shop.ts'
+import type { TitleUse } from '../game/logic/titles.ts'
 import { createDefaultSave } from '../game/logic/save.ts'
 import { farthestSpot, isSpotOpen } from '../game/logic/spots.ts'
 import { gameService } from '../game/service/index.ts'
@@ -75,6 +76,10 @@ interface GameStore {
   sellGear(uids: string[]): Promise<PieceSale>
   identifyItems(magnifierId: number, targets: IdentifyTarget[]): Promise<IdentifyResult>
   setPotionSlot(group: PotionGroup, slot: PotionSlot): Promise<void>
+  /** Uses a title item from the bag (its title is added, worn if none is). */
+  redeemTitleItem(itemId: number): Promise<TitleUse>
+  /** Wears an owned title, or takes the worn one off (null). */
+  setTitle(titleId: number | null): Promise<void>
   /** The hero drinks a potion from the bag now (the bag updates with the next report). */
   drinkPotion(itemId: number): DrinkProblem | 'away' | null
   selectMonster(monsterId: string): void
@@ -93,6 +98,8 @@ interface GameStore {
   devSimulateAfk(seconds: number): void
   /** Opens every hunting spot, then goes to the one given. */
   devTravel(zoneId: string, monsterId: string): void
+  /** Puts a title's item in the bag. */
+  devAddTitleItem(titleId: number): void
 }
 
 function toHud(c: CombatState): CombatHud {
@@ -409,6 +416,18 @@ export const useGameStore = create<GameStore>((set, get) => {
       return sale
     },
 
+    async redeemTitleItem(itemId) {
+      const id = playedId()
+      const use = await enqueue(() => gameService.redeemTitleItem(id, itemId))
+      applyCharacter(use.character)
+      return use
+    },
+
+    async setTitle(titleId) {
+      const id = playedId()
+      applyCharacter(await enqueue(() => gameService.setTitle(id, titleId)))
+    },
+
     async identifyItems(magnifierId, targets) {
       const id = playedId()
       const result = await enqueue(() => gameService.identifyItems(id, magnifierId, targets))
@@ -489,6 +508,10 @@ export const useGameStore = create<GameStore>((set, get) => {
           travel(zoneId, monsterId)
         })
         .catch(logError)
+    },
+
+    devAddTitleItem(titleId) {
+      dev((id) => gameService.dev?.addTitleItem(id, titleId))
     },
 
     devSimulateAfk(seconds) {

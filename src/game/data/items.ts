@@ -296,6 +296,8 @@ const PLACEHOLDER_ITEMS: Record<number, ItemDef> = {
     price: 1000000,
     magnifier: { chance: MAGNIFIER_CHANCE[GOLDEN_MAGNIFIER_ID]! },
   },
+  // a title item (the placeholder title 1, data/titles.ts)
+  900: { id: 900, name: 'Brave Hunter', type: 'other', level: 0, price: 0, title: 1 },
 }
 
 export const ITEMS: Record<number, ItemDef> = lcData
@@ -307,7 +309,7 @@ export const ITEMS: Record<number, ItemDef> = lcData
           {
             id: i.id,
             name: i.name,
-            type: LC_TYPES[i.type] ?? 'other',
+            type: i.title !== undefined ? 'other' : (LC_TYPES[i.type] ?? 'other'),
             level: i.level,
             price: i.price,
             gear,
@@ -322,6 +324,7 @@ export const ITEMS: Record<number, ItemDef> = lcData
             ...(MAGNIFIER_CHANCE[i.id] !== undefined
               ? { magnifier: { chance: MAGNIFIER_CHANCE[i.id]! } }
               : {}),
+            ...(i.title !== undefined ? { title: i.title } : {}),
           },
         ]
       }),

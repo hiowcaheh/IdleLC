@@ -5,10 +5,12 @@ import type { CharacterData } from '../../game/logic/character.ts'
 import { requiredLevel } from '../../game/logic/equipment.ts'
 import type { ItemOption } from '../../game/logic/options.ts'
 import { GRADES, isRare } from '../../game/logic/rare.ts'
+import { getTitle } from '../../game/data/titles.ts'
 import { SLOT_LABELS, fmt, gearStats, nameTone, optionLines, pieceName } from '../gear/format.ts'
 import { ItemIcon } from './ItemIcon.tsx'
 import { TYPE_LABELS } from './itemTypes.ts'
 import { potionLine } from './potionText.ts'
+import { titleDuration, titleStyle } from '../titles/format.ts'
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
@@ -68,18 +70,23 @@ export function ItemInfo({
       tone: classes.includes(character.classId) ? '' : ' is-unmet',
     })
   }
-  const lines = optionLines(options, character.classId)
+  const title = item.title === undefined ? undefined : getTitle(item.title)
+  if (title) rows.push({ label: 'Lasts', value: titleDuration(title.days) })
+  const lines = optionLines(options ?? title?.options, character.classId)
 
   return (
     <div className="item-info">
       <div className="item-info__head">
         <ItemIcon item={item} />
         <span className="item-info__title">
-          <span className={`item-info__name${nameTone({ itemId, rare })}`}>
+          <span
+            className={`item-info__name${nameTone({ itemId, rare })}`}
+            style={title ? titleStyle(title) : undefined}
+          >
             {pieceName(itemId, plus, rare)}
             {count > 1 ? ` ×${fmt(count)}` : ''}
           </span>
-          <span className="item-info__kind">{kindOf(item)}</span>
+          <span className="item-info__kind">{title ? 'Title' : kindOf(item)}</span>
         </span>
       </div>
       {rows.length > 0 && (
@@ -108,6 +115,7 @@ export function ItemInfo({
           ))}
         </dl>
       )}
+      {title?.description && <p className="item-row__note">{title.description}</p>}
     </div>
   )
 }

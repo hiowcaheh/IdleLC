@@ -8,6 +8,7 @@ import { MONSTERS } from '../data/monsters.ts'
 import { MAX_LEVEL } from '../data/progression.ts'
 import { getItem, getOption, getRareSet, slotsFor } from '../data/items.ts'
 import { getSkill } from '../data/skills.ts'
+import { getTitle } from '../data/titles.ts'
 import type { ClassId, EquipSlot } from '../data/types.ts'
 import { ZONES } from '../data/zones.ts'
 import {
@@ -37,6 +38,7 @@ import {
   type PotionSlots,
 } from './potions.ts'
 import { zoneSpots } from './spots.ts'
+import type { OwnedTitle } from './titles.ts'
 import {
   SKILL_BAR_SIZE,
   defaultBar,
@@ -45,7 +47,7 @@ import {
   type LearnedSkill,
 } from './skills.ts'
 
-export const SAVE_VERSION = 10
+export const SAVE_VERSION = 11
 
 export type GraphicsQuality = 'auto' | 'low' | 'high' | 'ultra'
 
@@ -176,6 +178,8 @@ export const MIGRATIONS: Record<number, Migration> = {
   // v10: hunting spots open one by one, expeditions, play time and kills per monster; the new fields
   // start at their defaults (sanitizeCharacter) and the spot a character is at counts as reached
   9: (save) => save,
+  // v11: titles (none yet; sanitizeCharacter fills the empty list)
+  10: (save) => save,
 }
 
 export const DEFAULT_SETTINGS: Settings = { quality: 'auto', showDamageNumbers: true }
@@ -285,6 +289,7 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
       .filter((p): p is GearPiece => p !== null),
     potionSlots: sanitizePotionSlots(raw.potionSlots),
     optionProgress: Math.min(OPTION_PLAY_SECONDS, Math.max(0, num(raw.optionProgress, 0))),
+    ...sanitizeTitles(raw.titles, raw.activeTitle),
   })
 }
 
@@ -306,6 +311,24 @@ function sanitizeReached(raw: unknown, location: CharacterLocation): Record<stri
     reached[location.zoneId] = location.monsterId
   }
   return reached
+}
+
+/** Titles that still exist (each once), and the worn one when the character has it. */
+function sanitizeTitles(
+  raw: unknown,
+  active: unknown,
+): { titles: OwnedTitle[]; activeTitle: number | null } {
+  const titles: OwnedTitle[] = []
+  for (const entry of Array.isArray(raw) ? raw : []) {
+    if (!isRecord(entry)) continue
+    const id = int(entry.id, -1)
+    if (!getTitle(id) || titles.some((t) => t.id === id)) continue
+    const expiresAt = entry.expiresAt === null ? null : num(entry.expiresAt, -1)
+    if (expiresAt === -1) continue
+    titles.push({ id, expiresAt })
+  }
+  const worn = int(active, -1)
+  return { titles, activeTitle: titles.some((t) => t.id === worn) ? worn : null }
 }
 
 /** Kill counts of monsters that still exist. */

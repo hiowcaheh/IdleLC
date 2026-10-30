@@ -8,6 +8,7 @@ import type { CombatReport, CombatResult } from '../logic/rewards.ts'
 import type { LoadResult, SaveData, Settings } from '../logic/save.ts'
 import type { IdentifyResult, IdentifyTarget } from '../logic/rare.ts'
 import type { PieceSale, PurchaseResult, SaleResult } from '../logic/shop.ts'
+import type { TitleUse } from '../logic/titles.ts'
 
 /**
  * Everything that changes the saved game goes through this contract, and every call is
@@ -70,6 +71,10 @@ export interface GameService {
     magnifierId: number,
     targets: IdentifyTarget[],
   ): Promise<IdentifyResult>
+  /** Uses a title item from the bag: its title is added for its days (worn if none is). */
+  redeemTitleItem(characterId: string, itemId: number): Promise<TitleUse>
+  /** Wears an owned title, or takes the worn one off (null). */
+  setTitle(characterId: string, titleId: number | null): Promise<CharacterData>
   /** Puts a potion the character owns (or nothing) in the HP or MP quick slot, with its automatic use. */
   setPotionSlot(characterId: string, group: PotionGroup, slot: PotionSlot): Promise<CharacterData>
   updateSettings(patch: Partial<Settings>): Promise<Settings>
@@ -92,6 +97,8 @@ export interface DevCommands {
   simulateAfk(characterId: string, seconds: number): Promise<CharacterData>
   /** Opens every hunting spot of every zone. */
   openAllSpots(characterId: string): Promise<CharacterData>
+  /** Puts the item of a title in the bag. */
+  addTitleItem(characterId: string, titleId: number): Promise<CharacterData>
 }
 
 /** Subset of the Web Storage API — lets tests use an in-memory store. */

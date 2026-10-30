@@ -2,13 +2,16 @@ import { useMemo } from 'react'
 import { CLASSES } from '../../game/data/classes.ts'
 import type { CharacterData } from '../../game/logic/character.ts'
 import { expToNextLevel } from '../../game/logic/progression.ts'
+import { wornTitle } from '../../game/logic/titles.ts'
 import { ClassPreview } from '../characters/ClassPreview.tsx'
 import { Bar } from '../hud/Bar.tsx'
 import { formatSp } from '../skills/format.ts'
+import { titleStyle } from '../titles/format.ts'
 import { fmt } from './format.ts'
 
 /**
- * The top of the Character window: the hero turning on a pedestal in its worn gear, its name, class
+ * The top of the Character window: the hero turning on a pedestal in its worn gear, its name (worn
+ * title under it), class
  * and level, the experience to the next level, skill points and gold.
  */
 export function HeroCard({ character }: { character: CharacterData }) {
@@ -16,6 +19,7 @@ export function HeroCard({ character }: { character: CharacterData }) {
   const worn = useMemo(() => Object.values(equipment).map((piece) => piece.itemId), [equipment])
   const needed = expToNextLevel(level)
   const share = needed > 0 ? (exp / needed) * 100 : 100
+  const title = wornTitle(character)
 
   return (
     <header className="hero-card">
@@ -24,6 +28,11 @@ export function HeroCard({ character }: { character: CharacterData }) {
       </div>
       <div className="hero-card__info">
         <h3 className="hero-card__name">{character.name}</h3>
+        {title && (
+          <p className="hero-card__title" style={titleStyle(title)}>
+            {title.name}
+          </p>
+        )}
         <p className="hero-card__class">
           {CLASSES[character.classId].name} · Level {level}
         </p>

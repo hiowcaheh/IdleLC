@@ -8,6 +8,7 @@ import { statsForLevel } from './balance.ts'
 import type { FighterInit, PotionSupply } from './combat.ts'
 import { applyGear, wielded, type Equipment } from './equipment.ts'
 import { lcPlayerStats } from './lcBalance.ts'
+import { optionEffects } from './options.ts'
 import type { ItemStack } from './loot.ts'
 import { POTION_GROUPS, countOwned, potionGroup, type PotionSlots } from './potions.ts'
 import {
@@ -17,6 +18,7 @@ import {
   wieldableRanks,
   type LearnedSkill,
 } from './skills.ts'
+import { titleOptions } from './titles.ts'
 
 /** What the hero's fighter depends on (a CharacterData fits). */
 export interface Hero {
@@ -30,6 +32,8 @@ export interface Hero {
   /** The bag: the potions of the quick slots come from it. */
   inventory?: readonly ItemStack[]
   potionSlots?: PotionSlots
+  /** The worn title: its options count like gear options. */
+  activeTitle?: number | null
 }
 
 /**
@@ -54,7 +58,8 @@ export function playerFighter(hero: Hero): FighterInit {
   const base = statsForLevel(CLASSES[classId], level)
   // LC data: class stats are not in the LC database yet — scale against LC monsters instead
   const levelStats = lcData ? lcPlayerStats(level, lcData.monsters, base) : base
-  const stats = applyGear(levelStats, classId, level, equipment)
+  const withGear = applyGear(levelStats, classId, level, equipment)
+  const stats = applyStats(withGear, optionEffects(titleOptions(hero.activeTitle), classId))
   // skills that need other gear (a shield, another weapon) are left out; estimates assume the gear fits
   const learned = learnedRanks(classId, skills)
   const ranks = equipment ? wieldableRanks(learned, wielded(equipment)) : learned
@@ -81,7 +86,8 @@ export function heroKey(hero: Hero): string {
   const potions = potionSupply(hero)
     .map((p) => `${p.itemId}x${p.count}`)
     .join(',')
-  return `${classId}/${level}/${learned.join(',')}/${worn}/${skillBar?.join(',') ?? 'all'}/${potions}`
+  const title = hero.activeTitle ?? 'none'
+  return `${classId}/${level}/${learned.join(',')}/${worn}/${skillBar?.join(',') ?? 'all'}/${potions}/${title}`
 }
 
 export function monsterFighter(monsterId: string): FighterInit {

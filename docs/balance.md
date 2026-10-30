@@ -297,6 +297,17 @@ Każda z 9 stref z bazy da się wybrać od razu (prośba właściciela — bez b
 najniższy i najwyższy poziom spotów strefy i ile z nich jest otwartych. Po wyborze postać idzie na najdalszy
 otwarty spot strefy (nowa strefa: pierwszy spot).
 
+## Tytuły
+
+- Dane 1:1 z `t_title` (włączone, z angielską nazwą przedmiotu — 184): nazwa i opis z przedmiotu tytułu
+  (`t_item.a_name_usa` / `a_descr_usa`), czas `a_time` w dniach (-1 = na stałe), kolor napisu `a_color`
+  i drugi kolor `a_bgcolor` (u nas poświata napisu), do 5 opcji `t_option` (`a_option_index/level`).
+- Przedmiot tytułu (typ Other) → „Use” w torbie dodaje tytuł na jego czas; ponowne użycie przedłuża czas
+  (dni dodają się); tytuł stały drugi raz — odmowa. Pierwszy tytuł zakłada się sam (**własne**).
+- Założony jest jeden tytuł; jego opcje działają jak opcje sprzętu. Czas płynie realnie (także na wyprawie
+  i z zamkniętą grą); po końcu tytuł znika i spada z postaci.
+- Skąd gracz dostaje przedmioty tytułów — **decyzja właściciela** (na razie tylko narzędzie dev).
+
 ## Spoty (własne)
 
 - Spoty strefy to jej potwory w kolejności: poziom, zwykłe przed elitami, mniej HP i ataku przed silniejszymi

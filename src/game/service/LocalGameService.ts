@@ -1,5 +1,6 @@
 import { MONSTERS } from '../data/monsters.ts'
 import { MAX_LEVEL } from '../data/progression.ts'
+import { getTitle } from '../data/titles.ts'
 import { ZONES } from '../data/zones.ts'
 import { clamp } from '../logic/balance.ts'
 import {
@@ -23,7 +24,7 @@ import {
 } from '../logic/rewards.ts'
 import { applyIdentify, type IdentifyResult, type IdentifyTarget } from '../logic/rare.ts'
 import { createRng, type Rng } from '../logic/rng.ts'
-import type { ItemStack } from '../logic/loot.ts'
+import { addToInventory, type ItemStack } from '../logic/loot.ts'
 import {
   applyBuy,
   applySale,
@@ -34,6 +35,7 @@ import {
 } from '../logic/shop.ts'
 import { SP_UNIT, applyAuto, applyBar, applyLearn } from '../logic/skills.ts'
 import { isSpotOpen, zoneSpots } from '../logic/spots.ts'
+import { applyUseTitleItem, applyWearTitle, pruneTitles, type TitleUse } from '../logic/titles.ts'
 import type { EquipSlot } from '../data/types.ts'
 import {
   applyEquip,
@@ -77,9 +79,12 @@ export class LocalGameService implements GameService {
 
   async load(): Promise<LoadResult> {
     const { save, status } = loadSave(this.read(), this.now())
-    this.save = save
+    this.save = {
+      ...save,
+      characters: save.characters.map((c) => pruneTitles(c, this.now())),
+    }
     if (status !== 'loaded') this.persist()
-    return { save: copy(save), status }
+    return { save: copy(this.save), status }
   }
 
   async createCharacter(input: NewCharacter): Promise<CharacterData> {
@@ -225,6 +230,17 @@ export class LocalGameService implements GameService {
     return copy({ ...purchase, character: updated })
   }
 
+  async redeemTitleItem(characterId: string, itemId: number): Promise<TitleUse> {
+    const use = applyUseTitleItem(this.character(characterId), itemId, this.now())
+    const updated = this.update(characterId, () => use.character)
+    return copy({ ...use, character: updated })
+  }
+
+  async setTitle(characterId: string, titleId: number | null): Promise<CharacterData> {
+    const changed = applyWearTitle(this.character(characterId), titleId, this.now())
+    return copy(this.update(characterId, () => changed))
+  }
+
   async setPotionSlot(
     characterId: string,
     group: PotionGroup,
@@ -307,6 +323,16 @@ export class LocalGameService implements GameService {
           return { ...c, expedition: { ...(c.expedition ?? c.location), startedAt: start } }
         }),
       ),
+    addTitleItem: async (characterId, titleId) => {
+      const title = getTitle(titleId)
+      if (!title) throw new GameError('unknown-title', `title ${titleId}`)
+      return copy(
+        this.update(characterId, (c) => ({
+          ...c,
+          inventory: addToInventory(c.inventory, [{ itemId: title.item, count: 1 }]),
+        })),
+      )
+    },
     openAllSpots: async (characterId) =>
       copy(
         this.update(characterId, (c) => ({
@@ -337,7 +363,8 @@ export class LocalGameService implements GameService {
     characterId: string,
     change: (character: CharacterData) => CharacterData,
   ): CharacterData {
-    const next = change(this.character(characterId))
+    // run-out titles go with every change
+    const next = pruneTitles(change(this.character(characterId)), this.now())
     this.save = {
       ...this.save,
       characters: this.save.characters.map((c) => (c.id === characterId ? next : c)),

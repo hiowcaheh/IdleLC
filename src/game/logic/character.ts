@@ -9,6 +9,7 @@ import { starterEquipment, type Equipment, type GearPiece } from './equipment.ts
 import type { ItemStack } from './loot.ts'
 import { EMPTY_POTION_SLOTS, type PotionSlots } from './potions.ts'
 import { defaultBar, starterSkills, type LearnedSkill } from './skills.ts'
+import type { OwnedTitle } from './titles.ts'
 
 export { GameError } from './errors.ts'
 
@@ -72,6 +73,9 @@ export interface CharacterData {
   potionSlots: PotionSlots
   /** Seconds of active play toward the next option on a worn piece (logic/options.ts). */
   optionProgress: number
+  /** Titles the character has (logic/titles.ts), and the worn one (shown under the name). */
+  titles: OwnedTitle[]
+  activeTitle: number | null
 }
 
 export interface NewCharacter {
@@ -133,6 +137,8 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     equipment: starterEquipment(input.classId),
     gear: [],
     potionSlots: EMPTY_POTION_SLOTS,
+    titles: [],
+    activeTitle: null,
     optionProgress: 0,
   }
 }
