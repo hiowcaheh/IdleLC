@@ -2293,17 +2293,35 @@
  "Data\\Item\\Weapon\\ni_sword_phynix.smc": [
   3219
  ],
+ "Data\\Item\\Weapon\\ni_dsword_phynix.smc": [
+  3220
+ ],
  "Data\\Item\\Weapon\\ti_gsword_phynix.smc": [
   3221
+ ],
+ "Data\\Item\\Weapon\\ti_axe_phynix.smc": [
+  3222
+ ],
+ "Data\\Item\\Weapon\\hw_bow_phynix.smc": [
+  3223
  ],
  "Data\\Item\\Weapon\\hw_staff_phynix.smc": [
   3224
  ],
+ "Data\\Item\\Weapon\\ma_staff_phynix.smc": [
+  3225
+ ],
  "Data\\Item\\Weapon\\ma_wand_phynix.smc": [
   3226
  ],
+ "Data\\Item\\Weapon\\ro_dagger_phynix.smc": [
+  3227
+ ],
  "Data\\Item\\Weapon\\ro_crossbow_phynix.smc": [
   3228
+ ],
+ "Data\\Item\\Weapon\\so_scythe_phynix.smc": [
+  3229
  ],
  "Data\\Item\\Weapon\\so_staff_phynix.smc": [
   3230

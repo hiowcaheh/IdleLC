@@ -12,7 +12,8 @@ const atlas = (name) => `Data\\Interface\\${name}.tex`
 /**
  * name → [atlas, x, y, width, height, options?] (rectangles measured on the atlases); options:
  * `scale` (upscaled once here, sharpened so small icons stay crisp on phone screens), `quality`
- * (lossy WebP for pictures; the rest is lossless).
+ * (lossy WebP for pictures; the rest is lossless), `keyOut` (the dark blue background of an item
+ * icon made transparent).
  */
 export const UI_PARTS = {
   window: [atlas('NewInventory'), 0, 0, 256, 408],
@@ -32,6 +33,8 @@ export const UI_PARTS = {
   'menu-inventory': [atlas('TopUI'), 26, 222, 22, 22, { scale: 4 }],
   'menu-skills': [atlas('TopUI'), 52, 222, 22, 22, { scale: 4 }],
   'menu-system': [atlas('TopUI'), 156, 222, 22, 22, { scale: 4 }],
+  // the Gold Coin item's icon (t_item 19: ItemBtn0, row 0, column 0) without its frame and background
+  coin: [atlas('ItemBtn0'), 2, 2, 28, 28, { scale: 4, keyOut: true }],
   // a round button with a bronze rim and a black middle: the counter badge on buttons
   badge: [atlas('TopUI'), 734, 711, 25, 25, { scale: 3 }],
   // the character window's value box
@@ -81,7 +84,7 @@ export async function buildUiParts(files) {
   const textures = new Map()
   const out = {}
   for (const [name, [path, x, y, width, rectHeight, options = {}]] of Object.entries(UI_PARTS)) {
-    const { scale = 1, quality } = options
+    const { scale = 1, quality, keyOut = false } = options
     let height = rectHeight
     if (!textures.has(path)) {
       textures.set(path, files.resolve(path) ? parseTexture(files.read(path)) : null)
@@ -104,6 +107,12 @@ export async function buildUiParts(files) {
           const grey = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3
           for (let c = 0; c < 3; c++) pixels[i + c] = Math.round(grey * EMPTY_SHADE)
         }
+      }
+    }
+    if (keyOut) {
+      // gold on dark blue: the more blue than red a pixel is, the more transparent
+      for (let i = 0; i < pixels.length; i += 4) {
+        pixels[i + 3] = Math.max(0, Math.min(255, (pixels[i] - pixels[i + 2] - 10) * 3))
       }
     }
     let image = sharp(pixels, { raw: { width, height, channels: 4 } })

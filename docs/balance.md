@@ -236,7 +236,8 @@ cenie z bazy (decyzja własna).
 **Sklep (kupno)** — przycisk Shop w panelu polowania:
 
 - **broń i zbroje klasy**: dla każdego slotu poprzedni, obecny i następny próg (`tierWindow`) z głównej linii
-  przedmiotów w bazie (zwykłe przedmioty, flaga ulepszania, cena ≥ 100, najczęstsza cena w progu; bez poziomu 1 —
+  przedmiotów w bazie (zwykłe przedmioty, flaga ulepszania, cena > 100 — eventowy zestaw Phoenix z 50 poz. za 100
+  złota nie jest w sklepie, decyzja właściciela; najczęstsza cena w progu; bez poziomu 1 —
   każdy ma zestaw startowy), w każdym progu **jeden, najsłabszy** przedmiot (najmniej ataku / obrony; prośba
   właściciela — bez duplikatów i mocniejszych odmian). Broń co 4 poziomy, zbroja co 5;
 - **akcesoria** z losowymi opcjami;

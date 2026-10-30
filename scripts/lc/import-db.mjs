@@ -56,8 +56,12 @@ const FLAG_REGULAR = 1 << 27
 const FLAG_CASH = 1 << 28
 const isRegularGear = (flag) =>
   (flag & FLAG_UPGRADE) !== 0 && (flag & FLAG_REGULAR) !== 0 && (flag & FLAG_CASH) === 0
-/** Region placeholders cost 1 gold; real gear costs hundreds. */
-const MIN_SHOP_PRICE = 100
+/**
+ * Region placeholders cost 1 gold; real gear costs hundreds and more. The level-50 Phoenix event gear
+ * costs a token 100 gold: it stays out of the shop (owner's decision).
+ */
+const MIN_SHOP_PRICE = 101
+const EVENT_GEAR_PRICE = 100
 /** t_item.a_flag of the plain "Magical Accessory" pieces (cords, stones, eyes, earrings, rings). */
 const FLAG_MAGIC_ACCESSORY = 134217754
 /** t_skill.a_useState / a_appState bits IdleLC checks: a weapon worn, a shield worn. */
@@ -196,6 +200,17 @@ function buildData(tables) {
     for (const tiers of Object.values(slots))
       for (const t of tiers) t.items.forEach((id) => usedItems.add(id))
   for (const ids of Object.values(starterGear)) ids.forEach((id) => usedItems.add(id))
+  // the Phoenix event gear (token price) is not in the shop but stays known: pieces bought before
+  // keep working
+  for (const r of tables.t_item) {
+    if (
+      usable(r) &&
+      isGear(r) &&
+      int(r.a_price) === EVENT_GEAR_PRICE &&
+      (int(r.a_job_flag) & BASE_CLASS_BITS) !== 0
+    )
+      usedItems.add(int(r.a_index))
+  }
   UPGRADE_STONES.forEach((id) => usedItems.add(id))
   const shopItems = new Set(Object.values(shops).flat())
   shopItems.forEach((id) => usedItems.add(id))

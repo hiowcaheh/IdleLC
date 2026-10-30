@@ -102,12 +102,12 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
     ['Evasion', `+${percent(stats.dodge ?? 0)}`, change(stats.dodge ?? 0, base.dodge ?? 0, 1)],
     [
       'HP recovery',
-      `+${fmt(Math.round(hpRecovery))} / ${REGEN_TICK_SECONDS} s`,
+      `+${fmt(Math.round(hpRecovery))} / ${REGEN_TICK_SECONDS}s`,
       change(hpRecovery, base.hpRegen ?? 0),
     ],
     [
       'MP recovery',
-      `+${fmt(Math.round(mpRecovery))} / ${REGEN_TICK_SECONDS} s`,
+      `+${fmt(Math.round(mpRecovery))} / ${REGEN_TICK_SECONDS}s`,
       change(mpRecovery, base.mpRegen ?? 0),
     ],
     ['Skill cooldown', signed(-capped(stats.cooldownReduction, MAX_COOLDOWN_REDUCTION))],
@@ -238,18 +238,16 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
           <dl className="hero-stats">
             {statRows.map(([label, value, buffed]) => (
               <div key={label}>
-                <dt>{label}</dt>
-                <dd>
-                  {value}
-                  {buffed && <span className="hero-stats__buff"> ({buffed})</span>}
-                </dd>
+                <dt>
+                  <span>{label}</span>
+                  {buffed && <span className="hero-stats__buff">{buffed}</span>}
+                </dt>
+                <dd>{value}</dd>
               </div>
             ))}
           </dl>
           {buffs.length > 0 && (
-            <p className="sheet__meta">
-              Active now: {buffs.join(', ')} (in brackets: what they add).
-            </p>
+            <p className="sheet__meta">Active now: {buffs.join(', ')} (in green: what they add).</p>
           )}
           <h3 className="inventory__heading">Bonuses</h3>
           <dl className="hero-stats">

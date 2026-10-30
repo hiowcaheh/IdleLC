@@ -322,12 +322,14 @@ p {
   font-variant-numeric: tabular-nums;
 }
 
+/* gold: the client's Gold Coin icon */
 .coin {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff1b8, #e2b864 45%, #8a6a3a);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+  display: inline-block;
+  flex: none;
+  width: 17px;
+  height: 17px;
+  vertical-align: -3px;
+  background: url('/ui/lc/coin.webp') center / contain no-repeat;
 }
 
 .unit-frame__title {
@@ -1195,10 +1197,9 @@ a.button {
 }
 
 .coin--small {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  vertical-align: -1px;
+  width: 13px;
+  height: 13px;
+  vertical-align: -2px;
 }
 
 .inventory__sell-all {
@@ -1860,9 +1861,12 @@ a.button {
   overflow: hidden;
 }
 
-/* attacks on the left, buffs on the right */
-.skill-slot.is-first-support {
-  margin-left: 8px;
+/* a slot with no skill: the bar keeps its 7 places */
+.skill-slot.is-empty {
+  cursor: default;
+  border-color: var(--bronze-dim);
+  background: radial-gradient(circle at 50% 30%, #15110d, #070504 80%);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
 }
 
 .skill-slot .skill-icon {
@@ -2212,22 +2216,34 @@ a.button {
 }
 
 .hero-stats dt {
-  overflow: hidden;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px;
+  min-width: 0;
   font-size: 12px;
   color: var(--parchment-dim);
   white-space: nowrap;
+}
+
+.hero-stats dt > span:first-child {
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* every value box the same width, whatever is in it */
 .hero-stats dd {
   flex: none;
-  min-width: 68px;
+  width: 76px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   margin: 0;
   padding: 1px 4px;
   border-style: solid;
   border-width: 3px 5px;
   border-image: url('/ui/lc/value-box.webp') 3 5 fill / 3px 5px stretch;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 800;
   line-height: 16px;
   text-align: right;
@@ -2747,7 +2763,9 @@ a.button {
 }
 
 .hero-stats__buff {
-  font-size: 13px;
+  flex: none;
+  font-size: 11.5px;
+  font-weight: 800;
   color: #8fe36a;
 }
 
@@ -3357,7 +3375,9 @@ a.button {
 }
 
 .item-info__stats dd {
+  width: auto;
   min-width: 96px;
+  max-width: 68%;
 }
 
 .item-info__stats .is-unmet {

@@ -1,14 +1,15 @@
 import { useMemo } from 'react'
 import { getSkill } from '../../game/data/skills.ts'
 import { wielded } from '../../game/logic/equipment.ts'
-import { learnedRanks, worksWith, type SkillRank } from '../../game/logic/skills.ts'
+import { SKILL_BAR_SIZE, learnedRanks, worksWith, type SkillRank } from '../../game/logic/skills.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { SkillIcon } from './SkillIcon.tsx'
 import { useCombatTicker } from './useCombatTicker.ts'
 
 /**
- * The skills on the bar (at most 7; attacks left, buffs right) with their cooldowns. They fire on
- * their own; tapping one turns its automatic use on or off. The Skills window changes the bar.
+ * The skill bar: always its 7 slots, the attacks filling them from the left and the buffs from the
+ * right, empty slots dark between them; cooldowns on the skills. They fire on their own; tapping
+ * one turns its automatic use on or off. The Skills window changes the bar.
  */
 export function SkillBar() {
   const classId = useGameStore((s) => s.character?.classId)
@@ -22,9 +23,17 @@ export function SkillBar() {
     const byId = new Map(learnedRanks(classId, skills).map((r) => [r.id, r]))
     return bar.map((id) => byId.get(id)).filter((r): r is SkillRank => r !== undefined)
   }, [classId, skills, bar])
-  if (ranks.length === 0) return null
+  if (!bar) return null
   const player = combat.player
   const hands = wielded(equipment ?? {})
+  const attacks = ranks.filter((r) => !isSupport(r))
+  const supports = ranks.filter(isSupport)
+  const empty = Math.max(0, SKILL_BAR_SIZE - attacks.length - supports.length)
+  const slots: (SkillRank | null)[] = [
+    ...attacks,
+    ...Array.from({ length: empty }, () => null),
+    ...supports,
+  ]
 
   return (
     <div
@@ -32,9 +41,9 @@ export function SkillBar() {
       role="toolbar"
       aria-label="Skills — tap to turn automatic use on or off"
     >
-      {ranks.map((rank, i) => {
-        // a small gap between the attacks and the buffs
-        const firstSupport = isSupport(rank) && i > 0 && !isSupport(ranks[i - 1]!)
+      {slots.map((rank, i) => {
+        if (!rank)
+          return <span key={`empty-${i}`} className="skill-slot is-empty" aria-hidden="true" />
         const cooldown = player.skillCooldowns[rank.id] ?? 0
         const ratio = cooldown > 0 ? Math.min(1, cooldown / rank.cooldown) : 0
         const dry = player.mp < rank.mpCost
@@ -46,7 +55,7 @@ export function SkillBar() {
           <button
             key={rank.id}
             type="button"
-            className={`skill-slot${rank.auto ? '' : ' is-off'}${dry ? ' is-dry' : ''}${blocked ? ' is-blocked' : ''}${casting ? ' is-casting' : ''}${firstSupport ? ' is-first-support' : ''}`}
+            className={`skill-slot${rank.auto ? '' : ' is-off'}${dry ? ' is-dry' : ''}${blocked ? ' is-blocked' : ''}${casting ? ' is-casting' : ''}`}
             aria-pressed={rank.auto}
             aria-label={`${rank.name} — automatic use ${rank.auto ? 'on' : 'off'}${blocked ? ', needs other gear' : ''}`}
             title={`${rank.name} (Lv ${rank.level}) · ${rank.mpCost} MP${blocked ? ' · needs other gear' : ''}`}
