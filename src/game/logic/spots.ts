@@ -63,7 +63,10 @@ export function recordKills(
   const spots = zoneSpots(zoneId)
   const index = spots.indexOf(monsterId)
   const opensNext =
-    kills > 0 && index >= 0 && index + 1 === openSpotCount(character, zoneId) && index + 1 < spots.length
+    kills > 0 &&
+    index >= 0 &&
+    index + 1 === openSpotCount(character, zoneId) &&
+    index + 1 < spots.length
   return {
     stats,
     reachedSpots: opensNext

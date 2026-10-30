@@ -28,8 +28,8 @@ export function WorldMapPanel({ onClose }: { onClose(): void }) {
   return (
     <Sheet title="World map" titleId="world-map-title" onClose={onClose}>
       <p className="sheet__meta">
-        Pick a zone to hunt its monsters and their drops. Every zone starts at its first spot; kill a
-        spot's monster to open the next one. The colour shows how hard its monsters are for your
+        Pick a zone to hunt its monsters and their drops. Every zone starts at its first spot; kill
+        a spot's monster to open the next one. The colour shows how hard its monsters are for your
         level.
       </p>
       <ul className="world-map">
