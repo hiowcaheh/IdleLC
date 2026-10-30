@@ -355,7 +355,7 @@ describe('loadSave', () => {
     expect(r.save.settings).toEqual({ quality: 'auto', showDamageNumbers: false })
     expect(r.save.characters).toHaveLength(1)
     expect(r.save.characters[0]).toMatchObject({
-      level: 99,
+      level: 100,
       exp: 0,
       gold: 5,
       location: save.characters[0]!.location,

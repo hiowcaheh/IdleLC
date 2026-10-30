@@ -54,7 +54,7 @@ Definicje w `src/game/data/` — w etapie 2 przeniesiemy je do bazy:
 - `items` (typ, slot, statystyki, wymagany poziom, rzadkość)
 - `lootTables` (potwór → przedmiot, szansa)
 
-Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/balance.md`. Max poziom na start: 99.
+Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/balance.md`. Max poziom na start: 100 (decyzja właściciela 2026-10-30; w grze na razie tylko Juno, Dratan, Merac i Egeha).
 
 ## Kamienie milowe (po kolei, każdy kończy się działającym deployem na GitHub Pages)
 

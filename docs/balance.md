@@ -31,7 +31,7 @@ stat(poziom) = round(base + perLevel × (poziom − 1))     dla maxHp, attack, d
 Pozostałe statystyki (szybkość ataku, krytyk) na razie nie rosną z poziomem. Mana:
 `maxMp = round(mana.base + mana.perLevel × (poziom − 1))` — Titan 40 (+4), Knight 45 (+4,5), Healer 60 (+7),
 Mage 70 (+8), Rogue 45 (+4,5), Sorcerer 55 (+6) (wartości własne).
-Poziom jest ograniczony do zakresu 1–99 (`MAX_LEVEL`).
+Poziom jest ograniczony do zakresu 1–100 (`MAX_LEVEL`; decyzja właściciela — w grze są na razie tylko Juno, Dratan, Merac i Egeha).
 
 | Klasa    | HP  | Atak | Obrona | Interwał | Krytyk   | +HP/poz | +Atak/poz | +Obr/poz |
 | -------- | --- | ---- | ------ | -------- | -------- | ------- | --------- | -------- |
@@ -108,7 +108,7 @@ Interwał ataku i krytyki zostają z klasy. Interwał ataku potwora LC = `a_atta
 
 - **Exp na poziom** — `t_exp` z bazy 1:1 (`src/game/data/progression.ts`): `EXP_TABLE[poziom − 1]` to exp
   potrzebny z poziomu `poziom` na następny (1 → 34, 10 → 18 748, 30 → 4 046 233). Nadmiar przechodzi na
-  kolejny poziom; jedna nagroda może dać kilka poziomów. Na poziomie 99 exp się nie zbiera. Bez danych LC
+  kolejny poziom; jedna nagroda może dać kilka poziomów. Na poziomie 100 exp się nie zbiera. Bez danych LC
   działa zastępcza krzywa `30 × poziom^2,2`.
 - **Nagroda za zabicie** — `t_npc.a_exp` i `a_prize` (złoto) 1:1 (`src/game/logic/rewards.ts`).
   Kary i premie za różnicę poziomów, drużynę i exp tracony po śmierci dodamy z kodu serwera.

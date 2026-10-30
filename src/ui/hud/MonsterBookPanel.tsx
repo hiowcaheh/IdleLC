@@ -152,6 +152,8 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
     ['Level', String(monster.level)],
     ['HP', fmt(monster.stats.maxHp)],
     ['EXP', fmt(monster.exp)],
+    // a_skill_point is in 1/10 000 SP
+    ['SP', ((monster.sp ?? 0) / 10_000).toLocaleString('en-US', { maximumFractionDigits: 2 })],
     ['Gold', fmt(monster.gold)],
     ['Spot', `${index + 1}${index >= open ? ' · locked' : ''}`],
   ]
@@ -214,7 +216,6 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
             <span className="book__kills-count">{fmt(kills)}</span>
             <span className="book__kills-label">defeated</span>
           </p>
-          <BookRewards monsterId={monsterId} kills={kills} />
           <dl className="book__facts">
             {facts.map(([label, value]) => (
               <div key={label}>
@@ -223,6 +224,7 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
               </div>
             ))}
           </dl>
+          <BookRewards monsterId={monsterId} kills={kills} />
         </div>
       </div>
     </Sheet>

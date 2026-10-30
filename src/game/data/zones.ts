@@ -64,22 +64,30 @@ function huntingOrder(ids: string[]): string[] {
 /** Zones drawn on the client's terrain (`npm run convert-lc -- --only terrain`). */
 const ZONE_MAPS: Record<string, string> = { 'lc-zone-0': 'juno' }
 
+/**
+ * The zones in the game for now: Juno, Dratan, Merac and Egeha (owner's decision; max level 100).
+ * The other zones of the database come later.
+ */
+const PLAYABLE_ZONES = new Set(['lc-zone-0', 'lc-zone-4', 'lc-zone-7', 'lc-zone-15'])
+
 export const ZONES: Record<string, ZoneDef> = lcData
   ? Object.fromEntries(
-      lcData.zones.map((z) => [
-        z.id,
-        {
-          id: z.id,
-          name: z.name,
-          minLevel: z.minLevel,
-          monsterIds: huntingOrder(
-            z.monsterIds.filter((id) => !EVENT_MONSTERS.has(id) && !RAID_BOSSES.has(id)),
-          ),
-          bossIds: z.monsterIds.filter((id) => RAID_BOSSES.has(id)),
-          ...(ZONE_MAPS[z.id] ? { map: ZONE_MAPS[z.id] } : {}),
-          environment: GLADE_ENVIRONMENT,
-        },
-      ]),
+      lcData.zones
+        .filter((z) => PLAYABLE_ZONES.has(z.id))
+        .map((z) => [
+          z.id,
+          {
+            id: z.id,
+            name: z.name,
+            minLevel: z.minLevel,
+            monsterIds: huntingOrder(
+              z.monsterIds.filter((id) => !EVENT_MONSTERS.has(id) && !RAID_BOSSES.has(id)),
+            ),
+            bossIds: z.monsterIds.filter((id) => RAID_BOSSES.has(id)),
+            ...(ZONE_MAPS[z.id] ? { map: ZONE_MAPS[z.id] } : {}),
+            environment: GLADE_ENVIRONMENT,
+          },
+        ]),
     )
   : PLACEHOLDER_ZONES
 

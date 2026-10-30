@@ -3063,6 +3063,24 @@
  "Data\\Item\\Shield\\Sorcerer\\so_ft_021-1.smc": [
   4203
  ],
+ "Data\\Item\\Shield\\Titan\\ti_hn_017-1.smc": [
+  5979
+ ],
+ "Data\\Item\\Shield\\Knight\\ni_hn_017-1.smc": [
+  5986
+ ],
+ "Data\\Item\\Shield\\Healer\\hw_hn_017-1.smc": [
+  5994
+ ],
+ "Data\\Item\\shield\\mage\\ma_hn_017-1.smc": [
+  6001
+ ],
+ "Data\\Item\\Shield\\Rogue\\ro_hn_017-1.smc": [
+  6008
+ ],
+ "Data\\Item\\Shield\\Sorcerer\\so_hn_017-1.smc": [
+  6015
+ ],
  "Data\\Item\\Weapon\\ti_gsword_oubli.smc": [
   7065
  ],

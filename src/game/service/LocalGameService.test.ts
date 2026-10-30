@@ -373,7 +373,7 @@ describe('LocalGameService', () => {
 
   it('offers dev commands for level, exp and gold', async () => {
     const { game, hero } = await withKnight()
-    expect((await game.dev.setLevel(hero.id, 500)).level).toBe(99)
+    expect((await game.dev.setLevel(hero.id, 500)).level).toBe(100)
     expect((await game.dev.setLevel(hero.id, 5)).level).toBe(5)
     const levelled = await game.dev.addExp(hero.id, EXP_TABLE[4]! + 1)
     expect(levelled).toMatchObject({ level: 6, exp: 1 })

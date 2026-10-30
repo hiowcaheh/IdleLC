@@ -1,6 +1,7 @@
 import { lcData } from './lcSource.ts'
 
-export const MAX_LEVEL = 99
+/** Highest level for now (owner: 100 is enough with Juno, Dratan, Merac and Egeha). */
+export const MAX_LEVEL = 100
 
 /** Placeholder curve (own values) used without the LC data: 30 × level^2.2. */
 function placeholderExp(level: number): number {

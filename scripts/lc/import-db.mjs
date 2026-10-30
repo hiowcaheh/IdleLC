@@ -18,7 +18,7 @@ import { buildModelManifest, modelIdFromSmc } from './manifest.mjs'
 import { int, num, readTables } from './sql.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
-const MAX_LEVEL = 99
+const MAX_LEVEL = 100
 
 /**
  * Field zones (t_zonedata index) with their English names. The dump has no direct link from a zone
