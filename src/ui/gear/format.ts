@@ -190,7 +190,7 @@ export function compareText(
     const d = Math.round((b - a) * 10) / 10
     if (d !== 0) parts.push(`${label} ${d > 0 ? '+' : '−'}${Math.abs(d)}%`)
   }
-  pct('Accuracy', before.hit, after.hit)
+  pct('Hit Rate', before.hit, after.hit)
   pct('Evasion', before.dodge, after.dodge)
   if (Math.abs(after.attackInterval - before.attackInterval) > 0.001) {
     parts.push(

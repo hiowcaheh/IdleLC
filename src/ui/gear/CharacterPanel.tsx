@@ -97,7 +97,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
       change(stats.critChance * 100, base.critChance * 100, 1),
     ],
     ['Critical damage', `×${stats.critMultiplier.toFixed(2)}`],
-    ['Accuracy', `+${percent(stats.hit ?? 0)}`, change(stats.hit ?? 0, base.hit ?? 0, 1)],
+    ['Hit Rate', `+${percent(stats.hit ?? 0)}`, change(stats.hit ?? 0, base.hit ?? 0, 1)],
     ['Evasion', `+${percent(stats.dodge ?? 0)}`, change(stats.dodge ?? 0, base.dodge ?? 0, 1)],
     [
       'HP recovery',

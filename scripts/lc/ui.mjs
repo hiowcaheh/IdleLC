@@ -52,21 +52,30 @@ export const UI_PARTS = {
  * Pieces put together from rows of their rectangle: [first row, rows, times]. The inventory window
  * has its item preview (black) and bag slots next to the side borders; the frames the game stretches
  * keep only a clean row of the sides (y 380: outline, gilt line, steel), so no black strip shows. The
- * bottom edge starts below the bag's outline (y 400), which would show as a line inside the frame.
+ * bottom edge starts below the bag's outline (y 401: steel, gilt line, shadow), its top row repeated.
  * window: the title edge (37 rows) and the bottom; panel: a thin top edge.
  */
 const ROWS = {
   window: [
     [0, 37, 1],
-    [380, 1, 19],
-    [401, 7, 1],
+    [380, 1, 16],
+    [401, 1, 4],
+    [402, 6, 1],
   ],
   panel: [
     [0, 10, 1],
-    [380, 1, 19],
-    [401, 7, 1],
+    [380, 1, 16],
+    [401, 1, 4],
+    [402, 6, 1],
   ],
 }
+
+/**
+ * The bottom edge is stretched across the whole window, so its middle (between the 8 px corners) is
+ * one column repeated — the texture's streaks would show as long smears: [rows from the bottom, column].
+ */
+const FLAT_BOTTOM = { window: [10, 128], panel: [10, 128] }
+const CORNER = 8
 
 /** Parts of a piece shown empty: the player frame's bar tracks (the bars are drawn on top). */
 const EMPTY_AREAS = {
@@ -100,6 +109,15 @@ export async function buildUiParts(files) {
       const from = ((y + source) * texture.width + x) * 4
       pixels.set(texture.rgba.subarray(from, from + width * 4), row * width * 4)
     })
+    if (FLAT_BOTTOM[name]) {
+      const [count, column] = FLAT_BOTTOM[name]
+      for (let row = height - count; row < height; row++) {
+        const from = (row * width + column) * 4
+        for (let col = CORNER; col < width - CORNER; col++) {
+          pixels.copyWithin((row * width + col) * 4, from, from + 4)
+        }
+      }
+    }
     for (const [ex, ey, ew, eh] of EMPTY_AREAS[name] ?? []) {
       for (let row = ey; row < ey + eh; row++) {
         for (let col = ex; col < ex + ew; col++) {

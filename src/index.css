@@ -2503,31 +2503,43 @@ a.button {
 
 /* Rare items: unidentified red, identified by grade (owner's colours) */
 .item-row__name.name--unidentified,
+.item-info__name.name--unidentified,
+.item-info__options.name--unidentified,
 .name--unidentified {
   color: #ff6b5e;
 }
 
 .item-row__name.name--grade-A,
+.item-info__name.name--grade-A,
+.item-info__options.name--grade-A,
 .name--grade-A {
   color: #4f8bff;
 }
 
 .item-row__name.name--grade-B,
+.item-info__name.name--grade-B,
+.item-info__options.name--grade-B,
 .name--grade-B {
   color: #5fd36a;
 }
 
 .item-row__name.name--grade-C,
+.item-info__name.name--grade-C,
+.item-info__options.name--grade-C,
 .name--grade-C {
   color: #8fe3ff;
 }
 
 .item-row__name.name--grade-D,
+.item-info__name.name--grade-D,
+.item-info__options.name--grade-D,
 .name--grade-D {
   color: #f2d45c;
 }
 
 .item-row__name.name--grade-E,
+.item-info__name.name--grade-E,
+.item-info__options.name--grade-E,
 .name--grade-E {
   color: #f4efe4;
 }
@@ -2871,7 +2883,8 @@ a.button {
   border-width: 28px 9px 10px;
   border-image: url('/ui/lc/window.webp') 37 8 10 8 / 28px 9px 10px stretch;
   border-radius: 0;
-  background: #35393f;
+  /* the steel of the frame's inner edge, so the frame and the window are one surface */
+  background: #3c3f42;
   /* the client's frame: no inner line of the old panel style along its edges */
   box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
   padding: 6px 12px calc(16px + var(--safe-bottom));
@@ -3669,4 +3682,65 @@ a.button {
 /* the Character window keeps its height whichever tab is open */
 .sheet.sheet--character {
   height: min(90%, 880px);
+}
+
+/* an item's window: its actions a little below the card */
+.item-details .item-row__actions {
+  margin-top: 14px;
+}
+
+/* identify with a magnifying glass: the glass with how many you have, and how sure it is */
+.identify-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  min-height: 52px;
+  padding-left: 12px;
+  text-align: left;
+}
+
+.identify-button__glass {
+  position: relative;
+  flex: none;
+}
+
+.identify-button__count {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  min-width: 16px;
+  padding: 0 3px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 15px;
+  text-align: center;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 0 1px rgba(200, 160, 100, 0.6);
+}
+
+.identify-button:disabled .item-icon {
+  filter: grayscale(0.9) brightness(0.6);
+}
+
+.identify-button__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.identify-button__title {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.identify-button__meta {
+  white-space: nowrap;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  opacity: 0.85;
 }

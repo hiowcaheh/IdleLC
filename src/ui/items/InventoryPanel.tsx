@@ -24,6 +24,7 @@ import { toast } from '../../state/toasts.ts'
 import { compareText, nameTone, pieceName, rareLabel, wearProblem } from '../gear/format.ts'
 import { potionText } from './potionText.ts'
 import { Sheet } from '../Sheet.tsx'
+import { ItemIcon } from './ItemIcon.tsx'
 import { ItemInfo } from './ItemInfo.tsx'
 import { ItemSlot } from './ItemSlot.tsx'
 
@@ -225,7 +226,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
           <button
             key={glassId}
             type="button"
-            className={`button${glassId === GOLDEN_MAGNIFIER_ID ? ' button--gold' : ''}`}
+            className={`button identify-button${glassId === GOLDEN_MAGNIFIER_ID ? ' button--gold' : ''}`}
             disabled={busy || away || have < 1}
             onClick={() =>
               run(async () => {
@@ -238,8 +239,16 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
               })
             }
           >
-            Identify · {glass.name} ×{fmt(have)}
-            {chance < 100 ? ` (${chance}%)` : ''}
+            <span className="identify-button__glass">
+              <ItemIcon item={glass} size={30} />
+              <span className="identify-button__count">{fmt(have)}</span>
+            </span>
+            <span className="identify-button__text">
+              <span className="identify-button__title">Identify</span>
+              <span className="identify-button__meta">
+                {chance < 100 ? `${chance}% chance` : 'Always works'}
+              </span>
+            </span>
           </button>
         )
       })}

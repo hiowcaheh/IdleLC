@@ -51,7 +51,7 @@ const STAT_LABELS: Record<StatKey, string> = {
   defense: 'Defense',
   maxHp: 'Max HP',
   maxMp: 'Max MP',
-  hit: 'Accuracy',
+  hit: 'Hit Rate',
   dodge: 'Evasion',
   critChance: 'Critical chance',
   critMultiplier: 'Critical damage',
