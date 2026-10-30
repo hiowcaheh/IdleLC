@@ -7,6 +7,7 @@ import { ClientFiles, MemoryFiles } from './client.mjs'
 import { parseMesh } from './mesh.mjs'
 import { buildModel, inverseBindMatrix } from './model.mjs'
 import { parseAnimSet, parseSkeleton } from './ska.mjs'
+import { parseSkillAnims } from './skill-anims.mjs'
 import { parseSmc } from './smc.mjs'
 import { decodeDxt, parseTexture } from './texture.mjs'
 import {
@@ -431,5 +432,48 @@ describe('buildModel', () => {
     expect(Array.from(primitive.getAttribute('JOINTS_0').getElement(0, []))).toEqual([2, 0, 0, 0])
     expect(primitive.getMaterial().getBaseColorTexture().getMimeType()).toBe('image/webp')
     expect(root.listExtensionsUsed().map((e) => e.extensionName)).toContain('EXT_texture_webp')
+  })
+})
+
+describe('parseSkillAnims', () => {
+  /** A skills.lod-like record: the skill id `head` bytes before its first length-prefixed clip name. */
+  const record = (id, head, names) => {
+    const clips = Buffer.concat(
+      names.map((name) => {
+        const length = Buffer.alloc(4)
+        length.writeUInt32LE(name.length)
+        return Buffer.concat([length, Buffer.from(name, 'latin1')])
+      }),
+    )
+    const before = Buffer.alloc(head)
+    before.writeUInt32LE(id, 0)
+    return Buffer.concat([before, clips, Buffer.alloc(40)])
+  }
+  const prefixes = { knight: 'ni', mage: 'hw' }
+
+  it('reads one clip, or the three phases of a spell, skipping the alternative set', () => {
+    const buffer = Buffer.concat([
+      record(14, 102, ['ni_skill_01', 'ni_a_skill_01']),
+      record(31, 90, ['hw_skill_02_1', 'hw_skill_02_2', 'hw_a_skill_02', 'hw_skill_02_3']),
+    ])
+    const anims = parseSkillAnims(
+      buffer,
+      [
+        { id: 14, classId: 'knight' },
+        { id: 31, classId: 'mage' },
+      ],
+      prefixes,
+    )
+    expect(anims.get(14)).toEqual({ fire: 'ni_skill_01' })
+    expect(anims.get(31)).toEqual({
+      ready: 'hw_skill_02_1',
+      still: 'hw_skill_02_2',
+      fire: 'hw_skill_02_3',
+    })
+  })
+
+  it("takes a clip only for a skill of the clip's class", () => {
+    const buffer = record(14, 102, ['hw_skill_01'])
+    expect(parseSkillAnims(buffer, [{ id: 14, classId: 'knight' }], prefixes).size).toBe(0)
   })
 })

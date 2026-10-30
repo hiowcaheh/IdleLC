@@ -36,7 +36,7 @@ export const TIMINGS = {
   monsterInitiative: 0.5,
   /**
    * Share of a skill's fire animation (t_skill.a_fireTime) the hero stays busy after it lands.
-   * 0 until the client's skill animations are attached: standing still for it looks frozen.
+   * 0: the client's skill clips are fitted into the fight's timing instead (scene/Character.tsx).
    */
   skillAnimationLock: 0,
 } as const

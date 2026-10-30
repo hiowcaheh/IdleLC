@@ -146,6 +146,16 @@ export interface LcIconSheet {
   icons: Record<string, number>
 }
 
+/**
+ * The hero's clips for a skill (lc-skill-anims.json, from the client's skills.lod): one clip, or a
+ * spell's wind-up, held pose and release.
+ */
+export interface LcSkillAnim {
+  ready?: string
+  still?: string
+  fire: string
+}
+
 /** Weapon and armor models written by `npm run convert-lc` (lc-gear.json). */
 export interface LcGearManifest {
   /** Relative to the app base URL, e.g. "models/lc/gear/". */

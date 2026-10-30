@@ -3,7 +3,7 @@
   "models": [
     {
       "id": "class-knight",
-      "file": "class-knight.glb?v=599d6abf0e",
+      "file": "class-knight.glb?v=f7886f1ad8",
       "scale": 1,
       "animations": {
         "idle": "ni_idle_01",
@@ -26,7 +26,7 @@
     },
     {
       "id": "class-titan",
-      "file": "class-titan.glb?v=8117b7af74",
+      "file": "class-titan.glb?v=02e520ab11",
       "scale": 1,
       "animations": {
         "idle": "ti_idle_01",
@@ -49,7 +49,7 @@
     },
     {
       "id": "class-healer",
-      "file": "class-healer.glb?v=f68bde92f5",
+      "file": "class-healer.glb?v=0273b5533e",
       "scale": 1,
       "animations": {
         "idle": "hw_idle_01",
@@ -70,7 +70,7 @@
     },
     {
       "id": "class-mage",
-      "file": "class-mage.glb?v=91d06239f5",
+      "file": "class-mage.glb?v=9e60bae9f7",
       "scale": 1,
       "animations": {
         "idle": "ma_idle_01",
@@ -91,7 +91,7 @@
     },
     {
       "id": "class-rogue",
-      "file": "class-rogue.glb?v=9dec676cdb",
+      "file": "class-rogue.glb?v=47e9ce5ebc",
       "scale": 1,
       "animations": {
         "idle": "ro_idle_01",
@@ -113,7 +113,7 @@
     },
     {
       "id": "class-sorcerer",
-      "file": "class-sorcerer.glb?v=7e624ebaa9",
+      "file": "class-sorcerer.glb?v=75cd4072c2",
       "scale": 1,
       "animations": {
         "idle": "so_idle_01",

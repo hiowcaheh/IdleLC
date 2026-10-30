@@ -36,6 +36,7 @@ import {
   type LogicalAnimation,
   type ModelEntry,
 } from '../game/assets/manifest.ts'
+import { lcSkillAnims } from '../game/data/lcSource.ts'
 import { TIMINGS } from '../game/logic/combat.ts'
 import { useGameStore } from '../state/gameStore.ts'
 
@@ -46,6 +47,11 @@ export interface CharacterHandle {
   setBase(anim: BaseAnimation): void
   /** Swing timed so the blow lands exactly TIMINGS.impactDelay after this call. */
   attack(): void
+  /**
+   * The skill's own clips from the client (one clip, or a spell's wind-up then release), timed so
+   * the blow lands `landsIn` game seconds from now; false when the model has none for it.
+   */
+  skill(skillId: number, landsIn: number): boolean
   /** Hit reaction: red flash, flinch, and the "hit" clip if the model has one. */
   hit(crit: boolean): void
   die(): void
@@ -68,7 +74,15 @@ interface AnimState {
   flinch: number
   height: number
   measured: number
+  /** A clip waiting to start (a spell's release after its wind-up), in game seconds. */
+  pending: { in: number; start(): void } | null
 }
+
+/** Share of a skill clip at which its blow lands (the client's timing is in the encrypted effects). */
+const SKILL_IMPACT_AT = 0.45
+/** Limits of the speed a skill clip is played at to fit the fight's timing. */
+const SKILL_SPEED = { min: 0.5, max: 2.5 }
+const clampSpeed = (speed: number) => Math.min(SKILL_SPEED.max, Math.max(SKILL_SPEED.min, speed))
 
 function fadeTo(state: AnimState, action: AnimationAction, fade: number): void {
   if (state.current === action) return
@@ -211,7 +225,7 @@ export function Character({ modelId, ref, timeScale, gear, scale = 1 }: Props) {
   )
   const mixer = useMemo(() => new AnimationMixer(object), [object])
 
-  const { actions, attacks } = useMemo(() => {
+  const { actions, attacks, clipAction } = useMemo(() => {
     const find = (clipName: string, logical: string) => {
       const clip = AnimationClip.findByName(gltf.animations, clipName)
       if (!clip) console.warn(`[${model.id}] clip "${clipName}" not found for "${logical}"`)
@@ -225,7 +239,13 @@ export function Character({ modelId, ref, timeScale, gear, scale = 1 }: Props) {
     const attackActions = model.attacks
       .map((name) => find(name, 'attack'))
       .filter((a): a is AnimationAction => Boolean(a))
-    return { actions: map, attacks: attackActions }
+    // skill clips: the client's names differ in letter case now and then
+    const byName = new Map(gltf.animations.map((clip) => [clip.name.toLowerCase(), clip]))
+    const clipAction = (name: string | undefined) => {
+      const clip = name ? byName.get(name.toLowerCase()) : undefined
+      return clip ? mixer.clipAction(clip) : undefined
+    }
+    return { actions: map, attacks: attackActions, clipAction }
   }, [gltf.animations, mixer, model])
 
   const flinchRef = useRef<Group>(null)
@@ -238,6 +258,7 @@ export function Character({ modelId, ref, timeScale, gear, scale = 1 }: Props) {
     flinch: 0,
     height: 1.8,
     measured: 0,
+    pending: null,
   })
   const swing = useRef(0)
 
@@ -276,6 +297,13 @@ export function Character({ modelId, ref, timeScale, gear, scale = 1 }: Props) {
       if (state.current === action) action.reset().play()
       else fadeTo(state, action, fade)
     }
+    /** Loops a clip until the next one-shot takes over (a spell held before its release). */
+    const hold = (action: AnimationAction) => {
+      action.setLoop(LoopRepeat, Infinity)
+      action.timeScale = 1
+      state.oneShot = true
+      fadeTo(state, action, 0.1)
+    }
     const playBase = (fade: number) => {
       const action = actions[state.base]
       if (!action) return
@@ -294,6 +322,40 @@ export function Character({ modelId, ref, timeScale, gear, scale = 1 }: Props) {
         if (state.dead || !action) return
         playOnce(action, model.attackImpact / TIMINGS.impactDelay, 0.08)
       },
+      skill(skillId, landsIn) {
+        const anim = lcSkillAnims?.[skillId]
+        const fire = clipAction(anim?.fire)
+        if (!anim || !fire || state.dead) return false
+        const ready = clipAction(anim.ready)
+        const release = (inSeconds: number) =>
+          playOnce(fire, clampSpeed((fire.getClip().duration * SKILL_IMPACT_AT) / inSeconds), 0.08)
+        const windUp = landsIn - TIMINGS.impactDelay
+        const still = clipAction(anim.still)
+        const releaseAfter = (inSeconds: number) => ({
+          in: inSeconds,
+          start: () => release(TIMINGS.impactDelay),
+        })
+        if (ready && still && windUp > ready.getClip().duration * 1.2) {
+          // a long spell: the wind-up at its own pace, then the caster holds it until the release
+          const readyTime = ready.getClip().duration * 0.9
+          playOnce(ready, 1, 0.1)
+          state.pending = {
+            in: readyTime,
+            start: () => {
+              hold(still)
+              state.pending = releaseAfter(windUp - readyTime)
+            },
+          }
+        } else if (ready && windUp > 0.15) {
+          // a spell: wind-up for the cast time, then the release lands the blow
+          playOnce(ready, clampSpeed(ready.getClip().duration / windUp), 0.1)
+          state.pending = releaseAfter(windUp)
+        } else {
+          state.pending = null
+          release(Math.max(0.1, landsIn))
+        }
+        return true
+      },
       hit(crit) {
         if (state.dead) return
         state.flash = 1
@@ -304,6 +366,7 @@ export function Character({ modelId, ref, timeScale, gear, scale = 1 }: Props) {
       die() {
         const action = actions.die
         state.dead = true
+        state.pending = null
         state.oneShot = false
         state.flinch = 0
         if (!action) return
@@ -324,13 +387,21 @@ export function Character({ modelId, ref, timeScale, gear, scale = 1 }: Props) {
       },
       height: () => state.height,
     }
-  }, [actions, attacks, model])
+  }, [actions, attacks, clipAction, model])
 
   useFrame((_, delta) => {
     const state = anim.current
     const scale = timeScale ? timeScale() : useGameStore.getState().timeScale
     const dt = Math.min(delta, 0.1) * scale
     mixer.update(dt)
+    if (state.pending) {
+      state.pending.in -= dt
+      if (state.pending.in <= 0) {
+        const { start } = state.pending
+        state.pending = null
+        if (!state.dead) start()
+      }
+    }
 
     // Measure once the skeleton has been posed by a render (bind-pose bounds are unreliable).
     const holder = flinchRef.current

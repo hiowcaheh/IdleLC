@@ -152,6 +152,24 @@ Ikony umiejętności analogicznie: `SkillBtn{N}.tex` i `t_skill.a_client_icon_te
 Położenia ramek i okien HUD w atlasach (`TopUI`, `NewCharacterInfo`, …) nie są zapisane w plikach —
 klient ma je w kodzie, więc trzeba je wyciąć ręcznie.
 
+## Umiejętności `Data\skills.lod` (jawny)
+
+Tabela skilli klienta: rekord na umiejętność z nazwami klipów postaci (napisy z długością u32 na początku),
+nazwami efektów i drugim zestawem dla drugiego rodzaju broni klasy (`*_a_*`, np. `ni_a_soul`). Układ rekordu
+znamy tylko częściowo: **id skilla leży 102 bajty przed nazwą pierwszego klipu** (90 bajtów przy czarach
+trójfazowych). Czary mają fazy `_1` (przygotowanie), `_2` (trzymanie), `_3` (wystrzał), np.
+`hw_skill_02_1/2/3`; pozostałe skille — jeden klip. Nazwa klipu zaczyna się prefiksem klasy (`ti`, `ni`, `hw`,
+`ma`, `ro`, `so`), więc parser (`scripts/lc/skill-anims.mjs`) bierze klip dla skilla tylko przy zgodnym
+prefiksie. Wynik: `src/game/data/generated/lc-skill-anims.json` (66 skilli), a klipy dochodzą do modeli klas.
+Brakujące w animsetach klienta Nemesis: `ti_skill_10`, `so_summon`, `so_stoneskin`, `so_vconverstion` —
+te skille grają zwykły zamach.
+
+Nazwy efektów z rekordu wskazują definicje w `Data\Effect\Effect.dat`, który w Nemesis jest
+**zaszyfrowany** — dokładne efekty LC (cząsteczki, kolejność, kolory) są nieczytelne. Same tekstury efektów
+(`Data\Effect\Texture`, `Data\Effect\Particle`, zwykłe `.tex`) są jawne: `npm run convert-lc -- --only fx`
+zapisuje wybrane (`scripts/lc/fx.mjs`) do `public/fx/*.webp`, a gra składa z nich efekty według rodzaju
+skilla (`src/scene/SkillEffects.tsx`).
+
 ## Świat `.wld` (jeszcze nie rozpracowany)
 
 Plik świata Serious Engine: bryły (`BR3D`, sektory, wielokąty), encje, światła, modele rozstawione na mapie

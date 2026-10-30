@@ -15,7 +15,7 @@ import { HpBar3D } from './HpBar3D.tsx'
 import { LevelUpEffect } from './LevelUpEffect.tsx'
 import { ModelBoundary } from './ModelBoundary.tsx'
 import { placeLabel, type SceneLabelId } from './labelAnchors.ts'
-import { SkillAura } from './SkillAura.tsx'
+import { SkillEffects } from './SkillEffects.tsx'
 import { ARENA_RADIUS, smoothstep } from './terrain.ts'
 import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
@@ -87,8 +87,8 @@ export function Battle() {
     appear: 1,
     sink: -1,
     hudTimer: 0,
-    /** Game seconds until the hero swings for a skill being cast (-1: none). */
-    swingIn: -1,
+    /** Game seconds until a fighter swings for a skill being cast (-1: none). */
+    swingIn: { player: -1, monster: -1 } as Record<Side, number>,
   })
   const showNumbersRef = useRef(showNumbers)
   useEffect(() => {
@@ -182,9 +182,10 @@ export function Battle() {
           break
         case 'cast':
           textAt(e.source, e.name, 'skill')
-          // the swing starts so that the blow lands when the skill does
+          // the skill's own clips from the client, else a swing timed to land with the skill
+          if (e.source === 'player' && player.current?.skill(e.skillId, e.castTime)) break
           if (e.kind === 'attack' || e.kind === 'debuff') {
-            m.swingIn = Math.max(0, e.castTime - TIMINGS.impactDelay)
+            m.swingIn[e.source] = Math.max(0, e.castTime - TIMINGS.impactDelay)
           }
           break
         case 'hit':
@@ -214,7 +215,7 @@ export function Battle() {
           textAt(e.target, 'Miss', 'miss')
           break
         case 'death':
-          m.swingIn = -1
+          m.swingIn = { player: -1, monster: -1 }
           if (e.who === 'monster') {
             monster.current?.die()
             player.current?.victory()
@@ -233,7 +234,7 @@ export function Battle() {
         case 'reset':
           resetView()
           m.sink = -1
-          m.swingIn = -1
+          m.swingIn = { player: -1, monster: -1 }
           useFloatingTexts.getState().clear()
           player.current?.revive()
           player.current?.setBase('idle')
@@ -263,11 +264,12 @@ export function Battle() {
       view.player.lerpVectors(m.approachFrom, m.engageAt, t)
     }
 
-    if (m.swingIn >= 0) {
-      m.swingIn -= dt
-      if (m.swingIn <= 0) {
-        m.swingIn = -1
-        player.current?.attack()
+    for (const side of ['player', 'monster'] as const) {
+      if (m.swingIn[side] < 0) continue
+      m.swingIn[side] -= dt
+      if (m.swingIn[side] <= 0) {
+        m.swingIn[side] = -1
+        ;(side === 'player' ? player : monster).current?.attack()
       }
     }
 
@@ -348,7 +350,9 @@ export function Battle() {
       <HpBar3D color="#d8392b" read={monsterBar} />
       <DamageNumbers />
       <LevelUpEffect />
-      <SkillAura />
+      <Suspense fallback={null}>
+        <SkillEffects />
+      </Suspense>
     </>
   )
 }

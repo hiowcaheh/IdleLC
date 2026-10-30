@@ -16,7 +16,7 @@
  *   --data <lc-data.json>  generated game data (default src/game/data/generated/lc-data.json)
  *   --only <id,id>         convert only these model ids (e.g. fox,class-knight,gear/ni_bu_001); `gear` = all
  *                          weapon and armor models, `starter` = the classes' starting sets,
- *                          `icons` = item and skill icons, `ui` = interface pieces
+ *                          `icons` = item and skill icons, `ui` = interface pieces, `fx` = effect textures
  *   --smc <path>           convert one .smc (client path or file); with --anims <a,b> to pick clips
  *   --max-texture <px>     longest texture side (default 1024)
  *
@@ -34,14 +34,18 @@ import sharp from 'sharp'
 import { CLASS_MODELS, gearClass } from './classes.mjs'
 import { ClientFiles } from './client.mjs'
 import { ICON_KINDS, buildIconSheet, buildPortraitSheet, iconColor } from './icons.mjs'
+import { buildFxTextures } from './fx.mjs'
 import { buildUiParts } from './ui.mjs'
 import { buildGearManifest, buildModelManifest, modelIdFromSmc } from './manifest.mjs'
 import { buildModel } from './model.mjs'
+import { parseSkillAnims } from './skill-anims.mjs'
 import { parseSmc } from './smc.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const GENERATED = path.join(ROOT, 'src/game/data/generated')
 const DEFAULT_OUT = path.join(ROOT, 'public/models/lc')
+/** Skill id → the hero's clips for it (from the client's skills.lod; read by the game). */
+const SKILL_ANIMS = path.join(GENERATED, 'lc-skill-anims.json')
 /** Gear .smc → item ids (written by `npm run import-lc-db`). */
 const ITEM_MODELS = path.join(GENERATED, 'lc-item-models.json')
 /** Longest texture side of weapon and armor models (WebP): small on screen, and there are many. */
@@ -81,7 +85,7 @@ function parseArgs(argv) {
  * Conversion jobs: { id, smc (client path or parsed), animations (clip names or null), override
  * (fields replacing the .smc's: skeleton, animation sets), gear, starter }.
  */
-function listJobs(args, data, files, itemModels, icons) {
+function listJobs(args, data, files, itemModels, icons, skillAnims) {
   if (args.smc) {
     const smc = fs.existsSync(args.smc) ? path.resolve(args.smc) : args.smc
     return [{ id: modelIdFromSmc(args.smc), smc, animations: args.anims ?? null }]
@@ -89,7 +93,13 @@ function listJobs(args, data, files, itemModels, icons) {
   const jobs = Object.entries(CLASS_MODELS).map(([id, def]) => ({
     id,
     smc: def.smc,
-    animations: Object.values(def.animations).flat(),
+    // the basic clips and the class's skill clips
+    animations: [
+      ...Object.values(def.animations).flat(),
+      ...(data?.skills ?? [])
+        .filter((skill) => `class-${skill.classId}` === id)
+        .flatMap((skill) => Object.values(skillAnims?.[skill.id] ?? {})),
+    ],
     override: def.animSets ? { animSets: def.animSets } : undefined,
   }))
   const monsters = new Map()
@@ -138,6 +148,27 @@ function listJobs(args, data, files, itemModels, icons) {
       (j.gear && args.only.has('gear')) ||
       (j.starter && args.only.has('starter')),
   )
+}
+
+/**
+ * The skill clips of the client's skills.lod (skill id → { fire } or { ready, still, fire }); written
+ * to lc-skill-anims.json for the game. Without skills.lod in the client the existing file is kept.
+ */
+function readSkillAnims(files, data) {
+  const previous = fs.existsSync(SKILL_ANIMS)
+    ? JSON.parse(fs.readFileSync(SKILL_ANIMS, 'utf8'))
+    : null
+  if (!data?.skills || !files.resolve('Data\\skills.lod')) return previous
+  const prefixes = Object.fromEntries(
+    Object.entries(CLASS_MODELS).map(([id, def]) => [id.replace(/^class-/, ''), def.prefix]),
+  )
+  const anims = Object.fromEntries(
+    parseSkillAnims(files.read('Data\\skills.lod'), data.skills, prefixes),
+  )
+  fs.mkdirSync(GENERATED, { recursive: true })
+  fs.writeFileSync(SKILL_ANIMS, JSON.stringify(anims))
+  console.log(`skill clips: ${Object.keys(anims).length} skills (lc-skill-anims.json)`)
+  return anims
 }
 
 /** The game's item icon sheet (raw RGBA) and its lc-icons.json entry, or null. */
@@ -203,8 +234,11 @@ async function main() {
   // `--only icons` rebuilds just the item icons
   // `--only icons` / `--only ui` (or both) convert no models
   const iconsOnly =
-    args.only !== undefined && [...args.only].every((o) => o === 'icons' || o === 'ui')
-  const jobs = iconsOnly ? [] : listJobs(args, data, files, itemModels, await readItemIcons())
+    args.only !== undefined && [...args.only].every((o) => ['icons', 'ui', 'fx'].includes(o))
+  const skillAnims = readSkillAnims(files, data)
+  const jobs = iconsOnly
+    ? []
+    : listJobs(args, data, files, itemModels, await readItemIcons(), skillAnims)
   const textureCache = new Map()
   const shaders = new Set()
   let converted = 0
@@ -260,6 +294,17 @@ async function main() {
       fs.writeFileSync(path.join(dir, `${name}.webp`), image)
     console.log(
       `ui: ${Object.keys(parts).join(', ') || 'no interface atlases in the client folder(s)'}`,
+    )
+  }
+
+  if (!args.smc && (!args.only || args.only.has('fx'))) {
+    const textures = await buildFxTextures(files)
+    const dir = path.join(ROOT, 'public', 'fx')
+    fs.mkdirSync(dir, { recursive: true })
+    for (const [name, image] of Object.entries(textures))
+      fs.writeFileSync(path.join(dir, `${name}.webp`), image)
+    console.log(
+      `fx: ${Object.keys(textures).join(', ') || 'no effect textures in the client folder(s)'}`,
     )
   }
 

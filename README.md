@@ -159,6 +159,8 @@ i zrzut bazy trzymamy poza repo, w `assets-src/`. Żeby odświeżyć dane albo d
    startowe: `--only starter`, cały sprzęt: `--only gear`. Wycina też ikony przedmiotów z atlasów
    `ItemBtn*.tex` do `public/icons/lc/items.webp` (same ikony: `--only icons`). Pojedynczy model:
    `--smc "Data\Monster\Animals\Fox.smc"`, wybrane modele: `--only fox,class-knight,gear/ni_bu_001`.
+   Animacje umiejętności czyta z `Data\skills.lod` (`lc-skill-anims.json`, klipy trafiają do modeli klas),
+   tekstury efektów skilli z `Data\Effect` → `public/fx/` (same efekty: `--only fx`).
    Formaty plików: [`docs/lc-formats.md`](docs/lc-formats.md).
 
 3. `npm run dev` i commit zmienionych plików.

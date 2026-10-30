@@ -153,8 +153,9 @@ Interpretacja efektów jest **nasza** (`src/game/logic/skills.ts`) do czasu kodu
   wymaganych umiejętności. Nowa postać zna 1. poziom darmowych umiejętności z poziomu 1 (np. Knuckle Spear).
 - **Czasy** — `a_readyTime / 10` s to przygotowanie (np. czarowanie maga, 0 dla większości ataków; skraca je
   „Fast Spell Casting”), potem skill trafia jak zwykły cios (+0,4 s). `a_fireTime` to w LC animacja **po**
-  wystrzeleniu — dopóki nie mamy animacji skilli z klienta, postać nie stoi w tym czasie
-  (`TIMINGS.skillAnimationLock = 0`) i rusza dalej po zwykłym interwale ataku. Odnowienie
+  wystrzeleniu — postać nie stoi w tym czasie (`TIMINGS.skillAnimationLock = 0`) i rusza dalej po zwykłym
+  interwale ataku; klipy skilli z klienta (`skills.lod`) są dopasowane do tego rytmu: przygotowanie czaru
+  trwa tyle, co rzucanie, a wystrzał trafia w chwili ciosu (tempo klipu ×0,5…×2,5). Odnowienie
   `max(przygotowanie, a_reuseTime / 10)` liczone od początku rzucania, efekty trwają `a_durtime / 10` s.
 - **Efekty** (`t_magic` typ/podtyp):
   - typ 3 — obrażenia: cios × `1 + power/100`;

@@ -161,8 +161,14 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   sylwetki klasy z `NewInventory` (`equip-<klasa>.webp`, ramki slotów zmierzone w `CharacterPanel.tsx`). Mikstury
   przy pasku umiejętności; dolny pasek EXP usunięty (jest w ramce). Czcionka klienta to
   tylko bitmapy 7–8 px (`FontGerman0.tex`, DXT; w Nemesis zaszyfrowane) — czekamy na decyzję właściciela.
-- Skille trafiają po `a_readyTime` + 0,4 s (`a_fireTime` to animacja po wystrzale — bez blokady, dopóki nie ma
-  animacji skilli z klienta: `TIMINGS.skillAnimationLock = 0`).
+- Skille trafiają po `a_readyTime` + 0,4 s (`a_fireTime` to animacja po wystrzale — bez blokady:
+  `TIMINGS.skillAnimationLock = 0`).
+- **Animacje i efekty skilli:** klipy z `Data\skills.lod` (66 skilli, `lc-skill-anims.json`; czary w 3 fazach:
+  przygotowanie → trzymanie → wystrzał) dołożone do modeli klas i dopasowane do rytmu walki
+  (`Character.skill`); brak klipu = zwykły zamach. Efekty (`SkillEffects.tsx`) z tekstur klienta
+  (`public/fx/`, `--only fx`) według rodzaju skilla, w kolorze klasy: krąg magii przy rzucaniu, pocisk klas
+  dystansowych, wybuch/iskry/fala przy trafieniu, klątwa, aura buffa, krąg leczenia. Dokładne efekty LC
+  (`Effect.dat`) są w Nemesis zaszyfrowane.
 - Narzędzia dev włączane w Settings (bez `?dev=1`): prędkość ×20, dowolny potwór, poziom, exp, złoto, SP,
   kill/heal, podgląd modeli.
 - **PWA:** `public/manifest.webmanifest`, własne ikony (`npm run pwa-icons`), service worker `public/sw.js`
@@ -182,11 +188,12 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
 
 **Następne kroki:**
 
-1. Plan klienta krok po kroku (zrobione: 1 spis, 2 klasy, 3 potwory Juno, 4 wygląd sprzętu): 6 animacje
-   i efekty skilli, potwory Dratan i kolejnych stref
+1. Plan klienta krok po kroku (zrobione: 1 spis, 2 klasy, 3 potwory Juno, 4 wygląd sprzętu, 6 animacje
+   i efekty skilli): potwory Dratan i kolejnych stref
    (`npm run convert-lc -- --client "assets-src/client-full/LastChaos Nemesis" --only <model ids>`),
    brakujące ikony z `ItemBtn19.tex` (`--only icons`), modele sprzętu zaszyfrowane w Nemesis (z klienta 2015),
-   teren stref z map (`.wld`/`.wtr`, najpierw `juno`), animacje i efekty skilli. Kod serwera LC (statystyki
+   teren stref z map (`.wld`/`.wtr`, najpierw `juno`), efekty 1:1 z `Effect.dat` (jeśli w kliencie
+   od właściciela jest jawny). Kod serwera LC (statystyki
    klas, wzory walki, szanse ulepszeń) — nadal brak; czekamy na właściciela.
 2. Dalej: M6 do końca (osobne tło / teren każdej strefy, gdy będą mapy z klienta; ewentualny wymagany poziom
    strefy — na razie właściciel chce swobodnego wyboru), żywioły, opcje specjalne, które jeszcze nie działają.
@@ -195,5 +202,5 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
 **Otwarte kwestie:** czcionka (bitmapy klienta są nieczytelne na telefonie — pytanie do właściciela); brak mapy
 z otwartym terenem (`.wld` + `.wtr`); brak w bazie statystyk startowych klas (także many) i wzorów walki
 (w tym jak `a_power` umiejętności przekłada się na obrażenia, czym są podtypy `t_magic`, jednostki regeneracji)
-— źródło: kod serwera (właściciel go ma). Animacje rzucania skilli z klienta — do podpięcia, gdy będzie
-pełny klient.
+— źródło: kod serwera (właściciel go ma). Klient z jawnymi teksturami (zapowiedziany przez właściciela):
+przepuścić przez `convert-lc` jako drugi `--client` (tekstury sprzętu 60–109, `ItemBtn19`, `Effect.dat`?).
