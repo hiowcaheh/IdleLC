@@ -35,6 +35,7 @@ import {
 } from '../logic/shop.ts'
 import { SP_UNIT, applyAuto, applyBar, applyLearn } from '../logic/skills.ts'
 import { isSpotOpen, zoneSpots } from '../logic/spots.ts'
+import { applyClaimBookReward, type BookClaim } from '../logic/book.ts'
 import { applyUseTitleItem, applyWearTitle, pruneTitles, type TitleUse } from '../logic/titles.ts'
 import type { EquipSlot } from '../data/types.ts'
 import {
@@ -239,6 +240,12 @@ export class LocalGameService implements GameService {
   async setTitle(characterId: string, titleId: number | null): Promise<CharacterData> {
     const changed = applyWearTitle(this.character(characterId), titleId, this.now())
     return copy(this.update(characterId, () => changed))
+  }
+
+  async claimBookReward(characterId: string, monsterId: string): Promise<BookClaim> {
+    const claim = applyClaimBookReward(this.character(characterId), monsterId)
+    const updated = this.update(characterId, () => claim.character)
+    return copy({ ...claim, character: updated })
   }
 
   async setPotionSlot(

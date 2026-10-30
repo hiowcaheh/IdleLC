@@ -228,7 +228,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
   }
 
   return (
-    <Sheet title="Skills" titleId="skills-title" onClose={onClose}>
+    <Sheet title="Skills" titleId="skills-title" onClose={onClose} className="sheet--fixed">
       <dl className="hero-stats">
         <div>
           <dt>Skill bar</dt>

@@ -17,6 +17,7 @@ import type { CombatResult } from '../game/logic/rewards.ts'
 import type { LoadResult, SaveData, Settings } from '../game/logic/save.ts'
 import type { IdentifyResult, IdentifyTarget } from '../game/logic/rare.ts'
 import type { PieceSale, PurchaseResult, SaleResult } from '../game/logic/shop.ts'
+import type { BookClaim } from '../game/logic/book.ts'
 import type { TitleUse } from '../game/logic/titles.ts'
 import { createDefaultSave } from '../game/logic/save.ts'
 import { farthestSpot, isSpotOpen } from '../game/logic/spots.ts'
@@ -80,6 +81,8 @@ interface GameStore {
   redeemTitleItem(itemId: number): Promise<TitleUse>
   /** Wears an owned title, or takes the worn one off (null). */
   setTitle(titleId: number | null): Promise<void>
+  /** Claims a monster's next monster book reward. */
+  claimBookReward(monsterId: string): Promise<BookClaim>
   /** The hero drinks a potion from the bag now (the bag updates with the next report). */
   drinkPotion(itemId: number): DrinkProblem | 'away' | null
   selectMonster(monsterId: string): void
@@ -421,6 +424,13 @@ export const useGameStore = create<GameStore>((set, get) => {
       const use = await enqueue(() => gameService.redeemTitleItem(id, itemId))
       applyCharacter(use.character)
       return use
+    },
+
+    async claimBookReward(monsterId) {
+      const id = playedId()
+      const claim = await enqueue(() => gameService.claimBookReward(id, monsterId))
+      applyCharacter(claim.character)
+      return claim
     },
 
     async setTitle(titleId) {

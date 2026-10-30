@@ -34,13 +34,16 @@ export const NAKED_DEFENSE = 0.5
 /** Each "+" adds this share of the piece's power (own value). */
 export const PLUS_BONUS = 0.1
 
-/** Chance that an upgrade from +N succeeds, index N (own values until the LC server code). */
+/**
+ * Chance that an upgrade from +N succeeds, index N (own values until the LC server code; owner:
+ * +10 must be reachable). On average about 13 Heaven Stones reach +10, 21 reach +12, 76 reach +15.
+ */
 export const UPGRADE_CHANCE = [
-  0.95, 0.9, 0.85, 0.75, 0.65, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1,
+  1, 1, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35,
 ]
 
-/** From this "+" on, a failed upgrade takes one "+" away (own rule). */
-export const UPGRADE_RISK_FROM = 3
+/** From this "+" on, a failed upgrade takes one "+" away; below it a failure only costs the stone. */
+export const UPGRADE_RISK_FROM = 10
 
 /** One weapon, armor piece or accessory with its upgrade level and options. */
 export interface GearPiece {
@@ -272,7 +275,10 @@ export function applyExchange(character: CharacterData, count: number): Characte
   }
 }
 
-/** Upgrades a worn piece with one Heaven Stone: +1 on success; on failure from +3 on it loses one. */
+/**
+ * Upgrades a worn piece with one Heaven Stone: +1 on success; a failure from UPGRADE_RISK_FROM on
+ * takes one "+" away.
+ */
 export function applyUpgrade(character: CharacterData, slot: EquipSlot, rng: Rng): UpgradeResult {
   const piece = character.equipment[slot]
   if (!piece) throw new GameError('nothing-equipped', slot)

@@ -397,6 +397,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   return (
     <Sheet
       title="Inventory"
+      className="sheet--fixed"
       titleId="inventory-title"
       onClose={onClose}
       extra={

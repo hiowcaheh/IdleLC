@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
+import { claimableRewards } from '../../game/logic/book.ts'
 import { openSpotCount, zoneSpots } from '../../game/logic/spots.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { ExpeditionDialog } from '../expedition/ExpeditionDialog.tsx'
@@ -37,6 +38,7 @@ export function HuntPanel() {
   const nextOpen = next !== undefined && index + 1 < open
   const away = character.expedition !== null
   const kills = character.stats.monsterKills[monsterId] ?? 0
+  const claimable = claimableRewards(character)
 
   return (
     <section className="hunt" aria-label="Hunting">
@@ -80,11 +82,17 @@ export function HuntPanel() {
             {monster.name}
           </span>
           <span className="hunt__spot-meta">
-            {fmt(kills)} {kills === 1 ? 'kill' : 'kills'}
-            {next &&
-              (nextOpen
-                ? ` · next: ${getMonster(next).name}`
-                : ` · defeat one to open ${getMonster(next).name}`)}
+            <span>Monsters killed: {fmt(kills)}</span>
+            <span className={`hunt__next${next && !nextOpen ? ' is-locked' : ''}`}>
+              {next ? (
+                <>
+                  Next: {getMonster(next).name}
+                  {!nextOpen && <LockIcon />}
+                </>
+              ) : (
+                'Last spot'
+              )}
+            </span>
           </span>
         </div>
         <button
@@ -111,8 +119,14 @@ export function HuntPanel() {
         <button type="button" className="hunt__shop" onClick={() => setAppraiserOpen(true)}>
           Appraiser
         </button>
-        <button type="button" className="hunt__shop" onClick={() => setBookOpen(true)}>
+        <button
+          type="button"
+          className="hunt__shop hunt__book"
+          onClick={() => setBookOpen(true)}
+          aria-label={claimable > 0 ? `Book (${claimable} rewards to claim)` : 'Book'}
+        >
           Book
+          {claimable > 0 && <span className="icon-button__badge">{claimable}</span>}
         </button>
         <button type="button" className="hunt__expedition" onClick={() => setExpeditionOpen(true)}>
           Expedition

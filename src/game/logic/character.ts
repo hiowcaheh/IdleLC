@@ -39,6 +39,8 @@ export interface CharacterStats {
   playSeconds: number
   /** Kills by monster id — the monster book. */
   monsterKills: Record<string, number>
+  /** Monster book rewards claimed, by monster id (they go in order: 1 = the 10 kills one). */
+  bookClaims: Record<string, number>
 }
 
 export interface CharacterData {
@@ -128,7 +130,14 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     lastPlayedAt: now,
     location: startLocation(),
     reachedSpots: {},
-    stats: { kills: 0, deaths: 0, expeditions: 0, playSeconds: 0, monsterKills: {} },
+    stats: {
+      kills: 0,
+      deaths: 0,
+      expeditions: 0,
+      playSeconds: 0,
+      monsterKills: {},
+      bookClaims: {},
+    },
     inventory: [],
     expedition: null,
     sp: 0,

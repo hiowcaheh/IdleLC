@@ -217,8 +217,10 @@ Typowy sprzęt = dotychczasowy balans; bez broni zostaje 60% ataku, bez zbroi 50
 ulepszony sprzęt daje więcej (np. broń +5 = 150% typowej → 120% ataku).
 
 **Ulepszanie +0…+15** (okno Character): zużywa jeden **Heaven Stone** (`t_item` 85, sprzedawany w Juno za
-1 000) — tylko on ulepsza (decyzja właściciela). Szansa z +N (własne): 95, 90, 85, 75, 65, 55, 50, 45, 40, 35,
-30, 25, 20, 15, 10%. Porażka od +3 zabiera jeden „+”, niżej tylko kamień. Każdy „+” = +10% mocy przedmiotu.
+1 000) — tylko on ulepsza (decyzja właściciela). Szansa z +N (własne, poprawione 2026-10-30 na prośbę
+właściciela — „+10 ma być osiągalne”): 100, 100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35%. Porażka
+od +10 zabiera jeden „+”, niżej tylko kamień. Średnio ok. 13 kamieni do +10, 21 do +12, 76 do +15 (wcześniej
+77 do +10 i ~58 000 do +15). Każdy „+” = +10% mocy przedmiotu.
 Smelting Stone (84) w LC wypada z potworów według zasady serwera, której nie ma w bazie — u nas **1% na zabicie
 każdego potwora** (`GENERAL_DROPS`, własne). W torbie **10 Smelting Stone wymienia się na 1 Heaven Stone**
 (`exchangeStones`, decyzja właściciela). Poziom kamienia z LC („do przedmiotów tego samego poziomu”) pomijamy.
@@ -307,6 +309,13 @@ otwarty spot strefy (nowa strefa: pierwszy spot).
 - Założony jest jeden tytuł; jego opcje działają jak opcje sprzętu. Czas płynie realnie (także na wyprawie
   i z zamkniętą grą); po końcu tytuł znika i spada z postaci.
 - Skąd gracz dostaje przedmioty tytułów — **decyzja właściciela** (na razie tylko narzędzie dev).
+
+## Księga potworów — nagrody
+
+Za 10 / 100 / 1 000 / 10 000 zabić danego potwora (`BOOK_MILESTONES`) gracz odbiera nagrodę w księdze (po
+kolei, przycisk Claim). Na razie każdy potwór daje Heaven Stone: 1 / 2 / 5 / 10 (ilości **własne**, prośba
+właściciela: „na razie Heaven Stone”); nagrody poszczególnych potworów ustawi właściciel
+(`MONSTER_REWARDS` w `data/bookRewards.ts`).
 
 ## Spoty (własne)
 

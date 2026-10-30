@@ -3,6 +3,7 @@
  * The save is one account: settings + up to MAX_CHARACTERS characters (future database rows).
  * When the shape changes: bump SAVE_VERSION and add a migration from the previous version.
  */
+import { BOOK_MILESTONES } from '../data/bookRewards.ts'
 import { CLASSES } from '../data/classes.ts'
 import { MONSTERS } from '../data/monsters.ts'
 import { MAX_LEVEL } from '../data/progression.ts'
@@ -47,7 +48,7 @@ import {
   type LearnedSkill,
 } from './skills.ts'
 
-export const SAVE_VERSION = 11
+export const SAVE_VERSION = 12
 
 export type GraphicsQuality = 'auto' | 'low' | 'high' | 'ultra'
 
@@ -180,6 +181,8 @@ export const MIGRATIONS: Record<number, Migration> = {
   9: (save) => save,
   // v11: titles (none yet; sanitizeCharacter fills the empty list)
   10: (save) => save,
+  // v12: monster book rewards claimed (none yet; sanitizeCharacter fills the empty record)
+  11: (save) => save,
 }
 
 export const DEFAULT_SETTINGS: Settings = { quality: 'auto', showDamageNumbers: true }
@@ -277,6 +280,7 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
       expeditions: int(stats.expeditions, 0),
       playSeconds: num(stats.playSeconds, 0),
       monsterKills: sanitizeMonsterKills(stats.monsterKills),
+      bookClaims: sanitizeBookClaims(stats.bookClaims),
     },
     inventory: sanitizeInventory(raw.inventory),
     expedition: sanitizeExpedition(raw.expedition),
@@ -329,6 +333,16 @@ function sanitizeTitles(
   }
   const worn = int(active, -1)
   return { titles, activeTitle: titles.some((t) => t.id === worn) ? worn : null }
+}
+
+/** Claimed monster book rewards of monsters that still exist (at most every milestone). */
+function sanitizeBookClaims(raw: unknown): Record<string, number> {
+  const claims: Record<string, number> = {}
+  for (const [monsterId, count] of Object.entries(isRecord(raw) ? raw : {})) {
+    const n = Math.min(BOOK_MILESTONES.length, int(count, 0))
+    if (MONSTERS[monsterId] && n > 0) claims[monsterId] = n
+  }
+  return claims
 }
 
 /** Kill counts of monsters that still exist. */

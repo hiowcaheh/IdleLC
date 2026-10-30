@@ -8,6 +8,7 @@ import type { CombatReport, CombatResult } from '../logic/rewards.ts'
 import type { LoadResult, SaveData, Settings } from '../logic/save.ts'
 import type { IdentifyResult, IdentifyTarget } from '../logic/rare.ts'
 import type { PieceSale, PurchaseResult, SaleResult } from '../logic/shop.ts'
+import type { BookClaim } from '../logic/book.ts'
 import type { TitleUse } from '../logic/titles.ts'
 
 /**
@@ -75,6 +76,8 @@ export interface GameService {
   redeemTitleItem(characterId: string, itemId: number): Promise<TitleUse>
   /** Wears an owned title, or takes the worn one off (null). */
   setTitle(characterId: string, titleId: number | null): Promise<CharacterData>
+  /** Claims a monster's next monster book reward once its kills reach the milestone. */
+  claimBookReward(characterId: string, monsterId: string): Promise<BookClaim>
   /** Puts a potion the character owns (or nothing) in the HP or MP quick slot, with its automatic use. */
   setPotionSlot(characterId: string, group: PotionGroup, slot: PotionSlot): Promise<CharacterData>
   updateSettings(patch: Partial<Settings>): Promise<Settings>

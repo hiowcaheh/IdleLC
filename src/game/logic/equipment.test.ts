@@ -142,12 +142,12 @@ describe('upgrades', () => {
     expect(r.character.inventory).toEqual([])
   })
 
-  it('a failure keeps the plus below +3 and takes one away from +3 on', () => {
-    expect(applyUpgrade(withStones(2), 'weapon', never)).toMatchObject({
+  it('a failure keeps the plus below +10 and takes one away from +10 on', () => {
+    expect(applyUpgrade(withStones(9), 'weapon', never)).toMatchObject({
       success: false,
-      plusAfter: 2,
+      plusAfter: 9,
     })
-    expect(applyUpgrade(withStones(5), 'weapon', never).plusAfter).toBe(4)
+    expect(applyUpgrade(withStones(12), 'weapon', never).plusAfter).toBe(11)
   })
 
   it('only Heaven Stones upgrade; 10 Smelting Stones exchange for one', () => {

@@ -8,7 +8,13 @@ import {
   effectiveStats,
 } from '../../game/logic/combat.ts'
 import { GameError } from '../../game/logic/character.ts'
-import { MAX_PLUS, stonesOwned, upgradeChance, type GearPiece } from '../../game/logic/equipment.ts'
+import {
+  MAX_PLUS,
+  UPGRADE_RISK_FROM,
+  stonesOwned,
+  upgradeChance,
+  type GearPiece,
+} from '../../game/logic/equipment.ts'
 import { rewardBonuses } from '../../game/logic/rewards.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { toast } from '../../state/toasts.ts'
@@ -173,45 +179,57 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
           rare={piece.rare}
         />
         <div className="item-row__actions">
-          {item.upgradeable && (
+          <div className="upgrade-row">
             <button
               type="button"
-              className="button button--gold"
-              disabled={busy || away || stones < 1 || piece.plus >= MAX_PLUS}
-              onClick={() => upgrade(slot, piece)}
+              className="button"
+              disabled={busy || away}
+              onClick={() =>
+                run(async () => {
+                  await unequipItem(slot)
+                  setSelected(null)
+                  return `${pieceName(piece.itemId, piece.plus, piece.rare)} is back in your bag.`
+                })
+              }
             >
-              {piece.plus >= MAX_PLUS
-                ? `+${MAX_PLUS} — maximum`
-                : `Upgrade to +${piece.plus + 1} · ${Math.round(upgradeChance(piece.plus) * 100)}%`}
+              Take off
             </button>
-          )}
-          <button
-            type="button"
-            className="button"
-            disabled={busy || away}
-            onClick={() =>
-              run(async () => {
-                await unequipItem(slot)
-                setSelected(null)
-                return `${pieceName(piece.itemId, piece.plus, piece.rare)} is back in your bag.`
-              })
-            }
-          >
-            Take off
-          </button>
-          {item.upgradeable ? (
-            <>
-              <span
-                className={`stone-count${stones < 1 ? ' is-none' : ''}`}
-                title={`Heaven Stones in your bag: ${fmt(stones)}`}
+            {item.upgradeable && (
+              <button
+                type="button"
+                className="button button--gold upgrade-button"
+                disabled={busy || away || stones < 1 || piece.plus >= MAX_PLUS}
+                onClick={() => upgrade(slot, piece)}
               >
-                <ItemIcon item={getItem(HEAVEN_STONE_ID)} size={28} />
-                <span className="stone-count__value">×{fmt(stones)}</span>
-              </span>
-              {piece.plus >= 3 && piece.plus < MAX_PLUS && (
-                <p className="item-row__note">A failed upgrade takes one + away.</p>
-              )}
-            </>
+                <span className="upgrade-button__text">
+                  <span className="upgrade-button__title">
+                    {piece.plus >= MAX_PLUS
+                      ? `+${MAX_PLUS} maximum`
+                      : `Upgrade to +${piece.plus + 1}`}
+                  </span>
+                  {piece.plus < MAX_PLUS && (
+                    <span className="upgrade-button__meta">
+                      {Math.round(upgradeChance(piece.plus) * 100)}% chance
+                    </span>
+                  )}
+                </span>
+                <span
+                  className={`stone-count${stones < 1 ? ' is-none' : ''}`}
+                  title={`Heaven Stones in your bag: ${fmt(stones)}`}
+                >
+                  <ItemIcon item={getItem(HEAVEN_STONE_ID)} size={28} />
+                  <span className="stone-count__value">{fmt(stones)}</span>
+                </span>
+              </button>
+            )}
+          </div>
+          {item.upgradeable ? (
+            piece.plus >= UPGRADE_RISK_FROM &&
+            piece.plus < MAX_PLUS && (
+              <p className="item-row__note">
+                From +{UPGRADE_RISK_FROM} a failed upgrade takes one + away.
+              </p>
+            )
           ) : (
             <p className="item-row__note">Accessories can't be upgraded.</p>
           )}
@@ -221,12 +239,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   }
 
   return (
-    <Sheet
-      title="Character"
-      titleId="character-title"
-      className="sheet--character"
-      onClose={onClose}
-    >
+    <Sheet title="Character" titleId="character-title" className="sheet--fixed" onClose={onClose}>
       <HeroCard character={character} />
       <div className="tabs" role="tablist" aria-label="Character card">
         {TABS.map((t) => (

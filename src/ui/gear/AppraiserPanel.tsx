@@ -169,6 +169,7 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
   return (
     <Sheet
       title="Appraiser"
+      className="sheet--fixed"
       titleId="appraiser-title"
       onClose={onClose}
       extra={
@@ -212,7 +213,7 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
                       {item.name} ×{fmt(count)}
                     </span>
                     <span className="item-row__meta">
-                      {chance < 1 ? `Works ${Math.round(chance * 100)}%` : 'Always works'} ·{' '}
+                      Works {Math.round(chance * 100)}% ·{' '}
                       <span className="coin coin--small" aria-hidden="true" /> {fmt(buyPrice(id))}
                     </span>
                   </span>

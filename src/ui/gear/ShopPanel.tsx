@@ -162,6 +162,7 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
   return (
     <Sheet
       title="Shop"
+      className="sheet--fixed"
       titleId="shop-title"
       onClose={onClose}
       extra={

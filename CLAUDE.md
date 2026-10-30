@@ -74,6 +74,8 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 - Jeśli coś jest niejasne (balans, wygląd, nazewnictwo) — zapytaj, nie zgaduj.
 - Pisz po polsku w rozmowie; kod, nazwy zmiennych i komentarze po angielsku.
 - **Gra jest po angielsku**: cały tekst w UI oraz nazwy klas, potworów, lokacji i przedmiotów. Dokumentacja dla właściciela (README, `docs/`) może być po polsku.
+- **Zasada UI (właściciel):** okna z zakładkami mają zawsze tę samą wysokość, bez względu na otwartą zakładkę
+  (klasa `.sheet--fixed` w `Sheet`) — dotyczy też każdego nowego okna z zakładkami.
 
 ## Komendy
 
@@ -212,6 +214,11 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   scena rysuje 300 m terenu wokół walki z 9 warstwami tekstur w shaderze (`LcTerrain.tsx`, `lcMap.ts`).
   Spawny Juno z `t_npc_regen` nie pasują do żadnego terenu klienta (Dratan pasuje 1:1), więc miejsca walk
   na Juno wybiera konwerter (`pickArenas`) — **własne**. Drzewa/budynki z `.wld` jeszcze nie czytane.
+- **Nagrody księgi potworów (zapis v12):** za 10 / 100 / 1 000 / 10 000 zabić potwora — na razie 1 / 2 / 5 / 10
+  Heaven Stone (ilości własne; `data/bookRewards.ts`, `MONSTER_REWARDS` na nagrody indywidualne), odbierane po
+  kolei przyciskiem Claim pod podglądem (`stats.bookClaims`); licznik nagród do odebrania na przycisku Book.
+- **Ulepszanie łatwiejsze (2026-10-30):** szanse 100…35%, porażka zabiera „+” dopiero od +10 (średnio ~13
+  Heaven Stone do +10, ~76 do +15). Okno założonego przedmiotu: Take off po lewej, Upgrade z kamieniami po prawej.
 - **Tytuły (zapis v11):** `t_title` 1:1 (184 z angielską nazwą przedmiotu: czas w dniach / na stałe, kolor
   napisu i poświaty, do 5 opcji `t_option`) w `lc-data.json` (`titles`), przedmioty tytułów typu Other
   (`item.title`). „Use” w torbie dodaje tytuł (ponownie: dni się dodają), pierwszy zakłada się sam;
@@ -234,7 +241,8 @@ i dane LC są w repo i na Pages (surowy klient i zrzut bazy — nie).
 **Następne kroki:**
 
 1. **Tytuły — źródło:** zapytać właściciela, skąd gracz ma dostawać przedmioty tytułów (próg w księdze
-   potworów, rzadki drop, sklep?) i czy wszystkie 184 (wiele eventowych).
+   potworów, rzadki drop, sklep?) i czy wszystkie 184 (wiele eventowych). Nagrody księgi: właściciel ustawi
+   je indywidualnie (`MONSTER_REWARDS`).
 2. Plan klienta krok po kroku (zrobione: 1 spis, 2 klasy, 3 potwory Juno, Dratan, Merac, Egeha, 4 wygląd
    sprzętu, 6 animacje i efekty skilli, teren Juno): teren Dratan i kolejnych stref (spawny z bazy pasują —
    walki w prawdziwych miejscach), drzewa/budynki z `.wld`, potwory pozostałych stref
