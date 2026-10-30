@@ -31,7 +31,8 @@ export const UI_PARTS = {
   // the client's menu buttons (22 × 22, drawn about 4× as large on phone screens: upscaled here once)
   'menu-character': [atlas('TopUI'), 0, 222, 22, 22, { scale: 4 }],
   'menu-inventory': [atlas('TopUI'), 26, 222, 22, 22, { scale: 4 }],
-  'menu-skills': [atlas('TopUI'), 52, 222, 22, 22, { scale: 4 }],
+  // the book with a quill (the owner's pick for the Skills window)
+  'menu-skills': [atlas('TopUI'), 0, 170, 22, 22, { scale: 4 }],
   'menu-system': [atlas('TopUI'), 156, 222, 22, 22, { scale: 4 }],
   // the scroll with red writing: the Titles window
   'menu-titles': [atlas('TopUI'), 130, 222, 22, 22, { scale: 4 }],

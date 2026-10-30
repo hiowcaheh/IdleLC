@@ -4211,7 +4211,7 @@ a.button {
 /* a worn piece's actions: take off on the left, the upgrade (with the Heaven Stones) on the right */
 .upgrade-row {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 8px;
 }
 
@@ -4219,7 +4219,8 @@ a.button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
+  padding-inline: 10px;
   text-align: left;
 }
 
@@ -4230,9 +4231,10 @@ a.button {
 }
 
 .upgrade-button__title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   line-height: 1.1;
+  white-space: nowrap;
 }
 
 .upgrade-button__meta {
