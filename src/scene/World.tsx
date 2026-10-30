@@ -1,3 +1,4 @@
+import { Sparkles } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import {
@@ -66,7 +67,7 @@ function SkyDome({ env }: { env: Env }) {
   )
 }
 
-function Sun({ shadows }: { shadows: boolean }) {
+function Sun({ shadows, ultra }: { shadows: boolean; ultra: boolean }) {
   const light = useRef<DirectionalLight>(null)
   useFrame(() => {
     const l = light.current
@@ -81,7 +82,7 @@ function Sun({ shadows }: { shadows: boolean }) {
       color="#ffe2b8"
       intensity={2.4}
       castShadow={shadows}
-      shadow-mapSize={[1024, 1024]}
+      shadow-mapSize={ultra ? [2048, 2048] : [1024, 1024]}
       shadow-camera-left={-9}
       shadow-camera-right={9}
       shadow-camera-top={9}
@@ -214,7 +215,16 @@ function Rocks() {
   )
 }
 
-export function World({ zone, shadows }: { zone: ZoneDef; shadows: boolean }) {
+export function World({
+  zone,
+  shadows,
+  ultra = false,
+}: {
+  zone: ZoneDef
+  shadows: boolean
+  /** Ultra graphics: finer shadows and motes of light drifting over the hunting ground. */
+  ultra?: boolean
+}) {
   const env = zone.environment
   return (
     <>
@@ -222,10 +232,21 @@ export function World({ zone, shadows }: { zone: ZoneDef; shadows: boolean }) {
       <fog attach="fog" args={[env.fog, 26, 90]} />
       <SkyDome env={env} />
       <hemisphereLight args={[env.skyTop, env.groundLow, 1.15]} />
-      <Sun shadows={shadows} />
+      <Sun shadows={shadows} ultra={ultra} />
       <Ground env={env} />
       <Trees />
       <Rocks />
+      {ultra && (
+        <Sparkles
+          count={70}
+          scale={[26, 5, 26]}
+          position={[0, 2.6, 0]}
+          size={2.2}
+          speed={0.25}
+          opacity={0.7}
+          color="#fff1c2"
+        />
+      )}
     </>
   )
 }

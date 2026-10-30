@@ -64,10 +64,11 @@ const CLASS_FX: Record<ClassId, { color: string; spark: Fx }> = {
 const RANGED: ReadonlySet<ClassId> = new Set(['mage', 'healer', 'sorcerer'])
 const MONSTER_FX = { color: '#ff7a5a', spark: 'spark-red' as Fx }
 const CURSE = new Color('#b77bff')
+const LEVEL_GOLD = new Color('#ffd76a')
 const HEALING = new Color('#7dff95')
 
 /** Particles alive at once; the oldest one is reused past that. */
-const POOL_SIZE = 64
+const POOL_SIZE = 96
 /** A spell's magic circle shows only for wind-ups longer than this (game seconds). */
 const MIN_WIND_UP = 0.15
 
@@ -160,7 +161,8 @@ function animate(p: Particle, camera: Camera, realDt: number): void {
 /**
  * Skill effects from the client's effect textures: a magic circle under a spell being cast, then
  * a burst of light, sparks and a shockwave where an attack lands, a curse closing in on a
- * debuffed target, rising stars around a buff and a healing circle — in the caster's class colour.
+ * debuffed target, rising stars around a buff and a healing circle — in the caster's class colour;
+ * and the golden burst of a level up.
  */
 export function SkillEffects() {
   const textures = useTexture(FX_URLS, inSrgb) as Record<Fx, Texture>
@@ -426,6 +428,55 @@ export function SkillEffects() {
       }
     }
 
+    /** A level up (with LevelUpEffect's golden pillar): a gold circle opening under the hero, a
+     * shockwave, a flash and golden stars spiralling up. */
+    const levelUp = () => {
+      const { feet, middle } = bodyOf('player')
+      const light = lighten(LEVEL_GOLD, 0.3)
+      spawn({
+        fx: 'magic-circle',
+        at: feet,
+        ground: true,
+        size: [0.6, 3.2],
+        life: 2.2,
+        color: lighten(LEVEL_GOLD, 0.15),
+        spin: 1.2,
+        fadeIn: 0.08,
+      })
+      spawn({
+        fx: 'shockwave',
+        at: feet,
+        ground: true,
+        size: [0.5, 5],
+        life: 0.9,
+        color: LEVEL_GOLD,
+      })
+      spawn({
+        fx: 'ring',
+        at: feet,
+        ground: true,
+        size: [0.5, 3.6],
+        life: 0.7,
+        color: light,
+        delay: 0.15,
+      })
+      spawn({ fx: 'flash', at: middle, size: [1, 4.2], life: 0.5, fadeIn: 0.05 })
+      spawn({ fx: 'burst', at: middle, size: [1.2, 3.4], life: 1, color: LEVEL_GOLD, spin: 1.5 })
+      for (let i = 0; i < 24; i++) {
+        const a = (i / 24) * Math.PI * 4
+        spawn({
+          fx: i % 3 === 0 ? 'star' : 'spark-yellow',
+          at: feet.clone().add(new Vector3(Math.cos(a) * 0.7, 0.1, Math.sin(a) * 0.7)),
+          size: [0.5, 0.15],
+          life: random(1.1, 1.6),
+          color: light,
+          vel: new Vector3(-Math.sin(a) * 0.8, random(1.8, 2.8), Math.cos(a) * 0.8),
+          spin: 3,
+          delay: i * 0.03,
+        })
+      }
+    }
+
     const land = (source: Side, kind: SkillKind) => {
       const target: Side = source === 'player' ? 'monster' : 'player'
       const { color, spark } = style(source)
@@ -469,6 +520,8 @@ export function SkillEffects() {
         landings.current = landings.current.filter((l) => l.source !== e.target)
       } else if (e.type === 'death') {
         landings.current = landings.current.filter((l) => l.source !== e.who)
+      } else if (e.type === 'levelUp') {
+        levelUp()
       } else if (e.type === 'reset') {
         landings.current = []
         for (const p of pool.current) p.age = p.life

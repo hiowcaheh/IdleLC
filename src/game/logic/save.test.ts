@@ -289,7 +289,7 @@ describe('loadSave', () => {
     const save = withCharacter()
     const broken = {
       ...save,
-      settings: { quality: 'ultra', showDamageNumbers: false },
+      settings: { quality: 'extreme', showDamageNumbers: false },
       characters: [
         {
           ...save.characters[0],

@@ -1,4 +1,4 @@
-import { PerformanceMonitor, useGLTF } from '@react-three/drei'
+import { PerformanceMonitor, SoftShadows, useGLTF } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
 import { Suspense, useEffect, useState } from 'react'
 import { getModel, modelUrl, playerModelId } from '../game/assets/manifest.ts'
@@ -19,6 +19,7 @@ function maxDpr(quality: GraphicsQuality): number {
   const device = typeof window === 'undefined' ? 1 : window.devicePixelRatio || 1
   if (quality === 'low') return 1
   if (quality === 'high') return Math.min(device, 2)
+  if (quality === 'ultra') return Math.min(device, 3)
   return Math.min(device, 1.5)
 }
 
@@ -65,7 +66,9 @@ function QualityCanvas({
           onFallback={() => setDpr(1)}
         />
       )}
-      <World zone={zone} shadows={shadows} />
+      {/* ultra: soft shadow edges that widen away from what casts them */}
+      {quality === 'ultra' && <SoftShadows size={14} samples={10} focus={0.4} />}
+      <World zone={zone} shadows={shadows} ultra={quality === 'ultra'} />
       <Suspense fallback={null}>
         <Battle />
       </Suspense>

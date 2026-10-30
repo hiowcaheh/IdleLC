@@ -111,6 +111,8 @@ interface Tinted {
 }
 
 /** A material of our own for a model copy: tint, self light, and a slot in the hit flash list. */
+const ULTRA_ANISOTROPY = 8
+
 function ownMaterial(m: Material, model: ModelEntry | null, materials: Tinted[]): Material {
   const copy = m.clone() as MeshStandardMaterial
   const tint = model?.tint[m.name]
@@ -122,6 +124,12 @@ function ownMaterial(m: Material, model: ModelEntry | null, materials: Tinted[])
     copy.emissive.setScalar(SELF_LIGHT)
   }
   if (copy.emissive) materials.push({ material: copy, emissive: copy.emissive.clone() })
+  // ultra graphics: textures stay sharp when seen at an angle (the GPU caps the value)
+  const ultra = useGameStore.getState().save.settings.quality === 'ultra'
+  if (ultra && copy.map && copy.map.anisotropy < ULTRA_ANISOTROPY) {
+    copy.map.anisotropy = ULTRA_ANISOTROPY
+    copy.map.needsUpdate = true
+  }
   return copy
 }
 

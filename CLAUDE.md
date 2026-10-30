@@ -88,7 +88,7 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
 
 ## Stan prac (aktualizuj na koniec każdej sesji)
 
-**Stan na 2026-10-30 (rano, sesja 2):**
+**Stan na 2026-10-30 (sesja 2):**
 
 - M0 i M1 gotowe. Gra na Pages (https://hiowcaheh.github.io/IdleLC/) działa na danych i modelach LC
   (6 klas: ciało nowej postaci + założony sprzęt; wszystkie potwory Juno oprócz Elder Drake — jego `.smc` wskazuje
@@ -144,7 +144,14 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   Auto-picie w walce i na wyprawach (progi 50% HP / 30% MP — **własne**) tylko mikstur ze slotów HP/MP,
   które gracz wybiera z torby (zapis v9, `potions.ts`, `setPotionSlot`; slot ma przełącznik AUTO), zużycie zgłaszane w `reportCombat` (`potions`) i liczone w `simulateAfk`.
   Stany `t_magic` 2/9 i 2/10 = HP/MP na sekundę także w skillach (Mana Recovery).
-- **Karta postaci** z zakładkami Stats (wszystkie statystyki + suma opcji) i Equipment; „+N” za nazwą.
+- **Karta postaci** z zakładkami Stats (wszystkie statystyki zawsze widoczne, regeneracja z buffami i miksturami,
+  premie EXP/SP/Gold/Drop — `rewardBonuses`, na razie 0) i Equipment; „+N” za nazwą.
+- **Okno przedmiotu** (`ItemInfo.tsx`): karta jak tooltip klienta — rodzaj, ocena, atak, szybkość, wymagany
+  poziom, klasa (niespełnione na czerwono), opcje jedna pod drugą; brak „Wear” dla sprzętu innej klasy.
+  Komunikaty okien (sprzedaż, zakładanie, ulepszanie, nauka) jako wysuwane toasty (`state/toasts.ts`).
+  Inventory: picie mikstur z torby (`drinkPotion`, te same zasady odnowienia), sprzęt od najwyższego poziomu,
+  „No items of this type”, okno potwierdzenia „Sell all loot”. Heaven Stone w ulepszaniu jako ikona z liczbą.
+- **Drop bez sprzętu Night Shadow** (nikt z 6 klas go nie nosi; decyzja właściciela).
 - **Rzadkie przedmioty (zapis v8):** `t_rareoption` 1:1 (klasy A–E, prefiksy, premie, opcje z szansami),
   nieodkryte (czerwone, można nosić), Appraiser z lupami (złota 1 000 000 zawsze, zwykła 600 000 — 60% własne),
   kolory klas wg właściciela (A niebieski, B zielony, C jasnoniebieski, D żółty, E biały), masowa sprzedaż.
@@ -156,10 +163,11 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   wyprawy + regeneracja za czas nieobecności).
 - **UI z klienta:** ramka gracza z `TopUI` przypięta w lewym górnym rogu (paski HP/MP/EXP to grafiki klienta,
   EXP szary), buffy pod nią; okna z tytułem we wgłębieniu ramki i X na narożniku (`Sheet.tsx`); ikony menu
-  (System, Inventory, Skills, Character). Strona bez zoomu i zaznaczania (`lockZoom.ts`). Okno Inventory = siatka
+  (System, Inventory, Skills, Character; ×4 z wyostrzeniem), licznik na przycisku na okrągłym przycisku
+  klienta (`badge`), złoto tylko w oknach. Strona bez zoomu i zaznaczania (`lockZoom.ts`). Okno Inventory = siatka
   slotów torby + szczegóły wybranego; Character: Stats w polach wartości z `NewCharacterInfo`, Equipment na planszy
-  sylwetki klasy z `NewInventory` (`equip-<klasa>.webp`, ramki slotów zmierzone w `CharacterPanel.tsx`). Mikstury
-  przy pasku umiejętności; dolny pasek EXP usunięty (jest w ramce). Czcionka klienta to
+  sylwetki klasy z `NewInventory` (`equip-<klasa>.webp`, ramki slotów zmierzone w `CharacterPanel.tsx`). Sloty
+  mikstur na lewej krawędzi ekranu; dolny pasek EXP usunięty (jest w ramce); nick nad postacią biały. Czcionka klienta to
   tylko bitmapy 7–8 px (`FontGerman0.tex`, DXT; w Nemesis zaszyfrowane) — czekamy na decyzję właściciela.
 - Skille trafiają po `a_readyTime` + 0,4 s (`a_fireTime` to animacja po wystrzale — bez blokady:
   `TIMINGS.skillAnimationLock = 0`).
@@ -167,8 +175,10 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   przygotowanie → trzymanie → wystrzał) dołożone do modeli klas i dopasowane do rytmu walki
   (`Character.skill`); brak klipu = zwykły zamach. Efekty (`SkillEffects.tsx`) z tekstur klienta
   (`public/fx/`, `--only fx`) według rodzaju skilla, w kolorze klasy: krąg magii przy rzucaniu, pocisk klas
-  dystansowych, wybuch/iskry/fala przy trafieniu, klątwa, aura buffa, krąg leczenia. Dokładne efekty LC
-  (`Effect.dat`) są w Nemesis zaszyfrowane.
+  dystansowych, wybuch/iskry/fala przy trafieniu, klątwa, aura buffa, krąg leczenia; awans: złoty słup,
+  krąg, fala i spirala gwiazd. Dokładne efekty LC (`Effect.dat`) są w Nemesis zaszyfrowane.
+- **Grafika:** Auto / Low / High / **Ultra** (pełna rozdzielczość ekranu do ×3, miękkie cienie `SoftShadows`
+  z drei, cień 2048, anizotropia tekstur, drobinki światła `Sparkles`) — bez nowych zależności.
 - Narzędzia dev włączane w Settings (bez `?dev=1`): prędkość ×20, dowolny potwór, poziom, exp, złoto, SP,
   kill/heal, podgląd modeli.
 - **PWA:** `public/manifest.webmanifest`, własne ikony (`npm run pwa-icons`), service worker `public/sw.js`

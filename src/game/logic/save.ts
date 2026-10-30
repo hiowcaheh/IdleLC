@@ -46,7 +46,7 @@ import {
 
 export const SAVE_VERSION = 9
 
-export type GraphicsQuality = 'auto' | 'low' | 'high'
+export type GraphicsQuality = 'auto' | 'low' | 'high' | 'ultra'
 
 export interface Settings {
   quality: GraphicsQuality
@@ -216,7 +216,7 @@ const int = (value: unknown, fallback: number) => Math.floor(num(value, fallback
 function sanitizeSettings(raw: unknown): Settings {
   const settings = isRecord(raw) ? raw : {}
   return {
-    quality: ['auto', 'low', 'high'].includes(settings.quality as string)
+    quality: ['auto', 'low', 'high', 'ultra'].includes(settings.quality as string)
       ? (settings.quality as GraphicsQuality)
       : DEFAULT_SETTINGS.quality,
     showDamageNumbers:

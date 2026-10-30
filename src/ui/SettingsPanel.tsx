@@ -9,6 +9,11 @@ const QUALITY_OPTIONS: { value: GraphicsQuality; label: string; hint: string }[]
   { value: 'auto', label: 'Auto', hint: 'Adapts to your device' },
   { value: 'low', label: 'Low', hint: 'No shadows, for older phones' },
   { value: 'high', label: 'High', hint: 'Full resolution and shadows' },
+  {
+    value: 'ultra',
+    label: 'Ultra',
+    hint: "Your screen's full sharpness, soft shadows, sharper textures and light in the air — for strong phones and computers",
+  },
 ]
 
 export function SettingsPanel({ onClose }: { onClose(): void }) {
