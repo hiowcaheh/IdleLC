@@ -12,6 +12,7 @@ const atlas = (name) => `Data\\Interface\\${name}.tex`
 /** name → [atlas, x, y, width, height, scale?] (rectangles measured on the atlases). */
 export const UI_PARTS = {
   window: [atlas('NewInventory'), 0, 0, 256, 408],
+  panel: [atlas('NewInventory'), 0, 0, 256, 408],
   slot: [atlas('NewInventory'), 39, 218, 34, 34],
   title: [atlas('MessageBox'), 0, 0, 216, 23],
   close: [atlas('MessageBox'), 220, 1, 14, 14],
@@ -29,6 +30,25 @@ export const UI_PARTS = {
   'menu-system': [atlas('TopUI'), 156, 222, 22, 22, 2],
 }
 
+/**
+ * Pieces put together from rows of their rectangle: [first row, rows, times]. The inventory window
+ * has its item preview (black) and bag slots next to the side borders; the frames the game stretches
+ * keep only a clean row of the sides (y 380: outline, gilt line, steel), so no black strip shows.
+ * window: the title edge (37 rows) and the bottom; panel: a thin top edge.
+ */
+const ROWS = {
+  window: [
+    [0, 37, 1],
+    [380, 1, 16],
+    [398, 10, 1],
+  ],
+  panel: [
+    [0, 10, 1],
+    [380, 1, 16],
+    [398, 10, 1],
+  ],
+}
+
 /** Parts of a piece shown empty: the player frame's bar tracks (the bars are drawn on top). */
 const EMPTY_AREAS = {
   'player-frame': [
@@ -44,17 +64,22 @@ const EMPTY_SHADE = 0.22
 export async function buildUiParts(files) {
   const textures = new Map()
   const out = {}
-  for (const [name, [path, x, y, width, height, scale = 1]] of Object.entries(UI_PARTS)) {
+  for (const [name, [path, x, y, width, rectHeight, scale = 1]] of Object.entries(UI_PARTS)) {
+    let height = rectHeight
     if (!textures.has(path)) {
       textures.set(path, files.resolve(path) ? parseTexture(files.read(path)) : null)
     }
     const texture = textures.get(path)
     if (!texture) continue
+    const rows = (ROWS[name] ?? [[0, height, 1]]).flatMap(([first, count, times]) =>
+      Array.from({ length: count * times }, (_, i) => first + (i % count)),
+    )
+    height = rows.length
     const pixels = Buffer.alloc(width * height * 4)
-    for (let row = 0; row < height; row++) {
-      const from = ((y + row) * texture.width + x) * 4
+    rows.forEach((source, row) => {
+      const from = ((y + source) * texture.width + x) * 4
       pixels.set(texture.rgba.subarray(from, from + width * 4), row * width * 4)
-    }
+    })
     for (const [ex, ey, ew, eh] of EMPTY_AREAS[name] ?? []) {
       for (let row = ey; row < ey + eh; row++) {
         for (let col = ex; col < ex + ew; col++) {

@@ -3009,7 +3009,7 @@ a.button {
 .hunt {
   border-style: solid;
   border-width: 8px;
-  border-image: url('/ui/lc/window.webp') 10 8 10 8 / 8px stretch;
+  border-image: url('/ui/lc/panel.webp') 10 8 10 8 / 8px stretch;
   border-radius: 0;
   background: rgba(46, 50, 56, 0.94);
   box-shadow: var(--panel-shadow);
