@@ -1839,13 +1839,15 @@ a.button {
   display: flex;
   justify-content: center;
   gap: 5px;
-  max-width: 100%;
+  /* the 7 slots' full width (the bar sits in a centring column, which would shrink it to its content) */
+  width: min(100%, 356px);
   padding: 2px;
 }
 
 .skill-slot {
   position: relative;
   flex: 0 1 46px;
+  width: 46px;
   min-width: 0;
   aspect-ratio: 1;
   padding: 0;
