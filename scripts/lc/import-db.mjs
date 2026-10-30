@@ -222,7 +222,8 @@ function buildData(tables) {
     [...usedItems].map((id) => itemRows.get(id)).filter((r) => r && isGear(r) && usable(r)),
   )
 
-  // rare items: the t_rareoption sets each piece can get when it is identified, with their weights
+  // rare items: the t_rareoption sets each piece can get when it is identified, with their weights;
+  // from level 77 every rare piece of a slot can also get that slot's special sets (owner's rule)
   const rareOf = (r) => {
     if (!isGear(r) || (int(r.a_job_flag) & BASE_CLASS_BITS) === 0) return []
     const sets = []
@@ -230,6 +231,11 @@ function buildData(tables) {
       const set = int(r[`a_rare_index_${i}`])
       const weight = int(r[`a_rare_prob_${i}`])
       if (set > 0 && weight > 0) sets.push([set, weight])
+    }
+    if (sets.length > 0 && int(r.a_level) >= SPECIAL_RARE_LEVEL) {
+      for (const [set, weight] of SPECIAL_RARE_SETS[int(r.a_wearing)] ?? []) {
+        if (!sets.some(([s]) => s === set)) sets.push([set, weight])
+      }
     }
     return sets
   }
@@ -302,6 +308,28 @@ const numbers = (text) =>
     .split(/\s+/)
     .filter(Boolean)
     .map(Number)
+
+/**
+ * Owner's rule (2026-10-30): rare pieces from level 77 can get their slot's special grade-A sets —
+ * helmets Casting-Up (53, skill cooldown), armor and pants Anti-Stun / Anti-Silence / Anti-Stone (56,
+ * 57, 60), boots Speed-Up (59, move speed) — with the weights other pieces have them with in the
+ * database. By t_item.a_wearing: [t_rareoption index, weight].
+ */
+const SPECIAL_RARE_LEVEL = 77
+const SPECIAL_RARE_SETS = {
+  0: [[53, 250]],
+  1: [
+    [56, 125],
+    [57, 125],
+    [60, 125],
+  ],
+  3: [
+    [56, 125],
+    [57, 125],
+    [60, 125],
+  ],
+  6: [[59, 250]],
+}
 
 /** "FF8000FF" (RRGGBBAA) → "#ff8000". */
 const rgb = (rgba) =>

@@ -253,6 +253,12 @@ Cena = `a_price × a_buy_rate %` (100%).
 
 ## Rzadkie przedmioty i lupy
 
+**Zasada właściciela (2026-10-30):** rzadkie przedmioty od 77 poziomu mogą dostać zestawy specjalne swojego
+slotu (ocena A, z wagą, jaką mają w bazie na innych przedmiotach): hełmy **Casting-Up** (53, skrócenie
+odnowienia skilli, waga 250), zbroje i spodnie **Anti-Stun / Anti-Silence / Anti-Stone** (56, 57, 60 —
+odporności, po 125), buty **Speed-Up** (59, szybkość ruchu, 250). Np. Reidon Helm: 250 / 10 250 ≈ 2,4% na
+identyfikację (`SPECIAL_RARE_SETS` w `import-db.mjs`).
+
 Dane 1:1 z bazy:
 
 - `t_item.a_rare_index_N` / `a_rare_prob_N` — które zestawy `t_rareoption` przedmiot może dostać i z jaką wagą
