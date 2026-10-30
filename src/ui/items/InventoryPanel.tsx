@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react'
-import { HEAVEN_STONE_ID, SMELTING_STONE_ID, getItem } from '../../game/data/items.ts'
+import {
+  GOLDEN_MAGNIFIER_ID,
+  HEAVEN_STONE_ID,
+  MAGNIFIER_ID,
+  SMELTING_STONE_ID,
+  getItem,
+} from '../../game/data/items.ts'
 import type { ItemDef, ItemType } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
 import { STONES_PER_HEAVEN, type GearPiece, type GearSource } from '../../game/logic/equipment.ts'
 import type { ItemOption } from '../../game/logic/options.ts'
-import { isRare } from '../../game/logic/rare.ts'
+import { isRare, type IdentifyTarget } from '../../game/logic/rare.ts'
 import type { ItemStack } from '../../game/logic/loot.ts'
 import { sellPrice, stacksValue } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
@@ -73,6 +79,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   const sellGear = useGameStore((s) => s.sellGear)
   const equipItem = useGameStore((s) => s.equipItem)
   const exchangeStones = useGameStore((s) => s.exchangeStones)
+  const identifyItems = useGameStore((s) => s.identifyItems)
   const [selected, setSelected] = useState<string | null>(null)
   const [category, setCategory] = useState<Category>('all')
   const [message, setMessage] = useState<string | null>(null)
@@ -191,6 +198,44 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
     )
   }
 
+  const owned = (itemId: number) =>
+    inventory.reduce((n, s) => n + (s.itemId === itemId ? s.count : 0), 0)
+
+  /** Identify buttons (one per kind of magnifying glass) for an unidentified rare piece. */
+  const identifyActions = (target: IdentifyTarget) => (
+    <>
+      {[MAGNIFIER_ID, GOLDEN_MAGNIFIER_ID].map((glassId) => {
+        const glass = getItem(glassId)
+        const have = owned(glassId)
+        const chance = Math.round((glass.magnifier?.chance ?? 1) * 100)
+        return (
+          <button
+            key={glassId}
+            type="button"
+            className={`button${glassId === GOLDEN_MAGNIFIER_ID ? ' button--gold' : ''}`}
+            disabled={busy || away || have < 1}
+            onClick={() =>
+              run(async () => {
+                const result = await identifyItems(glassId, [target])
+                const [done] = result.results
+                if (!done?.success) return `The ${glass.name.toLowerCase()} failed — try again.`
+                // the piece leaves its stack: show it in its new slot
+                setSelected(`piece-${done.piece.uid}`)
+                return `${rareLabel(done.piece)}: ${pieceName(done.piece.itemId, 0, done.piece.rare)}.`
+              })
+            }
+          >
+            Identify · {glass.name} ×{fmt(have)}
+            {chance < 100 ? ` (${chance}%)` : ''}
+          </button>
+        )
+      })}
+      <p className="item-row__note">
+        Or let the Appraiser identify all your rare items at once (hunting panel).
+      </p>
+    </>
+  )
+
   /** What can be done with the piece or stack in the slot tapped. */
   const details = (entry: BagEntry) => {
     const { item, piece, stack } = entry
@@ -212,6 +257,9 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
             </span>
           </div>
           <div className="item-row__actions">
+            {isRare(piece.itemId) &&
+              piece.rare === undefined &&
+              identifyActions({ uid: piece.uid })}
             {wearActions(piece.itemId, piece.plus, { uid: piece.uid }, piece.options, piece.rare)}
             {sellPrice(piece.itemId) > 0 && (
               <button
@@ -239,6 +287,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
           <ItemRowContent itemId={stack.itemId} count={stack.count} item={item} />
         </div>
         <div className="item-row__actions">
+          {isRare(stack.itemId) && identifyActions({ itemId: stack.itemId, count: 1 })}
           {item.gear && wearActions(stack.itemId, 0, { itemId: stack.itemId })}
           {item.potion && <p className="item-row__note">{potionText(item.potion)}</p>}
           {stack.itemId === SMELTING_STONE_ID && (

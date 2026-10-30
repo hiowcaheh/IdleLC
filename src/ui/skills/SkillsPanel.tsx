@@ -124,7 +124,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
                 Bar
               </span>
             )}
-            {current && current.kind !== 'passive' && (
+            {current && current.kind !== 'passive' && onBar && (
               <span
                 className={`skill-tag ${current.auto ? 'skill-tag--auto' : 'skill-tag--off'}`}
                 title={current.auto ? 'Fires on its own' : 'Automatic use off'}
@@ -171,7 +171,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
                   {learned ? 'Upgrade' : 'Learn'} · {state.next.learnSp} SP
                 </button>
               )}
-              {current && current.kind !== 'passive' && (
+              {current && current.kind !== 'passive' && onBar && (
                 <button
                   type="button"
                   className="button"
@@ -214,7 +214,10 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
               )}
             </div>
             {current && current.kind !== 'passive' && !onBar && (
-              <p className="skill-row__note">Only skills on the bar are used in fights.</p>
+              <p className="skill-row__note">
+                Only the {SKILL_BAR_SIZE} skills on the bar are used in fights — and only they can
+                fire on their own (Auto).
+              </p>
             )}
             {state.blocked && available && <p className="skill-row__note">{state.blocked}</p>}
           </div>
@@ -229,8 +232,14 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
       titleId="skills-title"
       onClose={onClose}
       extra={
-        <p className="skills__sp" aria-label="Skill points">
-          <strong>{formatSp(character.sp)}</strong> SP
+        <p className="skills__sp">
+          <span aria-label="Skills on the bar">
+            Bar <strong>{character.skillBar.length}</strong>/{SKILL_BAR_SIZE}
+          </span>
+          {' · '}
+          <span aria-label="Skill points">
+            <strong>{formatSp(character.sp)}</strong> SP
+          </span>
         </p>
       }
     >
