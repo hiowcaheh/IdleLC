@@ -4,14 +4,13 @@ import { useGameStore } from '../../state/gameStore.ts'
 import { EffectRow } from '../skills/EffectRow.tsx'
 import { Bar } from './Bar.tsx'
 import { ClassPortrait } from './ClassPortrait.tsx'
-import { PotionSlots } from './PotionSlots.tsx'
 
 const formatGold = (gold: number) => gold.toLocaleString('en-US')
 
 /**
  * The hero's frame from the client's interface (TopUI): portrait in the ring, level in the small
- * ring, name in the name box, HP, MP and EXP in the three bar slots; buffs right under it, then gold
- * and potions.
+ * ring, name in the name box, HP, MP and EXP in the three bar slots; buffs right under it, then
+ * gold.
  */
 export function PlayerFrame() {
   const hp = useGameStore((s) => s.hud.playerHp)
@@ -66,7 +65,6 @@ export function PlayerFrame() {
           <span className="coin" aria-hidden="true" />
           {formatGold(gold)}
         </p>
-        <PotionSlots />
       </div>
     </section>
   )

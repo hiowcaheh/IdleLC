@@ -106,7 +106,7 @@ p {
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-rows: auto auto 1fr auto auto;
+  grid-template-rows: auto auto 1fr auto;
   padding: calc(var(--gutter) + var(--safe-top)) calc(var(--gutter) + var(--safe-right))
     calc(var(--gutter) + var(--safe-bottom)) calc(var(--gutter) + var(--safe-left));
   pointer-events: none;
@@ -414,62 +414,7 @@ p {
   color: #ff9a8a;
 }
 
-/* ---------- Experience bar and level up ---------- */
-
-.hud__exp {
-  grid-row: 5;
-  margin-top: 8px;
-}
-
-.exp-bar {
-  position: relative;
-  width: 100%;
-  height: 16px;
-  border-radius: 3px;
-  overflow: hidden;
-  background: #0e0a07;
-  box-shadow:
-    0 0 0 1px var(--bronze-dim),
-    inset 0 1px 3px rgba(0, 0, 0, 0.8);
-}
-
-.exp-bar__fill {
-  position: absolute;
-  inset: 0;
-  transform-origin: left center;
-  background: linear-gradient(180deg, #e9f7a6, #9ccc45 45%, #4f7a19);
-  transition: transform 0.4s ease-out;
-}
-
-/* ten segments, like the exp bars of the era */
-.exp-bar__ticks {
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    90deg,
-    transparent 0 calc(10% - 1px),
-    rgba(0, 0, 0, 0.45) calc(10% - 1px) 10%
-  );
-}
-
-.exp-bar__text {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  font-size: 11px;
-  font-weight: 800;
-  line-height: 16px;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-  text-shadow:
-    0 0 2px #000,
-    0 1px 1px #000;
-}
-
-.exp-bar__level {
-  color: var(--gilt-bright);
-}
+/* ---------- Level up ---------- */
 
 .level-up {
   margin-top: 18px;
@@ -1879,6 +1824,17 @@ a.button {
   align-items: center;
   gap: 8px;
   width: min(100%, 560px);
+  /* the hunting panel sits on the bottom edge (above the home indicator) */
+  margin-bottom: calc(-1 * var(--gutter));
+}
+
+/* potions and skills in one row above the hunting panel */
+.hud__quick {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: 100%;
 }
 
 .skill-bar {
@@ -2950,7 +2906,7 @@ a.button {
 .sheet--framed .sheet__title {
   overflow: hidden;
   /* capitals only: nudged down to sit in the middle of the recess */
-  padding-top: 3px;
+  padding-top: 6px;
   font-size: 12px;
   line-height: 1;
   letter-spacing: 0.04em;

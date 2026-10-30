@@ -9,8 +9,8 @@ import { AfkSummary } from './AfkSummary.tsx'
 import { DevPanel } from './dev/DevPanel.tsx'
 import { ExpeditionPanel } from './expedition/ExpeditionPanel.tsx'
 import { useDevTools } from './dev/devMode.ts'
-import { ExpBar } from './hud/ExpBar.tsx'
 import { HuntPanel } from './hud/HuntPanel.tsx'
+import { PotionSlots } from './hud/PotionSlots.tsx'
 import { LevelUpBanner } from './hud/LevelUpBanner.tsx'
 import { PlayerFrame } from './hud/PlayerFrame.tsx'
 import { StatusLine } from './hud/StatusLine.tsx'
@@ -101,14 +101,14 @@ export function GameScreen() {
             <ExpeditionPanel character={character} expedition={expedition} />
           ) : (
             <div className="hud__dock">
-              <SkillBar />
+              <div className="hud__quick">
+                <PotionSlots />
+                <SkillBar />
+              </div>
               <HuntPanel />
             </div>
           )}
           {devTools && <DevPanel />}
-        </div>
-        <div className="hud__exp">
-          <ExpBar />
         </div>
       </div>
 
