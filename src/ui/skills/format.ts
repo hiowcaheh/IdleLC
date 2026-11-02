@@ -144,9 +144,13 @@ export function describeEffect(effect: SkillEffect, rank: SkillRank): string {
     case 'poison':
       return `Poison: ${effect.perSecond} damage per second${lasting}`
     case 'heal':
-      return `Restores ${effect.amount} HP`
+      return effect.percent
+        ? `Restores ${effect.amount}% of max HP`
+        : `Restores ${effect.amount} HP`
     case 'mana':
-      return `Restores ${effect.amount} MP`
+      return effect.percent
+        ? `Restores ${effect.amount}% of max MP`
+        : `Restores ${effect.amount} MP`
     case 'regen':
       return `Restores ${effect.perSecond} ${effect.resource === 'hp' ? 'HP' : 'MP'} per second${lasting}`
   }

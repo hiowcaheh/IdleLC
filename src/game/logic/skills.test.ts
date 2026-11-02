@@ -92,6 +92,32 @@ describe('interpretEffect', () => {
     expect(interpretEffect({ type: 0, subtype: 9, damageType: 1, power: 3 })).toBeNull()
     expect(interpretEffect({ type: 5, subtype: 0, damageType: 1, power: 0 })).toBeNull()
   })
+
+  it('distinguishes flat recovery from a percentage of the maximum HP or MP', () => {
+    for (const [subtype, kind] of [
+      [0, 'heal'],
+      [1, 'mana'],
+    ] as const) {
+      expect(interpretEffect({ type: 4, subtype, damageType: 0, power: 25 })).toEqual({
+        kind,
+        amount: 25,
+      })
+      expect(interpretEffect({ type: 4, subtype, damageType: 2, power: 25 })).toEqual({
+        kind,
+        amount: 25,
+        percent: true,
+      })
+    }
+  })
+
+  it('rejects ADDITION and unknown damage types for immediate recovery', () => {
+    for (const subtype of [0, 1]) {
+      for (const damageType of [1, 3]) {
+        expect(interpretEffect({ type: 4, subtype, damageType, power: 25 })).toBeNull()
+      }
+    }
+    expect(interpretEffect({ type: 4, subtype: 2, damageType: 2, power: 25 })).toBeNull()
+  })
 })
 
 describe('skillRank', () => {

@@ -677,11 +677,15 @@ function landSkill(
   for (const e of skill.effects) {
     if (e.kind === 'heal') {
       const before = self.hp
-      self.hp = Math.min(stats.maxHp, self.hp + e.amount)
+      // MT_RECOVER/MDT_RATE uses maximum HP and integer division by SKILL_RATE_UNIT (100).
+      const amount = e.percent ? Math.floor((stats.maxHp * e.amount) / 100) : e.amount
+      self.hp = Math.min(stats.maxHp, self.hp + amount)
       events.push({ type: 'heal', target: side, amount: Math.round(self.hp - before) })
     } else if (e.kind === 'mana') {
       const before = self.mp
-      self.mp = Math.min(stats.maxMp ?? 0, self.mp + e.amount)
+      const maxMp = stats.maxMp ?? 0
+      const amount = e.percent ? Math.floor((maxMp * e.amount) / 100) : e.amount
+      self.mp = Math.min(maxMp, self.mp + amount)
       events.push({ type: 'heal', target: side, amount: Math.round(self.mp - before), mana: true })
     }
   }

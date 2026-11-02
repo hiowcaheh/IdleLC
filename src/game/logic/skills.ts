@@ -1,7 +1,7 @@
 /**
  * Class skills: learning (character level, SP, prerequisites — 1:1 from t_skilllevel) and what a skill
- * does in IdleLC's one-on-one auto-combat. The effect mapping from t_magic type/subtype is our reading
- * of the data (names and descriptions) until the LC server code is available; see docs/balance.md.
+ * does in IdleLC's one-on-one auto-combat. Immediate HP/MP recovery follows the original server's
+ * GameServer/Skill.cpp; other effect mappings remain IdleLC adaptations (docs/source-audit/skills.md).
  * Pure — the server will run the same code.
  */
 import { getSkill, skillsForClass } from '../data/skills.ts'
@@ -58,8 +58,9 @@ export type SkillEffect =
   /** `chance` 0..1 that the stun lands. */
   | { kind: 'stun'; chance: number }
   | { kind: 'poison'; perSecond: number }
-  | { kind: 'heal'; amount: number }
-  | { kind: 'mana'; amount: number }
+  /** Immediate recovery: a flat amount, or a percent of the maximum resource. */
+  | { kind: 'heal'; amount: number; percent?: true }
+  | { kind: 'mana'; amount: number; percent?: true }
   /** HP or MP restored every second while the effect lasts (like healing and mana potions). */
   | { kind: 'regen'; resource: 'hp' | 'mp'; perSecond: number }
 
@@ -104,8 +105,15 @@ export function interpretEffect(e: SkillEffectDef): SkillEffect | null {
     case 3:
       return { kind: 'damage', percent: e.power }
     case 4:
-      if (e.subtype === 0) return { kind: 'heal', amount: e.power }
-      if (e.subtype === 1) return { kind: 'mana', amount: e.power }
+      // GameServer/Skill.cpp: MT_RECOVER accepts ONLYPOWER (0) and RATE (2), not ADDITION (1).
+      if (e.damageType !== 0 && e.damageType !== 2) return null
+      if (e.subtype === 0 || e.subtype === 1) {
+        return {
+          kind: e.subtype === 0 ? 'heal' : 'mana',
+          amount: e.power,
+          ...(e.damageType === 2 ? { percent: true as const } : {}),
+        }
+      }
       return null
     default:
       return null

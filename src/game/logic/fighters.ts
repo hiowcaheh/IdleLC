@@ -78,10 +78,18 @@ export function heroKey(hero: Hero): string {
     .sort()
     .map((id) => `${id}:${skills[id]!.level}${skills[id]!.auto ? 'a' : ''}`)
   const worn = equipment
-    ? Object.entries(equipment)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([slot, piece]) => `${slot}:${piece?.uid}+${piece?.plus}`)
-        .join(',')
+    ? JSON.stringify(
+        Object.entries(equipment)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([slot, piece]) => [
+            slot,
+            piece?.uid,
+            piece?.itemId,
+            piece?.plus,
+            piece?.rare,
+            piece?.options?.map(({ type, level }) => [type, level]) ?? [],
+          ]),
+      )
     : 'typical'
   const potions = potionSupply(hero)
     .map((p) => `${p.itemId}x${p.count}`)

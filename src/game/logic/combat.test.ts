@@ -23,7 +23,7 @@ import {
   type PotionSupply,
 } from './combat.ts'
 import { createRng, type Rng } from './rng.ts'
-import type { SkillRank } from './skills.ts'
+import { interpretEffect, type SkillRank } from './skills.ts'
 
 const stats = (over: Partial<CombatStats> = {}): CombatStats => ({
   maxHp: 100,
@@ -329,6 +329,83 @@ describe('skills in combat', () => {
     const { events, state } = run(hurt, 0.6, createRng(8))
     expect(events).toContainEqual({ type: 'heal', target: 'player', amount: 30 })
     expect(state.player.hp).toBeGreaterThanOrEqual(70)
+  })
+
+  it('recovers a floored percentage of effective maximum HP and MP, not their current values', () => {
+    const recovery = rank({
+      kind: 'heal',
+      offensive: false,
+      mpCost: 0,
+      effects: [0, 1].map((subtype) =>
+        interpretEffect({ type: 4, subtype, damageType: 2, power: 17 })!,
+      ),
+    })
+    const start = engaged(caster([recovery], { maxHp: 200, maxMp: 100 }))
+    const hurt = {
+      ...start,
+      player: {
+        ...start.player,
+        hp: 40,
+        mp: 30,
+        effects: [
+          {
+            skillId: 99,
+            name: 'Reserves',
+            remaining: 10,
+            stats: [
+              { kind: 'stat' as const, stat: 'maxHp' as const, value: 37, percent: false },
+              { kind: 'stat' as const, stat: 'maxMp' as const, value: 43, percent: false },
+            ],
+            stun: false,
+            poison: 0,
+            nextTick: 1,
+          },
+        ],
+      },
+    }
+    const { events, state } = run(hurt, 0.6, createRng(8))
+
+    expect(events).toContainEqual({ type: 'heal', target: 'player', amount: 40 }) // floor(237 × 17%)
+    expect(events).toContainEqual({ type: 'heal', target: 'player', amount: 24, mana: true }) // floor(143 × 17%)
+    expect(state.player.hp).toBe(80)
+    expect(state.player.mp).toBeGreaterThanOrEqual(54) // includes natural MP regeneration
+  })
+
+  it('caps percentage recovery at maximum HP and MP', () => {
+    const recovery = rank({
+      kind: 'heal',
+      offensive: false,
+      mpCost: 0,
+      effects: [
+        { kind: 'heal', amount: 200, percent: true },
+        { kind: 'mana', amount: 200, percent: true },
+      ],
+    })
+    const start = engaged(caster([recovery], { maxHp: 237, maxMp: 143 }))
+    const hurt = { ...start, player: { ...start.player, hp: 40, mp: 30 } }
+    const { events, state } = run(hurt, 0.6, createRng(8))
+
+    expect(events).toContainEqual({ type: 'heal', target: 'player', amount: 197 })
+    expect(state.player.hp).toBe(237)
+    expect(state.player.mp).toBe(143)
+  })
+
+  it('keeps flat HP and MP recovery independent of the maximum resource', () => {
+    const recovery = rank({
+      kind: 'heal',
+      offensive: false,
+      mpCost: 0,
+      effects: [
+        { kind: 'heal', amount: 17 },
+        { kind: 'mana', amount: 17 },
+      ],
+    })
+    const start = engaged(caster([recovery], { maxHp: 237, maxMp: 143 }))
+    const hurt = { ...start, player: { ...start.player, hp: 40, mp: 30 } }
+    const { events } = run(hurt, 0.6, createRng(8))
+
+    expect(events).toContainEqual({ type: 'heal', target: 'player', amount: 17 })
+    expect(events).toContainEqual({ type: 'heal', target: 'player', amount: 17, mana: true })
   })
 
   it('a stunned monster does not attack until the stun ends', () => {
