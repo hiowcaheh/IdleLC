@@ -64,6 +64,8 @@ Pochodzenie oraz ograniczenia zgodności opisuje [audyt źródeł](docs/source-a
 - Chromium/WebGL2 na buildzie produkcyjnym: sześć klas z odzyskanymi rękawicami, dziewięć modeli
   z animacjami w viewerze, walka i utrwalenie zapisu; układ mobilny 390×844.
   Test viewer/sceny z nowymi propsami: zero błędów strony, konsoli i HTTP.
+- PWA: po pobraniu zasobów wyłączono sieć i odświeżono stronę — gra uruchamia się z cache
+  `idlelc-v2`, WebGL2 i zapis postaci pozostają poprawne; zero błędów strony i konsoli.
 - Osobno sprawdzono trzech odzyskanych przeciwników w faktycznej walce, najgęstszą arenę
   roślinności oraz rozliczenie AFK 1 h; bez błędów strony, konsoli i HTTP.
 

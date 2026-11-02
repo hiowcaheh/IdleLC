@@ -1,0 +1,63 @@
+{
+  "date": "2026-11-02",
+  "build": "production Vite preview, Chromium WebGL2 / software renderer",
+  "unitTests": 271,
+  "testFiles": 31,
+  "checkPassed": true,
+  "buildPassed": true,
+  "glbRecoveryVerifierPassed": true,
+  "recoveredGlovesInGame": ["titan", "knight", "healer", "mage", "rogue", "sorcerer"],
+  "modelViewer": [
+    {
+      "id": "class-knight",
+      "clips": 21
+    },
+    {
+      "id": "class-titan",
+      "clips": 18
+    },
+    {
+      "id": "class-healer",
+      "clips": 24
+    },
+    {
+      "id": "class-mage",
+      "clips": 25
+    },
+    {
+      "id": "class-rogue",
+      "clips": 21
+    },
+    {
+      "id": "class-sorcerer",
+      "clips": 15
+    },
+    {
+      "id": "wyvern",
+      "clips": 6
+    },
+    {
+      "id": "cused_wever",
+      "clips": 8
+    },
+    {
+      "id": "cusedrich",
+      "clips": 7
+    }
+  ],
+  "inGameBattles": ["Elder Drake", "Cursed Weaver", "Cursed Lich"],
+  "denseVegetationArena": 12,
+  "afkHoursTested": 1,
+  "mobileViewport": [390, 844],
+  "offlineReloadPassed": true,
+  "cacheVersion": "idlelc-v2",
+  "savePreserved": true,
+  "pageErrors": [],
+  "consoleErrors": [],
+  "httpErrorsInOnlineSceneTests": [],
+  "limits": [
+    "Software Chromium is not physical mobile performance measurement",
+    "Not every gear combination or animation frame visually inspected",
+    "Remote GitHub Actions status unavailable through API (Forbidden)"
+  ]
+}

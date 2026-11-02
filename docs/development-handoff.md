@@ -177,3 +177,15 @@ Nie jest to inspekcja wszystkich klatek i kombinacji sprzętu ani pomiar wydajno
 Dodatkowy test sceny: Elder Drake, Cursed Weaver i Cursed Lich w faktycznej walce (nie tylko
 w viewerze), przejazd do areny o największej gęstości odzyskanej roślinności i wyprawa AFK 1 h.
 Wszystkie ścieżki zakończone poprawnie, zero błędów strony, konsoli i HTTP.
+
+PWA sprawdzono również z wyłączoną siecią: odświeżenie uruchamia grę z `idlelc-v2`,
+z tym samym zapisem postaci i WebGL2, bez błędów strony ani konsoli.
+
+Commity wdrożenia na `main`:
+
+- `c60bd3b` — zasoby, parsery, GUI, PWA i dokumentacja audytu.
+- `05a56c1` — odświeżanie statystyk sprzętu i jednostki natychmiastowego HP/MP.
+- `9686d6e` — uzupełnienie roślinności Juno bez wymiany wcześniejszych propsów.
+
+Push potwierdzono zdalnym HEAD. Lokalna walidacja jest zakończona; odczyt statusu GitHub Actions
+przez API zwracał `Forbidden`, więc w tej sesji nie potwierdzono zakończenia zdalnego CI/deployu Pages.
