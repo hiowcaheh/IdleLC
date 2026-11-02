@@ -1,5 +1,7 @@
 # IdleLC
 
+Dokumentacja techniczna i stan odzysku zasobów: [przekazanie dla kolejnej sesji](docs/development-handoff.md), [audyt kodu źródłowego LC](docs/source-audit/README.md), [decyzje projektowe](docs/design-decisions.md), [changelog](CHANGELOG.md).
+
 Przeglądarkowe RPG idle/AFK z walką 3D w klimacie klasycznych MMORPG z lat 2007–2010.
 Działa na PC i telefonie, bez instalacji.
 

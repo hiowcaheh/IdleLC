@@ -5,11 +5,11 @@
  * (lc-item-models.json, see convert-lc.mjs) the game puts on this body.
  */
 
-const classModel = (folder, prefix, animations, animSets) => ({
+const classModel = (folder, prefix, animations, fallbackAnimSets) => ({
   prefix,
   smc: `Data\\Character\\${folder}\\${prefix}.smc`,
   skeleton: `Data\\Character\\${folder}\\${prefix}.bs`,
-  ...(animSets ? { animSets } : {}),
+  ...(fallbackAnimSets ? { fallbackAnimSets } : {}),
   animations,
 })
 
@@ -26,7 +26,7 @@ export const CLASS_MODELS = {
       die: 'ni_die_01',
       victory: 'ni_idle_02',
     },
-    // the full client stores ni.ba encrypted (version 254); ni_ep1.ba holds the same basic clips
+    // Older encrypted clients need this fallback; readable ni.ba from the SMC takes priority.
     ['Data\\Character\\Knight\\ni_ep1.ba'],
   ),
   'class-titan': classModel('Titan', 'ti', {
@@ -68,7 +68,7 @@ export const CLASS_MODELS = {
       die: 'ro_die_01',
       victory: 'ro_idle_02',
     },
-    // ro.ba is stored encrypted (version 254); ro_ep1.ba holds the same basic clips
+    // Older encrypted clients need this fallback; readable ro.ba takes priority.
     ['Data\\Character\\Rogue\\ro_ep1.ba'],
   ),
   'class-sorcerer': classModel(
@@ -83,8 +83,7 @@ export const CLASS_MODELS = {
       die: 'so_die',
       victory: 'so_idle_02',
     },
-    // so.ba is stored encrypted (version 254); the undead sorcerer monster has the same skeleton
-    // (identical so.bs) and a readable copy of the basic clips
+    // Older encrypted clients use this monster's identical skeleton and basic clips as a fallback.
     ['Data\\Monster\\Undead\\Sorcerer3\\so.ba'],
   ),
 }

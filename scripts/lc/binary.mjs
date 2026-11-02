@@ -8,35 +8,55 @@ export class Reader {
     this.view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength)
     this.o = offset
     this.key = key ? { bytes: Uint8Array.from(key.bytes), step: key.step } : null
+    this.require(0)
   }
 
   get remaining() {
     return this.buf.length - this.o
   }
 
+  /** Validate a byte count before reading or allocating from a file-controlled count. */
+  require(count) {
+    if (
+      !Number.isSafeInteger(count) ||
+      count < 0 ||
+      !Number.isSafeInteger(this.o) ||
+      this.o < 0 ||
+      count > this.remaining
+    )
+      throw new RangeError(
+        `read of ${count} bytes out of range at ${this.o} (${this.remaining} left)`,
+      )
+  }
+
   u8() {
+    this.require(1)
     return this.buf[this.o++]
   }
 
   u16() {
+    this.require(2)
     const v = this.view.getUint16(this.o, true)
     this.o += 2
     return v
   }
 
   u32() {
+    this.require(4)
     const v = this.view.getUint32(this.o, true)
     this.o += 4
     return v
   }
 
   i32() {
+    this.require(4)
     const v = this.view.getInt32(this.o, true)
     this.o += 4
     return v
   }
 
   f32() {
+    this.require(4)
     const v = this.view.getFloat32(this.o, true)
     this.o += 4
     return v
@@ -51,18 +71,25 @@ export class Reader {
   }
 
   floats(count) {
+    if (!Number.isSafeInteger(count) || count < 0)
+      throw new RangeError(`invalid float count ${count}`)
+    this.require(count * 4)
     const out = new Float32Array(count)
     for (let i = 0; i < count; i++) out[i] = this.f32()
     return out
   }
 
   u16s(count) {
+    if (!Number.isSafeInteger(count) || count < 0)
+      throw new RangeError(`invalid u16 count ${count}`)
+    this.require(count * 2)
     const out = new Uint16Array(count)
     for (let i = 0; i < count; i++) out[i] = this.u16()
     return out
   }
 
   bytes(count) {
+    this.require(count)
     const out = this.buf.subarray(this.o, this.o + count)
     this.o += count
     return out

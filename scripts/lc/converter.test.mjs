@@ -7,7 +7,6 @@ import { ClientFiles, MemoryFiles } from './client.mjs'
 import { parseMesh } from './mesh.mjs'
 import { buildModel, inverseBindMatrix, outwardIndices } from './model.mjs'
 import { parseAnimSet, parseSkeleton } from './ska.mjs'
-import { parseSkillAnims } from './skill-anims.mjs'
 import { parseSmc } from './smc.mjs'
 import { heightAt, parseTerrain } from './terrain.mjs'
 import { decodeDxt, parseTexture } from './texture.mjs'
@@ -35,9 +34,57 @@ describe('obfuscated integers', () => {
     const r = new Reader(buffer, 0, MESH_KEY)
     expect([r.xint(), r.xint(), r.xint()]).toEqual([1, 0, 0xdeadbeef])
   })
+
+  it('rejects truncated reads and file-controlled allocations before consuming bytes', () => {
+    const r = new Reader(Buffer.alloc(3))
+    expect(() => r.u32()).toThrow(/out of range/)
+    expect(() => r.bytes(4)).toThrow(/out of range/)
+    expect(() => r.floats(0xffffffff)).toThrow(/out of range/)
+    expect(() => r.u16s(0xffffffff)).toThrow(/out of range/)
+    expect(() => r.floats(0.25)).toThrow(/invalid float count/)
+    expect(() => r.bytes(-1)).toThrow(/out of range/)
+    expect(r.o).toBe(0)
+  })
 })
 
 describe('parseMesh', () => {
+  it('reads asymmetric shader parameters in the order written by CMesh::Write_t_new', () => {
+    const buffer = meshFile({
+      ...TRIANGLE,
+      surfaces: [
+        {
+          first: 0,
+          indices: [0, 1, 2],
+          name: 'colored',
+          shader: 'Shaders\\Color.sha',
+          textures: ['diffuse'],
+          colors: [0xff112233, 0x80445566],
+          floats: [0.25, 2, -0.5],
+          texCoords: [0],
+          flags: 0x12,
+        },
+      ],
+    })
+    const mesh = parseMesh(buffer)
+    expect(mesh.end).toBe(buffer.length)
+    expect(mesh.lods[0].surfaces[0]).toMatchObject({
+      textures: ['diffuse'],
+      colors: [0xff112233, 0x80445566],
+      floats: [0.25, 2, -0.5],
+      texCoords: [0],
+      shaderFlags: 0x12,
+    })
+  })
+
+  it('rejects impossible counts and triangle references', () => {
+    const enormous = new Writer(MESH_KEY).id('MESH').u32(17).u32(0).xint(0xffffffff).toBuffer()
+    expect(() => parseMesh(enormous)).toThrow(/LOD count/)
+    const badIndex = meshFile({
+      ...TRIANGLE,
+      surfaces: [{ first: 0, indices: [0, 1, 3], name: 'bad' }],
+    })
+    expect(() => parseMesh(badIndex)).toThrow(/triangle index/)
+  })
   it('reads vertices, surfaces with absolute indices, shaders and weight maps', () => {
     const buffer = meshFile({
       positions: [...TRIANGLE.positions, 0, 0, 1],
@@ -159,6 +206,95 @@ describe('textures', () => {
     )
     expect(tex).toMatchObject({ width: 2, height: 2, format: 'RGB', alpha: false })
     expect([...tex.rgba.subarray(0, 8)]).toEqual([10, 20, 30, 255, 40, 50, 60, 255])
+  })
+
+  it('does not interpret FRMC inside raw pixels as a chunk header', () => {
+    const pixels = Buffer.concat([Buffer.from('FRMC'), Buffer.alloc(8, 90)])
+    const tex = parseTexture(
+      textureFile({ width: 2, height: 2 }, Buffer.concat([Buffer.from('FRMS'), pixels])),
+    )
+    expect(tex.format).toBe('RGB')
+    expect([...tex.rgba.subarray(0, 8)]).toEqual([70, 82, 77, 255, 67, 90, 90, 255])
+  })
+
+  it('distinguishes DXT3 explicit alpha from DXT5 interpolated alpha', () => {
+    const colors = [0x00, 0xf8, 0, 0, 0, 0, 0, 0]
+    const tex = parseTexture(
+      textureFile(
+        { width: 4, height: 4, flags: 5 },
+        frmcChunk([[0x10, 0x32, 0x54, 0x76, 0x98, 0xba, 0xdc, 0xfe, ...colors]]),
+      ),
+    )
+    expect(tex).toMatchObject({ format: 'DXT3', alpha: true })
+    expect([tex.rgba[3], tex.rgba[7], tex.rgba[11], tex.rgba[63]]).toEqual([0, 17, 34, 255])
+    const interpolated = parseTexture(
+      textureFile(
+        { width: 4, height: 4, flags: 37 },
+        frmcChunk([[255, 0, 0, 0, 0, 0, 0, 0, ...colors]]),
+      ),
+    )
+    expect(interpolated.format).toBe('DXT5')
+    expect(interpolated.rgba[3]).toBe(255)
+  })
+
+  it('reads plain v4 headers and both raw frames while returning the first', () => {
+    const file = new Writer()
+      .id('TVER')
+      .u32(4)
+      .id('TDAT')
+      .u32(1)
+      .u32(1)
+      .u32(1)
+      .u32(1)
+      .u32(0)
+      .u32(2)
+      .id('FRMS')
+      .bytes([1, 2, 3, 4, 5, 6, 7, 8])
+      .toBuffer()
+    expect(parseTexture(file)).toMatchObject({
+      width: 1,
+      height: 1,
+      frames: 2,
+      format: 'RGBA',
+      rgba: Uint8Array.from([1, 2, 3, 4]),
+    })
+    expect(() => parseTexture(file.subarray(0, file.length - 1))).toThrow(/out of range/)
+  })
+
+  it('decodes old v3 RGBA4444 and RGB5551 pixels after the longer TDAT header', () => {
+    const file = (flags, pixel) =>
+      new Writer()
+        .id('TVER')
+        .u32(3)
+        .id('TDAT')
+        .u32(flags)
+        .u32(1)
+        .u32(1)
+        .u32(1)
+        .u32(1)
+        .u32(0)
+        .u32(2)
+        .u32(1)
+        .id('FRMS')
+        .u16(pixel)
+        .toBuffer()
+    expect([...parseTexture(file(1, 0xf08a)).rgba]).toEqual([255, 0, 136, 170])
+    expect([...parseTexture(file(0, 0xf800)).rgba]).toEqual([255, 0, 0, 255])
+  })
+
+  it('rejects truncated or inconsistent compressed frames and invalid dimensions', () => {
+    const valid = textureFile({ width: 4, height: 4 }, frmcChunk([opaqueBlock]))
+    expect(() => parseTexture(valid.subarray(0, valid.length - 1))).toThrow(/out of range/)
+    const badMipSize = Buffer.from(valid)
+    badMipSize.writeUInt32LE(0xffffffff, 44)
+    expect(() => parseTexture(badMipSize)).toThrow(/invalid FRMC mip size/)
+    const badFrameSize = Buffer.from(valid)
+    badFrameSize.writeUInt32LE(0xffffffff, 40)
+    expect(() => parseTexture(badFrameSize)).toThrow(/out of range/)
+    expect(() =>
+      parseTexture(textureFile({ width: 0xffffffff, height: 4 }, frmcChunk([opaqueBlock]))),
+    ).toThrow(/invalid texture dimensions/)
+    expect(() => decodeDxt(new Uint8Array(7), 4, 4, false)).toThrow(/DXT block data length/)
   })
 })
 
@@ -433,49 +569,6 @@ describe('buildModel', () => {
     expect(Array.from(primitive.getAttribute('JOINTS_0').getElement(0, []))).toEqual([2, 0, 0, 0])
     expect(primitive.getMaterial().getBaseColorTexture().getMimeType()).toBe('image/webp')
     expect(root.listExtensionsUsed().map((e) => e.extensionName)).toContain('EXT_texture_webp')
-  })
-})
-
-describe('parseSkillAnims', () => {
-  /** A skills.lod-like record: the skill id `head` bytes before its first length-prefixed clip name. */
-  const record = (id, head, names) => {
-    const clips = Buffer.concat(
-      names.map((name) => {
-        const length = Buffer.alloc(4)
-        length.writeUInt32LE(name.length)
-        return Buffer.concat([length, Buffer.from(name, 'latin1')])
-      }),
-    )
-    const before = Buffer.alloc(head)
-    before.writeUInt32LE(id, 0)
-    return Buffer.concat([before, clips, Buffer.alloc(40)])
-  }
-  const prefixes = { knight: 'ni', mage: 'hw' }
-
-  it('reads one clip, or the three phases of a spell, skipping the alternative set', () => {
-    const buffer = Buffer.concat([
-      record(14, 102, ['ni_skill_01', 'ni_a_skill_01']),
-      record(31, 90, ['hw_skill_02_1', 'hw_skill_02_2', 'hw_a_skill_02', 'hw_skill_02_3']),
-    ])
-    const anims = parseSkillAnims(
-      buffer,
-      [
-        { id: 14, classId: 'knight' },
-        { id: 31, classId: 'mage' },
-      ],
-      prefixes,
-    )
-    expect(anims.get(14)).toEqual({ fire: 'ni_skill_01' })
-    expect(anims.get(31)).toEqual({
-      ready: 'hw_skill_02_1',
-      still: 'hw_skill_02_2',
-      fire: 'hw_skill_02_3',
-    })
-  })
-
-  it("takes a clip only for a skill of the clip's class", () => {
-    const buffer = record(14, 102, ['hw_skill_01'])
-    expect(parseSkillAnims(buffer, [{ id: 14, classId: 'knight' }], prefixes).size).toBe(0)
   })
 })
 

@@ -1,0 +1,1747 @@
+{
+  "sourceArchive": {
+    "driveId": "1jclE99G1GscMocwveuw7oavgyUj-P2tk",
+    "sha256": "a8372e0ce360713d50ac2368400434d3e82e4d0f36f859f71e62c9bdcac6cc69"
+  },
+  "baselineCommit": "c9944c92cacfc50595dbfc8bbd085b64cf5e4048",
+  "models": [
+    {
+      "id": "class-knight",
+      "reason": "canonical-animation-set"
+    },
+    {
+      "id": "class-titan",
+      "reason": "canonical-animation-set",
+      "allowedMissing": ["animation ti_skill_10"]
+    },
+    {
+      "id": "class-healer",
+      "reason": "canonical-animation-set"
+    },
+    {
+      "id": "class-mage",
+      "reason": "canonical-animation-set"
+    },
+    {
+      "id": "class-rogue",
+      "reason": "canonical-animation-set"
+    },
+    {
+      "id": "class-sorcerer",
+      "reason": "canonical-animation-set"
+    },
+    {
+      "id": "wyvern",
+      "source": "Data\\monster\\Wyvern\\Wyvern.smc",
+      "reason": "missing-or-stand-in-monster"
+    },
+    {
+      "id": "cused_wever",
+      "source": "Data\\Monster\\cusedwever\\cused_wever.smc",
+      "reason": "missing-or-stand-in-monster"
+    },
+    {
+      "id": "cusedrich",
+      "source": "Data\\Monster\\CusedRich\\cusedrich.smc",
+      "reason": "missing-or-stand-in-monster"
+    },
+    {
+      "id": "gear/ti_bu_014",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bu_014.smc",
+      "itemIds": [1148],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_ja_bd_001",
+      "source": "Data\\Item\\Shield\\Titan\\ti_ja_bd_001.smc",
+      "itemIds": [1230],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_ja_bu_001",
+      "source": "Data\\Item\\Shield\\Titan\\ti_ja_bu_001.smc",
+      "itemIds": [1229],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_bd_014",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bd_014.smc",
+      "itemIds": [1150],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_hn_014",
+      "source": "Data\\Item\\Shield\\Titan\\ti_hn_014.smc",
+      "itemIds": [1151],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_ft_014",
+      "source": "Data\\Item\\Shield\\Titan\\ti_ft_014.smc",
+      "itemIds": [1152],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bu_014",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bu_014.smc",
+      "itemIds": [1154],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bd_014",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bd_014.smc",
+      "itemIds": [1155],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_hn_014",
+      "source": "Data\\Item\\Shield\\Knight\\ni_hn_014.smc",
+      "itemIds": [1156],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_ft_014",
+      "source": "Data\\Item\\Shield\\Knight\\ni_ft_014.smc",
+      "itemIds": [1157],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bu_014",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bu_014.smc",
+      "itemIds": [1158],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bd_014",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bd_014.smc",
+      "itemIds": [1159],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_hn_014",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hn_014.smc",
+      "itemIds": [1160],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_ft_014",
+      "source": "Data\\Item\\Shield\\Healer\\hw_ft_014.smc",
+      "itemIds": [1161],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_bu_014",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bu_014.smc",
+      "itemIds": [1163],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_bd_014",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bd_014.smc",
+      "itemIds": [1164],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_hn_014",
+      "source": "Data\\Item\\Shield\\Mage\\ma_hn_014.smc",
+      "itemIds": [1165],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_ft_014",
+      "source": "Data\\Item\\Shield\\Mage\\ma_ft_014.smc",
+      "itemIds": [1166],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_bu_014",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bu_014.smc",
+      "itemIds": [1168],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_bd_014",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bd_014.smc",
+      "itemIds": [1169],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_hn_014",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_hn_014.smc",
+      "itemIds": [1170],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_ft_014",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_ft_014.smc",
+      "itemIds": [1171],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_ja_hn_001",
+      "source": "Data\\Item\\Shield\\Titan\\ti_ja_hn_001.smc",
+      "itemIds": [1231],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_ja_bu_001",
+      "source": "Data\\Item\\Shield\\Knight\\ni_ja_bu_001.smc",
+      "itemIds": [1234],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_ja_bd_001",
+      "source": "Data\\Item\\Shield\\Knight\\ni_ja_bd_001.smc",
+      "itemIds": [1235],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_ja_hn_001",
+      "source": "Data\\Item\\Shield\\Knight\\ni_ja_hn_001.smc",
+      "itemIds": [1236],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_ja_bu_001",
+      "source": "Data\\Item\\Shield\\Healer\\hw_ja_bu_001.smc",
+      "itemIds": [1240],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_ja_bd_001",
+      "source": "Data\\Item\\Shield\\Healer\\hw_ja_bd_001.smc",
+      "itemIds": [1241],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_ja_hn_001",
+      "source": "Data\\Item\\Shield\\Healer\\hw_ja_hn_001.smc",
+      "itemIds": [1242],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_ja_ft_001",
+      "source": "Data\\Item\\Shield\\Healer\\hw_ja_ft_001.smc",
+      "itemIds": [1243],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_ja_bu_001",
+      "source": "Data\\Item\\Shield\\mage\\ma_ja_bu_001.smc",
+      "itemIds": [1245],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_ja_bd_001",
+      "source": "Data\\Item\\shield\\mage\\ma_ja_bd_001.smc",
+      "itemIds": [1246],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_ja_hn_001",
+      "source": "Data\\Item\\shield\\mage\\ma_ja_hn_001.smc",
+      "itemIds": [1247],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_ja_bu_001",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_ja_bu_001.smc",
+      "itemIds": [1250],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_ja_bd_001",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_ja_bd_001.smc",
+      "itemIds": [1251],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_ja_hn_001",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_ja_hn_001.smc",
+      "itemIds": [1252],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_staff_015",
+      "source": "Data\\Item\\Weapon\\ma_staff_015.smc",
+      "itemIds": [1337],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_sword_015",
+      "source": "Data\\Item\\Weapon\\ni_sword_015.smc",
+      "itemIds": [1331],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_dsword_015",
+      "source": "Data\\Item\\Weapon\\ni_dsword_015.smc",
+      "itemIds": [1332],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_gsword_015",
+      "source": "Data\\Item\\Weapon\\ti_gsword_015.smc",
+      "itemIds": [1333],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_axe_015",
+      "source": "Data\\Item\\Weapon\\ti_axe_015.smc",
+      "itemIds": [1334],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bow_015",
+      "source": "Data\\Item\\Weapon\\hw_bow_015.smc",
+      "itemIds": [1335],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_staff_015",
+      "source": "Data\\Item\\Weapon\\hw_staff_015.smc",
+      "itemIds": [1336],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_wand_015",
+      "source": "Data\\Item\\Weapon\\ma_wand_015.smc",
+      "itemIds": [1338],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_dagger_015",
+      "source": "Data\\Item\\Weapon\\ro_dagger_015.smc",
+      "itemIds": [1339],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_crossbow_015",
+      "source": "Data\\Item\\Weapon\\ro_crossbow_015.smc",
+      "itemIds": [1340],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_scythe_015",
+      "source": "Data\\Item\\Weapon\\so_scythe_015.smc",
+      "itemIds": [1341],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_staff_015",
+      "source": "Data\\Item\\Weapon\\so_staff_015.smc",
+      "itemIds": [1342],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bu_013",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bu_013.smc",
+      "itemIds": [1343],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bd_013",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bd_013.smc",
+      "itemIds": [1344],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_hn_013",
+      "source": "Data\\Item\\Shield\\Knight\\ni_hn_013.smc",
+      "itemIds": [1345],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_ft_013",
+      "source": "Data\\Item\\Shield\\Knight\\ni_ft_013.smc",
+      "itemIds": [1346],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_shield_015",
+      "source": "Data\\Item\\Shield\\Knight\\ni_shield_015.smc",
+      "itemIds": [1348],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_bu_013",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bu_013.smc",
+      "itemIds": [1349],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_bd_013",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bd_013.smc",
+      "itemIds": [1350],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_hn_013",
+      "source": "Data\\Item\\Shield\\Titan\\ti_hn_013.smc",
+      "itemIds": [1351],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_ft_013",
+      "source": "Data\\Item\\Shield\\Titan\\ti_ft_013.smc",
+      "itemIds": [1352],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bu_013",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bu_013.smc",
+      "itemIds": [1354],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bd_013",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bd_013.smc",
+      "itemIds": [1355],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_hn_013",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hn_013.smc",
+      "itemIds": [1356],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_ft_013",
+      "source": "Data\\Item\\Shield\\Healer\\hw_ft_013.smc",
+      "itemIds": [1357],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_bu_013",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bu_013.smc",
+      "itemIds": [1359],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_bd_013",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bd_013.smc",
+      "itemIds": [1360],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_hn_013",
+      "source": "Data\\Item\\Shield\\Mage\\ma_hn_013.smc",
+      "itemIds": [1361],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_ft_013",
+      "source": "Data\\Item\\Shield\\Mage\\ma_ft_013.smc",
+      "itemIds": [1362],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_bu_013",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bu_013.smc",
+      "itemIds": [1364],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_bd_013",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bd_013.smc",
+      "itemIds": [1365],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_hn_013",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_hn_013.smc",
+      "itemIds": [1366],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_ft_013",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_ft_013.smc",
+      "itemIds": [1367],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_bu_013",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bu_013.smc",
+      "itemIds": [1374],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_bd_013",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bd_013.smc",
+      "itemIds": [1375],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_hn_013",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_hn_013.smc",
+      "itemIds": [1376],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_ft_013",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_ft_013.smc",
+      "itemIds": [1377],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_bu_014",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bu_014.smc",
+      "itemIds": [1379],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_bd_014",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bd_014.smc",
+      "itemIds": [1380],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_hn_014",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_hn_014.smc",
+      "itemIds": [1381],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_ft_014",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_ft_014.smc",
+      "itemIds": [1382],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bu_015",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bu_015.smc",
+      "itemIds": [1541],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bd_015",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bd_015.smc",
+      "itemIds": [1542],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_hn_015",
+      "source": "Data\\Item\\Shield\\Knight\\ni_hn_015.smc",
+      "itemIds": [1543],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_ft_015",
+      "source": "Data\\Item\\Shield\\Knight\\ni_ft_015.smc",
+      "itemIds": [1544],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_bu_015",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bu_015.smc",
+      "itemIds": [1546],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_bd_015",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bd_015.smc",
+      "itemIds": [1547],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_hn_015",
+      "source": "Data\\Item\\Shield\\Titan\\ti_hn_015.smc",
+      "itemIds": [1548],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_ft_015",
+      "source": "Data\\Item\\Shield\\Titan\\ti_ft_015.smc",
+      "itemIds": [1549],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bu_015",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bu_015.smc",
+      "itemIds": [1551],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bd_015",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bd_015.smc",
+      "itemIds": [1552],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_hn_015",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hn_015.smc",
+      "itemIds": [1553],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_ft_015",
+      "source": "Data\\Item\\Shield\\Healer\\hw_ft_015.smc",
+      "itemIds": [1554],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_bu_015",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bu_015.smc",
+      "itemIds": [1556],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_bd_015",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bd_015.smc",
+      "itemIds": [1557],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_hn_015",
+      "source": "Data\\Item\\Shield\\Mage\\ma_hn_015.smc",
+      "itemIds": [1558],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_ft_015",
+      "source": "Data\\Item\\Shield\\Mage\\ma_ft_015.smc",
+      "itemIds": [1559],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_bu_015",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bu_015.smc",
+      "itemIds": [1561],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_bd_015",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bd_015.smc",
+      "itemIds": [1562],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_hn_015",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_hn_015.smc",
+      "itemIds": [1563],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_ft_015",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_ft_015.smc",
+      "itemIds": [1564],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_bu_015",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bu_015.smc",
+      "itemIds": [1566],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_bd_015",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bd_015.smc",
+      "itemIds": [1567],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_hn_015",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_hn_015.smc",
+      "itemIds": [1568],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_ft_015",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_ft_015.smc",
+      "itemIds": [1569],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_sword_017",
+      "source": "Data\\Item\\Weapon\\ni_sword_017.smc",
+      "itemIds": [1614],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/ni_dsword_017",
+      "source": "Data\\Item\\Weapon\\ni_dsword_017.smc",
+      "itemIds": [1615],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/ti_gsword_017",
+      "source": "Data\\Item\\Weapon\\ti_gsword_017.smc",
+      "itemIds": [1616],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/ti_axe_017",
+      "source": "Data\\Item\\Weapon\\ti_axe_017.smc",
+      "itemIds": [1617],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/hw_bow_017",
+      "source": "Data\\Item\\Weapon\\hw_bow_017.smc",
+      "itemIds": [1618],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/hw_staff_017",
+      "source": "Data\\Item\\Weapon\\hw_staff_017.smc",
+      "itemIds": [1619],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/ma_staff_017",
+      "source": "Data\\Item\\Weapon\\ma_staff_017.smc",
+      "itemIds": [1620],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/ma_wand_017",
+      "source": "Data\\Item\\Weapon\\ma_wand_017.smc",
+      "itemIds": [1621],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/ro_dagger_017",
+      "source": "Data\\Item\\Weapon\\ro_dagger_017.smc",
+      "itemIds": [1622],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/so_scythe_017",
+      "source": "Data\\Item\\Weapon\\so_scythe_017.smc",
+      "itemIds": [1623],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/so_staff_017",
+      "source": "Data\\Item\\Weapon\\so_staff_017.smc",
+      "itemIds": [1624],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/ro_crossbow_017",
+      "source": "Data\\Item\\Weapon\\ro_crossbow_017.smc",
+      "itemIds": [1625],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/ni_shield_017",
+      "source": "Data\\Item\\Shield\\Knight\\ni_shield_017.smc",
+      "itemIds": [1631],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/ni_sword_018",
+      "source": "Data\\Item\\Weapon\\ni_sword_018.smc",
+      "itemIds": [1845, 1888, 1900],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_staff_018",
+      "source": "Data\\Item\\Weapon\\hw_staff_018.smc",
+      "itemIds": [1850, 1893, 1905],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_wand_018",
+      "source": "Data\\Item\\Weapon\\ma_wand_018.smc",
+      "itemIds": [1852, 1895, 1907],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_crossbow_018",
+      "source": "Data\\Item\\Weapon\\ro_crossbow_018.smc",
+      "itemIds": [1854, 1897, 1909],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_staff_018",
+      "source": "Data\\Item\\Weapon\\so_staff_018.smc",
+      "itemIds": [1856, 1899, 1911],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_bu_016",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bu_016.smc",
+      "itemIds": [1858, 1914, 1945],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_bd_016",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bd_016.smc",
+      "itemIds": [1859, 1915, 1946],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_hn_016",
+      "source": "Data\\Item\\Shield\\Titan\\ti_hn_016.smc",
+      "itemIds": [1860, 1916, 1947],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_ft_016",
+      "source": "Data\\Item\\Shield\\Titan\\ti_ft_016.smc",
+      "itemIds": [1861, 1917, 1948],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bu_016",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bu_016.smc",
+      "itemIds": [1863, 1919, 1950],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bd_016",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bd_016.smc",
+      "itemIds": [1864, 1920, 1951],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_hn_016",
+      "source": "Data\\Item\\Shield\\Knight\\ni_hn_016.smc",
+      "itemIds": [1865, 1921, 1952],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_ft_016",
+      "source": "Data\\Item\\Shield\\Knight\\ni_ft_016.smc",
+      "itemIds": [1866, 1922, 1953],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_shield_018",
+      "source": "Data\\Item\\Shield\\Knight\\ni_shield_018.smc",
+      "itemIds": [1867, 1923, 1954],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bu_016",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bu_016.smc",
+      "itemIds": [1869, 1925, 1956],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bd_016",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bd_016.smc",
+      "itemIds": [1870, 1926, 1957],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_hn_016",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hn_016.smc",
+      "itemIds": [1871, 1927, 1958],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_ft_016",
+      "source": "Data\\Item\\Shield\\Healer\\hw_ft_016.smc",
+      "itemIds": [1872, 1928, 1959],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_bu_016",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bu_016.smc",
+      "itemIds": [1874, 1930, 1961],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_bd_016",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bd_016.smc",
+      "itemIds": [1875, 1931, 1962],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_hn_016",
+      "source": "Data\\Item\\Shield\\Mage\\ma_hn_016.smc",
+      "itemIds": [1876, 1932, 1963],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_ft_016",
+      "source": "Data\\Item\\Shield\\Mage\\ma_ft_016.smc",
+      "itemIds": [1877, 1933, 1964],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_bu_016",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bu_016.smc",
+      "itemIds": [1879, 1935, 1966],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_bd_016",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bd_016.smc",
+      "itemIds": [1880, 1936, 1967],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_hn_016",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_hn_016.smc",
+      "itemIds": [1881, 1937, 1968],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_ft_016",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_ft_016.smc",
+      "itemIds": [1882, 1938, 1969],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_bu_016",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bu_016.smc",
+      "itemIds": [1884, 1940, 1971],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_bd_016",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bd_016.smc",
+      "itemIds": [1885, 1941, 1972],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_hn_016",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_hn_016.smc",
+      "itemIds": [1886, 1942, 1973],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_ft_016",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_ft_016.smc",
+      "itemIds": [1887, 1943, 1974],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_dsword_018",
+      "source": "Data\\Item\\Weapon\\ni_dsword_018.smc",
+      "itemIds": [1889, 1901],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_axe_018",
+      "source": "Data\\Item\\Weapon\\ti_axe_018.smc",
+      "itemIds": [1891, 1903],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bow_018",
+      "source": "Data\\Item\\Weapon\\hw_bow_018.smc",
+      "itemIds": [1892, 1904],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_staff_018",
+      "source": "Data\\Item\\Weapon\\ma_staff_018.smc",
+      "itemIds": [1894, 1906],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_dagger_018",
+      "source": "Data\\Item\\Weapon\\ro_dagger_018.smc",
+      "itemIds": [1896, 1908],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_sword_019",
+      "source": "Data\\Item\\Weapon\\ni_sword_019.smc",
+      "itemIds": [2501],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_gsword_019",
+      "source": "Data\\Item\\Weapon\\ti_gsword_019.smc",
+      "itemIds": [2503],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_staff_019",
+      "source": "Data\\Item\\Weapon\\hw_staff_019.smc",
+      "itemIds": [2506],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_wand_019",
+      "source": "Data\\Item\\Weapon\\ma_wand_019.smc",
+      "itemIds": [2508],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_crossbow_019",
+      "source": "Data\\Item\\Weapon\\ro_crossbow_019.smc",
+      "itemIds": [2510],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_staff_019",
+      "source": "Data\\Item\\Weapon\\so_staff_019.smc",
+      "itemIds": [2512],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_bu_017",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bu_017.smc",
+      "itemIds": [2514],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_bd_017",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bd_017.smc",
+      "itemIds": [2515],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_hn_017",
+      "source": "Data\\Item\\Shield\\Titan\\ti_hn_017.smc",
+      "itemIds": [2516],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_ft_017",
+      "source": "Data\\Item\\Shield\\Titan\\ti_ft_017.smc",
+      "itemIds": [2517],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bu_017",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bu_017.smc",
+      "itemIds": [2519],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bd_017",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bd_017.smc",
+      "itemIds": [2520],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_hn_017",
+      "source": "Data\\Item\\Shield\\Knight\\ni_hn_017.smc",
+      "itemIds": [2521],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_ft_017",
+      "source": "Data\\Item\\Shield\\Knight\\ni_ft_017.smc",
+      "itemIds": [2522],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_shield_019",
+      "source": "Data\\Item\\Shield\\Knight\\ni_shield_019.smc",
+      "itemIds": [2523],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/hw_bu_017",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bu_017.smc",
+      "itemIds": [2525],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bd_017",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bd_017.smc",
+      "itemIds": [2526],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_hn_017",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hn_017.smc",
+      "itemIds": [2527],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_ft_017",
+      "source": "Data\\Item\\Shield\\Healer\\hw_ft_017.smc",
+      "itemIds": [2528],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_bu_017",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bu_017.smc",
+      "itemIds": [2530],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/ma_bd_017",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bd_017.smc",
+      "itemIds": [2531],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_hn_017",
+      "source": "Data\\Item\\Shield\\Mage\\ma_hn_017.smc",
+      "itemIds": [2532],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_ft_017",
+      "source": "Data\\Item\\Shield\\Mage\\ma_ft_017.smc",
+      "itemIds": [2533],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_bu_017",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bu_017.smc",
+      "itemIds": [2535],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/ro_bd_017",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bd_017.smc",
+      "itemIds": [2536],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_hn_017",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_hn_017.smc",
+      "itemIds": [2537],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_ft_017",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_ft_017.smc",
+      "itemIds": [2538],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/so_bu_017",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bu_017.smc",
+      "itemIds": [2540],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/so_bd_017",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bd_017.smc",
+      "itemIds": [2541],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_hn_017",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_hn_017.smc",
+      "itemIds": [2542],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_ft_017",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_ft_017.smc",
+      "itemIds": [2543],
+      "reason": "stand-in"
+    },
+    {
+      "id": "gear/so_ja_bu_001",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_ja_bu_001.smc",
+      "itemIds": [2643],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_ja_bd_001",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_ja_bd_001.smc",
+      "itemIds": [2644],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_ja_hn_001",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_ja_hn_001.smc",
+      "itemIds": [2645],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_ja_ft_001",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_ja_ft_001.smc",
+      "itemIds": [2646],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_sword_020",
+      "source": "Data\\Item\\Weapon\\ni_sword_020.smc",
+      "itemIds": [3018],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_gsowrd_020",
+      "source": "Data\\Item\\Weapon\\ti_gsowrd_020.smc",
+      "itemIds": [3020],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_staff_020",
+      "source": "Data\\Item\\Weapon\\hw_staff_020.smc",
+      "itemIds": [3023],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_wand_020",
+      "source": "Data\\Item\\Weapon\\ma_wand_020.smc",
+      "itemIds": [3025],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_crossbow_020",
+      "source": "Data\\Item\\Weapon\\ro_crossbow_020.smc",
+      "itemIds": [3027],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_staff_020",
+      "source": "Data\\Item\\Weapon\\so_staff_020.smc",
+      "itemIds": [3029],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_hel_018",
+      "source": "Data\\Item\\Shield\\Titan\\ti_hel_018.smc",
+      "itemIds": [3030],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_bu_018",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bu_018.smc",
+      "itemIds": [3031],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_bd_018",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bd_018.smc",
+      "itemIds": [3032],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_hn_018",
+      "source": "Data\\Item\\Shield\\Titan\\ti_hn_018.smc",
+      "itemIds": [3033],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_ft_018",
+      "source": "Data\\Item\\Shield\\Titan\\ti_ft_018.smc",
+      "itemIds": [3034],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_hel_018",
+      "source": "Data\\Item\\Shield\\Knight\\ni_hel_018.smc",
+      "itemIds": [3035],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bu_018",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bu_018.smc",
+      "itemIds": [3036],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bd_018",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bd_018.smc",
+      "itemIds": [3037],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_hn_018",
+      "source": "Data\\Item\\Shield\\Knight\\ni_hn_018.smc",
+      "itemIds": [3038],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_ft_018",
+      "source": "Data\\Item\\Shield\\Knight\\ni_ft_018.smc",
+      "itemIds": [3039],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_shield_020",
+      "source": "Data\\Item\\Shield\\Knight\\ni_shield_020.smc",
+      "itemIds": [3040],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_hel_018",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hel_018.smc",
+      "itemIds": [3041],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bu_018",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bu_018.smc",
+      "itemIds": [3042],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bd_018",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bd_018.smc",
+      "itemIds": [3043],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_hn_018",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hn_018.smc",
+      "itemIds": [3044],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_ft_018",
+      "source": "Data\\Item\\Shield\\Healer\\hw_ft_018.smc",
+      "itemIds": [3045],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_hel_018",
+      "source": "Data\\Item\\Shield\\Mage\\ma_hel_018.smc",
+      "itemIds": [3046],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_bu_018",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bu_018.smc",
+      "itemIds": [3047],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_bd_018",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bd_018.smc",
+      "itemIds": [3048],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_hn_018",
+      "source": "Data\\Item\\Shield\\Mage\\ma_hn_018.smc",
+      "itemIds": [3049],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_ft_018",
+      "source": "Data\\Item\\Shield\\Mage\\ma_ft_018.smc",
+      "itemIds": [3050],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_hel_018",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_hel_018.smc",
+      "itemIds": [3051],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_bu_018",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bu_018.smc",
+      "itemIds": [3052],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_bd_018",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bd_018.smc",
+      "itemIds": [3053],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_hn_018",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_hn_018.smc",
+      "itemIds": [3054],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_ft_018",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_ft_018.smc",
+      "itemIds": [3055],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_hel_018",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_hel_018.smc",
+      "itemIds": [3056],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_bu_018",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bu_018.smc",
+      "itemIds": [3057],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_bd_018",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bd_018.smc",
+      "itemIds": [3058],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_hn_018",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_hn_018.smc",
+      "itemIds": [3059],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_ft_018",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_ft_018.smc",
+      "itemIds": [3060],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_sword_021",
+      "source": "Data\\Item\\Weapon\\ni_sword_021.smc",
+      "itemIds": [3314, 3357],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_dsword_021",
+      "source": "Data\\Item\\Weapon\\ni_dsword_021.smc",
+      "itemIds": [3315, 3358],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_gsowrd_021",
+      "source": "Data\\Item\\Weapon\\ti_gsowrd_021.smc",
+      "itemIds": [3316, 3359],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_axe_021",
+      "source": "Data\\Item\\Weapon\\ti_axe_021.smc",
+      "itemIds": [3317, 3360],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bow_021",
+      "source": "Data\\Item\\Weapon\\hw_bow_021.smc",
+      "itemIds": [3318, 3361],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_staff_021",
+      "source": "Data\\Item\\Weapon\\hw_staff_021.smc",
+      "itemIds": [3319, 3362],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_staff_021",
+      "source": "Data\\Item\\Weapon\\ma_staff_021.smc",
+      "itemIds": [3320, 3363],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_wand_021",
+      "source": "Data\\Item\\Weapon\\ma_wand_021.smc",
+      "itemIds": [3321, 3364],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_dagger_021",
+      "source": "Data\\Item\\Weapon\\ro_dagger_021.smc",
+      "itemIds": [3322, 3365],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_crossbow_021",
+      "source": "Data\\Item\\Weapon\\ro_crossbow_021.smc",
+      "itemIds": [3323, 3366],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_scythe_021",
+      "source": "Data\\Item\\Weapon\\so_scythe_021.smc",
+      "itemIds": [3324, 3367],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_staff_021",
+      "source": "Data\\Item\\Weapon\\so_staff_021.smc",
+      "itemIds": [3325, 3368],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_hel_019",
+      "source": "Data\\Item\\Shield\\Titan\\ti_hel_019.smc",
+      "itemIds": [3326, 3369],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_bu_019",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bu_019.smc",
+      "itemIds": [3327, 3370],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_bd_019",
+      "source": "Data\\Item\\Shield\\Titan\\ti_bd_019.smc",
+      "itemIds": [3328, 3371],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_hn_019",
+      "source": "Data\\Item\\Shield\\Titan\\ti_hn_019.smc",
+      "itemIds": [3329, 3372],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_ft_019",
+      "source": "Data\\Item\\Shield\\Titan\\ti_ft_019.smc",
+      "itemIds": [3330, 3373],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_hel_019",
+      "source": "Data\\Item\\Shield\\Knight\\ni_hel_019.smc",
+      "itemIds": [3331, 3374],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bu_019",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bu_019.smc",
+      "itemIds": [3332, 3375],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_bd_019",
+      "source": "Data\\Item\\Shield\\Knight\\ni_bd_019.smc",
+      "itemIds": [3333, 3376],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_hn_019",
+      "source": "Data\\Item\\Shield\\Knight\\ni_hn_019.smc",
+      "itemIds": [3334, 3377],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_ft_019",
+      "source": "Data\\Item\\Shield\\Knight\\ni_ft_019.smc",
+      "itemIds": [3335, 3378],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_shield_021",
+      "source": "Data\\Item\\Shield\\Knight\\ni_shield_021.smc",
+      "itemIds": [3336, 3379],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_hel_019",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hel_019.smc",
+      "itemIds": [3337, 3380],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bu_019",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bu_019.smc",
+      "itemIds": [3338, 3381],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_bd_019",
+      "source": "Data\\Item\\Shield\\Healer\\hw_bd_019.smc",
+      "itemIds": [3339, 3382],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_hn_019",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hn_019.smc",
+      "itemIds": [3340, 3383],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_ft_019",
+      "source": "Data\\Item\\Shield\\Healer\\hw_ft_019.smc",
+      "itemIds": [3341, 3384],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_hel_019",
+      "source": "Data\\Item\\Shield\\Mage\\ma_hel_019.smc",
+      "itemIds": [3342, 3385],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_bu_019",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bu_019.smc",
+      "itemIds": [3343, 3386],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_bd_019",
+      "source": "Data\\Item\\Shield\\Mage\\ma_bd_019.smc",
+      "itemIds": [3344, 3387],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_hn_019",
+      "source": "Data\\Item\\Shield\\Mage\\ma_hn_019.smc",
+      "itemIds": [3345, 3388],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_ft_019",
+      "source": "Data\\Item\\Shield\\Mage\\ma_ft_019.smc",
+      "itemIds": [3346, 3389],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_hel_019",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_hel_019.smc",
+      "itemIds": [3347, 3390],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_bu_019",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bu_019.smc",
+      "itemIds": [3348, 3391],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_bd_019",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_bd_019.smc",
+      "itemIds": [3349, 3392],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_hn_019",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_hn_019.smc",
+      "itemIds": [3350, 3393],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ro_ft_019",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_ft_019.smc",
+      "itemIds": [3351, 3394],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_hel_019",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_hel_019.smc",
+      "itemIds": [3352, 3395],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_bu_019",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bu_019.smc",
+      "itemIds": [3353, 3396],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_bd_019",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_bd_019.smc",
+      "itemIds": [3354, 3397],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_hn_019",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_hn_019.smc",
+      "itemIds": [3355, 3398],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_ft_019",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_ft_019.smc",
+      "itemIds": [3356, 3399],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_hel_019-1",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hel_019-1.smc",
+      "itemIds": [3423, 3466, 3509],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_hel_019-1",
+      "source": "Data\\Item\\Shield\\Mage\\ma_hel_019-1.smc",
+      "itemIds": [3428, 3471, 3514],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_hel_019-1",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_hel_019-1.smc",
+      "itemIds": [3438, 3481, 3524],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_hel_021",
+      "source": "Data\\Item\\Shield\\Knight\\ni_hel_021.smc",
+      "itemIds": [4007, 4019],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_hel_021",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hel_021.smc",
+      "itemIds": [4025],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_hel_021",
+      "source": "Data\\Item\\Shield\\Mage\\ma_hel_021.smc",
+      "itemIds": [4040],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_hel_021",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_hel_021.smc",
+      "itemIds": [4070],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ni_hel_021-1",
+      "source": "Data\\Item\\Shield\\Knight\\ni_hel_021-1.smc",
+      "itemIds": [4117],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/hw_hel_021-1",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hel_021-1.smc",
+      "itemIds": [4139],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ma_hel_021-1",
+      "source": "Data\\Item\\Shield\\Mage\\ma_hel_021-1.smc",
+      "itemIds": [4159],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_hel_021-1",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_hel_021-1.smc",
+      "itemIds": [4199],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/ti_hn_017-1",
+      "source": "Data\\Item\\Shield\\Titan\\ti_hn_017-1.smc",
+      "itemIds": [5979],
+      "reason": "missing"
+    },
+    {
+      "id": "gear/ni_hn_017-1",
+      "source": "Data\\Item\\Shield\\Knight\\ni_hn_017-1.smc",
+      "itemIds": [5986],
+      "reason": "missing"
+    },
+    {
+      "id": "gear/hw_hn_017-1",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hn_017-1.smc",
+      "itemIds": [5994],
+      "reason": "missing"
+    },
+    {
+      "id": "gear/ma_hn_017-1",
+      "source": "Data\\Item\\shield\\mage\\ma_hn_017-1.smc",
+      "itemIds": [6001],
+      "reason": "missing"
+    },
+    {
+      "id": "gear/ro_hn_017-1",
+      "source": "Data\\Item\\Shield\\Rogue\\ro_hn_017-1.smc",
+      "itemIds": [6008],
+      "reason": "missing"
+    },
+    {
+      "id": "gear/so_hn_017-1",
+      "source": "Data\\Item\\Shield\\Sorcerer\\so_hn_017-1.smc",
+      "itemIds": [6015],
+      "reason": "missing"
+    },
+    {
+      "id": "gear/hw_hm_oubli",
+      "source": "Data\\Item\\Shield\\Healer\\hw_hm_oubli.smc",
+      "itemIds": [7082],
+      "reason": "texture"
+    },
+    {
+      "id": "gear/so_cos_dessert_hm",
+      "source": "Data\\item\\Shield\\sorcerer\\So_cos_dessert_hm.smc",
+      "itemIds": [10108, 10191],
+      "reason": "texture"
+    }
+  ]
+}

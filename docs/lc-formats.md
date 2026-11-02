@@ -1,10 +1,12 @@
 # Formaty plików klienta LC (2015)
 
-Klient LC jest zbudowany na **Serious Engine 1** (system modeli SKA). LC zmodyfikował część formatów
-i zaszyfrował w nich liczby całkowite. Wszystko poniżej zostało ustalone na plikach z klienta 2015
-i zweryfikowane: **76/76 siatek** czyta się co do bajta do końca pliku, **184/184 tekstur** dekoduje się
-poprawnie, szkielety i animacje czytają się w całości. Konwerter: `npm run convert-lc` (`scripts/lc/`,
-Node); prototyp w Pythonie w `tools/lc/` daje te same wyniki.
+Klient LC używa systemu modeli SKA z Serious Engine. Opis zweryfikowano teraz z serializerami
+oryginalnego klienta z listopada 2018 oraz pełnym jawnym archiwum 2015. Skan odczytał do EOF
+**12 493 siatki MESH17** i poprawnie zdekodował **11 798 tekstur** (w tym 3366 DXT3).
+Pozostało 122 siatki starszych wersji 11/16 i 16 proceduralnych tekstur FXDT, których konwerter
+jawnie nie obsługuje. Wcześniejsza próbka 76 siatek nie wykryła pomylonej kolejności materiałów.
+Konwerter produkcyjny: `scripts/lc/`; stary prototyp Python w `tools/lc/` nie stanowi specyfikacji.
+Pochodzenie, hashe i granice zgodności: [audyt źródeł](source-audit/README.md).
 
 Liczby całkowite są w little-endian. `string` = `u32 długość` + bajty (bez zera na końcu).
 
@@ -43,10 +45,10 @@ dla każdego LOD:
     xint paletteCount, u8[paletteCount] bonePalette     (paleta kości do skinningu GPU)
     xint hasShader
     jeśli hasShader:
-      xint ctTexCoords, xint ctColors, xint ctTextures, xint ctFloats
+      xint ctColors, xint ctFloats, xint ctTextures, xint ctTexCoords
       string shader ("Shaders\Default.sha", "Shaders\NormalMap.sha", "Shaders\Color.sha", …)
       string[ctTextures] textures     (nazwy kluczy z .smc; dla NormalMap: [diffuse, normal])
-      xint[ctTexCoords]   xint[ctColors] (RGBA)   float[ctFloats]   xint flags
+      xint shaderFlags   xint[ctColors] (RGBA)   float[ctFloats]   xint[ctTexCoords] (indeksy UV od 0)
   }
   ctWeightMaps × { string boneName, xint count, (u32 vertex, float weight)[count] }   (pary jawne)
   morph maps — w otrzymanych plikach zawsze 0, nieobsłużone
@@ -120,15 +122,13 @@ część ciała swojego slotu (zbroja `bu`, spodnie `bd` + ewentualnie `bs`, rę
 do pokazania przedmiotu na ziemi / efektów). Hełmy poniżej 97 poz. wskazują pudełko z dropem
 `Data\Item\Common\ITEM_treasure02.smc` — na postaci nic nie widać.
 
-W kliencie Nemesis część plików jest zaszyfrowana w całości (bez nagłówka `TVER`, z datą 2025): tekstury
-m.in. zestawów 60–109 poz., kilka siatek broni (`*_017`, `ni_shield_019`), atlasy interfejsu (także
-`ItemBtn*.tex`) i animacje klas w wersji 254 (`ni.ba`, `ro.ba`, `so.ba` — zamiast nich `ni_ep1.ba`,
-`ro_ep1.ba` i `so.ba` nieumarłego czarownika). Konwerter robi wtedy model sprzętu z prawdziwym kształtem
-w jednolitym kolorze — średnim kolorze ikony przedmiotu z `public/icons/lc/items.webp` (tekstury `*_gold`
-złote); 258 z 1146 modeli. Przedmiot z nieczytelną siatką (19) pokazuje najbliższy niższy model tego samego
-rodzaju (`ni_sword_017` → `ni_sword_*`). Powierzchnia może nazywać teksturę inaczej niż `.smc`
-(`ni_bu_017_1_gold` / `ni_bu_017_1`) — siatka z jedną teksturą bierze wtedy ją. Jawne kopie tekstur są
-w kliencie 2015 (drugi `--client` po Nemesis je podmieni).
+W starszej kopii Nemesis szyfrowanie całych plików wymuszało jednolite kolory tekstur,
+zastępcze modele oraz alternatywne animacje. Partia `scripts/lc/batches/recovery-2015.json`
+odzyskuje 258 teksturowanych modeli, 19 wcześniej zastąpionych modeli i 6 brakujących rękawic.
+Manifest sprzętu zawiera teraz wszystkie 1158 źródłowych grup bez zastępczych modeli.
+Kanoniczne animsety wskazane w SMC mają pierwszeństwo; starsze zamienniki są używane dopiero,
+gdy kanonicznego pliku nie można odczytać. Ta sama zasada dotyczy Cursed Lich i Cursed Weaver.
+Jednoteksturowa siatka może nadal użyć jedynej tekstury SMC przy różnicy nazwy klucza.
 
 ## Tekstura `.tex`
 
@@ -140,12 +140,16 @@ w kliencie 2015 (drugi `--client` po Nemesis je podmieni).
    piksele: width = mexWidth >> mexShift, height = mexHeight >> mexShift
    flags & 1 = kanał alfa
 "FRMS" surowe piksele mip 0: RGB (3 B) lub RGBA (4 B) × width × height × frames
-"FRMC" u32 total, potem kolejne mipy: { u32 size, bloki DXT1 (8 B/4×4) lub DXT5 (16 B/4×4) }
+"FRMC" u32 total, potem kolejne mipy: { u32 size, bloki DXT1 (8 B/4×4), DXT3 albo DXT5 (16 B/4×4) }
 na końcu opcjonalnie "ANIM"/"ADAT" (animacja tekstury)
 ```
 
-Wymiary tekstury DXT bierzemy z TDAT. Sam łańcuch rozmiarów mipów nie odróżnia np. 256×128 od 128×256
-(tak powstawały poszarpane tekstury niekwadratowe), więc służy tylko za zapas, gdy TDAT nie pasuje.
+Nagłówki czytamy sekwencyjnie: ciąg `FRMC` wewnątrz pikseli `FRMS` nie jest nowym chunkem.
+Wymiary pochodzą z TDAT, a rozmiary mipów muszą je potwierdzać; uszkodzone dane kończą się błędem.
+Alfa wygładzona jest DXT3, chyba że flaga 32 wskazuje DXT5; alfa binarna lub brak alfy używa DXT1.
+Wersja 3 ma dodatkowe pola mipów/rozmiaru ramki oraz piksele RGB5551 albo RGBA4444.
+Czytnik sprawdza granice bufora i rozmiary przed alokacją. Tekstury proceduralne FXDT są odrzucane.
+Konwerter eksportuje pierwszą klatkę i najwyższy mip, nie animuje tekstur.
 
 Kanał alfa w teksturach postaci i potworów to zwykle maska połysku, nie przezroczystość — w glTF materiały
 są OPAQUE i alfę pomijamy (tekstury → JPEG).
@@ -155,26 +159,31 @@ są OPAQUE i alfę pomijamy (tekstury → JPEG).
 Atlasy w tym samym formacie `.tex`. Ikony przedmiotów: `ItemBtn{N}.tex`, siatka **32×32 px**;
 przedmiot z bazy wskazuje ikonę przez `t_item.a_texture_id` (N), `a_texture_row`, `a_texture_col`.
 Ikony umiejętności analogicznie: `SkillBtn{N}.tex` i `t_skill.a_client_icon_texid/row/col`.
-Położenia ramek i okien HUD w atlasach (`TopUI`, `NewCharacterInfo`, …) nie są zapisane w plikach —
-klient ma je w kodzie, więc trzeba je wyciąć ręcznie.
+Położenia HUD pochodzą z kodu klienta. Titles to akcja 49, ActionBtn0, wiersz 6 / kolumna 0.
+Ramki nicku i tytułu są trzema fragmentami NamePopup, a paski ładowania używają UV z GameMP/Map.cpp,
+nie szerokości narysowanego paska. `ui.mjs` kontroluje granice wszystkich wycinków; testy pilnują
+sklejania fragmentów. Pełne źródło współrzędnych: [audyt zasobów](source-audit/assets.md).
 
 ## Umiejętności `Data\skills.lod` (jawny)
 
-Tabela skilli klienta: rekord na umiejętność z nazwami klipów postaci (napisy z długością u32 na początku),
-nazwami efektów i drugim zestawem dla drugiego rodzaju broni klasy (`*_a_*`, np. `ni_a_soul`). Układ rekordu
-znamy tylko częściowo: **id skilla leży 102 bajty przed nazwą pierwszego klipu** (90 bajtów przy czarach
-trójfazowych). Czary mają fazy `_1` (przygotowanie), `_2` (trzymanie), `_3` (wystrzał), np.
-`hw_skill_02_1/2/3`; pozostałe skille — jeden klip. Nazwa klipu zaczyna się prefiksem klasy (`ti`, `ni`, `hw`,
-`ma`, `ro`, `so`), więc parser (`scripts/lc/skill-anims.mjs`) bierze klip dla skilla tylko przy zgodnym
-prefiksie. Wynik: `src/game/data/generated/lc-skill-anims.json` (66 skilli), a klipy dochodzą do modeli klas.
-Brakujące w animsetach klienta Nemesis: `ti_skill_10`, `so_summon`, `so_stoneskin`, `so_vconverstion` —
-te skille grają zwykły zamach.
+`scripts/lc/skill-anims.mjs` czyta cały układ według `Engine/Entities/Skill.cpp`: nagłówek
+najwyższego indeksu, rekordy z dwoma zestawami broni, 141 bajtów na poziom, terminator -9999
+i sumę CFileSecure. Plik 2015 zawiera 1787 rekordów (najwyższy indeks 1854), zgodnych do EOF.
+Odczytywane są dokładne fazy ready/still/fire, nazwy efektów i metadane pocisków.
+Nie stosujemy już wyszukiwania napisów ani zgadywania przesunięć 90/102 bajty.
 
-Nazwy efektów z rekordu wskazują definicje w `Data\Effect\Effect.dat`, który w Nemesis jest
-**zaszyfrowany** — dokładne efekty LC (cząsteczki, kolejność, kolory) są nieczytelne. Same tekstury efektów
-(`Data\Effect\Texture`, `Data\Effect\Particle`, zwykłe `.tex`) są jawne: `npm run convert-lc -- --only fx`
-zapisuje wybrane (`scripts/lc/fx.mjs`) do `public/fx/*.webp`, a gra składa z nich efekty według rodzaju
-skilla (`src/scene/SkillEffects.tsx`).
+75 mapowań klas ma wszystkie klipy w kanonicznych BA. Manifest zawiera 79 wpisów: zachowuje
+też 4 wcześniejsze mapowania (10, 11, 23, 51), ponieważ ich rekordy w starszym kliencie są puste.
+`ti_skill_10` nadal nie występuje — nie utożsamiamy go z innym `ti_skill10`; gra używa zamachu
+zastępczego. `hw_s_skill_02`, `so_summon`, `so_stoneskin`, `so_vconverstion` odzyskano.
+Drugi wariant broni jest odczytywany, ale wybór animacji w grze nadal używa pierwszego.
+Odzyskanie animacji przywołania nie implementuje systemu przywołań.
+
+Jawny `Effect.dat` z 2015 jest dostępny. Ustalono kontenery EFTB/EPGM/EEFM/EEGM/EFTE i odczytano
+3413 grup z 11919 kluczami efektów. To jeszcze **nie jest pełny czytnik definicji ani renderer**.
+Obecne `SkillEffects`, `TitleAura`, `UpgradeAura` nadal składają własne efekty z tekstur LC.
+Nie opisujemy tego już jako braku archiwum lub szyfrowania; pozostała implementacja odczytu
+poszczególnych typów i ich odtwarzania. Zob. [stan odzysku](source-audit/assets.md).
 
 ## Świat `.wld` (modele na mapie)
 

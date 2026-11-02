@@ -3,7 +3,7 @@
   "models": [
     {
       "id": "class-knight",
-      "file": "class-knight.glb?v=f7886f1ad8",
+      "file": "class-knight.glb?v=e98814c7d5",
       "scale": 1,
       "animations": {
         "idle": "ni_idle_01",
@@ -49,7 +49,7 @@
     },
     {
       "id": "class-healer",
-      "file": "class-healer.glb?v=0273b5533e",
+      "file": "class-healer.glb?v=0773db0787",
       "scale": 1,
       "animations": {
         "idle": "hw_idle_01",
@@ -70,7 +70,7 @@
     },
     {
       "id": "class-mage",
-      "file": "class-mage.glb?v=df69e1e0c9",
+      "file": "class-mage.glb?v=b9694224d1",
       "scale": 1,
       "animations": {
         "idle": "ma_idle_01",
@@ -91,7 +91,7 @@
     },
     {
       "id": "class-rogue",
-      "file": "class-rogue.glb?v=d23056f130",
+      "file": "class-rogue.glb?v=f4b9a4bcd1",
       "scale": 1,
       "animations": {
         "idle": "ro_idle_01",
@@ -113,7 +113,7 @@
     },
     {
       "id": "class-sorcerer",
-      "file": "class-sorcerer.glb?v=cd601a40b4",
+      "file": "class-sorcerer.glb?v=9a89811e68",
       "scale": 1,
       "animations": {
         "idle": "so_idle_01",
@@ -623,6 +623,26 @@
       },
       "attackImpact": 0.6,
       "height": 1.1022064882351146,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "wyvern",
+      "file": "wyvern.glb?v=49554002dc",
+      "scale": 1,
+      "animations": {
+        "idle": "wm_i",
+        "walk": "wm",
+        "run": "wm",
+        "attack": [
+          "wm_att",
+          "wm_att1"
+        ],
+        "hit": "wm_damage",
+        "die": "wm_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
       "radius": 1,
       "tint": {}
     },
@@ -1495,7 +1515,7 @@
     },
     {
       "id": "cused_wever",
-      "file": "cused_wever.glb?v=7a84ee9cdd",
+      "file": "cused_wever.glb?v=542d7c59f7",
       "scale": 1,
       "animations": {
         "idle": "cusedwever_idle2",
@@ -1516,7 +1536,7 @@
     },
     {
       "id": "cusedrich",
-      "file": "cusedrich.glb?v=383a4530ff",
+      "file": "cusedrich.glb?v=17612fd457",
       "scale": 1,
       "animations": {
         "idle": "cusedrich_idle",

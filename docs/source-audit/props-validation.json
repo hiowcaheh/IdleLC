@@ -1,0 +1,19 @@
+{
+  "oldModels": 41,
+  "newModels": 56,
+  "oldInstances": 963,
+  "newInstances": 5151,
+  "oldModelsPrefixIdentical": true,
+  "oldInstancesPrefixIdentical": true,
+  "changedExistingGeometryOrMaterials": [],
+  "oldBytes": 969508,
+  "newBytes": 1185424,
+  "bufferCount": 1,
+  "date": "2026-11-02",
+  "terrainChanged": false,
+  "arenas": 38,
+  "idempotentRerun": true,
+  "estimatedMaximumAdditionalDrawCalls": 15,
+  "estimatedMaximumAdditionalTriangles": 23477,
+  "note": "Static estimate within 120 m per arena; not physical mobile FPS. st_sheaf02 MESH16 remains unsupported."
+}

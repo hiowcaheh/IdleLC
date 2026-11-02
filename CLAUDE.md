@@ -1,5 +1,34 @@
 # IdleLC — wytyczne projektu
 
+## Bieżące przekazanie — 2026-11-02
+
+**Zacznij od [dokumentacji przekazania](docs/development-handoff.md),
+[audytu źródeł](docs/source-audit/README.md), [rejestru decyzji](docs/design-decisions.md)
+i [changelogu](CHANGELOG.md). Poniższy dziennik z 30 października jest historyczny; jego
+informacje o brakujących archiwach, ikonach, szyfrowaniu i wzorach nie opisują już obecnego stanu.**
+
+Właściciel zatwierdził etapowe wdrażanie odzyskanych zasobów, a następnie potwierdzonych błędów
+na podstawie kodu serwera. Nie trzeba ponownie zatwierdzać tego uzgodnionego zakresu.
+Supabase, migrację do backendu oraz zmianę świadomych reguł gry pozostawiamy na później.
+Bezpieczne ulepszanie, AFK, 4 strefy i limit 100 pozostają ustaleniami właściciela.
+
+Dostarczone źródła: jawny klient 2015 oraz kod C++ klienta i serwera z listopada 2018;
+identyfikatory Drive, SHA-256 i mapę dowodów zapisano w audycie. Surowe archiwa pozostają poza Git.
+Nie ma pełnego zrzutu SQL: nie wolno odtwarzać brakujących hitrate/flag/drop-slotów przez zgadywanie.
+
+Partia `scripts/lc/batches/recovery-2015.json` opisuje 292 cele: 283 modele sprzętu, sześć klas
+z kanonicznymi animacjami i trzy oryginalne potwory. Sprzęt ma wszystkie 1158 grup, bez stand-inów.
+Ikony: 2052/2052 przedmioty, 119/119 skille (5 szarych placeholderów pochodzi ze źródła).
+Parsery MESH/TEX/skills.lod są poprawione według C++, GUI korzysta z ActionBtn0 i NamePopup.
+79 mapowań animacji = 75 dokładnych z 2015 + 4 zachowane starsze; `ti_skill_10` nadal brak.
+`Effect.dat` jest jawny, ale pełny czytnik definicji i renderer efektów nadal wymagają implementacji.
+Nie nazywaj istniejących efektów proceduralnych wierną rekonstrukcją LC.
+
+Dopisano 15 modeli roślinności/drobnych obiektów Juno i 4188 instancji, zachowując stare propsy oraz teren.
+Wprowadzono też odświeżanie walki po zmianie opcji/rare noszonego sprzętu i naprawy cache PWA.
+Pierwsza poprawka z serwera rozróżnia stałe i procentowe przywracanie HP/MP; pozostałe wzory
+walki, klasy i statusy nadal wymagają osobnych etapów opisanych w audycie.
+
 ## Cel projektu
 
 Budujemy **IdleLC** — przeglądarkowe RPG typu IDLE / AFK z walką 3D, w klimacie klasycznego MMORPG z lat 2007–2010. Gracz tworzy postać, wybiera lokację i potwory, walczy aktywnie (auto-walka z animacjami 3D) albo wysyła postać na wyprawę AFK i wraca po expa i łupy. Gra ma działać na PC i telefonie, bez instalacji.
@@ -89,7 +118,7 @@ Formuły balansu w jednym module `src/game/logic/balance.ts`, opisane w `docs/ba
   przedmiotów → `public/icons/lc/items.webp` (same ikony: `--only icons`), teren map → `public/maps/`
   (`--only terrain`)
 
-## Stan prac (aktualizuj na koniec każdej sesji)
+## Historyczny dziennik prac (2026-10-30; aktualny stan jest w dokumentacji przekazania)
 
 **Stan na 2026-10-30 (sesja 2, wieczór):**
 

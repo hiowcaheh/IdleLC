@@ -1,10 +1,11 @@
 /**
  * IdleLC service worker: after the first visit the game opens from the cache (fast, and offline).
  * - the page: network first, so a new deploy shows up on the next start when online;
- * - /assets/ (file names change with every build): cache first, older builds of a file are dropped;
+ * - /assets/ (file names change with every build): cache first, retaining chunks for open tabs;
  * - models, icons, fonts: served from the cache and refreshed in the background.
  */
-const CACHE = 'idlelc-v1'
+const CACHE_PREFIX = 'idlelc-'
+const CACHE = `${CACHE_PREFIX}v2`
 /** Static files: a "Vary: Origin" header (module scripts send Origin) must not cause a miss. */
 const MATCH = { ignoreVary: true }
 
@@ -30,25 +31,22 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((k) => k.startsWith(CACHE_PREFIX) && k !== CACHE)
+            .map((k) => caches.delete(k)),
+        ),
+      )
       .then(() => self.clients.claim()),
   )
 })
-
-/** "index-AbC123.js" → "index-" — the same file of another build. */
-const buildFamily = (url) => {
-  const name = url.pathname.split('/').pop() ?? ''
-  const dash = name.lastIndexOf('-')
-  return dash > 0
-    ? url.pathname.slice(0, url.pathname.length - name.length) + name.slice(0, dash + 1)
-    : null
-}
 
 async function networkFirst(request) {
   const cache = await caches.open(CACHE)
   try {
     const response = await fetch(request)
-    if (response.ok) await cache.put('./', response.clone())
+    if (response.ok) await cache.put('./', response.clone()).catch(() => undefined)
     return response
   } catch {
     return (await cache.match('./', MATCH)) ?? Response.error()
@@ -61,15 +59,8 @@ async function cacheFirst(request) {
   if (cached) return cached
   const response = await fetch(request)
   if (response.ok) {
-    const url = new URL(request.url)
-    const family = buildFamily(url)
-    if (family) {
-      for (const old of await cache.keys()) {
-        if (old.url !== request.url && new URL(old.url).pathname.startsWith(family))
-          cache.delete(old)
-      }
-    }
-    await cache.put(request, response.clone())
+    // Other tabs can still import chunks from the preceding build. Activation cleans old caches.
+    await cache.put(request, response.clone()).catch(() => undefined)
   }
   return response
 }
@@ -78,16 +69,16 @@ async function staleWhileRevalidate(event) {
   const cache = await caches.open(CACHE)
   const cached = await cache.match(event.request, MATCH)
   const refresh = fetch(event.request)
-    .then((response) => {
-      if (response.ok || response.type === 'opaque') cache.put(event.request, response.clone())
+    .then(async (response) => {
+      if (response.ok || response.type === 'opaque') {
+        await cache.put(event.request, response.clone()).catch(() => undefined)
+      }
       return response
     })
     .catch(() => cached ?? Response.error())
-  if (cached) {
-    event.waitUntil(refresh)
-    return cached
-  }
-  return refresh
+  // Keep the worker alive until the cache write completes, including a cache-miss request.
+  event.waitUntil(refresh)
+  return cached ?? refresh
 }
 
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com']

@@ -1,6 +1,6 @@
 /**
  * Builders for synthetic LC files used by the converter tests (no client assets in the repo).
- * They write the same layouts the readers expect — see docs/lc-formats.md.
+ * Layouts follow the original client serializers — see docs/lc-formats.md.
  */
 import { MESH_KEY, TEXTURE_KEY } from './binary.mjs'
 
@@ -66,7 +66,7 @@ export class Writer {
 
 /**
  * MESH v17 with one LOD. Surfaces: { first, indices (relative to first), name, shader?, textures?,
- * colors?, flags? }; weightMaps: { bone, pairs: [[vertex, weight]] }.
+ * colors?, floats?, texCoords?, flags? }; weightMaps: { bone, pairs: [[vertex, weight]] }.
  */
 export function meshFile({ positions, normals, uvs = null, surfaces, weightMaps = [] }) {
   const ctVx = positions.length / 3
@@ -83,7 +83,7 @@ export function meshFile({ positions, normals, uvs = null, surfaces, weightMaps 
   if (uvs) w.string('Texture').floats(uvs)
   for (const s of surfaces) {
     w.xint(s.first)
-      .xint(s.count ?? ctVx)
+      .xint(s.count ?? ctVx - s.first)
       .xint(s.indices.length / 3)
     for (const i of s.indices) w.u16(i)
     w.string(s.name).xint(0).xint(0) // unknown, empty bone palette
@@ -91,12 +91,15 @@ export function meshFile({ positions, normals, uvs = null, surfaces, weightMaps 
     if (s.shader) {
       const textures = s.textures ?? []
       const colors = s.colors ?? []
-      w.xint(1).xint(colors.length).xint(textures.length).xint(0)
+      const floats = s.floats ?? []
+      const texCoords = s.texCoords ?? [0]
+      w.xint(colors.length).xint(floats.length).xint(textures.length).xint(texCoords.length)
       w.string(s.shader)
       for (const t of textures) w.string(t)
-      w.xint(0) // texcoord set
-      for (const c of colors) w.xint(c)
       w.xint(s.flags ?? 0)
+      for (const c of colors) w.xint(c)
+      w.floats(floats)
+      for (const uv of texCoords) w.xint(uv)
     }
   }
   for (const map of weightMaps) {

@@ -21,7 +21,7 @@ export function SceneLabels() {
     <div className="scene-labels">
       <div ref={(el) => bindLabel('player', el)} className="scene-label scene-label--player">
         <span className="scene-label__text">
-          {name}
+          <span className="scene-label__name">{name}</span>
           {title && (
             <span className="scene-label__title" style={titleStyle(title)}>
               {title.name}

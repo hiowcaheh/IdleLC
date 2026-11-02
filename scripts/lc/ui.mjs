@@ -35,8 +35,11 @@ export const UI_PARTS = {
   // the book with a quill (the owner's pick for the Skills window)
   'menu-skills': [atlas('TopUI'), 0, 170, 22, 22, { scale: 4 }],
   'menu-system': [atlas('TopUI'), 156, 222, 22, 22, { scale: 4 }],
-  // the scroll with red writing: the Titles window
-  'menu-titles': [atlas('TopUI'), 130, 222, 22, 22, { scale: 4 }],
+  // actions.lod action 49 opens Titles: ActionBtn0, row 6, column 0 (32 px cells).
+  'menu-titles': [atlas('ActionBtn0'), 0, 192, 32, 32, { scale: 4 }],
+  // UIManager.cpp / ActorMgr.cpp: the three slices of the normal player name and title backgrounds.
+  'name-frame': [atlas('NamePopup'), 0, 14, 32, 15],
+  'title-frame': [atlas('NamePopup'), 35, 31, 32, 13],
   // the Gold Coin item's icon (t_item 19: ItemBtn0, row 0, column 0) without its frame and background
   coin: [atlas('ItemBtn0'), 2, 2, 28, 28, { scale: 4, keyOut: true }],
   // a round button with a bronze rim and a black middle: the counter badge on buttons
@@ -47,8 +50,9 @@ export const UI_PARTS = {
   'loading-dratan': [loading('F_02'), 40, 16, 944, 344, { quality: 78 }],
   'loading-merac': [loading('F_03'), 40, 16, 944, 344, { quality: 78 }],
   'loading-egeha': [loading('F_04'), 40, 16, 944, 344, { quality: 78 }],
-  'loading-track': [loading('LoadingBar'), 0, 0, 729, 13],
-  'loading-fill': [loading('ProgressBar'), 0, 0, 927, 17],
+  // GameMP/Map.cpp:79–89 supplies source UV rectangles, not the drawn screen widths.
+  'loading-track': [loading('LoadingBar'), 0, 0, 11, 11],
+  'loading-fill': [loading('ProgressBar'), 0, 0, 62, 17],
   // the character window's value box
   'value-box': [atlas('NewCharacterInfo'), 100, 47, 129, 15],
   // equipment boards: each class's silhouette with the slot frames (LC job order)
@@ -82,6 +86,24 @@ const ROWS = {
   ],
 }
 
+/** The original left/centre/right UV slices, joined without unrelated atlas pixels between them. */
+const COLUMNS = {
+  'loading-fill': [
+    [0, 36],
+    [49, 13],
+  ],
+  'name-frame': [
+    [0, 2],
+    [4, 10],
+    [30, 2],
+  ],
+  'title-frame': [
+    [0, 2],
+    [4, 10],
+    [30, 2],
+  ],
+}
+
 /**
  * The bottom edge is stretched across the whole window, so its middle (between the 8 px corners) is
  * one column repeated — the texture's streaks would show as long smears: [rows from the bottom, column].
@@ -104,7 +126,9 @@ const EMPTY_SHADE = 0.22
 export async function buildUiParts(files) {
   const textures = new Map()
   const out = {}
-  for (const [name, [path, x, y, width, rectHeight, options = {}]] of Object.entries(UI_PARTS)) {
+  for (const [name, [path, x, y, rectWidth, rectHeight, options = {}]] of Object.entries(
+    UI_PARTS,
+  )) {
     const { scale = 1, quality, keyOut = false } = options
     let height = rectHeight
     if (!textures.has(path)) {
@@ -112,14 +136,42 @@ export async function buildUiParts(files) {
     }
     const texture = textures.get(path)
     if (!texture) continue
+    if (
+      ![x, y, rectWidth, rectHeight].every(Number.isInteger) ||
+      x < 0 ||
+      y < 0 ||
+      rectWidth <= 0 ||
+      rectHeight <= 0 ||
+      x + rectWidth > texture.width ||
+      y + rectHeight > texture.height
+    ) {
+      throw new Error(
+        `UI part ${name}: rectangle ${x},${y} ${rectWidth}x${rectHeight} exceeds ${path} ${texture.width}x${texture.height}`,
+      )
+    }
+    const columns = COLUMNS[name]?.flatMap(([first, count]) =>
+      Array.from({ length: count }, (_, i) => first + i),
+    )
+    const width = columns?.length ?? rectWidth
     const rows = (ROWS[name] ?? [[0, height, 1]]).flatMap(([first, count, times]) =>
       Array.from({ length: count * times }, (_, i) => first + (i % count)),
     )
     height = rows.length
     const pixels = Buffer.alloc(width * height * 4)
     rows.forEach((source, row) => {
-      const from = ((y + source) * texture.width + x) * 4
-      pixels.set(texture.rgba.subarray(from, from + width * 4), row * width * 4)
+      if (source < 0 || source >= rectHeight)
+        throw new Error(`UI part ${name}: row ${source} out of range`)
+      if (columns) {
+        columns.forEach((column, col) => {
+          if (column < 0 || column >= rectWidth)
+            throw new Error(`UI part ${name}: column ${column} out of range`)
+          const from = ((y + source) * texture.width + x + column) * 4
+          pixels.set(texture.rgba.subarray(from, from + 4), (row * width + col) * 4)
+        })
+      } else {
+        const from = ((y + source) * texture.width + x) * 4
+        pixels.set(texture.rgba.subarray(from, from + width * 4), row * width * 4)
+      }
     })
     if (FLAT_BOTTOM[name]) {
       const [count, column] = FLAT_BOTTOM[name]

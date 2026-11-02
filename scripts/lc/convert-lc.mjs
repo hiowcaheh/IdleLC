@@ -17,6 +17,8 @@
  *   --only <id,id>         convert only these model ids (e.g. fox,class-knight,gear/ni_bu_001); `gear` = all
  *                          weapon and armor models, `starter` = the classes' starting sets,
  *                          `icons` = item and skill icons, `ui` = interface pieces, `fx` = effect textures
+ *   --batch <json>         select the model ids in a reviewed recovery batch (instead of --only)
+ *   --strict               fail models with missing or unreadable dependencies
  *   --smc <path>           convert one .smc (client path or file); with --anims <a,b> to pick clips
  *   --max-texture <px>     longest texture side (default 1024)
  *
@@ -41,6 +43,7 @@ import { buildModel } from './model.mjs'
 import { buildProps, obstacles, placedModels } from './props.mjs'
 import { parseSkillAnims } from './skill-anims.mjs'
 import { parseSmc } from './smc.mjs'
+import { chooseAnimSets } from './source-choice.mjs'
 import { buildTerrain } from './terrain.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
@@ -55,8 +58,7 @@ const GEAR_MAX_TEXTURE = 512
 /** Colour of gear whose texture and icon can't be read (linear RGB). */
 const GEAR_GREY = [0.3, 0.3, 0.32]
 /**
- * Monsters whose model in the Nemesis client can't be read (the .smc the database names points at
- * unreadable meshes); the client's second version of the model has the same skeleton and clips.
+ * Legacy fallbacks for encrypted clients. A readable original always takes priority.
  */
 const MONSTER_SMC_STANDINS = {
   cusedrich: 'Data\\Monster\\CusedRich2\\cusedrich2.smc',
@@ -101,11 +103,23 @@ function parseArgs(argv) {
     else if (flag === '--out') args.out = path.resolve(value())
     else if (flag === '--data') args.data = path.resolve(value())
     else if (flag === '--only') args.only = new Set(value().toLowerCase().split(','))
+    else if (flag === '--batch') args.batch = path.resolve(value())
+    else if (flag === '--strict') args.strict = true
     else if (flag === '--smc') args.smc = value()
     else if (flag === '--anims') args.anims = value().split(',')
     else if (flag === '--max-texture') args.maxTexture = Number(value())
     else if (flag === '--help' || flag === '-h') args.help = true
     else throw new Error(`unknown option ${flag}`)
+  }
+  if (args.batch) {
+    if (args.only) throw new Error('--batch and --only cannot be combined')
+    const batch = JSON.parse(fs.readFileSync(args.batch, 'utf8'))
+    if (!Array.isArray(batch.models) || batch.models.some((model) => typeof model.id !== 'string'))
+      throw new Error('batch needs a models array with string ids')
+    args.only = new Set(batch.models.map((model) => model.id.toLowerCase()))
+    args.allowedMissing = new Map(
+      batch.models.map((model) => [model.id.toLowerCase(), new Set(model.allowedMissing ?? [])]),
+    )
   }
   return args
 }
@@ -129,19 +143,23 @@ function listJobs(args, data, files, itemModels, icons, skillAnims) {
         .filter((skill) => `class-${skill.classId}` === id)
         .flatMap((skill) => Object.values(skillAnims?.[skill.id] ?? {})),
     ],
-    override: def.animSets ? { animSets: def.animSets } : undefined,
+    fallbackAnimSets: def.fallbackAnimSets,
   }))
   const monsters = new Map()
   for (const m of data?.monsters ?? []) {
-    const smc = MONSTER_SMC_STANDINS[m.model] ?? m.smc
-    const job = monsters.get(m.model) ?? { id: m.model, smc, animations: new Set() }
+    const job = monsters.get(m.model) ?? {
+      id: m.model,
+      smc: m.smc,
+      fallbackSmc: MONSTER_SMC_STANDINS[m.model],
+      animations: new Set(),
+    }
     for (const clip of Object.values(m.animations).flat())
       if (clip) job.animations.add(String(clip))
     monsters.set(m.model, job)
   }
   let absent = 0
   for (const job of monsters.values()) {
-    if (!files.resolve(job.smc)) {
+    if (!files.resolve(job.smc) && !files.resolve(job.fallbackSmc ?? job.smc)) {
       absent++ // not in this client (yet)
       continue
     }
@@ -172,12 +190,17 @@ function listJobs(args, data, files, itemModels, icons, skillAnims) {
     })
   }
   if (!args.only) return jobs
-  return jobs.filter(
+  const selected = jobs.filter(
     (j) =>
       args.only.has(j.id) ||
       (j.gear && args.only.has('gear')) ||
       (j.starter && args.only.has('starter')),
   )
+  const selectors = new Set(['gear', 'starter', 'icons', 'ui', 'fx', 'terrain'])
+  for (const id of args.only)
+    if (!selectors.has(id) && !selected.some((job) => job.id === id))
+      throw new Error(`requested model is unavailable: ${id}`)
+  return selected
 }
 
 /**
@@ -192,9 +215,12 @@ function readSkillAnims(files, data) {
   const prefixes = Object.fromEntries(
     Object.entries(CLASS_MODELS).map(([id, def]) => [id.replace(/^class-/, ''), def.prefix]),
   )
-  const anims = Object.fromEntries(
-    parseSkillAnims(files.read('Data\\skills.lod'), data.skills, prefixes),
-  )
+  // The 2015 table has empty records for some skills known to later clients. Keep their existing
+  // mappings as legacy fallbacks; exact nonempty records replace earlier guesses.
+  const anims = {
+    ...previous,
+    ...Object.fromEntries(parseSkillAnims(files.read('Data\\skills.lod'), data.skills, prefixes)),
+  }
   fs.mkdirSync(GENERATED, { recursive: true })
   fs.writeFileSync(SKILL_ANIMS, JSON.stringify(anims))
   console.log(`skill clips: ${Object.keys(anims).length} skills (lc-skill-anims.json)`)
@@ -217,7 +243,9 @@ function readSmc(job, files) {
   const text = fs.existsSync(job.smc)
     ? fs.readFileSync(job.smc, 'latin1')
     : files.read(job.smc).toString('latin1')
-  return { ...parseSmc(text), ...job.override }
+  const smc = { ...parseSmc(text), ...job.override }
+  if (job.fallbackAnimSets) smc.animSets = chooseAnimSets(files, smc.animSets, job.fallbackAnimSets)
+  return smc
 }
 
 const USAGE =
@@ -266,7 +294,14 @@ async function main() {
   const iconsOnly =
     args.only !== undefined &&
     [...args.only].every((o) => ['icons', 'ui', 'fx', 'terrain'].includes(o))
-  const skillAnims = readSkillAnims(files, data)
+  // A selective asset conversion must not rewrite unrelated skill metadata.
+  const updatesSkills =
+    !args.smc && (!args.only || [...args.only].some((id) => id.startsWith('class-')))
+  const skillAnims = updatesSkills
+    ? readSkillAnims(files, data)
+    : fs.existsSync(SKILL_ANIMS)
+      ? JSON.parse(fs.readFileSync(SKILL_ANIMS, 'utf8'))
+      : null
   const jobs = iconsOnly
     ? []
     : listJobs(args, data, files, itemModels, await readItemIcons(), skillAnims)
@@ -276,7 +311,6 @@ async function main() {
   let failed = 0
   for (const job of jobs) {
     try {
-      const smc = readSmc(job, files)
       const options = {
         animations: job.animations,
         maxTextureSize: job.maxTextureSize ?? args.maxTexture,
@@ -285,12 +319,38 @@ async function main() {
         fallbackColor: job.fallbackColor?.(),
         textureCache,
       }
-      let { document, stats } = await buildModel(files, smc, options)
-      if (job.animations?.length && stats.animations.length === 0 && stats.bones > 0) {
-        // none of the requested clip names exist: keep every clip rather than none
-        ;({ document, stats } = await buildModel(files, smc, { ...options, animations: null }))
+      const convert = async (source) => {
+        const smc = readSmc({ ...job, smc: source }, files)
+        let result = await buildModel(files, smc, options)
+        if (
+          job.animations?.length &&
+          result.stats.animations.length === 0 &&
+          result.stats.bones > 0
+        )
+          result = await buildModel(files, smc, { ...options, animations: null })
+        if (
+          result.stats.meshes === 0 ||
+          (job.fallbackSmc && result.stats.unreadable.some((file) => /\.bm$/i.test(file)))
+        )
+          throw new Error(`incomplete meshes: ${result.stats.unreadable.join(', ')}`)
+        return result
       }
-      if (stats.meshes === 0) throw new Error(`no meshes (missing: ${stats.missing.join(', ')})`)
+      let result
+      try {
+        result = await convert(job.smc)
+      } catch (error) {
+        if (!job.fallbackSmc || !files.resolve(job.fallbackSmc)) throw error
+        console.warn(`${job.id}: original unreadable; using ${job.fallbackSmc}`)
+        result = await convert(job.fallbackSmc)
+      }
+      const { document, stats } = result
+      const unexpectedMissing = stats.missing.filter(
+        (file) => !args.allowedMissing?.get(job.id)?.has(file),
+      )
+      if (args.strict && (unexpectedMissing.length || stats.unreadable.length))
+        throw new Error(
+          `incomplete dependencies: ${[...unexpectedMissing, ...stats.unreadable].join(', ')}`,
+        )
       stats.shaders.forEach((s) => shaders.add(s))
       document.setLogger(new Logger(Logger.Verbosity.ERROR))
       await document.transform(

@@ -220,7 +220,7 @@ export async function buildModel(files, smc, options = {}) {
     const texturePath = textureName
       ? (textures[textureName] ?? (own.length === 1 ? own[0] : undefined))
       : undefined
-    const color = surface.shader?.endsWith('Color.sha') ? surface.shaderFlags : surface.colors?.[0]
+    const color = surface.colors?.[0]
     const matKey = `${texturePath ?? ''}|${color ?? ''}|${mode}`
     if (materials.has(matKey)) return materials.get(matKey)
     const name = texturePath ? baseName(texturePath) : textureName || 'color'

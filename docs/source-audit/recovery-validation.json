@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-02",
+  "baseline": "c9944c92cacfc50595dbfc8bbd085b64cf5e4048",
+  "sourceArchive": {
+    "driveId": "1jclE99G1GscMocwveuw7oavgyUj-P2tk",
+    "sha256": "a8372e0ce360713d50ac2368400434d3e82e4d0f36f859f71e62c9bdcac6cc69"
+  },
+  "converted": {
+    "models": 292,
+    "gear": 283,
+    "textures": 401,
+    "flatFallbacks": 0,
+    "meshes": 434,
+    "animationSamplers": 30676
+  },
+  "gearManifestModels": 1158,
+  "exactGearMappings": 1158,
+  "modelManifestModels": 78,
+  "itemIcons": 2052,
+  "skillIcons": 119,
+  "skillMappings": 79,
+  "knownMissingClips": [
+    {
+      "id": 11,
+      "clip": "ti_skill_10"
+    }
+  ],
+  "checks": [
+    "all recovery GLBs decoded with Meshopt",
+    "all decoded accessor values finite",
+    "all gear joints belong to class skeleton",
+    "no flat texture fallbacks",
+    "all gear item mappings match original SMC groups",
+    "all model and gear URL hashes match bytes",
+    "all imported items and skills mapped to icons"
+  ]
+}

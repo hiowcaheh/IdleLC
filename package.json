@@ -20,7 +20,9 @@
     "check": "npm run lint && npm run format:check && npm run typecheck && npm run test",
     "import-lc-db": "node scripts/lc/import-db.mjs",
     "convert-lc": "node scripts/lc/convert-lc.mjs",
-    "pwa-icons": "node scripts/pwa-icons.mjs"
+    "pwa-icons": "node scripts/pwa-icons.mjs",
+    "recover-lc-props": "node scripts/lc/recover-props.mjs",
+    "verify-lc-recovery": "node scripts/lc/verify-recovery.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
