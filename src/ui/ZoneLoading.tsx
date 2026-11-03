@@ -32,8 +32,8 @@ function prepareArt(art: string): Promise<void> {
 }
 
 /**
- * Going to another zone: the screen goes dark, the zone's picture comes up with its name in the
- * middle and the loading bar fills, then the new zone brightens out of the dark.
+ * Going to another zone: the decoded illustration fills the viewport, its lower title and loading
+ * bar appear, then the new zone brightens out of the picture.
  */
 export function ZoneLoading() {
   const zoneId = useGameStore((s) => s.character?.location.zoneId)
