@@ -34,9 +34,14 @@ export function ExpeditionDialog({
   }, [onClose])
 
   const onSend = async () => {
+    if (busy) return
     setBusy(true)
-    await startExpedition()
-    onClose()
+    try {
+      await startExpedition()
+      onClose()
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (

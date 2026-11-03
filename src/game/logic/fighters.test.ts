@@ -1,5 +1,8 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { GOLDEN_MAGNIFIER_ID } from '../data/items.ts'
+import { CombatSession } from '../session/combatSession.ts'
+import { classAttributes, classResources } from './attributes.ts'
+import { classRatings, ratingHitChance, rollRatings } from './ratings.ts'
 import { createCharacterData } from './character.ts'
 import { heroKey, playerFighter, potionSupply } from './fighters.ts'
 import { OPTION_PLAY_SECONDS, applyPlayTime } from './options.ts'
@@ -128,5 +131,94 @@ describe('heroKey', () => {
 
     expect(playerFighter(after)).toEqual(playerFighter(before))
     expect(heroKey(after)).toBe(heroKey(before))
+  })
+})
+
+describe('source attribute and rating integration', () => {
+  it('uses the six unpromoted classes and their resource coefficients', () => {
+    expect(classResources('knight', 20)).toEqual({ maxHp: 720, maxMp: 390 })
+    expect(classAttributes('knight', 20)).toEqual({
+      strength: 76,
+      dexterity: 66,
+      intelligence: 66,
+      constitution: 76,
+    })
+    expect(
+      ['titan', 'knight', 'healer', 'mage', 'rogue', 'sorcerer'].map((id) =>
+        classResources(id as 'knight', 2),
+      ),
+    ).toEqual([
+      { maxHp: 216, maxMp: 82 },
+      { maxHp: 180, maxMp: 102 },
+      { maxHp: 128, maxMp: 130 },
+      { maxHp: 101, maxMp: 153 },
+      { maxHp: 157, maxMp: 65 },
+      { maxHp: 125, maxMp: 157 },
+    ])
+  })
+
+  it('displays Knight20 base168 and option +75 as243 raw points', () => {
+    const hero = {
+      classId: 'knight' as const,
+      level: 20,
+      equipment: {
+        accessory1: { uid: 'ring', itemId: 166, plus: 0, options: [{ type: 21, level: 4 }] },
+      },
+    }
+    expect(classRatings('knight', 20).hit).toBe(168)
+    expect(playerFighter(hero).stats.hit).toBe(243)
+    const rolls = [0.4, 0.6]
+    expect(rollRatings(100, 100, () => rolls.shift()!)).toBe(false)
+    expect(rollRatings(100, 100, () => 0.5)).toBe(false)
+    expect(ratingHitChance(100, 100)).toBeCloseTo(0.499995, 10)
+  })
+
+  it('shares fixed source percentage bases across equipment and titles without compounding', () => {
+    const fresh = {
+      ...createCharacterData({ name: 'Brom', classId: 'knight' }, 'a', 1000),
+      level: 20,
+      skills: {},
+    }
+    const noTitle = { ...fresh, activeTitle: null }
+    const base = playerFighter(noTitle, 1000).stats
+    const titled = playerFighter(fresh, 1000).stats
+    expect(titled.maxHp - base.maxHp).toBe(72)
+    expect(titled.maxMp! - base.maxMp!).toBe(39)
+    const gear = {
+      ...fresh.equipment,
+      accessory1: {
+        uid: 'ring',
+        itemId: 166,
+        plus: 0,
+        options: [
+          { type: 71, level: 6 },
+          { type: 72, level: 6 },
+        ],
+      },
+    }
+    const together = playerFighter({ ...fresh, equipment: gear }, 1000).stats
+    expect(together.maxHp - base.maxHp).toBe(144)
+    expect(together.maxMp! - base.maxMp!).toBe(78)
+  })
+
+  it('removes an expired title from live combat without waiting for a save report', () => {
+    vi.useFakeTimers()
+    try {
+      vi.setSystemTime(1000)
+      const fresh = createCharacterData({ name: 'Brom', classId: 'knight' }, 'a', 1000)
+      const hero = { ...fresh, skills: {}, titles: [{ id: 23, expiresAt: 2000 }] }
+      const session = new CombatSession(() => 0.5)
+      session.start(hero, 'rust-golem')
+      const boosted = session.state.player.stats.maxHp
+      vi.setSystemTime(2000)
+      session.tick(0)
+      expect(session.state.player.stats.maxHp).toBe(boosted - 15)
+      expect(heroKey(hero, 1999)).not.toBe(heroKey(hero, 2000))
+      expect(heroKey({ ...hero, titles: [{ id: 23, expiresAt: 3000 }] }, 1000)).not.toBe(
+        heroKey(hero, 1000),
+      )
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

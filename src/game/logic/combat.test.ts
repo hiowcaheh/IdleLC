@@ -232,6 +232,31 @@ const engaged = (player: FighterInit, monster = tank): CombatState => {
 }
 
 describe('skills in combat', () => {
+  it('cast speed shortens ready time while reuse time changes only the cooldown', () => {
+    const chant = caster([rank({ castTime: 2, cooldown: 10 })], { castSpeed: 25, reuseTime: -1 })
+    const result = combatTick(engaged(chant), 0.01, createRng(7))
+    expect(result.events.find((event) => event.type === 'cast')).toMatchObject({ castTime: 1.9 })
+    expect(result.state.player.skillCooldowns[1]).toBeCloseTo(9, 1)
+    expect(result.state.player.stats.attackInterval).toBe(1)
+  })
+
+  it('passes the skill marker through to blocking without granting extra evasion', () => {
+    const defender = {
+      level: 10,
+      stats: stats({ maxHp: 5000, attack: 1, defense: 0, blockChance: 100 }),
+    }
+    const plain = run(engaged(caster([]), defender), 0.5, () => 0.5)
+    const skilled = run(
+      engaged(caster([rank({ effects: [{ kind: 'damage', percent: 0 }] })]), defender),
+      0.5,
+      () => 0.5,
+    )
+    const damage = (events: CombatEvent[]) =>
+      events.find((event) => event.type === 'hit' && event.target === 'monster')
+    expect(damage(plain.events)).toMatchObject({ amount: 10 })
+    expect(damage(skilled.events)).toMatchObject({ amount: 20, skill: true })
+  })
+
   it('a skill without a wind-up lands like a swing, and the hero acts again after one interval', () => {
     const instant = caster([rank({ castTime: 0, fireTime: 2.6, cooldown: 30 })])
     const early = run(engaged(instant), TIMINGS.impactDelay + 0.05, createRng(2))

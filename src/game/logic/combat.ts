@@ -577,12 +577,16 @@ function fighterStep(
     const skill = chooseSkill(self, target)
     if (skill) {
       // wind-up (shortened by cast-speed skills), then it lands like a swing
-      const windUp = Math.max(0, skill.castTime + (stats.castTime ?? 0))
+      const windUp = Math.max(
+        0,
+        skill.castTime * (1 - (stats.castSpeed ?? 0) / 100) + (stats.castTime ?? 0),
+      )
       const landsIn = windUp + TIMINGS.impactDelay
       const faster = Math.min(MAX_COOLDOWN_REDUCTION, (stats.cooldownReduction ?? 0) / 100)
       self.mp -= skillMpCost(skill, stats)
       self.hp -= skill.hpCost
-      self.skillCooldowns[skill.id] = skill.cooldown * (1 - faster)
+      self.skillCooldowns[skill.id] =
+        Math.max(0, skill.cooldown + (stats.reuseTime ?? 0)) * (1 - faster)
       self.casting = skill
       self.impactIn = landsIn
       self.cooldown += Math.max(
@@ -623,6 +627,7 @@ function strike(
     { level: target.level, stats: effectiveStats(target) },
     rng,
     multiplier,
+    skill,
   )
   if (result.kind === 'miss') {
     events.push({ type: 'miss', target: targetSide })

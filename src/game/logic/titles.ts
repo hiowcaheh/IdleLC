@@ -31,6 +31,17 @@ export function pruneTitles<C extends Titled>(character: C, now: number): C {
   return { ...character, titles, activeTitle: worn ? character.activeTitle : null }
 }
 
+/** Active title valid at the calculation time; synthetic estimates may omit ownership. */
+export function activeTitleId(
+  character: { activeTitle?: number | null; titles?: readonly OwnedTitle[] },
+  now: number,
+): number | null {
+  const id = character.activeTitle ?? null
+  if (id === null || character.titles === undefined) return id
+  const owned = character.titles.find((title) => title.id === id)
+  return owned && live(owned, now) ? id : null
+}
+
 /** The worn title, if the character still has it. */
 export function wornTitle(character: Titled, now?: number): TitleDef | undefined {
   const id = character.activeTitle

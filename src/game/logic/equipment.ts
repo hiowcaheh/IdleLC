@@ -98,8 +98,10 @@ export function applyGear(
   classId: ClassId,
   level: number,
   equipment: Equipment | undefined,
+  extraOptions: readonly ItemOption[] = [],
 ): CombatStats {
-  if (!equipment) return stats
+  if (!equipment)
+    return applyStats(stats, optionEffects(extraOptions, classId, level, equipment, stats))
   const reference = gearReference(classId, level)
   const ratio = (power: number, typical: number) => (typical > 0 ? power / typical : 1)
   const weapon = equipment.weapon
@@ -109,7 +111,10 @@ export function applyGear(
   }, 0)
   const weaponRatio = ratio(weapon ? piecePower(weapon) : 0, reference.weapon)
   const armorRatio = ratio(armorPower, reference.armor)
-  const options = Object.values(equipment).flatMap((piece) => piece?.options ?? [])
+  const options = [
+    ...Object.values(equipment).flatMap((piece) => piece?.options ?? []),
+    ...extraOptions,
+  ]
   const withGear: CombatStats = {
     ...stats,
     attack: Math.max(
@@ -119,7 +124,7 @@ export function applyGear(
     defense: Math.round(stats.defense * (NAKED_DEFENSE + (1 - NAKED_DEFENSE) * armorRatio)),
     attackInterval: (weapon && getItem(weapon.itemId).gear?.attackInterval) || stats.attackInterval,
   }
-  return applyStats(withGear, optionEffects(options, classId))
+  return applyStats(withGear, optionEffects(options, classId, level, equipment, stats))
 }
 
 /** The class's free starter set, worn. */

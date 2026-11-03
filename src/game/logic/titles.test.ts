@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createCharacterData } from './character.ts'
 import { playerFighter } from './fighters.ts'
 import {
+  activeTitleId,
   DAY_MS,
   NEWBIE_TITLE,
   applyLevelTitles,
@@ -67,9 +68,23 @@ describe('titles', () => {
       { type: 0, level: 2 },
       { type: 20, level: 3 },
     ])
-    const withTitle = playerFighter(owned).stats
-    const without = playerFighter({ ...owned, activeTitle: null }).stats
+    const withTitle = playerFighter(owned, NOW).stats
+    const without = playerFighter({ ...owned, activeTitle: null }, NOW).stats
     expect(withTitle.attack).toBeGreaterThan(without.attack)
+  })
+
+  it('uses Newbie HP/MP percentages while worn, and removes them at expiry', () => {
+    const fresh = createCharacterData({ name: 'Ann', classId: 'mage' }, 'b', NOW)
+    expect(titleOptions(fresh.activeTitle)).toEqual([
+      { type: 71, level: 6 },
+      { type: 72, level: 6 },
+    ])
+    const withTitle = playerFighter(fresh, NOW).stats
+    const without = playerFighter({ ...fresh, activeTitle: null }, NOW).stats
+    expect(withTitle.maxHp).toBeGreaterThan(without.maxHp)
+    expect(withTitle.maxMp).toBeGreaterThan(without.maxMp!)
+    expect(activeTitleId(fresh, NOW + 7 * DAY_MS)).toBeNull()
+    expect(playerFighter(fresh, NOW + 7 * DAY_MS).stats).toEqual(without)
   })
 
   it('a new character wears Newbie for 7 days; level 50 gives Rising Star once', () => {

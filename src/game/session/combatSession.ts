@@ -17,6 +17,7 @@ import {
   type DrinkProblem,
   type FighterInit,
 } from '../logic/combat.ts'
+import { activeTitleId } from '../logic/titles.ts'
 import { getItem } from '../data/items.ts'
 import { monsterFighter, playerFighter, type Hero } from '../logic/fighters.ts'
 import type { ItemStack } from '../logic/loot.ts'
@@ -32,6 +33,8 @@ const NOBODY: FighterInit = {
 export class CombatSession {
   private combat: CombatState
   private readonly rng: Rng
+  private hero: Hero | null = null
+  private titleId: number | null = null
   /** Potions reported to the service and not yet settled (not off the character's inventory yet). */
   private readonly reported = new Map<number, number>()
 
@@ -46,16 +49,20 @@ export class CombatSession {
 
   /** Starts a fresh fight for a character against a monster (entering the game). */
   start(hero: Hero, monsterId: string): void {
+    this.trackTitle(hero)
     this.combat = createCombat(this.fighter(hero), monsterId, monsterFighter(monsterId))
   }
 
   /** A fresh fight after `awaySeconds` away (expedition), keeping the hero's HP and MP. */
   resume(hero: Hero, monsterId: string, awaySeconds: number): void {
+    this.trackTitle(hero)
     const next = createCombat(this.fighter(hero), monsterId, monsterFighter(monsterId))
     this.combat = carryVitals(this.combat, next, awaySeconds)
   }
 
   tick(dt: number): CombatEvent[] {
+    if (this.hero && activeTitleId(this.hero, Date.now()) !== this.titleId)
+      this.setPlayer(this.hero)
     const { state, events } = combatTick(this.combat, dt, this.rng)
     this.combat = state
     return events
@@ -70,7 +77,13 @@ export class CombatSession {
 
   /** New level, skills, gear or potions, keeping the HP and MP ratios. */
   setPlayer(hero: Hero): void {
+    this.trackTitle(hero)
     this.combat = updatePlayer(this.combat, this.fighter(hero))
+  }
+
+  private trackTitle(hero: Hero): void {
+    this.hero = hero
+    this.titleId = activeTitleId(hero, Date.now())
   }
 
   /**

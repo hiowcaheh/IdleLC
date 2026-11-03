@@ -8,7 +8,9 @@ import { clamp } from './balance.ts'
 import type { CharacterData } from './character.ts'
 import { TIMINGS } from './combat.ts'
 import { lootTable, rollDrops, stowDrops, takeFromInventory, type ItemStack } from './loot.ts'
-import { applyPlayTime, type OptionGain } from './options.ts'
+import { applyPlayTime, optionValue, type OptionGain } from './options.ts'
+import type { Hero } from './fighters.ts'
+import { activeTitleId, pruneTitles, titleOptions } from './titles.ts'
 import { gainExp } from './progression.ts'
 import type { Rng } from './rng.ts'
 import { recordKills } from './spots.ts'
@@ -64,12 +66,18 @@ export interface RewardBonuses {
   drop: number
 }
 
-/**
- * The character's reward bonuses. Nothing raises them yet: items and events that do (LC options
- * such as "EXP(%)") come later, and the payouts will apply them here.
- */
-export function rewardBonuses(_character: CharacterData): RewardBonuses {
-  return { exp: 0, sp: 0, gold: 0, drop: 0 }
+/** EXP/SP options from worn equipment and the still-valid title share one sum. */
+export function rewardBonuses(character: Hero, now = Date.now()): RewardBonuses {
+  const options = [
+    ...Object.values(character.equipment ?? {}).flatMap((piece) => piece?.options ?? []),
+    ...titleOptions(activeTitleId(character, now)),
+  ]
+  const bonuses = { exp: 0, sp: 0, gold: 0, drop: 0 }
+  for (const option of options) {
+    if (option.type === 82) bonuses.exp += optionValue(option)
+    if (option.type === 83) bonuses.sp += optionValue(option)
+  }
+  return bonuses
 }
 
 /** Most kills a report may hold after `elapsedSeconds` of real time at a given game speed. */
@@ -82,8 +90,20 @@ export function maxKills(elapsedSeconds: number, timeScale = 1): number {
  * Reward for one kill: t_npc.a_exp, a_prize and a_skill_point 1:1. Level-difference rules and
  * party bonuses come with the LC server code.
  */
-export function killReward(monster: MonsterDef): { exp: number; gold: number; sp: number } {
-  return { exp: monster.exp, gold: monster.gold, sp: monster.sp ?? 0 }
+export function killReward(
+  monster: MonsterDef,
+  hero?: Hero,
+  now = Date.now(),
+): { exp: number; gold: number; sp: number } {
+  const bonuses = hero ? rewardBonuses(hero, now) : { exp: 0, sp: 0 }
+  // Source options add an integer percentage to each kill's reward, before batching kills.
+  const withBonus = (value: number, percent: number) =>
+    Math.max(0, value + Math.trunc((value * percent) / 100))
+  return {
+    exp: withBonus(monster.exp, bonuses.exp),
+    gold: monster.gold,
+    sp: withBonus(monster.sp ?? 0, bonuses.sp),
+  }
 }
 
 /**
@@ -97,10 +117,12 @@ export function applyCombatReport(
   allowedKills: number,
   rng: Rng,
   playSeconds = 0,
+  now = Date.now(),
 ): CombatResult {
+  character = pruneTitles(character, now)
   const kills = clamp(Math.floor(report.kills), 0, Math.max(0, allowedKills))
   const deaths = Math.max(0, Math.floor(report.deaths))
-  const reward = killReward(monster)
+  const reward = killReward(monster, character, now)
   const exp = reward.exp * kills
   const gold = reward.gold * kills
   const sp = reward.sp * kills

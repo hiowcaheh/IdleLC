@@ -4,14 +4,9 @@
 import { MAX_LEVEL } from '../data/progression.ts'
 import type { ClassDef, CombatStats } from '../data/types.ts'
 import { chance, type Rng } from './rng.ts'
+import { ratingHitChance, rollRatings } from './ratings.ts'
 
 export { MAX_LEVEL }
-
-/** Hit chance at equal levels, change per level of difference, and its bounds. */
-export const BASE_HIT_CHANCE = 0.92
-export const HIT_CHANCE_PER_LEVEL = 0.02
-export const MIN_HIT_CHANCE = 0.5
-export const MAX_HIT_CHANCE = 0.98
 
 /** Damage is multiplied by a uniform roll in [1 - variance, 1 + variance]. */
 export const DAMAGE_VARIANCE = 0.1
@@ -48,10 +43,31 @@ export function baseDamage(attack: number, defense: number): number {
   return Math.max(1, (attack * attack) / (attack + Math.max(0, defense)))
 }
 
-/** `bonus`: attacker's hit minus defender's dodge, in percentage points (skills). */
-export function hitChance(attackerLevel: number, defenderLevel: number, bonus = 0): number {
-  const raw = BASE_HIT_CHANCE + HIT_CHANCE_PER_LEVEL * (attackerLevel - defenderLevel) + bonus / 100
-  return clamp(raw, MIN_HIT_CHANCE, MAX_HIT_CHANCE)
+/** Raw rating adjustment: PC.cpp:6301–6383 and NPC.cpp:328–355. */
+function attackRatings(
+  attackerLevel: number,
+  defenderLevel: number,
+  hit: number,
+  avoid: number,
+  avoidPerLevel: number,
+) {
+  const difference = attackerLevel - defenderLevel
+  return {
+    hit: Math.max(0, hit + difference),
+    avoid: Math.max(0, avoid - difference * avoidPerLevel),
+  }
+}
+
+/** Analytic chance of winning the two integer rating rolls; 100/16 is the placeholder adapter. */
+export function hitChance(
+  attackerLevel: number,
+  defenderLevel: number,
+  hit = 100,
+  avoid = 16,
+  avoidPerLevel = 1,
+): number {
+  const ratings = attackRatings(attackerLevel, defenderLevel, hit, avoid, avoidPerLevel)
+  return ratingHitChance(ratings.hit, ratings.avoid)
 }
 
 export function regenPerSecond(maxHp: number): number {
@@ -79,9 +95,16 @@ export function rollAttack(
   defender: AttackRollInput,
   rng: Rng,
   multiplier = 1,
+  skill = false,
 ): AttackResult {
-  const bonus = (attacker.stats.hit ?? 0) - (defender.stats.dodge ?? 0)
-  if (!chance(rng, hitChance(attacker.level, defender.level, bonus))) {
+  const ratings = attackRatings(
+    attacker.level,
+    defender.level,
+    attacker.stats.hit ?? 100,
+    defender.stats.dodge ?? 16,
+    defender.stats.avoidPerLevel ?? 1,
+  )
+  if (!rollRatings(ratings.hit, ratings.avoid, rng)) {
     return { kind: 'miss', damage: 0 }
   }
 
@@ -92,5 +115,14 @@ export function rollAttack(
     variance *
     multiplier *
     (crit ? attacker.stats.critMultiplier : 1)
-  return { kind: crit ? 'crit' : 'hit', damage: Math.max(1, Math.round(raw)) }
+  let damage = Math.max(1, Math.round(raw))
+  // Battle_GetDamage.cpp:1559–1568: blocking halves normal damage, after integer damage calculation.
+  if (
+    !skill &&
+    (defender.stats.blockChance ?? 0) > 0 &&
+    chance(rng, (defender.stats.blockChance ?? 0) / 100)
+  ) {
+    damage = Math.max(1, Math.trunc(damage / 2))
+  }
+  return { kind: crit ? 'crit' : 'hit', damage }
 }

@@ -4,11 +4,12 @@ import { getItem } from '../data/items.ts'
 import { lcData } from '../data/lcSource.ts'
 import { getMonster } from '../data/monsters.ts'
 import type { ClassId } from '../data/types.ts'
+import { classAttributes } from './attributes.ts'
+import { classRatings } from './ratings.ts'
 import { statsForLevel } from './balance.ts'
 import type { FighterInit, PotionSupply } from './combat.ts'
 import { applyGear, wielded, type Equipment } from './equipment.ts'
 import { lcPlayerStats } from './lcBalance.ts'
-import { optionEffects } from './options.ts'
 import type { ItemStack } from './loot.ts'
 import { POTION_GROUPS, countOwned, potionGroup, type PotionSlots } from './potions.ts'
 import {
@@ -18,7 +19,7 @@ import {
   wieldableRanks,
   type LearnedSkill,
 } from './skills.ts'
-import { titleOptions } from './titles.ts'
+import { activeTitleId, titleOptions, type OwnedTitle } from './titles.ts'
 
 /** What the hero's fighter depends on (a CharacterData fits). */
 export interface Hero {
@@ -34,6 +35,7 @@ export interface Hero {
   potionSlots?: PotionSlots
   /** The worn title: its options count like gear options. */
   activeTitle?: number | null
+  titles?: readonly OwnedTitle[]
 }
 
 /**
@@ -53,13 +55,18 @@ export function potionSupply({ level, inventory = [], potionSlots }: Hero): Poti
   })
 }
 
-export function playerFighter(hero: Hero): FighterInit {
+export function playerFighter(hero: Hero, now = Date.now()): FighterInit {
   const { classId, level, skills = {}, equipment, skillBar } = hero
   const base = statsForLevel(CLASSES[classId], level)
   // LC data: class stats are not in the LC database yet — scale against LC monsters instead
   const levelStats = lcData ? lcPlayerStats(level, lcData.monsters, base) : base
-  const withGear = applyGear(levelStats, classId, level, equipment)
-  const stats = applyStats(withGear, optionEffects(titleOptions(hero.activeTitle), classId))
+  const stats = applyGear(
+    { ...levelStats, ...classAttributes(classId, level), ...classRatings(classId, level) },
+    classId,
+    level,
+    equipment,
+    titleOptions(activeTitleId(hero, now)),
+  )
   // skills that need other gear (a shield, another weapon) are left out; estimates assume the gear fits
   const learned = learnedRanks(classId, skills)
   const ranks = equipment ? wieldableRanks(learned, wielded(equipment)) : learned
@@ -72,7 +79,7 @@ export function playerFighter(hero: Hero): FighterInit {
 }
 
 /** Changes whenever the hero's fighter would (level, skills, auto settings, bar, gear, potions). */
-export function heroKey(hero: Hero): string {
+export function heroKey(hero: Hero, now = Date.now()): string {
   const { classId, level, skills = {}, equipment, skillBar } = hero
   const learned = Object.keys(skills)
     .sort()
@@ -94,7 +101,9 @@ export function heroKey(hero: Hero): string {
   const potions = potionSupply(hero)
     .map((p) => `${p.itemId}x${p.count}`)
     .join(',')
-  const title = hero.activeTitle ?? 'none'
+  const active = activeTitleId(hero, now)
+  const owned = hero.titles?.find((title) => title.id === active)
+  const title = active === null ? 'none' : `${active}@${owned?.expiresAt ?? 'permanent'}`
   return `${classId}/${level}/${learned.join(',')}/${worn}/${skillBar?.join(',') ?? 'all'}/${potions}/${title}`
 }
 

@@ -14,11 +14,23 @@ export interface CombatStats {
   /** HP and MP regenerated per second on top of the base regeneration (skills). */
   hpRegen?: number
   mpRegen?: number
-  /** Percentage points added to the hit chance of this fighter / taken off the attacker's. */
+  /** Raw hit and avoidance ratings at equal levels. */
   hit?: number
   dodge?: number
+  /** Avoidance adjustment per level of advantage: PC 10, NPC 1. */
+  avoidPerLevel?: number
+  strength?: number
+  dexterity?: number
+  intelligence?: number
+  constitution?: number
   /** Seconds added to every skill's cast time (negative = faster casting). */
   castTime?: number
+  /** Percent reduction of skill ready time (STAT23). */
+  castSpeed?: number
+  /** Seconds added to skill reuse time (STAT8), separate from ready time. */
+  reuseTime?: number
+  /** Percent chance to halve a normal attack; skills bypass this option. */
+  blockChance?: number
   /** % shorter skill cooldowns and % less mana for skills (rare options). */
   cooldownReduction?: number
   mpCostReduction?: number

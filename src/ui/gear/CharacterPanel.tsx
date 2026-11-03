@@ -94,6 +94,18 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   // rare options with the caps combat applies
   const capped = (value: number | undefined, cap: number) => Math.min(cap * 100, value ?? 0)
   const statRows: [string, string, string?][] = [
+    ['Strength', fmt(stats.strength ?? 0), change(stats.strength ?? 0, base.strength ?? 0)],
+    ['Dexterity', fmt(stats.dexterity ?? 0), change(stats.dexterity ?? 0, base.dexterity ?? 0)],
+    [
+      'Intelligence',
+      fmt(stats.intelligence ?? 0),
+      change(stats.intelligence ?? 0, base.intelligence ?? 0),
+    ],
+    [
+      'Constitution',
+      fmt(stats.constitution ?? 0),
+      change(stats.constitution ?? 0, base.constitution ?? 0),
+    ],
     ['Health', fmt(stats.maxHp), change(stats.maxHp, base.maxHp)],
     ['Mana', fmt(stats.maxMp ?? 0), change(stats.maxMp ?? 0, base.maxMp ?? 0)],
     ['Attack', fmt(stats.attack), change(stats.attack, base.attack)],
@@ -113,8 +125,8 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
       change(stats.critChance * 100, base.critChance * 100, 1),
     ],
     ['Critical damage', `×${stats.critMultiplier.toFixed(2)}`],
-    ['Hit Rate', `+${percent(stats.hit ?? 0)}`, change(stats.hit ?? 0, base.hit ?? 0, 1)],
-    ['Evasion', `+${percent(stats.dodge ?? 0)}`, change(stats.dodge ?? 0, base.dodge ?? 0, 1)],
+    ['Hit Rate', fmt(stats.hit ?? 0), change(stats.hit ?? 0, base.hit ?? 0)],
+    ['Evasion', fmt(stats.dodge ?? 0), change(stats.dodge ?? 0, base.dodge ?? 0)],
     [
       'HP recovery',
       `+${fmt(Math.round(hpRecovery))} / ${REGEN_TICK_SECONDS}s`,
@@ -125,6 +137,9 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
       `+${fmt(Math.round(mpRecovery))} / ${REGEN_TICK_SECONDS}s`,
       change(mpRecovery, base.mpRegen ?? 0),
     ],
+    ['Cast speed', signed(stats.castSpeed ?? 0)],
+    ['Skill reuse time', `${(stats.reuseTime ?? 0).toFixed(1)} s`],
+    ['Block chance', signed(stats.blockChance ?? 0)],
     ['Skill cooldown', signed(-capped(stats.cooldownReduction, MAX_COOLDOWN_REDUCTION))],
     ['Skill MP cost', signed(-capped(stats.mpCostReduction, MAX_MP_COST_REDUCTION))],
     ['HP steal', signed(stats.hpSteal ?? 0)],

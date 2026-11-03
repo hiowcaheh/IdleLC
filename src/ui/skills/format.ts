@@ -50,6 +50,14 @@ const STAT_LABELS: Record<StatKey, string> = {
   attack: 'Attack',
   defense: 'Defense',
   maxHp: 'Max HP',
+  maxHp450: 'Max HP (450 cap)',
+  strength: 'Strength',
+  dexterity: 'Dexterity',
+  intelligence: 'Intelligence',
+  constitution: 'Constitution',
+  castSpeed: 'Cast speed',
+  reuseTime: 'Skill reuse time',
+  blockChance: 'Block chance',
   maxMp: 'Max MP',
   hit: 'Hit Rate',
   dodge: 'Evasion',
@@ -73,8 +81,6 @@ const signed = (n: number, unit = '') =>
 function statValue(stat: StatKey, value: number, percent: boolean): string {
   if (percent) return signed(value, '%')
   switch (stat) {
-    case 'hit':
-    case 'dodge':
     case 'critChance':
       return signed(value / 10, '%')
     case 'critMultiplier':
@@ -82,7 +88,11 @@ function statValue(stat: StatKey, value: number, percent: boolean): string {
     case 'attackSpeed':
       return signed(value / 10, ' s')
     case 'castTime':
+    case 'reuseTime':
       return signed(value / 10, ' s')
+    case 'castSpeed':
+    case 'blockChance':
+      return signed(value, '%')
     case 'hpRegen':
     case 'mpRegen':
       return `${signed(value)} / ${REGEN_TICK_SECONDS} s`
@@ -102,7 +112,7 @@ export function activeEffectRows(
     label: STAT_LABELS[s.stat],
     value: statValue(s.stat, s.value, s.percent),
     // casting takes longer with a positive change; every other stat is worse when it drops
-    bad: s.stat === 'castTime' ? s.value > 0 : s.value < 0,
+    bad: s.stat === 'castTime' || s.stat === 'reuseTime' ? s.value > 0 : s.value < 0,
   }))
   if (effect.hpPerSecond)
     rows.push({ label: 'HP per second', value: `+${effect.hpPerSecond}`, bad: false })

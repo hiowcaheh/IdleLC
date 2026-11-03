@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { getItem } from '../data/items.ts'
+import { getItem, getOption } from '../data/items.ts'
 import { createCharacterData, type CharacterData } from './character.ts'
-import { checkWear } from './equipment.ts'
+import { applyGear, checkWear } from './equipment.ts'
 import { createRng } from './rng.ts'
 import {
   MAX_OPTIONS,
@@ -36,18 +36,25 @@ describe('item options', () => {
   it('give their value to the classes they help', () => {
     expect(optionValue({ type: 0, level: 2 })).toBe(6)
     expect(optionHelps({ type: 0 }, 'knight')).toBe(true)
-    expect(optionHelps({ type: 0 }, 'mage')).toBe(false)
+    expect(optionHelps({ type: 0 }, 'mage')).toBe(true)
     const options = [
       { type: 0, level: 3 },
       { type: 11, level: 2 },
       { type: 21, level: 2 },
     ]
     expect(optionEffects(options, 'knight')).toEqual([
+      { kind: 'stat', stat: 'strength', value: 8, percent: false },
+      { kind: 'stat', stat: 'maxHp', value: 32, percent: false },
       { kind: 'stat', stat: 'attack', value: 8, percent: false },
       { kind: 'stat', stat: 'defense', value: 2, percent: false },
       { kind: 'stat', stat: 'hit', value: 37, percent: false },
     ])
-    expect(optionEffects(options, 'mage').map((e) => e.stat)).toEqual(['defense', 'hit'])
+    expect(optionEffects(options, 'mage').map((e) => e.stat)).toEqual([
+      'strength',
+      'maxHp',
+      'defense',
+      'hit',
+    ])
   })
 })
 
@@ -112,5 +119,59 @@ describe('options from play time', () => {
     expect(optionEffects([{ type: 58, level: 2 }], 'mage')).toEqual([
       { kind: 'stat', stat: 'cooldownReduction', value: 30, percent: false },
     ])
+  })
+})
+
+describe('source option bases', () => {
+  const stats = {
+    maxHp: 1000,
+    maxMp: 500,
+    attack: 100,
+    defense: 50,
+    attackInterval: 1,
+    critChance: 0,
+    critMultiplier: 1.5,
+  }
+  it('applies every attribute to all classes with source HP/MP consequences and AllStats', () => {
+    const options = [{ type: 99, level: 1 }]
+    const value = getOption(99)!.values[0]!
+    const knight = applyGear(stats, 'knight', 20, {
+      accessory1: { uid: 'x', itemId: 166, plus: 0, options },
+    })
+    const bare = applyGear(stats, 'knight', 20, {})
+    expect(knight.maxHp - bare.maxHp).toBe(value * 15)
+    expect(knight.maxMp! - bare.maxMp!).toBe(value * 8)
+    expect(knight.strength).toBe(value)
+    const mage = optionEffects([{ type: 0, level: 2 }], 'mage')
+    expect(mage).toContainEqual({ kind: 'stat', stat: 'maxHp', value: 18, percent: false })
+  })
+
+  it('uses source base attributes for rates rather than previous flat options', () => {
+    const options = [
+      { type: 0, level: 2 },
+      { type: 67, level: 1 },
+    ]
+    const expected = 6 + Math.trunc((76 * getOption(67)!.values[0]!) / 100)
+    const values = optionEffects(options, 'knight', 20).filter(
+      (effect) => effect.stat === 'strength',
+    )
+    expect(values.reduce((sum, effect) => sum + effect.value, 0)).toBe(expected)
+    expect(
+      optionEffects([...options].reverse(), 'knight', 20)
+        .filter((effect) => effect.stat === 'strength')
+        .reduce((sum, effect) => sum + effect.value, 0),
+    ).toBe(expected)
+  })
+
+  it('maps block independently of evasion and composes move speed multiplicatively', () => {
+    expect(optionEffects([{ type: 63, level: 1 }], 'knight')[0]?.stat).toBe('blockChance')
+    const speed = [
+      { type: 64, level: 1 },
+      { type: 64, level: 2 },
+    ]
+    const result = applyGear(stats, 'knight', 1, {
+      accessory1: { uid: 'x', itemId: 166, plus: 0, options: speed },
+    })
+    expect(result.moveSpeed).toBeCloseTo(32)
   })
 })

@@ -10,6 +10,7 @@ import { monsterFighter, playerFighter, type Hero } from './fighters.ts'
 import { lootTable, rollDrops, stowDrops, takeFromInventory, type ItemStack } from './loot.ts'
 import { gainExp } from './progression.ts'
 import { killReward } from './rewards.ts'
+import { activeTitleId, pruneTitles } from './titles.ts'
 import { recordKills } from './spots.ts'
 import type { Rng } from './rng.ts'
 
@@ -92,9 +93,15 @@ export interface HourlyEstimate extends HuntRate {
 }
 
 /** What an hour of hunting `monsterId` is worth to the hero (level and skills) right now. */
-export function estimateHourly(hero: Hero, monsterId: string, rng: Rng): HourlyEstimate {
-  const rate = measureHuntRate(playerFighter(hero), monsterFighter(monsterId), rng)
-  const reward = killReward(getMonster(monsterId))
+export function estimateHourly(
+  hero: Hero,
+  monsterId: string,
+  rng: Rng,
+  now = Date.now(),
+): HourlyEstimate {
+  const current = { ...hero, activeTitle: activeTitleId(hero, now) }
+  const rate = measureHuntRate(playerFighter(current, now), monsterFighter(monsterId), rng)
+  const reward = killReward(getMonster(monsterId), current, now)
   const kills = rate.killsPerHour * AFK_EFFICIENCY
   return {
     ...rate,
@@ -108,10 +115,16 @@ export function estimateHourly(hero: Hero, monsterId: string, rng: Rng): HourlyE
  * Pays `awaySeconds` of AFK hunting (capped at 8 h) of the expedition's monster — or the current
  * one — and returns the character with the rewards added and the potions it drank taken away.
  */
-export function simulateAfk(character: CharacterData, awaySeconds: number, rng: Rng): AfkResult {
+export function simulateAfk(
+  character: CharacterData,
+  awaySeconds: number,
+  rng: Rng,
+  now = Date.now(),
+): AfkResult {
+  character = pruneTitles(character, now)
   const seconds = Math.min(Math.max(0, Math.floor(awaySeconds)), AFK_MAX_SECONDS)
   const monster = getMonster(character.expedition?.monsterId ?? character.location.monsterId)
-  const reward = killReward(monster)
+  const reward = killReward(monster, character, now)
   let { level, exp } = character
   let kills = 0
   let deaths = 0
@@ -121,7 +134,7 @@ export function simulateAfk(character: CharacterData, awaySeconds: number, rng: 
   const rates = new Map<string, HuntRate>()
   const rateAt = (lvl: number) => {
     const inventory = [...stock].map(([itemId, count]) => ({ itemId, count }))
-    const player = playerFighter({ ...character, level: lvl, inventory })
+    const player = playerFighter({ ...character, level: lvl, inventory }, now)
     const key = `${lvl}/${player.potions?.map((p) => p.itemId).join(',') ?? ''}`
     let rate = rates.get(key)
     if (!rate) {

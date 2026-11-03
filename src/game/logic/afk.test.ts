@@ -4,6 +4,7 @@ import { getMonster } from '../data/monsters.ts'
 import { AFK_MAX_SECONDS, estimateHourly, measureHuntRate, simulateAfk } from './afk.ts'
 import { createCharacterData } from './character.ts'
 import { combatTick, createCombat, type FighterInit } from './combat.ts'
+import { killReward } from './rewards.ts'
 import { expToNextLevel } from './progression.ts'
 import { createRng } from './rng.ts'
 
@@ -86,6 +87,42 @@ describe('simulateAfk', () => {
     const golem = getMonster('rust-golem')
     expect(estimate.expPerHour).toBeCloseTo(estimate.killsPerHour * golem.exp)
     expect(estimate.goldPerHour).toBeCloseTo(estimate.killsPerHour * golem.gold)
+  })
+
+  it('uses EXP/SP option rewards in both AFK payouts and hourly estimates', () => {
+    const boosted = {
+      ...hero,
+      titles: [],
+      activeTitle: null,
+      equipment: {
+        ...hero.equipment,
+        accessory1: {
+          uid: 'bonus',
+          itemId: 166,
+          plus: 0,
+          options: [
+            { type: 82, level: 2 },
+            { type: 83, level: 3 },
+          ],
+        },
+      },
+    }
+    const monster = getMonster(hero.location.monsterId)
+    const reward = killReward(monster, boosted, 1000)
+    const payout = simulateAfk(boosted, 3600, createRng(7), 1000)
+    expect(payout.exp).toBe(payout.kills * reward.exp)
+    expect(payout.sp).toBe(payout.kills * reward.sp)
+    const estimate = estimateHourly(boosted, monster.id, createRng(7), 1000)
+    expect(estimate.expPerHour).toBeCloseTo(estimate.killsPerHour * reward.exp)
+    expect(estimate.spPerHour).toBeCloseTo(estimate.killsPerHour * reward.sp)
+    const plain = estimateHourly(
+      { ...boosted, equipment: hero.equipment },
+      monster.id,
+      createRng(7),
+      1000,
+    )
+    expect(estimate.killsPerHour).toBe(plain.killsPerHour)
+    expect(estimate.expPerHour).toBeGreaterThan(plain.expPerHour)
   })
 
   it('drinks the potions of its quick slots against a tough monster, never more than it has', () => {

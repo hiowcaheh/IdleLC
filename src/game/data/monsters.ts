@@ -64,6 +64,9 @@ export function fromLc(m: LcMonster): MonsterDef {
     level: m.level,
     stats: {
       maxHp: m.hp,
+      hit: m.hit,
+      dodge: m.dodge,
+      avoidPerLevel: 1,
       attack: m.attack,
       defense: m.defense,
       attackInterval: Math.max(0.6, m.attackSpeed / 10),

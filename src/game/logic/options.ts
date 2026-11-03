@@ -8,7 +8,15 @@
  * options of those sets (skill cooldown, move speed, HP steal…) only come from there.
  */
 import { EQUIP_SLOTS, OPTIONS, getItem, getOption } from '../data/items.ts'
-import type { ClassId, EquipSlot, GearDef, OptionDef } from '../data/types.ts'
+import type { ClassId, CombatStats, EquipSlot, GearDef, OptionDef } from '../data/types.ts'
+import {
+  ATTRIBUTE_KEYS,
+  HP_COEFFICIENT,
+  MP_COEFFICIENT,
+  classAttributes,
+  classResources,
+} from './attributes.ts'
+import { classRatings } from './ratings.ts'
 import type { CharacterData } from './character.ts'
 import type { Equipment, GearPiece } from './equipment.ts'
 import { isRare } from './rare.ts'
@@ -33,9 +41,6 @@ export const MAX_OPTIONS = 5
  */
 export const OPTION_PLAY_SECONDS = 600
 
-/** Constitution → max HP per point (own value). */
-export const HP_PER_CONSTITUTION = 5
-
 const STRENGTH: ClassId[] = ['titan', 'knight']
 const DEXTERITY: ClassId[] = ['healer', 'rogue']
 const INTELLIGENCE: ClassId[] = ['mage', 'sorcerer']
@@ -59,14 +64,14 @@ export const LEVEL_OPTION = 49
 
 /**
  * What each t_option type does in IdleLC (one attack stat, one defense stat; hit and evasion in
- * 1/10 % like the skills). Elemental options (26–35) and the special ones have no counterpart yet and
+ * raw points). Elemental options (26–35) and the special ones have no counterpart yet and
  * never roll.
  */
 export const OPTION_EFFECTS: Record<number, OptionEffect> = {
-  0: { stat: 'attack', classes: STRENGTH }, // Strength
-  1: { stat: 'attack', classes: DEXTERITY }, // Dexterity
-  2: { stat: 'attack', classes: INTELLIGENCE }, // Intelligence
-  3: { stat: 'maxHp', scale: HP_PER_CONSTITUTION }, // Constitution
+  0: { stat: 'strength' },
+  1: { stat: 'dexterity' },
+  2: { stat: 'intelligence' },
+  3: { stat: 'constitution' },
   4: { stat: 'maxHp' }, // HP
   5: { stat: 'maxMp' }, // MP
   6: { stat: 'attack', classes: PHYSICAL }, // Physical Attack
@@ -98,9 +103,24 @@ export const OPTION_EFFECTS: Record<number, OptionEffect> = {
   57: { stat: 'mpRegen' }, // MP Regen
   58: { stat: 'cooldownReduction' }, // Skill Cool Down Reduction (%)
   59: { stat: 'mpCostReduction' }, // Decrease MP Consumption (%)
-  63: { stat: 'dodge', percent: true }, // Block Rate (%)
+  63: { stat: 'blockChance' }, // Halves normal attack damage; does not affect avoidance
   64: { stat: 'moveSpeed' }, // Move Speed (%)
-  66: { stat: 'critMultiplier' }, // Increase Deadly Chance (% critical damage)
+  66: { stat: 'critMultiplier' }, // Legacy adapter: source deadly weights are not yet modeled
+  67: { stat: 'strength', percent: true },
+  68: { stat: 'dexterity', percent: true },
+  69: { stat: 'intelligence', percent: true },
+  70: { stat: 'constitution', percent: true },
+  71: { stat: 'maxHp', percent: true },
+  72: { stat: 'maxMp', percent: true },
+  73: { stat: 'attack', percent: true },
+  74: { stat: 'defense', percent: true },
+  75: { stat: 'hit', classes: PHYSICAL, percent: true },
+  76: { stat: 'hit', classes: MAGIC, percent: true },
+  77: { stat: 'dodge', classes: PHYSICAL, percent: true },
+  78: { stat: 'dodge', classes: MAGIC, percent: true },
+  79: { stat: 'hpRegen', percent: true },
+  80: { stat: 'mpRegen', percent: true },
+  99: { stat: 'strength' }, // All four attributes, expanded below
 }
 
 /**
@@ -115,7 +135,7 @@ export function optionValue(option: ItemOption): number {
 
 /** Whether the option does something for the class. */
 export function optionHelps(option: Pick<ItemOption, 'type'>, classId: ClassId): boolean {
-  if (option.type === LEVEL_OPTION) return true
+  if ([LEVEL_OPTION, 82, 83, 99].includes(option.type)) return true
   const effect = OPTION_EFFECTS[option.type]
   return effect !== undefined && (!effect.classes || effect.classes.includes(classId))
 }
@@ -173,20 +193,72 @@ export function rollOptions(itemId: number, rng: Rng): ItemOption[] {
   return options.sort((a, b) => a.type - b.type)
 }
 
-/** Stat changes of a set of options for a class (options of other classes do nothing). */
-export function optionEffects(options: readonly ItemOption[], classId: ClassId): StatEffect[] {
-  return options.flatMap((option) => {
+/**
+ * Option percentages use fixed source bases (Option.cpp:550–660), so an equipment option and a
+ * title cannot compound. Primary HP/ATK/DEF and recovery remain IdleLC's balance adapter.
+ * The single attack/defense/rating channel is still an adapter, not full physical/magic combat.
+ */
+export function optionEffects(
+  options: readonly ItemOption[],
+  classId: ClassId,
+  level = 1,
+  equipment?: Equipment,
+  stats?: CombatStats,
+): StatEffect[] {
+  const attributes = classAttributes(classId, level)
+  const resources = classResources(classId, level)
+  const ratings = classRatings(classId, level)
+  const weapon = equipment?.weapon && getItem(equipment.weapon.itemId).gear
+  const magic = MAGIC.includes(classId)
+  const armor = Object.entries(equipment ?? {}).reduce((sum, [slot, piece]) => {
+    if (slot === 'weapon' || slot.startsWith('accessory') || !piece) return sum
+    return sum + (getItem(piece.itemId).gear?.defense ?? 0)
+  }, 0)
+  const bases: Partial<Record<StatKey, number>> = {
+    ...attributes,
+    ...resources,
+    ...ratings,
+    attack: weapon ? (magic ? weapon.magicAttack : weapon.attack) : 0,
+    defense: armor,
+    hpRegen: stats?.hpRegen ?? 0,
+    mpRegen: stats?.mpRegen ?? 0,
+  }
+  const effects: StatEffect[] = []
+  const flat = (stat: StatKey, value: number) => {
+    effects.push({ kind: 'stat', stat, value, percent: false })
+  }
+  const attribute = (stat: (typeof ATTRIBUTE_KEYS)[number], value: number) => {
+    flat(stat, value)
+    const index = ATTRIBUTE_KEYS.indexOf(stat)
+    const hp = value * HP_COEFFICIENT[classId][index]!
+    const mp = value * MP_COEFFICIENT[classId][index]!
+    if (hp) flat('maxHp', hp)
+    if (mp) flat('maxMp', mp)
+    // Retain the selected offensive channel of the existing balance adapter.
+    const offensive =
+      stat === 'strength'
+        ? STRENGTH
+        : stat === 'dexterity'
+          ? DEXTERITY
+          : stat === 'intelligence'
+            ? INTELLIGENCE
+            : []
+    if (offensive.includes(classId)) flat('attack', value)
+  }
+  for (const option of options) {
     const effect = OPTION_EFFECTS[option.type]
-    if (!effect || !optionHelps(option, classId)) return []
-    return [
-      {
-        kind: 'stat' as const,
-        stat: effect.stat,
-        value: optionValue(option) * (effect.scale ?? 1),
-        percent: effect.percent ?? false,
-      },
-    ]
-  })
+    if (!effect || !optionHelps(option, classId)) continue
+    const raw = optionValue(option) * (effect.scale ?? 1)
+    const value = effect.percent ? Math.trunc(((bases[effect.stat] ?? 0) * raw) / 100) : raw
+    if (option.type === 99) {
+      for (const key of ATTRIBUTE_KEYS) attribute(key, value)
+    } else if (ATTRIBUTE_KEYS.includes(effect.stat as (typeof ATTRIBUTE_KEYS)[number])) {
+      attribute(effect.stat as (typeof ATTRIBUTE_KEYS)[number], value)
+    } else {
+      flat(effect.stat, value)
+    }
+  }
+  return effects
 }
 
 /** An option a worn piece gained from play time. */

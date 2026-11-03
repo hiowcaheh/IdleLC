@@ -145,7 +145,7 @@ export class LocalGameService implements GameService {
     const elapsed = Math.max(0, (now - character.lastPlayedAt) / 1000)
     const allowed = maxKills(elapsed, this.timeScale)
     const played = Math.min(elapsed, MAX_PLAY_GAP) * this.timeScale
-    const result = applyCombatReport(character, monster, report, allowed, this.rng, played)
+    const result = applyCombatReport(character, monster, report, allowed, this.rng, played, now)
     // active play in real seconds (dev speed-up aside)
     const playSeconds = character.stats.playSeconds + Math.min(elapsed, MAX_PLAY_GAP)
     const updated = this.update(characterId, () => ({
@@ -174,7 +174,7 @@ export class LocalGameService implements GameService {
     const now = this.now()
     const away = Math.max(0, (now - character.expedition.startedAt) / 1000)
     const counts = away >= AFK_MIN_SECONDS
-    const result = simulateAfk(character, counts ? away : 0, this.rng)
+    const result = simulateAfk(character, counts ? away : 0, this.rng, now)
     const updated = this.update(characterId, () => ({
       ...result.character,
       stats: {
@@ -365,7 +365,7 @@ export class LocalGameService implements GameService {
   private character(characterId: string): CharacterData {
     const character = this.save.characters.find((c) => c.id === characterId)
     if (!character) throw new GameError('unknown-character', `No character ${characterId}`)
-    return character
+    return pruneTitles(character, this.now())
   }
 
   private notOnExpedition(characterId: string): CharacterData {

@@ -37,6 +37,14 @@ export type StatKey =
   | 'critMultiplier'
   | 'attackSpeed'
   | 'castTime'
+  | 'castSpeed'
+  | 'reuseTime'
+  | 'maxHp450'
+  | 'blockChance'
+  | 'strength'
+  | 'dexterity'
+  | 'intelligence'
+  | 'constitution'
   | 'hpRegen'
   | 'mpRegen'
   | 'cooldownReduction'
@@ -74,14 +82,14 @@ const STAT_SUBTYPES: Record<number, StatKey> = {
   5: 'dodge',
   6: 'critChance',
   7: 'attackSpeed',
-  8: 'castTime',
+  8: 'reuseTime',
   10: 'hpRegen',
   11: 'mpRegen',
   12: 'maxHp',
   13: 'maxMp',
   14: 'critMultiplier',
-  22: 'attack', // amplification
-  23: 'attackSpeed', // haste
+  22: 'maxHp450',
+  23: 'castSpeed',
 }
 
 /** What one t_magic effect does in IdleLC, or null when it has no counterpart here (yet). */
@@ -387,23 +395,52 @@ export function wieldableRanks(ranks: readonly SkillRank[], wielded: Wielded): S
 export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): CombatStats {
   if (effects.length === 0) return stats
   const s = { ...stats }
+  const sum = (stat: StatKey, percent: boolean) =>
+    effects.reduce(
+      (total, effect) =>
+        total + (effect.stat === stat && effect.percent === percent ? effect.value : 0),
+      0,
+    )
+  // Character.cpp:419–440: ordinary flat HP, ordinary rate, then independent flat/rate 450 caps.
+  // Sum the unbounded group before capping: +300,+300,-200 must contribute +400 in any order.
+  const ordinaryHp = stats.maxHp + sum('maxHp', false)
+  const hp = ordinaryHp + Math.trunc((ordinaryHp * sum('maxHp', true)) / 100)
+  s.maxHp =
+    hp +
+    Math.min(450, sum('maxHp450', false)) +
+    Math.min(450, Math.trunc((hp * sum('maxHp450', true)) / 100))
+  if (effects.some((effect) => effect.stat === 'reuseTime')) {
+    const units = (stats.reuseTime ?? 0) * 10 + sum('reuseTime', false)
+    s.reuseTime = (units + Math.trunc((units * sum('reuseTime', true)) / 100)) / 10
+  }
+  const grouped = new Set<StatKey>([
+    'attack',
+    'defense',
+    'maxHp',
+    'maxMp',
+    'hpRegen',
+    'mpRegen',
+    'hit',
+    'dodge',
+    'strength',
+    'dexterity',
+    'intelligence',
+    'constitution',
+  ])
+  for (const stat of grouped) {
+    if (stat === 'maxHp') continue
+    if (!effects.some((effect) => effect.stat === stat)) continue
+    const base = s[stat as keyof CombatStats] ?? 0
+    const flat = sum(stat, false)
+    const rate = sum(stat, true)
+    // Hit/avoid assist rates use the pre-addition rating (Battle_GetDamage.cpp:1664–1685).
+    const delta = ((stat === 'hit' || stat === 'dodge' ? base : base + flat) * rate) / 100
+    const value = base + flat + (stat === 'maxMp' ? Math.trunc(delta) : delta)
+    Object.assign(s, { [stat]: value })
+  }
   for (const { stat, value, percent } of effects) {
+    if (grouped.has(stat) || stat === 'maxHp450' || stat === 'reuseTime') continue
     switch (stat) {
-      case 'attack':
-      case 'defense':
-      case 'maxHp':
-      case 'maxMp':
-      case 'hpRegen':
-      case 'mpRegen': {
-        const base = s[stat] ?? 0
-        s[stat] = percent ? base * (1 + value / 100) : base + value
-        break
-      }
-      case 'hit':
-      case 'dodge':
-        // percentage points of hit chance; flat powers are in 1/10 %
-        s[stat] = (s[stat] ?? 0) + (percent ? value : value / 10)
-        break
       case 'critChance':
         s.critChance += percent ? value / 100 : value / 1000
         break
@@ -419,11 +456,18 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
       case 'castTime':
         s.castTime = (s.castTime ?? 0) + value / 10
         break
+      case 'castSpeed':
+        // Only the rate group is consumed by m_skillSpeed (Character.cpp:391).
+        if (percent) s.castSpeed = (s.castSpeed ?? 0) + value
+        break
+      case 'moveSpeed':
+        s.moveSpeed = ((1 + (s.moveSpeed ?? 0) / 100) * (1 + value / 100) - 1) * 100
+        break
+      case 'blockChance':
       case 'cooldownReduction':
       case 'mpCostReduction':
       case 'hpSteal':
       case 'mpSteal':
-      case 'moveSpeed':
         // percent values (rare options)
         s[stat] = (s[stat] ?? 0) + value
         break
@@ -435,6 +479,9 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
   if (s.maxMp !== undefined) s.maxMp = Math.max(0, Math.round(s.maxMp))
   s.attackInterval = Math.max(0.3, s.attackInterval)
   s.critChance = Math.min(1, Math.max(0, s.critChance))
+  for (const key of ['strength', 'dexterity', 'intelligence', 'constitution'] as const) {
+    if (s[key] !== undefined) s[key] = Math.max(1, Math.trunc(s[key]))
+  }
   return s
 }
 

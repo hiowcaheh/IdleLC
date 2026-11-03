@@ -51,7 +51,7 @@ describe('interpretEffect', () => {
       percent: false,
     })
     expect(interpretEffect({ type: 0, subtype: 23, damageType: 2, power: 10 })).toMatchObject({
-      stat: 'attackSpeed',
+      stat: 'castSpeed',
       percent: true,
     })
     expect(interpretEffect({ type: 2, subtype: 7, damageType: 0, power: 0 })).toEqual({
@@ -271,7 +271,7 @@ describe('applyStats', () => {
     expect(s.attackInterval).toBeCloseTo(0.8)
     expect(s.critChance).toBeCloseTo(0.15)
     expect(s.critMultiplier).toBeCloseTo(1.7)
-    expect(s.hit).toBeCloseTo(4.4)
+    expect(s.hit).toBe(44)
     expect(s.defense).toBe(0)
     expect(s.maxMp).toBe(75)
   })
@@ -279,6 +279,74 @@ describe('applyStats', () => {
   it('returns the same object when nothing changes', () => {
     const base = stats()
     expect(applyStats(base, [])).toBe(base)
+  })
+
+  it('maps HP-450 and reuse time separately from attack and ready speed', () => {
+    expect(interpretEffect({ type: 0, subtype: 22, damageType: 1, power: 300 })).toMatchObject({
+      stat: 'maxHp450',
+      value: 300,
+      percent: false,
+    })
+    expect(interpretEffect({ type: 0, subtype: 8, damageType: 1, power: -10 })).toMatchObject({
+      stat: 'reuseTime',
+      value: -10,
+      percent: false,
+    })
+  })
+
+  it('sums the uncapped HP-450 group independently of effect order', () => {
+    const values = [300, 300, -200]
+    const permutations = [values, [300, -200, 300], [-200, 300, 300]]
+    for (const order of permutations) {
+      const effects = order.map((value) => ({
+        kind: 'stat' as const,
+        stat: 'maxHp450' as const,
+        value,
+        percent: false,
+      }))
+      expect(applyStats(stats(), effects).maxHp).toBe(500)
+    }
+    expect(
+      applyStats(stats(), [{ kind: 'stat', stat: 'maxHp450', value: 600, percent: false }]).maxHp,
+    ).toBe(550)
+  })
+
+  it('uses ordinary HP after flat and rate, then truncates and caps HP-450 groups separately', () => {
+    const effects = [
+      { kind: 'stat' as const, stat: 'maxHp' as const, value: 5, percent: false },
+      { kind: 'stat' as const, stat: 'maxHp' as const, value: 17, percent: true },
+      { kind: 'stat' as const, stat: 'maxHp450' as const, value: 600, percent: false },
+      { kind: 'stat' as const, stat: 'maxHp450' as const, value: 25, percent: true },
+    ]
+    // (101+5)+trunc(106*.17)=124; flat450 + trunc(124*.25)=31.
+    expect(applyStats(stats({ maxHp: 101 }), effects).maxHp).toBe(605)
+    expect(applyStats(stats({ maxHp: 101 }), [...effects].reverse()).maxHp).toBe(605)
+    expect(
+      applyStats(stats({ maxHp: 2000 }), [
+        { kind: 'stat', stat: 'maxHp450', value: 600, percent: false },
+        { kind: 'stat', stat: 'maxHp450', value: 90, percent: true },
+      ]).maxHp,
+    ).toBe(2900)
+    expect(
+      applyStats(stats({ maxHp: 101 }), [
+        { kind: 'stat', stat: 'maxHp450', value: -25, percent: true },
+      ]).maxHp,
+    ).toBe(76) // trunc(-25.25), not floor(-25.25)
+  })
+
+  it('multiplies move bonuses and keeps cast speed distinct from attack and reuse timing', () => {
+    const result = applyStats(stats(), [
+      { kind: 'stat', stat: 'moveSpeed', value: 20, percent: false },
+      { kind: 'stat', stat: 'moveSpeed', value: 20, percent: false },
+      { kind: 'stat', stat: 'castSpeed', value: 25, percent: true },
+      { kind: 'stat', stat: 'castSpeed', value: 99, percent: false },
+      { kind: 'stat', stat: 'reuseTime', value: -10, percent: false },
+    ])
+    expect(result.moveSpeed).toBeCloseTo(44)
+    expect(result.castSpeed).toBe(25)
+    expect(result.reuseTime).toBe(-1)
+    expect(result.castTime).toBeUndefined()
+    expect(result.attackInterval).toBe(1)
   })
 })
 

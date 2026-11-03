@@ -36,11 +36,16 @@ export function ExpeditionPanel({
   const monster = getMonster(expedition.monsterId)
   // whole kills only, and exp/gold paid per kill, so the three numbers move together
   const kills = Math.floor(estimate.killsPerHour * AFK_EFFICIENCY * hours)
-  const reward = killReward(monster)
+  const reward = killReward(monster, character, now)
 
   const onReturn = async () => {
+    if (busy) return
     setBusy(true)
-    await returnFromExpedition()
+    try {
+      await returnFromExpedition()
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (

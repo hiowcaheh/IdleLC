@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getMonster } from '../data/monsters.ts'
+import { TITLES } from '../data/titles.ts'
 import { createCharacterData } from './character.ts'
 import { createRng } from './rng.ts'
 import {
@@ -8,6 +9,8 @@ import {
   MIN_KILL_CYCLE,
   applyCombatReport,
   maxKills,
+  rewardBonuses,
+  killReward,
 } from './rewards.ts'
 
 describe('rewards', () => {
@@ -41,6 +44,61 @@ describe('rewards', () => {
     expect(r.character.stats.monsterKills).toEqual({ [monster.id]: 3 })
     expect(r.character.gold).toBe(3 * monster.gold)
     expect(r.character.inventory).toEqual(r.drops)
+  })
+
+  it('adds worn EXP/SP options and title options once, with integer rewards per kill', () => {
+    const hero = createCharacterData({ name: 'Brom', classId: 'knight' }, 'a', 0)
+    const title = {
+      ...TITLES[1]!,
+      id: 999,
+      options: [
+        { type: 82, level: 2 },
+        { type: 83, level: 3 },
+      ],
+    }
+    TITLES[999] = title
+    try {
+      const boosted = {
+        ...hero,
+        equipment: {
+          ...hero.equipment,
+          accessory1: { uid: 'r', itemId: 166, plus: 0, options: [{ type: 82, level: 1 }] },
+        },
+        gear: [{ uid: 'bag', itemId: 166, plus: 0, options: [{ type: 83, level: 5 }] }],
+        titles: [{ id: 999, expiresAt: 2000 }],
+        activeTitle: 999,
+      }
+      expect(rewardBonuses(boosted, 1000)).toEqual({ exp: 30, sp: 30, gold: 0, drop: 0 })
+      const monster = { ...getMonster('rust-golem'), exp: 19, sp: 17 }
+      expect(killReward(monster, boosted, 1000)).toEqual({ exp: 24, sp: 22, gold: monster.gold })
+      const report = applyCombatReport(
+        boosted,
+        monster,
+        { monsterId: monster.id, kills: 3, deaths: 0 },
+        3,
+        createRng(1),
+        0,
+        1000,
+      )
+      expect(report).toMatchObject({ exp: 72, sp: 66, gold: monster.gold * 3 })
+      expect(rewardBonuses(boosted, 2000)).toEqual({ exp: 10, sp: 0, gold: 0, drop: 0 })
+      const expired = applyCombatReport(
+        boosted,
+        monster,
+        { monsterId: monster.id, kills: 1, deaths: 0 },
+        1,
+        createRng(1),
+        0,
+        2000,
+      )
+      expect(expired).toMatchObject({
+        exp: 20,
+        sp: 17,
+        character: { activeTitle: null, titles: [] },
+      })
+    } finally {
+      delete TITLES[999]
+    }
   })
 
   it('takes the potions drunk out of the inventory, never more than there are', () => {

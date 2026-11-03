@@ -574,6 +574,78 @@ const PLACEHOLDER_OPTIONS: OptionDef[] = [
     armorMask: 0,
     accessoryMask: 0,
   },
+  // Fixed-value fixtures for supported source options; they do not enter the fallback roll pool.
+  ...[
+    {
+      type: 1,
+      name: 'Dexterity',
+      values: [
+        4, 6, 8, 12, 16, 24, 32, 50, 1, 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
+        40, 42,
+      ],
+    },
+    {
+      type: 2,
+      name: 'Intelligence',
+      values: [
+        4, 6, 8, 12, 16, 24, 32, 1, 1, 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30,
+        40, 42,
+      ],
+    },
+    {
+      type: 3,
+      name: 'Constitution',
+      values: [
+        2, 3, 4, 6, 8, 16, 24, 1, 1, 1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 38,
+        40, 42, 46,
+      ],
+    },
+    {
+      type: 4,
+      name: 'HP',
+      values: [
+        7, 22, 29, 44, 58, 100, 275, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800, 900,
+        1000, 1250, 1500, 1, 1200, 1500, 1800, 2100, 2400, 2700, 3000, 3300, 3600, 3900, 4200, 4500,
+      ],
+    },
+    {
+      type: 5,
+      name: 'MP',
+      values: [
+        7, 22, 29, 44, 58, 100, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800,
+        850, 900, 950, 1000, 1100, 1200, 2100, 2250, 1500, 150, 450, 750, 1050, 1350, 1650, 1800,
+        1950,
+      ],
+    },
+    { type: 63, name: 'Block Rate', values: [1, 2, 3, 4, 5, 10] },
+    { type: 67, name: 'Strength(%)', values: [1, 2, 3, 4, 5] },
+    { type: 68, name: 'Dexterity(%)', values: [1, 2, 3, 4, 5] },
+    { type: 69, name: 'Intelligence(%)', values: [1, 2, 3, 4, 5] },
+    { type: 70, name: 'Constitution(%)', values: [1, 2, 3, 4, 5] },
+    { type: 71, name: 'HP(%)', values: [1, 2, 3, 4, 5, 10] },
+    { type: 72, name: 'MP(%)', values: [1, 2, 3, 4, 5, 10] },
+    { type: 73, name: 'Weapon Attack(%)', values: [1, 2, 3, 4, 5] },
+    { type: 74, name: 'Armor Defense(%)', values: [1, 2, 3, 4, 5] },
+    { type: 75, name: 'Physical Hit Rate(%)', values: [1, 2, 3, 4, 5] },
+    { type: 76, name: 'Magic Hit Rate(%)', values: [1, 2, 3, 4, 5] },
+    { type: 77, name: 'Physical Evasion(%)', values: [1, 2, 3, 4, 5] },
+    { type: 78, name: 'Magic Evasion(%)', values: [1, 2, 3, 4, 5] },
+    { type: 79, name: 'HP Regen(%)', values: [1, 2, 3, 4, 5] },
+    { type: 80, name: 'MP Regen(%)', values: [1, 2, 3, 4, 5] },
+    { type: 82, name: 'EXP(%)', values: [10, 20, 30, 40, 50] },
+    { type: 83, name: 'SP(%)', values: [10, 20, 30, 40, 50, 1] },
+    {
+      type: 99,
+      name: 'All Stats (4 types)',
+      values: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30],
+    },
+  ].map((option) => ({
+    ...option,
+    weights: option.values.map(() => 0),
+    weaponMask: 0,
+    armorMask: 0,
+    accessoryMask: 0,
+  })),
 ]
 
 /** Item options (t_option) by type. */

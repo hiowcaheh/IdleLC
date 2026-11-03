@@ -35,7 +35,10 @@ const PLACEHOLDER_TITLES: TitleDef[] = [
     days: 7,
     color: '#80ff00',
     outline: '#c0c0c0',
-    options: [],
+    options: [
+      { type: 71, level: 6 },
+      { type: 72, level: 6 },
+    ],
   },
 ]
 

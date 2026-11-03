@@ -54,19 +54,38 @@ describe('baseDamage', () => {
 })
 
 describe('hitChance', () => {
-  it('is 92% at equal level and shifts 2% per level', () => {
-    expect(hitChance(5, 5)).toBeCloseTo(0.92)
-    expect(hitChance(5, 7)).toBeCloseTo(0.88)
-    expect(hitChance(7, 5)).toBeCloseTo(0.96)
+  it('uses raw ratings and the defender-specific level avoidance coefficient', () => {
+    expect(hitChance(20, 20, 168, 66, 10)).toBeCloseTo(1 - 66001 / 336000)
+    expect(hitChance(20, 22, 168, 66, 10)).toBeCloseTo(1 - 86001 / 332000)
+    expect(hitChance(20, 22, 168, 66, 1)).toBeCloseTo(1 - 68001 / 332000)
+    expect(hitChance(20, 20, 243, 66, 10)).toBeGreaterThan(hitChance(20, 20, 168, 66, 10))
   })
 
-  it('is clamped to [0.5, 0.98]', () => {
-    expect(hitChance(1, 99)).toBe(0.5)
-    expect(hitChance(99, 1)).toBe(0.98)
+  it('handles exhausted ranges deterministically without the old probability clamp', () => {
+    expect(hitChance(1, 99, 50, 50)).toBe(0)
+    expect(hitChance(99, 1)).toBe(1)
+    expect(hitChance(5, 5, 1, 1000)).toBeLessThan(0.5)
+    expect(hitChance(5, 5, 1000, 1)).toBeGreaterThan(0.98)
   })
 })
 
 describe('rollAttack', () => {
+  it('compares two independent integer rolls and treats an equal roll as a miss', () => {
+    const attacker = { level: 1, stats: stats({ hit: 1 }) }
+    const defender = { level: 1, stats: stats({ dodge: 1 }) }
+    expect(rollAttack(attacker, defender, () => 0.5).kind).toBe('miss')
+    const rolls = [0.9, 0.1, 0.5, 0.9]
+    expect(rollAttack(attacker, defender, () => rolls.shift()!).kind).toBe('hit')
+  })
+
+  it('halves integer normal damage on block but lets skill damage pass', () => {
+    const attacker = { level: 1, stats: stats() }
+    const defender = { level: 1, stats: stats({ blockChance: 100 }) }
+    const normal = rollAttack(attacker, defender, () => 0.5)
+    const skill = rollAttack(attacker, defender, () => 0.5, 1, true)
+    expect(skill.damage).toBe(7)
+    expect(normal.damage).toBe(3)
+  })
   it('never crits with 0% crit and always crits with 100% (when it lands)', () => {
     const rng = createRng(1)
     for (let i = 0; i < 200; i++) {

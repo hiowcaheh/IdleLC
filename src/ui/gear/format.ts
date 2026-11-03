@@ -1,5 +1,12 @@
 import { CLASSES } from '../../game/data/classes.ts'
-import { getItem, getOption, getRareSet, gearClasses, slotsFor } from '../../game/data/items.ts'
+import {
+  DUAL_SWORDS,
+  getItem,
+  getOption,
+  getRareSet,
+  gearClasses,
+  slotsFor,
+} from '../../game/data/items.ts'
 import type { CombatStats, EquipSlot } from '../../game/data/types.ts'
 import type { CharacterData } from '../../game/logic/character.ts'
 import { PLUS_BONUS, checkWear, requiredLevel, type GearPiece } from '../../game/logic/equipment.ts'
@@ -110,7 +117,7 @@ export function heroStats(character: CharacterData): CombatStats {
   return playerFighter(character).stats
 }
 
-/** "Strength +6", "Hit Rate +3.7%" (hit and evasion are in 1/10 %). */
+/** "Strength +6", "Hit Rate +75" (hit and evasion are raw rating points). */
 export function optionText(option: ItemOption): string {
   return optionAmount(option.type, optionValue(option))
 }
@@ -123,6 +130,7 @@ const PERCENT_STATS = new Set([
   'mpSteal',
   'moveSpeed',
   'critMultiplier',
+  'blockChance',
 ])
 
 function optionAmount(type: number, value: number): string {
@@ -130,15 +138,16 @@ function optionAmount(type: number, value: number): string {
   return `${name} ${amount}`
 }
 
-/** An option's name and amount apart: ["Hit Rate", "+3.7%"]. */
+/** An option's name and amount apart: ["Hit Rate", "+75"]. */
 function optionParts(type: number, value: number): [string, string] {
   const name = getOption(type)?.name ?? `Option ${type}`
   const effect = OPTION_EFFECTS[type]
   const tenths = (v: number) => `${Number((v / 10).toFixed(1))}%`
   if (type === LEVEL_OPTION) return [name, `−${fmt(value)}`]
+  if (type === 82 || type === 83) return [name, `+${fmt(value)}%`]
   if (effect?.percent || (effect && PERCENT_STATS.has(effect.stat)))
     return [name, `+${fmt(value)}%`]
-  if (effect?.stat === 'hit' || effect?.stat === 'dodge' || effect?.stat === 'critChance') {
+  if (effect?.stat === 'critChance') {
     return [name, `+${tenths(value)}`]
   }
   return [name, `+${fmt(value)}`]
@@ -151,7 +160,11 @@ export function optionLines(
 ): { text: string; name: string; amount: string; helps: boolean; note?: string }[] {
   return (options ?? []).map((o) => {
     const helps = optionHelps(o, classId)
-    const works = o.type === LEVEL_OPTION || OPTION_EFFECTS[o.type] !== undefined
+    const works =
+      o.type === LEVEL_OPTION ||
+      o.type === 82 ||
+      o.type === 83 ||
+      OPTION_EFFECTS[o.type] !== undefined
     const [name, amount] = optionParts(o.type, optionValue(o))
     return {
       text: `${name} ${amount}`,
@@ -173,10 +186,10 @@ export function compareText(
   const slots = slotsFor(gear)
   const slot = slots.find((s) => !character.equipment[s]) ?? slots[0]!
   const before = heroStats(character)
-  const after = playerFighter({
-    ...character,
-    equipment: { ...character.equipment, [slot]: { uid: 'preview', ...piece } },
-  }).stats
+  const equipment = { ...character.equipment, [slot]: { uid: 'preview', ...piece } }
+  // Equipping dual swords also removes the shield, including its options.
+  if (gear.slot === 'weapon' && gear.subtype === DUAL_SWORDS) delete equipment.shield
+  const after = playerFighter({ ...character, equipment }).stats
   const parts: string[] = []
   const delta = (label: string, a: number, b: number) => {
     const d = Math.round(b - a)
@@ -186,12 +199,8 @@ export function compareText(
   delta('Defense', before.defense, after.defense)
   delta('HP', before.maxHp, after.maxHp)
   delta('MP', before.maxMp ?? 0, after.maxMp ?? 0)
-  const pct = (label: string, a = 0, b = 0) => {
-    const d = Math.round((b - a) * 10) / 10
-    if (d !== 0) parts.push(`${label} ${d > 0 ? '+' : '−'}${Math.abs(d)}%`)
-  }
-  pct('Hit Rate', before.hit, after.hit)
-  pct('Evasion', before.dodge, after.dodge)
+  delta('Hit Rate', before.hit ?? 0, after.hit ?? 0)
+  delta('Evasion', before.dodge ?? 0, after.dodge ?? 0)
   if (Math.abs(after.attackInterval - before.attackInterval) > 0.001) {
     parts.push(
       `${after.attackInterval.toFixed(1)} s per hit (now ${before.attackInterval.toFixed(1)})`,

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getItem } from '../../game/data/items.ts'
 import { getTitle } from '../../game/data/titles.ts'
+import { wornTitle } from '../../game/logic/titles.ts'
 import { GameError } from '../../game/logic/character.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { toast } from '../../state/toasts.ts'
@@ -30,7 +31,7 @@ export function TitlesPanel({ onClose }: { onClose(): void }) {
   const now = useNow()
   if (!character) return null
 
-  const worn = character.activeTitle === null ? undefined : getTitle(character.activeTitle)
+  const worn = wornTitle(character, now)
   const owned = character.titles
     .filter((t) => t.expiresAt === null || t.expiresAt > now)
     .map((t) => ({ ...t, def: getTitle(t.id) }))
