@@ -4,7 +4,7 @@
  * the .smc OFFSET heading (180) only turns them for the SE camera and is ignored.
  */
 import { Document } from '@gltf-transform/core'
-import { EXTTextureWebP } from '@gltf-transform/extensions'
+import { EXTTextureWebP, KHRMaterialsUnlit } from '@gltf-transform/extensions'
 import sharp from 'sharp'
 import { parseMesh } from './mesh.mjs'
 import { parseAnimSet, parseSkeleton } from './ska.mjs'
@@ -42,6 +42,33 @@ function alphaMode(shader = '') {
   return 'OPAQUE'
 }
 
+/** Add and Translucent share glTF BLEND, but require different runtime blend equations. */
+export function blendMode(shader = '') {
+  if (/(?:^|[\\/])add(?:shader)?\.sha$/i.test(shader)) return 'additive'
+  return alphaMode(shader) === 'BLEND' ? 'alpha' : 'opaque'
+}
+
+/**
+ * Lift black-backed additive texels into straight-alpha sRGB. RGB * alpha is preserved in byte
+ * space, where Three's unlit materials perform output conversion before fixed-function blending.
+ * Normalizing in linear sRGB first would apply the transfer curve twice and darken grey texels.
+ */
+export function normalizeAdditiveRgba(rgba) {
+  const out = Uint8Array.from(rgba)
+  for (let i = 0; i < out.length; i += 4) {
+    const peak = Math.max(out[i], out[i + 1], out[i + 2])
+    if (!peak) {
+      out[i + 3] = 0
+      continue
+    }
+    out[i] = Math.round((out[i] * 255) / peak)
+    out[i + 1] = Math.round((out[i + 1] * 255) / peak)
+    out[i + 2] = Math.round((out[i + 2] * 255) / peak)
+    out[i + 3] = Math.round((out[i + 3] * peak) / 255)
+  }
+  return out
+}
+
 /** Top-4 joints/weights per vertex from the mesh weight maps. */
 function skinAttributes(lod, boneIndex, vertexCount) {
   const influences = Array.from({ length: vertexCount }, () => [])
@@ -70,8 +97,8 @@ function skinAttributes(lod, boneIndex, vertexCount) {
  * Encodes a decoded texture as JPEG (opaque) or PNG (with alpha) — or WebP, about a third smaller
  * (EXT_texture_webp) — downscaled to `maxSize`. Results are cached per source file and alpha usage.
  */
-async function encodeTexture(texture, withAlpha, maxSize, webp) {
-  let image = sharp(Buffer.from(texture.rgba), {
+async function encodeTexture(texture, withAlpha, maxSize, webp, additive = false) {
+  let image = sharp(Buffer.from(additive ? normalizeAdditiveRgba(texture.rgba) : texture.rgba), {
     raw: { width: texture.width, height: texture.height, channels: 4 },
   })
   if (Math.max(texture.width, texture.height) > maxSize) {
@@ -79,7 +106,10 @@ async function encodeTexture(texture, withAlpha, maxSize, webp) {
   }
   if (webp) {
     if (!withAlpha) image = image.removeAlpha()
-    return { data: await image.webp({ quality: 82 }).toBuffer(), mimeType: 'image/webp' }
+    return {
+      data: await image.webp(additive ? { lossless: true } : { quality: 82 }).toBuffer(),
+      mimeType: 'image/webp',
+    }
   }
   if (withAlpha) return { data: await image.png().toBuffer(), mimeType: 'image/png' }
   const data = await image.removeAlpha().jpeg({ quality: 85, mozjpeg: true }).toBuffer()
@@ -146,6 +176,7 @@ export async function buildModel(files, smc, options = {}) {
 
   const doc = new Document()
   if (webp) doc.createExtension(EXTTextureWebP).setRequired(true)
+  const unlit = options.unlit ? doc.createExtension(KHRMaterialsUnlit) : null
   const buffer = doc.createBuffer()
   const scene = doc.createScene(smc.name || 'Scene')
   const root = doc.createNode('Root')
@@ -211,6 +242,8 @@ export async function buildModel(files, smc, options = {}) {
   // materials: one per texture file (or flat color)
   const materials = new Map()
   async function material(surface, textures) {
+    const blend = blendMode(surface.shader)
+    const additive = blend === 'additive'
     const shaderMode = alphaMode(surface.shader)
     const mode = options.cutout && shaderMode === 'OPAQUE' ? 'MASK' : shaderMode
     const textureName = surface.textures?.[0]
@@ -221,14 +254,18 @@ export async function buildModel(files, smc, options = {}) {
       ? (textures[textureName] ?? (own.length === 1 ? own[0] : undefined))
       : undefined
     const color = surface.colors?.[0]
-    const matKey = `${texturePath ?? ''}|${color ?? ''}|${mode}`
+    const doubleSided = Boolean((surface.shaderFlags ?? 0) & 1)
+    const matKey = `${texturePath ?? ''}|${color ?? ''}|${mode}|${blend}|${doubleSided}`
     if (materials.has(matKey)) return materials.get(matKey)
     const name = texturePath ? baseName(texturePath) : textureName || 'color'
     const mat = doc.createMaterial(name).setMetallicFactor(0).setRoughnessFactor(0.9)
+    mat.setDoubleSided(doubleSided)
+    mat.setExtras({ lcBlend: blend, lcShader: surface.shader ?? '' })
+    if (unlit) mat.setExtension('KHR_materials_unlit', unlit.createUnlit())
     if (color !== undefined && color >>> 0 !== 0xffffffff)
       mat.setBaseColorFactor(colorFactor(color))
     const file = texturePath ? files.resolve(texturePath) : null
-    const cacheKey = `${file}|${mode !== 'OPAQUE'}|${maxTextureSize}|${webp}`
+    const cacheKey = `${file}|${mode !== 'OPAQUE'}|${maxTextureSize}|${webp}|${additive}`
     if (file && !textureCache.has(cacheKey)) {
       let decoded = null
       try {
@@ -236,11 +273,11 @@ export async function buildModel(files, smc, options = {}) {
       } catch (error) {
         if (!options.fallbackColor) throw error
       }
-      const withAlpha = decoded !== null && mode !== 'OPAQUE' && decoded.alpha
+      const withAlpha = decoded !== null && mode !== 'OPAQUE' && (decoded.alpha || additive)
       textureCache.set(
         cacheKey,
         decoded && {
-          ...(await encodeTexture(decoded, withAlpha, maxTextureSize, webp)),
+          ...(await encodeTexture(decoded, withAlpha, maxTextureSize, webp, additive)),
           withAlpha,
         },
       )

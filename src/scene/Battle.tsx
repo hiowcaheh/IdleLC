@@ -4,6 +4,7 @@ import { Vector3, type Group } from 'three'
 import { gearLooks } from '../game/assets/gear.ts'
 import { getModel, playerModelId } from '../game/assets/manifest.ts'
 import { getMonster } from '../game/data/monsters.ts'
+import { getItem } from '../game/data/items.ts'
 import { TIMINGS, approachTime, effectiveStats, type Side } from '../game/logic/combat.ts'
 import { combatSession } from '../game/session/combatSession.ts'
 import { combatEvents, type ViewEvent } from '../state/combatEvents.ts'
@@ -17,7 +18,7 @@ import { ModelBoundary } from './ModelBoundary.tsx'
 import { placeLabel, type SceneLabelId } from './labelAnchors.ts'
 import { SkillEffects } from './SkillEffects.tsx'
 import { TitleAura } from './TitleAura.tsx'
-import { UpgradeAura } from './UpgradeAura.tsx'
+import { armorUpgradePlus } from './upgradeEffects.ts'
 import { ARENA_RADIUS, smoothstep } from './terrain.ts'
 import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
@@ -353,11 +354,23 @@ export function Battle() {
     <>
       <group ref={playerGroup}>
         <ModelBoundary resetKey={playerModel}>
-          <Character key={playerModel} ref={player} modelId={playerModel} gear={gear} />
+          <Character
+            key={playerModel}
+            ref={player}
+            modelId={playerModel}
+            gear={gear}
+            upgrades={{
+              classId,
+              weaponPlus: equipment?.weapon?.plus ?? 0,
+              armorPlus: armorUpgradePlus(equipment ?? {}),
+              weaponSubtype: equipment?.weapon
+                ? getItem(equipment.weapon.itemId).gear?.subtype
+                : undefined,
+            }}
+          />
         </ModelBoundary>
         <ModelBoundary resetKey="upgrade-aura" fallback={null}>
           <Suspense fallback={null}>
-            <UpgradeAura classId={classId} plus={equipment?.weapon?.plus ?? 0} />
             <TitleAura />
           </Suspense>
         </ModelBoundary>

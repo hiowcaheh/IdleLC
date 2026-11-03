@@ -39,6 +39,7 @@ import {
 import { lcSkillAnims } from '../game/data/lcSource.ts'
 import { TIMINGS } from '../game/logic/combat.ts'
 import { useGameStore } from '../state/gameStore.ts'
+import { UpgradeAura, type UpgradeLook } from './UpgradeAura.tsx'
 
 export type BaseAnimation = 'idle' | 'run'
 
@@ -100,6 +101,8 @@ interface Props {
   timeScale?: () => number
   /** Worn weapons and armor shown on a class body (see game/assets/gear.ts). */
   gear?: readonly GearLook[]
+  /** Upgrade effects follow this character's animated gear and hand bones. */
+  upgrades?: UpgradeLook
 }
 
 /** Share of a model's texture that shines on its own (see prepareModel). */
@@ -147,12 +150,13 @@ interface BodyParts {
   meshes: { part: string; mesh: Mesh }[]
   covers: Map<Mesh, number>
   bones: Map<string, Bone>
+  weapons: Set<Mesh>
 }
 
 function prepareModel(source: Object3D, model: ModelEntry) {
   const object = cloneSkinned(source)
   const materials: Tinted[] = []
-  const body: BodyParts = { meshes: [], covers: new Map(), bones: new Map() }
+  const body: BodyParts = { meshes: [], covers: new Map(), bones: new Map(), weapons: new Set() }
   object.traverse((child) => {
     if ((child as Bone).isBone) body.bones.set(child.name, child as Bone)
     const mesh = child as Mesh
@@ -195,6 +199,7 @@ function WornPiece({
       mesh.bind(new Skeleton(joints, boneInverses), mesh.bindMatrix)
       prepareMesh(mesh, null, own)
       object.add(mesh)
+      if (slot === 'weapon') body.weapons.add(mesh)
     }
     materials.push(...own)
     const covered = coveredParts(
@@ -207,7 +212,10 @@ function WornPiece({
       mesh.visible = false
     }
     return () => {
-      meshes.forEach((mesh) => mesh.removeFromParent())
+      meshes.forEach((mesh) => {
+        body.weapons.delete(mesh)
+        mesh.removeFromParent()
+      })
       for (const mesh of hidden) {
         const left = (body.covers.get(mesh) ?? 1) - 1
         body.covers.set(mesh, left)
@@ -224,7 +232,7 @@ function WornPiece({
   return null
 }
 
-export function Character({ modelId, ref, timeScale, gear, scale = 1 }: Props) {
+export function Character({ modelId, ref, timeScale, gear, upgrades, scale = 1 }: Props) {
   const model = getModel(modelId)
   const gltf = useGLTF(modelUrl(model))
   const { object, materials, body } = useMemo(
@@ -232,6 +240,10 @@ export function Character({ modelId, ref, timeScale, gear, scale = 1 }: Props) {
     [gltf.scene, model],
   )
   const mixer = useMemo(() => new AnimationMixer(object), [object])
+  const upgradeTarget = useMemo(
+    () => ({ object, bones: body.bones, weapons: body.weapons }),
+    [object, body],
+  )
 
   const { actions, attacks, clipAction } = useMemo(() => {
     const find = (clipName: string, logical: string) => {
@@ -447,6 +459,13 @@ export function Character({ modelId, ref, timeScale, gear, scale = 1 }: Props) {
           </Suspense>
         </ModelBoundary>
       ))}
+      {upgrades && (
+        <ModelBoundary resetKey="upgrade-effects" fallback={null}>
+          <Suspense fallback={null}>
+            <UpgradeAura {...upgrades} target={upgradeTarget} />
+          </Suspense>
+        </ModelBoundary>
+      )}
     </group>
   )
 }

@@ -22,6 +22,7 @@
     "convert-lc": "node scripts/lc/convert-lc.mjs",
     "pwa-icons": "node scripts/pwa-icons.mjs",
     "recover-lc-props": "node scripts/lc/recover-props.mjs",
+    "recover-upgrade-fx": "node scripts/lc/upgrade-effects.mjs",
     "verify-lc-recovery": "node scripts/lc/verify-recovery.mjs"
   },
   "dependencies": {

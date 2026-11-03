@@ -1,8 +1,9 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CLASSES } from '../../game/data/classes.ts'
 import type { CharacterData } from '../../game/logic/character.ts'
 import { expToNextLevel } from '../../game/logic/progression.ts'
 import { wornTitle } from '../../game/logic/titles.ts'
+import { armorUpgradePlus } from '../../scene/upgradeEffects.ts'
 import { ClassPreview } from '../characters/ClassPreview.tsx'
 import { Bar } from '../hud/Bar.tsx'
 import { formatSp } from '../skills/format.ts'
@@ -15,11 +16,16 @@ import { fmt } from './format.ts'
  * and level, the experience to the next level, skill points and gold.
  */
 export function HeroCard({ character }: { character: CharacterData }) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60_000)
+    return () => clearInterval(timer)
+  }, [])
   const { level, exp, sp, gold, equipment } = character
   const worn = useMemo(() => Object.values(equipment).map((piece) => piece.itemId), [equipment])
   const needed = expToNextLevel(level)
   const share = needed > 0 ? (exp / needed) * 100 : 100
-  const title = wornTitle(character)
+  const title = wornTitle(character, now)
 
   return (
     <header className="hero-card">
@@ -28,6 +34,7 @@ export function HeroCard({ character }: { character: CharacterData }) {
           classId={character.classId}
           items={worn}
           weaponPlus={equipment.weapon?.plus ?? 0}
+          armorPlus={armorUpgradePlus(equipment)}
         />
       </div>
       <div className="hero-card__info">
