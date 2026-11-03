@@ -87,9 +87,14 @@ describe('interpretEffect', () => {
     })
   })
 
-  it('returns null for effects IdleLC does not have (summons, movement speed…)', () => {
+  it('returns null for effects IdleLC does not have (summons and unsupported families)', () => {
     expect(interpretEffect({ type: 6, subtype: 9, damageType: 0, power: 2 })).toBeNull()
-    expect(interpretEffect({ type: 0, subtype: 9, damageType: 1, power: 3 })).toBeNull()
+    expect(interpretEffect({ type: 0, subtype: 9, damageType: 1, power: 3 })).toMatchObject({
+      kind: 'stat',
+      stat: 'runSpeed',
+      value: 3,
+      percent: false,
+    })
     expect(interpretEffect({ type: 5, subtype: 0, damageType: 1, power: 0 })).toBeNull()
   })
 

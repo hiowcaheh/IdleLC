@@ -20,14 +20,32 @@ const AVOID: Record<ClassId, number> = {
   sorcerer: 44,
 }
 
+/** PC.cpp:270–301: magic bases differ for Healer and Rogue; growth uses INT instead of DEX. */
+export function classRatingChannels(classId: ClassId, level: number) {
+  const levels = Math.max(0, Math.floor(level) - 1)
+  const physicalGrowth = ATTRIBUTE_GROWTH[classId][1] * levels
+  const magicGrowth = ATTRIBUTE_GROWTH[classId][2] * levels
+  return {
+    physicalHit: HIT[classId] + physicalGrowth,
+    physicalEvasion: AVOID[classId] + physicalGrowth,
+    magicHit: (classId === 'healer' ? 131 : HIT[classId]) + magicGrowth,
+    magicEvasion:
+      (classId === 'healer' ? 38 : classId === 'rogue' ? 20 : AVOID[classId]) + magicGrowth,
+  }
+}
+
 /** IdleLC's selected attack channel, without second professions or allocated points. */
 export function classRatings(
   classId: ClassId,
   level: number,
 ): { hit: number; dodge: number; avoidPerLevel: number } {
   const magic = classId === 'mage' || classId === 'sorcerer'
-  const growth = ATTRIBUTE_GROWTH[classId][magic ? 2 : 1] * Math.max(0, Math.floor(level) - 1)
-  return { hit: HIT[classId] + growth, dodge: AVOID[classId] + growth, avoidPerLevel: 10 }
+  const channels = classRatingChannels(classId, level)
+  return {
+    hit: magic ? channels.magicHit : channels.physicalHit,
+    dodge: magic ? channels.magicEvasion : channels.physicalEvasion,
+    avoidPerLevel: 10,
+  }
 }
 
 /** The original random function has invalid zero/negative ranges; the adapter makes these deterministic. */

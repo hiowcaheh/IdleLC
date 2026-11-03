@@ -136,6 +136,9 @@ export function optionValue(option: ItemOption): number {
 /** Whether the option does something for the class. */
 export function optionHelps(option: Pick<ItemOption, 'type'>, classId: ClassId): boolean {
   if ([LEVEL_OPTION, 82, 83, 99].includes(option.type)) return true
+  // Every class has both source-sheet channels, even when its normal attack uses one.
+  if ((option.type >= 6 && option.type <= 23) || (option.type >= 75 && option.type <= 78))
+    return true
   const effect = OPTION_EFFECTS[option.type]
   return effect !== undefined && (!effect.classes || effect.classes.includes(classId))
 }
@@ -247,7 +250,8 @@ export function optionEffects(
   }
   for (const option of options) {
     const effect = OPTION_EFFECTS[option.type]
-    if (!effect || !optionHelps(option, classId)) continue
+    // Keep the selected legacy battle adapter's class filter separate from the complete sheet.
+    if (!effect || (effect.classes && !effect.classes.includes(classId))) continue
     const raw = optionValue(option) * (effect.scale ?? 1)
     const value = effect.percent ? Math.trunc(((bases[effect.stat] ?? 0) * raw) / 100) : raw
     if (option.type === 99) {

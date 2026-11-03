@@ -47,6 +47,11 @@ export function seconds(value: number): string {
 }
 
 const STAT_LABELS: Record<StatKey, string> = {
+  runSpeed: 'Run speed',
+  magicAttack: 'Magic attack',
+  magicDefense: 'Magic defense',
+  magicHit: 'Magic hit rate',
+  magicEvasion: 'Magic evasion',
   attack: 'Attack',
   defense: 'Defense',
   maxHp: 'Max HP',
@@ -90,6 +95,8 @@ function statValue(stat: StatKey, value: number, percent: boolean): string {
     case 'castTime':
     case 'reuseTime':
       return signed(value / 10, ' s')
+    case 'runSpeed':
+      return signed(value / 10, ' m/s')
     case 'castSpeed':
     case 'blockChance':
       return signed(value, '%')

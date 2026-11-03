@@ -1,5 +1,36 @@
+/** The separate physical/magic fields displayed by the source character window. */
+export interface ClientCombatStats {
+  physicalAttack: number
+  magicAttack: number
+  physicalDefense: number
+  magicDefense: number
+  physicalHit: number
+  magicHit: number
+  physicalEvasion: number
+  magicEvasion: number
+  criticalRating: number
+  deadlyRating: number
+  runSpeed: number
+  walkSpeed: number
+}
+
+/** Calculation context for the source sheet; neither this nor the sheet is persisted in saves. */
+export interface ClientStatContext {
+  classId: ClassId
+  level: number
+  physicalAttribute: 'strength' | 'dexterity'
+  physicalChannel: 'melee' | 'ranged'
+  magicWeapon: boolean
+  criticalOptionRate: number
+  deadlyOptionRate: number
+  criticalGroups?: readonly { flat: number; rate: number }[]
+  deadlyGroups?: readonly { flat: number; rate: number }[]
+}
+
 /** Stats that drive auto-combat. Shared by player classes and monsters. */
 export interface CombatStats {
+  client?: ClientCombatStats
+  clientContext?: ClientStatContext
   maxHp: number
   attack: number
   defense: number

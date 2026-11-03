@@ -15,6 +15,7 @@ import type {
 } from '../data/types.ts'
 import type { CharacterData } from './character.ts'
 import { GameError } from './errors.ts'
+import { applyClientStats } from './clientStats.ts'
 
 /** 10 000 units = 1 skill point, as the LC server stores them (t_npc.a_skill_point). */
 export const SP_UNIT = 10_000
@@ -52,12 +53,19 @@ export type StatKey =
   | 'hpSteal'
   | 'mpSteal'
   | 'moveSpeed'
+  | 'magicAttack'
+  | 'magicDefense'
+  | 'magicHit'
+  | 'magicEvasion'
+  | 'runSpeed'
 
 export interface StatEffect {
   kind: 'stat'
   stat: StatKey
   value: number
   percent: boolean
+  /** Source melee/ranged assist subtypes only apply to the matching weapon channel. */
+  channel?: 'melee' | 'ranged'
 }
 
 export type SkillEffect =
@@ -76,18 +84,23 @@ export type SkillEffect =
 const STAT_SUBTYPES: Record<number, StatKey> = {
   0: 'attack',
   1: 'defense',
-  2: 'attack', // magic attack — IdleLC has one attack stat
-  3: 'defense', // magic defense — and one defense stat
+  2: 'magicAttack',
+  3: 'magicDefense',
   4: 'hit',
   5: 'dodge',
   6: 'critChance',
   7: 'attackSpeed',
   8: 'reuseTime',
+  9: 'runSpeed',
   10: 'hpRegen',
   11: 'mpRegen',
   12: 'maxHp',
   13: 'maxMp',
   14: 'critMultiplier',
+  15: 'magicHit',
+  16: 'magicEvasion',
+  18: 'attack',
+  19: 'attack',
   22: 'maxHp450',
   23: 'castSpeed',
 }
@@ -97,7 +110,19 @@ export function interpretEffect(e: SkillEffectDef): SkillEffect | null {
   switch (e.type) {
     case 0: {
       const stat = STAT_SUBTYPES[e.subtype]
-      return stat ? { kind: 'stat', stat, value: e.power, percent: e.damageType === 2 } : null
+      return stat
+        ? {
+            kind: 'stat',
+            stat,
+            value: e.power,
+            percent: e.damageType === 2,
+            ...(e.subtype === 18
+              ? { channel: 'melee' as const }
+              : e.subtype === 19
+                ? { channel: 'ranged' as const }
+                : {}),
+          }
+        : null
     }
     case 2: // states
       if (e.subtype === 7 || e.subtype === 5 || e.subtype === 2) {
@@ -430,7 +455,8 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
   for (const stat of grouped) {
     if (stat === 'maxHp') continue
     if (!effects.some((effect) => effect.stat === stat)) continue
-    const base = s[stat as keyof CombatStats] ?? 0
+    const existing = s[stat as keyof CombatStats]
+    const base = typeof existing === 'number' ? existing : 0
     const flat = sum(stat, false)
     const rate = sum(stat, true)
     // Hit/avoid assist rates use the pre-addition rating (Battle_GetDamage.cpp:1664–1685).
@@ -438,9 +464,30 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
     const value = base + flat + (stat === 'maxMp' ? Math.trunc(delta) : delta)
     Object.assign(s, { [stat]: value })
   }
+  // Synthetic fighters without a sheet retain the original single-channel fallback adapter.
+  if (!stats.clientContext || stats.clientContext.magicWeapon)
+    s.attack += sum('magicAttack', false) + (stats.attack * sum('magicAttack', true)) / 100
+  if (!stats.clientContext) {
+    s.defense += sum('magicDefense', false) + (stats.defense * sum('magicDefense', true)) / 100
+    if (effects.some((effect) => effect.stat === 'magicHit'))
+      s.hit =
+        (s.hit ?? 0) + sum('magicHit', false) + ((stats.hit ?? 0) * sum('magicHit', true)) / 100
+    if (effects.some((effect) => effect.stat === 'magicEvasion'))
+      s.dodge =
+        (s.dodge ?? 0) +
+        sum('magicEvasion', false) +
+        ((stats.dodge ?? 0) * sum('magicEvasion', true)) / 100
+  }
   for (const { stat, value, percent } of effects) {
     if (grouped.has(stat) || stat === 'maxHp450' || stat === 'reuseTime') continue
     switch (stat) {
+      case 'magicAttack':
+      case 'magicDefense':
+      case 'magicHit':
+      case 'magicEvasion':
+      case 'runSpeed':
+        // The source-sheet channels are updated separately below.
+        break
       case 'critChance':
         s.critChance += percent ? value / 100 : value / 1000
         break
@@ -481,6 +528,11 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
   s.critChance = Math.min(1, Math.max(0, s.critChance))
   for (const key of ['strength', 'dexterity', 'intelligence', 'constitution'] as const) {
     if (s[key] !== undefined) s[key] = Math.max(1, Math.trunc(s[key]))
+  }
+  applyClientStats(stats, s, effects)
+  if (s.client && s.clientContext) {
+    s.hit = s.clientContext.magicWeapon ? s.client.magicHit : s.client.physicalHit
+    s.dodge = s.clientContext.magicWeapon ? s.client.magicEvasion : s.client.physicalEvasion
   }
   return s
 }

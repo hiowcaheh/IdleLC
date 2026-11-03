@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { HEAVEN_STONE_ID, classSlots, getItem } from '../../game/data/items.ts'
-import type { EquipSlot } from '../../game/data/types.ts'
+import type { ClientCombatStats, EquipSlot } from '../../game/data/types.ts'
 import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
 import {
   MAX_COOLDOWN_REDUCTION,
@@ -93,7 +93,22 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   const signed = (value: number) => `${value < 0 ? '−' : '+'}${percent(Math.abs(value))}`
   // rare options with the caps combat applies
   const capped = (value: number | undefined, cap: number) => Math.min(cap * 100, value ?? 0)
-  const statRows: [string, string, string?][] = [
+  type StatRow = [string, string, string?]
+  const clientRow = (
+    label: string,
+    key: keyof ClientCombatStats,
+    digits = 0,
+    unit = '',
+  ): StatRow => {
+    const value = stats.client?.[key]
+    const before = base.client?.[key]
+    return [
+      label,
+      value === undefined ? '—' : `${digits ? value.toFixed(digits) : fmt(value)}${unit}`,
+      value === undefined || before === undefined ? undefined : change(value, before, digits),
+    ]
+  }
+  const attributeRows: StatRow[] = [
     ['Strength', fmt(stats.strength ?? 0), change(stats.strength ?? 0, base.strength ?? 0)],
     ['Dexterity', fmt(stats.dexterity ?? 0), change(stats.dexterity ?? 0, base.dexterity ?? 0)],
     [
@@ -106,27 +121,51 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
       fmt(stats.constitution ?? 0),
       change(stats.constitution ?? 0, base.constitution ?? 0),
     ],
+  ]
+  const resourceRows: StatRow[] = [
     ['Health', fmt(stats.maxHp), change(stats.maxHp, base.maxHp)],
     ['Mana', fmt(stats.maxMp ?? 0), change(stats.maxMp ?? 0, base.maxMp ?? 0)],
-    ['Attack', fmt(stats.attack), change(stats.attack, base.attack)],
-    ['Defense', fmt(stats.defense), change(stats.defense, base.defense)],
-    [
-      'Attack speed',
-      `${stats.attackInterval.toFixed(2)} s`,
-      change(stats.attackInterval, base.attackInterval, 2),
-    ],
-    [
-      'Cast time',
-      castTime === 0 ? 'Normal' : `${castTime > 0 ? '+' : '−'}${Math.abs(castTime).toFixed(1)} s`,
-    ],
+  ]
+  const combatRows: StatRow[] = [
+    clientRow('Physical attack', 'physicalAttack'),
+    clientRow('Magic attack', 'magicAttack'),
+    clientRow('Physical defense', 'physicalDefense'),
+    clientRow('Magic defense', 'magicDefense'),
+    clientRow('Physical hit rate', 'physicalHit'),
+    clientRow('Magic hit rate', 'magicHit'),
+    clientRow('Physical evasion', 'physicalEvasion'),
+    clientRow('Magic evasion', 'magicEvasion'),
+    clientRow('Critical rating', 'criticalRating'),
+    clientRow('Deadly rating', 'deadlyRating'),
+  ]
+  const combatBonusRows: StatRow[] = [
     [
       'Critical chance',
       percent(stats.critChance * 100),
       change(stats.critChance * 100, base.critChance * 100, 1),
     ],
     ['Critical damage', `×${stats.critMultiplier.toFixed(2)}`],
-    ['Hit Rate', fmt(stats.hit ?? 0), change(stats.hit ?? 0, base.hit ?? 0)],
-    ['Evasion', fmt(stats.dodge ?? 0), change(stats.dodge ?? 0, base.dodge ?? 0)],
+    ['Block chance', signed(stats.blockChance ?? 0)],
+  ]
+  const speedRows: StatRow[] = [
+    clientRow('Run speed', 'runSpeed', 1, ' m/s'),
+    clientRow('Walk speed', 'walkSpeed', 1, ' m/s'),
+    [
+      'Attack speed',
+      `${stats.attackInterval.toFixed(2)} s`,
+      change(stats.attackInterval, base.attackInterval, 2),
+    ],
+    ['Movement bonus', signed(stats.moveSpeed ?? 0)],
+    [
+      'Cast time',
+      castTime === 0 ? 'Normal' : `${castTime > 0 ? '+' : '−'}${Math.abs(castTime).toFixed(1)} s`,
+    ],
+    ['Cast speed', signed(stats.castSpeed ?? 0)],
+    ['Skill reuse time', `${(stats.reuseTime ?? 0).toFixed(1)} s`],
+    ['Skill cooldown', signed(-capped(stats.cooldownReduction, MAX_COOLDOWN_REDUCTION))],
+    ['Skill MP cost', signed(-capped(stats.mpCostReduction, MAX_MP_COST_REDUCTION))],
+  ]
+  const recoveryRows: StatRow[] = [
     [
       'HP recovery',
       `+${fmt(Math.round(hpRecovery))} / ${REGEN_TICK_SECONDS}s`,
@@ -137,14 +176,8 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
       `+${fmt(Math.round(mpRecovery))} / ${REGEN_TICK_SECONDS}s`,
       change(mpRecovery, base.mpRegen ?? 0),
     ],
-    ['Cast speed', signed(stats.castSpeed ?? 0)],
-    ['Skill reuse time', `${(stats.reuseTime ?? 0).toFixed(1)} s`],
-    ['Block chance', signed(stats.blockChance ?? 0)],
-    ['Skill cooldown', signed(-capped(stats.cooldownReduction, MAX_COOLDOWN_REDUCTION))],
-    ['Skill MP cost', signed(-capped(stats.mpCostReduction, MAX_MP_COST_REDUCTION))],
     ['HP steal', signed(stats.hpSteal ?? 0)],
     ['MP steal', signed(stats.mpSteal ?? 0)],
-    ['Move speed', signed(stats.moveSpeed ?? 0)],
   ]
   const bonuses = rewardBonuses(character)
   const bonusRows: [string, number][] = [
@@ -152,6 +185,14 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
     ['Skill points', bonuses.sp],
     ['Gold', bonuses.gold],
     ['Drop chance', bonuses.drop],
+  ]
+  const statGroups = [
+    { name: 'Attributes', rows: attributeRows },
+    { name: 'Health and mana', rows: resourceRows },
+    { name: 'Combat', rows: combatRows },
+    { name: 'Combat bonuses', rows: combatBonusRows },
+    { name: 'Speed and skills', rows: speedRows },
+    { name: 'Recovery', rows: recoveryRows },
   ]
   const stones = stonesOwned(character)
   const slots = classSlots(character.classId)
@@ -275,45 +316,54 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
 
       {tab === 'stats' && (
         <div role="tabpanel" id="character-panel-stats" aria-labelledby="character-tab-stats">
-          <dl className="hero-stats">
-            {statRows.map(([label, value, buffed]) => (
-              <div key={label}>
-                <dt>
-                  <span>{label}</span>
-                  {buffed && <span className="hero-stats__buff">{buffed}</span>}
-                </dt>
-                <dd>{value}</dd>
+          {statGroups.map(({ name, rows }) => (
+            <section className="character-stats__group" aria-label={name} key={name}>
+              <h3 className="character-stats__heading">{name}</h3>
+              <dl className="hero-stats">
+                {rows.map(([label, value, buffed]) => (
+                  <div key={label}>
+                    <dt>
+                      <span>{label}</span>
+                      {buffed && <span className="hero-stats__buff">{buffed}</span>}
+                    </dt>
+                    <dd>{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ))}
+          <section className="character-stats__group" aria-label="Bonuses">
+            <h3 className="character-stats__heading">Bonuses</h3>
+            <dl className="hero-stats">
+              {bonusRows.map(([label, value]) => (
+                <div key={label}>
+                  <dt>{label}</dt>
+                  <dd>{signed(value)}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+          <section className="character-stats__group" aria-label="Hunting record">
+            <h3 className="character-stats__heading">Hunting record</h3>
+            <dl className="hero-stats">
+              <div>
+                <dt>Kills</dt>
+                <dd>{fmt(character.stats.kills)}</dd>
               </div>
-            ))}
-          </dl>
-          <h3 className="inventory__heading">Bonuses</h3>
-          <dl className="hero-stats">
-            {bonusRows.map(([label, value]) => (
-              <div key={label}>
-                <dt>{label}</dt>
-                <dd>{signed(value)}</dd>
+              <div>
+                <dt>Deaths</dt>
+                <dd>{fmt(character.stats.deaths)}</dd>
               </div>
-            ))}
-          </dl>
-          <h3 className="inventory__heading">Hunting record</h3>
-          <dl className="hero-stats">
-            <div>
-              <dt>Kills</dt>
-              <dd>{fmt(character.stats.kills)}</dd>
-            </div>
-            <div>
-              <dt>Deaths</dt>
-              <dd>{fmt(character.stats.deaths)}</dd>
-            </div>
-            <div>
-              <dt>Expeditions</dt>
-              <dd>{fmt(character.stats.expeditions)}</dd>
-            </div>
-            <div>
-              <dt>Play time</dt>
-              <dd>{playTime(character.stats.playSeconds)}</dd>
-            </div>
-          </dl>
+              <div>
+                <dt>Expeditions</dt>
+                <dd>{fmt(character.stats.expeditions)}</dd>
+              </div>
+              <div>
+                <dt>Play time</dt>
+                <dd>{playTime(character.stats.playSeconds)}</dd>
+              </div>
+            </dl>
+          </section>
         </div>
       )}
 

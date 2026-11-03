@@ -6,6 +6,7 @@ import { getMonster } from '../data/monsters.ts'
 import type { ClassId } from '../data/types.ts'
 import { classAttributes } from './attributes.ts'
 import { classRatings } from './ratings.ts'
+import { clientStatChannels } from './clientStats.ts'
 import { statsForLevel } from './balance.ts'
 import type { FighterInit, PotionSupply } from './combat.ts'
 import { applyGear, wielded, type Equipment } from './equipment.ts'
@@ -70,9 +71,22 @@ export function playerFighter(hero: Hero, now = Date.now()): FighterInit {
   // skills that need other gear (a shield, another weapon) are left out; estimates assume the gear fits
   const learned = learnedRanks(classId, skills)
   const ranks = equipment ? wieldableRanks(learned, wielded(equipment)) : learned
+  const options = [
+    ...Object.values(equipment ?? {}).flatMap((piece) => piece?.options ?? []),
+    ...titleOptions(activeTitleId(hero, now)),
+  ]
+  const detailed = { ...stats, ...clientStatChannels(stats, classId, level, equipment, options) }
+  if (detailed.client && detailed.clientContext) {
+    detailed.hit = detailed.clientContext.magicWeapon
+      ? detailed.client.magicHit
+      : detailed.client.physicalHit
+    detailed.dodge = detailed.clientContext.magicWeapon
+      ? detailed.client.magicEvasion
+      : detailed.client.physicalEvasion
+  }
   return {
     level,
-    stats: applyStats(stats, passiveEffects(ranks)),
+    stats: applyStats(detailed, passiveEffects(ranks)),
     skills: ranks.filter((r) => r.kind !== 'passive' && (!skillBar || skillBar.includes(r.id))),
     potions: potionSupply(hero),
   }

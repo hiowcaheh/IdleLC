@@ -2200,6 +2200,35 @@ a.button {
 /* ---------- Gear and shop ---------- */
 
 /* stats like the client's character window: a label and its value box */
+.character-stats__group + .character-stats__group {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgb(202 171 104 / 18%);
+}
+
+.character-stats__heading {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--parchment-dim);
+}
+
+.character-stats__group .hero-stats {
+  margin-bottom: 0;
+}
+
+.character-stats__group .hero-stats dt {
+  white-space: normal;
+  line-height: 1.2;
+}
+
+.character-stats__group .hero-stats dt > span:first-child {
+  overflow: visible;
+  text-overflow: clip;
+}
+
 .hero-stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
