@@ -65,12 +65,12 @@ export function GameScreen() {
             </button>
             <button
               type="button"
-              className="icon-button hud__menu hud__menu--inventory"
-              onClick={() => setInventoryOpen(true)}
-              aria-label="Inventory"
+              className="icon-button hud__menu hud__menu--titles"
+              onClick={() => setTitlesOpen(true)}
+              aria-label="Titles"
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M8 8 V6.5 a4 4 0 0 1 8 0 V8 M5 8 H19 L18 20 H6 Z M9.5 12 H14.5" />
+                <path d="M6 4 H18 V20 H6 Z M9 8 H15 M9 12 H15 M9 16 H13" />
               </svg>
             </button>
             <button
@@ -86,12 +86,12 @@ export function GameScreen() {
             </button>
             <button
               type="button"
-              className="icon-button hud__menu hud__menu--titles"
-              onClick={() => setTitlesOpen(true)}
-              aria-label="Titles"
+              className="icon-button hud__menu hud__menu--inventory"
+              onClick={() => setInventoryOpen(true)}
+              aria-label="Inventory"
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M6 4 H18 V20 H6 Z M9 8 H15 M9 12 H15 M9 16 H13" />
+                <path d="M8 8 V6.5 a4 4 0 0 1 8 0 V8 M5 8 H19 L18 20 H6 Z M9.5 12 H14.5" />
               </svg>
             </button>
             <button

@@ -1,3 +1,4 @@
+import { Gold } from '../Gold.tsx'
 import { useState } from 'react'
 import {
   GOLDEN_MAGNIFIER_ID,
@@ -293,7 +294,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                   })
                 }
               >
-                Sell · +{fmt(sellPrice(piece.itemId))}
+                Sell · <Gold amount={sellPrice(piece.itemId)} prefix="+" />
               </button>
             )}
           </div>
@@ -373,7 +374,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                 disabled={busy}
                 onClick={() => sell([{ itemId: stack.itemId, count: 1 }])}
               >
-                Sell 1 · +{fmt(price)}
+                Sell 1 · <Gold amount={price} prefix="+" />
               </button>
               {stack.count > 1 && (
                 <button
@@ -382,7 +383,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                   disabled={busy}
                   onClick={() => sell([{ itemId: stack.itemId, count: stack.count }])}
                 >
-                  Sell all ×{fmt(stack.count)} · +{fmt(price * stack.count)}
+                  Sell all ×{fmt(stack.count)} · <Gold amount={price * stack.count} prefix="+" />
                 </button>
               )}
             </>
@@ -402,7 +403,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
       onClose={onClose}
       extra={
         <p className="shop__gold" aria-label={`${fmt(character.gold)} gold`}>
-          <span className="coin" aria-hidden="true" /> {fmt(character.gold)}
+          <Gold amount={character.gold} />
         </p>
       }
     >
@@ -471,7 +472,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
             disabled={busy}
             onClick={() => setConfirmAll(true)}
           >
-            {sellAllLabel} · +{fmt(value)} gold
+            {sellAllLabel} · <Gold amount={value} prefix="+" />
           </button>
           <p className="sheet__meta inventory__keep-note">
             Kept: gear your class can wear, potions, upgrade stones and magnifying glasses.
@@ -486,8 +487,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
           onClose={() => setConfirmAll(false)}
         >
           <p className="confirm__text">
-            Sell {fmt(sellable.reduce((n, s) => n + s.count, 0))} items for{' '}
-            <strong>{fmt(value)}</strong> gold?
+            Sell {fmt(sellable.reduce((n, s) => n + s.count, 0))} items for <Gold amount={value} />?
           </p>
           <div className="item-row__actions">
             <button

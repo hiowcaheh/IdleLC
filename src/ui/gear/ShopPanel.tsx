@@ -1,3 +1,4 @@
+import { Gold } from '../Gold.tsx'
 import { useState } from 'react'
 import { EQUIP_SLOTS, HEAVEN_STONE_ID, getItem } from '../../game/data/items.ts'
 import type { EquipSlot, GearSlot, ItemDef } from '../../game/data/types.ts'
@@ -103,7 +104,7 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
             </span>
           </span>
           <span className={`shop__price${afford ? '' : ' is-short'}`}>
-            <span className="coin coin--small" aria-hidden="true" /> {fmt(price)}
+            <Gold amount={price} />
           </span>
         </button>
         {open && (
@@ -141,7 +142,7 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
               disabled={busy || away || !afford}
               onClick={() => buy(item.id, 1)}
             >
-              Buy · {fmt(price)}
+              Buy · <Gold amount={price} />
             </button>
             {!item.gear && (
               <button
@@ -167,7 +168,7 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
       onClose={onClose}
       extra={
         <p className="shop__gold" aria-label={`${fmt(character.gold)} gold`}>
-          <span className="coin" aria-hidden="true" /> {fmt(character.gold)}
+          <Gold amount={character.gold} />
         </p>
       }
     >

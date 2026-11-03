@@ -1,3 +1,4 @@
+import type { AttributeKey } from '../logic/attributes.ts'
 import type { AfkResult } from '../logic/afk.ts'
 import type { EquipSlot } from '../data/types.ts'
 import type { CharacterData, CharacterLocation, NewCharacter } from '../logic/character.ts'
@@ -38,11 +39,12 @@ export interface GameService {
   /** Sends the character on an AFK expedition to its current hunting spot. */
   startAfk(characterId: string): Promise<CharacterData>
   /**
-   * Ends the expedition and pays the time it lasted (up to 8 h; under a minute pays nothing).
+   * Ends the expedition and pays the time it lasted (up to 8 h; counting from the first full second).
    */
   claimAfk(characterId: string): Promise<AfkResult>
   /** Sells items from the inventory to the shop for their database price. */
   sellItems(characterId: string, items: ItemStack[]): Promise<SaleResult>
+  allocateStatPoint(characterId: string, attribute: AttributeKey): Promise<CharacterData>
   /** Learns the next level of a class skill for its SP (level and prerequisites checked). */
   learnSkill(characterId: string, skillId: number): Promise<CharacterData>
   /** Turns automatic use of a learned skill in combat on or off. */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getItem, getOption } from '../data/items.ts'
+import { ITEMS, OPTIONS, getItem, getOption } from '../data/items.ts'
 import { createCharacterData, type CharacterData } from './character.ts'
 import { applyGear, checkWear } from './equipment.ts'
 import { createRng } from './rng.ts'
@@ -103,6 +103,35 @@ describe('options from play time', () => {
     expect(r.character.equipment.weapon).toEqual(rareSword)
   })
 
+  it('never grows equipped accessories or level 73+ gear, but permits ordinary level 72 armor', () => {
+    const base = getItem(knight().equipment.armor!.itemId)
+    ITEMS[99072] = { ...base, id: 99072, level: 72 }
+    ITEMS[99073] = { ...base, id: 99073, level: 73 }
+    try {
+      const blocked = knight({
+        equipment: {
+          accessory1: { uid: 'jewel', itemId: 166, plus: 0 },
+          armor: { uid: 'high', itemId: 99073, plus: 0 },
+          weapon: { uid: 'rare', itemId: 1845, plus: 0, rare: 1 },
+        },
+      })
+      const untouched = applyPlayTime(blocked, 10 * OPTION_PLAY_SECONDS, createRng(3))
+      expect(untouched.gained).toEqual([])
+      expect(untouched.character.equipment).toEqual(blocked.equipment)
+      const ordinary = {
+        ...blocked,
+        equipment: { ...blocked.equipment, armor: { uid: 'low', itemId: 99072, plus: 0 } },
+      }
+      const grown = applyPlayTime(ordinary, OPTION_PLAY_SECONDS, createRng(3))
+      expect(grown.gained).toHaveLength(1)
+      expect(grown.gained[0]!.slot).toBe('armor')
+      expect(grown.character.equipment.accessory1).toEqual(blocked.equipment.accessory1)
+    } finally {
+      delete ITEMS[99072]
+      delete ITEMS[99073]
+    }
+  })
+
   it('a "Reduced Level Requirement" option lets a piece be worn earlier', () => {
     const options = [
       { type: 20, level: 2 },
@@ -173,5 +202,48 @@ describe('source option bases', () => {
       accessory1: { uid: 'x', itemId: 166, plus: 0, options: speed },
     })
     expect(result.moveSpeed).toBeCloseTo(32)
+  })
+
+  it('keeps Stone, Stun and Silence resistance independent and caps their sums at 80%', () => {
+    // These DB records are absent from the small placeholder catalog. Powers match t_option.
+    for (const type of [60, 61, 62]) {
+      OPTIONS[type] = {
+        type,
+        name: 'Resistance fixture',
+        values: [10, 20, 30],
+        weights: [0, 0, 0],
+        weaponMask: 0,
+        armorMask: 0,
+        accessoryMask: 0,
+      }
+    }
+    try {
+      const result = applyGear(stats, 'knight', 1, {
+        accessory1: {
+          uid: 'resist',
+          itemId: 166,
+          plus: 0,
+          options: [
+            { type: 60, level: 1 },
+            { type: 61, level: 2 },
+            { type: 62, level: 3 },
+          ],
+        },
+      })
+      expect(result.stoneResistance).toBe(Math.min(80, getOption(60)!.values[0]!))
+      expect(result.stunResistance).toBe(Math.min(80, getOption(61)!.values[1]!))
+      expect(result.silenceResistance).toBe(Math.min(80, getOption(62)!.values[2]!))
+      const capped = applyGear(stats, 'knight', 1, {
+        accessory1: {
+          uid: 'resist',
+          itemId: 166,
+          plus: 0,
+          options: Array.from({ length: 20 }, () => ({ type: 61, level: 3 })),
+        },
+      })
+      expect(capped.stunResistance).toBe(80)
+    } finally {
+      for (const type of [60, 61, 62]) delete OPTIONS[type]
+    }
   })
 })

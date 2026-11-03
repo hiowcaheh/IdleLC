@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { HEAVEN_STONE_ID, classSlots, getItem } from '../../game/data/items.ts'
 import type { ClientCombatStats, EquipSlot } from '../../game/data/types.ts'
 import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
+import { ATTRIBUTE_KEYS } from '../../game/logic/attributes.ts'
+import { availableStatPoints } from '../../game/logic/statPoints.ts'
 import {
   MAX_COOLDOWN_REDUCTION,
   MAX_MP_COST_REDUCTION,
@@ -68,6 +70,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)
   const unequipItem = useGameStore((s) => s.unequipItem)
   const upgradeItem = useGameStore((s) => s.upgradeItem)
+  const allocateStatPoint = useGameStore((s) => s.allocateStatPoint)
   const [tab, setTab] = useState<Tab>('stats')
   const [selected, setSelected] = useState<EquipSlot | null>(null)
   const [busy, setBusy] = useState(false)
@@ -75,6 +78,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   if (!character) return null
 
   const away = character.expedition !== null
+  const points = availableStatPoints(character)
   // the fight's stats include the buffs on the hero right now; the gear-only ones are the base
   const base = heroStats(character)
   const stats = away ? base : effectiveStats(combat.player)
@@ -146,6 +150,9 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
     ],
     ['Critical damage', `×${stats.critMultiplier.toFixed(2)}`],
     ['Block chance', signed(stats.blockChance ?? 0)],
+    ['Stun resistance', percent(stats.stunResistance ?? 0)],
+    ['Stone resistance', percent(stats.stoneResistance ?? 0)],
+    ['Silence resistance', percent(stats.silenceResistance ?? 0)],
   ]
   const speedRows: StatRow[] = [
     clientRow('Run speed', 'runSpeed', 1, ' m/s'),
@@ -318,15 +325,43 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
         <div role="tabpanel" id="character-panel-stats" aria-labelledby="character-tab-stats">
           {statGroups.map(({ name, rows }) => (
             <section className="character-stats__group" aria-label={name} key={name}>
-              <h3 className="character-stats__heading">{name}</h3>
+              <h3 className="character-stats__heading">
+                {name}
+                {name === 'Attributes' && (
+                  <span
+                    className="attribute-points"
+                    aria-label={`${points} attribute points available`}
+                  >
+                    Points: <strong>{fmt(points)}</strong>
+                  </span>
+                )}
+              </h3>
               <dl className="hero-stats">
-                {rows.map(([label, value, buffed]) => (
+                {rows.map(([label, value, buffed], index) => (
                   <div key={label}>
                     <dt>
                       <span>{label}</span>
                       {buffed && <span className="hero-stats__buff">{buffed}</span>}
                     </dt>
-                    <dd>{value}</dd>
+                    <dd>
+                      {value}
+                      {name === 'Attributes' && (
+                        <button
+                          type="button"
+                          className="attribute-add"
+                          aria-label={`Add ${label}`}
+                          disabled={busy || away || points < 1}
+                          onClick={() =>
+                            run(async () => {
+                              await allocateStatPoint(ATTRIBUTE_KEYS[index]!)
+                              return `${label} increased by 1.`
+                            })
+                          }
+                        >
+                          +
+                        </button>
+                      )}
+                    </dd>
                   </div>
                 ))}
               </dl>

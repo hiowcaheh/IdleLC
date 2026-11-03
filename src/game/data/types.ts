@@ -61,6 +61,9 @@ export interface CombatStats {
   /** Seconds added to skill reuse time (STAT8), separate from ready time. */
   reuseTime?: number
   /** Percent chance to halve a normal attack; skills bypass this option. */
+  stunResistance?: number
+  stoneResistance?: number
+  silenceResistance?: number
   blockChance?: number
   /** % shorter skill cooldowns and % less mana for skills (rare options). */
   cooldownReduction?: number

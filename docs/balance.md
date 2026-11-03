@@ -10,6 +10,23 @@ kodu, tego dokumentu i odpowiednich testów logiki.
 
 ## Statystyki
 
+Od 2026-11-03 każda klasa bez profesji dostaje 1 rozdawany punkt za awans.
+Pula to `level − 1 − suma(allocatedStats)`, a poziom 1 zaczyna z zerem. Pula wynika
+z poziomu, więc obejmuje jednoczesne awanse i AFK bez osobnego, powielanego kredytu.
+Rozdanie zwiększa źródłowy atrybut, HP/MP według współczynników klasy, właściwy kanał
+arkusza oraz ofensywny atrybut adaptera walki. Procentowe opcje używają podstaw
+uwzględniających rozdane punkty. SaveVersion 14 sanitizuje liczby i ogranicza sumę do
+zdobytej puli. W trakcie ekspedycji rozdawanie jest zablokowane.
+
+Stun, Stone i Silence resistance są niezależnymi sumami opcji 61, 60 i 62,
+z limitem 80% dla każdej. Stun/Stone zmniejsza szansę na istniejące ogłuszenie /
+petryfikację mnożnikiem `(1 − resistance/100)`. Silence pokazuje rzeczywistą wartość
+opcji; nie dodaje to brakującego systemu wyciszenia umiejętności.
+
+Ruch: `czas = bazowyCzas × 6 / runSpeed` dla podróży (`TIMINGS.travel`) i podejścia
+(`TIMINGS.approach`). `runSpeed` uwzględnia klasę, sprzęt i efekty; scena i symulacja
+używają wspólnego czasu. Bez źródłowego arkusza używa się `6 × (1 + moveSpeed/100)`.
+
 Character grupuje atrybuty, HP/MP, walkę, bonusy, szybkości i regenerację. Nowy arkusz
 `CombatStats.client` ma osobne physical/magic attack, defense, hit i evasion,
 critical/deadly rating oraz run/walk m/s, według źródłowego okna i pakietu statusu.
@@ -163,7 +180,7 @@ wypada** — wpisy takich przedmiotów są pomijane w tabelach dropu (decyzja w�
 - Gracz wysyła postać na **wyprawę** (przycisk „Expedition” w panelu polowania). Postać poluje na wybranego
   potwora, a walka na ekranie staje. Start zapisuje czas (`expedition.startedAt`); wyprawa przetrwa
   zamknięcie gry.
-- Powrót („Return now”) płaci `min(teraz − start, 8 h)`; wyprawa krótsza niż 1 min nie daje nic. Bez wyprawy
+- Powrót („Return now”) płaci `min(teraz − start, 8 h)`; liczy się każda pełna sekunda wyprawy, również przed pierwszą minutą. Bez wyprawy
   czas poza grą nie daje nagród (aktywna gra albo wyprawa — jak w opisie M4).
 - Tempo polowania mierzymy na **prawdziwej symulacji walki** (`measureHuntRate`: 20 minut walki tymi samymi
   wzorami co na ekranie) osobno dla każdego poziomu postaci. Czas wyprawy dzielimy na 10-minutowe odcinki,
@@ -318,15 +335,15 @@ Zasady:
 Opcje specjalne zestawów (działanie **własne**): skrócenie odnowienia skilli (58, max −50%), mniej many na
 skille (59, max −75%), kradzież HP / MP z obrażeń (24, 25, 51, 52), szybkość ruchu (64 — krótsze podbieganie
 do potwora, więc więcej zabić na godzinę; kolejne bonusy mnożą prędkość), blok (63 → połowa zwykłego ciosu), szansa krytyka (55, w 1/10 %),
-obrażenia krytyczne (66, %), regeneracja HP / MP (50, 56, 57), niższy wymagany poziom (49). Odporności (60–62),
-lot (65), ataki ciemności / trucizny (53, 54) i przemiana (84) są wyświetlane, ale jeszcze nie działają.
+obrażenia krytyczne (66, %), regeneracja HP / MP (50, 56, 57), niższy wymagany poziom (49). Odporności 60–62 mają osobne wartości i limit 80%; Stun/Stone zmniejszają szansę właściwego stanu.
+Lot (65), ataki ciemności / trucizny (53, 54) i przemiana (84) są wyświetlane, ale jeszcze nie działają.
 
 ## Opcje z gry (zwykły sprzęt)
 
 Decyzja właściciela: broń i zbroja **nigdy nie spadają z opcjami**. Za każde **10 minut aktywnej gry**
-(walka na ekranie; wyprawy się nie liczą) losowa założona część, która nie jest rzadka i ma mniej niż 5 opcji,
+(walka na ekranie; wyprawy się nie liczą) losowa założona broń lub część zbroi poniżej 73. poziomu, która nie jest rzadka i ma mniej niż 5 opcji,
 dostaje jedną nową opcję — losowy typ z `t_option` dozwolony dla jej podtypu (maski) i jeszcze nieobecny,
-poziom według wag `a_prob`. Akcesoria też mogą dostać opcję. Czas liczy serwis przy zgłoszeniach walki:
+poziom według wag `a_prob`. Akcesoria i przedmioty rare nie otrzymują opcji z upływu czasu. Czas liczy serwis przy zgłoszeniach walki:
 odstęp między zgłoszeniami, najwyżej 2 minuty (dłuższa przerwa = gra była zamknięta). Gdy żadna część nie
 może dostać opcji, licznik czeka pełny. W karcie postaci (Stats) widać, za ile minut następna opcja.
 
@@ -382,6 +399,9 @@ właściciela: „na razie Heaven Stone”); nagrody poszczególnych potworów u
   (`zones.ts`). Bez potworów eventowych i bossów rajdowych (`EVENT_MONSTERS`, `RAID_BOSSES`).
 - Na start otwarty jest tylko pierwszy spot strefy; zabicie (w walce albo na wyprawie) potwora najdalszego
   otwartego spotu otwiera kolejny (`logic/spots.ts`). Podróż do zamkniętego spotu serwis odrzuca (`spot-locked`).
+- Kolejna strefa wymaga zabicia ostatniego potwora poprzedniej (Juno → Dratan → Merac → Egeha).
+  Sam poziom i odblokowany spot nie zastępują zabójstwa; kontrola działa też w serwisie (`zone-locked`).
+  Istniejąca postać w dalszej krainie może kontynuować polowanie i podróże wewnątrz tej krainy.
 - Czas gry: suma przerw między raportami walki, każda najwyżej `MAX_PLAY_GAP` (120 s); wyprawa się nie liczy.
   Wyprawa liczy się do statystyki, gdy trwała co najmniej `AFK_MIN_SECONDS`.
 - Heaven Stone w każdym sklepie po cenie z bazy (1 000) — tymczasowo, na prośbę właściciela.

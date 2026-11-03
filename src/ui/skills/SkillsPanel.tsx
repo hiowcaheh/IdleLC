@@ -107,7 +107,12 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
           aria-expanded={open}
           onClick={() => setSelected(open ? null : skill.id)}
         >
-          <SkillIcon id={skill.id} kind={shown.kind} size={36} />
+          <span className={`skills-slot skills-slot--${skill.type === 3 ? 'passive' : 'active'}`}>
+            <SkillIcon id={skill.id} kind={shown.kind} size={32} />
+            <span className="skills-slot__rank">
+              {learned?.level ?? 0}/{max}
+            </span>
+          </span>
           <span className="skill-row__body">
             <span className="skill-row__name">{skill.name}</span>
             <span className="skill-row__meta">
@@ -228,8 +233,13 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
   }
 
   return (
-    <Sheet title="Skills" titleId="skills-title" onClose={onClose} className="sheet--fixed">
-      <dl className="hero-stats">
+    <Sheet
+      title="Skills"
+      titleId="skills-title"
+      onClose={onClose}
+      className="sheet--fixed sheet--skills"
+    >
+      <dl className="hero-stats skills-summary">
         <div>
           <dt>Skill bar</dt>
           <dd>
@@ -238,7 +248,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
         </div>
         <div>
           <dt>Skill points</dt>
-          <dd>{formatSp(character.sp)}</dd>
+          <dd className="skills-summary__sp">{formatSp(character.sp)}</dd>
         </div>
       </dl>
       <p className="sheet__meta">

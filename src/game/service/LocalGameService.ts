@@ -1,3 +1,5 @@
+import { allocateStatPoint, sanitizeAllocatedStats } from '../logic/statPoints.ts'
+import type { AttributeKey } from '../logic/attributes.ts'
 import { MONSTERS } from '../data/monsters.ts'
 import { MAX_LEVEL } from '../data/progression.ts'
 import { getTitle } from '../data/titles.ts'
@@ -34,7 +36,7 @@ import {
   type SaleResult,
 } from '../logic/shop.ts'
 import { SP_UNIT, applyAuto, applyBar, applyLearn } from '../logic/skills.ts'
-import { isSpotOpen, zoneSpots } from '../logic/spots.ts'
+import { isZoneOpen, isSpotOpen, zoneSpots } from '../logic/spots.ts'
 import { applyClaimBookReward, type BookClaim } from '../logic/book.ts'
 import {
   applyLevelTitles,
@@ -129,7 +131,10 @@ export class LocalGameService implements GameService {
     if (!zone.monsterIds.includes(location.monsterId)) {
       throw new GameError('wrong-monster', `${location.monsterId} is not in ${location.zoneId}`)
     }
-    if (!isSpotOpen(this.character(characterId), location)) {
+    const character = this.character(characterId)
+    if (location.zoneId !== character.location.zoneId && !isZoneOpen(character, location.zoneId))
+      throw new GameError('zone-locked', 'Defeat the previous region’s last monster first')
+    if (!isSpotOpen(character, location)) {
       throw new GameError('spot-locked', `${location.monsterId} is not open yet`)
     }
     return copy(this.update(characterId, (c) => ({ ...c, location: { ...location } })))
@@ -191,6 +196,11 @@ export class LocalGameService implements GameService {
     const sale = applySale(this.character(characterId), items)
     const updated = this.update(characterId, () => sale.character)
     return copy({ ...sale, character: updated })
+  }
+
+  async allocateStatPoint(characterId: string, attribute: AttributeKey): Promise<CharacterData> {
+    const character = this.notOnExpedition(characterId)
+    return copy(this.update(characterId, () => allocateStatPoint(character, attribute)))
   }
 
   async learnSkill(characterId: string, skillId: number): Promise<CharacterData> {
@@ -304,6 +314,10 @@ export class LocalGameService implements GameService {
         this.update(characterId, (c) => ({
           ...c,
           level: clamp(Math.floor(level), 1, MAX_LEVEL),
+          allocatedStats: sanitizeAllocatedStats(
+            c.allocatedStats,
+            clamp(Math.floor(level), 1, MAX_LEVEL),
+          ),
           exp: 0,
         })),
       ),

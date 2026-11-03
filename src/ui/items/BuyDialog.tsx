@@ -6,6 +6,7 @@ import { useGameStore } from '../../state/gameStore.ts'
 import { toast } from '../../state/toasts.ts'
 import { fmt } from '../gear/format.ts'
 import { Sheet } from '../Sheet.tsx'
+import { Gold } from '../Gold.tsx'
 import { ItemIcon } from './ItemIcon.tsx'
 
 const QUICK = [1, 10, 100]
@@ -50,14 +51,14 @@ export function BuyDialog({ itemId, onClose }: { itemId: number; onClose(): void
   }
 
   return (
-    <Sheet centered title="Buy" titleId="buy-title" onClose={onClose}>
-      <div className="item-info">
+    <Sheet centered title="Buy" titleId="buy-title" className="sheet--buy" onClose={onClose}>
+      <div className="item-info buy-dialog">
         <div className="item-info__head">
           <ItemIcon item={item} size={44} />
           <span className="item-info__title">
             <span className="item-info__name">{item.name}</span>
             <span className="item-info__kind">
-              <span className="coin coin--small" aria-hidden="true" /> {fmt(price)} each
+              <Gold amount={price} /> each
             </span>
           </span>
         </div>
@@ -134,11 +135,15 @@ export function BuyDialog({ itemId, onClose }: { itemId: number; onClose(): void
             <dl className="hero-stats hero-stats--single item-info__stats">
               <div>
                 <dt>Total</dt>
-                <dd>{fmt(price * count)}</dd>
+                <dd>
+                  <Gold amount={price * count} />
+                </dd>
               </div>
               <div>
                 <dt>Gold left</dt>
-                <dd>{fmt(gold - price * count)}</dd>
+                <dd>
+                  <Gold amount={gold - price * count} />
+                </dd>
               </div>
             </dl>
           </>

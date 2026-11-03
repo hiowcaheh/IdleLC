@@ -2,6 +2,17 @@
 
 Stan rozpoznania: 2026-11-02. Punktem wyjścia wdrożenia jest commit `c9944c92cacfc50595dbfc8bbd085b64cf5e4048`. Ten dokument jest punktem wejścia dla Claude Code i kolejnych współpracowników; [raporty źródłowe](source-audit/README.md) zachowują szczegółowe dowody, a changelog w katalogu głównym opisuje faktycznie dostarczone zmiany.
 
+## Aktualizacja 2026-11-03
+
+Najnowszy zakres to [18 zgłoszeń GUI i rozwoju postaci](fixes-2026-11-03.md).
+SaveVersion wynosi teraz **14**: dodano trwałe `allocatedStats`; migracja zachowuje
+pozostałe dane i udostępnia po jednym punkcie za wcześniejszy awans. Wcześniejsze
+wzmianki o wersji 13 i swobodnym przechodzeniu między strefami opisują historię.
+Kolejne krainy wymagają zabicia ostatniego potwora poprzedniej. Opcje czasowe dotyczą
+wyłącznie zwykłej broni i zbroi poniżej 73. poziomu. Reszta zasad idle pozostaje.
+Przejścia nadal używają `cover`; loader czeka na dojście i ustabilizowanie kamery,
+a po odsłonięciu sceny pokazuje nazwę mapy. Prędkość biegu wpływa na oba rodzaje ruchu.
+
 ## Kontynuacja po utracie niewysłanej partii
 
 Po późniejszych testach właściciela poprawiono również pełnoekranowy loader,

@@ -14,6 +14,7 @@ import {
 import { buyPrice, sellPrice } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { toast } from '../../state/toasts.ts'
+import { Gold } from '../Gold.tsx'
 import { BuyDialog } from '../items/BuyDialog.tsx'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { Sheet } from '../Sheet.tsx'
@@ -60,6 +61,7 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
   const [fresh, setFresh] = useState<Set<string>>(new Set())
   const [buying, setBuying] = useState<number | null>(null)
   const [busy, setBusy] = useState(false)
+  const [confirmSale, setConfirmSale] = useState(false)
   if (!character) return null
 
   const away = character.expedition !== null
@@ -158,6 +160,7 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
     run(async () => {
       const sale = await sellGear(chosen.map((p) => p.uid))
       setSelected(new Set())
+      setConfirmSale(false)
       return `Sold ${sale.sold} ${sale.sold === 1 ? 'piece' : 'pieces'} for ${fmt(sale.gold)} gold.`
     })
 
@@ -174,7 +177,7 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
       onClose={onClose}
       extra={
         <p className="shop__gold" aria-label={`${fmt(character.gold)} gold`}>
-          <span className="coin" aria-hidden="true" /> {fmt(character.gold)}
+          <Gold amount={character.gold} />
         </p>
       }
     >
@@ -212,9 +215,9 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
                     <span className="item-row__name">
                       {item.name} ×{fmt(count)}
                     </span>
-                    <span className="item-row__meta">
-                      Works {Math.round(chance * 100)}% ·{' '}
-                      <span className="coin coin--small" aria-hidden="true" /> {fmt(buyPrice(id))}
+                    <span className="item-row__meta">Works {Math.round(chance * 100)}%</span>
+                    <span className="appraiser__glass-price">
+                      <Gold amount={buyPrice(id)} />
                     </span>
                   </span>
                   <span className="appraiser__glass-actions">
@@ -305,6 +308,20 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
           <>
             <div className="appraiser__bar appraiser__bar--sticky">
               <div className="appraiser__select" role="group" aria-label="Select by grade">
+                <button
+                  type="button"
+                  className={`grade-chip${chosen.length === identified.length ? ' is-active' : ''}`}
+                  aria-pressed={chosen.length === identified.length}
+                  onClick={() =>
+                    toggle(
+                      setSelected,
+                      identified.map((p) => p.uid),
+                      chosen.length !== identified.length,
+                    )
+                  }
+                >
+                  All ×{identified.length}
+                </button>
                 {grades.map((g) => {
                   const all = g.uids.every((uid) => selected.has(uid))
                   return (
@@ -324,11 +341,15 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
                 type="button"
                 className="button button--wide"
                 disabled={busy || chosen.length === 0}
-                onClick={sellSelected}
+                onClick={() => setConfirmSale(true)}
               >
-                {chosen.length === 0
-                  ? 'Select pieces to sell'
-                  : `Sell ${chosen.length} selected · +${fmt(value)} gold`}
+                {chosen.length === 0 ? (
+                  'Select pieces to sell'
+                ) : (
+                  <>
+                    Sell {chosen.length} selected · <Gold amount={value} prefix="+" />
+                  </>
+                )}
               </button>
             </div>
             <ul className="item-list">
@@ -377,6 +398,36 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
         <p className="sheet__meta">The Appraiser is closed while you are on an expedition.</p>
       )}
       {buying !== null && <BuyDialog itemId={buying} onClose={() => setBuying(null)} />}
+      {confirmSale && (
+        <Sheet
+          centered
+          title="Confirm sale"
+          titleId="appraiser-sale-title"
+          onClose={() => setConfirmSale(false)}
+        >
+          <p className="confirm__text">
+            Sell {chosen.length} identified pieces for <Gold amount={value} />?
+          </p>
+          <div className="item-row__actions">
+            <button
+              type="button"
+              className="button"
+              disabled={busy}
+              onClick={() => setConfirmSale(false)}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="button button--gold"
+              disabled={busy || chosen.length === 0}
+              onClick={sellSelected}
+            >
+              Sell
+            </button>
+          </div>
+        </Sheet>
+      )}
     </Sheet>
   )
 }

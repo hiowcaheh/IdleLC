@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ZONES } from '../game/data/zones.ts'
+import { combatSession } from '../game/session/combatSession.ts'
+import { view } from '../scene/viewState.ts'
 import { useGameStore } from '../state/gameStore.ts'
 
 /** Each zone's loading picture from the client (public/ui/lc/, `npm run convert-lc -- --only ui`). */
@@ -10,8 +12,7 @@ const LOADING_ART: Record<string, string> = {
   'lc-zone-15': 'loading-egeha',
 }
 
-/** The whole show (CSS animations in index.css), and a little more in case they never end. */
-const SHOW_MS = 2600
+const MIN_SHOW_MS = 2200
 
 const decodedArt = new Map<string, Promise<void>>()
 
@@ -43,12 +44,20 @@ export function ZoneLoading() {
     key: number
     ready: boolean
     artReady: boolean
+    leaving: boolean
   } | null>(null)
+  const [arrival, setArrival] = useState<string | null>(null)
   if (zoneId !== seen) {
     setSeen(zoneId)
     // a hero entering the world (no zone before) goes straight in
     if (zoneId && seen)
-      setShown({ zoneId, key: (shown?.key ?? 0) + 1, ready: false, artReady: false })
+      setShown({
+        zoneId,
+        key: (shown?.key ?? 0) + 1,
+        ready: false,
+        artReady: false,
+        leaving: false,
+      })
   }
 
   useEffect(() => {
@@ -80,21 +89,54 @@ export function ZoneLoading() {
   }, [shown])
 
   useEffect(() => {
-    if (!shown?.ready) return
-    const timer = setTimeout(() => setShown(null), SHOW_MS + 400)
+    if (!shown?.ready || shown.leaving) return
+    const started = performance.now()
+    const timer = setInterval(() => {
+      const elapsed = performance.now() - started
+      const phase = combatSession.state.phase
+      const landed = ['fighting', 'victory', 'defeat'].includes(phase)
+      // Slow rendering must not spend the fallback timer while the hero is still traveling.
+      if (elapsed >= MIN_SHOW_MS && landed && (view.cameraSettled || elapsed >= 10_000)) {
+        setShown((current) => (current ? { ...current, leaving: true } : null))
+      }
+    }, 100)
+    return () => clearInterval(timer)
+  }, [shown])
+
+  useEffect(() => {
+    if (!shown?.leaving) return
+    // Also complete when animation events are suppressed (background tabs / reduced motion).
+    const timer = setTimeout(() => {
+      setArrival(shown.zoneId)
+      setShown(null)
+    }, 500)
     return () => clearTimeout(timer)
   }, [shown])
 
-  if (!shown) return null
+  useEffect(() => {
+    if (!arrival) return
+    const timer = setTimeout(() => setArrival(null), 3600)
+    return () => clearTimeout(timer)
+  }, [arrival])
+
+  if (!shown)
+    return arrival ? (
+      <p className="zone-arrival" role="status">
+        {ZONES[arrival]?.name}
+      </p>
+    ) : null
   const art = LOADING_ART[shown.zoneId]
   return (
     <div
       key={shown.key}
-      className={`zone-loading${shown.ready ? ' zone-loading--ready' : ''}`}
+      className={`zone-loading${shown.ready ? ' zone-loading--ready' : ''}${shown.leaving ? ' zone-loading--leaving' : ''}`}
       role="status"
       aria-live="polite"
       onAnimationEnd={(e) => {
-        if (e.target === e.currentTarget) setShown(null)
+        if (e.target === e.currentTarget && shown.leaving) {
+          setArrival(shown.zoneId)
+          setShown(null)
+        }
       }}
     >
       {art && shown.artReady && (

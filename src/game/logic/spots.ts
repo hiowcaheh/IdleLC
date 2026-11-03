@@ -10,6 +10,20 @@ export function zoneSpots(zoneId: string): readonly string[] {
   return ZONES[zoneId]?.monsterIds ?? []
 }
 
+/** Cities follow hunting progression: defeat the previous region's final hunting monster. */
+export function previousZone(zoneId: string) {
+  const zones = Object.values(ZONES).sort((a, b) => a.minLevel - b.minLevel)
+  const index = zones.findIndex((zone) => zone.id === zoneId)
+  return index > 0 ? zones[index - 1] : undefined
+}
+
+export function isZoneOpen(character: Pick<CharacterData, 'stats'>, zoneId: string): boolean {
+  if (!ZONES[zoneId]) return false
+  const previous = previousZone(zoneId)
+  const last = previous?.monsterIds.at(-1)
+  return !previous || (last !== undefined && (character.stats.monsterKills[last] ?? 0) > 0)
+}
+
 /** How many spots of the zone are open (at least the first). */
 export function openSpotCount(
   character: Pick<CharacterData, 'reachedSpots'>,

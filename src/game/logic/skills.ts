@@ -58,6 +58,9 @@ export type StatKey =
   | 'magicHit'
   | 'magicEvasion'
   | 'runSpeed'
+  | 'stunResistance'
+  | 'stoneResistance'
+  | 'silenceResistance'
 
 export interface StatEffect {
   kind: 'stat'
@@ -72,7 +75,7 @@ export type SkillEffect =
   | { kind: 'damage'; percent: number }
   | StatEffect
   /** `chance` 0..1 that the stun lands. */
-  | { kind: 'stun'; chance: number }
+  | { kind: 'stun'; chance: number; resistance?: 'stone' }
   | { kind: 'poison'; perSecond: number }
   /** Immediate recovery: a flat amount, or a percent of the maximum resource. */
   | { kind: 'heal'; amount: number; percent?: true }
@@ -126,7 +129,11 @@ export function interpretEffect(e: SkillEffectDef): SkillEffect | null {
     }
     case 2: // states
       if (e.subtype === 7 || e.subtype === 5 || e.subtype === 2) {
-        return { kind: 'stun', chance: e.power > 0 ? Math.min(1, e.power / 100) : 1 }
+        return {
+          kind: 'stun',
+          chance: e.power > 0 ? Math.min(1, e.power / 100) : 1,
+          ...(e.subtype === 5 ? { resistance: 'stone' as const } : {}),
+        }
       }
       if (e.subtype === 16)
         return { kind: 'stat', stat: 'attackSpeed', value: e.power, percent: true }
@@ -509,6 +516,11 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
         break
       case 'moveSpeed':
         s.moveSpeed = ((1 + (s.moveSpeed ?? 0) / 100) * (1 + value / 100) - 1) * 100
+        break
+      case 'stunResistance':
+      case 'stoneResistance':
+      case 'silenceResistance':
+        s[stat] = Math.min(80, (s[stat] ?? 0) + value)
         break
       case 'blockChance':
       case 'cooldownReduction':

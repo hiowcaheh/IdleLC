@@ -1200,6 +1200,20 @@ a.button {
   vertical-align: -2px;
 }
 
+.gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  white-space: nowrap;
+  vertical-align: baseline;
+  font-variant-numeric: tabular-nums;
+}
+
+.gold .coin {
+  flex: none;
+}
+
 .inventory__sell-all {
   margin-top: 12px;
   border-color: var(--gilt);
@@ -4412,8 +4426,8 @@ a.button {
   background: #171813;
 }
 
-.zone-loading--ready {
-  animation: zone-loading-out 2.6s ease-in forwards;
+.zone-loading--leaving {
+  animation: zone-loading-out 0.4s ease-in forwards;
 }
 
 .zone-loading__art {
@@ -4488,8 +4502,7 @@ a.button {
 }
 
 @keyframes zone-loading-out {
-  0%,
-  70% {
+  0% {
     opacity: 1;
   }
   100% {
@@ -4534,8 +4547,8 @@ a.button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .zone-loading--ready {
-    animation: zone-loading-out 0.18s linear 1s forwards;
+  .zone-loading--leaving {
+    animation: zone-loading-out 0.18s linear forwards;
   }
 
   .zone-loading--ready .zone-loading__art,
@@ -4548,4 +4561,206 @@ a.button {
     width: 100%;
     animation: none;
   }
+}
+
+/* Source Cashshop fitting-room art, shared by the hero and monster turntables. */
+.class-preview,
+.book__preview {
+  background: #101a21 url('/ui/lc/model-preview.webp') center / 100% 100% no-repeat;
+  border: 0;
+  border-radius: 2px;
+  box-shadow: none;
+}
+
+.character-stats__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.attribute-points {
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0;
+  color: var(--gilt-bright);
+}
+
+.character-stats__group[aria-label='Attributes'] dd {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  width: 86px;
+}
+
+.attribute-add {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-image: url('/ui/lc/button-small.webp') 5 9 fill / 5px 9px stretch;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--gilt-bright);
+  cursor: pointer;
+}
+
+.attribute-add:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.appraiser__glass-price {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+}
+
+.buy-dialog {
+  display: flex;
+  flex-direction: column;
+  min-height: min(390px, 66dvh);
+}
+.buy-dialog__actions {
+  margin-top: auto;
+  padding-top: 26px;
+  padding-bottom: 2px;
+}
+.sheet--buy .hero-stats dd {
+  width: auto;
+  min-width: 110px;
+}
+.hero-card__stats dd {
+  width: auto;
+  min-width: 76px;
+}
+
+.titles__worn-hero,
+.titles__worn-name {
+  padding: 3px 16px;
+  border: solid transparent;
+  border-width: 0 5px;
+  line-height: 20px;
+}
+.titles__worn-hero {
+  border-image: url('/ui/lc/name-frame.webp') 0 2 fill / 0 5px stretch;
+}
+.titles__worn-name {
+  border-image: url('/ui/lc/title-frame.webp') 0 2 fill / 0 5px stretch;
+}
+
+.book__reward-ready {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 20px;
+  border-image: url('/ui/lc/badge.webp') 8 fill / 6px stretch;
+  color: #ffe77e;
+  font-weight: 900;
+  font-size: 14px;
+  text-shadow: 0 0 5px #dd9200;
+}
+
+/* The recovered skill_new.xml window, tabs, SP plate and distinct skill icon surrounds. */
+.sheet--skills {
+  border-image-source: url('/ui/lc/skills-window.webp');
+}
+.sheet--skills .sheet__body {
+  background:
+    linear-gradient(#101b22ba, #101b22ba),
+    url('/ui/lc/skills-background.webp') center / cover;
+}
+.sheet--skills .tabs__tab {
+  border: 0;
+  border-image: url('/ui/lc/skills-tab.webp') 8 12 fill / 8px 12px stretch;
+  background: none;
+  min-height: 38px;
+  color: #c3bda5;
+}
+.sheet--skills .tabs__tab.is-active {
+  border-image-source: url('/ui/lc/skills-tab-active.webp');
+  color: #ffe788;
+}
+.skills-summary__sp {
+  min-width: 96px;
+  padding-left: 22px !important;
+  border: 0 !important;
+  background: url('/ui/lc/skills-sp.webp') center / 100% 100% no-repeat;
+}
+.skills-slot {
+  flex: none;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  width: 44px;
+  height: 58px;
+  padding-top: 6px;
+  background: center / contain no-repeat url('/ui/lc/skills-slot-active.webp');
+}
+.skills-slot--passive {
+  background-image: url('/ui/lc/skills-slot-passive.webp');
+}
+.skills-slot__rank {
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 13px;
+  color: #e6d4b0;
+}
+.sheet--skills .skill-row {
+  border-radius: 1px;
+  background: #14212be0;
+}
+.sheet--skills .skill-row__main {
+  padding-left: 8px;
+}
+.sheet--skills .skill-row__details {
+  background: #0b151ac9;
+}
+
+.zone-arrival {
+  position: fixed;
+  z-index: 35;
+  top: calc(var(--safe-top) + 100px);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 100px);
+  margin: 0;
+  padding: 8px 30px;
+  border: solid transparent;
+  border-width: 0 8px;
+  border-image: url('/ui/lc/name-frame.webp') 0 2 fill / 0 8px stretch;
+  font-family: var(--font-display);
+  font-size: clamp(20px, 5vw, 30px);
+  color: var(--gilt-bright);
+  text-align: center;
+  text-shadow: 0 2px 4px #000;
+  pointer-events: none;
+  animation: zone-arrival 3.6s ease-out both;
+}
+@keyframes zone-arrival {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  12%,
+  80% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .zone-arrival {
+    animation: none;
+  }
+}
+
+.world-map__locked {
+  flex-basis: 100%;
+  color: #d3b58a;
+  font-size: 12px;
 }

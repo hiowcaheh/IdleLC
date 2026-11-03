@@ -131,6 +131,9 @@ const PERCENT_STATS = new Set([
   'moveSpeed',
   'critMultiplier',
   'blockChance',
+  'stunResistance',
+  'stoneResistance',
+  'silenceResistance',
 ])
 
 function optionAmount(type: number, value: number): string {

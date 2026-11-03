@@ -1,0 +1,531 @@
+{
+  "date": "2026-11-03",
+  "baseline": "58f51ae57be3dd0308356295a0333aca3712018f",
+  "scope": "18 zgłoszeń ekspedycji, GUI, statystyk i przejść map",
+  "automated": {
+    "check": "passed",
+    "lint": "passed",
+    "prettier": "passed",
+    "typecheck": "passed",
+    "tests": 337,
+    "testFiles": 39,
+    "build": "passed",
+    "verifyLcRecovery": "passed",
+    "buildNote": "Istniejące ostrzeżenie rozmiaru pakietu lc-data (1192.65 kB)."
+  },
+  "save": {
+    "version": 14,
+    "migration": "13 → 14: allocatedStats, pełne zachowanie postępów i pula za wcześniejsze awanse"
+  },
+  "browser": {
+    "engine": "Chromium / SwiftShader",
+    "physicalIPhone": false,
+    "productionGui": {
+      "page_errors": [],
+      "console_errors": [],
+      "http_errors": [],
+      "failed_requests": [],
+      "cases": [
+        {
+          "menuOrder": [
+            "Settings",
+            "Titles",
+            "Skills (2 to learn)",
+            "Inventory",
+            "Character and gear"
+          ]
+        },
+        {
+          "appraiserViewport": 390,
+          "prices": [
+            {
+              "metaBottom": 317.15625,
+              "priceTop": 320.15625,
+              "priceHeight": 19.6875,
+              "priceWidth": 114.140625,
+              "goldWidth": 61.40625,
+              "goldWhiteSpace": "nowrap"
+            },
+            {
+              "metaBottom": 402.421875,
+              "priceTop": 405.421875,
+              "priceHeight": 19.6875,
+              "priceWidth": 114.140625,
+              "goldWidth": 52.953125,
+              "goldWhiteSpace": "nowrap"
+            }
+          ],
+          "buyFooter": {
+            "actionsBottom": 623,
+            "actionsTop": 549.40625,
+            "bodyTop": 223,
+            "bodyBottom": 639
+          }
+        },
+        {
+          "appraiserViewport": 1280,
+          "prices": [
+            {
+              "metaBottom": 277.75,
+              "priceTop": 280.75,
+              "priceHeight": 19.6875,
+              "priceWidth": 144.140625,
+              "goldWidth": 61.40625,
+              "goldWhiteSpace": "nowrap"
+            },
+            {
+              "metaBottom": 363.015625,
+              "priceTop": 366.015625,
+              "priceHeight": 19.6875,
+              "priceWidth": 144.140625,
+              "goldWidth": 52.953125,
+              "goldWhiteSpace": "nowrap"
+            }
+          ],
+          "buyFooter": {
+            "actionsBottom": 651,
+            "actionsTop": 577.40625,
+            "bodyTop": 251,
+            "bodyBottom": 667
+          }
+        },
+        {
+          "bulkSaleConfirmation": "cancel preserves both; confirm sells both"
+        },
+        {
+          "titleOrder": [
+            {
+              "text": "TestHealer",
+              "image": "url(\"http://127.0.0.1:4180/IdleLC/ui/lc/name-frame.webp\")",
+              "top": 584.921875
+            },
+            {
+              "text": "Highest Level for Healers",
+              "image": "url(\"http://127.0.0.1:4180/IdleLC/ui/lc/title-frame.webp\")",
+              "top": 612.921875
+            }
+          ]
+        },
+        {
+          "attributeAllocation": {
+            "strength": 0,
+            "dexterity": 0,
+            "intelligence": 0,
+            "constitution": 1
+          },
+          "resistances": {
+            "Stun resistance": "20%",
+            "Stone resistance": "10%",
+            "Silence resistance": "30%"
+          }
+        },
+        {
+          "skillsAssets": "window, tabs, SP plate and active/passive surrounds rendered"
+        },
+        {
+          "bookReward": "list marker removed after claiming",
+          "preview": "url(\"http://127.0.0.1:4180/IdleLC/ui/lc/model-preview.webp\")"
+        },
+        {
+          "mapLocks": [
+            {
+              "text": "Juno1–30Spots 2 / 32You are here",
+              "disabled": true
+            },
+            {
+              "text": "Dratan20–64Spots 1 / 42Defeat Elder Drake in Juno",
+              "disabled": true
+            },
+            {
+              "text": "Merac28–51Spots 1 / 23Defeat Elite Sphinx Spear Man in Dratan",
+              "disabled": true
+            },
+            {
+              "text": "Egeha65–90Spots 1 / 15Defeat Elite Cerberus in Merac",
+              "disabled": true
+            }
+          ]
+        },
+        {
+          "firstMinuteCounterSeconds": 4,
+          "estimate": "So far about 1 kills · 11 EXP · \n2"
+        }
+      ],
+      "passed": true
+    },
+    "monsterPreview": {
+      "cases": [
+        {
+          "viewport": [390, 844],
+          "drawCalls": 2,
+          "frame": 53,
+          "width": 171,
+          "height": 150,
+          "clientWidth": 172,
+          "skinned": 2,
+          "bounds": [
+            [7.341506656392294e-5, 0.021102787615227072, 0.9803290283595144],
+            [0.027971449205755772, -0.302232600216116, 0.9829499256330362]
+          ]
+        },
+        {
+          "viewport": [1280, 900],
+          "drawCalls": 2,
+          "frame": 91,
+          "width": 187,
+          "height": 150,
+          "clientWidth": 188,
+          "skinned": 2,
+          "bounds": [
+            [2.9370820975600637e-6, 0.0009245880370637915, 0.9802038114373693],
+            [0.025648640381211445, -0.3243465636918669, 0.9828463255229016]
+          ]
+        }
+      ],
+      "errors": [],
+      "passed": true
+    },
+    "zoneTransitions": {
+      "passed": true,
+      "cases": [
+        {
+          "destination": "Dratan",
+          "viewport": [390, 844],
+          "motion": "no-preference",
+          "cover": {
+            "x": 0,
+            "y": 0,
+            "w": 390,
+            "h": 844,
+            "artSize": "cover",
+            "scale": "none"
+          },
+          "atArrival": {
+            "zone": "lc-zone-4",
+            "phase": "victory",
+            "monster": "lc-83",
+            "monsterVisible": true,
+            "monsterHeight": 3.1552079575422196,
+            "settled": true,
+            "width": 390,
+            "height": 844,
+            "clientWidth": 390,
+            "clientHeight": 844,
+            "frame": 97,
+            "drawCalls": 17,
+            "fov": 45,
+            "zoom": 1,
+            "relative": 19.262979556736994,
+            "camera": [10.638786569429094, 7.0267306041503605, 14.528595046221346],
+            "player": [3.3731704146335835, 0, -1.7646200318168699],
+            "center": [4.303739647401157, 0, -2.250994308577193],
+            "travelSeconds": 1.7857142857142856,
+            "approachSeconds": 0.9285714285714286
+          },
+          "cameraBefore": {
+            "zone": "lc-zone-4",
+            "phase": "victory",
+            "monster": "lc-83",
+            "monsterVisible": true,
+            "monsterHeight": 3.1552079575422196,
+            "settled": true,
+            "width": 390,
+            "height": 844,
+            "clientWidth": 390,
+            "clientHeight": 844,
+            "frame": 97,
+            "drawCalls": 17,
+            "fov": 45,
+            "zoom": 1,
+            "relative": 19.262979556736994,
+            "camera": [10.638786569429094, 7.0267306041503605, 14.528595046221346],
+            "player": [3.3731704146335835, 0, -1.7646200318168699],
+            "center": [4.303739647401157, 0, -2.250994308577193],
+            "travelSeconds": 1.7857142857142856,
+            "approachSeconds": 0.9285714285714286
+          },
+          "cameraAfter": {
+            "zone": "lc-zone-4",
+            "phase": "victory",
+            "monster": "lc-83",
+            "monsterVisible": true,
+            "monsterHeight": 3.1552079575422196,
+            "settled": true,
+            "width": 390,
+            "height": 844,
+            "clientWidth": 390,
+            "clientHeight": 844,
+            "frame": 109,
+            "drawCalls": 17,
+            "fov": 45,
+            "zoom": 1,
+            "relative": 19.261655435609732,
+            "camera": [10.649289891777524, 7.0267306041503605, 14.523105346335605],
+            "player": [3.3731704146335835, 0, -1.7646200318168699],
+            "center": [4.303739647401157, 0, -2.250994308577193],
+            "travelSeconds": 1.7857142857142856,
+            "approachSeconds": 0.9285714285714286
+          }
+        },
+        {
+          "destination": "Merac",
+          "viewport": [390, 844],
+          "motion": "no-preference",
+          "cover": {
+            "x": 0,
+            "y": 0,
+            "w": 390,
+            "h": 844,
+            "artSize": "cover",
+            "scale": "none"
+          },
+          "atArrival": {
+            "zone": "lc-zone-7",
+            "phase": "victory",
+            "monster": "lc-153",
+            "monsterVisible": true,
+            "monsterHeight": 1.365261662157096,
+            "settled": true,
+            "width": 390,
+            "height": 844,
+            "clientWidth": 390,
+            "clientHeight": 844,
+            "frame": 206,
+            "drawCalls": 19,
+            "fov": 45,
+            "zoom": 1,
+            "relative": 15.707378710336872,
+            "camera": [9.038775650513392, 5.728800000000001, 10.76333159378883],
+            "player": [3.031878392314806, 0, -2.2841319199082557],
+            "center": [3.8757516852528067, 0, -2.9204463949132995],
+            "travelSeconds": 1.7857142857142856,
+            "approachSeconds": 0.9285714285714286
+          },
+          "cameraBefore": {
+            "zone": "lc-zone-7",
+            "phase": "victory",
+            "monster": "lc-153",
+            "monsterVisible": true,
+            "monsterHeight": 1.365261662157096,
+            "settled": true,
+            "width": 390,
+            "height": 844,
+            "clientWidth": 390,
+            "clientHeight": 844,
+            "frame": 206,
+            "drawCalls": 19,
+            "fov": 45,
+            "zoom": 1,
+            "relative": 15.707378710336872,
+            "camera": [9.038775650513392, 5.728800000000001, 10.76333159378883],
+            "player": [3.031878392314806, 0, -2.2841319199082557],
+            "center": [3.8757516852528067, 0, -2.9204463949132995],
+            "travelSeconds": 1.7857142857142856,
+            "approachSeconds": 0.9285714285714286
+          },
+          "cameraAfter": {
+            "zone": "lc-zone-7",
+            "phase": "victory",
+            "monster": "lc-153",
+            "monsterVisible": true,
+            "monsterHeight": 1.365261662157096,
+            "settled": true,
+            "width": 390,
+            "height": 844,
+            "clientWidth": 390,
+            "clientHeight": 844,
+            "frame": 220,
+            "drawCalls": 19,
+            "fov": 45,
+            "zoom": 1,
+            "relative": 15.703925843228536,
+            "camera": [9.049312136787682, 5.728800000000001, 10.755386658467225],
+            "player": [3.031878392314806, 0, -2.2841319199082557],
+            "center": [3.8757516852528067, 0, -2.9204463949132995],
+            "travelSeconds": 1.7857142857142856,
+            "approachSeconds": 0.9285714285714286
+          }
+        },
+        {
+          "destination": "Egeha",
+          "viewport": [1280, 900],
+          "motion": "no-preference",
+          "cover": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 900,
+            "artSize": "cover",
+            "scale": "none"
+          },
+          "atArrival": {
+            "zone": "lc-zone-15",
+            "phase": "fighting",
+            "monster": "lc-287",
+            "monsterVisible": true,
+            "monsterHeight": 1.3236979564624283,
+            "settled": true,
+            "width": 1280,
+            "height": 900,
+            "clientWidth": 1280,
+            "clientHeight": 900,
+            "frame": 291,
+            "drawCalls": 22,
+            "fov": 45,
+            "zoom": 1,
+            "relative": 9.523184500112345,
+            "camera": [7.347963062488508, 3.4720000000000004, 5.956956532181412],
+            "player": [3.330438769047874, 0, -1.8434232288518912],
+            "center": [4.249626169963502, 0, -2.3518681454489023],
+            "travelSeconds": 1.7857142857142856,
+            "approachSeconds": 0.9285714285714286
+          },
+          "cameraBefore": {
+            "zone": "lc-zone-15",
+            "phase": "fighting",
+            "monster": "lc-287",
+            "monsterVisible": true,
+            "monsterHeight": 1.3236979564624283,
+            "settled": true,
+            "width": 1280,
+            "height": 900,
+            "clientWidth": 1280,
+            "clientHeight": 900,
+            "frame": 291,
+            "drawCalls": 22,
+            "fov": 45,
+            "zoom": 1,
+            "relative": 9.523184500112345,
+            "camera": [7.347963062488508, 3.4720000000000004, 5.956956532181412],
+            "player": [3.330438769047874, 0, -1.8434232288518912],
+            "center": [4.249626169963502, 0, -2.3518681454489023],
+            "travelSeconds": 1.7857142857142856,
+            "approachSeconds": 0.9285714285714286
+          },
+          "cameraAfter": {
+            "zone": "lc-zone-15",
+            "phase": "fighting",
+            "monster": "lc-287",
+            "monsterVisible": true,
+            "monsterHeight": 1.3236979564624283,
+            "settled": true,
+            "width": 1280,
+            "height": 900,
+            "clientWidth": 1280,
+            "clientHeight": 900,
+            "frame": 296,
+            "drawCalls": 22,
+            "fov": 45,
+            "zoom": 1,
+            "relative": 9.518646437615262,
+            "camera": [7.37722239476092, 3.4720000000000004, 5.9407784682057905],
+            "player": [3.330438769047874, 0, -1.8434232288518912],
+            "center": [4.249626169963502, 0, -2.3518681454489023],
+            "travelSeconds": 1.7857142857142856,
+            "approachSeconds": 0.9285714285714286
+          }
+        },
+        {
+          "destination": "Juno",
+          "viewport": [1280, 900],
+          "motion": "reduce",
+          "cover": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 900,
+            "artSize": "cover",
+            "scale": "none"
+          },
+          "atArrival": {
+            "zone": "lc-zone-0",
+            "phase": "fighting",
+            "monster": "lc-2",
+            "phaseTime": 0.07899999999999999,
+            "timeScale": 1,
+            "monsterVisible": true,
+            "monsterHeight": 4.184428801712053,
+            "settled": false,
+            "width": 1280,
+            "height": 900,
+            "clientWidth": 1280,
+            "clientHeight": 900,
+            "frame": 68,
+            "drawCalls": 32,
+            "fov": 45,
+            "zoom": 1,
+            "relative": 14.722297360050783,
+            "camera": [0.4856597536868562, 5.3306610398632746, 13.212054957776656],
+            "player": [-3.695866907975514, 0, 0.4157221244238339],
+            "center": [-4.7768386025122584, 0, 0.5378211155736625],
+            "travelSeconds": 1.7857142857142856,
+            "approachSeconds": 0.9285714285714286
+          },
+          "cameraBefore": {
+            "zone": "lc-zone-0",
+            "phase": "fighting",
+            "monster": "lc-2",
+            "phaseTime": 0.07899999999999999,
+            "timeScale": 0,
+            "monsterVisible": true,
+            "monsterHeight": 4.184428801712053,
+            "settled": false,
+            "width": 1280,
+            "height": 900,
+            "clientWidth": 1280,
+            "clientHeight": 900,
+            "frame": 68,
+            "drawCalls": 32,
+            "fov": 45,
+            "zoom": 1,
+            "relative": 14.722297360050783,
+            "camera": [0.4856597536868562, 5.3306610398632746, 13.212054957776656],
+            "player": [-3.695866907975514, 0, 0.4157221244238339],
+            "center": [-4.7768386025122584, 0, 0.5378211155736625],
+            "travelSeconds": 1.7857142857142856,
+            "approachSeconds": 0.9285714285714286
+          },
+          "cameraAfter": {
+            "zone": "lc-zone-0",
+            "phase": "fighting",
+            "monster": "lc-2",
+            "phaseTime": 0.07899999999999999,
+            "timeScale": 0,
+            "monsterVisible": true,
+            "monsterHeight": 4.184428801712053,
+            "settled": false,
+            "width": 1280,
+            "height": 900,
+            "clientWidth": 1280,
+            "clientHeight": 900,
+            "frame": 70,
+            "drawCalls": 32,
+            "fov": 45,
+            "zoom": 1,
+            "relative": 14.671048853713984,
+            "camera": [0.28365923117196473, 5.3306610398632746, 13.234871521924875],
+            "player": [-3.695866907975514, 0, 0.4157221244238339],
+            "center": [-4.7768386025122584, 0, 0.5378211155736625],
+            "travelSeconds": 1.7857142857142856,
+            "approachSeconds": 0.9285714285714286
+          }
+        }
+      ],
+      "page_errors": [],
+      "console_errors": [],
+      "http_errors": [],
+      "failed_requests": []
+    },
+    "measurementNotes": [
+      "Model Book potwierdzony przez SkinnedMesh, draw calls i pozycję w kadrze; sam wymiar canvas nie był wystarczający.",
+      "Dla Juno z reduced motion wydłużono czas testu ze względu na programowy renderer; loader musi czekać na zakończenie podróży.",
+      "Rounding canvas/clientWidth o 1 px przy ułamkowej szerokości kolumny jest poprawny."
+    ],
+    "artifactDirectory": "work/batch18/ (lokalne skrypty, logi i zrzuty; poza repozytorium)"
+  },
+  "limitations": [
+    "Główne HP/ATK/DEF pozostają adapterem balansu; to nie jest pełny port serwera.",
+    "Silence resistance jest wyliczana i wyświetlana; pełne wyciszanie umiejętności pozostaje niezaimplementowane.",
+    "Nie wykonano testu na fizycznym iPhonie/Safari."
+  ]
+}

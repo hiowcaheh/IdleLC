@@ -47,22 +47,32 @@ const RESOURCES: Record<ClassId, readonly [number, number]> = {
   sorcerer: [110, 128],
 }
 
-export function classAttributes(classId: ClassId, level: number): Attributes {
+export function classAttributes(
+  classId: ClassId,
+  level: number,
+  allocated: Readonly<Partial<Attributes>> = {},
+): Attributes {
   const growth = Math.max(0, Math.floor(level) - 1)
   return Object.fromEntries(
     ATTRIBUTE_KEYS.map((key, i) => [
       key,
-      BASE[classId][i]! + growth * ATTRIBUTE_GROWTH[classId][i]!,
+      BASE[classId][i]! + growth * ATTRIBUTE_GROWTH[classId][i]! + (allocated[key] ?? 0),
     ]),
   ) as Attributes
 }
 
 /** Source m_dbHP/MP, used as option percentage bases; primary combat HP remains the idle adapter. */
-export function classResources(classId: ClassId, level: number): { maxHp: number; maxMp: number } {
+export function classResources(
+  classId: ClassId,
+  level: number,
+  allocated: Readonly<Partial<Attributes>> = {},
+): { maxHp: number; maxMp: number } {
   const growth = Math.max(0, Math.floor(level) - 1)
   const resource = (coefficients: Row, base: number) =>
     base +
-    growth * ATTRIBUTE_GROWTH[classId].reduce((sum, value, i) => sum + value * coefficients[i]!, 0)
+    growth *
+      ATTRIBUTE_GROWTH[classId].reduce((sum, value, i) => sum + value * coefficients[i]!, 0) +
+    ATTRIBUTE_KEYS.reduce((sum, key, i) => sum + (allocated[key] ?? 0) * coefficients[i]!, 0)
   return {
     maxHp: resource(HP_COEFFICIENT[classId], RESOURCES[classId][0]),
     maxMp: resource(MP_COEFFICIENT[classId], RESOURCES[classId][1]),

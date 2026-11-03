@@ -24,7 +24,7 @@ import { LcTerrain } from './LcTerrain.tsx'
 import { groundHeight, loadMap } from './lcMap.ts'
 import { MapPropsLayer } from './MapProps.tsx'
 import { ModelBoundary } from './ModelBoundary.tsx'
-import { TIMINGS } from '../game/logic/combat.ts'
+import { travelTime } from '../game/logic/combat.ts'
 import { combatSession } from '../game/session/combatSession.ts'
 import { ROCKS, TERRAIN_SIZE, TREES, smoothstep, terrainHeight, type Prop } from './terrain.ts'
 import { SCREEN_RIGHT, view } from './viewState.ts'
@@ -228,7 +228,7 @@ function Rocks() {
 /** Travel progress 0…1 while the hero goes to another spot (combat phase "traveling"), else 1. */
 function travelProgress(): number {
   const c = combatSession.state
-  return c.phase === 'traveling' ? Math.min(1, c.phaseTime / TIMINGS.travel) : 1
+  return c.phase === 'traveling' ? Math.min(1, c.phaseTime / travelTime(c)) : 1
 }
 
 const easeInOut = (t: number) => t * t * (3 - 2 * t)

@@ -1,3 +1,4 @@
+import { Gold } from '../Gold.tsx'
 import { useEffect, useState, type ReactNode } from 'react'
 import { getItem } from '../../game/data/items.ts'
 import { SP_UNIT } from '../../game/logic/skills.ts'
@@ -71,7 +72,7 @@ export function RewardFeed() {
                   kind: 'gold' as const,
                   content: (
                     <>
-                      <span className="coin coin--small" aria-hidden="true" />+{fmt(e.gold)}
+                      <Gold amount={e.gold} prefix="+" />
                     </>
                   ),
                 },

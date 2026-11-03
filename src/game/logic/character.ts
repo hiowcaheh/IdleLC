@@ -2,6 +2,8 @@
  * Player characters. One record = one future `characters` table row (docs/supabase.md).
  * Pure — creation rules are checked here so the server can run the same code.
  */
+import type { Attributes } from './attributes.ts'
+import { EMPTY_ALLOCATED_STATS } from './statPoints.ts'
 import { CLASSES } from '../data/classes.ts'
 import type { ClassId } from '../data/types.ts'
 import { DEFAULT_ZONE_ID, ZONES } from '../data/zones.ts'
@@ -48,6 +50,7 @@ export interface CharacterData {
   name: string
   classId: ClassId
   level: number
+  allocatedStats: Attributes
   /** Experience collected towards the next level. */
   exp: number
   gold: number
@@ -126,6 +129,7 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     name: input.name.trim(),
     classId: input.classId,
     level: 1,
+    allocatedStats: { ...EMPTY_ALLOCATED_STATS },
     exp: 0,
     gold: 0,
     createdAt: now,

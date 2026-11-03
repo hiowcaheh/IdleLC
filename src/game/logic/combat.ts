@@ -221,7 +221,17 @@ export function skillMpCost(rank: SkillRank, stats: CombatStats): number {
 
 /** Seconds the hero runs to a new monster (rare option "Move Speed" makes it shorter). */
 export function approachTime(state: Pick<CombatState, 'player'>): number {
-  return TIMINGS.approach / (1 + Math.max(0, effectiveStats(state.player).moveSpeed ?? 0) / 100)
+  return movementTime(TIMINGS.approach, effectiveStats(state.player))
+}
+
+/** Run speed in metres/second drives both kinds of movement, including class and assist bonuses. */
+export function movementTime(secondsAtBaseSpeed: number, stats: CombatStats): number {
+  const speed = stats.client?.runSpeed ?? 6 * (1 + (stats.moveSpeed ?? 0) / 100)
+  return (secondsAtBaseSpeed * 6) / Math.max(0.1, speed)
+}
+
+export function travelTime(state: Pick<CombatState, 'player'>): number {
+  return movementTime(TIMINGS.travel, effectiveStats(state.player))
 }
 
 export function createCombat(
@@ -463,7 +473,7 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
   switch (s.phase) {
     case 'traveling':
       regen(s.player, dt, false)
-      if (reached(s.phaseTime, TIMINGS.travel)) {
+      if (reached(s.phaseTime, travelTime(s))) {
         enter(s, 'spawning')
         events.push({ type: 'arrive' })
       }
@@ -709,7 +719,12 @@ function applyEffects(
   if (skill.duration <= 0) return
   const stats = skill.effects.filter((e): e is StatEffect => e.kind === 'stat')
   const stunEffect = skill.effects.find((e) => e.kind === 'stun')
-  const stun = stunEffect !== undefined && chance(rng, stunEffect.chance)
+  const resistance =
+    effectiveStats(f)[stunEffect?.resistance === 'stone' ? 'stoneResistance' : 'stunResistance'] ??
+    0
+  const stun =
+    stunEffect !== undefined &&
+    chance(rng, stunEffect.chance * (1 - Math.min(80, resistance) / 100))
   const poison = skill.effects.find((e) => e.kind === 'poison')?.perSecond ?? 0
   const perSecond = (resource: 'hp' | 'mp') =>
     skill.effects.reduce(

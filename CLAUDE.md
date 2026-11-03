@@ -1,11 +1,18 @@
 # IdleLC — wytyczne projektu
 
-## Bieżące przekazanie — 2026-11-02
+## Bieżące przekazanie — 2026-11-03
 
 **Zacznij od [dokumentacji przekazania](docs/development-handoff.md),
 [audytu źródeł](docs/source-audit/README.md), [rejestru decyzji](docs/design-decisions.md)
 i [changelogu](CHANGELOG.md). Poniższy dziennik z 30 października jest historyczny; jego
 informacje o brakujących archiwach, ikonach, szyfrowaniu i wzorach nie opisują już obecnego stanu.**
+
+Najnowsza partia: [18 zgłoszeń z 2026-11-03](docs/fixes-2026-11-03.md).
+SaveVersion **14** zapisuje rozdane atrybuty i migruje v13 bez utraty postępów.
+Każdy poziom daje 1 punkt; wcześniejsze poziomy otrzymują zaległą pulę. Nowe reguły
+właściciela: następna mapa wymaga ostatniego zabójstwa poprzedniej, a opcje czasowe
+trafiają tylko na zwykłą broń/zbroję poniżej 73. poziomu. Ekspedycja liczy pełne sekundy.
+Starsze zapisy o wersji 13, akcesoriach i swobodnych mapach są historyczne.
 
 Właściciel zatwierdził etapowe wdrażanie odzyskanych zasobów, a następnie potwierdzonych błędów
 na podstawie kodu serwera. Nie trzeba ponownie zatwierdzać tego uzgodnionego zakresu.

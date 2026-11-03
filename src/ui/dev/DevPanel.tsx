@@ -1,3 +1,4 @@
+import { Gold } from '../Gold.tsx'
 import { Link } from 'react-router'
 import { getMonster } from '../../game/data/monsters.ts'
 import { TITLES } from '../../game/data/titles.ts'
@@ -133,7 +134,7 @@ export function DevPanel() {
           +25% exp
         </button>
         <button type="button" className="dev-chip" onClick={() => devAddGold(1000)}>
-          +1,000 gold
+          <Gold amount={1000} prefix="+" />
         </button>
         <button type="button" className="dev-chip" onClick={() => devAddSp(10)}>
           +10 SP

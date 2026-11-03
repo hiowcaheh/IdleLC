@@ -1,3 +1,4 @@
+import { Gold } from '../Gold.tsx'
 import { useEffect, useMemo, useState } from 'react'
 import { CLASSES } from '../../game/data/classes.ts'
 import type { CharacterData } from '../../game/logic/character.ts'
@@ -70,7 +71,7 @@ export function HeroCard({ character }: { character: CharacterData }) {
           <div>
             <dt>Gold</dt>
             <dd>
-              <span className="coin coin--small" aria-hidden="true" /> {fmt(gold)}
+              <Gold amount={gold} />
             </dd>
           </div>
         </dl>

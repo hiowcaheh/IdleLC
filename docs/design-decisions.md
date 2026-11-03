@@ -4,6 +4,25 @@ Stan rejestru: 2026-11-02, punkt odniesienia implementacji `c9944c9`. Celem jest
 
 „Oryginał” w tym dokumencie oznacza odczytane źródła November 2018, z uwzględnieniem ich ograniczeń i flag. Nie potwierdzono, że każda reguła działała identycznie na serwerze prywatnego klienta 2015. Dla brakujących wartości DB nie wybieramy liczb na podstawie nazw.
 
+## Rozstrzygnięcia właściciela — 2026-11-03
+
+Nowa lista 18 zgłoszeń precyzuje wcześniejsze decyzje:
+
+- **P03 / D13:** zachowano 600 s i limit pięciu opcji, ale losowanie dotyczy wyłącznie
+  zwykłej broni/zbroi o wymaganym poziomie poniżej 73. Akcesoria i rare są wyłączone.
+  Dotychczasowych opcji nie usuwa się z przedmiotów.
+- **P08:** zachowano jawny start i limit 8 h; usunięto minutową karencję licznika i wypłaty.
+- **D01:** dodano ręczne rozdawanie atrybutów, po 1 punkcie za awans klasy bez profesji
+  (`PC.cpp:1370–1379`). Trwały zapis wymaga wersji 14; migracja zachowuje stary zapis
+  i nalicza zaległe punkty. Główne HP/ATK/DEF wciąż korzystają z adaptera balansu.
+- **D24:** przejście do następnej krainy wymaga zabicia końcowego potwora poprzedniej
+  w kolejności Juno, Dratan, Merac, Egeha. Spoty i osobne bossy pozostają jak wcześniej.
+- **D25:** Cashshop jest wspólnym tłem podglądów modeli; Skills używa dodatkowych
+  oryginalnych zasobów. Wysokość okien i czytelne etykiety są dostosowane do telefonu.
+
+Zakres i weryfikacja: [raport 2026-11-03](fixes-2026-11-03.md). Poniższe tabele
+zachowują historię decyzji; powyższe rozstrzygnięcia zastępują kolidujące wpisy.
+
 ## Zasady uzgodnione — zachować podczas napraw
 
 | ID  | Reguła IdleLC                                                                                | Dowód ustalenia w repozytorium                                         | Skutek dla dalszej pracy                                                                                            |

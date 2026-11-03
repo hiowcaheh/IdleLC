@@ -1,3 +1,4 @@
+import { Gold } from '../Gold.tsx'
 import type { ReactNode } from 'react'
 import type { ItemDef } from '../../game/data/types.ts'
 import { isRare } from '../../game/logic/rare.ts'
@@ -29,7 +30,7 @@ export function ItemRowContent({ itemId, count, item }: ListedItem) {
           {price > 0 && (
             <>
               {' · '}
-              <span className="coin coin--small" aria-hidden="true" /> {fmt(price)}
+              <Gold amount={price} />
             </>
           )}
         </span>

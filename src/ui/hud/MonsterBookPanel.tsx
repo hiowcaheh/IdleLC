@@ -1,17 +1,18 @@
 import { Bounds, OrbitControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
-import { Suspense, useState } from 'react'
+import { Suspense, useState, type ReactNode } from 'react'
 import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
 import { bookRewards } from '../../game/data/bookRewards.ts'
 import { getItem } from '../../game/data/items.ts'
-import { claimedRewards } from '../../game/logic/book.ts'
+import { claimedRewards, nextReward } from '../../game/logic/book.ts'
 import { openSpotCount, zoneSpots } from '../../game/logic/spots.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { toast } from '../../state/toasts.ts'
 import { Character } from '../../scene/Character.tsx'
 import { ModelBoundary } from '../../scene/ModelBoundary.tsx'
 import { fmt } from '../gear/format.ts'
+import { Gold } from '../Gold.tsx'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { Sheet } from '../Sheet.tsx'
 import { Bar } from './Bar.tsx'
@@ -148,13 +149,13 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
   const index = spots.indexOf(monsterId)
   const kills = character.stats.monsterKills[monsterId] ?? 0
   const zoneKills = spots.reduce((sum, id) => sum + (character.stats.monsterKills[id] ?? 0), 0)
-  const facts: [string, string][] = [
+  const facts: [string, ReactNode][] = [
     ['Level', String(monster.level)],
     ['HP', fmt(monster.stats.maxHp)],
     ['EXP', fmt(monster.exp)],
     // a_skill_point is in 1/10 000 SP
     ['SP', ((monster.sp ?? 0) / 10_000).toLocaleString('en-US', { maximumFractionDigits: 2 })],
-    ['Gold', fmt(monster.gold)],
+    ['Gold', <Gold amount={monster.gold} />],
     ['Spot', `${index + 1}${index >= open ? ' · locked' : ''}`],
   ]
 
@@ -186,6 +187,9 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
           {spots.map((id, i) => {
             const m = getMonster(id)
             const locked = i >= open
+            const reward = nextReward(character, id)
+            const ready =
+              reward !== undefined && (character.stats.monsterKills[id] ?? 0) >= reward.kills
             return (
               <li key={id}>
                 <button
@@ -198,6 +202,15 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
                     {m.level}
                   </span>
                   <span className="book__monster-name">{m.name}</span>
+                  {ready && (
+                    <span
+                      className="book__reward-ready"
+                      title="Reward ready"
+                      aria-label="Reward ready"
+                    >
+                      !
+                    </span>
+                  )}
                   <span className="book__monster-kills">
                     {fmt(character.stats.monsterKills[id] ?? 0)}
                   </span>

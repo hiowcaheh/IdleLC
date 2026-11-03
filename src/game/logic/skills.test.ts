@@ -61,6 +61,7 @@ describe('interpretEffect', () => {
     expect(interpretEffect({ type: 2, subtype: 5, damageType: 1, power: 20 })).toEqual({
       kind: 'stun',
       chance: 0.2,
+      resistance: 'stone',
     })
     expect(interpretEffect({ type: 2, subtype: 0, damageType: 0, power: 6 })).toEqual({
       kind: 'poison',

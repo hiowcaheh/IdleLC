@@ -1,3 +1,4 @@
+import type { AttributeKey } from '../game/logic/attributes.ts'
 import { create } from 'zustand'
 import { ZONES } from '../game/data/zones.ts'
 import type { AfkResult } from '../game/logic/afk.ts'
@@ -20,7 +21,7 @@ import type { PieceSale, PurchaseResult, SaleResult } from '../game/logic/shop.t
 import type { BookClaim } from '../game/logic/book.ts'
 import type { TitleUse } from '../game/logic/titles.ts'
 import { createDefaultSave } from '../game/logic/save.ts'
-import { farthestSpot, isSpotOpen } from '../game/logic/spots.ts'
+import { farthestSpot, isSpotOpen, isZoneOpen } from '../game/logic/spots.ts'
 import { gameService } from '../game/service/index.ts'
 import { combatSession } from '../game/session/combatSession.ts'
 import { combatEvents } from './combatEvents.ts'
@@ -64,6 +65,8 @@ interface GameStore {
   dismissAfk(): void
   /** Sells items of the played character; resolves to the sale (rejects with a GameError). */
   sellItems(items: ItemStack[]): Promise<SaleResult>
+  /** Spends one available attribute point (rejects with a GameError). */
+  allocateStatPoint(attribute: AttributeKey): Promise<void>
   /** Learns the next level of a skill (rejects with a GameError). */
   learnSkill(skillId: number): Promise<void>
   setSkillAuto(skillId: number, auto: boolean): Promise<void>
@@ -213,6 +216,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     const character = get().character
     if (!character || character.expedition) return
     const location = { zoneId, monsterId }
+    if (zoneId !== character.location.zoneId && !isZoneOpen(character, zoneId)) return
     if (!isSpotOpen(character, location)) return
     combatEvents.emit(combatSession.setMonster(monsterId))
     applyCharacter({ ...character, location })
@@ -347,6 +351,11 @@ export const useGameStore = create<GameStore>((set, get) => {
       const sale = await enqueue(() => gameService.sellItems(character.id, items))
       applyCharacter(sale.character)
       return sale
+    },
+
+    async allocateStatPoint(attribute) {
+      const id = playedId()
+      applyCharacter(await enqueue(() => gameService.allocateStatPoint(id, attribute)))
     },
 
     async learnSkill(skillId) {

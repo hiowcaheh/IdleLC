@@ -4,7 +4,7 @@ import { getItem } from '../data/items.ts'
 import { lcData } from '../data/lcSource.ts'
 import { getMonster } from '../data/monsters.ts'
 import type { ClassId } from '../data/types.ts'
-import { classAttributes } from './attributes.ts'
+import { classAttributes, classResources, type Attributes } from './attributes.ts'
 import { classRatings } from './ratings.ts'
 import { clientStatChannels } from './clientStats.ts'
 import { statsForLevel } from './balance.ts'
@@ -26,6 +26,7 @@ import { activeTitleId, titleOptions, type OwnedTitle } from './titles.ts'
 export interface Hero {
   classId: ClassId
   level: number
+  allocatedStats?: Readonly<Partial<Attributes>>
   skills?: Readonly<Record<string, LearnedSkill>>
   /** Worn gear; left out = the typical gear of the level (estimates). */
   equipment?: Equipment
@@ -61,13 +62,29 @@ export function playerFighter(hero: Hero, now = Date.now()): FighterInit {
   const base = statsForLevel(CLASSES[classId], level)
   // LC data: class stats are not in the LC database yet — scale against LC monsters instead
   const levelStats = lcData ? lcPlayerStats(level, lcData.monsters, base) : base
+  const points = hero.allocatedStats ?? {}
+  const originalResources = classResources(classId, level)
+  const resources = classResources(classId, level, points)
   const stats = applyGear(
-    { ...levelStats, ...classAttributes(classId, level), ...classRatings(classId, level) },
+    {
+      ...levelStats,
+      maxHp: levelStats.maxHp + resources.maxHp - originalResources.maxHp,
+      maxMp: (levelStats.maxMp ?? 0) + resources.maxMp - originalResources.maxMp,
+      ...classAttributes(classId, level, points),
+      ...classRatings(classId, level),
+    },
     classId,
     level,
     equipment,
     titleOptions(activeTitleId(hero, now)),
+    points,
   )
+  const offense = ['titan', 'knight'].includes(classId)
+    ? 'strength'
+    : ['healer', 'rogue'].includes(classId)
+      ? 'dexterity'
+      : 'intelligence'
+  stats.attack += points[offense] ?? 0
   // skills that need other gear (a shield, another weapon) are left out; estimates assume the gear fits
   const learned = learnedRanks(classId, skills)
   const ranks = equipment ? wieldableRanks(learned, wielded(equipment)) : learned
@@ -118,7 +135,7 @@ export function heroKey(hero: Hero, now = Date.now()): string {
   const active = activeTitleId(hero, now)
   const owned = hero.titles?.find((title) => title.id === active)
   const title = active === null ? 'none' : `${active}@${owned?.expiresAt ?? 'permanent'}`
-  return `${classId}/${level}/${learned.join(',')}/${worn}/${skillBar?.join(',') ?? 'all'}/${potions}/${title}`
+  return `${classId}/${level}/${JSON.stringify(hero.allocatedStats ?? {})}/${learned.join(',')}/${worn}/${skillBar?.join(',') ?? 'all'}/${potions}/${title}`
 }
 
 export function monsterFighter(monsterId: string): FighterInit {

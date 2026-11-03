@@ -1,5 +1,43 @@
 # Historia zmian
 
+## 2026-11-03 — ekspedycje, rozwój postaci i GUI (18 zgłoszeń)
+
+Punkt wyjścia: `58f51ae`. Szczegóły zasad, źródeł i walidacji:
+[raport wdrożenia](docs/fixes-2026-11-03.md).
+
+1. Ekspedycja nalicza czas od pierwszej pełnej sekundy. Podgląd zabić, EXP i złota
+   nie czeka na upływ minuty; powrót przed minutą również rozlicza polowanie.
+2. Ceny lup w Appraiser są w osobnym wierszu pod szansą działania.
+3. Przyciski okna zakupu znajdują się przy dolnej krawędzi, poniżej podsumowania.
+4. Wszystkie kwoty i ceny, także komunikaty sprzedaży, używają ikony złota.
+5. Kolory kwot są zgodne z progami klienta: biały / cyjan / zielony / żółty / złoty.
+6. Appraiser ma zaznaczanie wszystkich odkrytych przedmiotów i potwierdzenie przed
+   sprzedażą; anulowanie zachowuje zaznaczenie oraz przedmioty.
+7. W oknie Titles nickname jest nad tytułem; oba mają źródłowe ramki NamePopup.
+8. Kolejna kraina wymaga zabicia ostatniego potwora poprzedniej: Juno → Dratan →
+   Merac → Egeha. Warunek sprawdzają GUI, store i serwis.
+9. Lista potworów w Book oznacza gotową do odebrania nagrodę znakiem „!”.
+10. Podglądy potworów i postaci mają wspólne oryginalne tło przymierzalni Cashshop.
+11. Skills korzysta z odzyskanej ramki, tła, zakładek, pola SP oraz osobnych opraw
+    aktywnych/pasywnych umiejętności z `skill_new.tex`.
+12. Opcja za czas gry trafia wyłącznie na zwykłą broń/zbroję poniżej poziomu 73.
+    Akcesoria i wszystkie przedmioty rare są wyłączone z tego mechanizmu.
+13. Attributes ma plusy i licznik pozostałych punktów. Każdy awans daje 1 punkt,
+    także na wyprawie. Rozdanie zmienia bieżące statystyki i zapisuje się trwale.
+    Migracja 13 → 14 zachowuje postępy; dotychczasowe poziomy dają należną pulę.
+14. Kamera zachowuje dystans przy zniknięciu potwora; zmiana rozmiaru celu nie
+    uruchamia animowanego zoomu. Loader odsłania mapę po podróży i ustaleniu kadru.
+15. Po wejściu na mapę jej nazwa pojawia się przez chwilę na górze ekranu.
+16. Kolejność górnych ikon: Settings → Titles → Skills → Inventory → Character.
+17. Rzeczywista prędkość biegu skraca podróż między spotami i dobieg do potwora.
+18. Combat bonuses zawiera osobne Stun / Stone / Silence resistance, z opcji
+    61 / 60 / 62 i źródłowym limitem 80%.
+
+Weryfikacja: `npm run check` (**337 testów / 39 plików**), build i weryfikator
+odzyskanych zasobów przeszły. Chromium: GUI mobilne/desktop, rzeczywiste modele
+Book, cztery przejścia map, nazwy po wejściu i reduced motion — poprawne, bez błędów
+strony, konsoli i zasobów. Migracja v13 i rozdawanie punktów mają osobne testy.
+
 ## Dalsza korekta po testach na telefonie
 
 Punkt wyjścia: `729a8b8`. [Raport źródłowy i walidacja](docs/source-followup-fixes.md).

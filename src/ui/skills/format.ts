@@ -63,6 +63,9 @@ const STAT_LABELS: Record<StatKey, string> = {
   castSpeed: 'Cast speed',
   reuseTime: 'Skill reuse time',
   blockChance: 'Block chance',
+  stunResistance: 'Stun resistance',
+  stoneResistance: 'Stone resistance',
+  silenceResistance: 'Silence resistance',
   maxMp: 'Max MP',
   hit: 'Hit Rate',
   dodge: 'Evasion',
@@ -99,6 +102,9 @@ function statValue(stat: StatKey, value: number, percent: boolean): string {
       return signed(value / 10, ' m/s')
     case 'castSpeed':
     case 'blockChance':
+    case 'stunResistance':
+    case 'stoneResistance':
+    case 'silenceResistance':
       return signed(value, '%')
     case 'hpRegen':
     case 'mpRegen':

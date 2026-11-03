@@ -10,6 +10,8 @@ export const view = {
   monsterVisible: false,
   playerHeight: 1.8,
   monsterHeight: 1.8,
+  /** Set by the camera after its position has settled; the zone illustration waits for this. */
+  cameraSettled: false,
   /** Where the hero runs while going to another hunting spot (yaw, radians). */
   travelYaw: 0,
 }
@@ -24,4 +26,5 @@ export function resetView(): void {
   view.player.set(0, 0, 0)
   view.monster.set(0, 0, 0)
   view.monsterVisible = false
+  view.cameraSettled = false
 }

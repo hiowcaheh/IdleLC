@@ -3,6 +3,7 @@
  * The save is one account: settings + up to MAX_CHARACTERS characters (future database rows).
  * When the shape changes: bump SAVE_VERSION and add a migration from the previous version.
  */
+import { sanitizeAllocatedStats } from './statPoints.ts'
 import { BOOK_MILESTONES } from '../data/bookRewards.ts'
 import { CLASSES } from '../data/classes.ts'
 import { MONSTERS } from '../data/monsters.ts'
@@ -48,7 +49,7 @@ import {
   type LearnedSkill,
 } from './skills.ts'
 
-export const SAVE_VERSION = 13
+export const SAVE_VERSION = 14
 
 export type GraphicsQuality = 'auto' | 'low' | 'high' | 'ultra'
 
@@ -185,6 +186,8 @@ export const MIGRATIONS: Record<number, Migration> = {
   11: (save) => save,
   // v13: titles the game gave by itself (none yet; level titles come with the next change)
   12: (save) => save,
+  // v14: allocated attributes; existing levels grant their unspent points without losing progress.
+  13: (save) => save,
 }
 
 export const DEFAULT_SETTINGS: Settings = { quality: 'auto', showDamageNumbers: true }
@@ -271,6 +274,10 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     classId: raw.classId as ClassId,
     level: Math.min(MAX_LEVEL, Math.max(1, int(raw.level, 1))),
     exp: int(raw.exp, 0),
+    allocatedStats: sanitizeAllocatedStats(
+      raw.allocatedStats,
+      Math.min(MAX_LEVEL, Math.max(1, int(raw.level, 1))),
+    ),
     gold: int(raw.gold, 0),
     createdAt,
     lastPlayedAt: num(raw.lastPlayedAt, createdAt),

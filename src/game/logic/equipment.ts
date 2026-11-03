@@ -4,6 +4,7 @@
  * combat stats, the upgrade chances and the bonus per "+" are our own until the LC server code is
  * available (docs/balance.md). Pure — the server will run the same code.
  */
+import type { Attributes } from './attributes.ts'
 import {
   ARMOR_SLOTS,
   DUAL_SWORDS,
@@ -99,9 +100,13 @@ export function applyGear(
   level: number,
   equipment: Equipment | undefined,
   extraOptions: readonly ItemOption[] = [],
+  allocated?: Readonly<Partial<Attributes>>,
 ): CombatStats {
   if (!equipment)
-    return applyStats(stats, optionEffects(extraOptions, classId, level, equipment, stats))
+    return applyStats(
+      stats,
+      optionEffects(extraOptions, classId, level, equipment, stats, allocated),
+    )
   const reference = gearReference(classId, level)
   const ratio = (power: number, typical: number) => (typical > 0 ? power / typical : 1)
   const weapon = equipment.weapon
@@ -124,7 +129,7 @@ export function applyGear(
     defense: Math.round(stats.defense * (NAKED_DEFENSE + (1 - NAKED_DEFENSE) * armorRatio)),
     attackInterval: (weapon && getItem(weapon.itemId).gear?.attackInterval) || stats.attackInterval,
   }
-  return applyStats(withGear, optionEffects(options, classId, level, equipment, stats))
+  return applyStats(withGear, optionEffects(options, classId, level, equipment, stats, allocated))
 }
 
 /** The class's free starter set, worn. */

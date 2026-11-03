@@ -17,6 +17,7 @@ import {
   classResources,
 } from './attributes.ts'
 import { classRatings } from './ratings.ts'
+import type { Attributes } from './attributes.ts'
 import type { CharacterData } from './character.ts'
 import type { Equipment, GearPiece } from './equipment.ts'
 import { isRare } from './rare.ts'
@@ -103,6 +104,9 @@ export const OPTION_EFFECTS: Record<number, OptionEffect> = {
   57: { stat: 'mpRegen' }, // MP Regen
   58: { stat: 'cooldownReduction' }, // Skill Cool Down Reduction (%)
   59: { stat: 'mpCostReduction' }, // Decrease MP Consumption (%)
+  60: { stat: 'stoneResistance' },
+  61: { stat: 'stunResistance' },
+  62: { stat: 'silenceResistance' },
   63: { stat: 'blockChance' }, // Halves normal attack damage; does not affect avoidance
   64: { stat: 'moveSpeed' }, // Move Speed (%)
   66: { stat: 'critMultiplier' }, // Legacy adapter: source deadly weights are not yet modeled
@@ -207,9 +211,10 @@ export function optionEffects(
   level = 1,
   equipment?: Equipment,
   stats?: CombatStats,
+  allocated?: Readonly<Partial<Attributes>>,
 ): StatEffect[] {
-  const attributes = classAttributes(classId, level)
-  const resources = classResources(classId, level)
+  const attributes = classAttributes(classId, level, allocated)
+  const resources = classResources(classId, level, allocated)
   const ratings = classRatings(classId, level)
   const weapon = equipment?.weapon && getItem(equipment.weapon.itemId).gear
   const magic = MAGIC.includes(classId)
@@ -279,7 +284,14 @@ function growable(
   return EQUIP_SLOTS.flatMap((slot) => {
     const piece = equipment[slot]
     const gear = piece && getItem(piece.itemId).gear
-    if (!piece || !gear || isRare(piece.itemId)) return []
+    if (
+      !piece ||
+      !gear ||
+      !['weapon', 'armor'].includes(getItem(piece.itemId).type) ||
+      getItem(piece.itemId).level >= 73 ||
+      isRare(piece.itemId)
+    )
+      return []
     const owned = piece.options ?? []
     if (owned.length >= MAX_OPTIONS) return []
     const pool = optionsFor(gear).filter((o) => !owned.some((p) => p.type === o.type))

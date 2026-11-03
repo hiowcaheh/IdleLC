@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { EXP_TABLE } from '../data/progression.ts'
 import { MONSTERS } from '../data/monsters.ts'
+import { ZONES } from '../data/zones.ts'
+import { availableStatPoints } from '../logic/statPoints.ts'
 import { AFK_MAX_SECONDS, AFK_MIN_SECONDS } from '../logic/afk.ts'
 import { GameError, MAX_CHARACTERS } from '../logic/character.ts'
 import { createRng } from '../logic/rng.ts'
@@ -150,7 +152,7 @@ describe('LocalGameService', () => {
     await expect(game.claimAfk(hero.id)).rejects.toThrow('no-expedition')
   })
 
-  it('pays nothing for an expedition shorter than a minute', async () => {
+  it('pays nothing when an expedition is ended before a full second', async () => {
     const { game, clock, hero } = await withKnight()
     await game.startAfk(hero.id)
     clock.now += (AFK_MIN_SECONDS - 1) * 1000
@@ -158,6 +160,36 @@ describe('LocalGameService', () => {
     expect(afk).toMatchObject({ seconds: 0, kills: 0, exp: 0, gold: 0, drops: [] })
     expect(afk.character.expedition).toBeNull()
     expect(afk.character.stats.expeditions).toBe(0)
+  })
+
+  it('pays kills, EXP and gold before the first minute of an expedition', async () => {
+    const { game, clock, hero } = await withKnight()
+    await game.startAfk(hero.id)
+    clock.now += 30_000
+    const afk = await game.claimAfk(hero.id)
+    expect(afk.seconds).toBe(30)
+    expect(afk.kills).toBeGreaterThan(0)
+    expect(afk.exp).toBeGreaterThan(0)
+    expect(afk.gold).toBeGreaterThan(0)
+    expect(afk.character.stats.expeditions).toBe(1)
+  })
+
+  it('spends attribute points once, persists them, and blocks spending on an expedition', async () => {
+    const { game, hero, storage } = await withKnight()
+    await expect(game.allocateStatPoint(hero.id, 'strength')).rejects.toThrow('no-stat-points')
+    await game.dev.setLevel(hero.id, 2)
+    const attempts = await Promise.allSettled([
+      game.allocateStatPoint(hero.id, 'strength'),
+      game.allocateStatPoint(hero.id, 'strength'),
+    ])
+    expect(attempts.map((a) => a.status)).toEqual(['fulfilled', 'rejected'])
+    const saved = (await make(storage).game.load()).save.characters[0]!
+    expect(saved.allocatedStats.strength).toBe(1)
+    expect(availableStatPoints(saved)).toBe(0)
+    await game.dev.setLevel(hero.id, 3)
+    await game.startAfk(hero.id)
+    await expect(game.allocateStatPoint(hero.id, 'dexterity')).rejects.toThrow('on-expedition')
+    expect(stored(storage).characters[0].allocatedStats).toEqual(saved.allocatedStats)
   })
 
   it('counts active play between reports, at most MAX_PLAY_GAP per report', async () => {
@@ -369,6 +401,31 @@ describe('LocalGameService', () => {
     await expect(game.travel(hero.id, { zoneId: 'nowhere', monsterId: 'x' })).rejects.toThrow(
       'unknown-zone',
     )
+  })
+
+  it('opens the next region only after defeating the previous final monster', async () => {
+    const { game, hero, clock } = await withKnight()
+    ZONES['next-region'] = {
+      ...ZONES.glade!,
+      id: 'next-region',
+      minLevel: 10,
+      monsterIds: ['rust-golem'],
+    }
+    try {
+      const destination = { zoneId: 'next-region', monsterId: 'rust-golem' }
+      await game.dev.setLevel(hero.id, 100)
+      await game.dev.openAllSpots(hero.id)
+      await expect(game.travel(hero.id, destination)).rejects.toThrow('zone-locked')
+      await game.travel(hero.id, { zoneId: 'glade', monsterId: 'stone-sentinel' })
+      clock.now += 10_000
+      await game.reportCombat(hero.id, { monsterId: 'stone-sentinel', kills: 1, deaths: 0 })
+      expect((await game.travel(hero.id, destination)).location).toEqual(destination)
+      expect(
+        (await game.travel(hero.id, { zoneId: 'glade', monsterId: 'rust-golem' })).location.zoneId,
+      ).toBe('glade')
+    } finally {
+      delete ZONES['next-region']
+    }
   })
 
   it('offers dev commands for level, exp and gold', async () => {

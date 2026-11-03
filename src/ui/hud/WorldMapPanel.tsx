@@ -1,6 +1,6 @@
 import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
-import { openSpotCount } from '../../game/logic/spots.ts'
+import { isZoneOpen, previousZone, openSpotCount } from '../../game/logic/spots.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { Sheet } from '../Sheet.tsx'
 import { levelTone } from './levelColor.ts'
@@ -28,20 +28,23 @@ export function WorldMapPanel({ onClose }: { onClose(): void }) {
   return (
     <Sheet title="World map" titleId="world-map-title" onClose={onClose}>
       <p className="sheet__meta">
-        Pick a zone to hunt its monsters and their drops. Every zone starts at its first spot; kill
-        a spot's monster to open the next one. The colour shows how hard its monsters are for your
-        level.
+        Defeat the last monster in a region to unlock the next city. Every zone starts at its first
+        spot; kill a spot's monster to open the next one. The colour shows how hard its monsters are
+        for your level.
       </p>
       <ul className="world-map">
         {zones.map(({ zone, low, high }) => {
           const current = zone.id === here
+          const locked = !current && !isZoneOpen(character, zone.id)
+          const prerequisite = previousZone(zone.id)
+          const final = prerequisite?.monsterIds.at(-1)
           return (
             <li key={zone.id}>
               <button
                 type="button"
                 className={`world-map__zone${current ? ' is-current' : ''}`}
                 aria-current={current ? 'location' : undefined}
-                disabled={away || current}
+                disabled={away || current || locked}
                 onClick={() => {
                   selectZone(zone.id)
                   onClose()
@@ -59,6 +62,11 @@ export function WorldMapPanel({ onClose }: { onClose(): void }) {
                   <span>
                     Spots {openSpotCount(character, zone.id)} / {zone.monsterIds.length}
                   </span>
+                  {locked && final && (
+                    <span className="world-map__locked">
+                      Defeat {getMonster(final).name} in {prerequisite!.name}
+                    </span>
+                  )}
                   {current && <span className="world-map__here">You are here</span>}
                 </span>
               </button>

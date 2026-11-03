@@ -15,8 +15,8 @@ import { recordKills } from './spots.ts'
 import type { Rng } from './rng.ts'
 
 export const AFK_MAX_SECONDS = 8 * 3600
-/** Expeditions shorter than this pay nothing. */
-export const AFK_MIN_SECONDS = 60
+/** Every full second of an expedition counts. */
+export const AFK_MIN_SECONDS = 1
 /** Stats are recomputed after every slice, so level ups while away make the hero stronger. */
 export const AFK_SLICE_SECONDS = 600
 /** Share of the watched hunting rate earned while away (own value: 1 = the same). */

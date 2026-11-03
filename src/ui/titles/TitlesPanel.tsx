@@ -61,7 +61,7 @@ export function TitlesPanel({ onClose }: { onClose(): void }) {
   return (
     <Sheet title="Titles" titleId="titles-title" onClose={onClose} className="sheet--titles">
       <div className="titles__worn">
-        <span className="titles__worn-label">Worn title</span>
+        <span className="titles__worn-hero">{character.name}</span>
         {worn ? (
           <span className="titles__worn-name" style={titleStyle(worn)}>
             {worn.name}
@@ -69,7 +69,6 @@ export function TitlesPanel({ onClose }: { onClose(): void }) {
         ) : (
           <span className="titles__worn-none">None</span>
         )}
-        <span className="titles__worn-hero">{character.name}</span>
       </div>
       {owned.length === 0 ? (
         <p className="sheet__empty">

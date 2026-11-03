@@ -1,3 +1,4 @@
+import { Gold } from './Gold.tsx'
 import { useEffect, useRef } from 'react'
 import { getItem } from '../game/data/items.ts'
 import { getMonster } from '../game/data/monsters.ts'
@@ -55,7 +56,7 @@ export function AfkSummary() {
           <div className="afk__stat--gold">
             <dt>Gold</dt>
             <dd>
-              <span className="coin" aria-hidden="true" /> +{fmt(result.gold)}
+              <Gold amount={result.gold} prefix="+" />
             </dd>
           </div>
           <div className="afk__stat--sp">
@@ -74,8 +75,7 @@ export function AfkSummary() {
           Loot
           {result.drops.length > 0 && (
             <span className="afk__heading-meta">
-              worth <span className="coin coin--small" aria-hidden="true" />{' '}
-              {fmt(stacksValue(result.drops))} gold
+              worth <Gold amount={stacksValue(result.drops)} />
             </span>
           )}
         </h3>

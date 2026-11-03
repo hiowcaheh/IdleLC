@@ -47,10 +47,6 @@ export function ClassPreview({
         <hemisphereLight args={['#f3dcb2', '#2a1f17', 1.4]} />
         <directionalLight position={[2.5, 4, 3]} intensity={2.4} />
         <directionalLight position={[-3, 2, -2]} intensity={0.8} color="#9bd0f0" />
-        <mesh rotation-x={-Math.PI / 2}>
-          <circleGeometry args={[1.3, 48]} />
-          <meshStandardMaterial color="#3a2b1f" />
-        </mesh>
         <ModelBoundary resetKey={modelId}>
           <Suspense fallback={null}>
             <Character

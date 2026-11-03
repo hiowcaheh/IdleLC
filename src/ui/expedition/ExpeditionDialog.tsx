@@ -1,3 +1,4 @@
+import { Gold } from '../Gold.tsx'
 import { useEffect, useRef, useState } from 'react'
 import { getItem } from '../../game/data/items.ts'
 import { getMonster } from '../../game/data/monsters.ts'
@@ -78,7 +79,7 @@ export function ExpeditionDialog({
           <div className="afk__stat--gold">
             <dt>Gold</dt>
             <dd>
-              <span className="coin" aria-hidden="true" /> {fmt(estimate.goldPerHour)}
+              <Gold amount={estimate.goldPerHour} />
             </dd>
           </div>
         </dl>

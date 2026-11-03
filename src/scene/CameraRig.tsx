@@ -1,6 +1,7 @@
 import { useFrame, useThree } from '@react-three/fiber'
 import { useRef } from 'react'
 import { PerspectiveCamera, Vector3 } from 'three'
+import { useGameStore } from '../state/gameStore.ts'
 import { CAMERA_OFFSET, view } from './viewState.ts'
 
 const LOOK_HEIGHT = 1.1
@@ -24,9 +25,16 @@ export function CameraRig() {
   const desired = useRef(new Vector3())
   const initialized = useRef(false)
   const zoom = useRef(1)
+  const zoneId = useGameStore((s) => s.character?.location.zoneId)
+  const lastZone = useRef(zoneId)
   const viewShift = useRef({ width: 0, height: 0, shift: 0 })
 
   useFrame((_, delta) => {
+    if (zoneId !== lastZone.current) {
+      lastZone.current = zoneId
+      initialized.current = false
+      view.cameraSettled = false
+    }
     const aspect = size.width / size.height
     const shift = aspect < 1 ? VIEW_SHIFT_TALL : VIEW_SHIFT_WIDE
     const last = viewShift.current
@@ -41,8 +49,11 @@ export function CameraRig() {
     // monsters (Treant, Balrog…) push the camera back until they fit
     const big = view.monsterVisible
       ? Math.min(MAX_BIG_ZOOM, 1 + Math.max(0, view.monsterHeight - TALL) * BIG_ZOOM_PER_UNIT)
-      : 1
-    zoom.current += (big - zoom.current) * Math.min(1, delta * 2)
+      : zoom.current
+    // A despawn must preserve the framing. New sizes take effect while the loader covers travel;
+    // tweening the distance after landing made the whole map visibly zoom in and out.
+    if (big !== zoom.current) initialized.current = false
+    zoom.current = big
     const distance =
       (aspect < 0.7 ? 1.65 : aspect < 1 ? 1.35 : aspect < 1.4 ? 1.1 : 1) * ZOOM_OUT * zoom.current
 
@@ -54,6 +65,9 @@ export function CameraRig() {
     initialized.current = true
     focus.current.lerp(desiredFocus.current, k)
     camera.position.lerp(desired.current, k)
+    view.cameraSettled =
+      camera.position.distanceToSquared(desired.current) < 0.01 &&
+      focus.current.distanceToSquared(desiredFocus.current) < 0.01
     // look higher too, so a tall monster's head and name stay in view
     const lookHeight = LOOK_HEIGHT * (1 + (zoom.current - 1) * 1.6)
     camera.lookAt(focus.current.x, focus.current.y + lookHeight, focus.current.z)

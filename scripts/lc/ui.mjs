@@ -55,6 +55,16 @@ export const UI_PARTS = {
   'loading-fill': [loading('ProgressBar'), 0, 0, 62, 17],
   // the character window's value box
   'value-box': [atlas('NewCharacterInfo'), 100, 47, 129, 15],
+  // Cashshop's original 3D fitting-room backdrop, including its ornate corners and blue portal.
+  'model-preview': [atlas('Cashshop'), 368, 257, 144, 255, { quality: 90 }],
+  // skill_new.xml: img_base, the class tabs and the active/passive icon surrounds.
+  'skills-window': [atlas('skill_new'), 401, 0, 800, 590],
+  'skills-tab': [atlas('skill_new'), 1463, 1, 115, 38],
+  'skills-tab-active': [atlas('skill_new'), 1235, 1, 110, 38],
+  'skills-slot-active': [atlas('skill_new'), 1273, 43, 44, 58],
+  'skills-slot-passive': [atlas('skill_new'), 1324, 43, 44, 58],
+  'skills-sp': [atlas('skill_new'), 841, 546, 162, 23],
+  'skills-background': [atlas('skill_new'), 420, 80, 380, 450, { quality: 85 }],
   // equipment boards: each class's silhouette with the slot frames (LC job order)
   'equip-titan': [atlas('NewInventory'), 257, 0, 246, 155, { quality: 90 }],
   'equip-knight': [atlas('NewInventory'), 504, 0, 246, 155, { quality: 90 }],
@@ -72,6 +82,11 @@ export const UI_PARTS = {
  * window: the title edge (37 rows) and the bottom; panel: a thin top edge.
  */
 const ROWS = {
+  'skills-window': [
+    [0, 37, 1],
+    [100, 1, 16],
+    [580, 10, 1],
+  ],
   window: [
     [0, 37, 1],
     [380, 1, 16],

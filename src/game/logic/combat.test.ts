@@ -5,6 +5,7 @@ import {
   MP_POTION_BELOW,
   TIMINGS,
   approachTime,
+  travelTime,
   carryVitals,
   changeMonster,
   choosePotion,
@@ -702,6 +703,40 @@ describe('rare options in combat', () => {
     const step = TIMINGS.spawning + TIMINGS.approach / 1.3 + 0.02
     expect(combatTick(quick, step, createRng(1)).state.phase).toBe('fighting')
     expect(combatTick(plain, step, createRng(1)).state.phase).toBe('approach')
+  })
+
+  it('actual run speed shortens travel between spots and the approach by the same ratio', () => {
+    const client = {
+      physicalAttack: 50,
+      magicAttack: 10,
+      physicalDefense: 5,
+      magicDefense: 3,
+      physicalHit: 100,
+      magicHit: 100,
+      physicalEvasion: 20,
+      magicEvasion: 20,
+      criticalRating: 90,
+      deadlyRating: 60,
+      runSpeed: 6,
+      walkSpeed: 1.5,
+    }
+    const slow = createCombat(
+      { ...strongPlayer, stats: { ...strongPlayer.stats, client } },
+      'm',
+      weakMonster,
+    )
+    const quick = createCombat(
+      { ...strongPlayer, stats: { ...strongPlayer.stats, client: { ...client, runSpeed: 12 } } },
+      'm',
+      weakMonster,
+    )
+    expect(travelTime(quick)).toBe(travelTime(slow) / 2)
+    expect(approachTime(quick)).toBe(approachTime(slow) / 2)
+    const moved = changeMonster(quick, 'other', weakMonster).state
+    const step = TIMINGS.travel / 2 + 0.01
+    expect(combatTick(moved, step, createRng(1)).events).toContainEqual({ type: 'arrive' })
+    const unboosted = changeMonster(slow, 'other', weakMonster).state
+    expect(combatTick(unboosted, step, createRng(1)).state.phase).toBe('traveling')
   })
 })
 
