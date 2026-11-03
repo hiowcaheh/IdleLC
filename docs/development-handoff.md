@@ -2,6 +2,24 @@
 
 Stan rozpoznania: 2026-11-02. Punktem wyjścia wdrożenia jest commit `c9944c92cacfc50595dbfc8bbd085b64cf5e4048`. Ten dokument jest punktem wejścia dla Claude Code i kolejnych współpracowników; [raporty źródłowe](source-audit/README.md) zachowują szczegółowe dowody, a changelog w katalogu głównym opisuje faktycznie dostarczone zmiany.
 
+## Kontynuacja po utracie niewysłanej partii
+
+Checkout odtworzony na `461e964` był czysty; brakujące poprawki odtworzono z repozytorium
+i ponownie pobranych, zweryfikowanych archiwów. Bieżący zakres i wyniki opisuje
+[raport poprawek](fixes-2026-11-02.md). Przy kolejnej kontynuacji zacznij od tego raportu.
+
+Źródłowe atrybuty, współczynniki HP/MP oraz raw hit/avoid działają obok dotychczasowego
+adaptera głównych HP/ATK/DEF. Procenty opcji sprzętu i tytułów nie mnożą się wzajemnie.
+Newbie, EXP/SP, wygasanie tytułów, STAT22/23/8 i block63 mają osobne poprawki oraz testy.
+Nie traktuj tego jako pełnego portu statystyk i walki serwera ani zmiany zasad projektu.
+
+Adapter ulepszeń korzysta z 108 grup i 145 definicji `Effect.dat`, oryginalnej wróżki,
+pięciu pierścieni, tagów dłoni i ścieżek. Progi broni i minimum czterech części pancerza
+są niezależne. Pełne emitery/trace/legacy MDL, efekty skilli i tytułów nadal wymagają
+osobnych etapów. Zasoby regeneruje `npm run recover-upgrade-fx -- --client <klient> --models`.
+Grafiki przejść map są dekodowane przed animacją i pokazywane w całości przez `contain`.
+SaveVersion nadal 13; bez backendu ani Supabase.
+
 ## Cel i obowiązujący zakres
 
 Właściciel zlecił etapowe wdrożenie ustaleń audytu. Najpierw uzupełniamy zasoby klienta, następnie poprawiamy potwierdzone błędy interpretacji i logiki. Rozbieżności wynikające z uzgodnionych rozwiązań IdleLC pozostają; pozostałe różnice zbieramy do decyzji punkt po punkcie. Nie wprowadzamy Supabase, kont sieciowych, nowego backendu ani bazy danych na tym etapie.
@@ -43,7 +61,7 @@ flowchart TD
 | Scena                   | `src/scene/GameCanvas.tsx`, `World.tsx`, `Battle.tsx`, `Character.tsx`                                       | R3F/Three: kamera, klatki walki, ruch, przejścia spotów, AnimationMixer, reakcje i etykiety. `Battle` tyka sesję i synchronizuje HUD co ok. 0,1 s; wyniki walki trafiają zdarzeniami do store i serwisu.                                                                       |
 | Wygląd wyposażenia      | `src/game/assets/manifest.ts`, `gear.ts`; `scene/Character.tsx`                                              | Manifest bazowy jest nadpisywany danymi LC. Osobne GLB sprzętu są podpinane do szkieletu postaci; zakryte części ciała są ukrywane. URL i hash muszą odpowiadać plikowi. `ModelBoundary` daje zastępstwo przy błędzie modelu.                                                  |
 | Teren i props           | `scene/lcMap.ts`, `LcTerrain.tsx`, `MapProps.tsx`; `public/maps/juno/`                                       | Shader warstw terenu i instancje drzew/domów/płotów z plików świata. Juno ma własny wybór aren, ponieważ spawny DB nie pasują do mapy. Nie przeliczać aren przy okazji odzyskiwania grafiki bez osobnej kontroli.                                                              |
-| Efekty                  | `SkillEffects.tsx`, `UpgradeAura.tsx`, `TitleAura.tsx`, `LevelUpEffect.tsx`                                  | Własne efekty z wybranymi teksturami klienta. Nie są wiernym odtwarzaczem `Effect.dat`. Mechanika trafienia i rytm animacji są osobnymi warstwami.                                                                                                                             |
+| Efekty                  | `SkillEffects.tsx`, `UpgradeAura.tsx`, `upgradeEffects.ts`, `TitleAura.tsx`, `LevelUpEffect.tsx`             | Ulepszenia używają podzbioru `Effect.dat`, oryginalnych modeli, tagów i ścieżek; emisja cząstek/trace/MDL pozostaje adapterem. SkillEffects i TitleAura są własne. Nie jest to pełny silnik efektów LC.                                                                        |
 | UI i komunikaty         | `src/ui/`, `state/toasts.ts`, `combatEvents.ts`, `floatingTexts.ts`, `src/index.css`                         | DOM nad sceną, okna, karty przedmiotów, panel postaci, HUD i podglądy. UI jest po angielsku, dokumentacja/rozmowa po polsku. Okna z zakładkami utrzymują stałą wysokość (`sheet--fixed`).                                                                                      |
 | Dane LC                 | `src/game/data/lcSource.ts`, `lcTypes.ts`, `generated/`; moduły `data/*.ts`                                  | Eager import wygenerowanych JSON. Gdy danych nie ma lub `VITE_LC_DATA=0`, używane są dane zastępcze. Eksport jest wybranym podzbiorem bazy, nie pełną kopią oryginalnego modelu.                                                                                               |
 | Import i konwersja      | `scripts/lc/`                                                                                                | SQL → dane; SMC/BM/BS/BA/TEX → GLB/WebP; mapy WTR/WLD → teren i props. `ClientFiles` rozwiązuje ścieżki z kilku katalogów klienta. glTF-Transform/meshoptimizer optymalizuje wyniki. Surowe pliki pozostają poza Git.                                                          |
@@ -94,7 +112,7 @@ Poniższa tabela jest planem wynikającym z audytu. **Status „do wdrożenia”
 | D    | Elder Drake, oryginalny Cursed Weaver/Lich, czytelne główne animsety klas | Wygenerowano w tej samej partii; końcowy test w grze wraz z pakietem                                                                                               | Komplet części/klipów, test w grze, fallback zachowany dla rzeczywiście nieczytelnego źródła                                    |
 | E    | Wybrane GUI i poprawne paski ładowania                                    | Wygenerowano 33 wycinki i zintegrowano CSS; końcowy test w grze wraz z pakietem                                                                                    | Wycinki w granicach atlasów, właściwy cel potwierdzony w źródle; bez masowego nadpisywania identycznych obrazów                 |
 | F    | Roślinność Juno                                                           | Wdrożono 15 brakujących modeli i 4188 instancji z zachowaniem istniejących zasobów                                                                                 | Zachowane areny i istniejące props, poprawne pozycje, test wydajności/zasłaniania kamery                                        |
-| G    | Oryginalne FX                                                             | Częściowa diagnostyka grup; brak pełnego renderera                                                                                                                 | Pełne definicje i zależności, odtwarzacz, kontrola czasu/blendingu/tagów i porównanie wizualne                                  |
+| G    | Oryginalne FX                                                             | Adapter 108 grup ulepszeń z modelami/tagami/ścieżkami; pełny renderer nadal otwarty                                                                                | Pełne definicje i zależności, odtwarzacz, kontrola czasu/blendingu/tagów i porównanie wizualne                                  |
 | H    | Potwierdzone błędy lokalnej logiki i interpretacji                        | Zintegrowano odświeżanie fightera po zmianie opcji oraz poprawki cache PWA; dodano poprawną semantykę stałego/procentowego odzysku HP/MP; pozostałe skille otwarte | Test odtwarzający problem, spójna walka aktywna/AFK/UI/zapis, zachowane decyzje właściciela                                     |
 | I    | Pełna mechanika z serwera                                                 | Dokumentacja gotowa; dane i migracja modelu niepełne                                                                                                               | Kompletny dump/profil, rozszerzony model, przypadki referencyjne i migracje; brak zgadywania wartości                           |
 | J    | Supabase                                                                  | Poza bieżącym zakresem                                                                                                                                             | Dopiero ostatnia faza na osobne zlecenie; plan w `supabase.md`                                                                  |

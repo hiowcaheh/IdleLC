@@ -1,11 +1,12 @@
 # Balans — wzory
 
-Wszystkie wzory są w `src/game/logic/balance.ts`, a czasy faz walki w `src/game/logic/combat.ts`
-(`TIMINGS`). Zmiana wzoru = zmiana kodu + tego dokumentu + testów w `balance.test.ts`.
+Wzory są w `src/game/logic/` (`balance.ts`, `ratings.ts`, `attributes.ts`, `options.ts`,
+`skills.ts`), a czasy faz walki w `combat.ts` (`TIMINGS`). Zmiana wzoru wymaga aktualizacji
+kodu, tego dokumentu i odpowiednich testów logiki.
 
-> Statystyki klas i wzory walki są **robocze (własne)** — baza LC ich nie ma. Zastąpimy je
-> wartościami z kodu serwera LC, gdy właściciel go dostarczy. Exp, poziomy i nagrody za potwory
-> są już 1:1 z bazy (patrz „Doświadczenie i nagrody”).
+> Źródła serwera November 2018 są dostępne. Atrybuty, współczynniki bonusów HP/MP,
+> punkty hit/avoid i część opcji są już oparte na nich. Główne HP/ATK/DEF oraz damage
+> nadal używają własnego adaptera. Zakres i ograniczenia: [raport poprawek](fixes-2026-11-02.md).
 
 ## Statystyki
 
@@ -19,8 +20,11 @@ Wszystkie wzory są w `src/game/logic/balance.ts`, a czasy faz walki w `src/game
 | `critMultiplier` | mnożnik obrażeń przy krytyku                   |
 | `maxMp`          | mana na umiejętności (potwory nie mają)        |
 
-Tylko z umiejętności (domyślnie 0): `hit` / `dodge` (punkty procentowe szansy trafienia), `hpRegen` /
-`mpRegen` (HP/MP na 5 s), `castTime` (sekundy dodane do rzucania).
+`hit` / `dodge` to surowe punkty ratingu, z bazą klasy i przyrostem poziomowym, opcjami
+i efektami umiejętności. `strength` / `dexterity` / `intelligence` / `constitution` są
+atrybutami źródłowych klas bez profesji. `hpRegen` / `mpRegen` to dodatki HP/MP na 5 s,
+`castSpeed` skraca przygotowanie castu (STAT23), `reuseTime` zmienia odnowienie (STAT8),
+a `blockChance` to procent szansy połowienia zwykłego ciosu.
 
 ### Statystyki klasy na poziomie
 
@@ -45,11 +49,16 @@ Poziom jest ograniczony do zakresu 1–100 (`MAX_LEVEL`; decyzja właściciela �
 ## Trafienie
 
 ```
-szansaTrafienia = clamp(0,92 + 0,02 × (poziomAtakującego − poziomBroniącego)
-                        + (hitAtakującego − dodgeBroniącego) / 100, 0,50, 0,98)
+różnica = poziomAtakującego − poziomBroniącego
+H = max(0, hitAtakującego + różnica)
+A = max(0, dodgeBroniącego − różnica × avoidPerLevelBroniącego)
+trafienie = U(1, trunc(1000 × H)) > U(1, trunc(1000 × A))
 ```
 
-Równy poziom: 92%. Każdy poziom przewagi +2%, każdy poziom niedoboru −2%. `hit` i `dodge` dają umiejętności.
+Losowania są niezależne i całkowite; remis oznacza pudło. `avoidPerLevel` wynosi 10
+dla postaci i 1 dla NPC. Knight 20 ma 168 hit, opcja 21 poziomu 4 dodaje 75, razem 243.
+Zerowy H oznacza pudło; dodatni H przy zerowym A oznacza trafienie. To adapter jednego
+kanału ratingów, bez pełnego `CalcNewHitProb`, profesji i wszystkich wyjątków PvP.
 
 ## Obrażenia
 
@@ -62,6 +71,9 @@ mnożnikSkilla = 1 dla zwykłego ciosu, 1 + a_power / 100 dla umiejętności (np
 
 Wzór `atak² / (atak + obrona)` daje malejące zyski z obrony: obrona równa atakowi
 połowi obrażenia, ale nigdy ich nie zeruje.
+
+Opcja 63 niezależnie losuje blok zwykłego ciosu: `max(1, trunc(obrażenia / 2))`.
+Ataki umiejętnościami pomijają ten blok.
 
 Przykład: Knight (atak 11) vs Rust Golem (obrona 3): `121 / 14 ≈ 8,6` obrażeń na cios.
 
@@ -111,6 +123,9 @@ Interwał ataku i krytyki zostają z klasy. Interwał ataku potwora LC = `a_atta
   kolejny poziom; jedna nagroda może dać kilka poziomów. Na poziomie 100 exp się nie zbiera. Bez danych LC
   działa zastępcza krzywa `30 × poziom^2,2`.
 - **Nagroda za zabicie** — `t_npc.a_exp` i `a_prize` (złoto) 1:1 (`src/game/logic/rewards.ts`).
+  Opcje sprzętu i aktywnego, niewygasłego tytułu 82/83 dodają procent EXP/SP:
+  `nagroda + trunc(nagroda × sumaProcentów / 100)`, osobno na zabójstwo.
+  To samo naliczanie działa online, w AFK i estymacji godzinowej.
   Kary i premie za różnicę poziomów, drużynę i exp tracony po śmierci dodamy z kodu serwera.
 - **Limit zabić** — przeglądarka tylko pokazuje walkę i zgłasza jej wynik (`reportCombat`). Serwis płaci
   za najwyżej `floor(czas od poprzedniego zgłoszenia × prędkość gry / 3,2 s) + 2` zabić. 3,2 s to najkrótszy
@@ -238,9 +253,14 @@ sznury, kamienie, oczy, kolczyki, pierścienie) nie mają własnych statystyk �
 i jaką ma wartość (`a_level`). Np. pierścień (podtyp 4) może dostać opcje ataku i celności, kamień (podtyp 1) —
 Strength/Dexterity/Intelligence/Constitution, obronę i unik. **Własne:** liczba opcji przy dropie 1–5 (wagi
 40/30/18/9/3), typy wybierane równo spośród pasujących, i to, co opcja robi w IdleLC (`OPTION_EFFECTS`):
-Strength → atak Titana i Knighta, Dexterity → Healera i Rogue, Intelligence → Mage i Sorcerera, Constitution →
-+5 HP za punkt, ataki fizyczne/magiczne/wręcz/dystansowe → atak klas, których dotyczą, obrony → obrona, celność
-i unik w 1/10 %. Opcje żywiołów (26–35) i specjalne nie wypadają, dopóki nie ma żywiołów. Opcja bez działania dla
+STR/DEX/INT/CON zmieniają odpowiednie atrybuty; wpływ STR/INT/CON na HP/MP używa
+współczynników klasy z serwera. Ofensywny wpływ atrybutów pozostaje adapterem:
+STR → atak Titana/Knighta, DEX → Healera/Rogue, INT → Mage/Sorcerera.
+Ataki fizyczne/magiczne/wręcz/dystansowe dotyczą wybranych klas, obrony zwiększają obronę,
+a hit/evasion są punktami. Opcje 67–80 używają stałych podstaw źródłowych (HP/MP:
+baza klasy bez profesji), więc sprzęt i tytuł nie mnożą wzajemnie procentów. AllStats 99
+stosuje wszystkie cztery atrybuty z ich wpływem na zasoby. Opcje żywiołów (26–35)
+nie wypadają, dopóki nie ma żywiołów. Opcja bez działania dla
 klasy jest w UI przekreślona. Akcesoriów nie ma w sklepach ani dropie w bazie — sprzedaje je sklep IdleLC po
 cenie z bazy (decyzja własna).
 
@@ -290,7 +310,7 @@ Zasady:
 
 Opcje specjalne zestawów (działanie **własne**): skrócenie odnowienia skilli (58, max −50%), mniej many na
 skille (59, max −75%), kradzież HP / MP z obrażeń (24, 25, 51, 52), szybkość ruchu (64 — krótsze podbieganie
-do potwora, więc więcej zabić na godzinę), blok (63 → unik w punktach %), szansa krytyka (55, w 1/10 %),
+do potwora, więc więcej zabić na godzinę; kolejne bonusy mnożą prędkość), blok (63 → połowa zwykłego ciosu), szansa krytyka (55, w 1/10 %),
 obrażenia krytyczne (66, %), regeneracja HP / MP (50, 56, 57), niższy wymagany poziom (49). Odporności (60–62),
 lot (65), ataki ciemności / trucizny (53, 54) i przemiana (84) są wyświetlane, ale jeszcze nie działają.
 
@@ -316,7 +336,7 @@ otwarty spot strefy (nowa strefa: pierwszy spot).
 
 ## Tytuły
 
-- Dane 1:1 z `t_title` (włączone, z angielską nazwą przedmiotu — 184): nazwa i opis z przedmiotu tytułu
+- Dane 1:1 z `t_title` (199 rekordów): nazwa i opis z przedmiotu tytułu
   (`t_item.a_name_usa` / `a_descr_usa`), czas `a_time` w dniach (-1 = na stałe), kolor napisu `a_color`
   i drugi kolor `a_bgcolor` (u nas poświata napisu), do 5 opcji `t_option` (`a_option_index/level`).
 - Przedmiot tytułu (typ Other) → „Use” w torbie dodaje tytuł na jego czas; ponowne użycie przedłuża czas
@@ -324,25 +344,21 @@ otwarty spot strefy (nowa strefa: pierwszy spot).
 - Założony jest jeden tytuł; jego opcje działają jak opcje sprzętu. Czas płynie realnie (także na wyprawie
   i z zamkniętą grą); po końcu tytuł znika i spada z postaci.
 - Skąd gracz dostaje przedmioty tytułów — **decyzja właściciela** (na razie tylko narzędzie dev).
-- Efekty (**własne** — `Effect.dat` klienta jest zaszyfrowany): napis założonego tytułu nad bohaterem
+- Newbie: opcje 71/72 poziomu 6 dają po 10% bazowych HP/MP klasy. Knight 20 otrzymuje
+  +72 HP i +39 MP do obecnego adaptera. Wygasłe tytuły są odrzucane przed obliczeniami.
+- Efekty tytułów (**własne**; dostępny `Effect.dat` nie jest jeszcze ich odtwarzaczem): napis założonego tytułu nad bohaterem
   pulsuje poświatą; tytuły z efektem w bazie (`a_effect_name`, 24 tytuły, np. `eff_nameSKY`) mają też
   poświatę i wznoszące się gwiazdki u stóp bohatera w kolorze z nazwy efektu (SKY błękit, GREEN zielony,
   INDIGO, ORANGE, PURPLE, RVIOLET, YELLOW…; inne efekty — kolor tytułu). `TitleAura.tsx`, `titleEffectColor`.
 
-## Ulepszenie broni — efekt na postaci (własne)
+## Efekty ulepszenia — częściowy adapter klienta
 
-Broń od +4 pokazuje się na bohaterze (`UpgradeAura.tsx`; tekstury z klienta: `Common_weapon_plus_glow`
-i pierścienie run `<Klasa>_weapon_plus_ring`): świecące „wróżki” w kolorze klasy krążą wokół postaci
-(Titan czerwony, Knight niebieski, Healer złoty, Mage fioletowy, Rogue pomarańczowy, Sorcerer szmaragdowy —
-pierścień Knighta w jego kolorze, bo Sorcerer nie ma własnego).
-
-| Broń | Wróżki | Pierścienie run          |
-| ---- | ------ | ------------------------ |
-| +4   | 1 mała | —                        |
-| +6   | 1      | —                        |
-| +8   | 2      | —                        |
-| +10  | 2      | przy stopach             |
-| +15  | 3      | przy stopach i na piersi |
+Broń i pancerz mają niezależne progi 4, 6, 8, 10, 12, 15. Dla pancerza liczy się
+minimum armor/pants/gloves/boots, bez helmet i shield. `UpgradeAura.tsx` wybiera
+źródłową grupę `Effect.dat`; oryginalna wróżka porusza się po odzyskanej ścieżce,
+modele ring są przy tagach dłoni, a poświata śledzi geometrię broni.
+Nie jest to pełny renderer cząstek/trace/legacy MDL. Importer, blending i granice
+zgodności są opisane w [raporcie poprawek](fixes-2026-11-02.md).
 
 ## Księga potworów — nagrody
 

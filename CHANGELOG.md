@@ -1,5 +1,35 @@
 # Historia zmian
 
+## 2026-11-02 — etap 4: statystyki, opcje i efekty ulepszenia
+
+Partię odtworzono od `461e964` po utracie niewysłanych plików. Źródła i ograniczenia
+zgodności, przykłady liczbowe oraz wyniki kontroli opisuje [raport poprawek](docs/fixes-2026-11-02.md).
+
+- Hitrate i evasion są punktami, z bazami/przyrostami klas i dwoma niezależnymi
+  losowaniami całkowitymi. Knight 20 ma 168 punktów, opcja +75 daje 243.
+- Dodano cztery źródłowe atrybuty i współczynniki bonusów HP/MP, opcje 67–80 i AllStats 99.
+  Sprzęt i tytuł są liczone razem, bez mnożenia ich procentów. Newbie daje właściwe
+  +10% bazowych HP/MP klasy; wygasłe tytuły tracą premie także podczas bieżącej walki.
+- Opcje EXP/SP 82/83 działają w aktywnych nagrodach, wyprawie i estymacji godzinowej.
+  STAT22 zwiększa maxHP z osobnymi limitami 450 po zsumowaniu grup; STAT23 zmienia
+  przygotowanie castu, STAT8 odnowienie. Opcja 63 dzieli zwykły cios przez dwa.
+- Bonusy ruchu mnożą prędkość. Porównanie podwójnych mieczy odejmuje również tarczę;
+  Expedition zwalnia stan `busy` także po błędzie.
+- Efekty broni i czterech części pancerza mają osobne progi 4/6/8/10/12/15.
+  Dodano importer 108 grup ulepszeń z `Effect.dat`, oryginalną wróżkę i pięć pierścieni,
+  ścieżki i tagi dłoni. Poświata śledzi geometrię broni. Poprawiono jasność/alfa Add,
+  odróżniono Translucent i zachowano dwustronne powierzchnie modeli.
+- Przejścia czterech map dekodują obrazy przed animacją, pokazują je w całości przez
+  `contain`, używają szerokości paska i respektują reduced motion.
+- Główne HP/ATK/DEF, pojedynczy kanał ratingów, critical/deadly oraz część renderera FX
+  nadal są adapterami. Nie dodano backendu ani migracji; SaveVersion pozostaje 13,
+  a zasady ulepszania, sześć klas, cztery strefy i AFK są zachowane.
+
+Weryfikacja tej partii: `npm run check` (**301 testów / 33 pliki**), build i weryfikator
+odzyskanych zasobów przeszły. Chromium: 18 kombinacji klas/ulepszeń, 28 kontroli map,
+cztery rzeczywiste przejścia oraz Character/Newbie na buildzie produkcyjnym — poprawne,
+bez błędów strony, konsoli i zasobów. Szczegóły oraz ograniczenia w raporcie powyżej.
+
 ## 2026-11-02 — etap 1: odzyskane zasoby klienta
 
 Punkt wyjścia: `c9944c9`. Partia pochodzi z jawnego archiwum klienta 2015; formaty potwierdzono

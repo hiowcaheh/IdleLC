@@ -21,13 +21,25 @@ z kanonicznymi animacjami i trzy oryginalne potwory. Sprzęt ma wszystkie 1158 g
 Ikony: 2052/2052 przedmioty, 119/119 skille (5 szarych placeholderów pochodzi ze źródła).
 Parsery MESH/TEX/skills.lod są poprawione według C++, GUI korzysta z ActionBtn0 i NamePopup.
 79 mapowań animacji = 75 dokładnych z 2015 + 4 zachowane starsze; `ti_skill_10` nadal brak.
-`Effect.dat` jest jawny, ale pełny czytnik definicji i renderer efektów nadal wymagają implementacji.
-Nie nazywaj istniejących efektów proceduralnych wierną rekonstrukcją LC.
+`Effect.dat` jest jawny. Adapter ulepszeń odczytuje 108 grup i 145 zależnych definicji,
+korzysta z modelu tinkerbell, pięciu ring_in oraz źródłowych tagów i ścieżek.
+Nie jest pełnym czytnikiem ani rendererem efektów LC; emisja cząstek, trace i legacy MDL
+nadal mają ograniczony adapter. SkillEffects i TitleAura pozostają efektami własnymi.
 
 Dopisano 15 modeli roślinności/drobnych obiektów Juno i 4188 instancji, zachowując stare propsy oraz teren.
 Wprowadzono też odświeżanie walki po zmianie opcji/rare noszonego sprzętu i naprawy cache PWA.
 Pierwsza poprawka z serwera rozróżnia stałe i procentowe przywracanie HP/MP; pozostałe wzory
 walki, klasy i statusy nadal wymagają osobnych etapów opisanych w audycie.
+
+Odtworzono też partię statystyk/opcji i efektów po utracie niewysłanych plików z poprzedniej
+sesji. `attributes.ts` i `ratings.ts` zawierają źródłowe atrybuty, współczynniki HP/MP
+i punkty hit/avoid. Knight 20: 168 hit, z opcją +75: 243. Sprzęt i tytuł są liczone razem;
+Newbie daje 10% bazowych HP/MP klasy, opcje 82/83 działają w aktywnych nagrodach i AFK.
+STAT22 ma osobne limity flat/rate 450 po zsumowaniu grup, STAT23 dotyczy castu,
+STAT8 odnowienia, a opcja 63 blokuje zwykłe ciosy zamiast zwiększać unik.
+Główne HP/ATK/DEF oraz relacja atrybutów do ataku nadal używają adaptera balansu;
+pojedynczy kanał ratingów i legacy 55/66 nie są pełnym przeniesieniem walki serwera.
+SaveVersion pozostaje 13. Szczegóły i końcowe wyniki w [raporcie poprawek](docs/fixes-2026-11-02.md).
 
 ## Cel projektu
 

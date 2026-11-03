@@ -181,9 +181,17 @@ Odzyskanie animacji przywołania nie implementuje systemu przywołań.
 
 Jawny `Effect.dat` z 2015 jest dostępny. Ustalono kontenery EFTB/EPGM/EEFM/EEGM/EFTE i odczytano
 3413 grup z 11919 kluczami efektów. To jeszcze **nie jest pełny czytnik definicji ani renderer**.
-Obecne `SkillEffects`, `TitleAura`, `UpgradeAura` nadal składają własne efekty z tekstur LC.
+`SkillEffects` i `TitleAura` nadal składają własne efekty z tekstur LC.
 Nie opisujemy tego już jako braku archiwum lub szyfrowania; pozostała implementacja odczytu
 poszczególnych typów i ich odtwarzania. Zob. [stan odzysku](source-audit/assets.md).
+
+Adapter `scripts/lc/upgrade-effects.mjs` odczytuje obecnie 108 grup ulepszeń i 145 zależnych
+definicji EFSP/EFSK/EFPT/EFMD. Zapisuje `lc-upgrade-effects.json`, źródłowe tagi/ścieżki,
+hash `Effect.dat` oraz hashe sześciu GLB i dwóch tekstur. `UpgradeAura` używa oryginalnego
+tinkerbell i pięciu ring_in; emisja cząstek/trace i legacy MDL pozostają adapterem.
+Konwerter rozróżnia Add/Translucent i zachowuje dwustronne powierzchnie. Add normalizuje
+bajtowe RGB/alfa bez przeliczenia do linear sRGB przed normalizacją.
+Pełny zakres i weryfikacja: [raport poprawek](fixes-2026-11-02.md).
 
 ## Świat `.wld` (modele na mapie)
 

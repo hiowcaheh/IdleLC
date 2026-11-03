@@ -40,13 +40,24 @@ Poniższe punkty nie są propozycją balansu. Dotyczą znaczenia odczytywanych p
 | B08 | DEADLY interpretowane jako critical damage multiplier                   | Oryginał ma osobną wagę trafienia deadly; potrzebny model typów trafień przed pełną korektą.                              |
 | B09 | Wycinki loading wychodzą poza atlas                                     | Rzeczywiste rozmiary 16×16 i 64×32; wycięcie i sposób skalowania muszą być spójne.                                        |
 
-Stan wdrożenia 2026-11-02: B01–B04 i B09 naprawiono i objęto testami; B05–B08 pozostają otwarte.
+Stan wdrożenia 2026-11-02: B01–B04, B06–B07 i B09 naprawiono i objęto testami;
+B05 i B08 pozostają otwarte. STAT22 sumuje nieograniczone grupy przed limitami 450,
+a STAT23 skraca przygotowanie castu. Szczegóły częściowego adaptera są w
+[raporcie poprawek](fixes-2026-11-02.md).
 Dodatkowo naprawiono MT_RECOVER: typ 2 przywraca procent maksymalnego HP/MP, typ 0 stałą ilość,
 a typ 1 jest odrzucany. Usunięto też błędy cache PWA. Dowody w changelogu i dokumentacji przekazania.
 
 ## Różnice do przedstawienia właścicielowi punkt po punkcie
 
 Każdy wpis pozostaje **otwarty** do czasu zapisania decyzji lub zakończenia wymaganego rozpoznania. To lista do późniejszej rozmowy, nie blokada rozpoczętego etapu odzyskiwania zasobów. Niektóre propozycje zależą od pełnego SQL i rozszerzenia modelu; samo „zmienić na oryginał” nie wystarczy do ich bezpiecznej implementacji.
+
+Aktualizacja bieżącej partii: w D01/D02 dodano źródłowe atrybuty i punkty ratingów
+z dwoma losowaniami; główne HP/ATK/DEF oraz jeden kanał walki pozostają adapterem.
+W D10 działają już opcje EXP/SP 82/83; pełne reguły nagród nadal są otwarte.
+W D16 opcja 63 jest już blokiem połowy zwykłego ciosu, natomiast legacy 55/66
+i pozostałe wskazane różnice wymagają dalszego modelu. D25 ma częściowy adapter
+ulepszeń z oryginalnymi modelami i ścieżkami; pełne efekty skilli/tytułów pozostają otwarte.
+Poniższa tabela zachowuje historyczny punkt odniesienia tych decyzji.
 
 | ID  | Obecne IdleLC / problem wyboru                                                                         | Odczytany oryginał lub brak danych                                                      | Decyzja do podjęcia                                                                                            |
 | --- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
