@@ -2,125 +2,188 @@ import { useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import {
-  AdditiveBlending,
   Color,
+  DynamicDrawUsage,
+  InstancedBufferAttribute,
   MeshBasicMaterial,
+  NormalBlending,
+  Object3D,
+  PlaneGeometry,
+  Quaternion,
   SRGBColorSpace,
-  SpriteMaterial,
-  type Mesh,
-  type Sprite,
+  type Group,
+  type InstancedMesh,
   type Texture,
 } from 'three'
-import { getTitle } from '../game/data/titles.ts'
-import { useGameStore } from '../state/gameStore.ts'
-import { titleEffectColor } from '../ui/titles/format.ts'
+import recovered from '../game/data/generated/lc-title-effects.json'
+import { titleParticle, titleParticleCount, type TitleParticleGroup } from './titleEffects.ts'
+import { additiveEffectMaterial, placeSourceTag, type UpgradeTarget } from './upgradeEffects.ts'
 
-const fxUrl = (name: string) => `${import.meta.env.BASE_URL}fx/${name}.webp`
-
-/** Stars rising around the hero, and how long one takes to rise (seconds). */
-const STARS = 7
-const RISE_TIME = 2.2
-const RISE_HEIGHT = 2.1
-
-/**
- * A worn title with an effect (t_title a_effect_name) shows as a glow on the ground around the
- * hero and stars rising in its colour. Our own look: the client's Effect.dat is encrypted.
- */
-export function TitleAura() {
-  const activeTitle = useGameStore((s) => s.character?.activeTitle ?? null)
-  const title = activeTitle === null ? undefined : getTitle(activeTitle)
-  const color = title ? titleEffectColor(title) : null
-  if (!color) return null
-  return <Aura color={color} />
+interface TitleEffects {
+  groups: Record<
+    string,
+    { effects: { time: number; name: string }[]; tags: { effect: number; name: string }[] }
+  >
+  effects: Record<string, { particleGroup: string }>
+  particles: Record<string, TitleParticleGroup>
+  textures: Record<string, { url: string; sha256: string; width: number; height: number }>
 }
+const data = recovered as unknown as TitleEffects
 
-function Aura({ color }: { color: string }) {
-  const [glow, ring, star] = useTexture([fxUrl('glow'), fxUrl('ring'), fxUrl('star')], (loaded) => {
-    for (const t of loaded as Texture[]) t.colorSpace = SRGBColorSpace
-  }) as Texture[]
-  const floor = useRef<Mesh>(null)
-  const band = useRef<Mesh>(null)
-  const stars = useRef<(Sprite | null)[]>([])
-  const clock = useRef(0)
-
-  const materials = useMemo(() => {
-    const tint = new Color(color)
-    const ground = (map: Texture | undefined, opacity: number) =>
-      new MeshBasicMaterial({
-        map,
-        color: tint,
-        transparent: true,
-        opacity,
-        blending: AdditiveBlending,
-        depthWrite: false,
-        toneMapped: false,
-      })
-    return {
-      glow: ground(glow, 0.55),
-      ring: ground(ring, 0.8),
-      // each star fades on its own: a material each
-      stars: Array.from(
-        { length: STARS },
-        () =>
-          new SpriteMaterial({
-            map: star,
-            color: tint.clone().lerp(new Color('#ffffff'), 0.3),
-            transparent: true,
-            blending: AdditiveBlending,
-            depthWrite: false,
-            toneMapped: false,
-          }),
-      ),
+/** Source title groups are three body-centred emitters, with no ground geometry. */
+export function TitleAura({ effectName, target }: { effectName: string; target: UpgradeTarget }) {
+  const definition = data.groups[effectName]
+  if (!definition) return null
+  return (
+    <group name="title-smoke">
+      {definition.effects.map((effect, index) => {
+        const particle = data.particles[data.effects[effect.name]!.particleGroup]!
+        const tag = definition.tags.find((tag) => tag.effect === index)?.name
+        return tag ? (
+          <TitleParticles
+            key={effect.name}
+            particle={particle}
+            target={target}
+            tag={tag}
+            delay={effect.time}
+          />
+        ) : null
+      })}
+    </group>
+  )
+}
+function prepareTexture(texture: Texture | Texture[]) {
+  for (const item of Array.isArray(texture) ? texture : [texture]) {
+    item.colorSpace = SRGBColorSpace
+    item.premultiplyAlpha = false
+  }
+}
+function TitleParticles({
+  particle,
+  target,
+  tag,
+  delay,
+}: {
+  particle: TitleParticleGroup
+  target: UpgradeTarget
+  tag: string
+  delay: number
+}) {
+  const asset = data.textures[particle.textureAsset]!
+  const texture = useTexture(
+    `${import.meta.env.BASE_URL}${asset.url}?v=${asset.sha256.slice(0, 12)}`,
+    prepareTexture,
+  )
+  const holder = useRef<Group>(null),
+    anchor = useRef<Group>(null),
+    mesh = useRef<InstancedMesh>(null),
+    clock = useRef(0)
+  const dummy = useMemo(() => new Object3D(), []),
+    worldQuaternion = useMemo(() => new Quaternion(), []),
+    faceCamera = useMemo(() => new Quaternion(), []),
+    roll = useMemo(() => new Quaternion(), []),
+    color = useMemo(() => new Color(), [])
+  const count = titleParticleCount(particle)
+  const { geometry, material } = useMemo(() => {
+    const geometry = new PlaneGeometry(1, 1),
+      uv = geometry.getAttribute('uv')
+    for (let i = 0; i < uv.count; i++)
+      uv.setXY(
+        i,
+        ((uv.getX(i) + particle.col) * particle.mexWidth) / asset.width,
+        1 - ((1 - uv.getY(i) + particle.row) * particle.mexHeight) / asset.height,
+      )
+    const opacity = new InstancedBufferAttribute(new Float32Array(count), 1)
+    opacity.setUsage(DynamicDrawUsage)
+    geometry.setAttribute('instanceOpacity', opacity)
+    const material = new MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      depthWrite: false,
+      toneMapped: false,
+    })
+    if (particle.blend === 206) additiveEffectMaterial(material)
+    else {
+      material.blending = NormalBlending
+      material.premultipliedAlpha = false
     }
-  }, [color, glow, ring, star])
-
+    material.onBeforeCompile = (shader) => {
+      shader.vertexShader = shader.vertexShader
+        .replace(
+          '#include <common>',
+          '#include <common>\nattribute float instanceOpacity;\nvarying float vInstanceOpacity;',
+        )
+        .replace(
+          '#include <color_vertex>',
+          '#include <color_vertex>\nvInstanceOpacity = instanceOpacity;',
+        )
+      shader.fragmentShader = shader.fragmentShader
+        .replace('#include <common>', '#include <common>\nvarying float vInstanceOpacity;')
+        .replace(
+          '#include <color_fragment>',
+          '#include <color_fragment>\ndiffuseColor.a *= vInstanceOpacity;',
+        )
+    }
+    material.customProgramCacheKey = () => 'title-particle-opacity-v1'
+    return { geometry, material }
+  }, [particle, asset.width, asset.height, count, texture])
   useEffect(
     () => () => {
-      materials.glow.dispose()
-      materials.ring.dispose()
-      materials.stars.forEach((m) => m.dispose())
+      geometry.dispose()
+      material.dispose()
     },
-    [materials],
+    [geometry, material],
   )
-
-  useFrame((_, delta) => {
+  useFrame(({ camera }, delta) => {
     clock.current += Math.min(delta, 0.1)
-    const t = clock.current
-    const ground = floor.current?.material as MeshBasicMaterial | undefined
-    if (ground) ground.opacity = 0.3 + 0.15 * Math.sin(t * 2)
-    if (band.current) {
-      band.current.rotation.z = t * 0.6
-      band.current.scale.setScalar(1 + 0.06 * Math.sin(t * 2.6))
+    if (!holder.current || !anchor.current || !mesh.current) return
+    const opacity = mesh.current.geometry.getAttribute(
+      'instanceOpacity',
+    ) as InstancedBufferAttribute
+    const time = clock.current - delay
+    target.object.updateWorldMatrix(true, true)
+    holder.current.updateWorldMatrix(true, false)
+    anchor.current.visible =
+      time >= 0 && placeSourceTag(target, tag, holder.current, anchor.current)
+    if (!anchor.current.visible) return
+    anchor.current.updateWorldMatrix(true, true)
+    anchor.current.getWorldQuaternion(worldQuaternion)
+    faceCamera.copy(worldQuaternion).invert().multiply(camera.quaternion)
+    for (let index = 0; index < count; index++) {
+      const state = titleParticle(particle, index, time)
+      if (state) {
+        dummy.position.fromArray(state.position)
+        dummy.quaternion.copy(faceCamera)
+        roll.set(0, 0, Math.sin(state.rotation / 2), Math.cos(state.rotation / 2))
+        dummy.quaternion.multiply(roll)
+        dummy.scale.setScalar(state.diameter)
+        color.setRGB(
+          state.color[0]! / 255,
+          state.color[1]! / 255,
+          state.color[2]! / 255,
+          SRGBColorSpace,
+        )
+        mesh.current.setColorAt(index, color)
+      } else dummy.scale.setScalar(0)
+      dummy.updateMatrix()
+      mesh.current.setMatrixAt(index, dummy.matrix)
+      opacity.setX(index, state?.alpha ?? 0)
     }
-    stars.current.forEach((sprite, i) => {
-      if (!sprite) return
-      // each star rises on its own beat, from a point on a circle round the hero
-      const life = ((t + (i / STARS) * RISE_TIME) % RISE_TIME) / RISE_TIME
-      const angle = i * 2.4 + Math.floor((t + (i / STARS) * RISE_TIME) / RISE_TIME) * 1.3
-      sprite.position.set(Math.cos(angle) * 0.6, 0.1 + life * RISE_HEIGHT, Math.sin(angle) * 0.6)
-      sprite.scale.setScalar(0.16 * Math.sin(life * Math.PI) + 0.02)
-      sprite.material.opacity = Math.sin(life * Math.PI)
-    })
+    mesh.current.instanceMatrix.needsUpdate = true
+    if (mesh.current.instanceColor) mesh.current.instanceColor.needsUpdate = true
+    opacity.needsUpdate = true
   })
-
   return (
-    <group>
-      <mesh ref={floor} rotation-x={-Math.PI / 2} position-y={0.03} material={materials.glow}>
-        <planeGeometry args={[2.2, 2.2]} />
-      </mesh>
-      <mesh ref={band} rotation-x={-Math.PI / 2} position-y={0.04} material={materials.ring}>
-        <planeGeometry args={[1.7, 1.7]} />
-      </mesh>
-      {Array.from({ length: STARS }, (_, i) => (
-        <sprite
-          key={i}
-          ref={(s) => {
-            stars.current[i] = s
-          }}
-          material={materials.stars[i]}
-          renderOrder={5}
+    <group ref={holder}>
+      <group ref={anchor}>
+        <instancedMesh
+          ref={mesh}
+          args={[geometry, material, count]}
+          name={`title-particles:${particle.name}`}
+          frustumCulled={false}
+          renderOrder={4}
         />
-      ))}
+      </group>
     </group>
   )
 }

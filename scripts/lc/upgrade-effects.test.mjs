@@ -10,6 +10,7 @@ import {
   readEffectGroups,
   readUpgradeEffect,
   recoverUpgradeDefinitions,
+  sourceMeshTags,
 } from './upgrade-effects.mjs'
 import { meshFile, textureFile, Writer } from './test-utils.mjs'
 
@@ -65,6 +66,22 @@ function effectFile(records, group = groups()) {
 }
 
 describe('additive texture conversion', () => {
+  it('recovers source triangle/group attachment offsets and joint weights, rather than a joint origin', () => {
+    const tags = sourceMeshTags({
+      positions: Float32Array.from([0.2, 1.1, 0.05, 0.3, 1.2, 0.05]),
+      normals: Float32Array.from([0, 1, 0, 1, 0, 0]),
+      weightMaps: [
+        { bone: 'Bip01 Pelvis', vertices: Uint32Array.from([0]), weights: Float32Array.from([1]) },
+      ],
+      surfaces: [
+        { name: '_TAG_T_CENTER', first: 0, count: 1 },
+        { name: '_TAG_G_0_BOW', first: 1, count: 1 },
+      ],
+    })
+    expect(tags.CENTER.position[1]).toBeCloseTo(1.1)
+    expect(tags.CENTER.weights).toEqual([{ bone: 'Bip01 Pelvis', weight: 1 }])
+    expect(tags.__0_BOW.normal).toEqual([1, 0, 0])
+  })
   it('preserves byte-space RGB contributions, including black, grey and translucent texels', () => {
     const original = Uint8Array.from([
       0, 0, 0, 255, 64, 64, 64, 255, 64, 32, 16, 128, 255, 127, 0, 32,

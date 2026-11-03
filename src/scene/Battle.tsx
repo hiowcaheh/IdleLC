@@ -6,6 +6,7 @@ import { getModel, playerModelId } from '../game/assets/manifest.ts'
 import { getMonster } from '../game/data/monsters.ts'
 import { getItem } from '../game/data/items.ts'
 import { TIMINGS, approachTime, effectiveStats, type Side } from '../game/logic/combat.ts'
+import { wornTitle } from '../game/logic/titles.ts'
 import { combatSession } from '../game/session/combatSession.ts'
 import { combatEvents, type ViewEvent } from '../state/combatEvents.ts'
 import { useFloatingTexts, type FloatingKind } from '../state/floatingTexts.ts'
@@ -17,7 +18,6 @@ import { LevelUpEffect } from './LevelUpEffect.tsx'
 import { ModelBoundary } from './ModelBoundary.tsx'
 import { placeLabel, type SceneLabelId } from './labelAnchors.ts'
 import { SkillEffects } from './SkillEffects.tsx'
-import { TitleAura } from './TitleAura.tsx'
 import { armorUpgradePlus } from './upgradeEffects.ts'
 import { ARENA_RADIUS, smoothstep } from './terrain.ts'
 import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
@@ -72,6 +72,9 @@ export function Battle() {
   const showNumbers = useGameStore((s) => s.save.settings.showDamageNumbers)
   const classId = useGameStore((s) => s.character?.classId ?? 'knight')
   const equipment = useGameStore((s) => s.character?.equipment)
+  const titleEffect = useGameStore((s) =>
+    s.character ? wornTitle(s.character, Date.now())?.effect : undefined,
+  )
   const playerModel = playerModelId(classId)
   const gear = useMemo(
     () => gearLooks(Object.values(equipment ?? {}).map((piece) => piece.itemId)),
@@ -359,6 +362,7 @@ export function Battle() {
             ref={player}
             modelId={playerModel}
             gear={gear}
+            titleEffect={titleEffect}
             upgrades={{
               classId,
               weaponPlus: equipment?.weapon?.plus ?? 0,
@@ -368,11 +372,6 @@ export function Battle() {
                 : undefined,
             }}
           />
-        </ModelBoundary>
-        <ModelBoundary resetKey="upgrade-aura" fallback={null}>
-          <Suspense fallback={null}>
-            <TitleAura />
-          </Suspense>
         </ModelBoundary>
       </group>
       <group ref={monsterGroup} visible={false}>

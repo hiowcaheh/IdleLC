@@ -7,6 +7,7 @@ import {
   Object3D,
   Vector3,
 } from 'three'
+import definitions from '../game/data/generated/lc-upgrade-effects.json'
 import {
   additiveEffectMaterial,
   armorUpgradePlus,
@@ -79,5 +80,23 @@ describe('client upgrade effects', () => {
     expect(material.premultipliedAlpha).toBe(false)
     expect(material.depthWrite).toBe(false)
     expect(material.toneMapped).toBe(false)
+  })
+
+  it('uses source effect group tags for bow, single sword and dual swords', () => {
+    const groups = definitions.groups as Record<
+      string,
+      { effects: { name: string }[]; tags: { effect: number; name: string }[] }
+    >
+    const ringTags = (name: string) => {
+      const group = groups[name]!
+      return group.effects.flatMap((effect, i) =>
+        effect.name.startsWith('(SKA)')
+          ? group.tags.filter((tag) => tag.effect === i).map((tag) => tag.name)
+          : [],
+      )
+    }
+    expect(ringTags('i_hw_wp_6')).toEqual(['LHAND'])
+    expect(ringTags('ia_k_wp_6')).toEqual(['RHAND'])
+    expect(ringTags('ia_k_wp2_6')).toEqual(['LHAND', 'RHAND'])
   })
 })

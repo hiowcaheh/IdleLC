@@ -1,0 +1,6009 @@
+{
+  "source": {
+    "path": "Data/Effect/Effect.dat",
+    "sha256": "24ccf0f7b0c076bfc67012f5dd90f80b01ae37f8523b1fdb452cac6a25577e1b"
+  },
+  "adapter": "title-cylinder-particles-v1",
+  "groups": {
+    "eff_nameB": {
+      "effects": [
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameB"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameB_1"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameB_2"
+        }
+      ],
+      "tags": [
+        {
+          "time": 0,
+          "effect": 0,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 1,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 2,
+          "name": "CENTER"
+        }
+      ]
+    },
+    "eff_nameT": {
+      "effects": [
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameT"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameT_1"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameT_2"
+        }
+      ],
+      "tags": [
+        {
+          "time": 0,
+          "effect": 0,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 1,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 2,
+          "name": "CENTER"
+        }
+      ]
+    },
+    "eff_nameSKY": {
+      "effects": [
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameSKY"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameSKY_1"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameSKY_2"
+        }
+      ],
+      "tags": [
+        {
+          "time": 0,
+          "effect": 0,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 1,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 2,
+          "name": "CENTER"
+        }
+      ]
+    },
+    "eff_nameGREEN": {
+      "effects": [
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameGREEN"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameGREEN_1"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameGREEN_2"
+        }
+      ],
+      "tags": [
+        {
+          "time": 0,
+          "effect": 0,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 1,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 2,
+          "name": "CENTER"
+        }
+      ]
+    },
+    "eff_nameINDIGO": {
+      "effects": [
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameINDIGO"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameINDIGO_1"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameINDIGO_2"
+        }
+      ],
+      "tags": [
+        {
+          "time": 0,
+          "effect": 0,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 1,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 2,
+          "name": "CENTER"
+        }
+      ]
+    },
+    "eff_nameORANGE": {
+      "effects": [
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameORANGE"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameORANGE_1"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameORANGE_2"
+        }
+      ],
+      "tags": [
+        {
+          "time": 0,
+          "effect": 0,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 1,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 2,
+          "name": "CENTER"
+        }
+      ]
+    },
+    "eff_namePURPLE": {
+      "effects": [
+        {
+          "time": 0,
+          "name": "(PTC)eff_namePURPLE"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_namePURPLE_1"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_namePURPLE_2"
+        }
+      ],
+      "tags": [
+        {
+          "time": 0,
+          "effect": 0,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 1,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 2,
+          "name": "CENTER"
+        }
+      ]
+    },
+    "eff_nameRVIOLET": {
+      "effects": [
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameRVIOLET"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameRVIOLET_1"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameRVIOLET_2"
+        }
+      ],
+      "tags": [
+        {
+          "time": 0,
+          "effect": 0,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 1,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 2,
+          "name": "CENTER"
+        }
+      ]
+    },
+    "eff_nameYELLOW": {
+      "effects": [
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameYELLOW"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameYELLOW_1"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameYELLOW_2"
+        }
+      ],
+      "tags": [
+        {
+          "time": 0,
+          "effect": 0,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 1,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 2,
+          "name": "CENTER"
+        }
+      ]
+    },
+    "eff_nameM": {
+      "effects": [
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameM"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameM_1"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameM_2"
+        }
+      ],
+      "tags": [
+        {
+          "time": 0,
+          "effect": 0,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 1,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 2,
+          "name": "CENTER"
+        }
+      ]
+    },
+    "eff_nameN": {
+      "effects": [
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameN"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameN_1"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_nameN_2"
+        }
+      ],
+      "tags": [
+        {
+          "time": 0,
+          "effect": 0,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 1,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 2,
+          "name": "CENTER"
+        }
+      ]
+    },
+    "eff_name": {
+      "effects": [
+        {
+          "time": 0,
+          "name": "(PTC)eff_name"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_name_1"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)eff_name_2"
+        }
+      ],
+      "tags": [
+        {
+          "time": 0,
+          "effect": 0,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 1,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 2,
+          "name": "CENTER"
+        }
+      ]
+    }
+  },
+  "effects": {
+    "(PTC)eff_name": {
+      "name": "(PTC)eff_name",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_name",
+      "rotation": 2
+    },
+    "(PTC)eff_nameB": {
+      "name": "(PTC)eff_nameB",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameB",
+      "rotation": 2
+    },
+    "(PTC)eff_nameB_1": {
+      "name": "(PTC)eff_nameB_1",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameB_1",
+      "rotation": 2
+    },
+    "(PTC)eff_nameB_2": {
+      "name": "(PTC)eff_nameB_2",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameB_2",
+      "rotation": 2
+    },
+    "(PTC)eff_nameGREEN": {
+      "name": "(PTC)eff_nameGREEN",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameGREEN",
+      "rotation": 2
+    },
+    "(PTC)eff_nameGREEN_1": {
+      "name": "(PTC)eff_nameGREEN_1",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameGREEN_1",
+      "rotation": 2
+    },
+    "(PTC)eff_nameGREEN_2": {
+      "name": "(PTC)eff_nameGREEN_2",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameGREEN_2",
+      "rotation": 2
+    },
+    "(PTC)eff_nameINDIGO": {
+      "name": "(PTC)eff_nameINDIGO",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameINDIGO",
+      "rotation": 2
+    },
+    "(PTC)eff_nameINDIGO_1": {
+      "name": "(PTC)eff_nameINDIGO_1",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameINDIGO_1",
+      "rotation": 2
+    },
+    "(PTC)eff_nameINDIGO_2": {
+      "name": "(PTC)eff_nameINDIGO_2",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameINDIGO_2",
+      "rotation": 2
+    },
+    "(PTC)eff_nameM": {
+      "name": "(PTC)eff_nameM",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameM",
+      "rotation": 2
+    },
+    "(PTC)eff_nameM_1": {
+      "name": "(PTC)eff_nameM_1",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameM_1",
+      "rotation": 2
+    },
+    "(PTC)eff_nameM_2": {
+      "name": "(PTC)eff_nameM_2",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameM_2",
+      "rotation": 2
+    },
+    "(PTC)eff_nameN": {
+      "name": "(PTC)eff_nameN",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameN",
+      "rotation": 2
+    },
+    "(PTC)eff_nameN_1": {
+      "name": "(PTC)eff_nameN_1",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameN_1",
+      "rotation": 2
+    },
+    "(PTC)eff_nameN_2": {
+      "name": "(PTC)eff_nameN_2",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameN_2",
+      "rotation": 2
+    },
+    "(PTC)eff_nameORANGE": {
+      "name": "(PTC)eff_nameORANGE",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameORANGE",
+      "rotation": 2
+    },
+    "(PTC)eff_nameORANGE_1": {
+      "name": "(PTC)eff_nameORANGE_1",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameORANGE_1",
+      "rotation": 2
+    },
+    "(PTC)eff_nameORANGE_2": {
+      "name": "(PTC)eff_nameORANGE_2",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameORANGE_2",
+      "rotation": 2
+    },
+    "(PTC)eff_namePURPLE": {
+      "name": "(PTC)eff_namePURPLE",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_namePURPLE",
+      "rotation": 2
+    },
+    "(PTC)eff_namePURPLE_1": {
+      "name": "(PTC)eff_namePURPLE_1",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_namePURPLE_1",
+      "rotation": 2
+    },
+    "(PTC)eff_namePURPLE_2": {
+      "name": "(PTC)eff_namePURPLE_2",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_namePURPLE_2",
+      "rotation": 2
+    },
+    "(PTC)eff_nameRVIOLET": {
+      "name": "(PTC)eff_nameRVIOLET",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameRVIOLET",
+      "rotation": 2
+    },
+    "(PTC)eff_nameRVIOLET_1": {
+      "name": "(PTC)eff_nameRVIOLET_1",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameRVIOLET_1",
+      "rotation": 2
+    },
+    "(PTC)eff_nameRVIOLET_2": {
+      "name": "(PTC)eff_nameRVIOLET_2",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameRVIOLET_2",
+      "rotation": 2
+    },
+    "(PTC)eff_nameSKY": {
+      "name": "(PTC)eff_nameSKY",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameSKY",
+      "rotation": 2
+    },
+    "(PTC)eff_nameSKY_1": {
+      "name": "(PTC)eff_nameSKY_1",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameSKY_1",
+      "rotation": 2
+    },
+    "(PTC)eff_nameSKY_2": {
+      "name": "(PTC)eff_nameSKY_2",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameSKY_2",
+      "rotation": 2
+    },
+    "(PTC)eff_nameT": {
+      "name": "(PTC)eff_nameT",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameT",
+      "rotation": 2
+    },
+    "(PTC)eff_nameT_1": {
+      "name": "(PTC)eff_nameT_1",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameT_1",
+      "rotation": 2
+    },
+    "(PTC)eff_nameT_2": {
+      "name": "(PTC)eff_nameT_2",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameT_2",
+      "rotation": 2
+    },
+    "(PTC)eff_nameYELLOW": {
+      "name": "(PTC)eff_nameYELLOW",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameYELLOW",
+      "rotation": 2
+    },
+    "(PTC)eff_nameYELLOW_1": {
+      "name": "(PTC)eff_nameYELLOW_1",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameYELLOW_1",
+      "rotation": 2
+    },
+    "(PTC)eff_nameYELLOW_2": {
+      "name": "(PTC)eff_nameYELLOW_2",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_nameYELLOW_2",
+      "rotation": 2
+    },
+    "(PTC)eff_name_1": {
+      "name": "(PTC)eff_name_1",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_name_1",
+      "rotation": 2
+    },
+    "(PTC)eff_name_2": {
+      "name": "(PTC)eff_name_2",
+      "lifeTime": 4,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "eff_name_2",
+      "rotation": 2
+    }
+  },
+  "particles": {
+    "eff_name": {
+      "name": "eff_name",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 0.07999999821186066,
+              "value": [
+                1,
+                1
+              ]
+            },
+            {
+              "time": 0.10000000149011612,
+              "value": [
+                0.800000011920929,
+                0.800000011920929
+              ]
+            },
+            {
+              "time": 0.14000000059604645,
+              "value": [
+                0.5,
+                0.5
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4294967295,
+            4294967295
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1.5
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.699999988079071,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameB": {
+      "name": "eff_nameB",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 203,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 0.07999999821186066,
+              "value": [
+                1,
+                1
+              ]
+            },
+            {
+              "time": 0.10000000149011612,
+              "value": [
+                0.800000011920929,
+                0.800000011920929
+              ]
+            },
+            {
+              "time": 0.14000000059604645,
+              "value": [
+                0.5,
+                0.5
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": [
+            {
+              "time": 0,
+              "value": [
+                0,
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            255,
+            255
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1.5
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.699999988079071,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-alpha"
+    },
+    "eff_nameB_1": {
+      "name": "eff_nameB_1",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 203,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": [
+            {
+              "time": 0,
+              "value": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                300,
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            255,
+            255
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            -0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-alpha"
+    },
+    "eff_nameB_2": {
+      "name": "eff_nameB_2",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 203,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": [
+            {
+              "time": 0,
+              "value": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                -300,
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            255,
+            255
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-alpha"
+    },
+    "eff_nameGREEN": {
+      "name": "eff_nameGREEN",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 0.07999999821186066,
+              "value": [
+                1,
+                1
+              ]
+            },
+            {
+              "time": 0.10000000149011612,
+              "value": [
+                0.800000011920929,
+                0.800000011920929
+              ]
+            },
+            {
+              "time": 0.14000000059604645,
+              "value": [
+                0.5,
+                0.5
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            8388863,
+            16711935
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1.5
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.699999988079071,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameGREEN_1": {
+      "name": "eff_nameGREEN_1",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            8388863,
+            16711935
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            -0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameGREEN_2": {
+      "name": "eff_nameGREEN_2",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            8388863,
+            16711935
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameINDIGO": {
+      "name": "eff_nameINDIGO",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 203,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 0.07999999821186066,
+              "value": [
+                1,
+                1
+              ]
+            },
+            {
+              "time": 0.10000000149011612,
+              "value": [
+                0.800000011920929,
+                0.800000011920929
+              ]
+            },
+            {
+              "time": 0.14000000059604645,
+              "value": [
+                0.5,
+                0.5
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            3831295,
+            3765247
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1.5
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.699999988079071,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-alpha"
+    },
+    "eff_nameINDIGO_1": {
+      "name": "eff_nameINDIGO_1",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 203,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4161023,
+            3500799
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            -0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-alpha"
+    },
+    "eff_nameINDIGO_2": {
+      "name": "eff_nameINDIGO_2",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 203,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            3302655,
+            4954111
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-alpha"
+    },
+    "eff_nameM": {
+      "name": "eff_nameM",
+      "texture": "Data\\Effect\\Particle\\pef_13.tex",
+      "render": 0,
+      "blend": 203,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 0.07999999821186066,
+              "value": [
+                1,
+                1
+              ]
+            },
+            {
+              "time": 0.10000000149011612,
+              "value": [
+                0.800000011920929,
+                0.800000011920929
+              ]
+            },
+            {
+              "time": 0.14000000059604645,
+              "value": [
+                0.5,
+                0.5
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            40959,
+            3229951
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          2
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.699999988079071,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_13-alpha"
+    },
+    "eff_nameM_1": {
+      "name": "eff_nameM_1",
+      "texture": "Data\\Effect\\Particle\\pef_13.tex",
+      "render": 0,
+      "blend": 203,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            33023,
+            4284671
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            -0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_13-alpha"
+    },
+    "eff_nameM_2": {
+      "name": "eff_nameM_2",
+      "texture": "Data\\Effect\\Particle\\pef_13.tex",
+      "render": 0,
+      "blend": 203,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            37887,
+            4161023
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_13-alpha"
+    },
+    "eff_nameN": {
+      "name": "eff_nameN",
+      "texture": "Data\\Effect\\Particle\\pef_04.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 0.07999999821186066,
+              "value": [
+                1,
+                1
+              ]
+            },
+            {
+              "time": 0.10000000149011612,
+              "value": [
+                0.800000011920929,
+                0.800000011920929
+              ]
+            },
+            {
+              "time": 0.14000000059604645,
+              "value": [
+                0.5,
+                0.5
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            1790312447,
+            4294967295
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1.7000000476837158
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.699999988079071,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_04-add"
+    },
+    "eff_nameN_1": {
+      "name": "eff_nameN_1",
+      "texture": "Data\\Effect\\Particle\\pef_04.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4286595327,
+            4294967295
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            -0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_04-add"
+    },
+    "eff_nameN_2": {
+      "name": "eff_nameN_2",
+      "texture": "Data\\Effect\\Particle\\pef_04.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4286578943,
+            4294967295
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_04-add"
+    },
+    "eff_nameORANGE": {
+      "name": "eff_nameORANGE",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 0.07999999821186066,
+              "value": [
+                1,
+                1
+              ]
+            },
+            {
+              "time": 0.10000000149011612,
+              "value": [
+                0.800000011920929,
+                0.800000011920929
+              ]
+            },
+            {
+              "time": 0.14000000059604645,
+              "value": [
+                0.5,
+                0.5
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4286595327,
+            4286578943
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1.5
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.699999988079071,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameORANGE_1": {
+      "name": "eff_nameORANGE_1",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4286595327,
+            4286578943
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            -0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameORANGE_2": {
+      "name": "eff_nameORANGE_2",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4286595327,
+            4286578943
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_namePURPLE": {
+      "name": "eff_namePURPLE",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 0.07999999821186066,
+              "value": [
+                1,
+                1
+              ]
+            },
+            {
+              "time": 0.10000000149011612,
+              "value": [
+                0.800000011920929,
+                0.800000011920929
+              ]
+            },
+            {
+              "time": 0.14000000059604645,
+              "value": [
+                0.5,
+                0.5
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            1073774847,
+            2147549183
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1.5
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.699999988079071,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_namePURPLE_1": {
+      "name": "eff_namePURPLE_1",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            1073774847,
+            2147549183
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            -0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_namePURPLE_2": {
+      "name": "eff_namePURPLE_2",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            1073774847,
+            2147549183
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameRVIOLET": {
+      "name": "eff_nameRVIOLET",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 0.07999999821186066,
+              "value": [
+                1,
+                1
+              ]
+            },
+            {
+              "time": 0.10000000149011612,
+              "value": [
+                0.800000011920929,
+                0.800000011920929
+              ]
+            },
+            {
+              "time": 0.14000000059604645,
+              "value": [
+                0.5,
+                0.5
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            2147516671,
+            4278190335
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1.5
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.699999988079071,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameRVIOLET_1": {
+      "name": "eff_nameRVIOLET_1",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            2130739199,
+            4278190335
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            -0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameRVIOLET_2": {
+      "name": "eff_nameRVIOLET_2",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            2130739199,
+            4278190335
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameSKY": {
+      "name": "eff_nameSKY",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 0.07999999821186066,
+              "value": [
+                1,
+                1
+              ]
+            },
+            {
+              "time": 0.10000000149011612,
+              "value": [
+                0.800000011920929,
+                0.800000011920929
+              ]
+            },
+            {
+              "time": 0.14000000059604645,
+              "value": [
+                0.5,
+                0.5
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            8454143,
+            16777215
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1.5
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.699999988079071,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameSKY_1": {
+      "name": "eff_nameSKY_1",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            8454143,
+            16777215
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            -0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameSKY_2": {
+      "name": "eff_nameSKY_2",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            8438015,
+            16777215
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameT": {
+      "name": "eff_nameT",
+      "texture": "Data\\Effect\\Particle\\pef_12.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 0.07999999821186066,
+              "value": [
+                1,
+                1
+              ]
+            },
+            {
+              "time": 0.10000000149011612,
+              "value": [
+                0.800000011920929,
+                0.800000011920929
+              ]
+            },
+            {
+              "time": 0.14000000059604645,
+              "value": [
+                0.5,
+                0.5
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4286611711,
+            4278190335
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1.7000000476837158
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.699999988079071,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_12-add"
+    },
+    "eff_nameT_1": {
+      "name": "eff_nameT_1",
+      "texture": "Data\\Effect\\Particle\\pef_12.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4286611711,
+            4278190335
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            -0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_12-add"
+    },
+    "eff_nameT_2": {
+      "name": "eff_nameT_2",
+      "texture": "Data\\Effect\\Particle\\pef_12.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4286611711,
+            4278190335
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_12-add"
+    },
+    "eff_nameYELLOW": {
+      "name": "eff_nameYELLOW",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 0.07999999821186066,
+              "value": [
+                1,
+                1
+              ]
+            },
+            {
+              "time": 0.10000000149011612,
+              "value": [
+                0.800000011920929,
+                0.800000011920929
+              ]
+            },
+            {
+              "time": 0.14000000059604645,
+              "value": [
+                0.5,
+                0.5
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4294902015,
+            4294934783
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1.5
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.699999988079071,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameYELLOW_1": {
+      "name": "eff_nameYELLOW_1",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4294902015,
+            4294934783
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            -0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_nameYELLOW_2": {
+      "name": "eff_nameYELLOW_2",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 30
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4294902015,
+            4294934783
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_name_1": {
+      "name": "eff_name_1",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4294967295,
+            4294967295
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            -0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    },
+    "eff_name_2": {
+      "name": "eff_name_2",
+      "texture": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "render": 0,
+      "blend": 206,
+      "mexWidth": 64,
+      "mexHeight": 64,
+      "col": 0,
+      "row": 0,
+      "processes": [
+        {
+          "kind": "dynamic",
+          "twinkle": 0,
+          "fadeIn": 0.10000000149011612,
+          "fadeOut": 0.20000000298023224,
+          "color": [],
+          "alpha": [
+            {
+              "time": 0,
+              "value": 20
+            }
+          ],
+          "texPos": [],
+          "size": [
+            {
+              "time": 0,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 1,
+              "value": [
+                1.5,
+                1.5
+              ]
+            },
+            {
+              "time": 1.600000023841858,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            },
+            {
+              "time": 2,
+              "value": [
+                0.20000000298023224,
+                0.20000000298023224
+              ]
+            }
+          ],
+          "mass": [],
+          "deltaPos": [],
+          "angle": []
+        },
+        {
+          "kind": "control",
+          "type": 0,
+          "useParticlePosition": true,
+          "angleSpeed": 0,
+          "heightSpeed": 0,
+          "dependRadius": false
+        }
+      ],
+      "emitter": {
+        "type": 3,
+        "totalCount": 200,
+        "countPerSecond": 50,
+        "particle": {
+          "life": [
+            0.6000000238418579,
+            0.699999988079071
+          ],
+          "width": [
+            0.30000001192092896,
+            0.4000000059604645
+          ],
+          "height": [
+            1,
+            1
+          ],
+          "row": 0,
+          "col": 0,
+          "mass": [
+            1,
+            1
+          ],
+          "color": [
+            4294967295,
+            4294967295
+          ],
+          "quaternion": {
+            "w": [
+              1,
+              1
+            ],
+            "x": [
+              0,
+              0
+            ],
+            "y": [
+              0,
+              0
+            ],
+            "z": [
+              0,
+              0
+            ]
+          }
+        },
+        "local": true,
+        "kind": "cylinder",
+        "speed": [
+          0.10000000149011612,
+          1
+        ],
+        "useShapePosition": true,
+        "useShapeSpeed": true,
+        "emitAllDirections": false,
+        "shape": {
+          "height": 0.5,
+          "radiusInner": 0.10000000149011612,
+          "radiusOuter": 0.10000000149011612,
+          "center": [
+            0.20000000298023224,
+            -0.5,
+            0
+          ]
+        }
+      },
+      "absorption": {
+        "type": 1,
+        "move": 4,
+        "dependLife": true,
+        "kind": "default"
+      },
+      "textureAsset": "pef_08_k-add"
+    }
+  },
+  "textures": {
+    "pef_08_k-add": {
+      "source": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "url": "fx/titles/pef_08_k-add.webp",
+      "sha256": "1a0f6950dbde08c93d2150bed5961642c06919c8766380c049bccc9643ec54ae",
+      "width": 64,
+      "height": 64
+    },
+    "pef_08_k-alpha": {
+      "source": "Data\\Effect\\Particle\\pef_08_k.tex",
+      "url": "fx/titles/pef_08_k-alpha.webp",
+      "sha256": "fb3355f685c80b8066b1f5323c9a792fab2ba0dfc7ff4ef2dd597fb8758ba6b9",
+      "width": 64,
+      "height": 64
+    },
+    "pef_13-alpha": {
+      "source": "Data\\Effect\\Particle\\pef_13.tex",
+      "url": "fx/titles/pef_13-alpha.webp",
+      "sha256": "970cec933efb44c98ad67c2ad054659b937232053ea10637158008efbe354369",
+      "width": 64,
+      "height": 64
+    },
+    "pef_04-add": {
+      "source": "Data\\Effect\\Particle\\pef_04.tex",
+      "url": "fx/titles/pef_04-add.webp",
+      "sha256": "383a224e066bbf6499f8bf26e4ee05f8154c298b02b79a16673550699f78ed4e",
+      "width": 64,
+      "height": 64
+    },
+    "pef_12-add": {
+      "source": "Data\\Effect\\Particle\\pef_12.tex",
+      "url": "fx/titles/pef_12-add.webp",
+      "sha256": "b7ae85dcbce9578a1e8f110b131216871c976e823a81bc7063c671e919aa50ba",
+      "width": 64,
+      "height": 64
+    }
+  }
+}

@@ -35,6 +35,7 @@ export function HeroCard({ character }: { character: CharacterData }) {
           items={worn}
           weaponPlus={equipment.weapon?.plus ?? 0}
           armorPlus={armorUpgradePlus(equipment)}
+          titleEffect={title?.effect}
         />
       </div>
       <div className="hero-card__info">

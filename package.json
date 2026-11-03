@@ -23,6 +23,7 @@
     "pwa-icons": "node scripts/pwa-icons.mjs",
     "recover-lc-props": "node scripts/lc/recover-props.mjs",
     "recover-upgrade-fx": "node scripts/lc/upgrade-effects.mjs",
+    "recover-title-fx": "node scripts/lc/title-effects.mjs",
     "verify-lc-recovery": "node scripts/lc/verify-recovery.mjs"
   },
   "dependencies": {

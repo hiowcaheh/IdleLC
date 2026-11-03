@@ -20,12 +20,14 @@ export function ClassPreview({
   items,
   weaponPlus = 0,
   armorPlus = 0,
+  titleEffect,
 }: {
   classId: ClassId
   items?: readonly number[]
   /** Independent source upgrade steps of the weapon and the four body armor pieces. */
   weaponPlus?: number
   armorPlus?: number
+  titleEffect?: string
 }) {
   const modelId = playerModelId(classId)
   const placeholder = modelId !== `class-${classId}`
@@ -33,10 +35,15 @@ export function ClassPreview({
   const gear = useMemo(() => gearLooks(worn), [worn])
   const weaponSubtype = worn.map(getItem).find((item) => item.gear?.slot === 'weapon')
     ?.gear?.subtype
+  // The recovered armor fairy flies above the head, beyond the body-only framing.
+  const showFairy = armorPlus >= 4
 
   return (
     <div className="class-preview">
-      <Canvas dpr={[1, 1.5]} camera={{ fov: 32, position: [0, 1.35, 4.6] }}>
+      <Canvas
+        dpr={[1, 1.5]}
+        camera={{ fov: 32, position: showFairy ? [0, 1.55, 5.8] : [0, 1.35, 4.6] }}
+      >
         <hemisphereLight args={['#f3dcb2', '#2a1f17', 1.4]} />
         <directionalLight position={[2.5, 4, 3]} intensity={2.4} />
         <directionalLight position={[-3, 2, -2]} intensity={0.8} color="#9bd0f0" />
@@ -52,11 +59,12 @@ export function ClassPreview({
               timeScale={realTime}
               gear={gear}
               upgrades={{ classId, weaponPlus, armorPlus, weaponSubtype }}
+              titleEffect={titleEffect}
             />
           </Suspense>
         </ModelBoundary>
         <OrbitControls
-          target={[0, 0.95, 0]}
+          target={[0, showFairy ? 1.25 : 0.95, 0]}
           enablePan={false}
           enableZoom={false}
           autoRotate

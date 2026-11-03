@@ -5,7 +5,6 @@ import {
   AnimationMixer,
   Color,
   NormalBlending,
-  Quaternion,
   SRGBColorSpace,
   SpriteMaterial,
   Vector3,
@@ -22,6 +21,7 @@ import definitions from '../game/data/generated/lc-upgrade-effects.json'
 import type { ClassId } from '../game/data/types.ts'
 import {
   additiveEffectMaterial,
+  placeSourceTag,
   upgradeGroup,
   upgradePath,
   upgradeStep,
@@ -142,19 +142,6 @@ function controlTime(samples: { time: number }[], elapsed: number): number {
   return period > 0 ? elapsed % period : elapsed
 }
 
-/** Position/orientation in the enclosing character's local space, after the skeleton moves. */
-function placeTag(target: UpgradeTarget, tag: string, holder: Group, out: Group) {
-  const hand = tag === 'LHAND' ? 'Bip01 L Hand' : tag === 'RHAND' ? 'Bip01 R Hand' : null
-  const bone = hand ? target.bones.get(hand) : undefined
-  const source = bone ?? target.object
-  source.getWorldPosition(out.position)
-  holder.worldToLocal(out.position)
-  if (bone) {
-    source.getWorldQuaternion(out.quaternion)
-    out.quaternion.premultiply(holder.getWorldQuaternion(new Quaternion()).invert())
-  } else out.quaternion.identity()
-}
-
 export function UpgradeAura({
   target,
   classId,
@@ -195,15 +182,22 @@ function AttachedEffect({ entry, target }: { entry: Entry; target: UpgradeTarget
     if (elapsed < 0) return
     target.object.updateWorldMatrix(true, true)
     holder.current.updateWorldMatrix(true, false)
-    placeTag(target, entry.tag, holder.current, anchor.current)
+    anchor.current.visible = placeSourceTag(target, entry.tag, holder.current, anchor.current)
+    if (!anchor.current.visible) return
     if (entry.path)
       anchor.current.position.add(
-        entry.path(localTime(elapsed, entry.pathLife ?? effect.lifeTime), offset),
+        entry
+          .path(localTime(elapsed, entry.pathLife ?? effect.lifeTime), offset)
+          .applyQuaternion(anchor.current.quaternion),
       )
   })
   return (
     <group ref={holder}>
-      <group ref={anchor}>
+      <group
+        ref={anchor}
+        name={`upgrade-tag:${entry.tag}`}
+        userData={{ sourceTag: entry.tag, effect: effect.name, spline: Boolean(entry.path) }}
+      >
         {effect.kind === 'EFSK' && asset ? (
           <EffectModel effect={effect} url={fxUrl(asset)} />
         ) : (

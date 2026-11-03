@@ -3,6 +3,9 @@ import {
   CustomBlending,
   OneFactor,
   SrcAlphaFactor,
+  Matrix4,
+  PropertyBinding,
+  Quaternion,
   Vector3,
   type Bone,
   type Material,
@@ -12,6 +15,7 @@ import {
 } from 'three'
 import type { ClassId } from '../game/data/types.ts'
 import type { Equipment } from '../game/logic/equipment.ts'
+import definitions from '../game/data/generated/lc-upgrade-effects.json'
 
 /** CItemEffect::Change, ItemEffect.cpp:318-330,386-405. Helmet/shield do not count. */
 export const UPGRADE_STEPS = [4, 6, 8, 10, 12, 15] as const
@@ -76,6 +80,93 @@ export interface UpgradeTarget {
   object: Object3D
   bones: Map<string, Bone>
   weapons: Set<Mesh>
+  weaponModels: Map<Mesh, string>
+  classId?: ClassId
+}
+
+interface SourceTag {
+  position: number[]
+  normal: number[]
+  weights: { bone: string; weight: number }[]
+}
+const tags = definitions as unknown as {
+  characterTags: Partial<Record<ClassId, Record<string, SourceTag>>>
+  weaponTags: Record<string, Record<string, SourceTag>>
+  tagBindInverses: Partial<Record<ClassId, Record<string, number[]>>>
+}
+const sourceInverses = new Map<ClassId, Map<string, Matrix4>>(
+  Object.entries(tags.tagBindInverses).map(([id, bones]) => [
+    id as ClassId,
+    new Map(
+      Object.entries(bones).map(([name, matrix]) => [
+        PropertyBinding.sanitizeNodeName(name),
+        new Matrix4().fromArray(matrix),
+      ]),
+    ),
+  ]),
+)
+const tagMatrix = new Matrix4()
+const tagPoint = new Vector3()
+const tagNormal = new Vector3()
+const tagScale = new Vector3()
+const tagRotation = new Quaternion()
+const tagWorldRotation = new Quaternion()
+const tagHolderRotation = new Quaternion()
+const up = new Vector3(0, 1, 0)
+
+/**
+ * Source _TAG_T vertices are in bind-model space, not offsets from a joint. Mesh.cpp:2435–2535
+ * and RMRender.cpp:2554–2634 apply the animated skin matrix before the tag normal rotation.
+ * Three sanitizes GLTF joint names, so all source names pass through the same conversion.
+ */
+export function placeSourceTag(
+  target: UpgradeTarget,
+  name: string,
+  holder: Object3D,
+  out: Object3D,
+  rotate = true,
+): boolean {
+  if (name === '__ROOT') {
+    target.object.getWorldPosition(out.position)
+    holder.worldToLocal(out.position)
+    if (rotate) {
+      target.object.getWorldQuaternion(out.quaternion)
+      out.quaternion.premultiply(holder.getWorldQuaternion(tagHolderRotation).invert())
+    } else out.quaternion.identity()
+    return true
+  }
+  const source =
+    (target.classId && tags.characterTags[target.classId]?.[name]) ??
+    [...target.weaponModels.values()].map((id) => tags.weaponTags[id]?.[name]).find(Boolean)
+  if (!source) return false
+  out.position.set(0, 0, 0)
+  tagWorldRotation.identity()
+  let total = 0
+  for (const influence of source.weights) {
+    const key = PropertyBinding.sanitizeNodeName(influence.bone)
+    const bone = target.bones.get(key)
+    // Meshopt quantization changes shipped mesh inverse-bind matrices. Raw source tag vertices
+    // must use the original BS inverse, while the live bone hierarchy supplies the current pose.
+    const inverse = target.classId && sourceInverses.get(target.classId)?.get(key)
+    if (!bone || !inverse) return false
+    tagMatrix.multiplyMatrices(bone.matrixWorld, inverse)
+    tagPoint.fromArray(source.position).applyMatrix4(tagMatrix)
+    out.position.addScaledVector(tagPoint, influence.weight)
+    tagMatrix.decompose(tagPoint, tagRotation, tagScale)
+    if (total === 0) tagWorldRotation.copy(tagRotation)
+    else tagWorldRotation.slerp(tagRotation, influence.weight / (total + influence.weight))
+    total += influence.weight
+  }
+  if (total > 0) out.position.divideScalar(total)
+  else target.object.localToWorld(out.position.fromArray(source.position))
+  holder.worldToLocal(out.position)
+  if (rotate) {
+    tagNormal.fromArray(source.normal).normalize()
+    tagRotation.setFromUnitVectors(up, tagNormal)
+    out.quaternion.copy(tagWorldRotation).multiply(tagRotation)
+    out.quaternion.premultiply(holder.getWorldQuaternion(tagHolderRotation).invert())
+  } else out.quaternion.identity()
+  return true
 }
 
 export interface VectorSample {

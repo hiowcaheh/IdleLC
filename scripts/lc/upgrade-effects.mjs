@@ -13,9 +13,11 @@ import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
 import sharp from 'sharp'
 import { Reader } from './binary.mjs'
 import { ClientFiles } from './client.mjs'
-import { buildModel, normalizeAdditiveRgba } from './model.mjs'
+import { buildModel, inverseBindMatrix, normalizeAdditiveRgba } from './model.mjs'
 import { parseSmc } from './smc.mjs'
 import { parseTexture } from './texture.mjs'
+import { parseMesh } from './mesh.mjs'
+import { parseSkeleton } from './ska.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const hash = (data) => createHash('sha256').update(data).digest('hex')
@@ -212,6 +214,95 @@ export function recoverUpgradeDefinitions(buffer) {
   return { groups, effects, totalGroups: Object.keys(allGroups).length }
 }
 
+/** Mesh.cpp:2435–2535 creates tags from the first vertex of _TAG_T/_TAG_G surfaces. */
+export function sourceMeshTags(lod) {
+  const tags = {}
+  for (const surface of lod.surfaces) {
+    const match = /^_TAG_([TG])_(.+)$/.exec(surface.name)
+    if (!match || surface.count === 0) continue
+    let name = match[2]
+    if (match[1] === 'G') {
+      if (!/^[012]_/.test(name)) continue
+      name = `__${name}`
+    }
+    const vertex = surface.first
+    const weights = lod.weightMaps
+      .flatMap((map) => {
+        const index = Array.prototype.indexOf.call(map.vertices, vertex)
+        return index >= 0 && map.weights[index] > 0
+          ? [{ bone: map.bone, weight: map.weights[index] }]
+          : []
+      })
+      .sort((a, b) => b.weight - a.weight)
+      .slice(0, 4)
+    tags[name] = {
+      position: Array.from(lod.positions.slice(vertex * 3, vertex * 3 + 3)),
+      normal: Array.from(lod.normals.slice(vertex * 3, vertex * 3 + 3)),
+      weights,
+    }
+  }
+  return tags
+}
+
+export function recoverSourceTags(files, smcPath) {
+  const smc = parseSmc(files.read(smcPath).toString('latin1'))
+  const tags = {}
+  for (const mesh of smc.meshes) {
+    if (!/^_tag/i.test(path.win32.basename(mesh.file)) || !files.resolve(mesh.file)) continue
+    Object.assign(tags, sourceMeshTags(parseMesh(files.read(mesh.file)).lods[0]))
+  }
+  return tags
+}
+
+function recoverAttachmentTags(files) {
+  const characterTags = {}
+  const skeletons = {}
+  for (const [id, directory, prefix] of [
+    ['titan', 'Titan', 'ti'],
+    ['knight', 'Knight', 'ni'],
+    ['healer', 'Healer', 'hw'],
+    ['mage', 'Mage', 'ma'],
+    ['rogue', 'Rogue', 'ro'],
+    ['sorcerer', 'Sorcerer', 'so'],
+  ]) {
+    characterTags[id] = recoverSourceTags(files, `Data\\Character\\${directory}\\${prefix}.smc`)
+    const smc = parseSmc(
+      files.read(`Data\\Character\\${directory}\\${prefix}.smc`).toString('latin1'),
+    )
+    skeletons[id] = parseSkeleton(files.read(smc.skeleton)).lods[0].bones
+    for (const name of ['CENTER', 'HEAD', 'LHAND', 'RHAND'])
+      if (!characterTags[id][name]) throw new Error(`missing ${id} source tag ${name}`)
+  }
+  const data = JSON.parse(fs.readFileSync(path.join(ROOT, 'src/game/data/generated/lc-data.json')))
+  const weapons = new Set(data.items.filter((item) => item.type === 0).map((item) => item.id))
+  const sources = JSON.parse(
+    fs.readFileSync(path.join(ROOT, 'src/game/data/generated/lc-item-models.json')),
+  )
+  const weaponTags = {}
+  for (const [source, ids] of Object.entries(sources)) {
+    if (!ids.some((id) => weapons.has(id)) || !files.resolve(source)) continue
+    const tags = recoverSourceTags(files, source)
+    if (Object.keys(tags).length)
+      weaponTags[path.win32.basename(source, '.smc').toLowerCase()] = tags
+  }
+  const usedBones = new Set(
+    [...Object.values(characterTags), ...Object.values(weaponTags)].flatMap((tags) =>
+      Object.values(tags).flatMap((tag) => tag.weights.map((w) => w.bone)),
+    ),
+  )
+  const tagBindInverses = Object.fromEntries(
+    Object.entries(skeletons).map(([id, bones]) => [
+      id,
+      Object.fromEntries(
+        bones
+          .filter((bone) => usedBones.has(bone.name))
+          .map((bone) => [bone.name, inverseBindMatrix(bone.abs)]),
+      ),
+    ]),
+  )
+  return { characterTags, weaponTags, tagBindInverses }
+}
+
 async function main(argv) {
   const clients = []
   let models = false
@@ -267,6 +358,7 @@ async function main(argv) {
     source: { path: 'Data/Effect/Effect.dat', sha256: hash(source) },
     adapter: 'upgrade-subset-v1',
     ...definitions,
+    ...recoverAttachmentTags(files),
     assets,
   }
   fs.writeFileSync(

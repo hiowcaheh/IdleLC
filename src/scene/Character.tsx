@@ -40,6 +40,7 @@ import { lcSkillAnims } from '../game/data/lcSource.ts'
 import { TIMINGS } from '../game/logic/combat.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { UpgradeAura, type UpgradeLook } from './UpgradeAura.tsx'
+import { TitleAura } from './TitleAura.tsx'
 
 export type BaseAnimation = 'idle' | 'run'
 
@@ -103,6 +104,7 @@ interface Props {
   gear?: readonly GearLook[]
   /** Upgrade effects follow this character's animated gear and hand bones. */
   upgrades?: UpgradeLook
+  titleEffect?: string
 }
 
 /** Share of a model's texture that shines on its own (see prepareModel). */
@@ -151,12 +153,19 @@ interface BodyParts {
   covers: Map<Mesh, number>
   bones: Map<string, Bone>
   weapons: Set<Mesh>
+  weaponModels: Map<Mesh, string>
 }
 
 function prepareModel(source: Object3D, model: ModelEntry) {
   const object = cloneSkinned(source)
   const materials: Tinted[] = []
-  const body: BodyParts = { meshes: [], covers: new Map(), bones: new Map(), weapons: new Set() }
+  const body: BodyParts = {
+    meshes: [],
+    covers: new Map(),
+    bones: new Map(),
+    weapons: new Set(),
+    weaponModels: new Map(),
+  }
   object.traverse((child) => {
     if ((child as Bone).isBone) body.bones.set(child.name, child as Bone)
     const mesh = child as Mesh
@@ -199,7 +208,10 @@ function WornPiece({
       mesh.bind(new Skeleton(joints, boneInverses), mesh.bindMatrix)
       prepareMesh(mesh, null, own)
       object.add(mesh)
-      if (slot === 'weapon') body.weapons.add(mesh)
+      if (slot === 'weapon') {
+        body.weapons.add(mesh)
+        body.weaponModels.set(mesh, url.split('/').pop()!.split('.glb')[0]!.toLowerCase())
+      }
     }
     materials.push(...own)
     const covered = coveredParts(
@@ -214,6 +226,7 @@ function WornPiece({
     return () => {
       meshes.forEach((mesh) => {
         body.weapons.delete(mesh)
+        body.weaponModels.delete(mesh)
         mesh.removeFromParent()
       })
       for (const mesh of hidden) {
@@ -227,12 +240,20 @@ function WornPiece({
         tinted.material.dispose()
       }
     }
-  }, [object, body, materials, gltf, slot])
+  }, [object, body, materials, gltf, slot, url])
 
   return null
 }
 
-export function Character({ modelId, ref, timeScale, gear, upgrades, scale = 1 }: Props) {
+export function Character({
+  modelId,
+  ref,
+  timeScale,
+  gear,
+  upgrades,
+  titleEffect,
+  scale = 1,
+}: Props) {
   const model = getModel(modelId)
   const gltf = useGLTF(modelUrl(model))
   const { object, materials, body } = useMemo(
@@ -241,8 +262,14 @@ export function Character({ modelId, ref, timeScale, gear, upgrades, scale = 1 }
   )
   const mixer = useMemo(() => new AnimationMixer(object), [object])
   const upgradeTarget = useMemo(
-    () => ({ object, bones: body.bones, weapons: body.weapons }),
-    [object, body],
+    () => ({
+      object,
+      bones: body.bones,
+      weapons: body.weapons,
+      weaponModels: body.weaponModels,
+      classId: upgrades?.classId,
+    }),
+    [object, body, upgrades?.classId],
   )
 
   const { actions, attacks, clipAction } = useMemo(() => {
@@ -463,6 +490,13 @@ export function Character({ modelId, ref, timeScale, gear, upgrades, scale = 1 }
         <ModelBoundary resetKey="upgrade-effects" fallback={null}>
           <Suspense fallback={null}>
             <UpgradeAura {...upgrades} target={upgradeTarget} />
+          </Suspense>
+        </ModelBoundary>
+      )}
+      {titleEffect && (
+        <ModelBoundary resetKey={`title-effect:${titleEffect}`} fallback={null}>
+          <Suspense fallback={null}>
+            <TitleAura effectName={titleEffect} target={upgradeTarget} />
           </Suspense>
         </ModelBoundary>
       )}
