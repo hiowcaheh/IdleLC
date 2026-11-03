@@ -63,7 +63,7 @@ const savedOptions = new Map<number, OptionDef | undefined>()
 beforeEach(() => {
   for (const item of items) {
     savedItems.set(item.id, ITEMS[item.id])
-    ITEMS[item.id] = item
+    ITEMS[item.id] = { ...item, upgradeable: true }
   }
   for (const type of optionTypes) {
     savedOptions.set(type, OPTIONS[type])
@@ -116,10 +116,10 @@ describe('source character-window channels', () => {
     const stats = sheet('knight', { weapon: piece(BLADE, 5), armor: piece(ARMOR, 5) })
     // CmdMsg.cpp:570–584,687–705: equipment, then level/attribute display terms.
     expect(stats.client).toMatchObject({
-      physicalAttack: 200,
-      magicAttack: 104,
-      physicalDefense: 180,
-      magicDefense: 55,
+      physicalAttack: 183,
+      magicAttack: 97,
+      physicalDefense: 167,
+      magicDefense: 50,
     })
     expect(stats.attack).toBe(9876)
     expect(stats.defense).toBe(5432)

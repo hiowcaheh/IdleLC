@@ -1,11 +1,12 @@
 /**
  * Source character-window channels (CmdMsg.cpp:559–930, UICharacterInfo.cpp:1486–1556).
  * This is a sheet, separate from the existing IdleLC attack/defense balance adapter.
- * Gear retains the project's linear +10% power rule; professions/PK/elements are not invented.
+ * Gear upgrade values follow PC.cpp; professions/PK/elements are not invented.
  */
-import { getItem, getRareSet } from '../data/items.ts'
+import { getItem } from '../data/items.ts'
 import type { ClassId, ClientCombatStats, ClientStatContext, CombatStats } from '../data/types.ts'
 import { classAttributes } from './attributes.ts'
+import { pieceStats, upgradeBonuses } from './itemUpgrades.ts'
 import type { Equipment } from './equipment.ts'
 import { optionValue, type ItemOption } from './options.ts'
 import { classRatingChannels } from './ratings.ts'
@@ -35,8 +36,7 @@ export function clientStatChannels(
   const subtype = weapon?.subtype ?? -1
   const ranged = subtype === 1 || subtype === 6
   const physicalAttribute = [1, 6, 7].includes(subtype) ? 'dexterity' : 'strength'
-  const set = weaponPiece?.rare === undefined ? undefined : getRareSet(weaponPiece.rare)
-  const factor = 1 + 0.1 * (weaponPiece?.plus ?? 0)
+  const weaponValues = weaponPiece && pieceStats(weaponPiece)
   let armor = 0,
     resist = 0,
     rawArmor = 0,
@@ -45,13 +45,14 @@ export function clientStatChannels(
     if (!piece || slot === 'weapon' || slot.startsWith('accessory')) continue
     const gear = getItem(piece.itemId).gear
     if (!gear) continue
-    const rare = piece.rare === undefined ? undefined : getRareSet(piece.rare)
     rawArmor += gear.defense
     rawResist += gear.magicDefense
-    armor += Math.trunc((gear.defense + (rare?.defense ?? 0)) * (1 + 0.1 * piece.plus))
-    resist += Math.trunc((gear.magicDefense + (rare?.resist ?? 0)) * (1 + 0.1 * piece.plus))
+    const values = pieceStats(piece).total
+    armor += values.defense
+    resist += values.magicDefense
   }
   const ratings = classRatingChannels(classId, level)
+  const hitBonus = weaponPiece ? upgradeBonuses(weaponPiece).hitRate : 0
   const context: ClientStatContext = {
     classId,
     level,
@@ -68,11 +69,9 @@ export function clientStatChannels(
   const dexGrowth = attributes.dexterity - classAttributes(classId, 1).dexterity
   const client: ClientCombatStats = {
     physicalAttack:
-      Math.trunc((attributes[physicalAttribute] * 10) / 15) +
-      Math.trunc(((weapon?.attack ?? 0) + (set?.attack ?? 0)) * factor),
+      Math.trunc((attributes[physicalAttribute] * 10) / 15) + (weaponValues?.total.attack ?? 0),
     magicAttack:
-      Math.trunc((attributes.intelligence * 10) / 15) +
-      Math.trunc(((weapon?.magicAttack ?? 0) + (set?.magic ?? 0)) * factor),
+      Math.trunc((attributes.intelligence * 10) / 15) + (weaponValues?.total.magicAttack ?? 0),
     physicalDefense: level * 3 + Math.trunc(armor),
     magicDefense:
       Math.trunc(level * (MAGIC_CLASSES.includes(classId) ? 1 : 0.5)) + Math.trunc(resist),
@@ -173,6 +172,8 @@ export function clientStatChannels(
         break
     }
   }
+  client.physicalHit += Math.trunc((ratings.physicalHit * hitBonus) / 100)
+  client.magicHit += Math.trunc((ratings.magicHit * hitBonus) / 100)
   client.criticalRating += Math.trunc((client.criticalRating * context.criticalOptionRate) / 100)
   client.deadlyRating += Math.trunc((client.deadlyRating * context.deadlyOptionRate) / 100)
   return { client, clientContext: context }

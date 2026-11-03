@@ -156,20 +156,24 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   ]
   const speedRows: StatRow[] = [
     clientRow('Run speed', 'runSpeed', 1, ' m/s'),
-    clientRow('Walk speed', 'walkSpeed', 1, ' m/s'),
     [
-      'Attack speed',
+      'Attack interval',
       `${stats.attackInterval.toFixed(2)} s`,
-      change(stats.attackInterval, base.attackInterval, 2),
+      change(stats.attackInterval, base.attackInterval, 2)
+        ? `${change(stats.attackInterval, base.attackInterval, 2)} s`
+        : undefined,
     ],
     ['Movement bonus', signed(stats.moveSpeed ?? 0)],
     [
-      'Cast time',
-      castTime === 0 ? 'Normal' : `${castTime > 0 ? '+' : '−'}${Math.abs(castTime).toFixed(1)} s`,
+      'Cast time adjustment',
+      `${castTime > 0 ? '+' : castTime < 0 ? '−' : ''}${Math.abs(castTime).toFixed(1)} s`,
     ],
     ['Cast speed', signed(stats.castSpeed ?? 0)],
-    ['Skill reuse time', `${(stats.reuseTime ?? 0).toFixed(1)} s`],
-    ['Skill cooldown', signed(-capped(stats.cooldownReduction, MAX_COOLDOWN_REDUCTION))],
+    [
+      'Cooldown adjustment',
+      `${(stats.reuseTime ?? 0) > 0 ? '+' : ''}${(stats.reuseTime ?? 0).toFixed(1)} s`,
+    ],
+    ['Cooldown reduction', percent(capped(stats.cooldownReduction, MAX_COOLDOWN_REDUCTION))],
     ['Skill MP cost', signed(-capped(stats.mpCostReduction, MAX_MP_COST_REDUCTION))],
   ]
   const recoveryRows: StatRow[] = [
@@ -302,7 +306,12 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   }
 
   return (
-    <Sheet title="Character" titleId="character-title" className="sheet--fixed" onClose={onClose}>
+    <Sheet
+      title="Character"
+      titleId="character-title"
+      className="sheet--fixed sheet--client sheet--character"
+      onClose={onClose}
+    >
       <HeroCard character={character} />
       <div className="tabs" role="tablist" aria-label="Character card">
         {TABS.map((t) => (
@@ -343,28 +352,45 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
                       <span>{label}</span>
                       {buffed && <span className="hero-stats__buff">{buffed}</span>}
                     </dt>
-                    <dd>
-                      {value}
-                      {name === 'Attributes' && (
-                        <button
-                          type="button"
-                          className="attribute-add"
-                          aria-label={`Add ${label}`}
-                          disabled={busy || away || points < 1}
-                          onClick={() =>
-                            run(async () => {
-                              await allocateStatPoint(ATTRIBUTE_KEYS[index]!)
-                              return `${label} increased by 1.`
-                            })
-                          }
-                        >
-                          +
-                        </button>
-                      )}
-                    </dd>
+                    <dd>{value}</dd>
+                    {name === 'Attributes' && (
+                      <button
+                        type="button"
+                        className="attribute-add"
+                        aria-label={`Add ${label}`}
+                        disabled={busy || away || points < 1}
+                        onClick={() =>
+                          run(async () => {
+                            await allocateStatPoint(ATTRIBUTE_KEYS[index]!)
+                            return `${label} increased by 1.`
+                          })
+                        }
+                      >
+                        +
+                      </button>
+                    )}
                   </div>
                 ))}
               </dl>
+              {name === 'Speed and skills' && (
+                <details className="stat-help">
+                  <summary>How speeds work</summary>
+                  <p>
+                    Attack interval is the time between normal hits. Lower is faster. The green
+                    change is in seconds: 1.20 s − 0.20 s = 1.00 s per hit.
+                  </p>
+                  <p>
+                    Cast speed shortens skill preparation and speeds up its casting animation. Cast
+                    time adjustment adds or removes a fixed number of seconds; zero means no
+                    adjustment.
+                  </p>
+                  <p>
+                    Cooldown adjustment adds or removes seconds from a skill's base cooldown.
+                    Cooldown reduction then reduces that time by a percentage. Each skill's own
+                    timing is shown in its details.
+                  </p>
+                </details>
+              )}
             </section>
           ))}
           <section className="character-stats__group" aria-label="Bonuses">

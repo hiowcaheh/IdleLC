@@ -219,6 +219,16 @@ export function skillMpCost(rank: SkillRank, stats: CombatStats): number {
   return rank.mpCost * (1 - reduction)
 }
 
+/** Skill preparation and reuse are shared by the battle and its details window. */
+export function skillPreparationTime(rank: SkillRank, stats: CombatStats): number {
+  return Math.max(0, rank.castTime * (1 - (stats.castSpeed ?? 0) / 100) + (stats.castTime ?? 0))
+}
+
+export function skillCooldownTime(rank: SkillRank, stats: CombatStats): number {
+  const reduction = Math.min(MAX_COOLDOWN_REDUCTION, (stats.cooldownReduction ?? 0) / 100)
+  return Math.max(0, rank.cooldown + (stats.reuseTime ?? 0)) * (1 - reduction)
+}
+
 /** Seconds the hero runs to a new monster (rare option "Move Speed" makes it shorter). */
 export function approachTime(state: Pick<CombatState, 'player'>): number {
   return movementTime(TIMINGS.approach, effectiveStats(state.player))
@@ -587,16 +597,11 @@ function fighterStep(
     const skill = chooseSkill(self, target)
     if (skill) {
       // wind-up (shortened by cast-speed skills), then it lands like a swing
-      const windUp = Math.max(
-        0,
-        skill.castTime * (1 - (stats.castSpeed ?? 0) / 100) + (stats.castTime ?? 0),
-      )
+      const windUp = skillPreparationTime(skill, stats)
       const landsIn = windUp + TIMINGS.impactDelay
-      const faster = Math.min(MAX_COOLDOWN_REDUCTION, (stats.cooldownReduction ?? 0) / 100)
       self.mp -= skillMpCost(skill, stats)
       self.hp -= skill.hpCost
-      self.skillCooldowns[skill.id] =
-        Math.max(0, skill.cooldown + (stats.reuseTime ?? 0)) * (1 - faster)
+      self.skillCooldowns[skill.id] = skillCooldownTime(skill, stats)
       self.casting = skill
       self.impactIn = landsIn
       self.cooldown += Math.max(

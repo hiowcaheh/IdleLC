@@ -66,7 +66,12 @@ export function HeroCard({ character }: { character: CharacterData }) {
         <dl className="hero-stats hero-stats--single hero-card__stats">
           <div>
             <dt>Skill points</dt>
-            <dd>{formatSp(sp)}</dd>
+            <dd>
+              <span className="sp-value">
+                <span className="sp-icon" aria-hidden="true" />
+                {formatSp(sp)}
+              </span>
+            </dd>
           </div>
           <div>
             <dt>Gold</dt>

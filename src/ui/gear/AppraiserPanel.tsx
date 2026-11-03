@@ -172,7 +172,7 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
   return (
     <Sheet
       title="Appraiser"
-      className="sheet--fixed"
+      className="sheet--fixed sheet--client sheet--appraiser"
       titleId="appraiser-title"
       onClose={onClose}
       extra={

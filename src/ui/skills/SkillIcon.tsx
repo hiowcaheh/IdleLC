@@ -16,7 +16,10 @@ export function SkillIcon({ id, kind, size = 32 }: { id: number; kind: SkillKind
   if (sprite) {
     const k = size / sprite.size
     return (
-      <span className="skill-icon" aria-hidden="true">
+      <span
+        className={`skill-icon${kind === 'passive' ? ' skill-icon--passive' : ''}`}
+        aria-hidden="true"
+      >
         <span
           className="skill-icon__sprite"
           style={{

@@ -4,7 +4,7 @@ import { EQUIP_SLOTS, HEAVEN_STONE_ID, getItem } from '../../game/data/items.ts'
 import type { EquipSlot, GearSlot, ItemDef } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
 import { isRare } from '../../game/logic/rare.ts'
-import { buyPrice, shopOffer } from '../../game/logic/shop.ts'
+import { buyPrice, shopOffer, sortedShopGoods } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { toast } from '../../state/toasts.ts'
 import { BuyDialog } from '../items/BuyDialog.tsx'
@@ -44,10 +44,7 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
   const gear = [...offer.gear].sort(
     (a, b) => EQUIP_SLOTS.indexOf(slotKey(a.slot)) - EQUIP_SLOTS.indexOf(slotKey(b.slot)),
   )
-  // potions first, then stones and glasses (stable: the merchants' order within each)
-  const goods = [...offer.goods].sort(
-    (a, b) => Number(!getItem(a).potion) - Number(!getItem(b).potion),
-  )
+  const goods = sortedShopGoods(offer.goods)
 
   const buy = async (itemId: number, count: number) => {
     if (busy) return
@@ -163,7 +160,7 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
   return (
     <Sheet
       title="Shop"
-      className="sheet--fixed"
+      className="sheet--fixed sheet--client sheet--shop"
       titleId="shop-title"
       onClose={onClose}
       extra={

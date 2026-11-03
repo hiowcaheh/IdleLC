@@ -29,7 +29,7 @@ używają wspólnego czasu. Bez źródłowego arkusza używa się `6 × (1 + mov
 
 Character grupuje atrybuty, HP/MP, walkę, bonusy, szybkości i regenerację. Nowy arkusz
 `CombatStats.client` ma osobne physical/magic attack, defense, hit i evasion,
-critical/deadly rating oraz run/walk m/s, według źródłowego okna i pakietu statusu.
+critical/deadly rating oraz prędkości źródłowe. Character pokazuje tylko run m/s; walk speed jest ukryte.
 To nie są aliasy pojedynczych bojowych `attack/defense` adaptera. Szczegóły i granice:
 [uzupełnienie źródłowe](source-followup-fixes.md). Magiczne i fizyczne opcje/buffy
 zmieniają odpowiednie pola, a critical/deadly są ponownie liczone po zmianie DEX.
@@ -211,7 +211,7 @@ Interpretacja efektów jest **nasza** (`src/game/logic/skills.ts`) do czasu kodu
 - **Efekty** (`t_magic` typ/podtyp):
   - typ 3 — obrażenia: cios × `1 + power/100`;
   - typ 0 — zmiana statystyki: 0 atak, 1 obrona, 2 atak magiczny → atak, 3 obrona magiczna → obrona, 4 celność,
-    5 unik, 6 szansa krytyka (power/10 %), 7 i 23 szybkość ataku, 8 czas rzucania, 10/11 regeneracja HP/MP,
+    5 unik, 6 szansa krytyka (power/10 %), 7 szybkość ataku, 8 odnowienie, 23 przygotowanie castu, 10/11 regeneracja HP/MP,
     12/13 maks. HP/MP, 14 obrażenia krytyczne (power %), 22 atak %; `a_damagetype` 2 = procent;
   - typ 2 — stany: 2, 5, 7 ogłuszenie (power > 0 = szansa %), 16 spowolnienie ataku, 9 / 10 HP / MP na
     sekundę przez czas trwania (te same stany mają mikstury leczenia i many; np. Mana Recovery maga),
@@ -244,26 +244,38 @@ Dane 1:1 z `t_item`: slot (`a_wearing` 0 hełm, 1 zbroja, 2 broń, 3 spodnie, 4 
 `a_num_0`, obrona magiczna `a_num_1`. Nowa postać nosi **darmowy zestaw startowy klasy** z bazy (cena 0, poziom 1,
 np. Knight: Lancer Sword, Squire Helm/Shirt/Pants/Gloves/Boots, Scale Shield).
 
-**Jak sprzęt wpływa na walkę (własne, tymczasowe — do czasu wzorów z kodu serwera).** Bazowe statystyki postaci
-są skalowane do potworów (patrz „Tryb LC”), więc liczby ze sprzętu LC nie dodają się wprost. Sprzęt mierzymy
-względem **typowego sprzętu klasy na danym poziomie** (`gearReference`, liczone przez `import-lc-db`: dla każdego
-slotu mediana mocy najnowszego progu dostępnych przedmiotów — drop, sklepy, zestaw startowy — z ich główną linią
-cenową, bez drogich zestawów premium):
+**Jak sprzęt wpływa na walkę.** Nieulepszony sprzęt nadal jest porównywany z typowym
+sprzętem klasy (`gearReference`), zachowując bazowy balans idle. Od partii 17 zgłoszeń
+przyrost za plus jest obliczany oddzielnie według źródła i dodawany bez dalszego
+mnożenia przez współczynnik adaptera:
 
 ```
-moc       = (atak + atak mag.) albo (obrona + obrona mag.) × (1 + 0,1 × plus)
-atak      = atakPoziomu  × (0,6 + 0,4 × mocBroni / typowaBroń)
-obrona    = obronaPoziomu × (0,5 + 0,5 × mocZbroi / typowaZbroja)     (mocZbroi = suma slotów poza bronią)
+atak = round(atakPoziomu × (0,6 + 0,4 × mocBroniPlus0 / typowaBroń)) + przyrostAtakuUlepszenia
+obrona = round(obronaPoziomu × (0,5 + 0,5 × mocZbroiPlus0 / typowaZbroja)) + sumaPrzyrostówObrony
 ```
 
-Typowy sprzęt = dotychczasowy balans; bez broni zostaje 60% ataku, bez zbroi 50% obrony; lepszy albo
-ulepszony sprzęt daje więcej (np. broń +5 = 150% typowej → 120% ataku).
+Dla sprzętu poniżej 146. poziomu, w grze ograniczonej do +15:
+`wartość = trunc(baza × f^plus)`, gdzie `f = 1,06` do +10 i `1,07` od +11.
+Potęga od +11 używa nowego współczynnika dla **całego** plusa. Broń skaluje bazę
+razem z płaskim rare ATK/MATK, zbroja dodaje rare DEF/MDEF po skalowaniu.
+Do wyliczonej wartości dochodzą płaskie premie:
+
+- broń od +6: +6 fizycznego albo +4 magicznego ataku, zależnie od podtypu;
+- broń od +15: dodatkowo +75 fizycznego albo +50 magicznego ataku;
+- zbroja poza tarczą: od +8 +10 DEF, od +10 +10 MDEF;
+- wszystkie części zbroi, także tarcza: od +15 dodatkowo +100 DEF i +50 MDEF.
+
+Źródłowy arkusz ma oba kanały; pojedynczy atak adaptera wybiera kanał broni,
+a pojedyncza obrona dostaje fizyczny przyrost. To nadal nie jest pełny port damage.
+Przykład: baza broni 100, +15 → 275 z potęgi +6 z progu +75 = 356, czyli przyrost
+256 punktów. Opis przedmiotu osobno pokazuje wzrost z potęgi i podpis premii +15,
+tak jak tooltip klienta. [Szczegóły i granice](client-ui-upgrade-fixes.md).
 
 **Ulepszanie +0…+15** (okno Character): zużywa jeden **Heaven Stone** (`t_item` 85, sprzedawany w Juno za
 1 000) — tylko on ulepsza (decyzja właściciela). Szansa z +N (własne, poprawione 2026-10-30 na prośbę
 właściciela — „+10 ma być osiągalne”): 100, 100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35%. Porażka
 od +10 zabiera jeden „+”, niżej tylko kamień. Średnio ok. 13 kamieni do +10, 21 do +12, 76 do +15 (wcześniej
-77 do +10 i ~58 000 do +15). Każdy „+” = +10% mocy przedmiotu.
+77 do +10 i ~58 000 do +15). Premie plusów są teraz źródłowe, według wzorów powyżej.
 Smelting Stone (84) w LC wypada z potworów według zasady serwera, której nie ma w bazie — u nas **1% na zabicie
 każdego potwora** (`GENERAL_DROPS`, własne). W torbie **10 Smelting Stone wymienia się na 1 Heaven Stone**
 (`exchangeStones`, decyzja właściciela). Poziom kamienia z LC („do przedmiotów tego samego poziomu”) pomijamy.
@@ -325,7 +337,7 @@ Zasady:
   przedmiotu, potem każdą opcję zestawu z jej szansą. Zwykła lupa działa w **60%** przypadków (własne —
   cena za sukces jak złotej), przy porażce lupa przepada, przedmiot zostaje nieodkryty;
 - premie zestawu dodają się do mocy przedmiotu (broń: atak + magia, zbroja: obrona + odporność), ulepszenia
-  „+” liczą się od sumy;
+  „+” liczy się od sumy dla broni; rare obrona zbroi jest dodawana po potędze;
 - kolory nazw (decyzja właściciela): nieodkryty czerwony, **A niebieski, B zielony, C jasnoniebieski,
   D żółty, E biały**;
 - Appraiser odkrywa hurtem (tyle sztuk, na ile starczy lup), pokazuje odkryte od najlepszych (klasa, liczba

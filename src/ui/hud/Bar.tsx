@@ -1,7 +1,7 @@
 interface Props {
   value: number
   max: number
-  variant: 'hp' | 'mp' | 'exp'
+  variant: 'hp' | 'mp' | 'exp' | 'book'
   label?: string
   /** Printed on the bar instead of "value / max". */
   text?: string

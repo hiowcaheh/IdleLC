@@ -181,3 +181,23 @@ export function applyBuy(character: CharacterData, itemId: number, count: number
     },
   }
 }
+
+/** Group consumables by effect, then order each family from small to large. */
+export function sortedShopGoods(ids: readonly number[]): number[] {
+  const order = { hp: 0, mp: 1, hpRegen: 2, mpRegen: 3 }
+  const key = (id: number) => {
+    const item = getItem(id)
+    return item.potion
+      ? [order[item.potion.kind], item.potion.power, item.potion.duration, item.level, item.price]
+      : [item.magnifier ? 5 : 4, item.price, item.level]
+  }
+  return [...ids].sort((a, b) => {
+    const ka = key(a),
+      kb = key(b)
+    for (let i = 0; i < Math.max(ka.length, kb.length); i++) {
+      const d = (ka[i] ?? 0) - (kb[i] ?? 0)
+      if (d) return d
+    }
+    return a - b
+  })
+}

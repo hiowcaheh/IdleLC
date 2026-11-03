@@ -1,5 +1,11 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+Najnowsza aktualizacja: [źródłowe premie ulepszeń i 17 poprawek GUI](client-ui-upgrade-fixes.md).
+Kamienie i szanse pozostają własne; wzrost ATK/DEF i +15 jest źródłowy. SaveVersion
+pozostaje 14. Walk speed ukryto, skille mają modal oraz okrągłe pasywne ikony,
+a loader pokazuje całą ilustrację przez `contain` na osobnym rozmytym tle.
+Starsze opisy +10% za plus i `cover` dotyczą poprzedniej wersji.
+
 Stan rozpoznania: 2026-11-02. Punktem wyjścia wdrożenia jest commit `c9944c92cacfc50595dbfc8bbd085b64cf5e4048`. Ten dokument jest punktem wejścia dla Claude Code i kolejnych współpracowników; [raporty źródłowe](source-audit/README.md) zachowują szczegółowe dowody, a changelog w katalogu głównym opisuje faktycznie dostarczone zmiany.
 
 ## Aktualizacja 2026-11-03

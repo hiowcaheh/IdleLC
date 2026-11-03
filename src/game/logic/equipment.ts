@@ -1,8 +1,8 @@
 /**
  * Equipment: wearing weapons, armor and accessories and upgrading weapons and armor (+0…+15).
  * Items, slots, classes, levels and stats are 1:1 from the LC data; how gear turns into IdleLC's
- * combat stats, the upgrade chances and the bonus per "+" are our own until the LC server code is
- * available (docs/balance.md). Pure — the server will run the same code.
+ * combat stats retain the idle adapter; upgrade increments follow the server. Upgrade chances
+ * and stone rules remain the owner's values (docs/balance.md). Pure — the server will run the same code.
  */
 import type { Attributes } from './attributes.ts'
 import {
@@ -10,15 +10,14 @@ import {
   DUAL_SWORDS,
   HEAVEN_STONE_ID,
   SMELTING_STONE_ID,
-  gearPower,
   gearReference,
   getItem,
-  getRareSet,
   slotsFor,
   starterGear,
 } from '../data/items.ts'
 import type { ClassId, CombatStats, EquipSlot } from '../data/types.ts'
 import type { CharacterData } from './character.ts'
+import { MAGIC_WEAPON_TYPES, pieceStats } from './itemUpgrades.ts'
 import { GameError } from './errors.ts'
 import { newId } from './id.ts'
 import { addToInventory } from './loot.ts'
@@ -31,9 +30,6 @@ export const MAX_PLUS = 15
 /** Share of the level's attack / defense a character has without any weapon / armor (own values). */
 export const NAKED_ATTACK = 0.6
 export const NAKED_DEFENSE = 0.5
-
-/** Each "+" adds this share of the piece's power (own value). */
-export const PLUS_BONUS = 0.1
 
 /**
  * Chance that an upgrade from +N succeeds, index N (own values until the LC server code; owner:
@@ -75,16 +71,9 @@ export type EquipError =
  * Power of a piece including its upgrades and the flat bonus of its rare set (weapons: attack + magic
  * attack, armor: defense + magic defense, like the item's own stats).
  */
-export function piecePower(piece: Pick<GearPiece, 'itemId' | 'plus' | 'rare'>): number {
-  const gear = getItem(piece.itemId).gear
-  if (!gear) return 0
-  const set = piece.rare === undefined ? undefined : getRareSet(piece.rare)
-  const bonus = !set
-    ? 0
-    : gear.slot === 'weapon'
-      ? set.attack + set.magic
-      : set.defense + set.resist
-  return (gearPower(gear) + bonus) * (1 + PLUS_BONUS * piece.plus)
+export function piecePower(piece: Pick<GearPiece, 'itemId' | 'plus' | 'rare' | 'options'>): number {
+  const stats = pieceStats(piece).total
+  return stats.attack + stats.magicAttack + stats.defense + stats.magicDefense
 }
 
 /**
@@ -112,21 +101,34 @@ export function applyGear(
   const weapon = equipment.weapon
   const armorPower = ARMOR_SLOTS.reduce((sum, slot) => {
     const piece = equipment[slot]
-    return sum + (piece ? piecePower(piece) : 0)
+    return sum + (piece ? piecePower({ ...piece, plus: 0 }) : 0)
   }, 0)
-  const weaponRatio = ratio(weapon ? piecePower(weapon) : 0, reference.weapon)
+  const weaponRatio = ratio(weapon ? piecePower({ ...weapon, plus: 0 }) : 0, reference.weapon)
   const armorRatio = ratio(armorPower, reference.armor)
   const options = [
     ...Object.values(equipment).flatMap((piece) => piece?.options ?? []),
     ...extraOptions,
   ]
+  const weaponStats = weapon && pieceStats(weapon)
+  const channel =
+    weapon && MAGIC_WEAPON_TYPES.has(getItem(weapon.itemId).gear!.subtype)
+      ? 'magicAttack'
+      : 'attack'
+  const attackGain = weaponStats ? weaponStats.total[channel] - weaponStats.base[channel] : 0
+  const defenseGain = ARMOR_SLOTS.reduce((sum, slot) => {
+    const piece = equipment[slot]
+    if (!piece) return sum
+    const value = pieceStats(piece)
+    return sum + value.total.defense - value.base.defense
+  }, 0)
   const withGear: CombatStats = {
     ...stats,
     attack: Math.max(
       1,
-      Math.round(stats.attack * (NAKED_ATTACK + (1 - NAKED_ATTACK) * weaponRatio)),
+      Math.round(stats.attack * (NAKED_ATTACK + (1 - NAKED_ATTACK) * weaponRatio)) + attackGain,
     ),
-    defense: Math.round(stats.defense * (NAKED_DEFENSE + (1 - NAKED_DEFENSE) * armorRatio)),
+    defense:
+      Math.round(stats.defense * (NAKED_DEFENSE + (1 - NAKED_DEFENSE) * armorRatio)) + defenseGain,
     attackInterval: (weapon && getItem(weapon.itemId).gear?.attackInterval) || stats.attackInterval,
   }
   return applyStats(withGear, optionEffects(options, classId, level, equipment, stats, allocated))

@@ -5,6 +5,8 @@ import {
   MP_POTION_BELOW,
   TIMINGS,
   approachTime,
+  skillPreparationTime,
+  skillCooldownTime,
   travelTime,
   carryVitals,
   changeMonster,
@@ -52,6 +54,13 @@ const strongPlayer = { level: 10, stats: stats({ attack: 50 }) }
 const weakMonster = { level: 1, stats: stats({ maxHp: 30, attack: 2 }) }
 
 describe('combatTick', () => {
+  it('distinguishes cast speed, flat preparation adjustment and the two cooldown modifiers', () => {
+    const skill = { castTime: 2, cooldown: 8 } as SkillRank
+    const boosted = stats({ castSpeed: 20, castTime: -0.2, reuseTime: -2, cooldownReduction: 50 })
+    expect(skillPreparationTime(skill, boosted)).toBeCloseTo(1.4)
+    expect(skillCooldownTime(skill, boosted)).toBe(3)
+    expect(skillPreparationTime(skill, stats({ castTime: -5 }))).toBe(0)
+  })
   it('does not mutate the input state', () => {
     const s = createCombat(strongPlayer, 'm', weakMonster)
     const copy = structuredClone(s)

@@ -48,7 +48,12 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
   }
 
   return (
-    <Sheet title="Settings" titleId="settings-title" onClose={onClose}>
+    <Sheet
+      title="Settings"
+      titleId="settings-title"
+      className="sheet--client sheet--settings"
+      onClose={onClose}
+    >
       <fieldset className="setting">
         <legend className="setting__label">Graphics quality</legend>
         <div className="segmented">

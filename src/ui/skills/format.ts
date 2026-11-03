@@ -61,7 +61,7 @@ const STAT_LABELS: Record<StatKey, string> = {
   intelligence: 'Intelligence',
   constitution: 'Constitution',
   castSpeed: 'Cast speed',
-  reuseTime: 'Skill reuse time',
+  reuseTime: 'Cooldown adjustment',
   blockChance: 'Block chance',
   stunResistance: 'Stun resistance',
   stoneResistance: 'Stone resistance',
@@ -72,7 +72,7 @@ const STAT_LABELS: Record<StatKey, string> = {
   critChance: 'Critical chance',
   critMultiplier: 'Critical damage',
   attackSpeed: 'Attack speed',
-  castTime: 'Cast time',
+  castTime: 'Cast time adjustment',
   hpRegen: 'HP recovery',
   mpRegen: 'MP recovery',
   cooldownReduction: 'Skill cooldown',
@@ -94,7 +94,7 @@ function statValue(stat: StatKey, value: number, percent: boolean): string {
     case 'critMultiplier':
       return signed(value, '%')
     case 'attackSpeed':
-      return signed(value / 10, ' s')
+      return signed(-value / 10, ' s per hit')
     case 'castTime':
     case 'reuseTime':
       return signed(value / 10, ' s')

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { SHOP_SELL_RATE, getItem } from '../data/items.ts'
+import { ITEMS, SHOP_SELL_RATE, getItem } from '../data/items.ts'
 import { createCharacterData } from './character.ts'
 import {
   applyBuy,
@@ -10,6 +10,7 @@ import {
   shopOffer,
   stacksValue,
   tierWindow,
+  sortedShopGoods,
 } from './shop.ts'
 
 const hero = {
@@ -22,6 +23,32 @@ const hero = {
 }
 
 describe('shop', () => {
+  it('keeps the full mana family together in size order, before recovery potions', () => {
+    const backup485 = ITEMS[485],
+      backup724 = ITEMS[724]
+    ITEMS[485] = {
+      ...getItem(484),
+      id: 485,
+      name: 'Medium Mana Potion',
+      potion: { kind: 'mp', power: 16, duration: 15, cooldown: 5 },
+    }
+    ITEMS[724] = {
+      ...getItem(484),
+      id: 724,
+      name: 'Great Mana Potion',
+      potion: { kind: 'mp', power: 24, duration: 15, cooldown: 5 },
+    }
+    try {
+      expect(sortedShopGoods([490, 724, 485, 44, 484, 43, 85])).toEqual([
+        43, 44, 484, 485, 724, 490, 85,
+      ])
+    } finally {
+      if (backup485) ITEMS[485] = backup485
+      else delete ITEMS[485]
+      if (backup724) ITEMS[724] = backup724
+      else delete ITEMS[724]
+    }
+  })
   it('pays the item price times the shop sell rate, rounded down', () => {
     const price = (id: number) => Math.floor((getItem(id).price * SHOP_SELL_RATE) / 100)
     expect(sellPrice(4)).toBe(price(4))

@@ -64,8 +64,8 @@ describe('gear and stats', () => {
       ...starter,
       weapon: { ...starter.weapon!, plus: 5 },
     })
-    // +5 = 150% of the typical weapon: 0.6 + 0.4 × 1.5
-    expect(upgraded.attack).toBe(120)
+    // Source +5: trunc(8 × 1.06^5) = 10; +2 real attack, independent of the adapter's scale.
+    expect(upgraded.attack).toBe(102)
     expect(applyGear(stats, 'knight', 1, undefined)).toBe(stats)
   })
 

@@ -1,5 +1,42 @@
 # Historia zmian
 
+## 2026-11-03 — źródłowe premie ulepszeń i dopracowanie GUI (17 zgłoszeń)
+
+Punkt wyjścia: `fa66c0e`. [Wzory, zasoby i walidacja](docs/client-ui-upgrade-fixes.md).
+
+1. Ulepszenia ATK/DEF używają źródłowej potęgi 1,06 do +10 i 1,07 powyżej +10,
+   obcięcia części ułamkowej oraz płaskich premii progowych, w tym +15.
+   Szanse, kamienie, wymiana, porażki i limit +15 pozostają takie jak dotąd.
+2. Walk speed jest ukryte w Character; źródłowe pole pozostaje w obliczeniach.
+3. Gotową nagrodę Book oznacza oryginalny prezent z Cashshop zamiast „!”.
+4. Book ma źródłowe ramki, zakładki, listy, papier nagród i pasek postępu.
+5. Usunięto powtórzony poziom spod ikon skilli; poziom jest w opisie obok.
+6. Ikony pasywne są faktycznie okrągłe, łącznie z przycięciem samego obrazka.
+7. Kliknięcie umiejętności otwiera osobny modal w ramce klienta.
+8. Character ma źródłowe zakładki, nagłówki sekcji i ikonę SP.
+9. Plusy atrybutów są mniejsze, z atlasu klienta, i znajdują się poza polem sumy.
+10. Attack interval pokazuje końcowy odstęp i zmianę z jednostką „s”. Cast time
+    adjustment i Cooldown adjustment zastępują niejasne „Normal” / „reuse time”.
+    Dodano rozwijane objaśnienia sekund i procentów; modal pokazuje bieżące czasy
+    skilla, z wartością bazową, gdy bonusy je zmieniają.
+11. Appraiser korzysta ze źródłowych zakładek i formatowania wierszy klienta.
+12. Shop korzysta z tych samych zakładek oraz uporządkowanych nagłówków i list.
+13. Goods są grupowane po działaniu i rosnącej mocy: HP, MP, regeneracja HP/MP,
+    kamienie i lupy. Great Mana Potion jest bezpośrednio po Medium Mana Potion.
+14. Settings ma ramkę NewOption, sekcje, źródłowe przyciski wyboru i prostsze kontrolki.
+15. Cała ilustracja ładowania mieści się przez `contain`, bez zoomu i przycinania.
+    Osobne rozmyte tło wypełnia przestrzeń na pionowym ekranie.
+16. Pod statystykami przedmiotu +15 są osobne źródłowe podpisy, np.
+    `Attack Power +75`, `Defense power +100`, `Magic Defense power +50`.
+17. Modal skilla zawiera źródłowy opis, typ i cel, wymagania poziomu/SP/sprzętu
+    i wcześniejszych skilli, bieżący oraz następny poziom, efekty, koszt HP/MP,
+    czas przygotowania, odnowienia i trwania oraz akcje nauki/AUTO/paska.
+
+Weryfikacja: `npm run check` (**350 testów / 40 plików**), build i weryfikator
+odzyskanych zasobów przeszły. Produkcyjny build sprawdzono w Chromium przy
+320×740, 390×844 i 1280×900, wraz z dwoma przejściami map. Brak błędów strony,
+konsoli i żądań zasobów; bez poziomego przepełnienia okien.
+
 ## 2026-11-03 — ekspedycje, rozwój postaci i GUI (18 zgłoszeń)
 
 Punkt wyjścia: `58f51ae`. Szczegóły zasad, źródeł i walidacji:

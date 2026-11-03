@@ -1,5 +1,11 @@
 # IdleLC — wytyczne projektu
 
+Najnowsza aktualizacja: [źródłowe premie ulepszeń i 17 poprawek GUI](docs/client-ui-upgrade-fixes.md).
+Kamienie i szanse pozostają własne; wzrost ATK/DEF i +15 jest źródłowy. SaveVersion
+pozostaje 14. Walk speed ukryto, skille mają modal oraz okrągłe pasywne ikony,
+a loader pokazuje całą ilustrację przez `contain` na osobnym rozmytym tle.
+Starsze opisy +10% za plus i `cover` dotyczą poprzedniej wersji.
+
 ## Bieżące przekazanie — 2026-11-03
 
 **Zacznij od [dokumentacji przekazania](docs/development-handoff.md),

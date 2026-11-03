@@ -1,0 +1,218 @@
+{
+  "date": "2026-11-03",
+  "baseline": "fa66c0edb78cceaea82ed07370e08db15d47409b",
+  "scope": "17 zgłoszeń: źródłowe premie ulepszeń, GUI klienta i pełna ilustracja ładowania",
+  "automated": {
+    "check": "passed",
+    "lint": "passed",
+    "prettier": "passed",
+    "typecheck": "passed",
+    "tests": 350,
+    "testFiles": 40,
+    "build": "passed",
+    "verifyLcRecovery": "passed",
+    "buildNote": "Istniejące ostrzeżenie rozmiaru pakietu lc-data (1192.65 kB).",
+    "diffWhitespace": "passed"
+  },
+  "save": {
+    "version": 14,
+    "migration": "Niepotrzebna: plusy i opcje istniejących przedmiotów są przeliczane z zapisu."
+  },
+  "source": {
+    "upgradeCurve": ["GameServer/PC.cpp:7048–7098", "Engine/Entities/Items.cpp:186–233"],
+    "thresholdBonuses": "GameServer/PC.cpp:3509–3637",
+    "rareWeaponScaling": "GameServer/PC.cpp:3103–3126",
+    "rareArmorScaling": "GameServer/PC.cpp:3262–3304",
+    "bonusCaptions": {
+      "source": "Local/us/String/strClient_us.lod, numery 1891–1894",
+      "values": [
+        "Attack Power +75",
+        "Magical Attack power +50",
+        "Defense power +100",
+        "Magic Defense power +50"
+      ]
+    },
+    "stoneRulesChanged": false,
+    "goldenCases": {
+      "base100BeforeThresholds": {
+        "0": 100,
+        "5": 133,
+        "10": 179,
+        "11": 210,
+        "14": 257,
+        "15": 275
+      },
+      "physicalWeaponBase100Plus15": 356,
+      "magicWeaponBase100Plus15": 329,
+      "armorBase80And30Plus15": [330, 142],
+      "shieldBase80And30Plus15": [320, 132]
+    }
+  },
+  "browser": {
+    "engine": "Chromium / SwiftShader",
+    "physicalIPhone": false,
+    "productionGuiAndTransitions": {
+      "cases": [
+        {
+          "viewport": [390, 844],
+          "passiveRadius": ["50%", "50%", "50%", "50%", "50%", "50%"],
+          "goods": [
+            "Green Herbal Remedy",
+            "Small Healing Potion",
+            "Medium Healing Potion",
+            "Great Healing Potion",
+            "Small Mana Potion",
+            "Medium Mana Potion",
+            "Great Mana Potion",
+            "Small HP Recovery Potion",
+            "Bandage of Randol Knights",
+            "Small Mana Recovery Potion",
+            "Heaven Stone",
+            "Magnifying glass",
+            "Golden magnifying glass"
+          ],
+          "equipmentLabels": [
+            "Weapon: Short Bow +15",
+            "Helmet: Cotton Tiara",
+            "Armor: Cotton Shirt",
+            "Pants: Cotton Skirt",
+            "Gloves: Cotton Gloves",
+            "Boots: Cotton Boots",
+            "Accessory: empty",
+            "Accessory: empty",
+            "Accessory: empty"
+          ],
+          "allocation": {
+            "strength": 0,
+            "dexterity": 0,
+            "intelligence": 0,
+            "constitution": 1
+          }
+        },
+        {
+          "viewport": [1280, 900],
+          "passiveRadius": ["50%", "50%", "50%", "50%", "50%", "50%"],
+          "goods": [
+            "Green Herbal Remedy",
+            "Small Healing Potion",
+            "Medium Healing Potion",
+            "Great Healing Potion",
+            "Small Mana Potion",
+            "Medium Mana Potion",
+            "Great Mana Potion",
+            "Small HP Recovery Potion",
+            "Bandage of Randol Knights",
+            "Small Mana Recovery Potion",
+            "Heaven Stone",
+            "Magnifying glass",
+            "Golden magnifying glass"
+          ],
+          "equipmentLabels": [
+            "Weapon: Short Bow +15",
+            "Helmet: Cotton Tiara",
+            "Armor: Cotton Shirt",
+            "Pants: Cotton Skirt",
+            "Gloves: Cotton Gloves",
+            "Boots: Cotton Boots",
+            "Accessory: empty",
+            "Accessory: empty",
+            "Accessory: empty"
+          ],
+          "allocation": {
+            "strength": 0,
+            "dexterity": 0,
+            "intelligence": 0,
+            "constitution": 2
+          }
+        },
+        {
+          "loading": "Dratan",
+          "size": "contain",
+          "transform": "none",
+          "filter": "none",
+          "ambientFilter": "blur(24px) brightness(0.42)",
+          "width": 390,
+          "height": 844
+        },
+        {
+          "loading": "Merac",
+          "size": "contain",
+          "transform": "none",
+          "filter": "none",
+          "ambientFilter": "blur(24px) brightness(0.42)",
+          "width": 1280,
+          "height": 900
+        }
+      ],
+      "page_errors": [],
+      "console_errors": [],
+      "http_errors": [],
+      "failed_requests": [],
+      "passed": true
+    },
+    "finalBonusAndSkillDetails": {
+      "cases": [
+        {
+          "viewport": [320, 740],
+          "originalBonusCaptions": true,
+          "currentAndNextRanks": true,
+          "escapeClosesTopModal": true,
+          "bounds": {
+            "width": 270,
+            "scroll": 270
+          }
+        },
+        {
+          "viewport": [390, 844],
+          "originalBonusCaptions": true,
+          "currentAndNextRanks": true,
+          "escapeClosesTopModal": true,
+          "bounds": {
+            "width": 340,
+            "scroll": 340
+          }
+        },
+        {
+          "viewport": [1280, 900],
+          "originalBonusCaptions": true,
+          "currentAndNextRanks": true,
+          "escapeClosesTopModal": true,
+          "bounds": {
+            "width": 402,
+            "scroll": 402
+          }
+        }
+      ],
+      "errors": [],
+      "passed": true
+    },
+    "checks": [
+      "Character: ukryte Walk speed, wyjaśnienia szybkości, SP, przyciski poza polem atrybutu i rozdanie punktu",
+      "Skills: okrągłe ikony pasywne, brak powtórzonego poziomu pod ikoną, nauka i informacje w osobnym modalu",
+      "Book: prezent, źródłowy pasek i formatowanie listy nagród",
+      "Appraiser, Shop i Settings: źródłowe ramki i zakładki",
+      "Goods: Small Mana → Medium Mana → Great Mana → Small HP Recovery",
+      "Przejścia Dratan i Merac: główna ilustracja contain bez transformacji i filtrów, osobne rozmyte tło, nazwa po wejściu",
+      "Broń i pancerz +15: dokładne źródłowe podpisy osobnych bonusów",
+      "Modal skilla: bieżący i następny poziom, typ i cel, wymagania oraz czasy i koszty",
+      "Escape zamyka najwyższy modal, brak poziomego przepełnienia przy 320, 390 i 1280 px"
+    ],
+    "visualReview": [
+      "character-390.png",
+      "book-390.png",
+      "skills-passive-390.png",
+      "settings-390.png",
+      "loading-dratan.png",
+      "skill-info-final-320.png",
+      "bonus-armor-320.png"
+    ],
+    "artifactDirectory": "/workspace/work/batch17/ (skrypty, logi i zrzuty poza repozytorium)"
+  },
+  "limitations": [
+    "Główne ATK/DEF walki zachowują bazę istniejącego adaptera balansu; źródłowy przyrost ulepszenia jest dodawany w punktach właściwego kanału.",
+    "To nie jest pełny port obrażeń weak/strong/hard, zasięgu zwykłego ataku ani wszystkich liczników rare.",
+    "Zakres używanego sprzętu jest poniżej poziomu 146; nie przenoszono pełnego systemu run wyższych poziomów.",
+    "Modal pokazuje źródłowy opis i informacje dostępne w danych gry; nie dopisuje niezaimportowanych pól.",
+    "Nie wykonano testu na fizycznym iPhonie/Safari."
+  ]
+}

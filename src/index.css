@@ -4764,3 +4764,350 @@ a.button {
   color: #d3b58a;
   font-size: 12px;
 }
+
+/* Shared original client controls on the character, merchant and settings windows. */
+.sheet--client .tabs__tab,
+.sheet--client .book__zone {
+  border: 0;
+  border-radius: 0;
+  border-image: url('/ui/lc/skills-tab.webp') 8 12 fill / 8px 12px stretch;
+  background: none;
+  min-height: 38px;
+  color: #c3bda5;
+}
+.sheet--client .tabs__tab.is-active,
+.sheet--client .book__zone.is-active {
+  border-image-source: url('/ui/lc/skills-tab-active.webp');
+  color: #ffe788;
+  box-shadow: none;
+}
+.sheet--client .shop__slot-title,
+.sheet--client .character-stats__heading,
+.sheet--client .skill-rank__title,
+.skill-info__requirements h3 {
+  padding: 5px 9px;
+  border: solid transparent;
+  border-width: 1px 3px;
+  border-image: url('/ui/lc/client-section.webp') 1 3 fill / 1px 3px stretch;
+  color: var(--gilt-bright);
+}
+.sheet--client .item-row {
+  border-radius: 1px;
+  background: #1b252dcc;
+  box-shadow: inset 0 0 0 1px #73715c5c;
+}
+.sp-value {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+}
+.sp-icon {
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  flex: none;
+  background: url('/ui/lc/sp-icon.webp') center / contain no-repeat;
+}
+.character-stats__group[aria-label='Attributes'] dd {
+  display: block;
+  width: 58px;
+}
+.attribute-add {
+  width: 25px;
+  height: 29px;
+  border: 0;
+  border-image: none;
+  background: url('/ui/lc/stat-plus.webp') center / 17px 17px no-repeat;
+  font-size: 0;
+}
+.attribute-add:disabled {
+  background-image: url('/ui/lc/stat-plus-disabled.webp');
+  opacity: 0.65;
+}
+.stat-help {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--parchment-dim);
+}
+.stat-help summary {
+  color: var(--gilt-bright);
+  cursor: pointer;
+}
+.stat-help p {
+  margin: 6px 0;
+}
+.skill-icon--passive,
+.skill-icon--passive .skill-icon__sprite {
+  border-radius: 50%;
+  overflow: hidden;
+}
+.skills-slot {
+  width: 44px;
+  height: 44px;
+  padding-top: 6px;
+  background-size: 44px 58px;
+  background-position: center top;
+}
+.skills-slot--passive {
+  background-image: none;
+}
+.skills-slot--passive .skill-icon {
+  border: 2px solid #b3aa83;
+  box-shadow:
+    0 0 0 1px #3b423a,
+    inset 0 0 4px #000;
+}
+.skills-slot__rank {
+  display: none;
+}
+.sheet--skill-detail {
+  border-image-source: url('/ui/lc/detail-window.webp');
+  width: min(100%, 440px);
+}
+.skill-info__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  background: #141c22c9;
+}
+.skill-info__header > span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.skill-info__header strong {
+  font-family: var(--font-display);
+  font-size: 17px;
+  color: var(--gilt-bright);
+}
+.skill-info__header > span > span {
+  color: var(--parchment-dim);
+  font-size: 13px;
+}
+.sheet--skill-detail .skill-row__desc {
+  margin: 12px 0;
+  font-style: italic;
+}
+.skill-info__facts {
+  display: grid;
+  gap: 5px;
+  margin: 8px 0;
+}
+.skill-info__facts > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #b7a07522;
+  padding: 3px 2px;
+  font-size: 13px;
+}
+.skill-info__facts dt {
+  color: var(--parchment-dim);
+}
+.skill-info__facts dd {
+  margin: 0;
+  font-weight: 700;
+}
+.skill-info__requirements h3 {
+  font-family: var(--font-display);
+  font-size: 12px;
+  margin: 12px 0 6px;
+}
+.sheet--skill-detail .skill-row__actions {
+  margin-top: 18px;
+}
+.sheet--skill-detail .skill-rank {
+  margin-top: 14px;
+  padding: 0;
+  background: #182128aa;
+}
+.sheet--skill-detail .skill-rank__title {
+  margin: 0;
+}
+.sheet--skill-detail .skill-rank__effects {
+  padding-bottom: 10px;
+}
+.sheet--settings {
+  border-image-source: url('/ui/lc/settings-window.webp');
+}
+.sheet--settings .setting {
+  background: #1d282fcc;
+  border: 1px solid #76858266;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 1px;
+}
+.sheet--settings .setting__label {
+  color: var(--gilt-bright);
+  padding: 0 4px;
+  font-family: var(--font-display);
+  font-size: 13px;
+}
+.sheet--settings .segmented {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.sheet--settings .segmented__option span {
+  border: 0;
+  border-radius: 0;
+  border-image: url('/ui/lc/skills-tab.webp') 8 12 fill / 8px 12px stretch;
+}
+.sheet--settings .segmented__option input:checked + span {
+  border-image-source: url('/ui/lc/skills-tab-active.webp');
+  background: none;
+  color: #ffe788;
+}
+.sheet--settings .switch {
+  border-radius: 1px;
+  background: #141c20;
+  border-color: #9e8c60;
+}
+.sheet--settings .switch::after {
+  border-radius: 1px;
+}
+.sheet--book {
+  border-image-source: url('/ui/lc/book-window.webp');
+}
+.sheet--book .book__zones {
+  gap: 4px;
+}
+.sheet--book .book__zone {
+  flex: 1;
+  min-width: 0;
+  padding-inline: 6px;
+}
+.gift-icon {
+  display: inline-block;
+  width: 23px;
+  height: 23px;
+  flex: none;
+  background: url('/ui/lc/gift.webp') center / contain no-repeat;
+  vertical-align: middle;
+}
+.book__reward-ready {
+  width: 23px;
+  height: 23px;
+  border-image: none;
+  background: none;
+  text-shadow: none;
+}
+.sheet--book .book__monster {
+  border-radius: 0;
+  border: 1px solid #8a775548;
+  background: #30271f url('/ui/lc/book-row.webp') center / 100% 100%;
+}
+.sheet--book .book__monster.is-active {
+  border-color: #dfc67d;
+  box-shadow: inset 0 0 8px #c99e4260;
+}
+.sheet--book .book__page {
+  border: 1px solid #99815b;
+  background: #211d18;
+  padding: 7px;
+}
+.sheet--book .book__facts {
+  padding: 7px 5px;
+  border: 1px solid #79644970;
+  background: #3f3527;
+}
+.book__reward-labels {
+  display: grid;
+  grid-template-columns: 42px 1fr 44px;
+  gap: 4px;
+  font-size: 10px;
+  color: #d9c392;
+  border-bottom: 1px solid #8a7755;
+  padding: 6px 3px;
+}
+.sheet--book .book__reward {
+  border-radius: 0;
+  border: 1px solid #8a775580;
+  background: #30271f url('/ui/lc/book-row.webp') center / 100% 100%;
+  padding: 7px 3px;
+}
+.sheet--book .book__reward.is-done {
+  background: #222822;
+  opacity: 0.7;
+}
+.book__rewards-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 0;
+  border-bottom: 1px solid #8a775580;
+}
+.bar--book {
+  height: 28px;
+  border: 0;
+  border-image: url('/ui/lc/book-progress.webp') 9 20 fill / 7px 14px stretch;
+  background: none;
+  border-radius: 0;
+  overflow: visible;
+}
+.bar--book .bar__fill {
+  inset: 7px 14px;
+  border-radius: 0;
+  background: url('/ui/lc/book-fill.webp') center / 100% 100% no-repeat;
+}
+.bar--book .bar__text {
+  font-size: 11px;
+  text-shadow: 0 1px 2px #000;
+}
+
+/* Show the entire loading illustration; a separate blurred backdrop fills portrait margins. */
+.zone-loading__ambient {
+  position: absolute;
+  inset: -30px;
+  background: center / cover no-repeat;
+  filter: blur(24px) brightness(0.42);
+}
+.zone-loading__art {
+  background-size: contain;
+}
+.zone-loading__art::after {
+  background: linear-gradient(180deg, #11171022, transparent 30%, transparent 65%, #10140c66);
+}
+.sheet--book .book__rewards {
+  padding: 8px 5px;
+  border: 1px solid #b59358;
+  background: #ac8853 url('/ui/lc/book-paper.webp') center / cover;
+}
+.sheet--book .book__rewards-title {
+  color: #33200e;
+}
+.sheet--book .book__reward-labels {
+  color: #33200e;
+  border-color: #77502e;
+  font-weight: 700;
+}
+.sheet--book .book__reward {
+  color: #f4e7cd;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.item-info__stats .item-info__addition {
+  display: block;
+  padding: 2px 8px 7px;
+}
+.item-info__stats .item-info__addition dd {
+  width: auto;
+  border: 0;
+  border-image: none;
+  padding: 0;
+  text-align: left;
+  background: none;
+  color: var(--gilt-bright);
+  white-space: normal;
+}

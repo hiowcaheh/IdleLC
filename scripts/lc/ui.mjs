@@ -65,6 +65,19 @@ export const UI_PARTS = {
   'skills-slot-passive': [atlas('skill_new'), 1324, 43, 44, 58],
   'skills-sp': [atlas('skill_new'), 841, 546, 162, 23],
   'skills-background': [atlas('skill_new'), 420, 80, 380, 450, { quality: 85 }],
+  // Original panels and controls, measured on the 2015 atlases.
+  'settings-window': [atlas('NewOption'), 0, 0, 256, 400],
+  'book-window': [atlas('QuestBook'), 0, 0, 475, 331],
+  'detail-window': [atlas('NewOption'), 270, 105, 178, 190],
+  'client-section': [atlas('QuestBook'), 0, 346, 155, 32],
+  'book-paper': [atlas('ItemCollectionbook'), 246, 58, 480, 466, { quality: 85 }],
+  'book-row': [atlas('ItemCollectionbook'), 13, 246, 193, 16],
+  'book-progress': [atlas('ItemCollectionbook'), 471, 778, 270, 34],
+  'book-fill': [atlas('ItemCollectionbook'), 32, 799, 168, 19],
+  gift: [atlas('Cashshop'), 251, 358, 60, 60],
+  'stat-plus': [atlas('skill_new'), 1213, 70, 13, 13, { scale: 3 }],
+  'stat-plus-disabled': [atlas('skill_new'), 1213, 98, 13, 13, { scale: 3 }],
+  'sp-icon': [atlas('skill_new'), 843, 550, 14, 14, { scale: 3 }],
   // equipment boards: each class's silhouette with the slot frames (LC job order)
   'equip-titan': [atlas('NewInventory'), 257, 0, 246, 155, { quality: 90 }],
   'equip-knight': [atlas('NewInventory'), 504, 0, 246, 155, { quality: 90 }],
@@ -82,6 +95,21 @@ export const UI_PARTS = {
  * window: the title edge (37 rows) and the bottom; panel: a thin top edge.
  */
 const ROWS = {
+  'settings-window': [
+    [0, 37, 1],
+    [365, 1, 16],
+    [390, 10, 1],
+  ],
+  'book-window': [
+    [0, 37, 1],
+    [300, 1, 16],
+    [321, 10, 1],
+  ],
+  'detail-window': [
+    [0, 37, 1],
+    [150, 1, 16],
+    [180, 10, 1],
+  ],
   'skills-window': [
     [0, 37, 1],
     [100, 1, 16],
@@ -128,6 +156,7 @@ const CORNER = 8
 
 /** Parts of a piece shown empty: the player frame's bar tracks (the bars are drawn on top). */
 const EMPTY_AREAS = {
+  'book-progress': [[20, 9, 230, 14]],
   'player-frame': [
     [112, 31, 118, 8],
     [112, 44, 118, 8],

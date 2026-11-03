@@ -4,6 +4,21 @@ Stan rejestru: 2026-11-02, punkt odniesienia implementacji `c9944c9`. Celem jest
 
 „Oryginał” w tym dokumencie oznacza odczytane źródła November 2018, z uwzględnieniem ich ograniczeń i flag. Nie potwierdzono, że każda reguła działała identycznie na serwerze prywatnego klienta 2015. Dla brakujących wartości DB nie wybieramy liczb na podstawie nazw.
 
+## Dalsze rozstrzygnięcia właściciela — 17 zgłoszeń GUI i premii
+
+- **D03 rozstrzygnięte:** plusy nadają wzrost ATK/DEF i premie +15 według źródeł.
+  P01/P02 (kamienie, szanse, bezpieczna porażka i limit) są zachowane. Własny balans
+  nieulepszonego sprzętu pozostaje; przyrost za ulepszenie jest dokładną liczbą
+  źródłowego kanału, zamiast dodatkowego mnożenia przez adapter gear-reference.
+- **D25:** kolejne okna używają oryginalnych zasobów, pasywne ikony mają okrągłe
+  przycięcie, a informacje skilla są w osobnym modalu. Walk speed ukryto w UI.
+- **Loader:** najnowsze polecenie wymaga całej ilustracji. `contain` zastępuje
+  wcześniejsze `cover`; marginesy wypełnia oddzielna, rozmyta kopia tła. Główna
+  ilustracja jest ostra, w całości, bez animowanego skalowania.
+
+Szczegóły: [raport premii i GUI](client-ui-upgrade-fixes.md). SaveVersion pozostaje 14;
+przeliczane są dane pochodne istniejących przedmiotów. Nie ma migracji ani kasowania plusów.
+
 ## Rozstrzygnięcia właściciela — 2026-11-03
 
 Nowa lista 18 zgłoszeń precyzuje wcześniejsze decyzje:

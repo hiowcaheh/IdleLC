@@ -82,16 +82,24 @@ function BookRewards({ monsterId, kills }: { monsterId: string; kills: number })
 
   return (
     <div className="book__rewards">
-      <h4 className="book__rewards-title">Kill rewards</h4>
+      <h4 className="book__rewards-title">
+        <span className="gift-icon" aria-hidden="true" />
+        Kill rewards
+      </h4>
       {next && (
         <Bar
-          variant="exp"
+          variant="book"
           value={Math.min(kills, next.kills) - previous}
           max={next.kills - previous}
           label="Kills to the next reward"
           text={`${fmt(Math.min(kills, next.kills))} / ${fmt(next.kills)}`}
         />
       )}
+      <div className="book__reward-labels" aria-hidden="true">
+        <span>Kills</span>
+        <span>Rewards</span>
+        <span>Status</span>
+      </div>
       <ul className="book__reward-list">
         {rewards.map((reward, i) => {
           const done = i < claimed
@@ -160,7 +168,12 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
   ]
 
   return (
-    <Sheet title="Monster Book" titleId="book-title" onClose={onClose} className="sheet--fixed">
+    <Sheet
+      title="Monster Book"
+      titleId="book-title"
+      onClose={onClose}
+      className="sheet--fixed sheet--client sheet--book"
+    >
       <div className="book__zones" role="tablist" aria-label="Zones">
         {Object.values(ZONES).map((zone) => (
           <button
@@ -208,7 +221,7 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
                       title="Reward ready"
                       aria-label="Reward ready"
                     >
-                      !
+                      <span className="gift-icon" aria-hidden="true" />
                     </span>
                   )}
                   <span className="book__monster-kills">

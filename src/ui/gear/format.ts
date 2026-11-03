@@ -1,3 +1,4 @@
+import { pieceStats } from '../../game/logic/itemUpgrades.ts'
 import { CLASSES } from '../../game/data/classes.ts'
 import {
   DUAL_SWORDS,
@@ -9,7 +10,7 @@ import {
 } from '../../game/data/items.ts'
 import type { CombatStats, EquipSlot } from '../../game/data/types.ts'
 import type { CharacterData } from '../../game/logic/character.ts'
-import { PLUS_BONUS, checkWear, requiredLevel, type GearPiece } from '../../game/logic/equipment.ts'
+import { checkWear, requiredLevel, type GearPiece } from '../../game/logic/equipment.ts'
 import { playerFighter } from '../../game/logic/fighters.ts'
 import { GRADES, isRare } from '../../game/logic/rare.ts'
 import {
@@ -63,21 +64,27 @@ export function rareLabel(piece: { itemId: number; rare?: number }): string | nu
 export function gearStats(itemId: number, plus = 0, rare?: number): [string, string][] {
   const gear = getItem(itemId).gear
   if (!gear) return []
-  // the rare set's flat bonuses count like the item's own stats
-  const set = rare === undefined ? undefined : getRareSet(rare)
-  const attack = gear.attack + (set?.attack ?? 0)
-  const magicAttack = gear.magicAttack + (set?.magic ?? 0)
-  const defense = gear.defense + (set?.defense ?? 0)
-  const magicDefense = gear.magicDefense + (set?.resist ?? 0)
-  const withPlus = (value: number) => {
-    const bonus = Math.round(value * PLUS_BONUS * plus)
-    return bonus > 0 ? `${fmt(value)} (+${fmt(bonus)})` : fmt(value)
-  }
+  const values = pieceStats({ itemId, plus, rare })
   const rows: [string, string][] = []
-  if (attack > 0) rows.push(['Attack', withPlus(attack)])
-  if (magicAttack > 0) rows.push(['Magic attack', withPlus(magicAttack)])
-  if (defense > 0) rows.push(['Defense', withPlus(defense)])
-  if (magicDefense > 0) rows.push(['Magic defense', withPlus(magicDefense)])
+  for (const [key, label] of [
+    ['attack', 'Attack'],
+    ['magicAttack', 'Magic attack'],
+    ['defense', 'Defense'],
+    ['magicDefense', 'Magic defense'],
+  ] as const) {
+    const base = values.base[key]
+    if (base <= 0 && values.total[key] <= 0) continue
+    const gain = values.scaled[key] - base
+    rows.push([label, gain > 0 ? `${fmt(base)} (+${fmt(gain)})` : fmt(base)])
+    if (plus >= 15 && values.bonus[key] > 0) {
+      const extra =
+        key === 'attack' ? 75 : key === 'magicAttack' ? 50 : key === 'defense' ? 100 : 50
+      rows.push([
+        `Additional ${label.toLowerCase()}`,
+        `+${fmt(Math.min(extra, values.bonus[key]))}`,
+      ])
+    }
+  }
   if (gear.attackInterval)
     rows.push(['Attack speed', `${gear.attackInterval.toFixed(1)} s per hit`])
   return rows

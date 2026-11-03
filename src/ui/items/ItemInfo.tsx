@@ -13,6 +13,13 @@ import { potionLine } from './potionText.ts'
 import { titleDuration, titleStyle } from '../titles/format.ts'
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+// strClient_us.lod 1891–1894: exact client captions for the separate +15 lines.
+const ADDITION_CAPTIONS: Record<string, string> = {
+  'Additional attack': 'Attack Power',
+  'Additional magic attack': 'Magical Attack power',
+  'Additional defense': 'Defense power',
+  'Additional magic defense': 'Magic Defense power',
+}
 
 /** "Sword", "Helmet", "Potion"… */
 function kindOf(item: ItemDef): string {
@@ -92,10 +99,15 @@ export function ItemInfo({
       {rows.length > 0 && (
         <dl className="hero-stats hero-stats--single item-info__stats">
           {rows.map(({ label, value, tone = '' }) => (
-            <div key={label}>
-              <dt>{label}</dt>
+            <div
+              key={label}
+              className={ADDITION_CAPTIONS[label] ? 'item-info__addition' : undefined}
+            >
+              <dt className={ADDITION_CAPTIONS[label] ? 'visually-hidden' : undefined}>{label}</dt>
               <dd>
-                <span className={tone.trim() || undefined}>{value}</span>
+                <span className={tone.trim() || undefined}>
+                  {ADDITION_CAPTIONS[label] ? `${ADDITION_CAPTIONS[label]} ${value}` : value}
+                </span>
               </dd>
             </div>
           ))}

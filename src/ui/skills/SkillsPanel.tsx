@@ -1,6 +1,14 @@
-import { useMemo, useState } from 'react'
-import { skillsForClass } from '../../game/data/skills.ts'
-import type { SkillDef } from '../../game/data/types.ts'
+import { useCallback, useMemo, useState } from 'react'
+import { getSkill, skillsForClass } from '../../game/data/skills.ts'
+import type { CombatStats, SkillDef } from '../../game/data/types.ts'
+import {
+  effectiveStats,
+  skillMpCost,
+  skillPreparationTime,
+  skillCooldownTime,
+} from '../../game/logic/combat.ts'
+import { heroStats } from '../gear/format.ts'
+import { useCombatTicker } from './useCombatTicker.ts'
 import { GameError } from '../../game/logic/character.ts'
 import {
   SKILL_BAR_SIZE,
@@ -12,22 +20,58 @@ import {
 import { useGameStore } from '../../state/gameStore.ts'
 import { toast } from '../../state/toasts.ts'
 import { wielded } from '../../game/logic/equipment.ts'
-import {
-  KIND_LABELS,
-  describeEffect,
-  formatSp,
-  learnState,
-  needsText,
-  rankCosts,
-} from './format.ts'
+import { KIND_LABELS, describeEffect, formatSp, learnState, needsText, seconds } from './format.ts'
 import { Sheet } from '../Sheet.tsx'
 import { SkillIcon } from './SkillIcon.tsx'
 
-function RankDetails({ title, rank }: { title: string; rank: SkillRank }) {
+function RankDetails({
+  title,
+  rank,
+  stats,
+}: {
+  title: string
+  rank: SkillRank
+  stats: CombatStats
+}) {
+  const timing = (base: number, value: number) =>
+    Math.abs(base - value) < 0.001 ? seconds(value) : `${seconds(value)} (base ${seconds(base)})`
   return (
     <section className="skill-rank">
       <h3 className="skill-rank__title">{title}</h3>
-      <p className="skill-rank__costs">{rankCosts(rank)}</p>
+      {rank.kind === 'passive' ? (
+        <p className="skill-rank__costs">Always active</p>
+      ) : (
+        <dl className="skill-info__facts">
+          <div>
+            <dt>MP cost</dt>
+            <dd>{Number(skillMpCost(rank, stats).toFixed(1))}</dd>
+          </div>
+          {rank.hpCost > 0 && (
+            <div>
+              <dt>HP cost</dt>
+              <dd>{rank.hpCost}</dd>
+            </div>
+          )}
+          <div>
+            <dt>Cast time</dt>
+            <dd>
+              {skillPreparationTime(rank, stats) > 0
+                ? timing(rank.castTime, skillPreparationTime(rank, stats))
+                : 'Instant'}
+            </dd>
+          </div>
+          <div>
+            <dt>Cooldown</dt>
+            <dd>{timing(rank.cooldown, skillCooldownTime(rank, stats))}</dd>
+          </div>
+          {rank.duration > 0 && (
+            <div>
+              <dt>Duration</dt>
+              <dd>{seconds(rank.duration)}</dd>
+            </div>
+          )}
+        </dl>
+      )}
       <ul className="skill-rank__effects">
         {rank.effects.map((effect, i) => (
           <li key={i}>{describeEffect(effect, rank)}</li>
@@ -55,7 +99,9 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
   const setSkillBar = useGameStore((s) => s.setSkillBar)
   const [tab, setTab] = useState<Tab>('active')
   const [selected, setSelected] = useState<number | null>(null)
+  const closeDetails = useCallback(() => setSelected(null), [])
   const [busy, setBusy] = useState(false)
+  const combat = useCombatTicker(500)
 
   const classId = character?.classId
   const skills = useMemo(() => {
@@ -66,6 +112,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
   }, [classId])
 
   if (!character) return null
+  const stats = character.expedition ? heroStats(character) : effectiveStats(combat.player)
 
   const run = async (action: () => Promise<void>, done: string) => {
     if (busy) return
@@ -104,14 +151,12 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
         <button
           type="button"
           className="skill-row__main"
+          aria-haspopup="dialog"
           aria-expanded={open}
           onClick={() => setSelected(open ? null : skill.id)}
         >
           <span className={`skills-slot skills-slot--${skill.type === 3 ? 'passive' : 'active'}`}>
             <SkillIcon id={skill.id} kind={shown.kind} size={32} />
-            <span className="skills-slot__rank">
-              {learned?.level ?? 0}/{max}
-            </span>
           </span>
           <span className="skill-row__body">
             <span className="skill-row__name">{skill.name}</span>
@@ -119,7 +164,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
               {KIND_LABELS[shown.kind]}
               {learned
                 ? ` · Lv ${learned.level}/${max}`
-                : ` · from level ${skill.levels[0]!.learnLevel}`}
+                : ` · Lv 0/${max} · from level ${skill.levels[0]!.learnLevel}`}
               {learned && !fits ? ' · needs other gear' : ''}
             </span>
           </span>
@@ -141,24 +186,96 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
           </span>
         </button>
         {open && (
-          <div className="skill-row__details">
+          <Sheet
+            centered
+            title={skill.name}
+            titleId={`skill-info-${skill.id}`}
+            className="sheet--client sheet--skill-detail"
+            onClose={closeDetails}
+          >
+            <header className="skill-info__header">
+              <SkillIcon id={skill.id} kind={shown.kind} size={44} />
+              <span>
+                <strong>{skill.name}</strong>
+                <span>
+                  {KIND_LABELS[shown.kind]} · Level {learned?.level ?? 0} / {max}
+                </span>
+              </span>
+            </header>
             <p className="skill-row__desc">{skill.description}</p>
+            <dl className="skill-info__facts">
+              <div>
+                <dt>Type</dt>
+                <dd>
+                  {['Melee', 'Ranged', 'Magic', 'Passive'][skill.type] ?? KIND_LABELS[shown.kind]}
+                </dd>
+              </div>
+              {skill.type !== 3 && (
+                <div>
+                  <dt>Target</dt>
+                  <dd>
+                    {(
+                      {
+                        0: 'Self',
+                        1: 'Area around caster',
+                        2: 'Single target',
+                        3: 'Area around target',
+                        4: 'Party member',
+                        5: 'Party',
+                        6: 'Front arc',
+                        7: 'Front area',
+                        9: 'Guild',
+                        10: 'Guild member',
+                        11: 'Nearby guild members',
+                        12: 'Guild members',
+                      } as Record<number, string>
+                    )[skill.targetType] ?? 'Special target'}
+                  </dd>
+                </div>
+              )}
+            </dl>
+            <section className="skill-info__requirements">
+              <h3>Requirements</h3>
+              <dl className="skill-info__facts">
+                <div>
+                  <dt>Character level</dt>
+                  <dd>{state.next?.learnLevel ?? skill.levels.at(-1)!.learnLevel}</dd>
+                </div>
+                {state.next && (
+                  <div>
+                    <dt>Learning cost</dt>
+                    <dd>
+                      <span className="sp-value">
+                        <span className="sp-icon" aria-hidden="true" />
+                        {state.next.learnSp} SP
+                      </span>
+                    </dd>
+                  </div>
+                )}
+              </dl>
+              {state.next && state.next.requires.length > 0 && (
+                <p>
+                  {state.next.requires
+                    .map((r) => `${getSkill(r.skill)?.name ?? 'Skill'} Lv ${r.level}`)
+                    .join(', ')}
+                </p>
+              )}
+            </section>
             {needs && (
               <p className={`skill-row__needs${fits ? '' : ' is-unmet'}`}>
                 {shown.kind === 'passive' ? 'Works with' : 'Needs'}: {needs}
                 {fits ? '' : ' — not with the gear you wear now'}
               </p>
             )}
-            {!available && (
-              <p className="skill-row__note">
-                Its effects (summons, movement, resurrection…) do not exist in IdleLC yet.
-              </p>
+            {!available && <p className="skill-row__note">This skill is not available yet.</p>}
+            {current && (
+              <RankDetails title={`Level ${current.level}`} rank={current} stats={stats} />
             )}
-            {current && <RankDetails title={`Level ${current.level}`} rank={current} />}
-            {available && state.nextRank && (
+            {state.nextRank && (
               <RankDetails
                 title={`${current ? 'Next: level' : 'Level'} ${state.nextRank.level} · ${state.next!.learnSp} SP`}
                 rank={state.nextRank}
+                stats={stats}
               />
             )}
             <div className="skill-row__actions">
@@ -226,7 +343,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
               </p>
             )}
             {state.blocked && available && <p className="skill-row__note">{state.blocked}</p>}
-          </div>
+          </Sheet>
         )}
       </li>
     )
@@ -237,7 +354,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
       title="Skills"
       titleId="skills-title"
       onClose={onClose}
-      className="sheet--fixed sheet--skills"
+      className="sheet--fixed sheet--skills sheet--client"
     >
       <dl className="hero-stats skills-summary">
         <div>
