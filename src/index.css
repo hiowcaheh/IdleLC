@@ -4380,6 +4380,9 @@ a.button {
   gap: 18px;
   padding: 0 var(--gutter);
   background: #000;
+}
+
+.zone-loading--ready {
   animation: zone-loading-out 2.6s ease-in forwards;
 }
 
@@ -4387,8 +4390,12 @@ a.button {
   position: absolute;
   inset: 0;
   background-position: center;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   opacity: 0;
+}
+
+.zone-loading--ready .zone-loading__art {
   animation: zone-loading-art 2.6s ease-out forwards;
 }
 
@@ -4421,6 +4428,10 @@ a.button {
     0 0 18px rgba(0, 0, 0, 0.95),
     0 2px 4px #000,
     0 0 30px rgba(246, 217, 142, 0.35);
+  opacity: 0;
+}
+
+.zone-loading--ready .zone-loading__name {
   animation: zone-loading-name 2.6s ease-out forwards;
 }
 
@@ -4437,10 +4448,12 @@ a.button {
 
 .zone-loading__fill {
   position: absolute;
-  inset: 0;
+  inset: 0 auto 0 0;
+  width: 0;
   border-image: url('/ui/lc/loading-fill.webp') 0 13 fill / 0 13px stretch;
-  transform-origin: left;
-  transform: scaleX(0);
+}
+
+.zone-loading--ready .zone-loading__fill {
   animation: zone-loading-fill 2.6s linear forwards;
 }
 
@@ -4457,14 +4470,12 @@ a.button {
 @keyframes zone-loading-art {
   0% {
     opacity: 0;
-    transform: scale(1.06);
   }
   25% {
     opacity: 1;
   }
   100% {
     opacity: 1;
-    transform: scale(1);
   }
 }
 
@@ -4472,11 +4483,9 @@ a.button {
   0%,
   8% {
     opacity: 0;
-    transform: scale(0.92);
   }
   30% {
     opacity: 1;
-    transform: scale(1);
   }
   100% {
     opacity: 1;
@@ -4486,21 +4495,16 @@ a.button {
 @keyframes zone-loading-fill {
   0%,
   8% {
-    transform: scaleX(0);
+    width: 0;
   }
   65%,
   100% {
-    transform: scaleX(1);
+    width: 100%;
   }
 }
 
 /* a phone held upright: the whole picture across the middle, dark above and below */
 @media (max-aspect-ratio: 1/1) {
-  .zone-loading__art {
-    background-size: 100% auto;
-    background-repeat: no-repeat;
-  }
-
   .zone-loading__art::after {
     background: linear-gradient(
       180deg,
@@ -4513,7 +4517,18 @@ a.button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .zone-loading__art {
-    transform: none;
+  .zone-loading--ready {
+    animation: zone-loading-out 0.18s linear 1s forwards;
+  }
+
+  .zone-loading--ready .zone-loading__art,
+  .zone-loading--ready .zone-loading__name {
+    opacity: 1;
+    animation: none;
+  }
+
+  .zone-loading--ready .zone-loading__fill {
+    width: 100%;
+    animation: none;
   }
 }
