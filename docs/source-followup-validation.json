@@ -1,0 +1,1363 @@
+{
+  "baselineCommit": "729a8b8fe9b5dd0ec98fd35c415087c24a731acc",
+  "checks": {
+    "check": {
+      "passed": true,
+      "tests": 317,
+      "files": 37
+    },
+    "build": {
+      "passed": true
+    },
+    "verify-lc-recovery": {
+      "passed": true,
+      "models": 292
+    }
+  },
+  "upgradeRegeneration": {
+    "assets": {
+      "src/game/data/generated/lc-upgrade-effects.json": "3513b8716fd290ce1c9ff71344e5e4b74702b1ab1b06e9772e70d0b6ceb5342e",
+      "public/fx/models/ring_in_m.glb": "82fcdf95146fd5af4e028b46fb3ef90cb9a43cae09b28c4daeffc1d5c420429f",
+      "public/fx/models/ring_in_e.glb": "f29c1e49f8d6a9c7c1ac1102697793492d5210a19ab9790dc7d14425d7d5c868",
+      "public/fx/models/tinkerbell.glb": "f672e4657bdc6e6c35440e05afa5713ec97ca24c798de9b58b5a27a5ade6b36f",
+      "public/fx/models/ring_in_r.glb": "92ae1d68bcc3e506bcabe35847b6b32b2bdb5efadc8b782eb5a6bd06a8a9da8d",
+      "public/fx/models/ring_in_t.glb": "ce9f8efc5bc3e4058af1bec20cb2d202c836d08bc2686ccd4c2f2d78a3f40302",
+      "public/fx/models/ring_in_k.glb": "24d9084d6b4a3cebaa249ffc1bdac429288eaadd8e5adf9170858cd757f006bf",
+      "public/fx/plus-glow.webp": "80ce96c68e1b2f55fec5da86f4aa91a97bc10b1c6ecbddd7979fbe36cb602e5b",
+      "public/fx/plus-particle.webp": "b0aea3d3abde124c6e6b2f683b6c777c181b3ffbb1753b7308ebb6fdd79a8ff0"
+    },
+    "changed": []
+  },
+  "titleRegeneration": {
+    "changed": [],
+    "assets": {
+      "src/game/data/generated/lc-title-effects.json": "f4622d331d2686b769207bef5243d6837dcd65ecb718ceeb3ce16e2bbe900772",
+      "public/fx/titles/pef_04-add.webp": "383a224e066bbf6499f8bf26e4ee05f8154c298b02b79a16673550699f78ed4e",
+      "public/fx/titles/pef_08_k-add.webp": "1a0f6950dbde08c93d2150bed5961642c06919c8766380c049bccc9643ec54ae",
+      "public/fx/titles/pef_08_k-alpha.webp": "fb3355f685c80b8066b1f5323c9a792fab2ba0dfc7ff4ef2dd597fb8758ba6b9",
+      "public/fx/titles/pef_12-add.webp": "b7ae85dcbce9578a1e8f110b131216871c976e823a81bc7063c671e919aa50ba",
+      "public/fx/titles/pef_13-alpha.webp": "970cec933efb44c98ad67c2ad054659b937232053ea10637158008efbe354369"
+    }
+  },
+  "spatialBrowser": {
+    "cases": [
+      {
+        "input": {
+          "classId": "titan",
+          "mode": "full",
+          "titleEffect": "eff_nameT"
+        },
+        "width": 348,
+        "height": 468,
+        "clientWidth": 348,
+        "frame": 28,
+        "drawCalls": 30,
+        "skinned": 16,
+        "loading": false,
+        "lost": false,
+        "bones": {
+          "Bip01_Head": [0.019661148549809913, 1.9060360526470344, 0.01764445151475929],
+          "Bip01_L_Hand": [0.3859164453843943, 1.1563939232096816, -0.04441332270295638],
+          "Bip01_R_Hand": [-0.3598763646929926, 1.1672042896508403, -0.15711211829939026],
+          "Bip01_R_Foot": [-0.19196217587457912, 0.1944420078593148, -0.11601034433685908],
+          "Bip01_L_Foot": [0.2432169424608347, 0.19244697857209092, 0.14002286293642746]
+        },
+        "anchors": [
+          {
+            "sourceTag": "RHAND",
+            "effect": "(MDL)ia_t_wp_4",
+            "spline": false,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [-0.35928831496600044, 1.0720188073525592, -0.17859563836990233],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "RHAND",
+            "effect": "(SKA)ia_t_wp_5",
+            "spline": false,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\Ska\\ring_in_t.smc",
+            "position": [-0.35928831496600044, 1.0720188073525592, -0.17859563836990233],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(SKA)ia_t_am_1",
+            "spline": true,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\tinkerbell.smc",
+            "position": [-0.2637773085844581, 2.3090654502213255, 0.06266051594753796],
+            "visible": true,
+            "bounds": {
+              "minX": -0.28067916727601644,
+              "maxX": -0.14880171086754687,
+              "minY": 0.643010358584154,
+              "maxY": 0.7562681884347823
+            }
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(MDL)ia_t_am_5",
+            "spline": true,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [-0.26115871119733264, 2.389017218879757, 0.06359030225088695],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(SKA)ia_t_am_6_1",
+            "spline": true,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\tinkerbell.smc",
+            "position": [-0.2677052027141403, 2.189137856802356, 0.061265837185258916],
+            "visible": true,
+            "bounds": {
+              "minX": -0.36085136959568326,
+              "maxX": -0.07239112749867549,
+              "minY": 0.5656032390147786,
+              "maxY": 0.810533153305202
+            }
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(MDL)ia_t_am_6_2",
+            "spline": true,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [-0.26050406282605426, 2.4090051312600265, 0.06382274848035199],
+            "visible": true,
+            "bounds": null
+          }
+        ],
+        "smoke": [
+          {
+            "name": "title-particles:eff_nameT",
+            "alive": 32,
+            "minY": 0.6793572237920367,
+            "maxY": 1.9354599153104695,
+            "anchor": [0.005175771409042691, 1.0822098974052528, 0.020038776673739468],
+            "sourceTag": null
+          },
+          {
+            "name": "title-particles:eff_nameT_1",
+            "alive": 34,
+            "minY": 0.6747749466215174,
+            "maxY": 1.5342207933998553,
+            "anchor": [0.005175771409042691, 1.0822098974052528, 0.020038776673739468],
+            "sourceTag": null
+          },
+          {
+            "name": "title-particles:eff_nameT_2",
+            "alive": 34,
+            "minY": 0.6614535899152615,
+            "maxY": 1.5208994364454695,
+            "anchor": [0.005175771409042691, 1.0822098974052528, 0.020038776673739468],
+            "sourceTag": null
+          }
+        ]
+      },
+      {
+        "input": {
+          "classId": "knight",
+          "mode": "full",
+          "titleEffect": "eff_nameSKY"
+        },
+        "width": 348,
+        "height": 468,
+        "clientWidth": 348,
+        "frame": 45,
+        "drawCalls": 32,
+        "skinned": 18,
+        "loading": false,
+        "lost": false,
+        "bones": {
+          "Bip01_Head": [0.0032728155626933608, 1.7554755071908563, -0.00411470465560029],
+          "Bip01_L_Hand": [0.2795770251915724, 1.103020233852571, 0.21800244229726912],
+          "Bip01_R_Hand": [-0.18707536317572201, 1.0951053744864567, -0.2817692315155448],
+          "Bip01_L_Foot": [0.21874079625304907, 0.15587255925497362, 0.30979308190898197],
+          "Bip01_R_Foot": [-0.045006040277008316, 0.15014180827749207, -0.12249724815403201]
+        },
+        "anchors": [
+          {
+            "sourceTag": "RHAND",
+            "effect": "(MDL)ia_k_wp_4",
+            "spline": false,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [-0.16273321844626687, 1.0034475497852169, -0.3160898964786196],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "RHAND",
+            "effect": "(SKA)ia_k_wp_5",
+            "spline": false,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\Ska\\ring_in_k.smc",
+            "position": [-0.16273321844626687, 1.0034475497852169, -0.3160898964786196],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(SKA)ia_k_am_1",
+            "spline": true,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\tinkerbell.smc",
+            "position": [-0.06988694152254644, 2.115667237738992, 0.03589947338482097],
+            "visible": true,
+            "bounds": {
+              "minX": -0.10151563089268864,
+              "maxX": 0.028840136703823512,
+              "minY": 0.5224691704130813,
+              "maxY": 0.6416620994522563
+            }
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(MDL)ia_k_am_5",
+            "spline": true,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [-0.05541248676093309, 2.193762639039335, 0.04547004211819605],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(SKA)ia_k_am_6_1",
+            "spline": true,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\tinkerbell.smc",
+            "position": [-0.09159862905712216, 1.9985241066956663, 0.02154361671944291],
+            "visible": true,
+            "bounds": {
+              "minX": -0.17276392342017127,
+              "maxX": 0.11015159290358735,
+              "minY": 0.44791260961072166,
+              "maxY": 0.7059109331664529
+            }
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(MDL)ia_k_am_6_2",
+            "spline": true,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [-0.0517938757666076, 2.213286474818016, 0.04786268251888212],
+            "visible": true,
+            "bounds": null
+          }
+        ],
+        "smoke": [
+          {
+            "name": "title-particles:eff_nameSKY",
+            "alive": 33,
+            "minY": 0.5978535369639951,
+            "maxY": 1.9638174177247951,
+            "anchor": [-0.006227692467425522, 1.0747629885676435, 0.016945027900884868],
+            "sourceTag": null
+          },
+          {
+            "name": "title-particles:eff_nameSKY_1",
+            "alive": 32,
+            "minY": 0.6667843054886087,
+            "maxY": 1.5010656992565867,
+            "anchor": [-0.006227692467425522, 1.0747629885676435, 0.016945027900884868],
+            "sourceTag": null
+          },
+          {
+            "name": "title-particles:eff_nameSKY_2",
+            "alive": 32,
+            "minY": 0.5801820346374758,
+            "maxY": 1.4144634284054538,
+            "anchor": [-0.006227692467425522, 1.0747629885676435, 0.016945027900884868],
+            "sourceTag": null
+          }
+        ]
+      },
+      {
+        "input": {
+          "classId": "healer",
+          "mode": "full",
+          "titleEffect": "eff_nameGREEN"
+        },
+        "width": 348,
+        "height": 468,
+        "clientWidth": 348,
+        "frame": 62,
+        "drawCalls": 31,
+        "skinned": 18,
+        "loading": false,
+        "lost": false,
+        "bones": {
+          "Bip01_Head": [-2.2903775176880484e-5, 1.679694887783548, -0.08283145041176052],
+          "Bip01_L_Hand": [0.1874166679134916, 1.0284536429862885, 0.031852591243310205],
+          "Bip01_R_Hand": [-0.11572435550448794, 1.0160538974464965, -0.21875540944830413],
+          "Bip01_L_Foot": [0.014348526310540222, 0.13062824948265372, -0.0575827799874815],
+          "Bip01_R_Foot": [0.01308819975881896, 0.14264595756527115, -0.15904903304147305]
+        },
+        "anchors": [
+          {
+            "sourceTag": "LHAND",
+            "effect": "(MDL)i_hw_wp_4",
+            "spline": false,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [0.17463585508656676, 0.9677112509631157, 0.02326892272522857],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "LHAND",
+            "effect": "(SKA)i_hw_wp_5",
+            "spline": false,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\ring_in_e.smc",
+            "position": [0.17463585508656676, 0.9677112509631157, 0.02326892272522857],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(SKA)i_hw_am_1",
+            "spline": true,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\tinkerbell.smc",
+            "position": [0.22009543589800976, 1.9845458039630781, 0.19335962893266923],
+            "visible": true,
+            "bounds": {
+              "minX": 0.14753471574630622,
+              "maxX": 0.2744779452758271,
+              "minY": 0.44778288108541725,
+              "maxY": 0.5647483050618375
+            }
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(MDL)i_hw_am_5",
+            "spline": true,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [0.22184603622052154, 2.0645149104851046, 0.19472883683938785],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(SKA)i_hw_am_6_1",
+            "spline": true,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\tinkerbell.smc",
+            "position": [0.2174695347620925, 1.8645921143892188, 0.19130581656252152],
+            "visible": true,
+            "bounds": {
+              "minX": 0.08467251350466007,
+              "maxX": 0.35980720129980553,
+              "minY": 0.37082433607774146,
+              "maxY": 0.6233423098403992
+            }
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(MDL)i_hw_am_6_2",
+            "spline": true,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [0.22228368727937384, 2.084507231801841, 0.19507113958117217],
+            "visible": true,
+            "bounds": null
+          }
+        ],
+        "smoke": [
+          {
+            "name": "title-particles:eff_nameGREEN",
+            "alive": 32,
+            "minY": 0.6610292886315567,
+            "maxY": 1.7547304091832556,
+            "anchor": [-0.03051424723829308, 1.1067038227081578, -0.004270655556573653],
+            "sourceTag": null
+          },
+          {
+            "name": "title-particles:eff_nameGREEN_1",
+            "alive": 33,
+            "minY": 0.6725890364760918,
+            "maxY": 1.4685755992380547,
+            "anchor": [-0.03051424723829308, 1.1067038227081578, -0.004270655556573653],
+            "sourceTag": null
+          },
+          {
+            "name": "title-particles:eff_nameGREEN_2",
+            "alive": 33,
+            "minY": 0.6616039700705547,
+            "maxY": 1.4575905320140663,
+            "anchor": [-0.03051424723829308, 1.1067038227081578, -0.004270655556573653],
+            "sourceTag": null
+          }
+        ]
+      },
+      {
+        "input": {
+          "classId": "mage",
+          "mode": "full",
+          "titleEffect": "eff_nameINDIGO"
+        },
+        "width": 348,
+        "height": 468,
+        "clientWidth": 348,
+        "frame": 75,
+        "drawCalls": 33,
+        "skinned": 19,
+        "loading": false,
+        "lost": false,
+        "bones": {
+          "Bip01_Head": [-0.09286943874658023, 1.719336972223831, -0.04330755790569859],
+          "Bip01_L_Hand": [0.15208908139561772, 1.0783507699756685, 0.03385908909322731],
+          "Bip01_R_Hand": [-0.33792411948149637, 1.0631317065126955, -0.08180722808095175],
+          "Bip01_L_Foot": [0.13296760888763348, 0.17986177466875625, 0.03287071286677644],
+          "Bip01_R_Foot": [-0.1404936660544127, 0.17538797895207286, -0.08515659318864309]
+        },
+        "anchors": [
+          {
+            "sourceTag": "STAFF",
+            "effect": "(MDL)i_ma_wp_4",
+            "spline": false,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [-0.18309768864662668, 0.8444143062293054, 0.8271789643468338],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "STAFF",
+            "effect": "(SKA)i_ma_wp_5",
+            "spline": false,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\ring_in_m.smc",
+            "position": [-0.18309768864662668, 0.8444143062293054, 0.8271789643468338],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(SKA)i_ma_am_1",
+            "spline": true,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\tinkerbell.smc",
+            "position": [-0.47537560880945956, 1.9962783217023028, -0.1090126936680383],
+            "visible": true,
+            "bounds": {
+              "minX": -0.4458721220935837,
+              "maxX": -0.3237267042957892,
+              "minY": 0.4455011307272962,
+              "maxY": 0.5563099890904598
+            }
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(MDL)i_ma_am_5",
+            "spline": true,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [-0.47193180110478505, 2.0761808506594948, -0.11094230100177492],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(SKA)i_ma_am_6_1",
+            "spline": true,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\tinkerbell.smc",
+            "position": [-0.48054132164938995, 1.876424498500497, -0.10611828194859846],
+            "visible": true,
+            "bounds": {
+              "minX": -0.5113425066621528,
+              "maxX": -0.24660403131387887,
+              "minY": 0.3716506510658856,
+              "maxY": 0.6112064823051124
+            }
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(MDL)i_ma_am_6_2",
+            "spline": true,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [-0.47107084725423853, 2.0961565275478193, -0.1114247039134614],
+            "visible": true,
+            "bounds": null
+          }
+        ],
+        "smoke": [
+          {
+            "name": "title-particles:eff_nameINDIGO",
+            "alive": 32,
+            "minY": 0.6793981806545217,
+            "maxY": 1.7816838398924406,
+            "anchor": [-0.10847132480909621, 1.1151298118282837, -0.013922649913846523],
+            "sourceTag": null
+          },
+          {
+            "name": "title-particles:eff_nameINDIGO_1",
+            "alive": 31,
+            "minY": 0.7379220347296964,
+            "maxY": 1.3986501431921523,
+            "anchor": [-0.10847132480909621, 1.1151298118282837, -0.013922649913846523],
+            "sourceTag": null
+          },
+          {
+            "name": "title-particles:eff_nameINDIGO_2",
+            "alive": 31,
+            "minY": 0.7239628880169018,
+            "maxY": 1.3846909964793577,
+            "anchor": [-0.10847132480909621, 1.1151298118282837, -0.013922649913846523],
+            "sourceTag": null
+          }
+        ]
+      },
+      {
+        "input": {
+          "classId": "rogue",
+          "mode": "full",
+          "titleEffect": "eff_nameORANGE"
+        },
+        "width": 348,
+        "height": 468,
+        "clientWidth": 348,
+        "frame": 89,
+        "drawCalls": 30,
+        "skinned": 16,
+        "loading": false,
+        "lost": false,
+        "bones": {
+          "Bip01_Head": [-0.016631348924883153, 1.5635009131135278, -0.022484279279044506],
+          "Bip01_L_Hand": [0.18710270051333702, 0.9732063633797268, 0.02254369581584758],
+          "Bip01_R_Hand": [-0.17910164734110767, 0.9538166759450533, -0.11518277833774095],
+          "Bip01_L_Foot": [0.1581791214812914, 0.1326934069877016, 0.12270900850329271],
+          "Bip01_R_Foot": [-0.15862599597731722, 0.1349502789808001, -0.10376481817930347]
+        },
+        "anchors": [
+          {
+            "sourceTag": "RHAND",
+            "effect": "(MDL)lh_ro_wp2_4",
+            "spline": false,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [-0.15956396355270475, 0.9169608060142047, -0.11319818932845138],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "RHAND",
+            "effect": "(SKA)ih_ro_wp2_5",
+            "spline": false,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\Ska\\ring_in_r.smc",
+            "position": [-0.15956396355270475, 0.9169608060142047, -0.11319818932845138],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(SKA)ih_ro_am_1",
+            "spline": true,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\tinkerbell.smc",
+            "position": [0.2528857877945371, 1.887526208990011, 0.1581515867465628],
+            "visible": true,
+            "bounds": {
+              "minX": 0.14846914017740181,
+              "maxX": 0.30064349152905356,
+              "minY": 0.3861958706656103,
+              "maxY": 0.49474063390921186
+            }
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(MDL)ih_ro_am_5",
+            "spline": true,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [0.2544304634670302, 1.9674125345592652, 0.15417838982329404],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(SKA)ih_ro_am_6_1",
+            "spline": true,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\tinkerbell.smc",
+            "position": [0.2505687737103608, 1.7676966908761478, 0.16411138361159738],
+            "visible": true,
+            "bounds": {
+              "minX": 0.05478013585673838,
+              "maxX": 0.3851102460985302,
+              "minY": 0.3111757595449603,
+              "maxY": 0.5462885530005903
+            }
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(MDL)ih_ro_am_6_2",
+            "spline": true,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [0.25481663324830844, 1.987384160591551, 0.1531850883722796],
+            "visible": true,
+            "bounds": null
+          }
+        ],
+        "smoke": [
+          {
+            "name": "title-particles:eff_nameORANGE",
+            "alive": 32,
+            "minY": 0.5961880792098786,
+            "maxY": 1.7458091283092365,
+            "anchor": [-0.010463988470442772, 1.0079371778210824, 0.04199922588657063],
+            "sourceTag": null
+          },
+          {
+            "name": "title-particles:eff_nameORANGE_1",
+            "alive": 32,
+            "minY": 0.6298110144288562,
+            "maxY": 1.322236928293603,
+            "anchor": [-0.010463988470442772, 1.0079371778210824, 0.04199922588657063],
+            "sourceTag": null
+          },
+          {
+            "name": "title-particles:eff_nameORANGE_2",
+            "alive": 32,
+            "minY": 0.6311701084039743,
+            "maxY": 1.3235960222687213,
+            "anchor": [-0.010463988470442772, 1.0079371778210824, 0.04199922588657063],
+            "sourceTag": null
+          }
+        ]
+      },
+      {
+        "input": {
+          "classId": "sorcerer",
+          "mode": "full",
+          "titleEffect": "eff_namePURPLE"
+        },
+        "width": 348,
+        "height": 468,
+        "clientWidth": 348,
+        "frame": 107,
+        "drawCalls": 30,
+        "skinned": 16,
+        "loading": false,
+        "lost": false,
+        "bones": {
+          "Bip01_Head": [-0.08628043399997984, 1.7362036158406016, -0.027004375466548866],
+          "Bip01_L_Hand": [0.17270611023354493, 1.1048364955583505, -0.062083201465121154],
+          "Bip01_R_Hand": [-0.3441338332321676, 1.0945465057719121, -0.09709985255366747],
+          "Bip01_L_Foot": [0.17730491254580882, 0.14417345267241877, 0.10828887213574934],
+          "Bip01_R_Foot": [-0.15437253016786504, 0.1428567626358198, -0.07661564263537046]
+        },
+        "anchors": [
+          {
+            "sourceTag": "RHAND",
+            "effect": "(MDL)i_hw_wp_4",
+            "spline": false,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [-0.3424296657363437, 1.0401772608412707, -0.10482499096295492],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "RHAND",
+            "effect": "(SKA)i_hw_wp_5",
+            "spline": false,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\ring_in_e.smc",
+            "position": [-0.3424296657363437, 1.0401772608412707, -0.10482499096295492],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(SKA)so_am_1",
+            "spline": true,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\tinkerbell.smc",
+            "position": [0.43278605180400415, 2.0844985650935954, 0.09046182826728674],
+            "visible": true,
+            "bounds": {
+              "minX": 0.2896532349188424,
+              "maxX": 0.42907841193196444,
+              "minY": 0.49952674527586255,
+              "maxY": 0.6144393439336389
+            }
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(MDL)so_am_5",
+            "spline": true,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [0.43372073858803756, 2.1643847172894692, 0.08629933170070214],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(SKA)ih_ro_am_6_1",
+            "spline": true,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\tinkerbell.smc",
+            "position": [0.4316176934980615, 1.9846408897287118, 0.09566494820019192],
+            "visible": true,
+            "bounds": {
+              "minX": 0.20910703280827267,
+              "maxX": 0.5113201631909304,
+              "minY": 0.4354255086412631,
+              "maxY": 0.6846351327017364
+            }
+          },
+          {
+            "sourceTag": "CENTER",
+            "effect": "(MDL)so_am_6_2",
+            "spline": true,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [0.43395441080634295, 2.184356299978313, 0.08525870523307928],
+            "visible": true,
+            "bounds": null
+          }
+        ],
+        "smoke": [
+          {
+            "name": "title-particles:eff_namePURPLE",
+            "alive": 34,
+            "minY": 0.8948560078177499,
+            "maxY": 1.9820288883482586,
+            "anchor": [-0.08503372375594336, 1.141272962329899, 0.04093554230631464],
+            "sourceTag": null
+          },
+          {
+            "name": "title-particles:eff_namePURPLE_1",
+            "alive": 33,
+            "minY": 0.7004827774436401,
+            "maxY": 1.543784436522513,
+            "anchor": [-0.08503372375594336, 1.141272962329899, 0.04093554230631464],
+            "sourceTag": null
+          },
+          {
+            "name": "title-particles:eff_namePURPLE_2",
+            "alive": 33,
+            "minY": 0.6976309855744955,
+            "maxY": 1.5409326447064873,
+            "anchor": [-0.08503372375594336, 1.141272962329899, 0.04093554230631464],
+            "sourceTag": null
+          }
+        ]
+      },
+      {
+        "input": {
+          "classId": "healer",
+          "mode": "weapon",
+          "weaponId": 1892
+        },
+        "width": 348,
+        "height": 468,
+        "clientWidth": 348,
+        "frame": 181,
+        "drawCalls": 18,
+        "skinned": 14,
+        "loading": false,
+        "lost": false,
+        "bones": {
+          "Bip01_Head": [-1.8850153870372116e-7, 1.6811785755216626, -0.08391824276762368],
+          "Bip01_L_Hand": [0.20979825463947038, 1.0382138759676323, 0.04176476396517517],
+          "Bip01_R_Hand": [-0.1442025484839442, 1.018368404726175, -0.20527208852215897],
+          "Bip01_L_Foot": [0.014308516337592659, 0.1305697712928261, -0.056876080727797165],
+          "Bip01_R_Foot": [0.013369546636114005, 0.14276656062306547, -0.15956605794688392]
+        },
+        "anchors": [
+          {
+            "sourceTag": "LHAND",
+            "effect": "(MDL)i_hw_wp_4",
+            "spline": false,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [0.19937352175181144, 0.9774386804077329, 0.03474955349547043],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "LHAND",
+            "effect": "(SKA)i_hw_wp_5",
+            "spline": false,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\SKA\\ring_in_e.smc",
+            "position": [0.19937352175181144, 0.9774386804077329, 0.03474955349547043],
+            "visible": true,
+            "bounds": null
+          }
+        ],
+        "smoke": []
+      },
+      {
+        "input": {
+          "classId": "knight",
+          "mode": "weapon",
+          "weaponId": 610
+        },
+        "width": 348,
+        "height": 468,
+        "clientWidth": 348,
+        "frame": 255,
+        "drawCalls": 20,
+        "skinned": 13,
+        "loading": false,
+        "lost": false,
+        "bones": {
+          "Bip01_Head": [0.0008882970380874652, 1.754285395670994, -0.0012680857128085019],
+          "Bip01_L_Hand": [0.27530428468449086, 1.1026027866803751, 0.22358825574587965],
+          "Bip01_R_Hand": [-0.1854818248446836, 1.0970125706760792, -0.2828146404780215],
+          "Bip01_L_Foot": [0.21878053168654077, 0.1551683271748841, 0.3091491335208353],
+          "Bip01_R_Foot": [-0.04540196233049273, 0.14956290794200855, -0.12220337929001043]
+        },
+        "anchors": [
+          {
+            "sourceTag": "LHAND",
+            "effect": "(MDL)ia_k_wp_4",
+            "spline": false,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [0.27706757029342044, 1.0057000567040184, 0.22069833979330022],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "RHAND",
+            "effect": "(MDL)ia_k_wp_4",
+            "spline": false,
+            "kind": "EFMD",
+            "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+            "position": [-0.16201714073987883, 1.0047835556282263, -0.3162230647960681],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "LHAND",
+            "effect": "(SKA)ia_k_wp_5",
+            "spline": false,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\Ska\\ring_in_k.smc",
+            "position": [0.27706757029342044, 1.0057000567040184, 0.22069833979330022],
+            "visible": true,
+            "bounds": null
+          },
+          {
+            "sourceTag": "RHAND",
+            "effect": "(SKA)ia_k_wp_5",
+            "spline": false,
+            "kind": "EFSK",
+            "model": "Data\\Effect\\Ska\\ring_in_k.smc",
+            "position": [-0.16201714073987883, 1.0047835556282263, -0.3162230647960681],
+            "visible": true,
+            "bounds": null
+          }
+        ],
+        "smoke": []
+      }
+    ],
+    "page_errors": [],
+    "console_errors": [],
+    "http_errors": [],
+    "failed_requests": [],
+    "passed": true
+  },
+  "productionCharacter": {
+    "page_errors": [],
+    "console_errors": [],
+    "http_errors": [],
+    "failed_requests": [],
+    "layouts": [
+      {
+        "viewport": [390, 844],
+        "clientWidth": 372,
+        "scrollWidth": 372,
+        "scrollHeight": 1188,
+        "clientHeight": 722,
+        "scrollTop": 466
+      },
+      {
+        "viewport": [1280, 900],
+        "clientWidth": 402,
+        "scrollWidth": 402,
+        "scrollHeight": 1188,
+        "clientHeight": 772,
+        "scrollTop": 416
+      }
+    ],
+    "stats": {
+      "Strength": "99",
+      "Dexterity": "287",
+      "Intelligence": "196",
+      "Constitution": "186",
+      "Health": "5,640",
+      "Mana": "613",
+      "Physical attack": "913",
+      "Magic attack": "130",
+      "Physical defense": "375",
+      "Magic defense": "80",
+      "Physical hit rate": "379",
+      "Magic hit rate": "289",
+      "Physical evasion": "287",
+      "Magic evasion": "196",
+      "Critical rating": "303",
+      "Deadly rating": "202",
+      "Critical chance": "5%",
+      "Critical damage": "×1.50",
+      "Block chance": "+0%",
+      "Run speed": "7.0 m/s",
+      "Walk speed": "1.5 m/s",
+      "Attack speed": "1.20 s",
+      "Movement bonus": "+0%",
+      "Cast time": "Normal",
+      "Cast speed": "+0%",
+      "Skill reuse time": "0.0 s",
+      "Skill cooldown": "+0%",
+      "Skill MP cost": "+0%",
+      "HP recovery": "+0 / 5s",
+      "MP recovery": "+0 / 5s",
+      "HP steal": "+0%",
+      "MP steal": "+0%",
+      "EXP": "+0%",
+      "Skill points": "+0%",
+      "Gold": "+0%",
+      "Drop chance": "+0%",
+      "Kills": "0",
+      "Deaths": "0",
+      "Expeditions": "0",
+      "Play time": "0m"
+    },
+    "groups": [
+      "Attributes",
+      "Health and mana",
+      "Combat",
+      "Combat bonuses",
+      "Speed and skills",
+      "Recovery",
+      "Bonuses",
+      "Hunting record"
+    ],
+    "titleTakenOff": true,
+    "passed": true
+  },
+  "loadingSizes": {
+    "page_errors": [],
+    "console_errors": [],
+    "http_errors": [],
+    "checks": [
+      {
+        "size": [320, 568],
+        "zone": "lc-zone-4",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 39.3594,
+        "viewport": [320, 568],
+        "overlay": [320, 568],
+        "overflow": false,
+        "laterWidth": 112.594
+      },
+      {
+        "size": [320, 568],
+        "zone": "lc-zone-7",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 39.3594,
+        "viewport": [320, 568],
+        "overlay": [320, 568],
+        "overflow": false,
+        "laterWidth": 109.906
+      },
+      {
+        "size": [320, 568],
+        "zone": "lc-zone-15",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 39.375,
+        "viewport": [320, 568],
+        "overlay": [320, 568],
+        "overflow": false,
+        "laterWidth": 109.891
+      },
+      {
+        "size": [320, 568],
+        "zone": "lc-zone-0",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 42.0781,
+        "viewport": [320, 568],
+        "overlay": [320, 568],
+        "overflow": false,
+        "laterWidth": 112.609
+      },
+      {
+        "size": [390, 844],
+        "zone": "lc-zone-4",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 48.0625,
+        "viewport": [390, 844],
+        "overlay": [390, 844],
+        "overflow": false,
+        "laterWidth": 137.453
+      },
+      {
+        "size": [390, 844],
+        "zone": "lc-zone-7",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 48.0469,
+        "viewport": [390, 844],
+        "overlay": [390, 844],
+        "overflow": false,
+        "laterWidth": 137.438
+      },
+      {
+        "size": [390, 844],
+        "zone": "lc-zone-15",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 51.375,
+        "viewport": [390, 844],
+        "overlay": [390, 844],
+        "overflow": false,
+        "laterWidth": 137.438
+      },
+      {
+        "size": [390, 844],
+        "zone": "lc-zone-0",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 51.375,
+        "viewport": [390, 844],
+        "overlay": [390, 844],
+        "overflow": false,
+        "laterWidth": 137.453
+      },
+      {
+        "size": [768, 1024],
+        "zone": "lc-zone-4",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 58.4375,
+        "viewport": [768, 1024],
+        "overlay": [768, 1024],
+        "overflow": false,
+        "laterWidth": 163.141
+      },
+      {
+        "size": [768, 1024],
+        "zone": "lc-zone-7",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 62.4844,
+        "viewport": [768, 1024],
+        "overlay": [768, 1024],
+        "overflow": false,
+        "laterWidth": 171.172
+      },
+      {
+        "size": [768, 1024],
+        "zone": "lc-zone-15",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 58.4531,
+        "viewport": [768, 1024],
+        "overlay": [768, 1024],
+        "overflow": false,
+        "laterWidth": 179.234
+      },
+      {
+        "size": [768, 1024],
+        "zone": "lc-zone-0",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 62.4844,
+        "viewport": [768, 1024],
+        "overlay": [768, 1024],
+        "overflow": false,
+        "laterWidth": 171.188
+      },
+      {
+        "size": [844, 390],
+        "zone": "lc-zone-4",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 54.4219,
+        "viewport": [844, 390],
+        "overlay": [844, 390],
+        "overflow": false,
+        "laterWidth": 163.125
+      },
+      {
+        "size": [844, 390],
+        "zone": "lc-zone-7",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 58.4688,
+        "viewport": [844, 390],
+        "overlay": [844, 390],
+        "overflow": false,
+        "laterWidth": 163.109
+      },
+      {
+        "size": [844, 390],
+        "zone": "lc-zone-15",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 62.4688,
+        "viewport": [844, 390],
+        "overlay": [844, 390],
+        "overflow": false,
+        "laterWidth": 171.172
+      },
+      {
+        "size": [844, 390],
+        "zone": "lc-zone-0",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 58.4531,
+        "viewport": [844, 390],
+        "overlay": [844, 390],
+        "overflow": false,
+        "laterWidth": 179.203
+      },
+      {
+        "size": [1024, 768],
+        "zone": "lc-zone-4",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 70.5156,
+        "viewport": [1024, 768],
+        "overlay": [1024, 768],
+        "overflow": false,
+        "laterWidth": 199.359
+      },
+      {
+        "size": [1024, 768],
+        "zone": "lc-zone-7",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 58.4375,
+        "viewport": [1024, 768],
+        "overlay": [1024, 768],
+        "overflow": false,
+        "laterWidth": 167.141
+      },
+      {
+        "size": [1024, 768],
+        "zone": "lc-zone-15",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 62.4688,
+        "viewport": [1024, 768],
+        "overlay": [1024, 768],
+        "overflow": false,
+        "laterWidth": 167.156
+      },
+      {
+        "size": [1024, 768],
+        "zone": "lc-zone-0",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 58.4531,
+        "viewport": [1024, 768],
+        "overlay": [1024, 768],
+        "overflow": false,
+        "laterWidth": 171.188
+      },
+      {
+        "size": [1280, 900],
+        "zone": "lc-zone-4",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 58.4219,
+        "viewport": [1280, 900],
+        "overlay": [1280, 900],
+        "overflow": false,
+        "laterWidth": 191.297
+      },
+      {
+        "size": [1280, 900],
+        "zone": "lc-zone-7",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 62.4688,
+        "viewport": [1280, 900],
+        "overlay": [1280, 900],
+        "overflow": false,
+        "laterWidth": 167.125
+      },
+      {
+        "size": [1280, 900],
+        "zone": "lc-zone-15",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 58.4375,
+        "viewport": [1280, 900],
+        "overlay": [1280, 900],
+        "overflow": false,
+        "laterWidth": 179.219
+      },
+      {
+        "size": [1280, 900],
+        "zone": "lc-zone-0",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 62.4688,
+        "viewport": [1280, 900],
+        "overlay": [1280, 900],
+        "overflow": false,
+        "laterWidth": 171.156
+      },
+      {
+        "size": [1920, 1080],
+        "zone": "lc-zone-4",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 58.4375,
+        "viewport": [1920, 1080],
+        "overlay": [1920, 1080],
+        "overflow": false,
+        "laterWidth": 179.234
+      },
+      {
+        "size": [1920, 1080],
+        "zone": "lc-zone-7",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 58.4531,
+        "viewport": [1920, 1080],
+        "overlay": [1920, 1080],
+        "overflow": false,
+        "laterWidth": 183.25
+      },
+      {
+        "size": [1920, 1080],
+        "zone": "lc-zone-15",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 62.4531,
+        "viewport": [1920, 1080],
+        "overlay": [1920, 1080],
+        "overflow": false,
+        "laterWidth": 183.234
+      },
+      {
+        "size": [1920, 1080],
+        "zone": "lc-zone-0",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "fillTransform": "none",
+        "fillWidth": 58.4531,
+        "viewport": [1920, 1080],
+        "overlay": [1920, 1080],
+        "overflow": false,
+        "laterWidth": 175.203
+      }
+    ],
+    "decode_gate": "passed: animation waits for decoded images",
+    "reduced_motion": {
+      "artAnimation": "none",
+      "nameAnimation": "none",
+      "fillAnimation": "none",
+      "rootDuration": "0.18s"
+    },
+    "passed": true
+  },
+  "productionZoneTransitions": {
+    "page_errors": [],
+    "console_errors": [],
+    "http_errors": [],
+    "request_failures": [],
+    "transitions": [
+      {
+        "zoneId": "lc-zone-4",
+        "monsterValue": "lc-zone-4|lc-83",
+        "zone": "Dratan",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "art": "url(\"http://127.0.0.1:4174/IdleLC/ui/lc/loading-dratan.webp\")",
+        "overflow": false
+      },
+      {
+        "zoneId": "lc-zone-7",
+        "monsterValue": "lc-zone-7|lc-153",
+        "zone": "Merac",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "art": "url(\"http://127.0.0.1:4174/IdleLC/ui/lc/loading-merac.webp\")",
+        "overflow": false
+      },
+      {
+        "zoneId": "lc-zone-15",
+        "monsterValue": "lc-zone-15|lc-287",
+        "zone": "Egeha",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "art": "url(\"http://127.0.0.1:4174/IdleLC/ui/lc/loading-egeha.webp\")",
+        "overflow": false
+      },
+      {
+        "zoneId": "lc-zone-0",
+        "monsterValue": "lc-zone-0|lc-145",
+        "zone": "Juno",
+        "backgroundSize": "cover",
+        "transform": "none",
+        "art": "url(\"http://127.0.0.1:4174/IdleLC/ui/lc/loading-juno.webp\")",
+        "overflow": false
+      }
+    ],
+    "behavior_passed": true,
+    "passed": true
+  },
+  "limits": [
+    "Chromium SwiftShader and emulated mobile viewport; no physical phone FPS measurement.",
+    "CombatStats.client is a source-derived sheet; main HP/ATK/DEF and crit probability/multiplier retain the IdleLC balance adapter.",
+    "Linear +10% gear upgrade scaling remains the project rule.",
+    "12 eff_name families cover 16 of the 24 titles that reference effects; 8 other-family titles remain unsupported.",
+    "This is a bounded effect adapter, not the complete source renderer."
+  ]
+}

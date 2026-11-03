@@ -10,6 +10,13 @@ kodu, tego dokumentu i odpowiednich testów logiki.
 
 ## Statystyki
 
+Character grupuje atrybuty, HP/MP, walkę, bonusy, szybkości i regenerację. Nowy arkusz
+`CombatStats.client` ma osobne physical/magic attack, defense, hit i evasion,
+critical/deadly rating oraz run/walk m/s, według źródłowego okna i pakietu statusu.
+To nie są aliasy pojedynczych bojowych `attack/defense` adaptera. Szczegóły i granice:
+[uzupełnienie źródłowe](source-followup-fixes.md). Magiczne i fizyczne opcje/buffy
+zmieniają odpowiednie pola, a critical/deadly są ponownie liczone po zmianie DEX.
+
 | Statystyka       | Opis                                           |
 | ---------------- | ---------------------------------------------- |
 | `maxHp`          | maksymalne zdrowie                             |
@@ -346,10 +353,12 @@ otwarty spot strefy (nowa strefa: pierwszy spot).
 - Skąd gracz dostaje przedmioty tytułów — **decyzja właściciela** (na razie tylko narzędzie dev).
 - Newbie: opcje 71/72 poziomu 6 dają po 10% bazowych HP/MP klasy. Knight 20 otrzymuje
   +72 HP i +39 MP do obecnego adaptera. Wygasłe tytuły są odrzucane przed obliczeniami.
-- Efekty tytułów (**własne**; dostępny `Effect.dat` nie jest jeszcze ich odtwarzaczem): napis założonego tytułu nad bohaterem
-  pulsuje poświatą; tytuły z efektem w bazie (`a_effect_name`, 24 tytuły, np. `eff_nameSKY`) mają też
-  poświatę i wznoszące się gwiazdki u stóp bohatera w kolorze z nazwy efektu (SKY błękit, GREEN zielony,
-  INDIGO, ORANGE, PURPLE, RVIOLET, YELLOW…; inne efekty — kolor tytułu). `TitleAura.tsx`, `titleEffectColor`.
+- Efekty tytułów z rodziny `eff_name*` używają odzyskanych trzech emiterów dymu przy
+  `CENTER`. Dotyczy to m.in. wszystkich sześciu tytułów najwyższego poziomu klasy:
+  Titan `eff_nameT`, Knight `eff_nameSKY`, Healer `eff_nameGREEN`, Mage `eff_nameINDIGO`,
+  Rogue `eff_nameORANGE`, Sorcerer `eff_namePURPLE`. Kolor wynika z definicji cząstek.
+  Zastępczy pierścień na ziemi i gwiazdy zostały usunięte. Obsługiwane jest 16 z 24
+  tytułów mających efekt; osiem innych rodzin pozostaje nieobsługiwanych.
 
 ## Efekty ulepszenia — częściowy adapter klienta
 

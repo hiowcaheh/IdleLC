@@ -1,5 +1,27 @@
 # Historia zmian
 
+## Dalsza korekta po testach na telefonie
+
+Punkt wyjścia: `729a8b8`. [Raport źródłowy i walidacja](docs/source-followup-fixes.md).
+
+- Loader map ponownie wypełnia ekran przez `cover`, bez pionowych czarnych pasów
+  i animowanego zoomu. Zachowano dekodowanie, pasek szerokości i reduced motion.
+- Character ma oddzielone atrybuty, zasoby, walkę, bonusy, szybkości i regenerację.
+  Dodano osobne źródłowe physical/magic attack, defense, hit i evasion,
+  critical/deadly rating oraz run/walk m/s. Główne pola bojowe nadal mają adapter balansu.
+- Pierścienie ulepszeń używają rzeczywistych tagów, poprawnych nazw kości GLTF i
+  źródłowych macierzy BS; łuk ma pierścień przy dłoni, podwójne miecze przy obu.
+  Nieznane tagi nie spadają już do podstawy postaci.
+- Wróżka korzysta z `CENTER` i źródłowej ścieżki przy głowie/ramieniu; kadr podglądu
+  obejmuje cały efekt także u wysokich klas.
+- Tytuły `eff_name*`, w tym najwyższy poziom sześciu klas, mają trzy źródłowe warstwy
+  dymu zamiast podłogowego pierścienia i gwiazd. Odzyskano 12 grup, 36 emiterów
+  i pięć tekstur; osiem innych rodzin efektów pozostaje nieobsługiwanych.
+- `npm run check`: **317 testów / 37 plików**; build i weryfikacja zasobów poprawne.
+  Sprawdzono rzeczywiste pozycje efektów sześciu klas, wysoki łuk i dual swords,
+  układ mobilny/desktop oraz 28 wariantów loadera i cztery przejścia produkcyjnego buildu.
+  Końcowe testy przeglądarkowe bez błędów strony, konsoli i zasobów.
+
 ## 2026-11-02 — etap 4: statystyki, opcje i efekty ulepszenia
 
 Partię odtworzono od `461e964` po utracie niewysłanych plików. Źródła i ograniczenia

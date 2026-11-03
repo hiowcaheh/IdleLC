@@ -181,7 +181,7 @@ Odzyskanie animacji przywołania nie implementuje systemu przywołań.
 
 Jawny `Effect.dat` z 2015 jest dostępny. Ustalono kontenery EFTB/EPGM/EEFM/EEGM/EFTE i odczytano
 3413 grup z 11919 kluczami efektów. To jeszcze **nie jest pełny czytnik definicji ani renderer**.
-`SkillEffects` i `TitleAura` nadal składają własne efekty z tekstur LC.
+`SkillEffects` nadal składa własne efekty z tekstur LC.
 Nie opisujemy tego już jako braku archiwum lub szyfrowania; pozostała implementacja odczytu
 poszczególnych typów i ich odtwarzania. Zob. [stan odzysku](source-audit/assets.md).
 
@@ -192,6 +192,19 @@ tinkerbell i pięciu ring_in; emisja cząstek/trace i legacy MDL pozostają adap
 Konwerter rozróżnia Add/Translucent i zachowuje dwustronne powierzchnie. Add normalizuje
 bajtowe RGB/alfa bez przeliczenia do linear sRGB przed normalizacją.
 Pełny zakres i weryfikacja: [raport poprawek](fixes-2026-11-02.md).
+
+Kolejna korekta dodaje `characterTags`, `weaponTags` i oryginalne `tagBindInverses`
+z BS. Tagi pochodzą z pierwszego wierzchołka powierzchni `_TAG_T/_TAG_G` wraz z wagami
+i normalną. Nie wolno używać wprost zoptymalizowanych macierzy bind GLB dla surowych
+punktów źródłowych; zmienia to położenie efektu. Nazwy kości przechodzą przez to samo
+czyszczenie nazw co GLTFLoader.
+
+`npm run recover-title-fx -- --client <klient2015>` odzyskuje 12 grup `eff_name*`,
+36 zależnych cylindrycznych emiterów PTGR oraz pięć wariantów tekstur Add/alpha.
+Parser sprawdza granice EFCT/PTGR; blender 206 oznacza SrcAlpha/One, 203 zwykłą alfę.
+TitleAura odtwarza trzy warstwy lokalnych quadów przy `CENTER`, zamiast własnego
+pierścienia na podłożu. Pozostałe osiem tytułów z innymi rodzinami efektów nie jest
+jeszcze odtwarzane. Szczegóły: [uzupełnienie źródłowe](source-followup-fixes.md).
 
 ## Świat `.wld` (modele na mapie)
 

@@ -24,7 +24,9 @@ Parsery MESH/TEX/skills.lod są poprawione według C++, GUI korzysta z ActionBtn
 `Effect.dat` jest jawny. Adapter ulepszeń odczytuje 108 grup i 145 zależnych definicji,
 korzysta z modelu tinkerbell, pięciu ring_in oraz źródłowych tagów i ścieżek.
 Nie jest pełnym czytnikiem ani rendererem efektów LC; emisja cząstek, trace i legacy MDL
-nadal mają ograniczony adapter. SkillEffects i TitleAura pozostają efektami własnymi.
+nadal mają ograniczony adapter. SkillEffects pozostaje własny. TitleAura odtwarza teraz
+12 źródłowych grup `eff_name*` (36 emiterów, pięć tekstur), w tym dym tytułów najwyższego
+poziomu sześciu klas. Pozostałe rodziny efektów tytułów nie są jeszcze obsługiwane.
 
 Dopisano 15 modeli roślinności/drobnych obiektów Juno i 4188 instancji, zachowując stare propsy oraz teren.
 Wprowadzono też odświeżanie walki po zmianie opcji/rare noszonego sprzętu i naprawy cache PWA.
@@ -40,6 +42,14 @@ STAT8 odnowienia, a opcja 63 blokuje zwykłe ciosy zamiast zwiększać unik.
 Główne HP/ATK/DEF oraz relacja atrybutów do ataku nadal używają adaptera balansu;
 pojedynczy kanał ratingów i legacy 55/66 nie są pełnym przeniesieniem walki serwera.
 SaveVersion pozostaje 13. Szczegóły i końcowe wyniki w [raporcie poprawek](docs/fixes-2026-11-02.md).
+
+Najnowsza korekta po testach właściciela: [uzupełnienie źródłowe i wizualne](docs/source-followup-fixes.md).
+Loader map wypełnia ekran przez `cover`, bez pionowych pasów. Character ma delikatnie
+oddzielone grupy i osobny arkusz `CombatStats.client`: fizyczne/magiczne ATK/DEF/hit/avoid,
+critical/deadly rating i run/walk m/s. Główne bojowe HP/ATK/DEF nadal są adapterem;
+arkusz nie oznacza pełnego portu damage. Efekty używają teraz oryginalnych `_TAG_T/_TAG_G`
+i macierzy BS, z poprawnymi nazwami kości GLTF i bez fallbacku nieznanych tagów do stóp.
+Pierścienie śledzą właściwe punkty broni/dłoni, a wróżka lata przy głowie/ramieniu.
 
 ## Cel projektu
 

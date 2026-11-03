@@ -4,6 +4,12 @@ Stan rozpoznania: 2026-11-02. Punktem wyjścia wdrożenia jest commit `c9944c92c
 
 ## Kontynuacja po utracie niewysłanej partii
 
+Po późniejszych testach właściciela poprawiono również pełnoekranowy loader,
+arkusz kanałów fizycznych/magicznych, źródłowe tagi efektów oraz dym tytułów.
+Aktualny punkt wejścia: [dalsza korekta wyglądu i statystyk](source-followup-fixes.md).
+Poprzednia walidacja renderowania nie sprawdzała odległości efektu od dłoni/głowy;
+nowa kontrola obejmuje rzeczywiste GLB, animowane pozy i punkty przypięcia.
+
 Checkout odtworzony na `461e964` był czysty; brakujące poprawki odtworzono z repozytorium
 i ponownie pobranych, zweryfikowanych archiwów. Bieżący zakres i wyniki opisuje
 [raport poprawek](fixes-2026-11-02.md). Przy kolejnej kontynuacji zacznij od tego raportu.
@@ -61,7 +67,7 @@ flowchart TD
 | Scena                   | `src/scene/GameCanvas.tsx`, `World.tsx`, `Battle.tsx`, `Character.tsx`                                       | R3F/Three: kamera, klatki walki, ruch, przejścia spotów, AnimationMixer, reakcje i etykiety. `Battle` tyka sesję i synchronizuje HUD co ok. 0,1 s; wyniki walki trafiają zdarzeniami do store i serwisu.                                                                       |
 | Wygląd wyposażenia      | `src/game/assets/manifest.ts`, `gear.ts`; `scene/Character.tsx`                                              | Manifest bazowy jest nadpisywany danymi LC. Osobne GLB sprzętu są podpinane do szkieletu postaci; zakryte części ciała są ukrywane. URL i hash muszą odpowiadać plikowi. `ModelBoundary` daje zastępstwo przy błędzie modelu.                                                  |
 | Teren i props           | `scene/lcMap.ts`, `LcTerrain.tsx`, `MapProps.tsx`; `public/maps/juno/`                                       | Shader warstw terenu i instancje drzew/domów/płotów z plików świata. Juno ma własny wybór aren, ponieważ spawny DB nie pasują do mapy. Nie przeliczać aren przy okazji odzyskiwania grafiki bez osobnej kontroli.                                                              |
-| Efekty                  | `SkillEffects.tsx`, `UpgradeAura.tsx`, `upgradeEffects.ts`, `TitleAura.tsx`, `LevelUpEffect.tsx`             | Ulepszenia używają podzbioru `Effect.dat`, oryginalnych modeli, tagów i ścieżek; emisja cząstek/trace/MDL pozostaje adapterem. SkillEffects i TitleAura są własne. Nie jest to pełny silnik efektów LC.                                                                        |
+| Efekty                  | `SkillEffects.tsx`, `UpgradeAura.tsx`, `upgradeEffects.ts`, `TitleAura.tsx`, `LevelUpEffect.tsx`             | Ulepszenia używają podzbioru `Effect.dat`, oryginalnych modeli, tagów i ścieżek; emisja cząstek/trace/MDL pozostaje adapterem. TitleAura używa 12 źródłowych grup dymu; SkillEffects pozostaje własny. Nie jest to pełny silnik efektów LC.                                    |
 | UI i komunikaty         | `src/ui/`, `state/toasts.ts`, `combatEvents.ts`, `floatingTexts.ts`, `src/index.css`                         | DOM nad sceną, okna, karty przedmiotów, panel postaci, HUD i podglądy. UI jest po angielsku, dokumentacja/rozmowa po polsku. Okna z zakładkami utrzymują stałą wysokość (`sheet--fixed`).                                                                                      |
 | Dane LC                 | `src/game/data/lcSource.ts`, `lcTypes.ts`, `generated/`; moduły `data/*.ts`                                  | Eager import wygenerowanych JSON. Gdy danych nie ma lub `VITE_LC_DATA=0`, używane są dane zastępcze. Eksport jest wybranym podzbiorem bazy, nie pełną kopią oryginalnego modelu.                                                                                               |
 | Import i konwersja      | `scripts/lc/`                                                                                                | SQL → dane; SMC/BM/BS/BA/TEX → GLB/WebP; mapy WTR/WLD → teren i props. `ClientFiles` rozwiązuje ścieżki z kilku katalogów klienta. glTF-Transform/meshoptimizer optymalizuje wyniki. Surowe pliki pozostają poza Git.                                                          |
