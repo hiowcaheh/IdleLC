@@ -140,14 +140,11 @@ export function ZoneLoading() {
       }}
     >
       {art && shown.artReady && (
-        <>
-          <div
-            className="zone-loading__ambient"
-            aria-hidden="true"
-            style={{ backgroundImage: `url(${artUrl(art)})` }}
-          />
-          <div className="zone-loading__art" style={{ backgroundImage: `url(${artUrl(art)})` }} />
-        </>
+        <div
+          className="zone-loading__art"
+          aria-hidden="true"
+          style={{ backgroundImage: `url(${artUrl(art)})` }}
+        />
       )}
       <p className="zone-loading__name">{ZONES[shown.zoneId]?.name ?? ''}</p>
       <div className="zone-loading__bar" aria-hidden="true">

@@ -1,5 +1,21 @@
 # Historia zmian
 
+## 2026-11-04: loader, Merac i osiem zgłoszeń GUI
+
+Punkt wyjścia `c744b39`. [Zakres i sprawdzenia](docs/ui-merac-fixes.md).
+
+- Merac zachowuje oryginalny teren, obiekty i 23 spoty z poprzedniej aktualizacji.
+- Loader wypełnia cały ekran całą ilustracją, bez przycinania, przybliżania
+  ani rozmytych marginesów; proporcje obrazu dostosowują się do ekranu.
+- Nagrody Book mają oddzielny wiersz z ikonami i ilościami oraz mniejszy Claim.
+- Character używa tego samego oryginalnego paska postępu co Monster Book.
+- Zielona ramka aktywnych i pasywnych skilli pojawia się tylko przy możliwości nauki.
+- „How speeds work” jest po prawej i otwiera osobne okno z GUI klienta.
+- SP pozostaje widoczne jako liczba, bez ikon w Character i Skills.
+- Usunięto długie myślniki z opisów, etykiet dostępności i metadanych aplikacji.
+
+SaveVersion **14**, bez przeliczania postaci i przedmiotów.
+
 ## 2026-11-04 — naprawy po audycie: zapis, czas, walka, AFK i mapy
 
 Punkt wyjścia `a35cfbb`. [Stan wszystkich 14 punktów, źródła i ograniczenia](docs/audit-fixes.md).

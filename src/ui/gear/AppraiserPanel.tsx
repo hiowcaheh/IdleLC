@@ -139,7 +139,7 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
       setPicked(new Set())
       if (done.length > 0) setTab('identified')
       const failed = result.used - done.length
-      return `Identified ${done.length} of ${result.used}${failed ? ` — ${failed} glasses failed` : ''}.`
+      return `Identified ${done.length} of ${result.used}${failed ? `; ${failed} glasses failed` : ''}.`
     })
 
   const toggle = (
@@ -200,7 +200,7 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
         <>
           <p className="sheet__meta">
             Rare weapons and armor come unidentified. Pick the items, then use a magnifying glass on
-            each — it reveals the piece's grade and rare options.
+            each. It reveals the piece's grade and rare options.
           </p>
           <ul className="appraiser__glasses">
             {GLASSES.map((id) => {

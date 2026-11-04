@@ -24,6 +24,7 @@ import { useCombatTicker } from '../skills/useCombatTicker.ts'
 import { Sheet } from '../Sheet.tsx'
 import { SLOT_LABELS, fmt, heroStats, nameTone, pieceName } from './format.ts'
 import { HeroCard } from './HeroCard.tsx'
+import { SpeedHelp } from './SpeedHelp.tsx'
 
 type Tab = 'stats' | 'equipment'
 
@@ -71,6 +72,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   const [tab, setTab] = useState<Tab>('stats')
   const [selected, setSelected] = useState<EquipSlot | null>(null)
   const [busy, setBusy] = useState(false)
+  const [speedHelpOpen, setSpeedHelpOpen] = useState(false)
   const combat = useCombatTicker(500)
   if (!character) return null
 
@@ -107,7 +109,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
     const before = base.client?.[key]
     return [
       label,
-      value === undefined ? '—' : `${digits ? value.toFixed(digits) : fmt(value)}${unit}`,
+      value === undefined ? 'N/A' : `${digits ? value.toFixed(digits) : fmt(value)}${unit}`,
       value === undefined || before === undefined ? undefined : change(value, before, digits),
     ]
   }
@@ -338,6 +340,17 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
                     Points: <strong>{fmt(points)}</strong>
                   </span>
                 )}
+                {name === 'Speed and skills' && (
+                  <button
+                    type="button"
+                    className="stat-help"
+                    aria-haspopup="dialog"
+                    aria-expanded={speedHelpOpen}
+                    onClick={() => setSpeedHelpOpen(true)}
+                  >
+                    How speeds work
+                  </button>
+                )}
               </h3>
               <dl className="hero-stats">
                 {rows.map(([label, value, buffed], index) => (
@@ -366,25 +379,6 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
                   </div>
                 ))}
               </dl>
-              {name === 'Speed and skills' && (
-                <details className="stat-help">
-                  <summary>How speeds work</summary>
-                  <p>
-                    Attack interval is the time between normal hits. Lower is faster. The green
-                    change is in seconds: 1.20 s − 0.20 s = 1.00 s per hit.
-                  </p>
-                  <p>
-                    Cast speed shortens skill preparation and speeds up its casting animation. Cast
-                    time adjustment adds or removes a fixed number of seconds; zero means no
-                    adjustment.
-                  </p>
-                  <p>
-                    Cooldown adjustment adds or removes seconds from a skill's base cooldown.
-                    Cooldown reduction then reduces that time by a percentage. Each skill's own
-                    timing is shown in its details.
-                  </p>
-                </details>
-              )}
             </section>
           ))}
           <section className="character-stats__group" aria-label="Bonuses">
@@ -463,7 +457,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
           </div>
           <p className="sheet__meta">
             {selected && !character.equipment[selected]
-              ? `${SLOT_LABELS[selected]}: nothing worn — the Inventory has your gear.`
+              ? `${SLOT_LABELS[selected]}: nothing worn. The Inventory has your gear.`
               : 'Tap a piece to see it.'}
           </p>
           {selected && character.equipment[selected] && (
@@ -479,6 +473,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
           {away && <p className="sheet__meta">Gear can't be changed during an expedition.</p>}
         </div>
       )}
+      {speedHelpOpen && <SpeedHelp onClose={() => setSpeedHelpOpen(false)} />}
     </Sheet>
   )
 }

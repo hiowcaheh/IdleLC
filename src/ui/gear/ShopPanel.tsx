@@ -123,8 +123,8 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
               <p className="item-row__note">
                 Identifies one rare item at the Appraiser
                 {item.magnifier.chance < 1
-                  ? ` — works ${Math.round(item.magnifier.chance * 100)}% of the time.`
-                  : ' — always works.'}
+                  ? `. Works ${Math.round(item.magnifier.chance * 100)}% of the time.`
+                  : '. Always works.'}
               </p>
             )}
             {isRare(item.id) && (

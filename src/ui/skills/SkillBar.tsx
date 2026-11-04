@@ -39,7 +39,7 @@ export function SkillBar() {
     <div
       className="skill-bar"
       role="toolbar"
-      aria-label="Skills — tap to turn automatic use on or off"
+      aria-label="Skills: tap to turn automatic use on or off"
     >
       {slots.map((rank, i) => {
         if (!rank)
@@ -57,7 +57,7 @@ export function SkillBar() {
             type="button"
             className={`skill-slot${rank.auto ? '' : ' is-off'}${dry ? ' is-dry' : ''}${blocked ? ' is-blocked' : ''}${casting ? ' is-casting' : ''}`}
             aria-pressed={rank.auto}
-            aria-label={`${rank.name} — automatic use ${rank.auto ? 'on' : 'off'}${blocked ? ', needs other gear' : ''}`}
+            aria-label={`${rank.name}: automatic use ${rank.auto ? 'on' : 'off'}${blocked ? ', needs other gear' : ''}`}
             title={`${rank.name} (Lv ${rank.level}) · ${rank.mpCost} MP${blocked ? ' · needs other gear' : ''}`}
             onClick={() => setSkillAuto(rank.id, !rank.auto).catch(() => undefined)}
           >

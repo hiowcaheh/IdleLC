@@ -1,5 +1,14 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+Aktualizacja 2026-11-04: [loader, Merac i osiem zgłoszeń GUI](ui-merac-fixes.md).
+Cała ilustracja loadera wypełnia ekran przez `100% 100%`, bez zoomu i marginesów.
+Zastępuje to wszystkie starsze opisy `contain`/rozmytego tła oraz `cover`.
+SP jest tekstem bez ikon, Character ma identyczny pasek jak Book, a zielona
+ramka skilla oznacza możliwość nauki kolejnego poziomu teraz. Pomoc o szybkościach
+otwiera modal z przycisku po prawej. Merac jest obecna od poprzedniej aktualizacji;
+nie tworzyć drugiej mapy ani nie usuwać blokady końcowym potworem Dratan.
+SaveVersion **14**, bez migracji. Starsze raporty zachowują historyczne wyniki.
+
 Aktualizacja po audycie `a35cfbb`: [stan 14 punktów i granice](audit-fixes.md).
 Zapis ma jednego właściciela, clock stały krok, AFK ciągłą walkę ze skończonym
 zapasem i historią tytułu. Źródłowe zasoby/wybrane kanały zastępują medianę NPC;

@@ -93,7 +93,9 @@ export function CharacterSelectScreen() {
                   <span className="slot__name">{c.name}</span>
                   <span className="slot__meta">
                     {CLASSES[c.classId].name} ·{' '}
-                    {c.expedition ? 'On an expedition' : (ZONES[c.location.zoneId]?.name ?? '—')}
+                    {c.expedition
+                      ? 'On an expedition'
+                      : (ZONES[c.location.zoneId]?.name ?? 'Unknown zone')}
                   </span>
                 </span>
               </button>

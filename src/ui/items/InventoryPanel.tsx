@@ -75,7 +75,7 @@ const byType = (a: ItemDef, b: ItemDef) =>
 /** What the bag says when the hero can't drink a potion now. */
 const DRINK_PROBLEMS: Record<DrinkProblem | 'away', string> = {
   away: 'Your hero is on an expedition.',
-  dead: 'Your hero is down — wait for the revival.',
+  dead: 'Your hero is down. Wait for the revival.',
   'level-too-low': 'Your level is too low for this potion.',
   'none-left': 'None left.',
   cooldown: 'A potion of this kind is cooling down.',
@@ -203,7 +203,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
         <p className="item-row__note">
           {problem ?? `If you wear it: ${compareText(character, { itemId, plus, options, rare })}`}
           {!problem && isRare(itemId) && rare === undefined
-            ? ' — unidentified: its options appear when the Appraiser identifies it.'
+            ? ', unidentified: its options appear when the Appraiser identifies it.'
             : ''}
         </p>
         <button
@@ -238,7 +238,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
               run(async () => {
                 const result = await identifyItems(glassId, [target])
                 const [done] = result.results
-                if (!done?.success) return `The ${glass.name.toLowerCase()} failed — try again.`
+                if (!done?.success) return `The ${glass.name.toLowerCase()} failed. Try again.`
                 // the piece leaves its stack: show it in its new slot
                 setSelected(`piece-${done.piece.uid}`)
                 return `${rareLabel(done.piece)}: ${pieceName(done.piece.itemId, 0, done.piece.rare)}.`

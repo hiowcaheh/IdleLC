@@ -1,5 +1,13 @@
 # Uzgodnione zasady i różnice względem oryginalnego LC
 
+Najnowsze rozstrzygnięcie właściciela, 2026-11-04:
+loader ma pokazywać całą ilustrację na całym ekranie bez przybliżania. Używamy
+rozciągania `100% 100%`, z możliwą zmianą proporcji. Poprzednie `contain`
+z rozmytymi marginesami jest wycofane. Usunięto też ikony SP na wyraźne polecenie
+właściciela. D25 obejmuje wspólny pasek Book/EXP, układ nagród z mniejszym Claim,
+warunkową źródłową zieloną ramkę skilli i osobne okno pomocy o szybkościach.
+[Zakres oraz sprawdzenia](ui-merac-fixes.md). SaveVersion nadal **14**.
+
 Aktualizacja po audycie `a35cfbb`: właściciel zezwolił na naprawy wszystkich
 14 punktów. Obejmuje to zastąpienie medianowego balansu postaci źródłowymi
 zasobami/kanałami, źródłowe szybkości i regenerację, ciągłą symulację AFK,
@@ -49,9 +57,9 @@ zapisu ani odbierania wcześniejszych nagród; SaveVersion pozostaje 14.
   źródłowego kanału, zamiast dodatkowego mnożenia przez adapter gear-reference.
 - **D25:** kolejne okna używają oryginalnych zasobów, pasywne ikony mają okrągłe
   przycięcie, a informacje skilla są w osobnym modalu. Walk speed ukryto w UI.
-- **Loader:** najnowsze polecenie wymaga całej ilustracji. `contain` zastępuje
-  wcześniejsze `cover`; marginesy wypełnia oddzielna, rozmyta kopia tła. Główna
-  ilustracja jest ostra, w całości, bez animowanego skalowania.
+- **Loader w tym etapie:** `contain` zastąpiło `cover`, z rozmytą kopią w tle.
+  Późniejsze polecenie opisane na początku dokumentu zastępuje ten wariant
+  rozciąganiem całej ilustracji do ekranu.
 
 Szczegóły: [raport premii i GUI](client-ui-upgrade-fixes.md). SaveVersion pozostaje 14;
 przeliczane są dane pochodne istniejących przedmiotów. Nie ma migracji ani kasowania plusów.

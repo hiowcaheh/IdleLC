@@ -156,7 +156,9 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
           aria-expanded={open}
           onClick={() => setSelected(open ? null : skill.id)}
         >
-          <span className={`skills-slot skills-slot--${skill.type === 3 ? 'passive' : 'active'}`}>
+          <span
+            className={`skills-slot skills-slot--${skill.type === 3 ? 'passive' : 'active'}${state.canLearn ? ' is-learnable' : ''}`}
+          >
             <SkillIcon id={skill.id} kind={shown.kind} size={32} />
           </span>
           <span className="skill-row__body">
@@ -247,12 +249,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
                 {state.next && (
                   <div>
                     <dt>Learning cost</dt>
-                    <dd>
-                      <span className="sp-value">
-                        <span className="sp-icon" aria-hidden="true" />
-                        {state.next.learnSp} SP
-                      </span>
-                    </dd>
+                    <dd>{state.next.learnSp} SP</dd>
                   </div>
                 )}
               </dl>
@@ -267,7 +264,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
             {needs && (
               <p className={`skill-row__needs${fits ? '' : ' is-unmet'}`}>
                 {shown.kind === 'passive' ? 'Works with' : 'Needs'}: {needs}
-                {fits ? '' : ' — not with the gear you wear now'}
+                {fits ? '' : '; not with the gear you wear now'}
               </p>
             )}
             {!available && <p className="skill-row__note">This skill is not available yet.</p>}
@@ -341,7 +338,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
             </div>
             {current && current.kind !== 'passive' && !onBar && (
               <p className="skill-row__note">
-                Only the {SKILL_BAR_SIZE} skills on the bar are used in fights — and only they can
+                Only the {SKILL_BAR_SIZE} skills on the bar are used in fights, and only they can
                 fire on their own (Auto).
               </p>
             )}
@@ -370,12 +367,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
         </div>
         <div>
           <dt>Skill points</dt>
-          <dd className="skills-summary__sp">
-            <span className="sp-value">
-              <span className="sp-icon" aria-hidden="true" />
-              {formatSp(character.sp)}
-            </span>
-          </dd>
+          <dd className="skills-summary__sp">{formatSp(character.sp)}</dd>
         </div>
       </dl>
       <p className="sheet__meta">

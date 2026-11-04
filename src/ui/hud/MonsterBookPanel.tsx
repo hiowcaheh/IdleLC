@@ -96,8 +96,7 @@ function BookRewards({ monsterId, kills }: { monsterId: string; kills: number })
         />
       )}
       <div className="book__reward-labels" aria-hidden="true">
-        <span>Kills</span>
-        <span>Rewards</span>
+        <span>Kills / rewards</span>
         <span>Status</span>
       </div>
       <ul className="book__reward-list">
@@ -114,7 +113,8 @@ function BookRewards({ monsterId, kills }: { monsterId: string; kills: number })
                     className="book__reward-item"
                     title={getItem(item.itemId).name}
                   >
-                    <ItemIcon item={getItem(item.itemId)} size={22} />×{fmt(item.count)}
+                    <ItemIcon item={getItem(item.itemId)} size={22} />
+                    <span className="book__reward-count">×{fmt(item.count)}</span>
                   </span>
                 ))}
               </span>
@@ -130,7 +130,12 @@ function BookRewards({ monsterId, kills }: { monsterId: string; kills: number })
                   Claim
                 </button>
               ) : (
-                <span className="book__reward-state is-locked">—</span>
+                <span className="book__reward-state is-locked" aria-label="Locked" title="Locked">
+                  <svg viewBox="0 0 16 16" aria-hidden="true">
+                    <rect x="3" y="7" width="10" height="7" rx="1" />
+                    <path d="M5 7V5a3 3 0 0 1 6 0v2" />
+                  </svg>
+                </span>
               )}
             </li>
           )

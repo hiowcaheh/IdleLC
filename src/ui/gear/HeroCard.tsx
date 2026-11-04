@@ -51,9 +51,9 @@ export function HeroCard({ character }: { character: CharacterData }) {
         </p>
         <div className="hero-card__exp">
           <Bar
-            value={Math.floor(share)}
+            value={share}
             max={100}
-            variant="exp"
+            variant="book"
             label="Experience"
             text={needed > 0 ? `${share.toFixed(2)}%` : 'Max level'}
           />
@@ -66,12 +66,7 @@ export function HeroCard({ character }: { character: CharacterData }) {
         <dl className="hero-stats hero-stats--single hero-card__stats">
           <div>
             <dt>Skill points</dt>
-            <dd>
-              <span className="sp-value">
-                <span className="sp-icon" aria-hidden="true" />
-                {formatSp(sp)}
-              </span>
-            </dd>
+            <dd>{formatSp(sp)}</dd>
           </div>
           <div>
             <dt>Gold</dt>

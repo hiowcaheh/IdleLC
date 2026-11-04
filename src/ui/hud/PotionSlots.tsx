@@ -51,8 +51,8 @@ export function PotionSlots() {
         key={group}
         type="button"
         className={`potion-slot potion-slot--${group}${auto ? ' is-auto' : ''}${count === 0 ? ' is-empty' : ''}`}
-        aria-label={`${LABELS[group]} slot — ${what}, ${state}`}
-        title={`${LABELS[group]} slot — ${what}, ${state} (tap to choose)`}
+        aria-label={`${LABELS[group]} slot: ${what}, ${state}`}
+        title={`${LABELS[group]} slot: ${what}, ${state} (tap to choose)`}
         disabled={away}
         onClick={() => setOpen(group)}
       >
@@ -103,7 +103,7 @@ function PotionSlotPicker({ group, onClose }: { group: PotionGroup; onClose(): v
   return (
     <Sheet title={`${LABELS[group]} slot`} titleId="potion-slot-title" onClose={onClose}>
       <p className="sheet__meta">
-        Your hero drinks only the potion in this slot — in fights and on expeditions.
+        Your hero drinks only the potion in this slot, in fights and on expeditions.
       </p>
       <div className="potion-picker__actions">
         <button
@@ -162,7 +162,7 @@ function PotionSlotPicker({ group, onClose }: { group: PotionGroup; onClose(): v
         </ul>
       ) : (
         <p className="sheet__empty">
-          No {group === 'hp' ? 'HP' : 'MP'} potions in your bag — the shop sells them.
+          No {group === 'hp' ? 'HP' : 'MP'} potions in your bag. The shop sells them.
         </p>
       )}
     </Sheet>

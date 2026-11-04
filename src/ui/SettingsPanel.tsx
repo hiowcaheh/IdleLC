@@ -12,7 +12,7 @@ const QUALITY_OPTIONS: { value: GraphicsQuality; label: string; hint: string }[]
   {
     value: 'ultra',
     label: 'Ultra',
-    hint: "Your screen's full sharpness, soft shadows, sharper textures and light in the air — for strong phones and computers",
+    hint: "Your screen's full sharpness, soft shadows, sharper textures and light in the air, for strong phones and computers",
   },
 ]
 
@@ -88,7 +88,7 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
       <label className="setting setting--row">
         <span>
           <span className="setting__label">Developer tools</span>
-          <span className="setting__hint">Game speed, level and any monster — for testing</span>
+          <span className="setting__hint">Game speed, level and any monster, for testing</span>
         </span>
         <input
           type="checkbox"

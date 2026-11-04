@@ -47,7 +47,7 @@ export function HuntPanel() {
           <button
             type="button"
             className="hunt__zone-button"
-            aria-label={`${zone.name} — open the world map`}
+            aria-label={`${zone.name}: open the world map`}
             onClick={() => setMapOpen(true)}
           >
             {zone.name}

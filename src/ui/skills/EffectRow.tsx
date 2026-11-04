@@ -47,7 +47,7 @@ export function EffectRow({
         const kind = skill ? skillRank(skill, 1).kind : 'buff'
         const left = Math.ceil(effect.remaining)
         const style = look(effect, side)
-        const label = [effect.name, LABELS[style]].filter(Boolean).join(' — ')
+        const label = [effect.name, LABELS[style]].filter(Boolean).join(' · ')
         const content = (
           <>
             {effect.itemId === undefined ? (
@@ -71,7 +71,7 @@ export function EffectRow({
               <button
                 type="button"
                 className="effect-row__button"
-                aria-label={`${label}, ${left} seconds left — details`}
+                aria-label={`${label}, ${left} seconds left, details`}
                 onClick={() => onPick(effectKey(effect))}
               >
                 {content}

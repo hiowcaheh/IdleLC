@@ -73,7 +73,7 @@ export function ItemInfo({
     const classes = gearClasses(gear)
     rows.push({
       label: 'Class',
-      value: classes.length > 0 ? classes.map((c) => CLASSES[c].name).join(', ') : '—',
+      value: classes.length > 0 ? classes.map((c) => CLASSES[c].name).join(', ') : 'N/A',
       tone: classes.includes(character.classId) ? '' : ' is-unmet',
     })
   }

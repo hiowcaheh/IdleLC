@@ -42,7 +42,7 @@ export function AfkSummary() {
         <p className="afk__subtitle">
           {result.character.name} spent {duration(result.awaySeconds)} hunting {monster.name}
           {zone ? ` in ${zone.name}` : ''}
-          {capped ? ` — expeditions pay up to ${duration(AFK_MAX_SECONDS)}` : ''}.
+          {capped ? `; expeditions pay up to ${duration(AFK_MAX_SECONDS)}` : ''}.
         </p>
 
         <dl className="afk__stats">

@@ -56,7 +56,7 @@ export function ExpeditionDialog({
         </h2>
         <p className="afk__subtitle">
           {character.name} will hunt <strong>{monster.name}</strong> in {ZONES[zoneId]?.name} while
-          you are away — up to {duration(AFK_MAX_SECONDS)}. Come back any time to collect.
+          you are away, up to {duration(AFK_MAX_SECONDS)}. Come back any time to collect.
         </p>
 
         <h3 className="afk__heading">Expected per hour</h3>
@@ -87,7 +87,7 @@ export function ExpeditionDialog({
         )}
         {estimate.killsPerHour === 0 && (
           <p className="expedition-dialog__warning">
-            {monster.name} is too strong — your hero would not win a single fight.
+            {monster.name} is too strong. Your hero would not win a single fight.
           </p>
         )}
 

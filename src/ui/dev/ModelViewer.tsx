@@ -103,7 +103,7 @@ export function ModelViewer() {
           >
             {models.map((m) => (
               <option key={m.id} value={m.id}>
-                {m.id} — {m.file}
+                {m.id}: {m.file}
               </option>
             ))}
           </select>

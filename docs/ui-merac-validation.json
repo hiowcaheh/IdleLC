@@ -1,0 +1,202 @@
+{
+  "date": "2026-11-04",
+  "baseCommit": "c744b39a7521847650e679c1c536f300c935a793",
+  "saveVersion": 14,
+  "commands": {
+    "check": "passed",
+    "testFiles": 47,
+    "testsPassed": 416,
+    "build": "passed",
+    "runtimeTextEmDashCount": 0
+  },
+  "environment": "Local production build with real LC data; Chromium, emulated mobile sizes; prepared isolated test saves, no player save modified.",
+  "responsive": [
+    {
+      "viewport": {
+        "width": 320,
+        "height": 740
+      },
+      "claim": {
+        "width": 51.671875,
+        "height": 30
+      },
+      "expAndBookStyle": {
+        "height": "28px",
+        "frame": "url(\"ui/lc/book-progress.webp\")",
+        "fill": "url(\"ui/lc/book-fill.webp\")",
+        "textSize": "11px"
+      },
+      "rewardCounts": [1, 2, 5, 10]
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "claim": {
+        "width": 51.671875,
+        "height": 30
+      },
+      "expAndBookStyle": {
+        "height": "28px",
+        "frame": "url(\"ui/lc/book-progress.webp\")",
+        "fill": "url(\"ui/lc/book-fill.webp\")",
+        "textSize": "11px"
+      },
+      "rewardCounts": [1, 2, 5, 10]
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "claim": {
+        "width": 51.671875,
+        "height": 30
+      },
+      "expAndBookStyle": {
+        "height": "28px",
+        "frame": "url(\"ui/lc/book-progress.webp\")",
+        "fill": "url(\"ui/lc/book-fill.webp\")",
+        "textSize": "11px"
+      },
+      "rewardCounts": [1, 2, 5, 10]
+    }
+  ],
+  "claim": {
+    "before": 0,
+    "after": 1
+  },
+  "skills": [
+    {
+      "case": "active learned to maximum",
+      "savedRank": 5,
+      "glowAfterMastered": false
+    },
+    {
+      "case": "no-sp",
+      "greenFrames": 1
+    },
+    {
+      "case": "low-level",
+      "greenFrames": 2
+    }
+  ],
+  "transitions": [
+    {
+      "zone": "Dratan",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "loader": {
+        "size": "100% 100%",
+        "transform": "none",
+        "filter": "none",
+        "width": 390,
+        "height": 844,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "zone": "Merac",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "loader": {
+        "size": "100% 100%",
+        "transform": "none",
+        "filter": "none",
+        "width": 390,
+        "height": 844,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "zone": "Egeha",
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "loader": {
+        "size": "100% 100%",
+        "transform": "none",
+        "filter": "none",
+        "width": 844,
+        "height": 390,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "zone": "Juno",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "loader": {
+        "size": "100% 100%",
+        "transform": "none",
+        "filter": "none",
+        "width": 1280,
+        "height": 900,
+        "x": 0,
+        "y": 0
+      }
+    }
+  ],
+  "meracAssets": [
+    "heights.bin",
+    "layer-0.webp",
+    "layer-1.webp",
+    "layer-2.webp",
+    "layer-3.webp",
+    "layer-4.webp",
+    "layer-5.webp",
+    "layer-6.webp",
+    "masks-0.webp",
+    "masks-1.webp",
+    "props.glb",
+    "props.json",
+    "terrain.json"
+  ],
+  "finalSmoke": {
+    "helpTitleFullyVisibleAt320": true,
+    "skillSummaryLayout": {
+      "columns": "278px",
+      "labelsFit": true
+    },
+    "activeFrameCentered": {
+      "x": 0,
+      "y": 0
+    },
+    "passiveFrameCentered": {
+      "x": 0,
+      "y": 0
+    },
+    "prerequisiteBlocksGlow": true,
+    "meracBookSpots": 23,
+    "junoReducedMotionLoader": {
+      "opacity": "1",
+      "size": "100% 100%",
+      "width": 1280,
+      "height": 900
+    },
+    "junoReducedMotionFullImage": true,
+    "meracLock": "Merac\n28\n–\n51\nSpots 1 / 23\nDefeat Elite Sphinx Spear Man in Dratan",
+    "completed": true
+  },
+  "diagnostics": {
+    "errors": 0,
+    "consoleErrors": 0,
+    "httpErrors": 0,
+    "requestFailures": 0
+  },
+  "limitations": [
+    "No physical iPhone or Safari test.",
+    "Public GitHub Pages host cannot be opened from this environment; deployment is verified through GitHub Actions separately."
+  ]
+}

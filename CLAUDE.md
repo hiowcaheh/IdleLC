@@ -1,6 +1,14 @@
 # IdleLC — wytyczne projektu
 
-Najnowszy etap: [naprawy po audycie a35cfbb](docs/audit-fixes.md).
+Najnowszy etap: [loader, Merac i osiem zgłoszeń GUI](docs/ui-merac-fixes.md).
+Loader rozciąga całą ilustrację do ekranu (`100% 100%`), bez cropa/zoomu ani
+rozmytych marginesów. To zastępuje wcześniejsze `contain`/`cover`. Merac ma już
+teren i obiekty; zachować blokadę ostatnim potworem Dratan. Character używa paska
+Book, pomoc o szybkościach jest w modalu po prawej. SP pokazujemy bez ikon,
+zielone ramki skilli tylko przy `learnState.canLearn`. Bez długich myślników
+w tekstach UI. SaveVersion nadal **14**.
+
+Poprzedni etap: [naprawy po audycie a35cfbb](docs/audit-fixes.md).
 Jedna karta jest właścicielem zapisu, logika zachowuje widoczny czas przy niskim FPS,
 AFK symuluje ograniczone mikstury i wygaśnięcia tytułów. HP/MP i kanały sprzętu
 sterują walką; regeneracja ma 3 s, cooldown źródłowy wzór. Merac i Egeha mają WTR/WLD.
@@ -8,8 +16,8 @@ To nie pełny port: brak SQL blokuje część szans/dropu/Deadly; summony i rend
 indywidualnych FX pozostają do ukończenia. Nie zamieniać „gotowego importera” na
 „aktywne reguły na brakujących danych”. SaveVersion nadal **14**.
 
-Najnowsza aktualizacja: [Book, Character, Skills i rare w sklepie](docs/book-shop-ui-fixes.md).
-Book ma niezależne przewijanie obu kolumn, a SP wspólną pełną ikonę. Sklep oferuje
+Poprzednia aktualizacja: [Book, Character, Skills i rare w sklepie](docs/book-shop-ui-fixes.md).
+Book ma niezależne przewijanie obu kolumn. Sklep oferuje
 najlepszy istniejący wariant rare w tej samej cenie, poziomie i rodzinie sprzętu;
 sześć opcji/Grade A pozostaje losowaniem Appraisera. SaveVersion nadal **14**.
 
