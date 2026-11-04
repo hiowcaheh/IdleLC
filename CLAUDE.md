@@ -1,6 +1,11 @@
 # IdleLC — wytyczne projektu
 
-Najnowsza aktualizacja: [poziomy PvE, losowe nagrody, Mist i Dratan](docs/pve-dratan-fixes.md).
+Najnowsza aktualizacja: [Book, Character, Skills i rare w sklepie](docs/book-shop-ui-fixes.md).
+Book ma niezależne przewijanie obu kolumn, a SP wspólną pełną ikonę. Sklep oferuje
+najlepszy istniejący wariant rare w tej samej cenie, poziomie i rodzinie sprzętu;
+sześć opcji/Grade A pozostaje losowaniem Appraisera. SaveVersion nadal **14**.
+
+Poprzednia aktualizacja: [poziomy PvE, losowe nagrody, Mist i Dratan](docs/pve-dratan-fixes.md).
 EXP/SP i Nas mają źródłowe losowania oraz kary solo. Drop przedmiotów jest blokowany
 od przewagi 6 poziomów; źródłowe minimum 1 jednostki SP pozostaje. Dratan używa
 oryginalnego WTR/WLD, a Mist ma miękką alfę i Full Bright. SaveVersion nadal **14**.

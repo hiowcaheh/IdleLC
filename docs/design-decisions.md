@@ -1,5 +1,15 @@
 # Uzgodnione zasady i różnice względem oryginalnego LC
 
+Aktualizacja 2026-11-04 — osiem poprawek Book/Character/Skills/Shop:
+`shopOffer` oferuje najlepszy istniejący wariant rare tej samej rodziny, ceny,
+poziomu i bazowych parametrów, aby także zakupy pozwalały uzyskać sześć pieczęci
+klasy A ze specjalnymi opcjami. Zachowano jeden wiersz rodziny, okno progów,
+pule/szanse Appraisera, P03 i P04. Dotychczasowy wybór najsłabszego wariantu
+w importerze nie jest już ofertą końcową. To jawna zmiana na życzenie właściciela;
+nie zmienia posiadanych przedmiotów ani schematu zapisu. D25 obejmuje niezależny
+scroll Book, poprawki SP/atrybutów/skilli i ramkę złota.
+[Szczegóły i kontrola](book-shop-ui-fixes.md).
+
 Stan rejestru: 2026-11-02, punkt odniesienia implementacji `c9944c9`. Celem jest oddzielenie naprawy błędnej interpretacji od zmiany projektu. Szczegóły oryginału i numery linii: [audyt źródeł](source-audit/README.md). Aktualne wdrożenie: [przekazanie prac](development-handoff.md) i changelog.
 
 „Oryginał” w tym dokumencie oznacza odczytane źródła November 2018, z uwzględnieniem ich ograniczeń i flag. Nie potwierdzono, że każda reguła działała identycznie na serwerze prywatnego klienta 2015. Dla brakujących wartości DB nie wybieramy liczb na podstawie nazw.

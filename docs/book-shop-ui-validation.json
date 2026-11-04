@@ -1,0 +1,700 @@
+{
+  "date": "2026-11-04",
+  "baseCommit": "b0f10ab56d20eca8c8fcab79340b8a25472eef2e",
+  "saveVersion": 14,
+  "checks": {
+    "lint": "passed",
+    "format": "passed",
+    "typescript": "passed",
+    "testFiles": 43,
+    "tests": 389,
+    "build": "passed"
+  },
+  "componentBrowser": {
+    "cases": [
+      {
+        "viewport": [390, 844],
+        "initialScroll": {
+          "left": 0,
+          "right": 0,
+          "body": 0,
+          "leftMax": 553,
+          "rightMax": 77,
+          "leftWidth": 170,
+          "rightWidth": 168
+        },
+        "leftScrolled": {
+          "left": 130,
+          "right": 0,
+          "body": 0,
+          "leftMax": 553,
+          "rightMax": 77,
+          "leftWidth": 170,
+          "rightWidth": 168
+        },
+        "rightScrolled": {
+          "left": 130,
+          "right": 77,
+          "body": 0,
+          "leftMax": 553,
+          "rightMax": 77,
+          "leftWidth": 170,
+          "rightWidth": 168
+        },
+        "attributeBoxes": [
+          {
+            "x": 101,
+            "y": 415.90625,
+            "w": 58,
+            "h": 24
+          },
+          {
+            "x": 281,
+            "y": 415.90625,
+            "w": 58,
+            "h": 24
+          },
+          {
+            "x": 101,
+            "y": 448.90625,
+            "w": 58,
+            "h": 24
+          },
+          {
+            "x": 281,
+            "y": 448.90625,
+            "w": 58,
+            "h": 24
+          }
+        ],
+        "gifts": [
+          {
+            "w": 16,
+            "h": 16
+          },
+          {
+            "w": 16,
+            "h": 16
+          }
+        ],
+        "rankInsets": [
+          {
+            "left": 10,
+            "right": 10
+          },
+          {
+            "left": 10,
+            "right": 10
+          }
+        ]
+      },
+      {
+        "viewport": [320, 740],
+        "initialScroll": {
+          "left": 0,
+          "right": 0,
+          "body": 0,
+          "leftMax": 666,
+          "rightMax": 190,
+          "leftWidth": 135,
+          "rightWidth": 133
+        },
+        "leftScrolled": {
+          "left": 130,
+          "right": 0,
+          "body": 0,
+          "leftMax": 666,
+          "rightMax": 190,
+          "leftWidth": 135,
+          "rightWidth": 133
+        },
+        "rightScrolled": {
+          "left": 130,
+          "right": 160,
+          "body": 0,
+          "leftMax": 666,
+          "rightMax": 190,
+          "leftWidth": 135,
+          "rightWidth": 133
+        },
+        "attributeBoxes": [
+          {
+            "x": 211,
+            "y": 405.5,
+            "w": 58,
+            "h": 24
+          },
+          {
+            "x": 211,
+            "y": 438.5,
+            "w": 58,
+            "h": 24
+          },
+          {
+            "x": 211,
+            "y": 471.5,
+            "w": 58,
+            "h": 24
+          },
+          {
+            "x": 211,
+            "y": 504.5,
+            "w": 58,
+            "h": 24
+          }
+        ],
+        "gifts": [
+          {
+            "w": 16,
+            "h": 16
+          },
+          {
+            "w": 16,
+            "h": 16
+          }
+        ],
+        "rankInsets": [
+          {
+            "left": 10,
+            "right": 10
+          },
+          {
+            "left": 10,
+            "right": 10
+          }
+        ]
+      },
+      {
+        "viewport": [1280, 740],
+        "initialScroll": {
+          "left": 0,
+          "right": 0,
+          "body": 0,
+          "leftMax": 647,
+          "rightMax": 171,
+          "leftWidth": 185,
+          "rightWidth": 183
+        },
+        "leftScrolled": {
+          "left": 130,
+          "right": 0,
+          "body": 0,
+          "leftMax": 647,
+          "rightMax": 171,
+          "leftWidth": 185,
+          "rightWidth": 183
+        },
+        "rightScrolled": {
+          "left": 130,
+          "right": 160,
+          "body": 0,
+          "leftMax": 647,
+          "rightMax": 171,
+          "leftWidth": 185,
+          "rightWidth": 183
+        },
+        "attributeBoxes": [
+          {
+            "x": 546,
+            "y": 368.5,
+            "w": 58,
+            "h": 24
+          },
+          {
+            "x": 741,
+            "y": 368.5,
+            "w": 58,
+            "h": 24
+          },
+          {
+            "x": 546,
+            "y": 401.5,
+            "w": 58,
+            "h": 24
+          },
+          {
+            "x": 741,
+            "y": 401.5,
+            "w": 58,
+            "h": 24
+          }
+        ],
+        "gifts": [
+          {
+            "w": 16,
+            "h": 16
+          },
+          {
+            "w": 16,
+            "h": 16
+          }
+        ],
+        "rankInsets": [
+          {
+            "left": 10,
+            "right": 10
+          },
+          {
+            "left": 10,
+            "right": 10
+          }
+        ]
+      }
+    ],
+    "page_errors": [],
+    "console_errors": [],
+    "http_errors": [],
+    "failed_requests": [],
+    "touch": {
+      "leftGesture": {
+        "left": 129,
+        "right": 0,
+        "body": 0,
+        "leftMax": 553,
+        "rightMax": 77,
+        "leftWidth": 170,
+        "rightWidth": 168
+      },
+      "rightGesture": {
+        "left": 129,
+        "right": 77,
+        "body": 0,
+        "leftMax": 553,
+        "rightMax": 77,
+        "leftWidth": 170,
+        "rightWidth": 168
+      },
+      "previewGesture": {
+        "left": 129,
+        "right": 77,
+        "body": 0,
+        "leftMax": 553,
+        "rightMax": 77,
+        "leftWidth": 170,
+        "rightWidth": 168
+      }
+    },
+    "passed": true
+  },
+  "sourceShop": {
+    "tierRows": 687,
+    "byClass": [
+      {
+        "classId": "titan",
+        "upgraded": 6,
+        "unchanged": 105
+      },
+      {
+        "classId": "knight",
+        "upgraded": 7,
+        "unchanged": 125
+      },
+      {
+        "classId": "healer",
+        "upgraded": 6,
+        "unchanged": 105
+      },
+      {
+        "classId": "mage",
+        "upgraded": 6,
+        "unchanged": 105
+      },
+      {
+        "classId": "rogue",
+        "upgraded": 6,
+        "unchanged": 105
+      },
+      {
+        "classId": "sorcerer",
+        "upgraded": 6,
+        "unchanged": 105
+      }
+    ],
+    "purchaseAppraisalPersistenceCases": 39,
+    "identifiedCases": [
+      {
+        "classId": "titan",
+        "slot": "helmet",
+        "item": 1944,
+        "rareSet": 53,
+        "sealTypes": [12, 11, 18, 22, 13, 58]
+      },
+      {
+        "classId": "titan",
+        "slot": "helmet",
+        "item": 1944,
+        "rareSet": 62,
+        "sealTypes": [23, 14, 15, 1, 23, 58]
+      },
+      {
+        "classId": "titan",
+        "slot": "armor",
+        "item": 1945,
+        "rareSet": 57,
+        "sealTypes": [3, 4, 22, 18, 3, 62]
+      },
+      {
+        "classId": "titan",
+        "slot": "armor",
+        "item": 1945,
+        "rareSet": 60,
+        "sealTypes": [23, 14, 15, 1, 23, 60]
+      },
+      {
+        "classId": "titan",
+        "slot": "pants",
+        "item": 1946,
+        "rareSet": 57,
+        "sealTypes": [3, 4, 22, 18, 3, 62]
+      },
+      {
+        "classId": "titan",
+        "slot": "pants",
+        "item": 1946,
+        "rareSet": 60,
+        "sealTypes": [23, 14, 15, 1, 23, 60]
+      },
+      {
+        "classId": "titan",
+        "slot": "boots",
+        "item": 1948,
+        "rareSet": 59,
+        "sealTypes": [23, 14, 15, 1, 23, 64]
+      },
+      {
+        "classId": "knight",
+        "slot": "helmet",
+        "item": 1918,
+        "rareSet": 53,
+        "sealTypes": [12, 11, 18, 22, 13, 58]
+      },
+      {
+        "classId": "knight",
+        "slot": "armor",
+        "item": 1950,
+        "rareSet": 57,
+        "sealTypes": [3, 4, 22, 18, 3, 62]
+      },
+      {
+        "classId": "knight",
+        "slot": "armor",
+        "item": 1950,
+        "rareSet": 60,
+        "sealTypes": [23, 14, 15, 1, 23, 60]
+      },
+      {
+        "classId": "knight",
+        "slot": "pants",
+        "item": 1951,
+        "rareSet": 57,
+        "sealTypes": [3, 4, 22, 18, 3, 62]
+      },
+      {
+        "classId": "knight",
+        "slot": "pants",
+        "item": 1951,
+        "rareSet": 60,
+        "sealTypes": [23, 14, 15, 1, 23, 60]
+      },
+      {
+        "classId": "knight",
+        "slot": "boots",
+        "item": 1953,
+        "rareSet": 59,
+        "sealTypes": [23, 14, 15, 1, 23, 64]
+      },
+      {
+        "classId": "healer",
+        "slot": "helmet",
+        "item": 1955,
+        "rareSet": 53,
+        "sealTypes": [12, 11, 18, 22, 13, 58]
+      },
+      {
+        "classId": "healer",
+        "slot": "helmet",
+        "item": 1955,
+        "rareSet": 62,
+        "sealTypes": [23, 14, 15, 1, 23, 58]
+      },
+      {
+        "classId": "healer",
+        "slot": "armor",
+        "item": 1956,
+        "rareSet": 57,
+        "sealTypes": [3, 4, 22, 18, 3, 62]
+      },
+      {
+        "classId": "healer",
+        "slot": "armor",
+        "item": 1956,
+        "rareSet": 60,
+        "sealTypes": [23, 14, 15, 1, 23, 60]
+      },
+      {
+        "classId": "healer",
+        "slot": "pants",
+        "item": 1957,
+        "rareSet": 57,
+        "sealTypes": [3, 4, 22, 18, 3, 62]
+      },
+      {
+        "classId": "healer",
+        "slot": "pants",
+        "item": 1957,
+        "rareSet": 60,
+        "sealTypes": [23, 14, 15, 1, 23, 60]
+      },
+      {
+        "classId": "healer",
+        "slot": "boots",
+        "item": 1959,
+        "rareSet": 59,
+        "sealTypes": [23, 14, 15, 1, 23, 64]
+      },
+      {
+        "classId": "mage",
+        "slot": "helmet",
+        "item": 1929,
+        "rareSet": 53,
+        "sealTypes": [12, 11, 18, 22, 13, 58]
+      },
+      {
+        "classId": "mage",
+        "slot": "armor",
+        "item": 1961,
+        "rareSet": 57,
+        "sealTypes": [3, 4, 22, 18, 3, 62]
+      },
+      {
+        "classId": "mage",
+        "slot": "armor",
+        "item": 1961,
+        "rareSet": 60,
+        "sealTypes": [23, 14, 15, 1, 23, 60]
+      },
+      {
+        "classId": "mage",
+        "slot": "pants",
+        "item": 1962,
+        "rareSet": 57,
+        "sealTypes": [3, 4, 22, 18, 3, 62]
+      },
+      {
+        "classId": "mage",
+        "slot": "pants",
+        "item": 1962,
+        "rareSet": 60,
+        "sealTypes": [23, 14, 15, 1, 23, 60]
+      },
+      {
+        "classId": "mage",
+        "slot": "boots",
+        "item": 1964,
+        "rareSet": 59,
+        "sealTypes": [23, 14, 15, 1, 23, 64]
+      },
+      {
+        "classId": "rogue",
+        "slot": "helmet",
+        "item": 1934,
+        "rareSet": 53,
+        "sealTypes": [12, 11, 18, 22, 13, 58]
+      },
+      {
+        "classId": "rogue",
+        "slot": "armor",
+        "item": 1966,
+        "rareSet": 57,
+        "sealTypes": [3, 4, 22, 18, 3, 62]
+      },
+      {
+        "classId": "rogue",
+        "slot": "armor",
+        "item": 1966,
+        "rareSet": 60,
+        "sealTypes": [23, 14, 15, 1, 23, 60]
+      },
+      {
+        "classId": "rogue",
+        "slot": "pants",
+        "item": 1967,
+        "rareSet": 57,
+        "sealTypes": [3, 4, 22, 18, 3, 62]
+      },
+      {
+        "classId": "rogue",
+        "slot": "pants",
+        "item": 1967,
+        "rareSet": 60,
+        "sealTypes": [23, 14, 15, 1, 23, 60]
+      },
+      {
+        "classId": "rogue",
+        "slot": "boots",
+        "item": 1969,
+        "rareSet": 59,
+        "sealTypes": [23, 14, 15, 1, 23, 64]
+      },
+      {
+        "classId": "sorcerer",
+        "slot": "helmet",
+        "item": 1970,
+        "rareSet": 53,
+        "sealTypes": [12, 11, 18, 22, 13, 58]
+      },
+      {
+        "classId": "sorcerer",
+        "slot": "helmet",
+        "item": 1970,
+        "rareSet": 62,
+        "sealTypes": [23, 14, 15, 1, 23, 58]
+      },
+      {
+        "classId": "sorcerer",
+        "slot": "armor",
+        "item": 1971,
+        "rareSet": 57,
+        "sealTypes": [3, 4, 22, 18, 3, 62]
+      },
+      {
+        "classId": "sorcerer",
+        "slot": "armor",
+        "item": 1971,
+        "rareSet": 60,
+        "sealTypes": [23, 14, 15, 1, 23, 60]
+      },
+      {
+        "classId": "sorcerer",
+        "slot": "pants",
+        "item": 1972,
+        "rareSet": 57,
+        "sealTypes": [3, 4, 22, 18, 3, 62]
+      },
+      {
+        "classId": "sorcerer",
+        "slot": "pants",
+        "item": 1972,
+        "rareSet": 60,
+        "sealTypes": [23, 14, 15, 1, 23, 60]
+      },
+      {
+        "classId": "sorcerer",
+        "slot": "boots",
+        "item": 1974,
+        "rareSet": 59,
+        "sealTypes": [23, 14, 15, 1, 23, 64]
+      }
+    ]
+  },
+  "productionBrowser": {
+    "cases": [
+      {
+        "viewport": [390, 844],
+        "bookPanes": [
+          {
+            "height": 628,
+            "overflow": "auto",
+            "max": 553
+          },
+          {
+            "height": 626,
+            "overflow": "auto",
+            "max": 79
+          }
+        ],
+        "attributeBoxes": [
+          {
+            "w": 48,
+            "h": 18
+          },
+          {
+            "w": 48,
+            "h": 18
+          },
+          {
+            "w": 48,
+            "h": 18
+          },
+          {
+            "w": 48,
+            "h": 18
+          }
+        ]
+      },
+      {
+        "viewport": [1280, 900],
+        "bookPanes": [
+          {
+            "height": 678,
+            "overflow": "auto",
+            "max": 503
+          },
+          {
+            "height": 676,
+            "overflow": "auto",
+            "max": 29
+          }
+        ],
+        "attributeBoxes": [
+          {
+            "w": 48,
+            "h": 18
+          },
+          {
+            "w": 48,
+            "h": 18
+          },
+          {
+            "w": 48,
+            "h": 18
+          },
+          {
+            "w": 48,
+            "h": 18
+          }
+        ]
+      }
+    ],
+    "page_errors": [],
+    "console_errors": [],
+    "http_errors": [],
+    "failed_requests": [],
+    "purchaseAndAppraisal": {
+      "piece": {
+        "uid": "be4ac437-9adf-4b32-8d10-1c4cc1d71236",
+        "itemId": 1955,
+        "plus": 0,
+        "rare": 33,
+        "options": [
+          {
+            "type": 23,
+            "level": 4
+          },
+          {
+            "type": 14,
+            "level": 4
+          },
+          {
+            "type": 15,
+            "level": 4
+          },
+          {
+            "type": 1,
+            "level": 4
+          },
+          {
+            "type": 23,
+            "level": 4
+          }
+        ]
+      },
+      "persistedAfterReload": true
+    },
+    "passed": true
+  },
+  "limits": [
+    "Chromium with software WebGL; no physical Safari/iPhone run.",
+    "Grade A and six seals remain random; controlled RNG is used only for validation."
+  ]
+}

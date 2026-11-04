@@ -1,5 +1,12 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+Aktualizacja 2026-11-04: [Book, Character, Skills i rare w sklepie](book-shop-ui-fixes.md).
+Dwie kolumny Book przewijają się niezależnie, również dotykiem nad podglądem 3D.
+Sklep wybiera lepszą źródłową pulę rare tej samej rodziny bez zmiany ceny/poziomu
+i bez gwarantowania klasy A/sześciu pieczęci. Nie wybierać wariantu wyłącznie po
+nazwie: część nazw źródła jest różna, mimo identycznej ikony i bazowych parametrów.
+SaveVersion nadal **14**, bez przeliczania posiadanych sztuk. Wyniki w raporcie.
+
 Aktualizacja 2026-11-04: [poziomy PvE, losowe nagrody, Mist i Dratan](pve-dratan-fixes.md).
 `rewardKills` wspólnie rozlicza aktywne walki i AFK, z losowaniem każdego zabójstwa
 i zmianą kar po awansie. `killReward` daje tylko wartość oczekiwaną do estymacji.

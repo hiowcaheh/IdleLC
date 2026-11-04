@@ -141,6 +141,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
     const open = selected === skill.id
     const onBar = character.skillBar.includes(skill.id)
     const max = skill.levels.length
+    const mastered = learned !== undefined && learned.level >= max
     const needs = needsText(skill)
     const fits = worksWith(skill, wielded(character.equipment))
     return (
@@ -166,6 +167,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
                 ? ` · Lv ${learned.level}/${max}`
                 : ` · Lv 0/${max} · from level ${skill.levels[0]!.learnLevel}`}
               {learned && !fits ? ' · needs other gear' : ''}
+              {mastered && <span className="skill-row__mastered"> · Mastered</span>}
             </span>
           </span>
           <span className="skill-row__tags">
@@ -199,6 +201,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
                 <strong>{skill.name}</strong>
                 <span>
                   {KIND_LABELS[shown.kind]} · Level {learned?.level ?? 0} / {max}
+                  {mastered && <span className="skill-row__mastered"> · Mastered</span>}
                 </span>
               </span>
             </header>
@@ -342,7 +345,9 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
                 fire on their own (Auto).
               </p>
             )}
-            {state.blocked && available && <p className="skill-row__note">{state.blocked}</p>}
+            {state.blocked && available && !mastered && (
+              <p className="skill-row__note">{state.blocked}</p>
+            )}
           </Sheet>
         )}
       </li>
@@ -365,7 +370,12 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
         </div>
         <div>
           <dt>Skill points</dt>
-          <dd className="skills-summary__sp">{formatSp(character.sp)}</dd>
+          <dd className="skills-summary__sp">
+            <span className="sp-value">
+              <span className="sp-icon" aria-hidden="true" />
+              {formatSp(character.sp)}
+            </span>
+          </dd>
         </div>
       </dl>
       <p className="sheet__meta">

@@ -196,7 +196,7 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
         open
       </p>
       <div className="book">
-        <ul className="book__list" aria-label="Monsters">
+        <ul className="book__list" aria-label="Monsters" tabIndex={0}>
           {spots.map((id, i) => {
             const m = getMonster(id)
             const locked = i >= open
@@ -236,7 +236,7 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
             )
           })}
         </ul>
-        <div className="book__page">
+        <section className="book__page" aria-label="Monster details" tabIndex={0}>
           <MonsterPreview modelId={monster.modelId} scale={monster.scale ?? 1} />
           <h3 className={`book__name level-tone--${levelTone(character.level, monster.level)}`}>
             {monster.name}
@@ -255,7 +255,7 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
             ))}
           </dl>
           <BookRewards monsterId={monsterId} kills={kills} />
-        </div>
+        </section>
       </div>
     </Sheet>
   )

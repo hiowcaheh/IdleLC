@@ -349,6 +349,23 @@ export function itemIcon(id: number): IconSprite | null {
   return iconSprite(lcIcons?.items, id)
 }
 
+// Generated sprite sheets give every item its own cell, including identical source icons.
+const SOURCE_APPEARANCES = new Map(
+  (lcData?.items ?? []).map((item) => [
+    item.id,
+    `${item.icon.atlas}:${item.icon.row}:${item.icon.col}`,
+  ]),
+)
+
+/** Rare variants may have different translated names while retaining the same source artwork. */
+export function sameItemAppearance(left: number, right: number): boolean {
+  const a = SOURCE_APPEARANCES.get(left)
+  const b = SOURCE_APPEARANCES.get(right)
+  return a !== undefined && b !== undefined
+    ? a === b
+    : getItem(left).name.toLowerCase() === getItem(right).name.toLowerCase()
+}
+
 const PLACEHOLDER_SHOPS: Record<string, number[]> = {
   glade: [7, 4, HEAVEN_STONE_ID, 43, 44, 484, 490],
 }

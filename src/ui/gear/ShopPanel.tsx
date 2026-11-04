@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { EQUIP_SLOTS, HEAVEN_STONE_ID, getItem } from '../../game/data/items.ts'
 import type { EquipSlot, GearSlot, ItemDef } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
-import { isRare } from '../../game/logic/rare.ts'
-import { buyPrice, shopOffer, sortedShopGoods } from '../../game/logic/shop.ts'
+import { GRADES, isRare } from '../../game/logic/rare.ts'
+import { buyPrice, shopOffer, shopRareInfo, sortedShopGoods } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { toast } from '../../state/toasts.ts'
 import { BuyDialog } from '../items/BuyDialog.tsx'
@@ -69,6 +69,7 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
     const open = selected === item.id
     const problem = item.gear ? wearProblem(character, item.id) : null
     const afford = character.gold >= price
+    const rare = isRare(item.id) ? shopRareInfo(item.id) : null
     return (
       <li
         key={item.id}
@@ -98,6 +99,11 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
               {tier !== undefined && (
                 <span className={problem ? 'shop__locked' : ''}> · Lv {tier}</span>
               )}
+              {rare && rare.grade !== null && (
+                <span className="shop__seals">
+                  Up to {rare.maxSeals} seals · Grade {GRADES[rare.grade]} possible
+                </span>
+              )}
             </span>
           </span>
           <span className={`shop__price${afford ? '' : ' is-short'}`}>
@@ -123,8 +129,18 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
             )}
             {isRare(item.id) && (
               <p className="item-row__note">
-                Rare item: sold unidentified. The Appraiser reveals its rare options with a
-                magnifying glass.
+                Sold unidentified. The Appraiser reveals its rare options with a magnifying glass.
+                {rare && rare.grade !== null && (
+                  <>
+                    {' '}
+                    Grade {GRADES[rare.grade]} sets:{' '}
+                    {rare.sets
+                      .map((s) => s.prefix)
+                      .filter(Boolean)
+                      .join(', ')}
+                    .
+                  </>
+                )}
               </p>
             )}
             {item.id === HEAVEN_STONE_ID && (

@@ -77,7 +77,7 @@ export const UI_PARTS = {
   gift: [atlas('Cashshop'), 251, 358, 60, 60],
   'stat-plus': [atlas('skill_new'), 1213, 70, 13, 13, { scale: 3 }],
   'stat-plus-disabled': [atlas('skill_new'), 1213, 98, 13, 13, { scale: 3 }],
-  'sp-icon': [atlas('skill_new'), 843, 550, 14, 14, { scale: 3 }],
+  'sp-icon': [atlas('skill_new'), 844, 548, 20, 20, { scale: 3 }],
   // equipment boards: each class's silhouette with the slot frames (LC job order)
   'equip-titan': [atlas('NewInventory'), 257, 0, 246, 155, { quality: 90 }],
   'equip-knight': [atlas('NewInventory'), 504, 0, 246, 155, { quality: 90 }],
@@ -151,7 +151,7 @@ const COLUMNS = {
  * The bottom edge is stretched across the whole window, so its middle (between the 8 px corners) is
  * one column repeated — the texture's streaks would show as long smears: [rows from the bottom, column].
  */
-const FLAT_BOTTOM = { window: [10, 128], panel: [10, 128] }
+const FLAT_BOTTOM = { window: [10, 128], panel: [10, 128], 'book-window': [10, 350] }
 const CORNER = 8
 
 /** Parts of a piece shown empty: the player frame's bar tracks (the bars are drawn on top). */

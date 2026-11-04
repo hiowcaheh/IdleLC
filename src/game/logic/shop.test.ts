@@ -1,17 +1,21 @@
 import { describe, expect, it } from 'vitest'
-import { ITEMS, SHOP_SELL_RATE, getItem } from '../data/items.ts'
+import { GOLDEN_MAGNIFIER_ID, ITEMS, RARE_SETS, SHOP_SELL_RATE, getItem } from '../data/items.ts'
+import type { ItemDef, RareSetDef } from '../data/types.ts'
 import { createCharacterData } from './character.ts'
 import {
   applyBuy,
   applySale,
   applySellPieces,
+  bestShopVariant,
   buyPrice,
   sellPrice,
   shopOffer,
+  shopRareInfo,
   stacksValue,
   tierWindow,
   sortedShopGoods,
 } from './shop.ts'
+import { applyIdentify, rollRare } from './rare.ts'
 
 const hero = {
   ...createCharacterData({ name: 'Brom', classId: 'knight' }, 'id', 0),
@@ -147,5 +151,158 @@ describe('buying', () => {
     expect(sale.character.gear.map((p) => p.uid)).toEqual(['z'])
     expect(() => applySellPieces(c, ['x', 'nope'])).toThrowError(/not-owned/)
     expect(() => applySellPieces(c, [])).toThrowError(/nothing-to-sell/)
+  })
+})
+
+describe('shop rare variants', () => {
+  const baseId = 7
+  const variantId = 90001
+  const lowSet = 90001
+  const highSet = 90002
+  const unreachableSet = 90003
+
+  /** Same-price armor variants with source-shaped seal pools, isolated from the live data. */
+  function withVariants(run: () => void) {
+    const itemBackup = { ...ITEMS }
+    const setBackup = { ...RARE_SETS }
+    const definition: RareSetDef = {
+      id: lowSet,
+      grade: 4,
+      type: 1,
+      prefix: 'Sturdy',
+      attack: 0,
+      defense: 10,
+      magic: 0,
+      resist: 0,
+      options: [12, 11, 18].map((type) => ({ type, level: 1, chance: 10000 })),
+    }
+    RARE_SETS[lowSet] = definition
+    RARE_SETS[highSet] = {
+      ...definition,
+      id: highSet,
+      grade: 0,
+      prefix: 'Casting-Up',
+      options: [12, 11, 18, 22, 13, 58].map((type, i) => ({
+        type,
+        level: 5,
+        chance: [10000, 10000, 10000, 9000, 8000, 1000][i]!,
+      })),
+    }
+    RARE_SETS[unreachableSet] = {
+      ...RARE_SETS[highSet]!,
+      id: unreachableSet,
+      prefix: 'Unreachable',
+      options: [...RARE_SETS[highSet]!.options, { type: 64, level: 5, chance: 10000 }],
+    }
+    ITEMS[baseId] = { ...getItem(baseId), rare: [{ set: lowSet, weight: 10000 }] }
+    ITEMS[variantId] = {
+      ...getItem(baseId),
+      id: variantId,
+      rare: [
+        { set: lowSet, weight: 9750 },
+        { set: highSet, weight: 250 },
+      ],
+    }
+    try {
+      run()
+    } finally {
+      for (const id of Object.keys(ITEMS)) delete ITEMS[Number(id)]
+      Object.assign(ITEMS, itemBackup)
+      for (const id of Object.keys(RARE_SETS)) delete RARE_SETS[Number(id)]
+      Object.assign(RARE_SETS, setBackup)
+    }
+  }
+
+  it('offers one stronger rare variant at the same tier and price, bought and appraised normally', () => {
+    withVariants(() => {
+      const character = { ...hero, gold: 2_000_000 }
+      const helmet = shopOffer(character).gear.find((slot) => slot.slot === 'helmet')!
+      expect(helmet.tiers).toEqual([{ level: 2, items: [variantId] }])
+      expect(buyPrice(variantId)).toBe(buyPrice(baseId))
+      expect(() => applyBuy(character, baseId, 1)).toThrowError(/not-in-shop/)
+      const bought = applyBuy(character, variantId, 1).character
+      expect(bought.gold).toBe(character.gold - buyPrice(baseId))
+      expect(bought.gear).toEqual([]) // still unidentified, in a stack
+      const stocked = applyBuy(bought, GOLDEN_MAGNIFIER_ID, 1).character
+      const rolls = [0, 0.99] // glass succeeds, Grade A set; remaining rolls give all six seals
+      const identified = applyIdentify(
+        stocked,
+        GOLDEN_MAGNIFIER_ID,
+        [{ itemId: variantId, count: 1 }],
+        () => rolls.shift() ?? 0,
+        () => 'shop-rare',
+      )
+      expect(identified.results[0]!.success).toBe(true)
+      expect(identified.character.gear[0]).toMatchObject({ itemId: variantId, rare: highSet })
+      expect(identified.character.gear[0]!.options?.map((o) => o.type)).toEqual([
+        12, 11, 18, 22, 13, 58,
+      ])
+      expect(identified.character.inventory.some((s) => s.itemId === variantId)).toBe(false)
+      // Better options are possible, without guaranteeing Grade A or all six seals.
+      expect(rollRare(variantId, () => 0).rare).toBe(lowSet)
+      expect(rollRare(variantId, () => 0.99).options).toHaveLength(3)
+      expect(getItem(baseId).rare).toEqual([{ set: lowSet, weight: 10000 }])
+    })
+  })
+
+  it('rejects unrelated variants and leaves ordinary gear unchanged', () => {
+    withVariants(() => {
+      const strong = getItem(variantId)
+      const different: Partial<ItemDef>[] = [
+        { name: 'Different armor' },
+        { level: strong.level + 1 },
+        { price: strong.price + 1 },
+        { type: 'weapon' },
+        { upgradeable: !strong.upgradeable },
+        { gear: { ...strong.gear!, slot: 'pants' } },
+        { gear: { ...strong.gear!, subtype: strong.gear!.subtype + 1 } },
+        { gear: { ...strong.gear!, defense: strong.gear!.defense + 1 } },
+        { gear: { ...strong.gear!, classes: ['healer'] } },
+        { gear: undefined },
+      ]
+      for (const changed of different) {
+        ITEMS[variantId] = { ...strong, ...changed }
+        expect(bestShopVariant(baseId, 'knight')).toBe(baseId)
+      }
+      ITEMS[variantId] = strong
+      ITEMS[baseId] = { ...getItem(baseId), rare: undefined }
+      expect(bestShopVariant(baseId, 'knight')).toBe(baseId)
+    })
+  })
+
+  it('does not advertise unreachable sets or seals', () => {
+    withVariants(() => {
+      ITEMS[variantId] = {
+        ...getItem(variantId),
+        rare: [
+          { set: highSet, weight: 250 },
+          { set: unreachableSet, weight: 0 },
+          { set: 99999, weight: 10000 },
+        ],
+      }
+      RARE_SETS[highSet]!.options.push({ type: 64, level: 5, chance: 0 })
+      const info = shopRareInfo(variantId)
+      expect(info.maxSeals).toBe(6)
+      expect(info.grade).toBe(0)
+      expect(info.sets.map((s) => s.id)).toEqual([highSet])
+    })
+  })
+
+  it('prefers better remaining grades when the six-seal Grade A chance is equal', () => {
+    withVariants(() => {
+      RARE_SETS[90004] = { ...RARE_SETS[lowSet]!, id: 90004, grade: 2 }
+      ITEMS[90002] = {
+        ...getItem(variantId),
+        id: 90002,
+        name: getItem(baseId).name.toUpperCase(),
+        rare: [
+          { set: lowSet, weight: 5000 },
+          { set: 90004, weight: 4750 },
+          { set: highSet, weight: 250 },
+        ],
+      }
+      expect(shopRareInfo(90002).gradeChance).toBe(shopRareInfo(variantId).gradeChance)
+      expect(bestShopVariant(baseId, 'knight')).toBe(90002)
+    })
   })
 })

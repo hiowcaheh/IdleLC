@@ -2361,6 +2361,20 @@ a.button {
   color: var(--gilt-bright);
   font-variant-numeric: tabular-nums;
 }
+.sheet--shop .shop__gold {
+  min-width: 140px;
+  max-width: 100%;
+  justify-content: flex-end;
+  margin-right: 0;
+  padding: 4px 8px;
+  border: solid transparent;
+  border-width: 3px 5px;
+  border-image: url('/ui/lc/value-box.webp') 3 5 fill / 3px 5px stretch;
+}
+.shop__seals {
+  display: block;
+  color: #b9cbe0;
+}
 
 .shop__filter {
   display: flex;
@@ -4030,9 +4044,13 @@ a.button {
 
 .book {
   display: grid;
-  grid-template-columns: minmax(0, 46fr) minmax(0, 54fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
   gap: 8px;
-  align-items: start;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  align-items: stretch;
 }
 
 .book__list {
@@ -4040,6 +4058,11 @@ a.button {
   /* long names are cut, not widening the column over the page */
   grid-template-columns: minmax(0, 1fr);
   min-width: 0;
+  min-height: 0;
+  align-content: start;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
   gap: 3px;
   margin: 0;
   padding: 0;
@@ -4096,9 +4119,9 @@ a.button {
 }
 
 .book__page {
-  position: sticky;
-  top: 0;
   display: grid;
+  align-content: start;
+  min-height: 0;
   gap: 6px;
   padding: 6px;
   border-radius: 2px;
@@ -4110,6 +4133,12 @@ a.button {
   height: 150px;
   border-radius: 2px;
   background: radial-gradient(circle at 50% 60%, rgba(120, 100, 70, 0.35), rgba(0, 0, 0, 0.5));
+}
+
+/* Vertical touch gestures scroll the details even when they start over the turntable. */
+.book__preview > div,
+.book__preview canvas {
+  touch-action: pan-y !important;
 }
 
 .book__name {
@@ -4151,7 +4180,10 @@ a.button {
   /* the preview's canvas must not widen the page (grid items default to their content width) */
   grid-template-columns: minmax(0, 1fr);
   min-width: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
 }
 
 .book__facts {
@@ -4686,10 +4718,7 @@ a.button {
   color: #ffe788;
 }
 .skills-summary__sp {
-  min-width: 96px;
-  padding-left: 22px !important;
-  border: 0 !important;
-  background: url('/ui/lc/skills-sp.webp') center / 100% 100% no-repeat;
+  min-width: 102px;
 }
 .skills-slot {
   flex: none;
@@ -4802,14 +4831,29 @@ a.button {
 }
 .sp-icon {
   display: inline-block;
-  width: 17px;
-  height: 17px;
+  width: 20px;
+  height: 20px;
   flex: none;
   background: url('/ui/lc/sp-icon.webp') center / contain no-repeat;
 }
 .character-stats__group[aria-label='Attributes'] dd {
   display: block;
   width: 58px;
+  height: 24px;
+}
+.character-stats__group[aria-label='Attributes'] .hero-stats > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px 25px;
+  gap: 5px;
+}
+.character-stats__group[aria-label='Attributes'] dt {
+  flex-direction: column;
+  gap: 0;
+}
+@media (max-width: 360px) {
+  .character-stats__group[aria-label='Attributes'] .hero-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .attribute-add {
   width: 25px;
@@ -4919,14 +4963,18 @@ a.button {
 }
 .sheet--skill-detail .skill-rank {
   margin-top: 14px;
-  padding: 0;
+  padding: 0 10px 10px;
   background: #182128aa;
 }
 .sheet--skill-detail .skill-rank__title {
-  margin: 0;
+  margin: 0 -10px 8px;
 }
 .sheet--skill-detail .skill-rank__effects {
-  padding-bottom: 10px;
+  padding-right: 4px;
+}
+.skill-row__mastered {
+  color: #a9d984;
+  font-weight: 700;
 }
 .sheet--settings {
   border-image-source: url('/ui/lc/settings-window.webp');
@@ -4970,6 +5018,16 @@ a.button {
 .sheet--book {
   border-image-source: url('/ui/lc/book-window.webp');
 }
+.sheet--book .sheet__body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 10px;
+}
+.sheet--book .book__zones,
+.sheet--book .sheet__meta {
+  flex: none;
+}
 .sheet--book .book__zones {
   gap: 4px;
 }
@@ -4980,15 +5038,15 @@ a.button {
 }
 .gift-icon {
   display: inline-block;
-  width: 23px;
-  height: 23px;
+  width: 16px;
+  height: 16px;
   flex: none;
   background: url('/ui/lc/gift.webp') center / contain no-repeat;
   vertical-align: middle;
 }
 .book__reward-ready {
-  width: 23px;
-  height: 23px;
+  width: 16px;
+  height: 16px;
   border-image: none;
   background: none;
   text-shadow: none;
@@ -5045,6 +5103,7 @@ a.button {
   background: none;
   border-radius: 0;
   overflow: visible;
+  box-shadow: none;
 }
 .bar--book .bar__fill {
   inset: 7px 14px;
@@ -5052,8 +5111,15 @@ a.button {
   background: url('/ui/lc/book-fill.webp') center / 100% 100% no-repeat;
 }
 .bar--book .bar__text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
   font-size: 11px;
   text-shadow: 0 1px 2px #000;
+  pointer-events: none;
 }
 
 /* Show the entire loading illustration; a separate blurred backdrop fills portrait margins. */

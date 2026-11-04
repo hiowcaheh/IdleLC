@@ -4,15 +4,18 @@
  */
 import {
   HEAVEN_STONE_ID,
+  ITEMS,
   SHOP_BUY_RATE,
   SHOP_SELL_RATE,
   getItem,
+  getRareSet,
+  sameItemAppearance,
   shopGear,
   shopItems,
   shopMagnifiers,
   type ShopTier,
 } from '../data/items.ts'
-import type { GearSlot } from '../data/types.ts'
+import type { ClassId, GearSlot } from '../data/types.ts'
 import type { CharacterData } from './character.ts'
 import { GameError } from './errors.ts'
 import { addToInventory, type ItemStack } from './loot.ts'
@@ -128,6 +131,65 @@ export function tierWindow(tiers: readonly ShopTier[], level: number): ShopTier[
  */
 const EVERYWHERE = [HEAVEN_STONE_ID]
 
+/** Only sets and seals with positive source weights can be obtained after appraisal. */
+export function shopRareInfo(itemId: number) {
+  const sets = (getItem(itemId).rare ?? []).flatMap(({ set, weight }) => {
+    const definition = getRareSet(set)
+    return definition && weight > 0 ? [{ definition, weight }] : []
+  })
+  const grade = sets.length ? Math.min(...sets.map((s) => s.definition.grade)) : null
+  const best = sets.filter((s) => s.definition.grade === grade)
+  const total = sets.reduce((sum, s) => sum + s.weight, 0)
+  return {
+    maxSeals: Math.max(
+      0,
+      ...sets.map((s) => s.definition.options.filter((o) => o.chance > 0).length),
+    ),
+    grade,
+    gradeChance: total ? best.reduce((sum, s) => sum + s.weight, 0) / total : 0,
+    meanGrade: total ? sets.reduce((sum, s) => sum + s.definition.grade * s.weight, 0) / total : 5,
+    sets: best.map((s) => s.definition),
+  }
+}
+
+/** One row per item family, offering its source rare variant with the strongest seal pool. */
+export function bestShopVariant(itemId: number, classId: ClassId): number {
+  const base = getItem(itemId)
+  if (!base.gear || !base.rare?.length) return itemId
+  const rank = (id: number) => {
+    const info = shopRareInfo(id)
+    return [info.maxSeals, -(info.grade ?? 5), info.gradeChance, -info.meanGrade, info.sets.length]
+  }
+  let chosen = itemId
+  let score = rank(itemId)
+  for (const item of Object.values(ITEMS)) {
+    if (
+      !item.rare?.length ||
+      !sameItemAppearance(itemId, item.id) ||
+      item.type !== base.type ||
+      item.level !== base.level ||
+      item.price !== base.price ||
+      item.upgradeable !== base.upgradeable ||
+      item.gear?.slot !== base.gear.slot ||
+      item.gear.subtype !== base.gear.subtype ||
+      item.gear.attack !== base.gear.attack ||
+      item.gear.magicAttack !== base.gear.magicAttack ||
+      item.gear.defense !== base.gear.defense ||
+      item.gear.magicDefense !== base.gear.magicDefense ||
+      item.gear.attackInterval !== base.gear.attackInterval ||
+      !item.gear.classes.includes(classId)
+    )
+      continue
+    const next = rank(item.id)
+    const difference = next.map((value, i) => value - score[i]!).find((value) => value !== 0) ?? 0
+    if (difference > 0) {
+      chosen = item.id
+      score = next
+    }
+  }
+  return chosen
+}
+
 export function shopOffer(
   character: Pick<CharacterData, 'classId' | 'level' | 'location'>,
 ): ShopOffer {
@@ -135,7 +197,10 @@ export function shopOffer(
   return {
     gear: (Object.entries(byClass) as [GearSlot, ShopTier[]][]).map(([slot, tiers]) => ({
       slot,
-      tiers: tierWindow(tiers, character.level),
+      tiers: tierWindow(tiers, character.level).map((tier) => ({
+        ...tier,
+        items: tier.items.map((id) => bestShopVariant(id, character.classId)),
+      })),
     })),
     goods: [
       ...new Set([

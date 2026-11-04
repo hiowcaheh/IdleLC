@@ -1,5 +1,29 @@
 # Historia zmian
 
+## 2026-11-04 — osiem poprawek Book, postaci, skilli i sklepu
+
+Punkt wyjścia: `b0f10ab`. [Zakres i walidacja](docs/book-shop-ui-fixes.md).
+
+1. Lista potworów i informacje w Book przewijają się niezależnie, również
+   dotykiem nad podglądem 3D. Licznik jest na pasku postępu, prezenty są mniejsze.
+2. Pola sum atrybutów są równe i symetrycznie ustawione; plusy pozostają obok.
+3. Character i Skills mają wspólną pełną ikonę SP bez rozciągania grafiki.
+4. Bieżący i następny poziom w modalu skilla mają odstępy od obu krawędzi.
+5. `Mastered` jest pod nazwą w liście i w nagłówku szczegółów, bez powtórki na dole.
+6. Usunięto dwie ciemne kreski z dolnej części ramki Book.
+7. Ilość posiadanego złota w Shop ma oryginalną ramkę pola wartości.
+8. Sklep oferuje najlepsze dostępne źródłowe warianty rare w tej samej rodzinie,
+   cenie i poziomie. Po odkryciu można uzyskać niebieską klasę A i sześć opcji,
+   m.in. casting/unik na hełmie, silence/stone na klatce i spodniach, bieg na butach,
+   zgodnie z pulą przedmiotu. Oferta pokazuje liczbę pieczęci i możliwą klasę.
+   Wynik nadal jest losowy; posiadane sztuki nie są zmieniane.
+
+Weryfikacja: **389 testów / 43 pliki**, lint, formatowanie, TypeScript i build.
+Chromium: trzy rozmiary okna, niezależny scroll myszy i dotyku, audyt 687 wpisów
+progów oraz 39 zakupów/identyfikacji w serwisie na rzeczywistych danych LC.
+Pełny build: zakup i odkrycie sprzętu przez GUI oraz zapis po odświeżeniu przeszły.
+SaveVersion pozostaje **14**.
+
 ## 2026-11-04 — poziomy potworów, losowe nagrody i Dratan
 
 Punkt wyjścia: `bf61f0f`. [Reguły, źródła i walidacja](docs/pve-dratan-fixes.md).
