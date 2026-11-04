@@ -9,6 +9,15 @@ const GLADE_ENVIRONMENT: ZoneDef['environment'] = {
   groundHigh: '#7f8d43',
 }
 
+/** Desert light and haze around the original sand/rock/palm terrain. */
+const DRATAN_ENVIRONMENT: ZoneDef['environment'] = {
+  skyTop: '#64879b',
+  skyBottom: '#e4d1a6',
+  fog: '#c7b28b',
+  groundLow: '#9c8356',
+  groundHigh: '#c8ad75',
+}
+
 const PLACEHOLDER_ZONES: Record<string, ZoneDef> = {
   glade: {
     id: 'glade',
@@ -62,7 +71,7 @@ function huntingOrder(ids: string[]): string[] {
 }
 
 /** Zones drawn on the client's terrain (`npm run convert-lc -- --only terrain`). */
-const ZONE_MAPS: Record<string, string> = { 'lc-zone-0': 'juno' }
+const ZONE_MAPS: Record<string, string> = { 'lc-zone-0': 'juno', 'lc-zone-4': 'dratan' }
 
 /**
  * The zones in the game for now: Juno, Dratan, Merac and Egeha (owner's decision; max level 100).
@@ -85,7 +94,7 @@ export const ZONES: Record<string, ZoneDef> = lcData
             ),
             bossIds: z.monsterIds.filter((id) => RAID_BOSSES.has(id)),
             ...(ZONE_MAPS[z.id] ? { map: ZONE_MAPS[z.id] } : {}),
-            environment: GLADE_ENVIRONMENT,
+            environment: z.id === 'lc-zone-4' ? DRATAN_ENVIRONMENT : GLADE_ENVIRONMENT,
           },
         ]),
     )

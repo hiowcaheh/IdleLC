@@ -160,10 +160,10 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
   const facts: [string, ReactNode][] = [
     ['Level', String(monster.level)],
     ['HP', fmt(monster.stats.maxHp)],
-    ['EXP', fmt(monster.exp)],
+    ['Base EXP', fmt(monster.exp)],
     // a_skill_point is in 1/10 000 SP
-    ['SP', ((monster.sp ?? 0) / 10_000).toLocaleString('en-US', { maximumFractionDigits: 2 })],
-    ['Gold', <Gold amount={monster.gold} />],
+    ['Base SP', ((monster.sp ?? 0) / 10_000).toLocaleString('en-US', { maximumFractionDigits: 4 })],
+    ['Base gold', <Gold amount={monster.gold} />],
     ['Spot', `${index + 1}${index >= open ? ' · locked' : ''}`],
   ]
 
@@ -214,7 +214,11 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
                   <span className={`level-tag level-tag--${levelTone(character.level, m.level)}`}>
                     {m.level}
                   </span>
-                  <span className="book__monster-name">{m.name}</span>
+                  <span
+                    className={`book__monster-name level-tone--${levelTone(character.level, m.level)}`}
+                  >
+                    {m.name}
+                  </span>
                   {ready && (
                     <span
                       className="book__reward-ready"
@@ -234,7 +238,7 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
         </ul>
         <div className="book__page">
           <MonsterPreview modelId={monster.modelId} scale={monster.scale ?? 1} />
-          <h3 className="book__name">
+          <h3 className={`book__name level-tone--${levelTone(character.level, monster.level)}`}>
             {monster.name}
             {monster.elite && <span className="book__elite">Elite</span>}
           </h3>

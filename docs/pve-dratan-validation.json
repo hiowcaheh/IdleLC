@@ -1,0 +1,934 @@
+{
+  "date": "2026-11-04",
+  "baseline": "bf61f0f356719797562b67405401a3f6767562c8",
+  "scope": "Cztery zgłoszenia: źródłowe kolory/poziomy, losowe nagrody, Mist i Dratan",
+  "automated": {
+    "check": "passed",
+    "lint": "passed",
+    "prettier": "passed",
+    "typecheck": "passed",
+    "tests": 385,
+    "testFiles": 43,
+    "build": "passed",
+    "verifyLcRecovery": "passed",
+    "buildNote": "Istniejące ostrzeżenie rozmiaru pakietu lc-data (1192.66 kB)."
+  },
+  "save": {
+    "version": 14,
+    "migration": "Niepotrzebna; nie przeliczano wstecz wcześniejszych nagród."
+  },
+  "assets": {
+    "date": "2026-11-04",
+    "monsters": [
+      {
+        "id": "mist",
+        "bytes": 572960,
+        "materials": [
+          {
+            "name": "w2_m_mist",
+            "mode": "BLEND",
+            "opacity": 0.8352941176470589,
+            "unlit": true,
+            "transparentTexels": 24662,
+            "softTexels": 97185
+          }
+        ],
+        "clips": [
+          "w2mist_die",
+          "w2mist_idle01",
+          "w2mist_idle02",
+          "w2mist_att01",
+          "w2mist_wak",
+          "w2mist_da",
+          "w2mist_run",
+          "m_mist_att02"
+        ],
+        "bones": 56,
+        "hash": "1574f5700b"
+      },
+      {
+        "id": "mist_gr",
+        "bytes": 567688,
+        "materials": [
+          {
+            "name": "w2_m_mist_green",
+            "mode": "BLEND",
+            "opacity": 0.8352941176470589,
+            "unlit": true,
+            "transparentTexels": 24662,
+            "softTexels": 97185
+          }
+        ],
+        "clips": [
+          "w2mist_die",
+          "w2mist_idle01",
+          "w2mist_idle02",
+          "w2mist_att01",
+          "w2mist_wak",
+          "w2mist_da",
+          "w2mist_run",
+          "m_mist_att02"
+        ],
+        "bones": 56,
+        "hash": "8d42173dd2"
+      }
+    ],
+    "dratan": {
+      "width": 513,
+      "height": 513,
+      "metresPerCell": 6,
+      "sizeMetres": 3072,
+      "layers": 11,
+      "masks": 3,
+      "arenas": 42,
+      "maxArenaRise": 1.5968690029365291,
+      "minObstacleClearance": 14.36234083692261,
+      "sourceHeightmapIdentical": true,
+      "sourceWorldModels": 265,
+      "sourceInstances": 6092,
+      "models": 20,
+      "instances": 264,
+      "placementsMatchWorld": true,
+      "bytes": 1427023
+    },
+    "passed": true
+  },
+  "browser": {
+    "engine": "Chromium / SwiftShader",
+    "physicalIPhone": false,
+    "production": {
+      "cases": [
+        {
+          "viewport": [390, 844],
+          "preview": "Poison Mist",
+          "nameColor": "rgb(197, 197, 197)"
+        },
+        {
+          "viewport": [390, 844],
+          "preview": "Elite Poison Mist",
+          "nameColor": "rgb(197, 197, 197)"
+        },
+        {
+          "viewport": [390, 844],
+          "preview": "Master of Secret Technique",
+          "nameColor": "rgb(206, 73, 0)"
+        },
+        {
+          "viewport": [390, 844],
+          "preview": "Elite Mystic",
+          "nameColor": "rgb(206, 73, 0)"
+        },
+        {
+          "viewport": [1280, 900],
+          "preview": "Poison Mist",
+          "nameColor": "rgb(197, 197, 197)"
+        },
+        {
+          "viewport": [1280, 900],
+          "preview": "Elite Poison Mist",
+          "nameColor": "rgb(197, 197, 197)"
+        },
+        {
+          "viewport": [1280, 900],
+          "preview": "Master of Secret Technique",
+          "nameColor": "rgb(206, 73, 0)"
+        },
+        {
+          "viewport": [1280, 900],
+          "preview": "Elite Mystic",
+          "nameColor": "rgb(206, 73, 0)"
+        }
+      ],
+      "page_errors": [],
+      "console_errors": [],
+      "http_errors": [],
+      "failed_requests": [],
+      "gl": {
+        "terrainLayers": [11],
+        "linked": 27,
+        "failures": [],
+        "draws": 3933,
+        "maxTextures": 32
+      },
+      "passed": true
+    },
+    "scene": {
+      "cases": [
+        {
+          "viewport": [390, 844],
+          "zone": "lc-zone-4",
+          "level": 39,
+          "monster": "lc-418",
+          "phase": "fighting",
+          "monsterVisible": true,
+          "settled": true,
+          "frame": 38,
+          "drawCalls": 27,
+          "triangles": 50281,
+          "maxTextures": 32,
+          "terrain": {
+            "tiles": 64,
+            "triangles": 524288,
+            "maxVertices": 4225,
+            "programKeys": ["lc-terrain-11-3"]
+          },
+          "mist": [
+            {
+              "material": "w2_m_mist_green",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [0.4741520950808974, 0.18122722626692273, 0.9870538730631441]
+            },
+            {
+              "material": "w2_m_mist_green",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [0.454515222646779, 0.19735314571517973, 0.9874347136592131]
+            }
+          ],
+          "visibleProps": 20,
+          "width": 390,
+          "height": 844,
+          "zoom": 1,
+          "shadows": false
+        },
+        {
+          "viewport": [390, 844],
+          "zone": "lc-zone-4",
+          "level": 39,
+          "monster": "lc-445",
+          "phase": "fighting",
+          "monsterVisible": true,
+          "settled": true,
+          "frame": 89,
+          "drawCalls": 25,
+          "triangles": 41171,
+          "maxTextures": 32,
+          "terrain": {
+            "tiles": 64,
+            "triangles": 524288,
+            "maxVertices": 4225,
+            "programKeys": ["lc-terrain-11-3"]
+          },
+          "mist": [
+            {
+              "material": "w2_m_mist_green",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [-0.5267857091000313, 0.21458183987337975, 0.9873434594761586]
+            },
+            {
+              "material": "w2_m_mist_green",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [-0.442677651338649, 0.18530184564697483, 0.9870130213454472]
+            }
+          ],
+          "visibleProps": 19,
+          "width": 390,
+          "height": 844,
+          "zoom": 1,
+          "shadows": false
+        },
+        {
+          "viewport": [390, 844],
+          "zone": "lc-zone-4",
+          "level": 39,
+          "monster": "lc-245",
+          "phase": "fighting",
+          "monsterVisible": true,
+          "settled": true,
+          "frame": 144,
+          "drawCalls": 28,
+          "triangles": 48101,
+          "maxTextures": 32,
+          "terrain": {
+            "tiles": 64,
+            "triangles": 524288,
+            "maxVertices": 4225,
+            "programKeys": ["lc-terrain-11-3"]
+          },
+          "mist": [
+            {
+              "material": "w2_m_mist",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [0.5944597579837223, 0.2616661298209951, 0.9881366170499458]
+            },
+            {
+              "material": "w2_m_mist",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [0.46738048791468895, 0.27587000201179346, 0.9885384712762663]
+            }
+          ],
+          "visibleProps": 12,
+          "width": 390,
+          "height": 844,
+          "zoom": 1,
+          "shadows": false
+        },
+        {
+          "viewport": [390, 844],
+          "zone": "lc-zone-4",
+          "level": 39,
+          "monster": "lc-449",
+          "phase": "fighting",
+          "monsterVisible": true,
+          "settled": true,
+          "frame": 199,
+          "drawCalls": 25,
+          "triangles": 40069,
+          "maxTextures": 32,
+          "terrain": {
+            "tiles": 64,
+            "triangles": 524288,
+            "maxVertices": 4225,
+            "programKeys": ["lc-terrain-11-3"]
+          },
+          "mist": [
+            {
+              "material": "w2_m_mist",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [0.596240021226625, 0.22995685525482903, 0.9883555352046492]
+            },
+            {
+              "material": "w2_m_mist",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [0.5275439805640028, 0.24981840390646248, 0.9888333788969534]
+            }
+          ],
+          "visibleProps": 15,
+          "width": 390,
+          "height": 844,
+          "zoom": 1,
+          "shadows": false
+        },
+        {
+          "viewport": [1280, 900],
+          "zone": "lc-zone-4",
+          "level": 39,
+          "monster": "lc-418",
+          "phase": "fighting",
+          "monsterVisible": true,
+          "settled": true,
+          "frame": 251,
+          "drawCalls": 29,
+          "triangles": 66665,
+          "maxTextures": 32,
+          "terrain": {
+            "tiles": 64,
+            "triangles": 524288,
+            "maxVertices": 4225,
+            "programKeys": ["lc-terrain-11-3"]
+          },
+          "mist": [
+            {
+              "material": "w2_m_mist_green",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [-0.2512612194740071, 0.045659447511453614, 0.9797024274703615]
+            },
+            {
+              "material": "w2_m_mist_green",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [-0.2468079110465914, 0.002113292532724189, 0.9787871352202708]
+            }
+          ],
+          "visibleProps": 20,
+          "width": 1280,
+          "height": 900,
+          "zoom": 1,
+          "shadows": false
+        },
+        {
+          "viewport": [1280, 900],
+          "zone": "lc-zone-4",
+          "level": 39,
+          "monster": "lc-445",
+          "phase": "fighting",
+          "monsterVisible": true,
+          "settled": true,
+          "frame": 305,
+          "drawCalls": 28,
+          "triangles": 65747,
+          "maxTextures": 32,
+          "terrain": {
+            "tiles": 64,
+            "triangles": 524288,
+            "maxVertices": 4225,
+            "programKeys": ["lc-terrain-11-3"]
+          },
+          "mist": [
+            {
+              "material": "w2_m_mist_green",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [-0.28106139358355053, 0.04834517692262088, 0.9790563972804206]
+            },
+            {
+              "material": "w2_m_mist_green",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [-0.2583681913691703, 0.00030397450004432803, 0.9780320698913785]
+            }
+          ],
+          "visibleProps": 19,
+          "width": 1280,
+          "height": 900,
+          "zoom": 1,
+          "shadows": false
+        },
+        {
+          "viewport": [1280, 900],
+          "zone": "lc-zone-4",
+          "level": 39,
+          "monster": "lc-245",
+          "phase": "fighting",
+          "monsterVisible": true,
+          "settled": true,
+          "frame": 357,
+          "drawCalls": 30,
+          "triangles": 56689,
+          "maxTextures": 32,
+          "terrain": {
+            "tiles": 64,
+            "triangles": 524288,
+            "maxVertices": 4225,
+            "programKeys": ["lc-terrain-11-3"]
+          },
+          "mist": [
+            {
+              "material": "w2_m_mist",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [-0.3285353028972964, 0.08679530147976432, 0.9794253173201424]
+            },
+            {
+              "material": "w2_m_mist",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [-0.2872560128455301, 0.02928297592701753, 0.9781871507135781]
+            }
+          ],
+          "visibleProps": 12,
+          "width": 1280,
+          "height": 900,
+          "zoom": 1,
+          "shadows": false
+        },
+        {
+          "viewport": [1280, 900],
+          "zone": "lc-zone-4",
+          "level": 39,
+          "monster": "lc-449",
+          "phase": "fighting",
+          "monsterVisible": true,
+          "settled": true,
+          "frame": 408,
+          "drawCalls": 29,
+          "triangles": 57177,
+          "maxTextures": 32,
+          "terrain": {
+            "tiles": 64,
+            "triangles": 524288,
+            "maxVertices": 4225,
+            "programKeys": ["lc-terrain-11-3"]
+          },
+          "mist": [
+            {
+              "material": "w2_m_mist",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [0.33070510446874, 0.07547570407761392, 0.9804035451187197]
+            },
+            {
+              "material": "w2_m_mist",
+              "basic": true,
+              "transparent": true,
+              "opacity": 0.8352941176470589,
+              "depthWrite": false,
+              "castShadow": false,
+              "bones": 56,
+              "center": [0.26889695895619886, 0.09785278626008836, 0.9816303612568832]
+            }
+          ],
+          "visibleProps": 15,
+          "width": 1280,
+          "height": 900,
+          "zoom": 1,
+          "shadows": false
+        }
+      ],
+      "colors": [
+        {
+          "playerLevel": 33,
+          "monsterLevel": 39,
+          "color": "rgb(206, 73, 0)"
+        },
+        {
+          "playerLevel": 34,
+          "monsterLevel": 39,
+          "color": "rgb(215, 170, 0)"
+        },
+        {
+          "playerLevel": 39,
+          "monsterLevel": 39,
+          "color": "rgb(197, 197, 197)"
+        },
+        {
+          "playerLevel": 44,
+          "monsterLevel": 39,
+          "color": "rgb(91, 153, 0)"
+        },
+        {
+          "playerLevel": 45,
+          "monsterLevel": 39,
+          "color": "rgb(0, 139, 170)"
+        }
+      ],
+      "highQuality": {
+        "zone": "lc-zone-4",
+        "level": 39,
+        "monster": "lc-418",
+        "phase": "fighting",
+        "monsterVisible": true,
+        "settled": true,
+        "frame": 9,
+        "drawCalls": 35,
+        "triangles": 53192,
+        "maxTextures": 32,
+        "terrain": {
+          "tiles": 64,
+          "triangles": 524288,
+          "maxVertices": 4225,
+          "programKeys": ["lc-terrain-11-3"]
+        },
+        "mist": [
+          {
+            "material": "w2_m_mist_green",
+            "basic": true,
+            "transparent": true,
+            "opacity": 0.8352941176470589,
+            "depthWrite": false,
+            "castShadow": false,
+            "bones": 56,
+            "center": [0.5407564921784912, 0.19144685882405116, 0.9874643556638331]
+          },
+          {
+            "material": "w2_m_mist_green",
+            "basic": true,
+            "transparent": true,
+            "opacity": 0.8352941176470589,
+            "depthWrite": false,
+            "castShadow": false,
+            "bones": 56,
+            "center": [0.39013352468561774, 0.1869344554440467, 0.987496561246988]
+          }
+        ],
+        "visibleProps": 20,
+        "width": 390,
+        "height": 844,
+        "zoom": 1,
+        "shadows": true
+      },
+      "page_errors": [],
+      "console_errors": [],
+      "http_errors": [],
+      "failed_requests": [],
+      "passed": true
+    },
+    "realDataRewards": {
+      "monster": "lc-418 / Poison Mist, level 39",
+      "sourceBase": {
+        "exp": 23058,
+        "sp": 1000,
+        "gold": 308
+      },
+      "cases": [
+        {
+          "levelDifferencePlayerMinusMob": -6,
+          "rates": {
+            "exp": 100,
+            "sp": 100,
+            "drops": true,
+            "goldChance": 0.8
+          },
+          "kills": 30,
+          "ranges": {
+            "exp": [20753, 25363],
+            "sp": [900, 1100],
+            "gold": [0, 455]
+          },
+          "uniqueValues": {
+            "exp": 15,
+            "sp": 17,
+            "gold": 21
+          },
+          "itemDrops": 29,
+          "sample": [
+            {
+              "exp": 22367,
+              "sp": 1020,
+              "gold": 0,
+              "drops": 2,
+              "level": 33
+            },
+            {
+              "exp": 25363,
+              "sp": 1090,
+              "gold": 240,
+              "drops": 2,
+              "level": 33
+            },
+            {
+              "exp": 24210,
+              "sp": 1060,
+              "gold": 418,
+              "drops": 0,
+              "level": 33
+            }
+          ],
+          "persisted": {
+            "sp": 29910,
+            "gold": 6783,
+            "exp": 706262,
+            "level": 33
+          }
+        },
+        {
+          "levelDifferencePlayerMinusMob": 0,
+          "rates": {
+            "exp": 100,
+            "sp": 100,
+            "drops": true,
+            "goldChance": 0.8
+          },
+          "kills": 30,
+          "ranges": {
+            "exp": [20753, 25363],
+            "sp": [900, 1100],
+            "gold": [0, 455]
+          },
+          "uniqueValues": {
+            "exp": 15,
+            "sp": 17,
+            "gold": 21
+          },
+          "itemDrops": 29,
+          "sample": [
+            {
+              "exp": 22367,
+              "sp": 1020,
+              "gold": 0,
+              "drops": 2,
+              "level": 39
+            },
+            {
+              "exp": 25363,
+              "sp": 1090,
+              "gold": 240,
+              "drops": 2,
+              "level": 39
+            },
+            {
+              "exp": 24210,
+              "sp": 1060,
+              "gold": 418,
+              "drops": 0,
+              "level": 39
+            }
+          ],
+          "persisted": {
+            "sp": 29910,
+            "gold": 6783,
+            "exp": 706262,
+            "level": 39
+          }
+        },
+        {
+          "levelDifferencePlayerMinusMob": 5,
+          "rates": {
+            "exp": 45,
+            "sp": 50,
+            "drops": true,
+            "goldChance": 0.55
+          },
+          "kills": 30,
+          "ranges": {
+            "exp": [9339, 11413],
+            "sp": [450, 550],
+            "gold": [0, 462]
+          },
+          "uniqueValues": {
+            "exp": 18,
+            "sp": 15,
+            "gold": 11
+          },
+          "itemDrops": 26,
+          "sample": [
+            {
+              "exp": 10065,
+              "sp": 510,
+              "gold": 0,
+              "drops": 2,
+              "level": 44
+            },
+            {
+              "exp": 11413,
+              "sp": 545,
+              "gold": 0,
+              "drops": 1,
+              "level": 44
+            },
+            {
+              "exp": 9546,
+              "sp": 525,
+              "gold": 0,
+              "drops": 0,
+              "level": 44
+            }
+          ],
+          "persisted": {
+            "sp": 15360,
+            "gold": 3883,
+            "exp": 304955,
+            "level": 44
+          }
+        },
+        {
+          "levelDifferencePlayerMinusMob": 6,
+          "rates": {
+            "exp": 10,
+            "sp": 40,
+            "drops": false,
+            "goldChance": 0.5
+          },
+          "kills": 30,
+          "ranges": {
+            "exp": [2098, 2512],
+            "sp": [360, 440],
+            "gold": [0, 443]
+          },
+          "uniqueValues": {
+            "exp": 16,
+            "sp": 15,
+            "gold": 15
+          },
+          "itemDrops": 0,
+          "sample": [
+            {
+              "exp": 2236,
+              "sp": 408,
+              "gold": 0,
+              "drops": 0,
+              "level": 45
+            },
+            {
+              "exp": 2489,
+              "sp": 368,
+              "gold": 434,
+              "drops": 0,
+              "level": 45
+            },
+            {
+              "exp": 2512,
+              "sp": 364,
+              "gold": 0,
+              "drops": 0,
+              "level": 45
+            }
+          ],
+          "persisted": {
+            "sp": 11936,
+            "gold": 4440,
+            "exp": 69656,
+            "level": 45
+          }
+        },
+        {
+          "levelDifferencePlayerMinusMob": 10,
+          "rates": {
+            "exp": 10,
+            "sp": 0,
+            "drops": false,
+            "goldChance": 0.3
+          },
+          "kills": 30,
+          "ranges": {
+            "exp": [2075, 2535],
+            "sp": [1, 1],
+            "gold": [0, 443]
+          },
+          "uniqueValues": {
+            "exp": 16,
+            "sp": 1,
+            "gold": 12
+          },
+          "itemDrops": 0,
+          "sample": [
+            {
+              "exp": 2236,
+              "sp": 1,
+              "gold": 0,
+              "drops": 0,
+              "level": 49
+            },
+            {
+              "exp": 2489,
+              "sp": 1,
+              "gold": 434,
+              "drops": 0,
+              "level": 49
+            },
+            {
+              "exp": 2512,
+              "sp": 1,
+              "gold": 0,
+              "drops": 0,
+              "level": 49
+            }
+          ],
+          "persisted": {
+            "sp": 30,
+            "gold": 3817,
+            "exp": 69817,
+            "level": 49
+          }
+        },
+        {
+          "levelDifferencePlayerMinusMob": 16,
+          "rates": {
+            "exp": 10,
+            "sp": 0,
+            "drops": false,
+            "goldChance": 0
+          },
+          "kills": 30,
+          "ranges": {
+            "exp": [2075, 2512],
+            "sp": [1, 1],
+            "gold": [0, 0]
+          },
+          "uniqueValues": {
+            "exp": 14,
+            "sp": 1,
+            "gold": 1
+          },
+          "itemDrops": 0,
+          "sample": [
+            {
+              "exp": 2236,
+              "sp": 1,
+              "gold": 0,
+              "drops": 0,
+              "level": 55
+            },
+            {
+              "exp": 2489,
+              "sp": 1,
+              "gold": 0,
+              "drops": 0,
+              "level": 55
+            },
+            {
+              "exp": 2489,
+              "sp": 1,
+              "gold": 0,
+              "drops": 0,
+              "level": 55
+            }
+          ],
+          "persisted": {
+            "sp": 30,
+            "gold": 0,
+            "exp": 68782,
+            "level": 55
+          }
+        }
+      ],
+      "notes": [
+        "Po 30 osobnych raportów serwisu dla każdej różnicy poziomów, na rzeczywistych danych LC.",
+        "Każdy raport przeszedł przez LocalGameService i zachował sumy SP/Nas w zapisie.",
+        "Przy +6 nie ma przedmiotów, przy +10 SP ma minimum 1 jednostki, a przy +16 Nas nie wypada."
+      ]
+    },
+    "artifactDirectory": "/workspace/work/batch4/ (lokalne skrypty, wyniki i zrzuty poza Git)",
+    "measurementNotes": [
+      "Shader produkcyjny zawiera warstwę uLayer10 i linkuje bez błędów.",
+      "Scena kontroluje rzeczywiste SkinnedMesh, alfę, depthWrite, castShadow, kości, położenie w kadrze i rysowane instancje.",
+      "Geometria ma 524288 trójkątów w 64 kaflach; frustum culling redukuje geometrię wysyłaną w konkretnym kadrze.",
+      "Przy pomiarze kadru zatrzymano walkę po fazie approach, aby ruch przeciwnika nie zmieniał położenia etykiet i kamery."
+    ]
+  },
+  "limitations": [
+    "Walidacja przeglądarki korzysta z Chromium i programowego renderera; bez fizycznego iPhone/Safari.",
+    "Runtime money rate jest neutralny (100%); nie włączano nieznanych eventów, premium, konfiguracji t_drop_prob ani party.",
+    "Zachowano własne szanse akcesoriów/Smelting i niezależne wpisy tabeli przedmiotów; pełne cztery próby wyboru spośród 20 slotów są odrębnym portem.",
+    "Areny są własnymi bezpiecznymi miejscami idle; nie są przedstawiane jako spawny z t_npc_regen. Eksport props obejmuje otoczenie trasy.",
+    "Naprawiono materiały i animację modeli Mist; nie jest to pełny port BAE ani wszystkich efektów klienta."
+  ]
+}

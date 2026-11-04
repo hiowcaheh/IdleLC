@@ -934,7 +934,7 @@
     },
     {
       "id": "mist_gr",
-      "file": "mist_gr.glb?v=566418a6de",
+      "file": "mist_gr.glb?v=8d42173dd2",
       "scale": 1,
       "animations": {
         "idle": "w2mist_idle01",
@@ -1160,7 +1160,7 @@
     },
     {
       "id": "mist",
-      "file": "mist.glb?v=f81f7cf586",
+      "file": "mist.glb?v=1574f5700b",
       "scale": 1,
       "animations": {
         "idle": "w2mist_idle01",
@@ -1168,7 +1168,8 @@
         "walk": "w2mist_wak",
         "run": "w2mist_run",
         "attack": [
-          "w2mist_att01"
+          "w2mist_att01",
+          "m_mist_att02"
         ],
         "hit": "w2mist_da",
         "die": "w2mist_die"

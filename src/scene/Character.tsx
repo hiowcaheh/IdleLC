@@ -112,7 +112,7 @@ const SELF_LIGHT = 0.35
 
 interface Tinted {
   material: MeshStandardMaterial
-  emissive: Color
+  emissive: Color | null
 }
 
 /** A material of our own for a model copy: tint, self light, and a slot in the hit flash list. */
@@ -128,7 +128,8 @@ function ownMaterial(m: Material, model: ModelEntry | null, materials: Tinted[])
     copy.emissiveMap = copy.map
     copy.emissive.setScalar(SELF_LIGHT)
   }
-  if (copy.emissive) materials.push({ material: copy, emissive: copy.emissive.clone() })
+  // Full Bright imports are unlit; own their copies too, so switching monsters releases them.
+  materials.push({ material: copy, emissive: copy.emissive?.clone() ?? null })
   // ultra graphics: textures stay sharp when seen at an angle (the GPU caps the value)
   const ultra = useGameStore.getState().save.settings.quality === 'ultra'
   if (ultra && copy.map && copy.map.anisotropy < ULTRA_ANISOTROPY) {
@@ -139,7 +140,10 @@ function ownMaterial(m: Material, model: ModelEntry | null, materials: Tinted[])
 }
 
 function prepareMesh(mesh: Mesh, model: ModelEntry | null, materials: Tinted[]) {
-  mesh.castShadow = true
+  // Translucent Full Bright clouds must not project the opaque outlines of their quads.
+  mesh.castShadow = [mesh.material]
+    .flat()
+    .every((m) => !(m.transparent && 'isMeshBasicMaterial' in m))
   // Skinned meshes move away from their bind-pose bounds; avoid popping out of view.
   mesh.frustumCulled = false
   mesh.material = Array.isArray(mesh.material)
@@ -463,7 +467,8 @@ export function Character({
     if (state.flash > 0) {
       state.flash = Math.max(0, state.flash - dt * 9)
       for (const { material, emissive } of materials) {
-        material.emissive.copy(emissive).lerp(FLASH_COLOR, state.flash * FLASH_STRENGTH)
+        if (emissive)
+          material.emissive.copy(emissive).lerp(FLASH_COLOR, state.flash * FLASH_STRENGTH)
       }
     }
     const flinch = flinchRef.current

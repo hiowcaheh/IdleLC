@@ -4,6 +4,24 @@ Stan rejestru: 2026-11-02, punkt odniesienia implementacji `c9944c9`. Celem jest
 
 „Oryginał” w tym dokumencie oznacza odczytane źródła November 2018, z uwzględnieniem ich ograniczeń i flag. Nie potwierdzono, że każda reguła działała identycznie na serwerze prywatnego klienta 2015. Dla brakujących wartości DB nie wybieramy liczb na podstawie nazw.
 
+## Rozstrzygnięcia właściciela — 2026-11-04
+
+- **D09/D10:** polecenie obejmuje źródłowe różnice poziomu i losowanie nagród solo.
+  EXP/SP mają niezależne ±10%, źródłowe procenty i minimum 1. Nas ma szansę 80%
+  pomniejszaną o 5 pp za przewagę poziomu oraz ilość 50–150% bazy. Runtime rate
+  jest neutralny; nie włączamy nieznanych eventów, premium ani party.
+- **D08:** blokada od przewagi 6 poziomów dotyczy wszystkich aktualnych kill-dropów.
+  Pełny algorytm czterech prób spośród 20 slotów pozostaje osobnym zakresem;
+  dotychczasowe szanse Smelting Stone i akcesoriów są zachowane w dozwolonych killach.
+- **D24/D25:** oryginalny teren i obiekty Dratan są wdrożone w obecnym modelu idle:
+  42 własne, bezpieczne areny w kolejności spotów, obiekty w otoczeniu trasy.
+  Nie zmienia to blokad miast ani zakresu czterech stref / poziomu 100.
+- **D25:** źródłowe progi i paleta obejmują całe nazwy potworów; materiały Mist
+  zachowują alfę, Full Bright i dokładne klipy 2015. To nie pełny port BAE.
+
+Szczegóły i walidacja: [raport PvE i Dratan](pve-dratan-fixes.md). Nie ma migracji
+zapisu ani odbierania wcześniejszych nagród; SaveVersion pozostaje 14.
+
 ## Dalsze rozstrzygnięcia właściciela — 17 zgłoszeń GUI i premii
 
 - **D03 rozstrzygnięte:** plusy nadają wzrost ATK/DEF i premie +15 według źródeł.

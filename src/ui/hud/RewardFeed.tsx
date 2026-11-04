@@ -23,9 +23,9 @@ interface Group {
 
 let nextId = 1
 const fmt = (n: number) => n.toLocaleString('en-US')
-/** A kill's SP with two decimals (most kills give a fraction of a point). */
+/** Keep the server's 1/10 000 SP precision, including its minimum overlevelled reward. */
 const spText = (units: number) =>
-  (units / SP_UNIT).toLocaleString('en-US', { maximumFractionDigits: 2 })
+  (units / SP_UNIT).toLocaleString('en-US', { maximumFractionDigits: 4 })
 
 /**
  * What a kill brought — drops with their icons, EXP, SP, gold — rising up the right side of the

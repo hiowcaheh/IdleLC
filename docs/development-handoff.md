@@ -1,6 +1,12 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
-Najnowsza aktualizacja: [źródłowe premie ulepszeń i 17 poprawek GUI](client-ui-upgrade-fixes.md).
+Aktualizacja 2026-11-04: [poziomy PvE, losowe nagrody, Mist i Dratan](pve-dratan-fixes.md).
+`rewardKills` wspólnie rozlicza aktywne walki i AFK, z losowaniem każdego zabójstwa
+i zmianą kar po awansie. `killReward` daje tylko wartość oczekiwaną do estymacji.
+Dratan ma oryginalny teren/obiekty i 42 areny; Mist zachowuje alfę źródła.
+SaveVersion pozostaje **14**. Szczegóły granic zgodności i wyników są w raporcie.
+
+Poprzednia aktualizacja: [źródłowe premie ulepszeń i 17 poprawek GUI](client-ui-upgrade-fixes.md).
 Kamienie i szanse pozostają własne; wzrost ATK/DEF i +15 jest źródłowy. SaveVersion
 pozostaje 14. Walk speed ukryto, skille mają modal oraz okrągłe pasywne ikony,
 a loader pokazuje całą ilustrację przez `contain` na osobnym rozmytym tle.

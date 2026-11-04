@@ -381,19 +381,20 @@ p {
 }
 
 .level-tag--trivial {
-  background: #8f8a80;
+  background: #008baa;
+  color: #fff;
 }
 .level-tag--easy {
-  background: #7bc25a;
+  background: #5b9900;
 }
 .level-tag--even {
-  background: #e8d070;
+  background: #c5c5c5;
 }
 .level-tag--hard {
-  background: #ec8a3a;
+  background: #d7aa00;
 }
 .level-tag--deadly {
-  background: #e2483a;
+  background: #ce4900;
   color: #fff3e6;
 }
 
@@ -2722,23 +2723,23 @@ a.button {
 }
 
 .level-tone--trivial {
-  color: #b7b1a6;
+  color: #008baa;
 }
 
 .level-tone--easy {
-  color: #8fdc6a;
+  color: #5b9900;
 }
 
 .level-tone--even {
-  color: #f2d870;
+  color: #c5c5c5;
 }
 
 .level-tone--hard {
-  color: #ff9d4a;
+  color: #d7aa00;
 }
 
 .level-tone--deadly {
-  color: #ff5a48;
+  color: #ce4900;
 }
 
 .scene-label--effects .effect-row {
@@ -3972,7 +3973,6 @@ a.button {
   text-overflow: ellipsis;
   font-size: 15px;
   font-weight: 800;
-  color: #f4ead6;
 }
 
 .hunt__spot-meta {
@@ -4119,7 +4119,6 @@ a.button {
   gap: 6px;
   margin: 0;
   font-size: 15px;
-  color: var(--gilt-bright);
 }
 
 .book__elite {

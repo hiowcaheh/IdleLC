@@ -1,36 +1,17 @@
 import { useTexture } from '@react-three/drei'
-import { use, useMemo } from 'react'
+import { use, useEffect, useMemo } from 'react'
 import {
   MeshStandardMaterial,
   NoColorSpace,
-  PlaneGeometry,
   RepeatWrapping,
   SRGBColorSpace,
-  type BufferGeometry,
   type Texture,
 } from 'three'
-import { groundHeight, loadMap, mapBase, type LcMap, type TerrainMeta } from './lcMap.ts'
+import { loadMap, mapBase, type TerrainMeta } from './lcMap.ts'
+import { terrainGeometries } from './lcTerrainGeometry.ts'
 
-/**
- * The whole map as the client draws it: one vertex per height-map point (6 m apart), in map
- * coordinates (x, height, z).
- */
-function useGeometry(map: LcMap): BufferGeometry {
-  return useMemo(() => {
-    const { width, height, cell } = map.meta
-    const geo = new PlaneGeometry((width - 1) * cell, (height - 1) * cell, width - 1, height - 1)
-    geo.rotateX(-Math.PI / 2)
-    geo.translate(((width - 1) * cell) / 2, 0, ((height - 1) * cell) / 2)
-    const pos = geo.attributes.position!
-    for (let i = 0; i < pos.count; i++) {
-      pos.setY(i, groundHeight(map, pos.getX(i), pos.getZ(i)))
-    }
-    geo.computeVertexNormals()
-    return geo
-  }, [map])
-}
-
-const LAYERS = 9
+// Dratan has 11 layers + 3 mask sheets; one shadow map still fits a 16-sampler mobile GPU.
+const LAYERS = 11
 
 /**
  * The standard material with its colour from the map's layers: each layer's texture, repeated over
@@ -112,7 +93,15 @@ function useSplatMaterial(map: string, meta: TerrainMeta) {
 /** The client's terrain of a map (map coordinates; the caller moves it under the fight). */
 export function LcTerrain({ map }: { map: string }) {
   const data = use(loadMap(map))
-  const geometry = useGeometry(data)
+  const geometry = useMemo(() => terrainGeometries(data), [data])
+  useEffect(() => () => geometry.forEach((tile) => tile.dispose()), [geometry])
   const material = useSplatMaterial(map, data.meta)
-  return <mesh geometry={geometry} material={material} receiveShadow />
+  useEffect(() => () => material.dispose(), [material])
+  return (
+    <group>
+      {geometry.map((tile, i) => (
+        <mesh key={i} geometry={tile} material={material} receiveShadow />
+      ))}
+    </group>
+  )
 }

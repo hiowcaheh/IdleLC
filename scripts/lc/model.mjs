@@ -9,6 +9,7 @@ import sharp from 'sharp'
 import { parseMesh } from './mesh.mjs'
 import { parseAnimSet, parseSkeleton } from './ska.mjs'
 import { parseTexture } from './texture.mjs'
+import { animationCandidates } from './source-choice.mjs'
 
 const baseName = (p) =>
   p
@@ -28,24 +29,26 @@ export function inverseBindMatrix(m) {
   return [m[0], m[1], m[2], 0, m[4], m[5], m[6], 0, m[8], m[9], m[10], 0, it[0], it[1], it[2], 1]
 }
 
-/** SE color 0xRRGGBBAA → linear-ish RGBA factor (alpha forced to 1). */
+/** SE color 0xRRGGBBAA → RGBA factor, including the shader's material opacity. */
 const colorFactor = (c) =>
-  [(c >>> 24) & 255, (c >>> 16) & 255, (c >>> 8) & 255].map((v) => v / 255).concat(1)
+  [(c >>> 24) & 255, (c >>> 16) & 255, (c >>> 8) & 255, c & 255].map((v) => v / 255)
 
 /** Plain colour (linear RGB) of an unreadable texture named as gold trim (`ni_bu_017_1_gold`). */
 const GOLD = [0.62, 0.42, 0.12]
 
-/** Alpha handling by shader name; SE shaders seen so far (Default, Detail, NormalMap) are opaque. */
-function alphaMode(shader = '') {
+/** DefaultShader.cpp:211–218: diffuse alpha chooses blending unless Always Opaque (bit 3). */
+function alphaMode(shader = '', flags = 0, color = 0xffffffff) {
   if (/translucent|transparent|blend|add/i.test(shader)) return 'BLEND'
+  if (/(?:^|[\\/])default(?:shader)?\.sha$/i.test(shader))
+    return (color & 255) < 255 && !(flags & 8) ? 'BLEND' : 'MASK'
   if (/alpha|mask|cutout|grass|leaf/i.test(shader)) return 'MASK'
   return 'OPAQUE'
 }
 
 /** Add and Translucent share glTF BLEND, but require different runtime blend equations. */
-export function blendMode(shader = '') {
+export function blendMode(shader = '', flags = 0, color = 0xffffffff) {
   if (/(?:^|[\\/])add(?:shader)?\.sha$/i.test(shader)) return 'additive'
-  return alphaMode(shader) === 'BLEND' ? 'alpha' : 'opaque'
+  return alphaMode(shader, flags, color) === 'BLEND' ? 'alpha' : 'opaque'
 }
 
 /**
@@ -176,7 +179,7 @@ export async function buildModel(files, smc, options = {}) {
 
   const doc = new Document()
   if (webp) doc.createExtension(EXTTextureWebP).setRequired(true)
-  const unlit = options.unlit ? doc.createExtension(KHRMaterialsUnlit) : null
+  const unlit = doc.createExtension(KHRMaterialsUnlit)
   const buffer = doc.createBuffer()
   const scene = doc.createScene(smc.name || 'Scene')
   const root = doc.createNode('Root')
@@ -242,9 +245,11 @@ export async function buildModel(files, smc, options = {}) {
   // materials: one per texture file (or flat color)
   const materials = new Map()
   async function material(surface, textures) {
-    const blend = blendMode(surface.shader)
+    const flags = surface.shaderFlags ?? 0
+    const color = surface.colors?.[0]
+    const blend = blendMode(surface.shader, flags, color)
     const additive = blend === 'additive'
-    const shaderMode = alphaMode(surface.shader)
+    const shaderMode = alphaMode(surface.shader, flags, color)
     const mode = options.cutout && shaderMode === 'OPAQUE' ? 'MASK' : shaderMode
     const textureName = surface.textures?.[0]
     // a surface may name its texture differently from the .smc (`ni_bu_017_1_gold` / `ni_bu_017_1`):
@@ -253,15 +258,16 @@ export async function buildModel(files, smc, options = {}) {
     const texturePath = textureName
       ? (textures[textureName] ?? (own.length === 1 ? own[0] : undefined))
       : undefined
-    const color = surface.colors?.[0]
-    const doubleSided = Boolean((surface.shaderFlags ?? 0) & 1)
-    const matKey = `${texturePath ?? ''}|${color ?? ''}|${mode}|${blend}|${doubleSided}`
+    const doubleSided = Boolean(flags & 1)
+    const fullBright = options.unlit || Boolean(flags & 2)
+    const matKey = `${texturePath ?? ''}|${color ?? ''}|${mode}|${blend}|${doubleSided}|${fullBright}`
     if (materials.has(matKey)) return materials.get(matKey)
     const name = texturePath ? baseName(texturePath) : textureName || 'color'
     const mat = doc.createMaterial(name).setMetallicFactor(0).setRoughnessFactor(0.9)
     mat.setDoubleSided(doubleSided)
     mat.setExtras({ lcBlend: blend, lcShader: surface.shader ?? '' })
-    if (unlit) mat.setExtension('KHR_materials_unlit', unlit.createUnlit())
+    if (fullBright) mat.setExtension('KHR_materials_unlit', unlit.createUnlit())
+    mat.setAlphaMode(mode)
     if (color !== undefined && color >>> 0 !== 0xffffffff)
       mat.setBaseColorFactor(colorFactor(color))
     const file = texturePath ? files.resolve(texturePath) : null
@@ -347,9 +353,8 @@ export async function buildModel(files, smc, options = {}) {
 
   // animations
   if (skin) {
-    const wanted = options.animations
-      ? new Set(options.animations.map((a) => a.toLowerCase()))
-      : null
+    const requested = options.animations?.map((a) => a.toLowerCase())
+    const wanted = requested ? new Set(requested.flatMap(animationCandidates)) : null
     const added = new Set()
     for (const setPath of smc.animSets) {
       if (!files.resolve(setPath)) {
@@ -394,7 +399,9 @@ export async function buildModel(files, smc, options = {}) {
       }
     }
     if (wanted) {
-      for (const name of wanted) if (!added.has(name)) stats.missing.push(`animation ${name}`)
+      for (const name of requested)
+        if (!animationCandidates(name).some((candidate) => added.has(candidate)))
+          stats.missing.push(`animation ${name}`)
     }
   }
 

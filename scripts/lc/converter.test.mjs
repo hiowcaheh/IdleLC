@@ -463,7 +463,7 @@ describe('buildModel', () => {
 
     const texture = primitive.getMaterial().getBaseColorTexture()
     expect(texture.getMimeType()).toBe('image/jpeg')
-    expect(primitive.getMaterial().getAlphaMode()).toBe('OPAQUE')
+    expect(primitive.getMaterial().getAlphaMode()).toBe('MASK')
 
     const [animation] = root.listAnimations()
     const [channel] = animation.listChannels()
@@ -482,6 +482,83 @@ describe('buildModel', () => {
       'animation attack',
     )
   })
+
+  it('recognizes the exact 2015 Mist second attack without losing the requested motion', async () => {
+    const mist = new MemoryFiles({
+      ...Object.fromEntries(files.files),
+      'Data\\Test\\test.ba': animSetFile([
+        {
+          name: 'm_mist_att02',
+          secondsPerFrame: 0.1,
+          frames: 2,
+          bones: [{ bone: 'root', positions: [{ frame: 0, value: [0, 0, 0] }], rotations: [] }],
+        },
+      ]),
+    })
+    const { stats } = await buildModel(
+      mist,
+      { ...smc, meshes: smc.meshes.slice(0, 1) },
+      {
+        animations: ['w2mist_att02'],
+      },
+    )
+    expect(stats.missing).toEqual([])
+    expect(stats.animations).toEqual(['m_mist_att02'])
+  })
+
+  it.each([
+    [7, 'BLEND', true],
+    [15, 'MASK', true],
+    [1, 'BLEND', false],
+  ])(
+    'preserves Default shader alpha, Full Bright and Always Opaque (flags %i)',
+    async (flags, mode, unlit) => {
+      const mist = new MemoryFiles({
+        'mist.bm': meshFile({
+          ...TRIANGLE,
+          surfaces: [
+            {
+              first: 0,
+              indices: [0, 1, 2],
+              name: 'mist',
+              shader: 'Shaders\\Default.sha',
+              textures: ['mist'],
+              colors: [0xfaf5f6d5],
+              flags,
+            },
+          ],
+        }),
+        'mist.tex': textureFile(
+          { width: 2, height: 2, flags: 1 },
+          Buffer.concat([
+            Buffer.from('FRMS'),
+            Buffer.from([0, 0, 0, 0, 80, 120, 80, 128, 120, 220, 120, 255, 0, 0, 0, 0]),
+          ]),
+        ),
+      })
+      const { document } = await buildModel(mist, {
+        name: 'mist',
+        meshes: [{ file: 'mist.bm', textures: { mist: 'mist.tex' } }],
+        skeleton: null,
+        animSets: [],
+      })
+      const [material] = document.getRoot().listMaterials()
+      expect(material.getAlphaMode()).toBe(mode)
+      expect(material.getBaseColorFactor()).toEqual([250 / 255, 245 / 255, 246 / 255, 213 / 255])
+      expect(material.getDoubleSided()).toBe(true)
+      expect(Boolean(material.getExtension('KHR_materials_unlit'))).toBe(unlit)
+      const image = material.getBaseColorTexture()
+      expect(image.getMimeType()).toBe('image/png')
+      const pixels = await (
+        await import('sharp')
+      )
+        .default(image.getImage())
+        .ensureAlpha()
+        .raw()
+        .toBuffer()
+      expect([pixels[3], pixels[7], pixels[11], pixels[15]]).toEqual([0, 128, 255, 0])
+    },
+  )
 
   it('colours surfaces whose texture is encrypted, and finds a texture named differently', async () => {
     const plain = new MemoryFiles({

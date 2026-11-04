@@ -106,15 +106,30 @@ describe('LocalGameService', () => {
       kills,
       deaths: 1,
     })
-    expect(result).toMatchObject({ kills, exp: kills * monster.exp, gold: kills * monster.gold })
+    expect(result.kills).toBe(kills)
+    expect(result.exp).toBeGreaterThanOrEqual(EXP_TABLE[0]!)
+    expect(result.gold).toBeLessThanOrEqual(kills * monster.gold * 1.5)
     expect(result.levelsGained).toBe(1)
     expect(result.character).toMatchObject({
       level: 2,
-      exp: kills * monster.exp - EXP_TABLE[0]!,
-      gold: kills * monster.gold,
+      exp: result.exp - EXP_TABLE[0]!,
+      gold: result.gold,
       stats: { kills, deaths: 1 },
     })
     expect(stored(storage).characters[0].level).toBe(2)
+  })
+
+  it('enforces overlevelled rewards in the service and preserves kill progress', async () => {
+    const { game, clock, hero, storage } = await withKnight()
+    await game.dev.setLevel(hero.id, 30)
+    clock.now += 60_000
+    const result = await game.reportCombat(hero.id, {
+      monsterId: hero.location.monsterId,
+      kills: 3,
+      deaths: 0,
+    })
+    expect(result).toMatchObject({ kills: 3, exp: 3, sp: 3, gold: 0, drops: [] })
+    expect(stored(storage).characters[0]).toMatchObject({ gold: 0, sp: 3, stats: { kills: 3 } })
   })
 
   it('puts the drops of reported kills into the inventory', async () => {
@@ -250,13 +265,15 @@ describe('LocalGameService', () => {
     await game.dev.setLevel(hero.id, 3)
 
     clock.now += 600 * 1000
-    const kills = Math.ceil(SP_UNIT / fox(hero).sp!)
+    // Level 3 against a level-1 mob earns 80% SP before the ±10% roll.
+    const kills = 8
     const result = await game.reportCombat(hero.id, {
       monsterId: hero.location.monsterId,
       kills,
       deaths: 0,
     })
-    expect(result.sp).toBe(kills * fox(hero).sp!)
+    expect(result.sp).toBeGreaterThan(0)
+    expect(result.sp).toBeLessThan(kills * fox(hero).sp!)
     expect(result.character.sp).toBeGreaterThanOrEqual(SP_UNIT)
 
     const learned = await game.learnSkill(hero.id, 1)

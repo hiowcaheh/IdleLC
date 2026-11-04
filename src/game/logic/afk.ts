@@ -7,9 +7,8 @@ import { getMonster } from '../data/monsters.ts'
 import type { CharacterData } from './character.ts'
 import { combatTick, createCombat, type FighterInit } from './combat.ts'
 import { monsterFighter, playerFighter, type Hero } from './fighters.ts'
-import { lootTable, rollDrops, stowDrops, takeFromInventory, type ItemStack } from './loot.ts'
-import { gainExp } from './progression.ts'
-import { killReward } from './rewards.ts'
+import { stowDrops, takeFromInventory, type ItemStack } from './loot.ts'
+import { killReward, rewardKills } from './rewards.ts'
 import { activeTitleId, pruneTitles } from './titles.ts'
 import { recordKills } from './spots.ts'
 import type { Rng } from './rng.ts'
@@ -124,8 +123,11 @@ export function simulateAfk(
   character = pruneTitles(character, now)
   const seconds = Math.min(Math.max(0, Math.floor(awaySeconds)), AFK_MAX_SECONDS)
   const monster = getMonster(character.expedition?.monsterId ?? character.location.monsterId)
-  const reward = killReward(monster, character, now)
   let { level, exp } = character
+  let totalExp = 0,
+    gold = 0,
+    sp = 0
+  const items = new Map<number, number>()
   let kills = 0
   let deaths = 0
   // potions left in the bag; the hunting rate changes when a kind runs out
@@ -150,7 +152,14 @@ export function simulateAfk(
     const sliceKills = roundRandom((rate.killsPerHour * AFK_EFFICIENCY * slice) / 3600, rng)
     deaths += roundRandom((rate.deathsPerHour * slice) / 3600, rng)
     kills += sliceKills
-    ;({ level, exp } = gainExp(level, exp, sliceKills * reward.exp))
+    const reward = rewardKills({ ...character, level, exp }, monster, sliceKills, rng, now)
+    level = reward.level
+    exp = reward.remainingExp
+    totalExp += reward.exp
+    gold += reward.gold
+    sp += reward.sp
+    for (const item of reward.drops)
+      items.set(item.itemId, (items.get(item.itemId) ?? 0) + item.count)
     for (const [id, perHour] of Object.entries(rate.potionsPerHour)) {
       const itemId = Number(id)
       const left = stock.get(itemId) ?? 0
@@ -165,16 +174,16 @@ export function simulateAfk(
     character.inventory,
     [...used].map(([itemId, count]) => ({ itemId, count })),
   )
-  const drops = rollDrops(lootTable(monster), kills, rng)
-  const gold = kills * reward.gold
-  const sp = kills * reward.sp
+  const drops = [...items]
+    .map(([itemId, count]) => ({ itemId, count }))
+    .sort((a, b) => a.itemId - b.itemId)
   return {
     awaySeconds,
     seconds,
     monsterId: monster.id,
     kills,
     deaths,
-    exp: kills * reward.exp,
+    exp: totalExp,
     gold,
     sp,
     levelBefore: character.level,

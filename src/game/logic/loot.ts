@@ -8,8 +8,8 @@ import { rollOptions } from './options.ts'
 import { chance, type Rng } from './rng.ts'
 
 /**
- * Drops every monster has on top of its own table. LC drops Smelting Stones by a server rule that is
- * not in the database; 1% per kill is our own value until the server code is available.
+ * Drops every monster has on top of its own table. The global 1% Smelting Stone chance is an
+ * existing IdleLC rule; it shares the solo level gate with the other item drops.
  */
 export const GENERAL_DROPS: MonsterDrop[] = [{ itemId: SMELTING_STONE_ID, chance: 0.01 }]
 
@@ -73,8 +73,8 @@ export interface ItemStack {
 }
 
 /**
- * Rolls a loot table for `kills` kills: every entry separately on every kill (LC t_npc a_item_N with
- * a_item_percent_N — the server code may add drop-rate rules later). Sorted by item id.
+ * Preserved IdleLC entry rolls, once per eligible kill. rewardKills applies the source level gate;
+ * the original four attempts over 20 slots are a separate migration. Sorted by item id.
  */
 export function rollDrops(
   drops: readonly MonsterDrop[] | undefined,

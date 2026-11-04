@@ -1,5 +1,28 @@
 # Historia zmian
 
+## 2026-11-04 — poziomy potworów, losowe nagrody i Dratan
+
+Punkt wyjścia: `bf61f0f`. [Reguły, źródła i walidacja](docs/pve-dratan-fixes.md).
+
+1. Całe nazwy potworów mają źródłowe kolory i progi różnicy poziomu: czerwony,
+   żółty, biały, zielony, niebieski. Kary EXP/SP, blokada przedmiotów od przewagi
+   6 poziomów i malejąca szansa złota działają w serwisie, aktywnej walce i AFK.
+   Zachowano źródłowe minimum EXP/SP; niebieskie potwory nadal dają 10% bazowego EXP.
+2. Mist i Poison Mist oraz ich elitarne warianty zachowują miękką przezroczystość,
+   źródłową alfę i Full Bright. Przeliczono oba modele; szare prostokąty nie są
+   rysowane jako nieprzezroczyste powierzchnie. Naprawiono też nazwę drugiego ataku.
+3. Dratan ma oryginalny teren 3072×3072 m, 11 warstw, obiekty z WLD i 42 miejsca
+   walki. Konwersję można odtwarzać osobno przez `--only terrain --map dratan`.
+4. Każde zabójstwo niezależnie losuje EXP/SP ±10%, szansę złota i jego ilość
+   50–150% bazy. Awans w środku rozliczenia zmienia następne nagrody. Estymacje
+   pokazują wartości oczekiwane, Book podpisuje bazy, a feed zachowuje precyzję SP.
+
+Weryfikacja: **385 testów / 43 pliki**, lint, formatowanie, TypeScript, build
+i weryfikator zasobów przeszły. Chromium: osiem widoków sceny, osiem podglądów Book,
+pięć kolorów, tryb z cieniami i przejście mapy — bez błędów strony, konsoli i zasobów.
+180 raportów na rzeczywistych danych LC potwierdziło losowanie, kary i zapis.
+Kaflowanie terenu zmniejszyło rysowany kadr z ok. 534 tys. do 40–67 tys. trójkątów.
+
 ## 2026-11-03 — źródłowe premie ulepszeń i dopracowanie GUI (17 zgłoszeń)
 
 Punkt wyjścia: `fa66c0e`. [Wzory, zasoby i walidacja](docs/client-ui-upgrade-fixes.md).

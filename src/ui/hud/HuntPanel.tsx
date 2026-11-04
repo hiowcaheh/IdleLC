@@ -75,7 +75,9 @@ export function HuntPanel() {
           ‹
         </button>
         <div className="hunt__spot-info" aria-live="polite">
-          <span className="hunt__spot-name">
+          <span
+            className={`hunt__spot-name level-tone--${levelTone(character.level, monster.level)}`}
+          >
             <span className={`level-tag level-tag--${levelTone(character.level, monster.level)}`}>
               {monster.level}
             </span>

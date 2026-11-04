@@ -12,7 +12,8 @@ import { applyPlayTime, optionValue, type OptionGain } from './options.ts'
 import type { Hero } from './fighters.ts'
 import { activeTitleId, pruneTitles, titleOptions } from './titles.ts'
 import { gainExp } from './progression.ts'
-import type { Rng } from './rng.ts'
+import { rollInt, type Rng } from './rng.ts'
+import { levelRewardRates } from './pveLevels.ts'
 import { recordKills } from './spots.ts'
 
 /** Shortest possible time between two kills (victory pause + respawn), in game seconds. */
@@ -86,23 +87,97 @@ export function maxKills(elapsedSeconds: number, timeScale = 1): number {
   return Math.floor((window * Math.max(1, timeScale)) / MIN_KILL_CYCLE) + KILL_BURST
 }
 
-/**
- * Reward for one kill: t_npc.a_exp, a_prize and a_skill_point 1:1. Level-difference rules and
- * party bonuses come with the LC server code.
- */
+const withBonus = (value: number, percent: number) =>
+  Math.max(0, value + Math.trunc((value * percent) / 100))
+
+/** C++ integer division truncates negative jitter toward zero, before the minimum and options. */
+function variedReward(base: number, percent: number, jitter: number, bonus: number) {
+  const value = Math.trunc((base * percent) / 100)
+  return withBonus(Math.max(1, value + Math.trunc((value * jitter) / 100)), bonus)
+}
+
+/** Expected reward for estimates; real payouts use independent rolls for every kill. */
 export function killReward(
   monster: MonsterDef,
   hero?: Hero,
   now = Date.now(),
 ): { exp: number; gold: number; sp: number } {
   const bonuses = hero ? rewardBonuses(hero, now) : { exp: 0, sp: 0 }
-  // Source options add an integer percentage to each kill's reward, before batching kills.
-  const withBonus = (value: number, percent: number) =>
-    Math.max(0, value + Math.trunc((value * percent) / 100))
+  const rates = levelRewardRates(hero?.level ?? monster.level, monster.level)
+  const mean = (base: number, percent: number, bonus: number) =>
+    Array.from({ length: 21 }, (_, i) => variedReward(base, percent, i - 10, bonus)).reduce(
+      (sum, value) => sum + value,
+      0,
+    ) / 21
+  const goldMean =
+    Array.from({ length: 101 }, (_, i) => Math.trunc((monster.gold * (i + 50)) / 100)).reduce(
+      (sum, value) => sum + value,
+      0,
+    ) / 101
   return {
-    exp: withBonus(monster.exp, bonuses.exp),
-    gold: monster.gold,
-    sp: withBonus(monster.sp ?? 0, bonuses.sp),
+    exp: mean(monster.exp, rates.exp, bonuses.exp),
+    gold: goldMean * rates.goldChance,
+    sp: mean(monster.sp ?? 0, rates.sp, bonuses.sp),
+  }
+}
+
+function rolledReward(monster: MonsterDef, level: number, bonuses: RewardBonuses, rng: Rng) {
+  const rates = levelRewardRates(level, monster.level)
+  return {
+    exp: variedReward(monster.exp, rates.exp, rollInt(rng, -10, 10), bonuses.exp),
+    sp: variedReward(monster.sp ?? 0, rates.sp, rollInt(rng, -10, 10), bonuses.sp),
+    gold:
+      rollInt(rng, 1, 10000) <= rates.goldChance * 10000
+        ? Math.trunc((monster.gold * rollInt(rng, 50, 150)) / 100)
+        : 0,
+  }
+}
+
+/** Battle_DivisionExpSP.cpp:143–230; Battle_NPCDropItem.cpp:495–528, solo and neutral events. */
+export function rollKillReward(monster: MonsterDef, hero: Hero, rng: Rng, now = Date.now()) {
+  return rolledReward(monster, hero.level, rewardBonuses(hero, now), rng)
+}
+
+/** Share per-kill rolls and level-up boundaries between watched combat and expeditions. */
+export function rewardKills(
+  hero: Hero & { exp: number },
+  monster: MonsterDef,
+  kills: number,
+  rng: Rng,
+  now = Date.now(),
+) {
+  const bonuses = rewardBonuses(hero, now)
+  const table = lootTable(monster)
+  const items = new Map<number, number>()
+  let level = hero.level,
+    remainingExp = hero.exp,
+    exp = 0,
+    gold = 0,
+    sp = 0
+  for (let k = 0; k < kills; k++) {
+    const reward = rolledReward(monster, level, bonuses, rng)
+    exp += reward.exp
+    gold += reward.gold
+    sp += reward.sp
+    if (levelRewardRates(level, monster.level).drops) {
+      for (const item of rollDrops(table, 1, rng))
+        items.set(item.itemId, (items.get(item.itemId) ?? 0) + item.count)
+    }
+    // A level gained by this kill changes the penalties of the next kill, even in one report.
+    const progress = gainExp(level, remainingExp, reward.exp)
+    level = progress.level
+    remainingExp = progress.exp
+  }
+  return {
+    exp,
+    gold,
+    sp,
+    level,
+    remainingExp,
+    levelsGained: level - hero.level,
+    drops: [...items]
+      .map(([itemId, count]) => ({ itemId, count }))
+      .sort((a, b) => a.itemId - b.itemId),
   }
 }
 
@@ -122,12 +197,8 @@ export function applyCombatReport(
   character = pruneTitles(character, now)
   const kills = clamp(Math.floor(report.kills), 0, Math.max(0, allowedKills))
   const deaths = Math.max(0, Math.floor(report.deaths))
-  const reward = killReward(monster, character, now)
-  const exp = reward.exp * kills
-  const gold = reward.gold * kills
-  const sp = reward.sp * kills
-  const progress = gainExp(character.level, character.exp, exp)
-  const drops = rollDrops(lootTable(monster), kills, rng)
+  const reward = rewardKills(character, monster, kills, rng, now)
+  const { exp, gold, sp, drops } = reward
   const potions = (report.potions ?? []).filter((p) => getItem(p.itemId).potion)
   const { inventory, taken } = takeFromInventory(character.inventory, potions)
   const played = applyPlayTime(character, playSeconds, rng)
@@ -136,8 +207,8 @@ export function applyCombatReport(
     character: {
       ...played.character,
       ...bag,
-      level: progress.level,
-      exp: progress.exp,
+      level: reward.level,
+      exp: reward.remainingExp,
       gold: character.gold + gold,
       sp: character.sp + sp,
       ...recordKills(character, character.location, kills, deaths),
@@ -146,7 +217,7 @@ export function applyCombatReport(
     exp,
     gold,
     sp,
-    levelsGained: progress.levelsGained,
+    levelsGained: reward.levelsGained,
     drops,
     potionsUsed: taken,
     optionsGained: played.gained,

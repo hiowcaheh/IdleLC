@@ -1,6 +1,12 @@
 # IdleLC — wytyczne projektu
 
-Najnowsza aktualizacja: [źródłowe premie ulepszeń i 17 poprawek GUI](docs/client-ui-upgrade-fixes.md).
+Najnowsza aktualizacja: [poziomy PvE, losowe nagrody, Mist i Dratan](docs/pve-dratan-fixes.md).
+EXP/SP i Nas mają źródłowe losowania oraz kary solo. Drop przedmiotów jest blokowany
+od przewagi 6 poziomów; źródłowe minimum 1 jednostki SP pozostaje. Dratan używa
+oryginalnego WTR/WLD, a Mist ma miękką alfę i Full Bright. SaveVersion nadal **14**.
+Starsze opisy gwarantowanej stałej nagrody i braku terenu Dratan są historyczne.
+
+Poprzednia aktualizacja: [źródłowe premie ulepszeń i 17 poprawek GUI](docs/client-ui-upgrade-fixes.md).
 Kamienie i szanse pozostają własne; wzrost ATK/DEF i +15 jest źródłowy. SaveVersion
 pozostaje 14. Walk speed ukryto, skille mają modal oraz okrągłe pasywne ikony,
 a loader pokazuje całą ilustrację przez `contain` na osobnym rozmytym tle.

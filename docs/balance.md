@@ -146,21 +146,30 @@ Interwał ataku i krytyki zostają z klasy. Interwał ataku potwora LC = `a_atta
   potrzebny z poziomu `poziom` na następny (1 → 34, 10 → 18 748, 30 → 4 046 233). Nadmiar przechodzi na
   kolejny poziom; jedna nagroda może dać kilka poziomów. Na poziomie 100 exp się nie zbiera. Bez danych LC
   działa zastępcza krzywa `30 × poziom^2,2`.
-- **Nagroda za zabicie** — `t_npc.a_exp` i `a_prize` (złoto) 1:1 (`src/game/logic/rewards.ts`).
+- **Nagroda za zabicie** — bazą są `t_npc.a_exp`, `a_skill_point` i `a_prize`.
+  `rewards.ts` / `pveLevels.ts` stosują źródłowe reguły solo. EXP przy przewadze
+  postaci 1/2/3/4/5/≥6 poziomów daje 95/90/75/60/45/10% bazy. SP traci 10 pp
+  za poziom przewagi, do 0% przy +10. Następnie EXP i SP niezależnie losują
+  całkowite ±10% z obcięciem do zera; minimum wynosi 1 EXP i 1 jednostkę SP.
   Opcje sprzętu i aktywnego, niewygasłego tytułu 82/83 dodają procent EXP/SP:
   `nagroda + trunc(nagroda × sumaProcentów / 100)`, osobno na zabójstwo.
-  To samo naliczanie działa online, w AFK i estymacji godzinowej.
-  Kary i premie za różnicę poziomów, drużynę i exp tracony po śmierci dodamy z kodu serwera.
+  Nas wypada z szansą 80% − 5 pp za każdy poziom przewagi postaci, minimum 0%;
+  po sukcesie ilość wynosi `trunc(a_prize × randomInt(50,150) / 100)`.
+  Aktywna walka i AFK losują każde zabójstwo i przeliczają kary po awansie.
+  Estymacja godzinowa używa dokładnej średniej losowań. Nie dodano party, eventów
+  ani strat po śmierci. Szczegóły: [reguły PvE](pve-dratan-fixes.md).
 - **Limit zabić** — przeglądarka tylko pokazuje walkę i zgłasza jej wynik (`reportCombat`). Serwis płaci
-  za najwyżej `floor(czas od poprzedniego zgłoszenia × prędkość gry / 3,2 s) + 2` zabić. 3,2 s to najkrótszy
-  możliwy cykl (2,2 s zwycięstwa + 1,0 s na nowego potwora). Prędkość gry > 1 jest tylko w narzędziach dev;
+  za najwyżej `floor(czas od poprzedniego zgłoszenia × prędkość gry / MIN_KILL_CYCLE) + 2` zabić.
+  Obecnie minimum to 1,7 s (1,2 s zwycięstwa + 0,5 s na nowego potwora). Prędkość gry > 1 jest tylko w narzędziach dev;
   na serwerze (Supabase) zawsze 1. Patrz [`docs/supabase.md`](supabase.md).
 
 ## Drop
 
-Każde zabicie losuje tabelę dropu potwora 1:1 z bazy (`t_npc.a_item_0…19` z szansą `a_item_percent_N / 10000`).
-Każdy wpis losujemy **osobno** (jedno zabicie może dać kilka przedmiotów) — założenie do sprawdzenia
-w kodzie serwera LC (tam mogą być dodatkowe zasady: mnożnik dropu serwera, różnica poziomów, drop z „+”).
+Przedmioty mogą wypaść, gdy postać przewyższa potwora najwyżej o 5 poziomów.
+Od przewagi 6 poziomów wypłata pomija wszystkie obecne kill-dropy, także dodatkowe
+akcesoria i Smelting Stone. W dozwolonym zabójstwie zachowano dotychczasowy model:
+każdy wpis tabeli (`a_item_percent_N / 10000`) losowany **osobno**. Pełny źródłowy
+wybór czterech prób z 20 slotów, mnożniki runtime i drop z „+” nie są tu portowane.
 Przedmioty trafiają do ekwipunku jako stosy (jeden stos na rodzaj; osobne egzemplarze sprzętu z ulepszeniem
 dojdą w M5). Ekwipunek nie ma na razie limitu miejsc.
 
@@ -199,9 +208,10 @@ Dane 1:1 z bazy: `t_skill` (klasa, typ, cel, czasy w 1/10 s), `t_skilllevel` (ma
 wymagany poziom postaci, koszt SP, wymagane inne umiejętności) i `t_magic` + `t_magiclevel` (efekty i ich moc).
 Interpretacja efektów jest **nasza** (`src/game/logic/skills.ts`) do czasu kodu serwera.
 
-- **SP** — za zabicie `t_npc.a_skill_point`, liczone jak na serwerze LC w 1/10 000 punktu (Fox: 1375 →
+- **SP** — baza za zabicie `t_npc.a_skill_point`, liczone jak na serwerze LC w 1/10 000 punktu (Fox: 1375 →
   0,1375 SP). Nauka kolejnego poziomu kosztuje `a_learnSP` pełnych punktów i wymaga `a_learnLevel` oraz
   wymaganych umiejętności. Nowa postać zna 1. poziom darmowych umiejętności z poziomu 1 (np. Knuckle Spear).
+  Wypłata stosuje kary, losowanie i bonusy opisane wyżej; źródłowe minimum to 0,0001 SP.
 - **Czasy** — `a_readyTime / 10` s to przygotowanie (np. czarowanie maga, 0 dla większości ataków; skraca je
   „Fast Spell Casting”), potem skill trafia jak zwykły cios (+0,4 s). `a_fireTime` to w LC animacja **po**
   wystrzeleniu — postać nie stoi w tym czasie (`TIMINGS.skillAnimationLock = 0`) i rusza dalej po zwykłym
@@ -365,10 +375,15 @@ Po zabiciu bohater od razu idzie dalej (prośba właściciela, 2026-10-30): prze
 
 ## Mapa świata
 
-W grze są na razie tylko Juno, Dratan, Merac i Egeha (decyzja właściciela; `PLAYABLE_ZONES` w `zones.ts`),
-każda do wybrania od razu (bez blokady poziomu). Mapa pokazuje
+W grze są na razie tylko Juno, Dratan, Merac i Egeha (decyzja właściciela; `PLAYABLE_ZONES` w `zones.ts`).
+Kolejna kraina wymaga pokonania ostatniego potwora poprzedniej. Mapa pokazuje
 najniższy i najwyższy poziom spotów strefy i ile z nich jest otwartych. Po wyborze postać idzie na najdalszy
 otwarty spot strefy (nowa strefa: pierwszy spot).
+
+Juno i Dratan używają oryginalnego terenu i obiektów klienta. Dratan ma 11 warstw,
+teren 3072×3072 m i 42 własne, bezpieczne areny odpowiadające spotom. Pozostałe
+strefy zachowują dotychczasowe tło. Źródłowe kolory nazw zależą od `mob − player`:
+≥6 czerwony, 3…5 żółty, −2…2 biały, −5…−3 zielony, ≤−6 niebieski.
 
 ## Tytuły
 

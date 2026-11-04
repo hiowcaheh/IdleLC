@@ -19,6 +19,7 @@
  *                          `icons` = item and skill icons, `ui` = interface pieces, `fx` = effect textures
  *   --batch <json>         select the model ids in a reviewed recovery batch (instead of --only)
  *   --strict               fail models with missing or unreadable dependencies
+ *   --map <id>             with --only terrain, convert just this map (juno or dratan)
  *   --smc <path>           convert one .smc (client path or file); with --anims <a,b> to pick clips
  *   --max-texture <px>     longest texture side (default 1024)
  *
@@ -82,6 +83,16 @@ const MAPS = {
     townRadius: 280,
     avoidLayers: [2, 8],
   },
+  dratan: {
+    wtr: 'Data\\World\\Dratan\\Dratan.wtr',
+    wld: 'Data\\World\\Dratan\\Dratan.wld',
+    count: 42,
+    view: [-0.354, -0.935],
+    // The world file's main settlement; arenas use the same clear-ground policy as Juno.
+    town: [2580, 2794],
+    townRadius: 280,
+    avoidLayers: [8],
+  },
 }
 /** Class portraits sheet (relative to public/). */
 const PORTRAITS_FILE = 'icons/lc/portraits.webp'
@@ -105,12 +116,15 @@ function parseArgs(argv) {
     else if (flag === '--only') args.only = new Set(value().toLowerCase().split(','))
     else if (flag === '--batch') args.batch = path.resolve(value())
     else if (flag === '--strict') args.strict = true
+    else if (flag === '--map') args.map = value().toLowerCase()
     else if (flag === '--smc') args.smc = value()
     else if (flag === '--anims') args.anims = value().split(',')
     else if (flag === '--max-texture') args.maxTexture = Number(value())
     else if (flag === '--help' || flag === '-h') args.help = true
     else throw new Error(`unknown option ${flag}`)
   }
+  if (args.map && (!MAPS[args.map] || !args.only?.has('terrain')))
+    throw new Error('--map needs a known map and --only terrain')
   if (args.batch) {
     if (args.only) throw new Error('--batch and --only cannot be combined')
     const batch = JSON.parse(fs.readFileSync(args.batch, 'utf8'))
@@ -393,6 +407,7 @@ async function main() {
 
   if (!args.smc && args.only?.has('terrain')) {
     for (const [map, def] of Object.entries(MAPS)) {
+      if (args.map && args.map !== map) continue
       if (!files.resolve(def.wtr)) {
         console.log(`terrain ${map}: ${def.wtr} is not in the client folder(s)`)
         continue
@@ -405,6 +420,8 @@ async function main() {
       for (const [name, content] of Object.entries(out))
         fs.writeFileSync(path.join(dir, name), content)
       const { arenas } = JSON.parse(out['terrain.json'].toString())
+      if (arenas.length < def.count)
+        throw new Error(`terrain ${map}: only ${arenas.length} of ${def.count} hunting grounds`)
       console.log(
         `terrain ${map}: ${Object.keys(out).length} files, ${arenas.length} hunting grounds`,
       )

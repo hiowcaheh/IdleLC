@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { getItem } from '../data/items.ts'
-import { getMonster } from '../data/monsters.ts'
+import { getMonster, MONSTERS } from '../data/monsters.ts'
 import { AFK_MAX_SECONDS, estimateHourly, measureHuntRate, simulateAfk } from './afk.ts'
 import { createCharacterData } from './character.ts'
 import { combatTick, createCombat, type FighterInit } from './combat.ts'
@@ -56,8 +56,10 @@ describe('simulateAfk', () => {
     const monster = getMonster(hero.location.monsterId)
     expect(one.seconds).toBe(3600)
     expect(one.kills).toBeGreaterThan(100)
-    expect(one.exp).toBe(one.kills * monster.exp)
-    expect(one.gold).toBe(one.kills * monster.gold)
+    expect(one.exp).toBeGreaterThan(0)
+    expect(one.exp).toBeLessThan(one.kills * monster.exp * 1.1)
+    expect(one.gold).toBeGreaterThan(0)
+    expect(one.gold).toBeLessThan(one.kills * monster.gold * 1.5)
     expect(one.character.gold).toBe(one.gold)
     expect(one.character.stats.kills).toBe(one.kills)
     expect(one.drops.length).toBeGreaterThan(0)
@@ -86,12 +88,15 @@ describe('simulateAfk', () => {
     const estimate = estimateHourly({ classId: 'knight', level: 1 }, 'rust-golem', createRng(1))
     const golem = getMonster('rust-golem')
     expect(estimate.expPerHour).toBeCloseTo(estimate.killsPerHour * golem.exp)
-    expect(estimate.goldPerHour).toBeCloseTo(estimate.killsPerHour * golem.gold)
+    expect(estimate.goldPerHour).toBeCloseTo(
+      estimate.killsPerHour * killReward(golem, { classId: 'knight', level: 1 }, 0).gold,
+    )
   })
 
   it('uses EXP/SP option rewards in both AFK payouts and hourly estimates', () => {
     const boosted = {
       ...hero,
+      level: 50,
       titles: [],
       activeTitle: null,
       equipment: {
@@ -107,22 +112,41 @@ describe('simulateAfk', () => {
         },
       },
     }
-    const monster = getMonster(hero.location.monsterId)
-    const reward = killReward(monster, boosted, 1000)
-    const payout = simulateAfk(boosted, 3600, createRng(7), 1000)
-    expect(payout.exp).toBe(payout.kills * reward.exp)
-    expect(payout.sp).toBe(payout.kills * reward.sp)
-    const estimate = estimateHourly(boosted, monster.id, createRng(7), 1000)
-    expect(estimate.expPerHour).toBeCloseTo(estimate.killsPerHour * reward.exp)
-    expect(estimate.spPerHour).toBeCloseTo(estimate.killsPerHour * reward.sp)
-    const plain = estimateHourly(
-      { ...boosted, equipment: hero.equipment },
-      monster.id,
-      createRng(7),
-      1000,
-    )
-    expect(estimate.killsPerHour).toBe(plain.killsPerHour)
-    expect(estimate.expPerHour).toBeGreaterThan(plain.expPerHour)
+    // Equal high levels keep this test below the next level-up, isolating option rewards.
+    const original = getMonster(hero.location.monsterId)
+    const monster = { ...original, level: 50 }
+    MONSTERS[monster.id] = monster
+    try {
+      const reward = killReward(monster, boosted, 1000)
+      const payout = simulateAfk(boosted, 3600, createRng(7), 1000)
+      const plainHero = { ...boosted, equipment: hero.equipment }
+      const plainPayout = simulateAfk(plainHero, 3600, createRng(7), 1000)
+      expect(payout.levelsGained).toBe(0)
+      expect(payout.kills).toBe(plainPayout.kills)
+      expect(payout.exp).toBeGreaterThan(plainPayout.exp)
+      expect(payout.sp).toBeGreaterThan(plainPayout.sp)
+      expect(payout.exp).not.toBe(payout.kills * reward.exp)
+      const estimate = estimateHourly(boosted, monster.id, createRng(7), 1000)
+      expect(estimate.expPerHour).toBeCloseTo(estimate.killsPerHour * reward.exp)
+      expect(estimate.spPerHour).toBeCloseTo(estimate.killsPerHour * reward.sp)
+      const plain = estimateHourly(plainHero, monster.id, createRng(7), 1000)
+      expect(estimate.killsPerHour).toBe(plain.killsPerHour)
+      expect(estimate.expPerHour).toBeGreaterThan(plain.expPerHour)
+    } finally {
+      MONSTERS[monster.id] = original
+    }
+  })
+
+  it('uses the same level restrictions for expedition payouts and hourly estimates', () => {
+    const overlevelled = { ...hero, level: 30, titles: [], activeTitle: null }
+    const payout = simulateAfk(overlevelled, 3600, createRng(9), 1000)
+    expect(payout.kills).toBeGreaterThan(0)
+    expect(payout).toMatchObject({ exp: payout.kills, sp: payout.kills, gold: 0, drops: [] })
+    expect(payout.character.stats.kills).toBe(payout.kills)
+    const estimate = estimateHourly(overlevelled, hero.location.monsterId, createRng(9), 1000)
+    expect(estimate.expPerHour).toBe(estimate.killsPerHour)
+    expect(estimate.spPerHour).toBe(estimate.killsPerHour)
+    expect(estimate.goldPerHour).toBe(0)
   })
 
   it('drinks the potions of its quick slots against a tough monster, never more than it has', () => {

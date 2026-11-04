@@ -31,10 +31,8 @@ export function SceneLabels() {
       </div>
       <div ref={(el) => bindLabel('monster', el)} className="scene-label scene-label--monster">
         {monster && (
-          <span className="scene-label__text">
-            <span className={`scene-label__level level-tone--${levelTone(level, monster.level)}`}>
-              Lv {monster.level}
-            </span>
+          <span className={`scene-label__text level-tone--${levelTone(level, monster.level)}`}>
+            <span className="scene-label__level">Lv {monster.level}</span>
             {monster.name}
           </span>
         )}

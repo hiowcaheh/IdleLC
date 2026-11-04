@@ -12,6 +12,7 @@ import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
 import { getBounds } from '@gltf-transform/functions'
 import { MeshoptDecoder } from 'meshoptimizer'
 import { CLASS_MODELS } from './classes.mjs'
+import { animationCandidates } from './source-choice.mjs'
 
 export const MODELS_BASE_URL = 'models/lc/'
 export const GEAR_DIR = 'gear'
@@ -57,7 +58,12 @@ export async function buildModelManifest(data, modelsDir) {
         .listAnimations()
         .map((a) => [a.getName().toLowerCase(), a]),
     )
-    const clipName = (name) => (name ? clips.get(String(name).toLowerCase())?.getName() : undefined)
+    const clipName = (name) =>
+      name
+        ? animationCandidates(String(name))
+            .map((candidate) => clips.get(candidate.toLowerCase())?.getName())
+            .find(Boolean)
+        : undefined
     const duration = (name) =>
       Math.max(
         0,
