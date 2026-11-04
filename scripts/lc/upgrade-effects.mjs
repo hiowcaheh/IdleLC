@@ -173,11 +173,13 @@ export function readEffectGroups(buffer) {
  * Find EFCT boundaries only inside EEFM. Each selected record is decoded and must end exactly at
  * the next boundary's type word. Unrelated record bodies remain explicitly unsupported.
  */
-export function recoverUpgradeDefinitions(buffer) {
+export function recoverUpgradeDefinitions(buffer, groupNames = null) {
   const allGroups = readEffectGroups(buffer)
   const groups = Object.fromEntries(
     Object.entries(allGroups).filter(([name]) =>
-      /^(?:ia_t|ia_k|i_hw|i_ma|ih_ro|so)_(?:wp2?|am)_[1-6]$/.test(name),
+      groupNames
+        ? groupNames.includes(name)
+        : /^(?:ia_t|ia_k|i_hw|i_ma|ih_ro|so)_(?:wp2?|am)_[1-6]$/.test(name),
     ),
   )
   const from = buffer.indexOf(Buffer.from('EEFM'))

@@ -4,11 +4,8 @@ import type { ClientCombatStats, EquipSlot } from '../../game/data/types.ts'
 import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
 import { ATTRIBUTE_KEYS } from '../../game/logic/attributes.ts'
 import { availableStatPoints } from '../../game/logic/statPoints.ts'
-import {
-  MAX_COOLDOWN_REDUCTION,
-  MAX_MP_COST_REDUCTION,
-  effectiveStats,
-} from '../../game/logic/combat.ts'
+import { naturalRecovery } from '../../game/logic/recovery.ts'
+import { MAX_MP_COST_REDUCTION, effectiveStats } from '../../game/logic/combat.ts'
 import { GameError } from '../../game/logic/character.ts'
 import {
   MAX_PLUS,
@@ -92,8 +89,10 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   // recovery buffs and potions restore HP / MP per second: shown per regeneration tick too
   const perTick = (key: 'hpPerSecond' | 'mpPerSecond') =>
     effects.reduce((sum, e) => sum + (e[key] ?? 0), 0) * REGEN_TICK_SECONDS
-  const hpRecovery = (stats.hpRegen ?? 0) + perTick('hpPerSecond')
-  const mpRecovery = (stats.mpRegen ?? 0) + perTick('mpPerSecond')
+  const recovery = naturalRecovery(stats, !away)
+  const baseRecovery = naturalRecovery(base, !away)
+  const hpRecovery = recovery.hp + perTick('hpPerSecond')
+  const mpRecovery = recovery.mp + perTick('mpPerSecond')
   const signed = (value: number) => `${value < 0 ? '−' : '+'}${percent(Math.abs(value))}`
   // rare options with the caps combat applies
   const capped = (value: number | undefined, cap: number) => Math.min(cap * 100, value ?? 0)
@@ -143,11 +142,6 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
     clientRow('Deadly rating', 'deadlyRating'),
   ]
   const combatBonusRows: StatRow[] = [
-    [
-      'Critical chance',
-      percent(stats.critChance * 100),
-      change(stats.critChance * 100, base.critChance * 100, 1),
-    ],
     ['Critical damage', `×${stats.critMultiplier.toFixed(2)}`],
     ['Block chance', signed(stats.blockChance ?? 0)],
     ['Stun resistance', percent(stats.stunResistance ?? 0)],
@@ -173,19 +167,19 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
       'Cooldown adjustment',
       `${(stats.reuseTime ?? 0) > 0 ? '+' : ''}${(stats.reuseTime ?? 0).toFixed(1)} s`,
     ],
-    ['Cooldown reduction', percent(capped(stats.cooldownReduction, MAX_COOLDOWN_REDUCTION))],
+    ['Cooldown bonus', signed(stats.cooldownReduction ?? 0)],
     ['Skill MP cost', signed(-capped(stats.mpCostReduction, MAX_MP_COST_REDUCTION))],
   ]
   const recoveryRows: StatRow[] = [
     [
       'HP recovery',
       `+${fmt(Math.round(hpRecovery))} / ${REGEN_TICK_SECONDS}s`,
-      change(hpRecovery, base.hpRegen ?? 0),
+      change(hpRecovery, baseRecovery.hp),
     ],
     [
       'MP recovery',
       `+${fmt(Math.round(mpRecovery))} / ${REGEN_TICK_SECONDS}s`,
-      change(mpRecovery, base.mpRegen ?? 0),
+      change(mpRecovery, baseRecovery.mp),
     ],
     ['HP steal', signed(stats.hpSteal ?? 0)],
     ['MP steal', signed(stats.mpSteal ?? 0)],

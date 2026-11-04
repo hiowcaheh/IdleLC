@@ -4,9 +4,11 @@ Wzory są w `src/game/logic/` (`balance.ts`, `ratings.ts`, `attributes.ts`, `opt
 `skills.ts`), a czasy faz walki w `combat.ts` (`TIMINGS`). Zmiana wzoru wymaga aktualizacji
 kodu, tego dokumentu i odpowiednich testów logiki.
 
-> Źródła serwera November 2018 są dostępne. Atrybuty, współczynniki bonusów HP/MP,
-> punkty hit/avoid i część opcji są już oparte na nich. Główne HP/ATK/DEF oraz damage
-> nadal używają własnego adaptera. Zakres i ograniczenia: [raport poprawek](fixes-2026-11-02.md).
+> Aktualizacja po audycie `a35cfbb`: źródłowe HP/MP i kanały arkusza sterują walką.
+> Wyprawa jest ciągłą symulacją z ograniczonym zapasem mikstur. Nie jest to jeszcze
+> pełny port GameServer: obecny eksport nie zawiera atrybutów NPC, magic avoid,
+> hitrate i pełnych slotów dropu. Zakres oraz jawne blokady:
+> [naprawy po audycie](audit-fixes.md).
 
 ## Statystyki
 
@@ -14,14 +16,16 @@ Od 2026-11-03 każda klasa bez profesji dostaje 1 rozdawany punkt za awans.
 Pula to `level − 1 − suma(allocatedStats)`, a poziom 1 zaczyna z zerem. Pula wynika
 z poziomu, więc obejmuje jednoczesne awanse i AFK bez osobnego, powielanego kredytu.
 Rozdanie zwiększa źródłowy atrybut, HP/MP według współczynników klasy, właściwy kanał
-arkusza oraz ofensywny atrybut adaptera walki. Procentowe opcje używają podstaw
+arkusza używany również w walce. Magiczna broń używa INT; łuk używa DEX.
+Procentowe opcje używają podstaw
 uwzględniających rozdane punkty. SaveVersion 14 sanitizuje liczby i ogranicza sumę do
 zdobytej puli. W trakcie ekspedycji rozdawanie jest zablokowane.
 
 Stun, Stone i Silence resistance są niezależnymi sumami opcji 61, 60 i 62,
 z limitem 80% dla każdej. Stun/Stone zmniejsza szansę na istniejące ogłuszenie /
-petryfikację mnożnikiem `(1 − resistance/100)`. Silence pokazuje rzeczywistą wartość
-opcji; nie dodaje to brakującego systemu wyciszenia umiejętności.
+petryfikację mnożnikiem `(1 − resistance/100)`. Silence blokuje rzucanie skilli,
+stone i stun blokują działania, hold ruch, confusion jest osobnym stanem bez stuna.
+Nie wyznaczamy szansy stanu z jego mocy; brakujące `hitrate` blokuje nową naukę.
 
 Ruch: `czas = bazowyCzas × 6 / runSpeed` dla podróży (`TIMINGS.travel`) i podejścia
 (`TIMINGS.approach`). `runSpeed` uwzględnia klasę, sprzęt i efekty; scena i symulacja
@@ -30,7 +34,7 @@ używają wspólnego czasu. Bez źródłowego arkusza używa się `6 × (1 + mov
 Character grupuje atrybuty, HP/MP, walkę, bonusy, szybkości i regenerację. Nowy arkusz
 `CombatStats.client` ma osobne physical/magic attack, defense, hit i evasion,
 critical/deadly rating oraz prędkości źródłowe. Character pokazuje tylko run m/s; walk speed jest ukryte.
-To nie są aliasy pojedynczych bojowych `attack/defense` adaptera. Szczegóły i granice:
+Wybrany kanał ataku i oba kanały obrony są wiązane z walką. Szczegóły i granice:
 [uzupełnienie źródłowe](source-followup-fixes.md). Magiczne i fizyczne opcje/buffy
 zmieniają odpowiednie pola, a critical/deadly są ponownie liczone po zmianie DEX.
 
@@ -46,29 +50,29 @@ zmieniają odpowiednie pola, a critical/deadly są ponownie liczone po zmianie D
 
 `hit` / `dodge` to surowe punkty ratingu, z bazą klasy i przyrostem poziomowym, opcjami
 i efektami umiejętności. `strength` / `dexterity` / `intelligence` / `constitution` są
-atrybutami źródłowych klas bez profesji. `hpRegen` / `mpRegen` to dodatki HP/MP na 5 s,
+atrybutami źródłowych klas bez profesji. `hpRegen` / `mpRegen` to dodatki HP/MP na 3 s,
 `castSpeed` skraca przygotowanie castu (STAT23), `reuseTime` zmienia odnowienie (STAT8),
 a `blockChance` to procent szansy połowienia zwykłego ciosu.
 
 ### Statystyki klasy na poziomie
 
-```
-stat(poziom) = round(base + perLevel × (poziom − 1))     dla maxHp, attack, defense
-```
+`attributes.ts` przenosi bazowe atrybuty, ich przyrosty oraz współczynniki HP/MP
+z `PC.cpp:58–138`. Zasoby: baza + przyrost × (poziom − 1), następnie wpływ
+rozdanych punktów, opcji i pasywnych efektów.
 
-Pozostałe statystyki (szybkość ataku, krytyk) na razie nie rosną z poziomem. Mana:
-`maxMp = round(mana.base + mana.perLevel × (poziom − 1))` — Titan 40 (+4), Knight 45 (+4,5), Healer 60 (+7),
-Mage 70 (+8), Rogue 45 (+4,5), Sorcerer 55 (+6) (wartości własne).
-Poziom jest ograniczony do zakresu 1–100 (`MAX_LEVEL`; decyzja właściciela — w grze są na razie tylko Juno, Dratan, Merac i Egeha).
+| Klasa    | HP na 1 | HP/poziom | MP na 1 | MP/poziom |
+| -------- | ------: | --------: | ------: | --------: |
+| Titan    |     180 |        36 |      68 |        14 |
+| Knight   |     150 |        30 |      86 |        16 |
+| Healer   |     110 |        18 |     108 |        22 |
+| Mage     |      90 |        11 |     122 |        31 |
+| Rogue    |     130 |        27 |      56 |         9 |
+| Sorcerer |     110 |        15 |     128 |        29 |
 
-| Klasa    | HP  | Atak | Obrona | Interwał | Krytyk   | +HP/poz | +Atak/poz | +Obr/poz |
-| -------- | --- | ---- | ------ | -------- | -------- | ------- | --------- | -------- |
-| Titan    | 140 | 14   | 6      | 1,6 s    | 8% ×1,8  | 14      | 2,2       | 0,9      |
-| Knight   | 160 | 11   | 9      | 1,3 s    | 5% ×1,5  | 16      | 1,7       | 1,3      |
-| Healer   | 110 | 9    | 5      | 1,2 s    | 5% ×1,5  | 11      | 1,4       | 0,8      |
-| Mage     | 95  | 15   | 4      | 1,5 s    | 10% ×1,7 | 9,5     | 2,4       | 0,6      |
-| Rogue    | 105 | 11   | 5      | 0,95 s   | 14% ×1,6 | 10,5    | 1,7       | 0,7      |
-| Sorcerer | 120 | 13   | 6      | 1,35 s   | 8% ×1,6  | 12      | 2         | 0,9      |
+Atak/obrona pochodzą z atrybutu i rzeczywistych wartości sprzętu (`clientStats.ts`),
+bez skalowania do mediany potworów lub typowego sprzętu. Broń wyznacza interwał;
+bez broni wynosi on 1,2 s. Krytyk zastępczy pozostaje do czasu odzyskania danych NPC.
+Poziom jest ograniczony do 1–100; dostępne są Juno, Dratan, Merac i Egeha.
 
 ## Trafienie
 
@@ -86,27 +90,35 @@ kanału ratingów, bez pełnego `CalcNewHitProb`, profesji i wszystkich wyjątk�
 
 ## Obrażenia
 
-```
-bazowe   = max(1, atak² / (atak + obrona))
-rozrzut  = losowo z [0,9; 1,1]
-obrażenia = max(1, round(bazowe × rozrzut × mnożnikSkilla × (krytyk ? critMultiplier : 1)))
-mnożnikSkilla = 1 dla zwykłego ciosu, 1 + a_power / 100 dla umiejętności (np. power 300 → ×4)
-```
+`sourceSkillDamage` rozdziela składnik atrybutu i broni, fizyczną obronę i resist.
+Zwykły atak PC używa tych samych kanałów co arkusz. `MDT_ONLYPOWER` zwraca moc;
+`MDT_ADDITION` dodaje ją do składnika broni po źródłowym mnożniku poziomu,
+przed korektą hit/avoid i odjęciem obrony. Nie zamienia się mocy 500 na +500%.
+Zachowano źródłową gałąź RATE, bez dopisywania nieobecnego w niej mnożnika.
 
-Wzór `atak² / (atak + obrona)` daje malejące zyski z obrony: obrona równa atakowi
-połowi obrażenia, ale nigdy ich nie zeruje.
+To gałęzie solo bez profesji. Brakuje kompletnego `CalcNewHitProb`, atrybutów,
+magic avoid i attack type wszystkich NPC oraz regionalnych wyjątków. Dla NPC
+i syntetycznych testów bez tych danych pozostaje jawny adapter `A²/(A+D)`.
+Nie jest on przedstawiany jako oryginalny wzór serwera.
+
+`sourceHitTypes.ts` przenosi sześć osobnych rzutów WEAK/NORMAL/STRONG/HARD/CRITICAL/DEADLY
+i wygrywanie remisów przez późniejszy typ. Wymaga rzeczywistego CON celu;
+bez niego nie podstawia zmyślonej wartości. STAT14/66 nie zwiększają już obrażeń
+krytycznych. Pełne włączenie Deadly dla obecnych NPC czeka na SQL; nowa nauka
+takich pasywnych skilli jest w tym czasie zablokowana.
 
 Opcja 63 niezależnie losuje blok zwykłego ciosu: `max(1, trunc(obrażenia / 2))`.
 Ataki umiejętnościami pomijają ten blok.
 
-Przykład: Knight (atak 11) vs Rust Golem (obrona 3): `121 / 14 ≈ 8,6` obrażeń na cios.
-
 ## Regeneracja
 
-Poza walką (szukanie potwora, podbieganie, po zwycięstwie) gracz odzyskuje **3% maks. HP i 2% maks. MP na
-sekundę**. W trakcie walki: HP nie wraca, MP wraca 0,5% maks. na sekundę. Do tego premie z umiejętności
-(`hpRegen` / `mpRegen` — wartość z bazy na 5 s, nasze odczytanie) i z mikstur (patrz „Mikstury”). Po śmierci
-postać wstaje z pełnym HP i MP, a buffy i działające mikstury znikają.
+Naturalny odzysk PC ma niezależny impuls **3 s**. Podczas ruchu i trybu walki baza
+wynosi 1 HP/MP, podczas stania bez siedzenia 25% odzysku klasy, z obcięciem.
+Następnie liczą się kolejno pasywne efekty, assisty i opcje (`PC.cpp:2408`).
+Same premie +2 dodają 10 jednostek przez 15 s, zamiast dawnych 6.
+Leczenie mikstur i assistów jest osobną mechaniką. Własny powrót z AFK nadal
+używa proporcji HP/MP sprzed wyprawy; nie zapisujemy trwałego stanu walki.
+Po śmierci postać wstaje z pełnymi zasobami, a efekty znikają.
 
 ## Przebieg walki (czasy)
 
@@ -127,18 +139,12 @@ się pod postacią), potem zwykłe `spawning`. W tym czasie nie ma walki ani zab
   dopasowywana do tego czasu niezależnie od modelu.
 - Gdy ktoś zginie, jego rozpoczęty cios przepada.
 
-## Tryb LC — tymczasowe statystyki gracza
+## Dawny adapter statystyk
 
-W bazie LC nie ma statystyk startowych klas, a wartości potworów LC są w innej skali niż nasze
-zastępcze klasy. Dopóki nie ustalimy statystyk klas (M3), w trybie LC (dane z bazy LC) gracz jest
-**skalowany do potworów ze swojego poziomu** (`src/game/logic/lcBalance.ts`, wartości własne):
-
-- bierzemy zwykłe (nie elitarne) potwory w oknie ±3 poziomy i liczymy medianę HP, obrony i ataku,
-- atak gracza dobieramy tak, żeby typowy potwór padał po ~8 ciosach (`atak² / (atak + obrona) = HP / 8`),
-- obrona gracza = 2 × atak potwora (potwór zadaje ok. ⅓ swojego ataku),
-- HP gracza = max(100 + 60 × poziom, 30 ciosów potwora).
-
-Interwał ataku i krytyki zostają z klasy. Interwał ataku potwora LC = `a_attackSpeed / 10` s (założenie).
+`lcBalance.ts` zachowano jako historyczny model porównawczy i fixture testowe.
+`playerFighter` nie skaluje już HP/ATK/DEF do mediany potworów. `applyGear` z
+referencyjnymi współczynnikami pozostaje starszym narzędziem testowym; główna
+postać używa kanałów `clientStats.ts` i rzeczywistych `pieceStats`.
 
 ## Doświadczenie i nagrody
 
@@ -167,9 +173,11 @@ Interwał ataku i krytyki zostają z klasy. Interwał ataku potwora LC = `a_atta
 
 Przedmioty mogą wypaść, gdy postać przewyższa potwora najwyżej o 5 poziomów.
 Od przewagi 6 poziomów wypłata pomija wszystkie obecne kill-dropy, także dodatkowe
-akcesoria i Smelting Stone. W dozwolonym zabójstwie zachowano dotychczasowy model:
-każdy wpis tabeli (`a_item_percent_N / 10000`) losowany **osobno**. Pełny źródłowy
-wybór czterech prób z 20 slotów, mnożniki runtime i drop z „+” nie są tu portowane.
+akcesoria i Smelting Stone. Gdy import ma komplet `dropSlots`, silnik wykonuje
+cztery wybory indeksu 0…19 i osobno test szansy wybranego slotu. Puste sloty zostają,
+a ten sam przedmiot może wypaść wielokrotnie. Obecny stary eksport nie ma tej tabeli:
+do czasu odzyskania SQL zachowuje wcześniejsze losowania osobnych wpisów. Nie
+odtwarzamy brakujących pozycji z listy dodatnich dropów. Eventy i drop z „+” nie są portowane.
 Przedmioty trafiają do ekwipunku jako stosy (jeden stos na rodzaj; osobne egzemplarze sprzętu z ulepszeniem
 dojdą w M5). Ekwipunek nie ma na razie limitu miejsc.
 
@@ -191,14 +199,16 @@ wypada** — wpisy takich przedmiotów są pomijane w tabelach dropu (decyzja w�
   zamknięcie gry.
 - Powrót („Return now”) płaci `min(teraz − start, 8 h)`; liczy się każda pełna sekunda wyprawy, również przed pierwszą minutą. Bez wyprawy
   czas poza grą nie daje nagród (aktywna gra albo wyprawa — jak w opisie M4).
-- Tempo polowania mierzymy na **prawdziwej symulacji walki** (`measureHuntRate`: 20 minut walki tymi samymi
-  wzorami co na ekranie) osobno dla każdego poziomu postaci. Czas wyprawy dzielimy na 10-minutowe odcinki,
-  więc awans w trakcie wyprawy wzmacnia postać. Wynik: zabicia (z losowym zaokrągleniem), śmierci, exp,
-  złoto, SP i drop jak za zwykłe zabicia. Symulacja używa nauczonych umiejętności postaci. `AFK_EFFICIENCY = 1` (wartość własna: wyprawa daje tyle co gra przy
-  włączonym ekranie). Okno przed wysłaniem pokazuje oczekiwane zabicia, exp, złoto i mikstury na godzinę.
-- **Mikstury na wyprawie**: pomiar tempa daje postaci tyle mikstur z torby, ile chce, i liczy, ile wypiła na
-  godzinę; każdy 10-minutowy odcinek zabiera z torby tyle sztuk (najwyżej tyle, ile zostało). Gdy rodzaj się
-  skończy, tempo jest mierzone od nowa bez niego. Zużyte mikstury są w oknie „While you were away…”.
+- Wypłatę liczy ciągły `combatTick`, krokiem do 0,05 s, z oddzielnym RNG walki
+  i nagród. Każde zabójstwo ma własny czas, nagrodę i granicę awansu. HP/MP, efekty
+  i cooldowny są zachowywane między walkami, bez restartu co 600 s.
+- Mikstury mają rzeczywisty skończony zapas. Ostatnia sztuka kończy się w chwili
+  użycia; dalsza walka przebiega bez niej. Drop mikstur do aktywnego slotu może
+  uzupełnić zapas. Zużycie trafia do podsumowania.
+- Tytuł liczy się do chwili wygaśnięcia. Trwająca wyprawa zachowuje jego historię
+  przez zapis i odświeżenie; dopiero odbiór usuwa wygasły tytuł.
+- `measureHuntRate` nadal jest próbką 1200 s z pełnym zapasem do **podglądu**
+  wydajności „while they last”. Nie służy do wypłaty AFK. `AFK_EFFICIENCY = 1`.
 - Jedno zgłoszenie walki obejmuje najwyżej 10 minut (`MAX_REPORT_WINDOW`), więc czas poza grą może zapłacić
   tylko wyprawa.
 
@@ -206,7 +216,7 @@ wypada** — wpisy takich przedmiotów są pomijane w tabelach dropu (decyzja w�
 
 Dane 1:1 z bazy: `t_skill` (klasa, typ, cel, czasy w 1/10 s), `t_skilllevel` (mana, HP, czas trwania,
 wymagany poziom postaci, koszt SP, wymagane inne umiejętności) i `t_magic` + `t_magiclevel` (efekty i ich moc).
-Interpretacja efektów jest **nasza** (`src/game/logic/skills.ts`) do czasu kodu serwera.
+Interpretację przenosimy według kodu serwera; niepełne efekty i brakujące szanse nie pozwalają wydać nowych SP. Pełna lista ograniczeń jest w [raporcie](audit-fixes.md).
 
 - **SP** — baza za zabicie `t_npc.a_skill_point`, liczone jak na serwerze LC w 1/10 000 punktu (Fox: 1375 →
   0,1375 SP). Nauka kolejnego poziomu kosztuje `a_learnSP` pełnych punktów i wymaga `a_learnLevel` oraz
@@ -217,18 +227,20 @@ Interpretacja efektów jest **nasza** (`src/game/logic/skills.ts`) do czasu kodu
   wystrzeleniu — postać nie stoi w tym czasie (`TIMINGS.skillAnimationLock = 0`) i rusza dalej po zwykłym
   interwale ataku; klipy skilli z klienta (`skills.lod`) są dopasowane do tego rytmu: przygotowanie czaru
   trwa tyle, co rzucanie, a wystrzał trafia w chwili ciosu (tempo klipu ×0,5…×2,5). Odnowienie
-  `max(przygotowanie, a_reuseTime / 10)` liczone od początku rzucania, efekty trwają `a_durtime / 10` s.
+  liczone od początku rzucania: `p = a_reuseTime + magicSpeed`,
+  `p *= 150/(150+bonus) * 100/(100+bonus)`, wynik w górę do impulsu 0,1 s.
+  Jeśli p < 1, źródło ustawia 10 impulsów. Nie ma dawnego limitu 50%.
+  Znane flagi guild/no-cool-time pomijają modyfikacje. Efekty trwają `a_durtime / 10` s.
 - **Efekty** (`t_magic` typ/podtyp):
-  - typ 3 — obrażenia: cios × `1 + power/100`;
-  - typ 0 — zmiana statystyki: 0 atak, 1 obrona, 2 atak magiczny → atak, 3 obrona magiczna → obrona, 4 celność,
-    5 unik, 6 szansa krytyka (power/10 %), 7 szybkość ataku, 8 odnowienie, 23 przygotowanie castu, 10/11 regeneracja HP/MP,
-    12/13 maks. HP/MP, 14 obrażenia krytyczne (power %), 22 atak %; `a_damagetype` 2 = procent;
-  - typ 2 — stany: 2, 5, 7 ogłuszenie (power > 0 = szansa %), 16 spowolnienie ataku, 9 / 10 HP / MP na
-    sekundę przez czas trwania (te same stany mają mikstury leczenia i many; np. Mana Recovery maga),
-    0 trucizna (power obrażeń na sekundę);
-  - typ 4 — 0 leczenie (power HP), 1 przywrócenie many (power MP);
-  - reszta (przywołania, prędkość ruchu, wskrzeszenie, oczyszczanie) — w IdleLC jeszcze nie działa; takie
-    umiejętności (i te, które ich wymagają) są szare i nie da się ich uczyć.
+  - typ 3 zachowuje ONLYPOWER/ADDITION/RATE, z kanałem melee/range/magic skilla;
+  - STAT14 to Deadly, a nie mnożnik krytyka; STAT22 jest HP z limitem 450;
+  - ASSIST0/5 to poison/blood, 1 hold, 2 confusion, 3 stone, 4 silence, 7 stun;
+  - zwykły DOT pozostawia 1 HP; wkład na PC jest redukowany według `Assist.cpp`;
+  - ASSIST13 rozlicza MP_CANCEL, wraz z anulowaniem całego buffa po braku many;
+  - CURE0 usuwa poison, zachowując krwawienie;
+  - nie wyznaczamy szansy z `power`. Brak `hitrate` pozostaje brakiem;
+  - częściowo obsługiwany skill nie może pobierać nowych SP. Zapisane poziomy
+    pozostają, a wykonują się tylko rozpoznane składniki.
 - **Rodzaje** — umiejętność z obrażeniami = atak; ogłuszenie / trucizna / same ujemne statystyki na cel =
   klątwa (na potwora); leczenie / mana = odnowa; reszta aktywnych = buff (na siebie); `a_type 3` = pasywna
   (zawsze działa, wliczona w statystyki).
@@ -254,15 +266,10 @@ Dane 1:1 z `t_item`: slot (`a_wearing` 0 hełm, 1 zbroja, 2 broń, 3 spodnie, 4 
 `a_num_0`, obrona magiczna `a_num_1`. Nowa postać nosi **darmowy zestaw startowy klasy** z bazy (cena 0, poziom 1,
 np. Knight: Lancer Sword, Squire Helm/Shirt/Pants/Gloves/Boots, Scale Shield).
 
-**Jak sprzęt wpływa na walkę.** Nieulepszony sprzęt nadal jest porównywany z typowym
-sprzętem klasy (`gearReference`), zachowując bazowy balans idle. Od partii 17 zgłoszeń
-przyrost za plus jest obliczany oddzielnie według źródła i dodawany bez dalszego
-mnożenia przez współczynnik adaptera:
-
-```
-atak = round(atakPoziomu × (0,6 + 0,4 × mocBroniPlus0 / typowaBroń)) + przyrostAtakuUlepszenia
-obrona = round(obronaPoziomu × (0,5 + 0,5 × mocZbroiPlus0 / typowaZbroja)) + sumaPrzyrostówObrony
-```
+**Jak sprzęt wpływa na walkę.** Atak fizyczny/magiczny używa właściwego
+atrybutu i rzeczywistych wartości `pieceStats`, a obrona DEF/resist rzeczywistego
+pancerza oraz źródłowej premii poziomu. Nie ma skalowania do `gearReference`.
+Opcje są rozdzielone według kanałów; premie HP/MP liczą się według współczynników klasy.
 
 Dla sprzętu poniżej 146. poziomu, w grze ograniczonej do +15:
 `wartość = trunc(baza × f^plus)`, gdzie `f = 1,06` do +10 i `1,07` od +11.
@@ -275,8 +282,7 @@ Do wyliczonej wartości dochodzą płaskie premie:
 - zbroja poza tarczą: od +8 +10 DEF, od +10 +10 MDEF;
 - wszystkie części zbroi, także tarcza: od +15 dodatkowo +100 DEF i +50 MDEF.
 
-Źródłowy arkusz ma oba kanały; pojedynczy atak adaptera wybiera kanał broni,
-a pojedyncza obrona dostaje fizyczny przyrost. To nadal nie jest pełny port damage.
+Źródłowy arkusz i walka używają wspólnych kanałów. Pełny port damage nadal wymaga brakujących danych NPC i wyjątków serwera.
 Przykład: baza broni 100, +15 → 275 z potęgi +6 z progu +75 = 356, czyli przyrost
 256 punktów. Opis przedmiotu osobno pokazuje wzrost z potęgi i podpis premii +15,
 tak jak tooltip klienta. [Szczegóły i granice](client-ui-upgrade-fixes.md).
@@ -354,7 +360,7 @@ Zasady:
   i siła opcji, poziom), zaznacza je klasami („E ×5”) i sprzedaje zaznaczone (`a_price × 40%`);
 - lupy sprzedaje sklep w każdej strefie (własne — w LC są w sklepach miast).
 
-Opcje specjalne zestawów (działanie **własne**): skrócenie odnowienia skilli (58, max −50%), mniej many na
+Opcje specjalne zestawów (działanie **własne**): bonus odnowienia skilli (58, wzór `IsReady` bez limitu 50%), mniej many na
 skille (59, max −75%), kradzież HP / MP z obrażeń (24, 25, 51, 52), szybkość ruchu (64 — krótsze podbieganie
 do potwora, więc więcej zabić na godzinę; kolejne bonusy mnożą prędkość), blok (63 → połowa zwykłego ciosu), szansa krytyka (55, w 1/10 %),
 obrażenia krytyczne (66, %), regeneracja HP / MP (50, 56, 57), niższy wymagany poziom (49). Odporności 60–62 mają osobne wartości i limit 80%; Stun/Stone zmniejszają szansę właściwego stanu.

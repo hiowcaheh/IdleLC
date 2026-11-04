@@ -1,5 +1,14 @@
 # Uzgodnione zasady i różnice względem oryginalnego LC
 
+Aktualizacja po audycie `a35cfbb`: właściciel zezwolił na naprawy wszystkich
+14 punktów. Obejmuje to zastąpienie medianowego balansu postaci źródłowymi
+zasobami/kanałami, źródłowe szybkości i regenerację, ciągłą symulację AFK,
+oryginalne tereny pozostałych dwóch map oraz zabezpieczenia zapisu/klawiatury.
+P01–P13 pozostają: bezpieczne kamienie, limit +15, cztery mapy, poziom 100,
+własne wyprawy i opcje czasowe. Brakujących danych nie wolno wymyślać.
+Importer/algorytm przygotowany do pełnych danych nie oznacza ich odzyskania.
+[Stan każdego punktu i pozostałe ograniczenia](audit-fixes.md).
+
 Aktualizacja 2026-11-04 — osiem poprawek Book/Character/Skills/Shop:
 `shopOffer` oferuje najlepszy istniejący wariant rare tej samej rodziny, ceny,
 poziomu i bazowych parametrów, aby także zakupy pozwalały uzyskać sześć pieczęci

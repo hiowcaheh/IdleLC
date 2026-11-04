@@ -1,5 +1,6 @@
 /**
- * TEMPORARY player stats for LC mode. The LC database has no class base stats (they live in the
+ * Historical comparison model, retained for regression fixtures; playerFighter no longer uses it.
+ * The LC database has no class base stats (they live in the
  * server code), so until they are known (M3) the player is scaled against the LC monsters of the
  * same level: a typical monster dies in ~HITS_TO_KILL blows and hits back for about a third of its
  * attack. Own values, not LC data — see docs/balance.md.

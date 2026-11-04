@@ -1,5 +1,24 @@
 # Historia zmian
 
+## 2026-11-04 — naprawy po audycie: zapis, czas, walka, AFK i mapy
+
+Punkt wyjścia `a35cfbb`. [Stan wszystkich 14 punktów, źródła i ograniczenia](docs/audit-fixes.md).
+
+- Jedna aktywna karta i odrzucanie starego zapisu; druga karta wznawia aktualne konto.
+- Stałe kroki logiki z zachowaniem czasu przy niskim FPS, bez automatycznych nagród z tła.
+- Źródłowe HP/MP i wspólne kanały arkusza/walki; INT laski i DEX łuku mają właściwy wpływ.
+- AFK symuluje skończone mikstury i ważność tytułu w czasie zabójstw.
+- Rozdzielone stany, DOT pozostawiający 1 HP, MP_CANCEL Tyranta i Cure Poison.
+- Źródłowe attack speed, cooldown bez limitu 50% i naturalna regeneracja co 3 s.
+- Merac i Egeha mają oryginalne tereny oraz otoczenie WLD.
+- Wszystkie okna utrzymują fokus klawiatury i oddają go po zamknięciu.
+- Importer zachowuje brakujące wcześniej pola; dodano ścisły odzysk profili FX.
+  Nie są to odzyskane dane SQL ani ukończony renderer. Nauka niekompletnych skilli
+  jest blokowana, bez kasowania zapisanych poziomów. Summony, pełne FX oraz część
+  hit/drop/Deadly pozostają do ukończenia; raport wymienia je jawnie.
+
+SaveVersion **14**. Wyniki sprawdzeń: [plik walidacji](docs/audit-fixes-validation.json).
+
 ## 2026-11-04 — osiem poprawek Book, postaci, skilli i sklepu
 
 Punkt wyjścia: `b0f10ab`. [Zakres i walidacja](docs/book-shop-ui-fixes.md).

@@ -18,7 +18,8 @@ import {
   rollAttack,
   skillDamageMultiplier,
 } from './balance.ts'
-import { chance, type Rng } from './rng.ts'
+import { chance, rollInt, type Rng } from './rng.ts'
+import { naturalRecovery } from './recovery.ts'
 import { applyStats, type SkillKind, type SkillRank, type StatEffect } from './skills.ts'
 
 export type Side = 'player' | 'monster'
@@ -53,8 +54,7 @@ export const MP_POTION_BELOW = 0.3
 /** Seconds between two poison ticks. */
 export const POISON_TICK = 1
 
-/** Caps of the rare-option reductions (own values): skill cooldowns and skill mana. */
-export const MAX_COOLDOWN_REDUCTION = 0.5
+/** Mana cap remains the owner's adapter; skill cooldowns use IsReady without a 50% cap. */
 export const MAX_MP_COST_REDUCTION = 0.75
 
 /** Largest simulated step; bigger dt values are split so event order stays correct. */
@@ -96,6 +96,9 @@ export interface ActiveEffect {
   remaining: number
   stats: StatEffect[]
   stun: boolean
+  state?: 'stone' | 'silence' | 'confusion' | 'hold'
+  dotKind?: 'poison' | 'blood'
+  mpChange?: { power: number; percent: boolean }
   /** Poison damage per tick. */
   poison: number
   /** Seconds until the next poison tick. */
@@ -108,6 +111,9 @@ export interface ActiveEffect {
 export interface Fighter extends FighterInit {
   hp: number
   mp: number
+  /** Recovery has its own server-pulse clock, independent of casts and render frames. */
+  recoveryIn: number
+  combatMode: boolean
   /** Seconds until the next swing or cast may start. */
   cooldown: number
   /** Seconds until the current swing or cast lands, or null when idle. */
@@ -149,7 +155,15 @@ export type CombatEvent =
       /** Seconds until it lands. */
       castTime: number
     }
-  | { type: 'hit'; target: Side; amount: number; crit: boolean; skill?: boolean; poison?: boolean }
+  | {
+      type: 'hit'
+      target: Side
+      amount: number
+      crit: boolean
+      deadly?: boolean
+      skill?: boolean
+      poison?: boolean
+    }
   | { type: 'miss'; target: Side }
   | { type: 'heal'; target: Side; amount: number; mana?: boolean }
   | { type: 'effect'; target: Side; skillId: number; name: string; kind: EffectKind }
@@ -174,6 +188,8 @@ function freshFighter(init: FighterInit): Fighter {
     potions: init.potions,
     hp: init.stats.maxHp,
     mp: init.stats.maxMp ?? 0,
+    recoveryIn: REGEN_TICK_SECONDS,
+    combatMode: false,
     cooldown: 0,
     impactIn: null,
     casting: null,
@@ -210,7 +226,7 @@ export function effectiveStats(f: Fighter): CombatStats {
 }
 
 export function isStunned(f: Fighter): boolean {
-  return f.effects.some((e) => e.stun)
+  return f.effects.some((e) => e.stun || e.state === 'stone')
 }
 
 /** Mana a skill costs the fighter (rare option "Decrease MP Consumption"). */
@@ -225,8 +241,14 @@ export function skillPreparationTime(rank: SkillRank, stats: CombatStats): numbe
 }
 
 export function skillCooldownTime(rank: SkillRank, stats: CombatStats): number {
-  const reduction = Math.min(MAX_COOLDOWN_REDUCTION, (stats.cooldownReduction ?? 0) / 100)
-  return Math.max(0, rank.cooldown + (stats.reuseTime ?? 0)) * (1 - reduction)
+  let pulses = rank.cooldown * 10
+  if (!rank.fixedCooldown) {
+    pulses += (stats.reuseTime ?? 0) * 10
+    const prob = stats.cooldownReduction ?? 0
+    if (prob !== 0) pulses *= ((150 / (150 + prob)) * 100) / (100 + prob)
+  }
+  if (pulses < 1) pulses = 10
+  return Math.ceil(pulses - 1e-9) / 10
 }
 
 /** Seconds the hero runs to a new monster (rare option "Move Speed" makes it shorter). */
@@ -430,6 +452,18 @@ function regen(f: Fighter, dt: number, inCombat: boolean): void {
     hpPotions += e.hpPerSecond ?? 0
     mpPotions += e.mpPerSecond ?? 0
   }
+  if (stats.clientContext) {
+    f.recoveryIn -= dt
+    while (f.recoveryIn <= EPSILON) {
+      f.recoveryIn += REGEN_TICK_SECONDS
+      const recovered = naturalRecovery(stats, inCombat || f.combatMode)
+      f.hp = Math.min(stats.maxHp, f.hp + recovered.hp)
+      f.mp = Math.min(stats.maxMp ?? 0, f.mp + recovered.mp)
+    }
+    f.hp = Math.min(stats.maxHp, f.hp + hpPotions * dt)
+    f.mp = Math.min(stats.maxMp ?? 0, f.mp + mpPotions * dt)
+    return
+  }
   const hpRate =
     (inCombat ? 0 : stats.maxHp * OUT_OF_COMBAT_REGEN) +
     (stats.hpRegen ?? 0) / REGEN_TICK_SECONDS +
@@ -464,10 +498,19 @@ function tickEffects(f: Fighter, dt: number): number[] {
   const poison: number[] = []
   for (const e of f.effects) {
     e.remaining -= dt
-    if (e.poison <= 0) continue
+    if (e.poison <= 0 && !e.mpChange) continue
     e.nextTick -= dt
     while (e.nextTick <= EPSILON && e.remaining > -EPSILON) {
-      poison.push(e.poison)
+      if (e.poison > 0) poison.push(e.poison)
+      if (e.mpChange) {
+        const value = e.mpChange.percent
+          ? Math.trunc(((f.stats.maxMp ?? 0) * e.mpChange.power) / 100)
+          : e.mpChange.power
+        const next = f.mp + value
+        f.mp = Math.max(0, Math.min(f.stats.maxMp ?? 0, next))
+        // MP_CANCEL ends the complete assist when it can no longer pay its upkeep.
+        if (next < 0 || next > (f.stats.maxMp ?? 0)) e.remaining = 0
+      }
       e.nextTick += POISON_TICK
     }
   }
@@ -476,13 +519,16 @@ function tickEffects(f: Fighter, dt: number): number[] {
 }
 
 function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): void {
-  s.phaseTime += dt
+  const movementBlocked =
+    (s.phase === 'traveling' || s.phase === 'approach') &&
+    (isStunned(s.player) || s.player.effects.some((e) => e.state === 'hold'))
+  if (!movementBlocked) s.phaseTime += dt
   tickCooldowns(s.player, dt)
-  if (s.phase !== 'fighting') tickEffects(s.player, dt)
+  if (s.phase !== 'fighting' && s.phase !== 'defeat') poisonStep(s, 'player', dt, events)
 
   switch (s.phase) {
     case 'traveling':
-      regen(s.player, dt, false)
+      regen(s.player, dt, true)
       if (reached(s.phaseTime, travelTime(s))) {
         enter(s, 'spawning')
         events.push({ type: 'arrive' })
@@ -499,7 +545,7 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
       return
 
     case 'approach':
-      regen(s.player, dt, false)
+      regen(s.player, dt, true)
       if (reached(s.phaseTime, approachTime(s))) {
         s.player.cooldown = 0
         s.player.impactIn = null
@@ -507,6 +553,7 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
         s.monster.cooldown = s.monster.stats.attackInterval * TIMINGS.monsterInitiative
         s.monster.impactIn = null
         enter(s, 'fighting')
+        s.player.combatMode = true
         events.push({ type: 'engage' })
       }
       return
@@ -558,13 +605,9 @@ function endFight(s: CombatState, loser: Side, events: CombatEvent[]): void {
 function poisonStep(s: CombatState, side: Side, dt: number, events: CombatEvent[]): boolean {
   const f = side === 'player' ? s.player : s.monster
   for (const amount of tickEffects(f, dt)) {
-    const damage = Math.max(1, Math.round(amount))
-    f.hp = Math.max(0, f.hp - damage)
+    const damage = Math.min(Math.max(0, f.hp - 1), Math.max(0, Math.trunc(amount)))
+    f.hp = Math.max(1, f.hp - damage)
     events.push({ type: 'hit', target: side, amount: damage, crit: false, poison: true })
-    if (f.hp <= 0) {
-      endFight(s, side, events)
-      return true
-    }
   }
   return false
 }
@@ -594,7 +637,7 @@ function fighterStep(
 
   if (self.cooldown <= 0) {
     const stats = effectiveStats(self)
-    const skill = chooseSkill(self, target)
+    const skill = chooseSkill(self, target, rng)
     if (skill) {
       // wind-up (shortened by cast-speed skills), then it lands like a swing
       const windUp = skillPreparationTime(skill, stats)
@@ -633,16 +676,34 @@ function strike(
   events: CombatEvent[],
   multiplier: number,
   skill: boolean,
+  power?: { power: number; type: number },
+  attackType?: CombatStats['attackType'],
 ): boolean | null {
   const self = side === 'player' ? s.player : s.monster
   const targetSide: Side = side === 'player' ? 'monster' : 'player'
   const target = side === 'player' ? s.monster : s.player
+  const original = effectiveStats(self)
+  const selected = attackType
+    ? {
+        ...original,
+        attackType,
+        attack:
+          attackType === 'magic'
+            ? (original.magicAttack ?? original.attack)
+            : (original.client?.physicalAttack ?? original.physicalAttack ?? original.attack),
+        hit:
+          attackType === 'magic'
+            ? (original.magicHit ?? original.hit)
+            : (original.client?.physicalHit ?? original.physicalHit ?? original.hit),
+      }
+    : original
   const result = rollAttack(
-    { level: self.level, stats: effectiveStats(self) },
+    { level: self.level, stats: selected },
     { level: target.level, stats: effectiveStats(target) },
     rng,
     multiplier,
     skill,
+    power,
   )
   if (result.kind === 'miss') {
     events.push({ type: 'miss', target: targetSide })
@@ -656,6 +717,7 @@ function strike(
     target: targetSide,
     amount: result.damage,
     crit: result.kind === 'crit',
+    ...(result.kind === 'deadly' ? { deadly: true } : {}),
     ...(skill ? { skill } : {}),
   })
   if (target.hp > 0) return false
@@ -685,8 +747,16 @@ function landSkill(
   if (skill.offensive) {
     const targetSide: Side = side === 'player' ? 'monster' : 'player'
     const damage = skill.effects.find((e) => e.kind === 'damage')
-    const multiplier = damage ? skillDamageMultiplier(damage.percent) : 0
-    const outcome = strike(s, side, rng, events, multiplier, true)
+    const multiplier = damage
+      ? damage.damageType === undefined
+        ? skillDamageMultiplier(damage.percent)
+        : 1
+      : 0
+    const power =
+      damage?.damageType === undefined
+        ? undefined
+        : { power: damage.percent, type: damage.damageType }
+    const outcome = strike(s, side, rng, events, multiplier, true, power, skill.attackType)
     if (outcome === null) return false // missed
     if (outcome) return true
     applyEffects(targetSide === 'player' ? s.player : s.monster, targetSide, skill, rng, events)
@@ -695,7 +765,9 @@ function landSkill(
 
   const stats = effectiveStats(self)
   for (const e of skill.effects) {
-    if (e.kind === 'heal') {
+    if (e.kind === 'cure') {
+      self.effects = self.effects.filter((fx) => !(fx.poison > 0 && fx.dotKind !== 'blood'))
+    } else if (e.kind === 'heal') {
       const before = self.hp
       // MT_RECOVER/MDT_RATE uses maximum HP and integer division by SKILL_RATE_UNIT (100).
       const amount = e.percent ? Math.floor((stats.maxHp * e.amount) / 100) : e.amount
@@ -724,13 +796,36 @@ function applyEffects(
   if (skill.duration <= 0) return
   const stats = skill.effects.filter((e): e is StatEffect => e.kind === 'stat')
   const stunEffect = skill.effects.find((e) => e.kind === 'stun')
+  const stateEffect = skill.effects.find((e) => e.kind === 'state')
   const resistance =
     effectiveStats(f)[stunEffect?.resistance === 'stone' ? 'stoneResistance' : 'stunResistance'] ??
     0
   const stun =
     stunEffect !== undefined &&
+    stunEffect.chance !== undefined &&
     chance(rng, stunEffect.chance * (1 - Math.min(80, resistance) / 100))
-  const poison = skill.effects.find((e) => e.kind === 'poison')?.perSecond ?? 0
+  const stateResistance =
+    stateEffect?.state === 'stone'
+      ? effectiveStats(f).stoneResistance
+      : stateEffect?.state === 'silence'
+        ? effectiveStats(f).silenceResistance
+        : 0
+  const state =
+    stateEffect &&
+    stateEffect.chance !== undefined &&
+    chance(rng, stateEffect.chance * (1 - Math.min(80, stateResistance ?? 0) / 100))
+      ? stateEffect.state
+      : undefined
+  const dot = skill.effects.find((e) => e.kind === 'poison')
+  let poison =
+    dot && (!dot.requiresHitrate || dot.chance !== undefined) && chance(rng, dot.chance ?? 1)
+      ? dot.percent
+        ? Math.trunc((effectiveStats(f).maxHp * dot.perSecond) / 100)
+        : dot.perSecond
+      : 0
+  // Assist.cpp: ordinary player DOT is reduced by twenty, NPCs receive its full power.
+  if (f.stats.clientContext) poison = Math.trunc(poison / 20)
+  const mpChange = skill.effects.find((e) => e.kind === 'mpChange')
   const perSecond = (resource: 'hp' | 'mp') =>
     skill.effects.reduce(
       (sum, e) => sum + (e.kind === 'regen' && e.resource === resource ? e.perSecond : 0),
@@ -738,7 +833,16 @@ function applyEffects(
     )
   const hpPerSecond = perSecond('hp')
   const mpPerSecond = perSecond('mp')
-  if (stats.length === 0 && !stun && poison <= 0 && hpPerSecond <= 0 && mpPerSecond <= 0) return
+  if (
+    stats.length === 0 &&
+    !stun &&
+    !state &&
+    !mpChange &&
+    poison <= 0 &&
+    hpPerSecond <= 0 &&
+    mpPerSecond <= 0
+  )
+    return
   f.effects = [
     ...f.effects.filter((e) => e.skillId !== skill.id),
     {
@@ -747,13 +851,16 @@ function applyEffects(
       remaining: skill.duration,
       stats,
       stun,
+      state,
+      dotKind: dot?.dotKind,
+      ...(mpChange ? { mpChange: { power: mpChange.power, percent: mpChange.percent } } : {}),
       poison,
       nextTick: POISON_TICK,
       hpPerSecond,
       mpPerSecond,
     },
   ]
-  if (stun) {
+  if (stun || state === 'stone' || (state === 'silence' && f.casting)) {
     // a stun interrupts the swing or cast in progress
     f.impactIn = null
     f.casting = null
@@ -883,8 +990,9 @@ function damageOf(rank: SkillRank): number {
 }
 
 /** Picks the automatic skill to use now, or null for a normal swing. */
-export function chooseSkill(self: Fighter, target: Fighter): SkillRank | null {
-  if (!self.skills || self.skills.length === 0) return null
+export function chooseSkill(self: Fighter, target: Fighter, rng?: Rng): SkillRank | null {
+  if (!self.skills || self.skills.length === 0 || self.effects.some((e) => e.state === 'silence'))
+    return null
   const stats = effectiveStats(self)
   const ready = self.skills.filter(
     (r) =>
@@ -895,6 +1003,16 @@ export function chooseSkill(self: Fighter, target: Fighter): SkillRank | null {
       self.hp > r.hpCost,
   )
   if (ready.length === 0) return null
+  if (self.skills.some((s) => s.npcSlot !== undefined)) {
+    if (!rng) return null
+    for (let slot = 0; slot < 4; slot++) {
+      const roll = rollInt(rng, 1, 10000)
+      const rank = ready.find((s) => s.npcSlot === slot)
+      if (rank && self.mp > skillMpCost(rank, stats) && roll <= (rank.npcProbability ?? 0))
+        return rank
+    }
+    return null
+  }
   const hurt = self.hp < stats.maxHp * HEAL_BELOW
   const drained = self.mp < (stats.maxMp ?? 0) * MANA_BELOW
   const on = (f: Fighter, id: number) => f.effects.some((e) => e.skillId === id)
@@ -902,7 +1020,12 @@ export function chooseSkill(self: Fighter, target: Fighter): SkillRank | null {
   const heal = ready.find(
     (r) =>
       r.kind === 'heal' &&
-      r.effects.some((e) => (e.kind === 'heal' && hurt) || (e.kind === 'mana' && drained)),
+      r.effects.some(
+        (e) =>
+          (e.kind === 'heal' && hurt) ||
+          (e.kind === 'mana' && drained) ||
+          (e.kind === 'cure' && self.effects.some((fx) => fx.poison > 0 && fx.dotKind !== 'blood')),
+      ),
   )
   if (heal) return heal
   const buff = ready.find((r) => r.kind === 'buff' && !on(self, r.id))

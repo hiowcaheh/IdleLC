@@ -1,4 +1,4 @@
-import type { OptionDef, PotionDef, RareSetDef, TitleDef } from './types.ts'
+import type { OptionDef, PotionDef, RareSetDef, SkillEffectDef, TitleDef } from './types.ts'
 
 /** Shape of the files written by scripts/lc/import-db.mjs (src/game/data/generated/). */
 
@@ -21,6 +21,19 @@ export interface LcMonster {
   resist: number
   hit: number
   dodge: number
+  flag?: number
+  attackType?: number
+  strength?: number
+  dexterity?: number
+  intelligence?: number
+  constitution?: number
+  recoverHp?: number
+  recoverMp?: number
+  magicAvoid?: number
+  attackLevel?: number
+  defenseLevel?: number
+  dropSlots?: LcDrop[]
+  skills?: { slot: number; id: number; level: number; prob: number }[]
   /** t_npc.a_attackSpeed — most likely tenths of a second between attacks. */
   attackSpeed: number
   exp: number
@@ -77,6 +90,7 @@ export interface LcData {
   shop?: { sellRate: number; buyRate: number }
   /** Class skills (base classes), see scripts/lc/import-db.mjs buildSkills. */
   skills?: LcSkill[]
+  npcSkills?: Omit<LcSkill, 'classId' | 'icon'>[]
   /** Item ids the NPC shops of each field zone sell (gear and the upgrade stone), by zone id. */
   shops?: Record<string, number[]>
   /** Gear the IdleLC shop sells a class: by t_item.a_wearing, the tiers (level → item ids). */
@@ -107,6 +121,14 @@ export interface LcSkill {
   readyTime: number
   fireTime: number
   reuseTime: number
+  flag?: number
+  useState?: number
+  applyState?: number
+  sorcerer?: number
+  stillTime?: number
+  appRange?: number
+  fireRange?: number
+  fireRange2?: number
   icon: { atlas: number; row: number; col: number }
   levels: {
     level: number
@@ -116,7 +138,7 @@ export interface LcSkill {
     learnLevel: number
     learnSp: number
     requires: { skill: number; level: number }[]
-    effects: { magic: number; type: number; subtype: number; damageType: number; power: number }[]
+    effects: SkillEffectDef[]
   }[]
 }
 

@@ -46,6 +46,37 @@ async function withKnight() {
 const fox = (hero: { location: { monsterId: string } }) => MONSTERS[hero.location.monsterId]!
 
 describe('LocalGameService', () => {
+  it('preserves an expiring expedition title across reload and prunes it after the claim', async () => {
+    const { game, hero, clock, storage } = await withKnight()
+    const account = stored(storage)
+    account.characters[0].titles = [{ id: 23, expiresAt: clock.now + 300000 }]
+    account.characters[0].activeTitle = 23
+    storage.setItem(SAVE_KEY, JSON.stringify(account))
+    await game.load()
+    await game.startAfk(hero.id)
+    clock.now += 600000
+    const reloaded = new LocalGameService(storage, { now: () => clock.now, rng: createRng(7) })
+    const loaded = await reloaded.load()
+    expect(loaded.save.characters[0]!.titles).toEqual([{ id: 23, expiresAt: clock.now - 300000 }])
+    const claim = await reloaded.claimAfk(hero.id)
+    expect(claim.character.activeTitle).toBeNull()
+    expect(claim.character.titles.some((title) => title.id === 23)).toBe(false)
+  })
+  it('rejects a stale account write from a second service without losing a purchase', async () => {
+    const { game, storage } = make()
+    await game.load()
+    const stale = make(storage).game
+    await stale.load()
+    const hero = await game.createCharacter({ name: 'Brom', classId: 'knight' })
+    const saved = storage.getItem(SAVE_KEY)
+    await expect(stale.updateSettings({ showDamageNumbers: false })).rejects.toThrow(
+      'save-conflict',
+    )
+    expect(storage.getItem(SAVE_KEY)).toBe(saved)
+    const { save } = await stale.load()
+    expect(save.characters[0]!.id).toBe(hero.id)
+    await expect(stale.updateSettings({ showDamageNumbers: false })).resolves.toBeTruthy()
+  })
   it('creates and persists an empty account on first load', async () => {
     const { game, storage } = make()
     const { status, save } = await game.load()

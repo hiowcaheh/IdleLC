@@ -1,0 +1,123 @@
+{
+  "width": 257,
+  "height": 257,
+  "cell": 6,
+  "heightScale": 0.004577706567943096,
+  "layers": [
+    {
+      "texture": "layer-0.webp",
+      "tile": 6
+    },
+    {
+      "texture": "layer-1.webp",
+      "tile": 6
+    },
+    {
+      "texture": "layer-2.webp",
+      "tile": 6
+    },
+    {
+      "texture": "layer-3.webp",
+      "tile": 7.200000286102295
+    },
+    {
+      "texture": "layer-4.webp",
+      "tile": 18
+    },
+    {
+      "texture": "layer-5.webp",
+      "tile": 9
+    },
+    {
+      "texture": "layer-6.webp",
+      "tile": 12
+    },
+    {
+      "texture": "layer-7.webp",
+      "tile": 6
+    },
+    {
+      "texture": "layer-8.webp",
+      "tile": 6
+    },
+    {
+      "texture": "layer-9.webp",
+      "tile": 6
+    },
+    {
+      "texture": "layer-10.webp",
+      "tile": 6
+    },
+    {
+      "texture": "layer-11.webp",
+      "tile": 6
+    }
+  ],
+  "masks": [
+    "masks-0.webp",
+    "masks-1.webp",
+    "masks-2.webp"
+  ],
+  "arenas": [
+    [
+      1200,
+      264
+    ],
+    [
+      984,
+      300
+    ],
+    [
+      648,
+      216
+    ],
+    [
+      492,
+      408
+    ],
+    [
+      636,
+      480
+    ],
+    [
+      504,
+      648
+    ],
+    [
+      480,
+      744
+    ],
+    [
+      516,
+      816
+    ],
+    [
+      756,
+      1224
+    ],
+    [
+      1356,
+      1356
+    ],
+    [
+      1404,
+      1332
+    ],
+    [
+      1368,
+      1128
+    ],
+    [
+      1416,
+      780
+    ],
+    [
+      1308,
+      612
+    ],
+    [
+      204,
+      276
+    ]
+  ]
+}

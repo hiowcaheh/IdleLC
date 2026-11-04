@@ -1,5 +1,6 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { useModalFocus } from './useModalFocus.ts'
 
 /**
  * A window in the client's frame: bottom sheet (centered dialog on wide screens; `centered`: a
@@ -27,15 +28,7 @@ export function Sheet({
   children: ReactNode
 }) {
   const dialog = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const windows = document.querySelectorAll('.sheet')
-      if (e.key === 'Escape' && windows[windows.length - 1] === dialog.current) onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    dialog.current?.focus()
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  useModalFocus(dialog, onClose)
 
   const content = (
     <div className={`sheet-backdrop${centered ? ' sheet-backdrop--center' : ''}`} onClick={onClose}>

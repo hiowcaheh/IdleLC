@@ -6,17 +6,19 @@ import { getMonster } from '../data/monsters.ts'
 import type { ClassId } from '../data/types.ts'
 import { classAttributes, classResources, type Attributes } from './attributes.ts'
 import { classRatings } from './ratings.ts'
-import { clientStatChannels } from './clientStats.ts'
+import { bindCombatChannels, clientStatChannels } from './clientStats.ts'
 import { statsForLevel } from './balance.ts'
 import type { FighterInit, PotionSupply } from './combat.ts'
-import { applyGear, wielded, type Equipment } from './equipment.ts'
-import { lcPlayerStats } from './lcBalance.ts'
+import { wielded, type Equipment } from './equipment.ts'
+import { optionEffects } from './options.ts'
 import type { ItemStack } from './loot.ts'
 import { POTION_GROUPS, countOwned, potionGroup, type PotionSlots } from './potions.ts'
 import {
   applyStats,
+  interpretEffect,
   learnedRanks,
   passiveEffects,
+  skillRank,
   wieldableRanks,
   type LearnedSkill,
 } from './skills.ts'
@@ -60,47 +62,41 @@ export function potionSupply({ level, inventory = [], potionSlots }: Hero): Poti
 export function playerFighter(hero: Hero, now = Date.now()): FighterInit {
   const { classId, level, skills = {}, equipment, skillBar } = hero
   const base = statsForLevel(CLASSES[classId], level)
-  // LC data: class stats are not in the LC database yet — scale against LC monsters instead
-  const levelStats = lcData ? lcPlayerStats(level, lcData.monsters, base) : base
   const points = hero.allocatedStats ?? {}
-  const originalResources = classResources(classId, level)
   const resources = classResources(classId, level, points)
-  const stats = applyGear(
-    {
-      ...levelStats,
-      maxHp: levelStats.maxHp + resources.maxHp - originalResources.maxHp,
-      maxMp: (levelStats.maxMp ?? 0) + resources.maxMp - originalResources.maxMp,
-      ...classAttributes(classId, level, points),
-      ...classRatings(classId, level),
-    },
-    classId,
-    level,
-    equipment,
-    titleOptions(activeTitleId(hero, now)),
-    points,
-  )
-  const offense = ['titan', 'knight'].includes(classId)
-    ? 'strength'
-    : ['healer', 'rogue'].includes(classId)
-      ? 'dexterity'
-      : 'intelligence'
-  stats.attack += points[offense] ?? 0
-  // skills that need other gear (a shield, another weapon) are left out; estimates assume the gear fits
-  const learned = learnedRanks(classId, skills)
-  const ranks = equipment ? wieldableRanks(learned, wielded(equipment)) : learned
   const options = [
     ...Object.values(equipment ?? {}).flatMap((piece) => piece?.options ?? []),
     ...titleOptions(activeTitleId(hero, now)),
   ]
-  const detailed = { ...stats, ...clientStatChannels(stats, classId, level, equipment, options) }
-  if (detailed.client && detailed.clientContext) {
-    detailed.hit = detailed.clientContext.magicWeapon
-      ? detailed.client.magicHit
-      : detailed.client.physicalHit
-    detailed.dodge = detailed.clientContext.magicWeapon
-      ? detailed.client.magicEvasion
-      : detailed.client.physicalEvasion
-  }
+  const weapon = equipment?.weapon && getItem(equipment.weapon.itemId).gear
+  const stats = applyStats(
+    {
+      ...base,
+      ...resources,
+      critMultiplier: 2,
+      attackInterval: weapon?.attackInterval ?? 1.2,
+      strongBonus: (equipment?.weapon?.plus ?? 0) >= 10 ? 300 : 0,
+      hardBonus: (equipment?.weapon?.plus ?? 0) >= 12 ? 400 : 0,
+      ...classAttributes(classId, level, points),
+      ...classRatings(classId, level),
+    },
+    // The channel-specific equipment options are applied once by clientStatChannels below.
+    optionEffects(
+      options.filter((o) => ![50, 56, 57, 79, 80].includes(o.type)),
+      classId,
+      level,
+      equipment,
+      undefined,
+      points,
+    ),
+  )
+  // skills that need other gear (a shield, another weapon) are left out; estimates assume the gear fits
+  const learned = learnedRanks(classId, skills)
+  const ranks = equipment ? wieldableRanks(learned, wielded(equipment)) : learned
+  const detailed = bindCombatChannels({
+    ...stats,
+    ...clientStatChannels(stats, classId, level, equipment, options),
+  })
   return {
     level,
     stats: applyStats(detailed, passiveEffects(ranks)),
@@ -140,5 +136,12 @@ export function heroKey(hero: Hero, now = Date.now()): string {
 
 export function monsterFighter(monsterId: string): FighterInit {
   const monster = getMonster(monsterId)
-  return { level: monster.level, stats: monster.stats }
+  const source = lcData?.monsters.find((m) => m.id === monsterId)
+  const skills = (source?.skills ?? []).flatMap((slot) => {
+    const skill = lcData?.npcSkills?.find((s) => s.id === slot.id)
+    const level = skill?.levels.find((l) => l.level === slot.level)
+    if (!skill || !level || level.effects.some((e) => interpretEffect(e) === null)) return []
+    return [{ ...skillRank(skill, slot.level), npcSlot: slot.slot, npcProbability: slot.prob }]
+  })
+  return { level: monster.level, stats: monster.stats, ...(skills.length ? { skills } : {}) }
 }

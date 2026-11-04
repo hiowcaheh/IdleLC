@@ -1,0 +1,591 @@
+{
+  "base": "a35cfbba2c1265cf3cae89004fdde5e71a68955f",
+  "sourceMonsters": 279,
+  "skills": 119,
+  "available": 93,
+  "unavailable": [
+    {
+      "id": 24,
+      "name": "Deep Wound Training",
+      "classId": "knight",
+      "missingChance": false,
+      "unsupportedEffects": []
+    },
+    {
+      "id": 37,
+      "name": "Deadly Shot",
+      "classId": "healer",
+      "missingChance": false,
+      "unsupportedEffects": []
+    },
+    {
+      "id": 43,
+      "name": "Body Crasher",
+      "classId": "titan",
+      "missingChance": true,
+      "unsupportedEffects": []
+    },
+    {
+      "id": 44,
+      "name": "Charge",
+      "classId": "titan",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 65,
+          "type": 6,
+          "subtype": 1,
+          "damageType": 1,
+          "power": 0
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "name": "Shield Strike",
+      "classId": "knight",
+      "missingChance": true,
+      "unsupportedEffects": []
+    },
+    {
+      "id": 50,
+      "name": "Resurrection",
+      "classId": "healer",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 102,
+          "type": 5,
+          "subtype": 6,
+          "damageType": 2,
+          "power": 30
+        }
+      ]
+    },
+    {
+      "id": 123,
+      "name": "Poison Capsule",
+      "classId": "rogue",
+      "missingChance": true,
+      "unsupportedEffects": []
+    },
+    {
+      "id": 125,
+      "name": "Snare",
+      "classId": "rogue",
+      "missingChance": true,
+      "unsupportedEffects": []
+    },
+    {
+      "id": 127,
+      "name": "Combat Reflection",
+      "classId": "rogue",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 170,
+          "type": 6,
+          "subtype": 4,
+          "damageType": 2,
+          "power": 4
+        }
+      ]
+    },
+    {
+      "id": 129,
+      "name": "Confusion",
+      "classId": "rogue",
+      "missingChance": true,
+      "unsupportedEffects": []
+    },
+    {
+      "id": 131,
+      "name": "Invisibility",
+      "classId": "rogue",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 165,
+          "type": 2,
+          "subtype": 15,
+          "damageType": 0,
+          "power": 0
+        }
+      ]
+    },
+    {
+      "id": 143,
+      "name": "Far Seeing",
+      "classId": "rogue",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 164,
+          "type": 0,
+          "subtype": 17,
+          "damageType": 1,
+          "power": 1
+        }
+      ]
+    },
+    {
+      "id": 293,
+      "name": "Summon Earth Elemental",
+      "classId": "sorcerer",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 294,
+          "type": 6,
+          "subtype": 9,
+          "damageType": 0,
+          "power": 2
+        }
+      ]
+    },
+    {
+      "id": 294,
+      "name": "Summon Fire Elemental",
+      "classId": "sorcerer",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 295,
+          "type": 6,
+          "subtype": 9,
+          "damageType": 0,
+          "power": 0
+        }
+      ]
+    },
+    {
+      "id": 297,
+      "name": "Empowered Earth Elemental",
+      "classId": "sorcerer",
+      "missingChance": false,
+      "unsupportedEffects": []
+    },
+    {
+      "id": 298,
+      "name": "Empowered Fire Elemental",
+      "classId": "sorcerer",
+      "missingChance": false,
+      "unsupportedEffects": []
+    },
+    {
+      "id": 300,
+      "name": "Summon Water Elemental",
+      "classId": "sorcerer",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 301,
+          "type": 6,
+          "subtype": 9,
+          "damageType": 0,
+          "power": 3
+        }
+      ]
+    },
+    {
+      "id": 301,
+      "name": "Summon Wind Elemental",
+      "classId": "sorcerer",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 302,
+          "type": 6,
+          "subtype": 9,
+          "damageType": 0,
+          "power": 1
+        }
+      ]
+    },
+    {
+      "id": 302,
+      "name": "Empowered Water Elemental",
+      "classId": "sorcerer",
+      "missingChance": false,
+      "unsupportedEffects": []
+    },
+    {
+      "id": 303,
+      "name": "Empowered Wind Elemental",
+      "classId": "sorcerer",
+      "missingChance": false,
+      "unsupportedEffects": []
+    },
+    {
+      "id": 1347,
+      "name": "Veteran's Composure(T)",
+      "classId": "titan",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 683,
+          "type": 6,
+          "subtype": 8,
+          "damageType": 0,
+          "power": 1000
+        }
+      ]
+    },
+    {
+      "id": 1348,
+      "name": "Veteran's Composure(K)",
+      "classId": "knight",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 683,
+          "type": 6,
+          "subtype": 8,
+          "damageType": 0,
+          "power": 1000
+        }
+      ]
+    },
+    {
+      "id": 1349,
+      "name": "Veteran's Composure(H)",
+      "classId": "healer",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 683,
+          "type": 6,
+          "subtype": 8,
+          "damageType": 0,
+          "power": 1000
+        }
+      ]
+    },
+    {
+      "id": 1350,
+      "name": "Veteran's Composure(M)",
+      "classId": "mage",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 683,
+          "type": 6,
+          "subtype": 8,
+          "damageType": 0,
+          "power": 1000
+        }
+      ]
+    },
+    {
+      "id": 1351,
+      "name": "Veteran's Composure(R)",
+      "classId": "rogue",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 683,
+          "type": 6,
+          "subtype": 8,
+          "damageType": 0,
+          "power": 1000
+        }
+      ]
+    },
+    {
+      "id": 1352,
+      "name": "Veteran's Composure(S)",
+      "classId": "sorcerer",
+      "missingChance": false,
+      "unsupportedEffects": [
+        {
+          "magic": 683,
+          "type": 6,
+          "subtype": 8,
+          "damageType": 0,
+          "power": 1000
+        }
+      ]
+    }
+  ],
+  "missing": {
+    "npcConstitution": 279,
+    "npcMagicAvoid": 279,
+    "npcDropSlots": 279,
+    "magicHitrate": 728
+  },
+  "healerStaff": [
+    {
+      "attribute": "none",
+      "attack": 81,
+      "sheetAttack": 81,
+      "hp": 632,
+      "mp": 746
+    },
+    {
+      "attribute": "intelligence",
+      "attack": 87,
+      "sheetAttack": 87,
+      "hp": 632,
+      "mp": 836
+    },
+    {
+      "attribute": "dexterity",
+      "attack": 81,
+      "sheetAttack": 81,
+      "hp": 632,
+      "mp": 746
+    }
+  ],
+  "afkFinite": [
+    {
+      "id": "lc-2",
+      "count": 0,
+      "kills": 0,
+      "deaths": 7,
+      "used": []
+    },
+    {
+      "id": "lc-2",
+      "count": 1,
+      "kills": 0,
+      "deaths": 7,
+      "used": [
+        {
+          "itemId": 43,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "lc-2",
+      "count": 3,
+      "kills": 1,
+      "deaths": 6,
+      "used": [
+        {
+          "itemId": 43,
+          "count": 3
+        }
+      ]
+    },
+    {
+      "id": "lc-2",
+      "count": 10000,
+      "kills": 5,
+      "deaths": 0,
+      "used": [
+        {
+          "itemId": 43,
+          "count": 30
+        }
+      ]
+    },
+    {
+      "id": "lc-418",
+      "count": 0,
+      "kills": 0,
+      "deaths": 15,
+      "used": []
+    },
+    {
+      "id": "lc-418",
+      "count": 1,
+      "kills": 0,
+      "deaths": 15,
+      "used": [
+        {
+          "itemId": 43,
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "lc-418",
+      "count": 3,
+      "kills": 0,
+      "deaths": 15,
+      "used": [
+        {
+          "itemId": 43,
+          "count": 3
+        }
+      ]
+    },
+    {
+      "id": "lc-418",
+      "count": 10000,
+      "kills": 0,
+      "deaths": 11,
+      "used": [
+        {
+          "itemId": 43,
+          "count": 28
+        }
+      ]
+    }
+  ],
+  "maps": {
+    "merac": {
+      "arenas": 23,
+      "models": 38,
+      "placements": 5667
+    },
+    "egeha": {
+      "arenas": 15,
+      "models": 42,
+      "placements": 5205
+    }
+  },
+  "validatedAt": "2026-11-04T18:59:35.914082+00:00",
+  "sourceDataSha256": "f2c0c4f7d11b04e7be842d8a019adca962b44f5d1babdc5439c177ba948ae84d",
+  "validation": {
+    "testFiles": 47,
+    "tests": 416,
+    "check": "passed: lint, format, TypeScript, tests",
+    "build": "passed",
+    "browser": {
+      "errors": [],
+      "consoleErrors": [],
+      "httpErrors": [],
+      "requestFailures": [],
+      "maps": [
+        {
+          "name": "Dratan",
+          "seconds": 10.06,
+          "loader": {
+            "size": "contain",
+            "transform": "none"
+          },
+          "location": {
+            "zoneId": "lc-zone-4",
+            "monsterId": "lc-83"
+          }
+        },
+        {
+          "name": "Merac",
+          "seconds": 13.74,
+          "loader": {
+            "size": "contain",
+            "transform": "none"
+          },
+          "location": {
+            "zoneId": "lc-zone-7",
+            "monsterId": "lc-153"
+          }
+        },
+        {
+          "name": "Egeha",
+          "seconds": 16.89,
+          "loader": {
+            "size": "contain",
+            "transform": "none"
+          },
+          "location": {
+            "zoneId": "lc-zone-15",
+            "monsterId": "lc-287"
+          }
+        },
+        {
+          "name": "Juno",
+          "seconds": 17.0,
+          "loader": {
+            "size": "contain",
+            "transform": "none"
+          },
+          "location": {
+            "zoneId": "lc-zone-0",
+            "monsterId": "lc-146"
+          }
+        }
+      ],
+      "character": "Character\nTestHealer\n\nRising Star\n\nHealer · Level 80\n\n0.00%\n2 / 2,857,461,589 EXP\nSkill points\n1,000\nGold\n20,000,000\nStats\nEquipment\nAttributes\nPoints: 79\nStrength\n99\n+\nDexterity\n287\n+\nIntelligence\n196\n+\nConstitution\n186\n+\nHealth and mana\nHealth\n1,532\nMana\n1,846\nCombat\nPhysical attack\n233\nMagic attack\n130\nPhysical defense\n294\nMagic defense\n80\nPhysical hit rate\n379\nMagic hit rate\n289\nPhysical evasion\n287\nMagic evasion\n196\nCritical rating\n303\nDeadly rating\n202\nCombat bonuses\nCritical damage\n×2.00\nBlock chance\n+0%\nStun resistance\n0%\nStone resistance\n0%\nSilence resistance\n0%\nSpeed and skills\nRun speed\n8.4 m/s\nAttack interval\n1.20 s\nMovement bonus\n+20%\nCast time adjustment\n0.0 s\nCast speed\n+0%\nCooldown adjustment\n0.0 s\nCooldown bonus\n+0%\nSkill MP cost\n+0%\nHow speeds work\nRecovery\nHP recovery\n+1 / 3s\nMP recovery\n+1 / 3s\nHP steal\n+0%\nMP steal\n+0%\nBonuses\nEXP\n+0%\nSkill points\n+0%\nGold\n+0%\nDrop chance\n+0%\nHunting record\nKills\n2\nDeaths\n0\nExpeditions\n0\nPlay time\n0m",
+      "nestedFocus": true,
+      "modalFocus": true,
+      "expeditionFocus": true,
+      "reload": true,
+      "twoTabs": {
+        "blockedBeforeOwnerCloses": true,
+        "purchasePreserved": true,
+        "resumedWithLatestAccount": true,
+        "gold": 19307419
+      },
+      "completed": true
+    },
+    "browserWithoutWebLocks": {
+      "errors": [],
+      "consoleErrors": [],
+      "httpErrors": [],
+      "requestFailures": [],
+      "maps": [],
+      "fallbackLease": {
+        "blockedSecondTab": true,
+        "resumedAfterOwnerClosed": true
+      },
+      "completed": true
+    },
+    "mapAssets": {
+      "merac": {
+        "models": 38,
+        "placements": 5667,
+        "arenas": 23,
+        "meshes": 38,
+        "textures": 66,
+        "accessors": 493,
+        "finite": true
+      },
+      "egeha": {
+        "models": 42,
+        "placements": 5205,
+        "arenas": 15,
+        "meshes": 42,
+        "textures": 64,
+        "accessors": 314,
+        "finite": true
+      }
+    },
+    "benchmark": "Local Node/Vite SSR: 8 h Healer80 vs Fox, 644 ms; not a phone benchmark"
+  },
+  "fx": {
+    "profiles": 75,
+    "parsedGroups": 70,
+    "parsedDefinitions": 185,
+    "unsupportedGroups": 187,
+    "runtimeRendererComplete": false,
+    "sources": {
+      "skills": {
+        "path": "Data/skills.lod",
+        "sha256": "5120934aca5656672f26bc2bc4f81d5f4d93e59dda52be2f678adbca00080052"
+      },
+      "effects": {
+        "path": "Data/Effect/Effect.dat",
+        "sha256": "24ccf0f7b0c076bfc67012f5dd90f80b01ae37f8523b1fdb452cac6a25577e1b"
+      },
+      "animations": {
+        "titan": {
+          "path": "Data/Character/Titan/ti.bae",
+          "sha256": "bb40b84122ee6273b33c0b11cb0c8239d0d6e428ecba30b9a863e9d8aff2218a"
+        },
+        "knight": {
+          "path": "Data/Character/Knight/ni.bae",
+          "sha256": "901b2614fc888a082f9c69d8217e33573854914826cc96d5b942ba48ed80bad4"
+        },
+        "healer": {
+          "path": "Data/Character/Healer/hw.bae",
+          "sha256": "258007a1fb06bc44a1b03c4a8929e96c7e656e60770d38110b06f28d2cd608ea"
+        },
+        "mage": {
+          "path": "Data/Character/Mage/ma.bae",
+          "sha256": "d311cd17379d364490459cbbd2c86f94668d56cf0f0c043c5c00dc17aa2564d1"
+        },
+        "rogue": {
+          "path": "Data/Character/Rogue/ro.bae",
+          "sha256": "e9563b3cdeff4566331de36b2a661c7cb747180fad7cfeb427ffe0f55420f628"
+        },
+        "sorcerer": {
+          "path": "Data/Character/Sorcerer/so.bae",
+          "sha256": "b3df9984b634f98dd708aff067d44747288ae121fc6b261af438b50c3001564a"
+        }
+      }
+    }
+  }
+}

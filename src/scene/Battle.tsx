@@ -8,6 +8,7 @@ import { getItem } from '../game/data/items.ts'
 import { TIMINGS, approachTime, effectiveStats, type Side } from '../game/logic/combat.ts'
 import { wornTitle } from '../game/logic/titles.ts'
 import { combatSession } from '../game/session/combatSession.ts'
+import { VisibleClock } from '../game/session/visibleClock.ts'
 import { combatEvents, type ViewEvent } from '../state/combatEvents.ts'
 import { useFloatingTexts, type FloatingKind } from '../state/floatingTexts.ts'
 import { useGameStore } from '../state/gameStore.ts'
@@ -66,6 +67,14 @@ function turn(group: Group, yaw: number, dt: number): void {
 }
 
 export function Battle() {
+  const clock = useRef(new VisibleClock())
+  useEffect(() => {
+    const sync = () => clock.current.visibility(!document.hidden, performance.now())
+    clock.current.reset(performance.now())
+    sync()
+    document.addEventListener('visibilitychange', sync)
+    return () => document.removeEventListener('visibilitychange', sync)
+  }, [])
   const monsterId = useGameStore((s) => s.hud.monsterId)
   const monsterDef = getMonster(monsterId)
   const monsterModel = monsterDef.modelId
@@ -204,8 +213,8 @@ export function Battle() {
           ;(e.target === 'player' ? player : monster).current?.hit(e.crit)
           textAt(
             e.target,
-            e.crit ? `${e.amount}!` : String(e.amount),
-            e.target === 'player' ? 'taken' : e.crit ? 'crit' : 'dealt',
+            e.deadly ? `${e.amount}!!` : e.crit ? `${e.amount}!` : String(e.amount),
+            e.target === 'player' ? 'taken' : e.crit || e.deadly ? 'crit' : 'dealt',
           )
           break
         case 'heal':
@@ -249,6 +258,7 @@ export function Battle() {
           player.current?.setBase('idle')
           break
         case 'reset':
+          clock.current.reset(performance.now())
           resetView()
           m.sink = -1
           m.swingIn = { player: -1, monster: -1 }
@@ -265,11 +275,12 @@ export function Battle() {
     const away = isAway()
     if (playerGroup.current) playerGroup.current.visible = !away
     if (away) {
+      clock.current.reset(performance.now())
       if (monsterGroup.current) monsterGroup.current.visible = false
       return
     }
     const realDt = Math.min(delta, 0.1)
-    const dt = realDt * useGameStore.getState().timeScale
+    const dt = clock.current.read(performance.now()) * useGameStore.getState().timeScale
     const events = combatSession.tick(dt)
     if (events.length > 0) combatEvents.emit(events)
 

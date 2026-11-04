@@ -1,9 +1,21 @@
 import type { GameService, KeyValueStorage } from './GameService.ts'
 import { LocalGameService } from './LocalGameService.ts'
+import { assertSaveSession } from './saveSession.ts'
 
 function browserStorage(): KeyValueStorage {
   try {
-    if (typeof localStorage !== 'undefined') return localStorage
+    if (typeof localStorage !== 'undefined')
+      return {
+        getItem: (key) => localStorage.getItem(key),
+        setItem: (key, value) => {
+          assertSaveSession()
+          localStorage.setItem(key, value)
+        },
+        removeItem: (key) => {
+          assertSaveSession()
+          localStorage.removeItem(key)
+        },
+      }
   } catch {
     // access denied (e.g. disabled cookies)
   }

@@ -7,7 +7,7 @@ import type { MonsterDef } from '../data/types.ts'
 import { clamp } from './balance.ts'
 import type { CharacterData } from './character.ts'
 import { TIMINGS } from './combat.ts'
-import { lootTable, rollDrops, stowDrops, takeFromInventory, type ItemStack } from './loot.ts'
+import { monsterDrops, stowDrops, takeFromInventory, type ItemStack } from './loot.ts'
 import { applyPlayTime, optionValue, type OptionGain } from './options.ts'
 import type { Hero } from './fighters.ts'
 import { activeTitleId, pruneTitles, titleOptions } from './titles.ts'
@@ -147,7 +147,6 @@ export function rewardKills(
   now = Date.now(),
 ) {
   const bonuses = rewardBonuses(hero, now)
-  const table = lootTable(monster)
   const items = new Map<number, number>()
   let level = hero.level,
     remainingExp = hero.exp,
@@ -160,7 +159,7 @@ export function rewardKills(
     gold += reward.gold
     sp += reward.sp
     if (levelRewardRates(level, monster.level).drops) {
-      for (const item of rollDrops(table, 1, rng))
+      for (const item of monsterDrops(monster, 1, rng))
         items.set(item.itemId, (items.get(item.itemId) ?? 0) + item.count)
     }
     // A level gained by this kill changes the penalties of the next kill, even in one report.

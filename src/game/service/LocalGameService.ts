@@ -75,6 +75,7 @@ const copy = <T>(value: T): T => structuredClone(value)
 export class LocalGameService implements GameService {
   private save: SaveData
   private readonly storage: KeyValueStorage
+  private persisted: string | null = null
   private readonly now: () => number
   private readonly rng: Rng
   private timeScale = 1
@@ -87,11 +88,12 @@ export class LocalGameService implements GameService {
   }
 
   async load(): Promise<LoadResult> {
-    const { save, status } = loadSave(this.read(), this.now())
+    this.persisted = this.read()
+    const { save, status } = loadSave(this.persisted, this.now())
     this.save = {
       ...save,
       characters: save.characters.map((c) =>
-        applyLevelTitles(pruneTitles(c, this.now()), this.now()),
+        applyLevelTitles(c.expedition ? c : pruneTitles(c, this.now()), this.now()),
       ),
     }
     if (status !== 'loaded') this.persist()
@@ -298,11 +300,6 @@ export class LocalGameService implements GameService {
   }
 
   async resetSave(): Promise<SaveData> {
-    try {
-      this.storage.removeItem(SAVE_KEY)
-    } catch {
-      // storage unavailable — nothing to remove
-    }
     this.save = createDefaultSave(this.now())
     this.persist()
     return copy(this.save)
@@ -379,7 +376,8 @@ export class LocalGameService implements GameService {
   private character(characterId: string): CharacterData {
     const character = this.save.characters.find((c) => c.id === characterId)
     if (!character) throw new GameError('unknown-character', `No character ${characterId}`)
-    return pruneTitles(character, this.now())
+    // An expedition needs the title history up to its claim, including already expired titles.
+    return character.expedition ? character : pruneTitles(character, this.now())
   }
 
   private notOnExpedition(characterId: string): CharacterData {
@@ -394,7 +392,8 @@ export class LocalGameService implements GameService {
   ): CharacterData {
     // run-out titles go and level titles come with every change
     const now = this.now()
-    const next = applyLevelTitles(pruneTitles(change(this.character(characterId)), now), now)
+    const changed = change(this.character(characterId))
+    const next = applyLevelTitles(changed.expedition ? changed : pruneTitles(changed, now), now)
     this.save = {
       ...this.save,
       characters: this.save.characters.map((c) => (c.id === characterId ? next : c)),
@@ -412,9 +411,15 @@ export class LocalGameService implements GameService {
   }
 
   private persist(): void {
+    const current = this.read()
+    if (current !== this.persisted)
+      throw new GameError('save-conflict', 'Reload the latest account before saving')
+    const serialized = serializeSave(this.save)
     try {
-      this.storage.setItem(SAVE_KEY, serializeSave(this.save))
-    } catch {
+      this.storage.setItem(SAVE_KEY, serialized)
+      this.persisted = serialized
+    } catch (error) {
+      if (error instanceof GameError) throw error
       // private mode / quota exceeded — the game keeps running without saving
     }
   }

@@ -57,6 +57,7 @@ const FALLBACK_MODEL = 'golem-rust'
 
 /** LC database row → game monster. Crit values are not in the database (own values). */
 export function fromLc(m: LcMonster): MonsterDef {
+  let terminated = false
   return {
     id: m.id,
     name: m.name,
@@ -64,11 +65,25 @@ export function fromLc(m: LcMonster): MonsterDef {
     level: m.level,
     stats: {
       maxHp: m.hp,
+      maxMp: m.mp,
       hit: m.hit,
       dodge: m.dodge,
+      magicEvasion: m.magicAvoid,
       avoidPerLevel: 1,
-      attack: m.attack,
+      attack: m.attackType === 2 ? m.magic : m.attack,
+      physicalAttack: m.attack,
+      physicalHit: m.hit,
+      magicHit: m.hit,
       defense: m.defense,
+      magicAttack: m.magic,
+      magicDefense: m.resist,
+      ...(m.strength === undefined ? {} : { strength: m.strength }),
+      ...(m.dexterity === undefined ? {} : { dexterity: m.dexterity }),
+      ...(m.intelligence === undefined ? {} : { intelligence: m.intelligence }),
+      ...(m.constitution === undefined ? {} : { constitution: m.constitution }),
+      ...(m.attackType === undefined
+        ? {}
+        : { attackType: (['melee', 'ranged', 'magic'] as const)[m.attackType] }),
       attackInterval: Math.max(0.6, m.attackSpeed / 10),
       critChance: 0.05,
       critMultiplier: 1.5,
@@ -82,6 +97,16 @@ export function fromLc(m: LcMonster): MonsterDef {
     drops: m.drops
       .filter((d) => getItem(d.item).gear?.classes.length !== 0)
       .map((d) => ({ itemId: d.item, chance: d.chance })),
+    ...(m.dropSlots
+      ? {
+          dropSlots: m.dropSlots.map((d) => {
+            if (d.item === -1) terminated = true
+            return terminated || d.item <= 0 || getItem(d.item).gear?.classes.length === 0
+              ? null
+              : { itemId: d.item, chance: d.chance }
+          }),
+        }
+      : {}),
     sp: m.sp ?? 0,
   }
 }

@@ -1,5 +1,13 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+Aktualizacja po audycie `a35cfbb`: [stan 14 punktów i granice](audit-fixes.md).
+Zapis ma jednego właściciela, clock stały krok, AFK ciągłą walkę ze skończonym
+zapasem i historią tytułu. Źródłowe zasoby/wybrane kanały zastępują medianę NPC;
+nowe Merac/Egeha mają teren i otoczenie. Obecną kontrolę nauki przechodzi 93/119 skilli;
+pozostałe blokują nowe SP. Pełny SQL, aktorzy summonów i renderer FX nadal potrzebne.
+Surowy SQL nie jest dostępny; pytanie o jego link pozostaje otwarte. Nie cofać
+zabezpieczeń i nie dopisywać szans z `power`. SaveVersion pozostaje **14**.
+
 Aktualizacja 2026-11-04: [Book, Character, Skills i rare w sklepie](book-shop-ui-fixes.md).
 Dwie kolumny Book przewijają się niezależnie, również dotykiem nad podglądem 3D.
 Sklep wybiera lepszą źródłową pulę rare tej samej rodziny bez zmiany ceny/poziomu

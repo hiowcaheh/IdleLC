@@ -73,7 +73,7 @@ const SKILL_LIST: SkillDef[] = lcData?.skills
   ? lcData.skills.map(({ icon: _icon, ...s }) => ({
       ...s,
       classId: s.classId as ClassId,
-      levels: s.levels.map((l) => ({ ...l, effects: l.effects.map(({ magic: _m, ...e }) => e) })),
+      levels: s.levels.map((l) => ({ ...l, effects: l.effects.map((e) => ({ ...e })) })),
     }))
   : PLACEHOLDER_SKILLS
 

@@ -43,6 +43,8 @@ describe('interpretEffect', () => {
     expect(interpretEffect({ type: 3, subtype: 0, damageType: 1, power: 150 })).toEqual({
       kind: 'damage',
       percent: 150,
+      damageType: 1,
+      attackType: 0,
     })
     expect(interpretEffect({ type: 0, subtype: 1, damageType: 1, power: 40 })).toEqual({
       kind: 'stat',
@@ -54,18 +56,29 @@ describe('interpretEffect', () => {
       stat: 'castSpeed',
       percent: true,
     })
-    expect(interpretEffect({ type: 2, subtype: 7, damageType: 0, power: 0 })).toEqual({
+    expect(
+      interpretEffect({ type: 2, subtype: 7, damageType: 0, power: 0, hitrate: 10000 }),
+    ).toEqual({
       kind: 'stun',
       chance: 1,
     })
-    expect(interpretEffect({ type: 2, subtype: 5, damageType: 1, power: 20 })).toEqual({
-      kind: 'stun',
-      chance: 0.2,
-      resistance: 'stone',
+    expect(
+      interpretEffect({ type: 2, subtype: 5, damageType: 1, power: 20, hitrate: 7500 }),
+    ).toEqual({
+      kind: 'poison',
+      perSecond: 20,
+      dotKind: 'blood',
+      percent: false,
+      chance: 0.75,
+      requiresHitrate: true,
     })
     expect(interpretEffect({ type: 2, subtype: 0, damageType: 0, power: 6 })).toEqual({
       kind: 'poison',
       perSecond: 6,
+      dotKind: 'poison',
+      percent: false,
+      chance: undefined,
+      requiresHitrate: true,
     })
     expect(interpretEffect({ type: 4, subtype: 0, damageType: 0, power: 95 })).toEqual({
       kind: 'heal',
@@ -96,7 +109,10 @@ describe('interpretEffect', () => {
       value: 3,
       percent: false,
     })
-    expect(interpretEffect({ type: 5, subtype: 0, damageType: 1, power: 0 })).toBeNull()
+    expect(interpretEffect({ type: 5, subtype: 0, damageType: 1, power: 0 })).toEqual({
+      kind: 'cure',
+      state: 'poison',
+    })
   })
 
   it('distinguishes flat recovery from a percentage of the maximum HP or MP', () => {

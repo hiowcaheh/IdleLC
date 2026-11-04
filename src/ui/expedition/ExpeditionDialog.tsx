@@ -1,5 +1,6 @@
 import { Gold } from '../Gold.tsx'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
+import { useModalFocus } from '../useModalFocus.ts'
 import { getItem } from '../../game/data/items.ts'
 import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
@@ -25,14 +26,8 @@ export function ExpeditionDialog({
     .filter(([, perHour]) => perHour >= 0.5)
     .map(([id, perHour]) => `${getItem(Number(id)).name} ×${fmt(perHour)}`)
   const [busy, setBusy] = useState(false)
-  const confirm = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
-    window.addEventListener('keydown', onKey)
-    confirm.current?.focus()
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  const dialog = useRef<HTMLDivElement>(null)
+  useModalFocus(dialog, onClose)
 
   const onSend = async () => {
     if (busy) return
@@ -49,6 +44,8 @@ export function ExpeditionDialog({
     <div className="sheet-backdrop sheet-backdrop--center" onClick={onClose}>
       <div
         className="sheet expedition-dialog"
+        ref={dialog}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="expedition-title"
@@ -95,13 +92,7 @@ export function ExpeditionDialog({
         )}
 
         <div className="screen__actions">
-          <button
-            ref={confirm}
-            type="button"
-            className="button button--primary"
-            onClick={onSend}
-            disabled={busy}
-          >
+          <button type="button" className="button button--primary" onClick={onSend} disabled={busy}>
             Send on expedition
           </button>
           <button type="button" className="button" onClick={onClose}>

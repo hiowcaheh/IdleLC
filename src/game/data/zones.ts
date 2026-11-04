@@ -71,7 +71,12 @@ function huntingOrder(ids: string[]): string[] {
 }
 
 /** Zones drawn on the client's terrain (`npm run convert-lc -- --only terrain`). */
-const ZONE_MAPS: Record<string, string> = { 'lc-zone-0': 'juno', 'lc-zone-4': 'dratan' }
+const ZONE_MAPS: Record<string, string> = {
+  'lc-zone-0': 'juno',
+  'lc-zone-4': 'dratan',
+  'lc-zone-7': 'merac',
+  'lc-zone-15': 'egeha',
+}
 
 /**
  * The zones in the game for now: Juno, Dratan, Merac and Egeha (owner's decision; max level 100).

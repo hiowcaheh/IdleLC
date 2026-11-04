@@ -1,6 +1,6 @@
 /**
  * Source character-window channels (CmdMsg.cpp:559–930, UICharacterInfo.cpp:1486–1556).
- * This is a sheet, separate from the existing IdleLC attack/defense balance adapter.
+ * These same channels drive combat and the character window.
  * Gear upgrade values follow PC.cpp; professions/PK/elements are not invented.
  */
 import { getItem } from '../data/items.ts'
@@ -10,6 +10,7 @@ import { pieceStats, upgradeBonuses } from './itemUpgrades.ts'
 import type { Equipment } from './equipment.ts'
 import { optionValue, type ItemOption } from './options.ts'
 import { classRatingChannels } from './ratings.ts'
+import { classRecovery } from './recovery.ts'
 import type { StatEffect, StatKey } from './skills.ts'
 
 const RUN_SPEED: Record<ClassId, number> = {
@@ -29,7 +30,7 @@ export function clientStatChannels(
   level: number,
   equipment: Equipment | undefined,
   options: readonly ItemOption[],
-): Pick<CombatStats, 'client' | 'clientContext'> {
+): Pick<CombatStats, 'client' | 'clientContext' | 'recoveryOptions'> {
   const attributes = { ...classAttributes(classId, level), ...stats }
   const weaponPiece = equipment?.weapon
   const weapon = weaponPiece && getItem(weaponPiece.itemId).gear
@@ -81,9 +82,26 @@ export function clientStatChannels(
     runSpeed: RUN_SPEED[classId],
     walkSpeed: 1.5,
   }
+  const recoveryOptions = { hpFlat: 0, hpRate: 0, mpRate: 0 }
+  const recoveryBase = classRecovery(classId, level)
   for (const option of options) {
     const value = optionValue(option)
     switch (option.type) {
+      case 50:
+        recoveryOptions.hpFlat += value
+        break
+      case 56:
+        recoveryOptions.hpRate += value
+        break
+      case 57:
+        recoveryOptions.mpRate += value
+        break
+      case 79:
+        recoveryOptions.hpRate += Math.trunc((recoveryBase.hp * value) / 100)
+        break
+      case 80:
+        recoveryOptions.mpRate += Math.trunc((recoveryBase.mp * value) / 100)
+        break
       case 6:
         client.physicalAttack += value
         break
@@ -172,11 +190,40 @@ export function clientStatChannels(
         break
     }
   }
-  client.physicalHit += Math.trunc((ratings.physicalHit * hitBonus) / 100)
-  client.magicHit += Math.trunc((ratings.magicHit * hitBonus) / 100)
+  client.physicalHit += hitBonus
+  client.magicHit += hitBonus
   client.criticalRating += Math.trunc((client.criticalRating * context.criticalOptionRate) / 100)
   client.deadlyRating += Math.trunc((client.deadlyRating * context.deadlyOptionRate) / 100)
-  return { client, clientContext: context }
+  return { client, clientContext: context, recoveryOptions }
+}
+
+/** Keep the selected normal attack and both defensive channels tied to the source sheet. */
+export function bindCombatChannels(stats: CombatStats): CombatStats {
+  if (!stats.clientContext && stats.physicalAttack !== undefined) {
+    const magic = stats.attackType === 'magic'
+    return {
+      ...stats,
+      attack: magic ? (stats.magicAttack ?? stats.attack) : stats.physicalAttack,
+      hit: magic ? (stats.magicHit ?? stats.hit) : (stats.physicalHit ?? stats.hit),
+    }
+  }
+  if (!stats.client || !stats.clientContext) return stats
+  const c = stats.client
+  const magic = stats.clientContext.magicWeapon
+  return {
+    ...stats,
+    attack: magic ? c.magicAttack : c.physicalAttack,
+    physicalAttack: c.physicalAttack,
+    physicalHit: c.physicalHit,
+    defense: c.physicalDefense,
+    magicAttack: c.magicAttack,
+    magicDefense: c.magicDefense,
+    hit: magic ? c.magicHit : c.physicalHit,
+    dodge: c.physicalEvasion,
+    magicHit: c.magicHit,
+    magicEvasion: c.magicEvasion,
+    attackType: magic ? 'magic' : stats.clientContext.physicalChannel,
+  }
 }
 
 /** Apply one passive/assist group to independent source channels, preserving its pre-addition rate base. */
@@ -233,7 +280,7 @@ export function applyClientStats(
   const criticalGroups = [...(context.criticalGroups ?? [])]
   const deadlyGroups = [...(context.deadlyGroups ?? [])]
   const critical = { flat: sum('critChance', false), rate: sum('critChance', true) }
-  const deadly = { flat: sum('critMultiplier', false), rate: sum('critMultiplier', true) }
+  const deadly = { flat: sum('deadly', false), rate: sum('deadly', true) }
   if (critical.flat || critical.rate) criticalGroups.push(critical)
   if (deadly.flat || deadly.rate) deadlyGroups.push(deadly)
   client.criticalRating = weight(

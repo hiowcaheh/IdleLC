@@ -1,5 +1,13 @@
 # IdleLC — wytyczne projektu
 
+Najnowszy etap: [naprawy po audycie a35cfbb](docs/audit-fixes.md).
+Jedna karta jest właścicielem zapisu, logika zachowuje widoczny czas przy niskim FPS,
+AFK symuluje ograniczone mikstury i wygaśnięcia tytułów. HP/MP i kanały sprzętu
+sterują walką; regeneracja ma 3 s, cooldown źródłowy wzór. Merac i Egeha mają WTR/WLD.
+To nie pełny port: brak SQL blokuje część szans/dropu/Deadly; summony i renderer
+indywidualnych FX pozostają do ukończenia. Nie zamieniać „gotowego importera” na
+„aktywne reguły na brakujących danych”. SaveVersion nadal **14**.
+
 Najnowsza aktualizacja: [Book, Character, Skills i rare w sklepie](docs/book-shop-ui-fixes.md).
 Book ma niezależne przewijanie obu kolumn, a SP wspólną pełną ikonę. Sklep oferuje
 najlepszy istniejący wariant rare w tej samej cenie, poziomie i rodzinie sprzętu;

@@ -1,5 +1,6 @@
 import { Gold } from './Gold.tsx'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
+import { useModalFocus } from './useModalFocus.ts'
 import { getItem } from '../game/data/items.ts'
 import { getMonster } from '../game/data/monsters.ts'
 import { ZONES } from '../game/data/zones.ts'
@@ -14,11 +15,8 @@ import { ItemList } from './items/ItemList.tsx'
 export function AfkSummary() {
   const result = useGameStore((s) => s.afkResult)
   const dismiss = useGameStore((s) => s.dismissAfk)
-  const button = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    if (result) button.current?.focus()
-  }, [result])
+  const dialog = useRef<HTMLDivElement>(null)
+  useModalFocus(dialog, dismiss, result !== null)
 
   if (!result) return null
   const monster = getMonster(result.monsterId)
@@ -30,7 +28,14 @@ export function AfkSummary() {
 
   return (
     <div className="sheet-backdrop sheet-backdrop--center">
-      <div className="sheet afk" role="dialog" aria-modal="true" aria-labelledby="afk-title">
+      <div
+        ref={dialog}
+        tabIndex={-1}
+        className="sheet afk"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="afk-title"
+      >
         <h2 id="afk-title" className="afk__title">
           While you were away…
         </h2>
@@ -92,12 +97,7 @@ export function AfkSummary() {
           </>
         )}
 
-        <button
-          ref={button}
-          type="button"
-          className="button button--primary afk__ok"
-          onClick={dismiss}
-        >
+        <button type="button" className="button button--primary afk__ok" onClick={dismiss}>
           Continue
         </button>
       </div>

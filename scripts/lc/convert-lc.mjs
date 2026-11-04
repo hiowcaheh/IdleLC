@@ -93,6 +93,26 @@ const MAPS = {
     townRadius: 280,
     avoidLayers: [8],
   },
+  merac: {
+    wtr: 'Data\\World\\Merac\\Merac.wtr',
+    wld: 'Data\\World\\Merac\\Merac.wld',
+    count: 23,
+    view: [-0.354, -0.935],
+    // w3_gate_A's settlement entrance in Merac.wld; routes remain IdleLC hunting spots.
+    town: [484.9375, 352.3125],
+    townRadius: 180,
+    avoidLayers: [],
+  },
+  egeha: {
+    wtr: 'Data\\World\\Egeha\\Egeha.wtr',
+    wld: 'Data\\World\\Egeha\\Egeha.wld',
+    count: 15,
+    view: [-0.354, -0.935],
+    // Egeha_start_00's placement in Egeha.wld.
+    town: [1470, 273],
+    townRadius: 180,
+    avoidLayers: [],
+  },
 }
 /** Class portraits sheet (relative to public/). */
 const PORTRAITS_FILE = 'icons/lc/portraits.webp'

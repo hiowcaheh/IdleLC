@@ -109,7 +109,7 @@ export const OPTION_EFFECTS: Record<number, OptionEffect> = {
   62: { stat: 'silenceResistance' },
   63: { stat: 'blockChance' }, // Halves normal attack damage; does not affect avoidance
   64: { stat: 'moveSpeed' }, // Move Speed (%)
-  66: { stat: 'critMultiplier' }, // Legacy adapter: source deadly weights are not yet modeled
+  66: { stat: 'deadly' },
   67: { stat: 'strength', percent: true },
   68: { stat: 'dexterity', percent: true },
   69: { stat: 'intelligence', percent: true },

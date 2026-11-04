@@ -5,7 +5,7 @@ import type { CharacterData } from './character.ts'
 import type { GearPiece } from './equipment.ts'
 import { newId } from './id.ts'
 import { rollOptions } from './options.ts'
-import { chance, type Rng } from './rng.ts'
+import { chance, rollInt, type Rng } from './rng.ts'
 
 /**
  * Drops every monster has on top of its own table. The global 1% Smelting Stone chance is an
@@ -33,6 +33,34 @@ export function accessoryDrops(): MonsterDrop[] {
 /** Everything a kill of the monster can drop. */
 export function lootTable(monster: Pick<MonsterDef, 'drops'>): MonsterDrop[] {
   return [...(monster.drops ?? []), ...GENERAL_DROPS, ...accessoryDrops()]
+}
+
+/** Battle_NPCDropItem.cpp:79–111. Empty positions remain selectable and duplicates can drop. */
+export function rollSourceDrops(
+  slots: readonly (MonsterDrop | null)[],
+  kills: number,
+  rng: Rng,
+): ItemStack[] {
+  if (slots.length !== 20) throw new Error('A source drop table must preserve all 20 slots')
+  const counts = new Map<number, number>()
+  for (let kill = 0; kill < kills; kill++)
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const drop = slots[rollInt(rng, 0, 19)]
+      const roll = rollInt(rng, 1, 10000)
+      if (drop && roll <= Math.trunc(drop.chance * 10000))
+        counts.set(drop.itemId, (counts.get(drop.itemId) ?? 0) + 1)
+    }
+  return [...counts]
+    .map(([itemId, count]) => ({ itemId, count }))
+    .sort((a, b) => a.itemId - b.itemId)
+}
+
+export function monsterDrops(monster: MonsterDef, kills: number, rng: Rng): ItemStack[] {
+  if (!monster.dropSlots) return rollDrops(lootTable(monster), kills, rng)
+  return addToInventory(
+    rollSourceDrops(monster.dropSlots, kills, rng),
+    rollDrops([...GENERAL_DROPS, ...accessoryDrops()], kills, rng),
+  )
 }
 
 /**

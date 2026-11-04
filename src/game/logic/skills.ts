@@ -5,6 +5,7 @@
  * Pure — the server will run the same code.
  */
 import { getSkill, skillsForClass } from '../data/skills.ts'
+import { lcData } from '../data/lcSource.ts'
 import type {
   ClassId,
   CombatStats,
@@ -15,7 +16,7 @@ import type {
 } from '../data/types.ts'
 import type { CharacterData } from './character.ts'
 import { GameError } from './errors.ts'
-import { applyClientStats } from './clientStats.ts'
+import { applyClientStats, bindCombatChannels } from './clientStats.ts'
 
 /** 10 000 units = 1 skill point, as the LC server stores them (t_npc.a_skill_point). */
 export const SP_UNIT = 10_000
@@ -36,6 +37,7 @@ export type StatKey =
   | 'dodge'
   | 'critChance'
   | 'critMultiplier'
+  | 'deadly'
   | 'attackSpeed'
   | 'castTime'
   | 'castSpeed'
@@ -72,11 +74,21 @@ export interface StatEffect {
 }
 
 export type SkillEffect =
-  | { kind: 'damage'; percent: number }
+  | { kind: 'damage'; percent: number; damageType?: number; attackType?: number }
   | StatEffect
   /** `chance` 0..1 that the stun lands. */
-  | { kind: 'stun'; chance: number; resistance?: 'stone' }
-  | { kind: 'poison'; perSecond: number }
+  | { kind: 'stun'; chance?: number; resistance?: 'stone' }
+  | { kind: 'state'; state: 'stone' | 'silence' | 'confusion' | 'hold'; chance?: number }
+  | {
+      kind: 'poison'
+      perSecond: number
+      dotKind?: 'poison' | 'blood'
+      percent?: boolean
+      chance?: number
+      requiresHitrate?: true
+    }
+  | { kind: 'mpChange'; power: number; percent: boolean }
+  | { kind: 'cure'; state: 'poison' }
   /** Immediate recovery: a flat amount, or a percent of the maximum resource. */
   | { kind: 'heal'; amount: number; percent?: true }
   | { kind: 'mana'; amount: number; percent?: true }
@@ -99,7 +111,7 @@ const STAT_SUBTYPES: Record<number, StatKey> = {
   11: 'mpRegen',
   12: 'maxHp',
   13: 'maxMp',
-  14: 'critMultiplier',
+  14: 'deadly',
   15: 'magicHit',
   16: 'magicEvasion',
   18: 'attack',
@@ -128,22 +140,36 @@ export function interpretEffect(e: SkillEffectDef): SkillEffect | null {
         : null
     }
     case 2: // states
-      if (e.subtype === 7 || e.subtype === 5 || e.subtype === 2) {
+      if (e.subtype === 7)
+        return { kind: 'stun', chance: e.hitrate === undefined ? undefined : e.hitrate / 10000 }
+      if ([1, 2, 3, 4].includes(e.subtype))
         return {
-          kind: 'stun',
-          chance: e.power > 0 ? Math.min(1, e.power / 100) : 1,
-          ...(e.subtype === 5 ? { resistance: 'stone' as const } : {}),
+          kind: 'state',
+          state: ({ 1: 'hold', 2: 'confusion', 3: 'stone', 4: 'silence' } as const)[
+            e.subtype as 1 | 2 | 3 | 4
+          ],
+          chance: e.hitrate === undefined ? undefined : e.hitrate / 10000,
         }
-      }
       if (e.subtype === 16)
         return { kind: 'stat', stat: 'attackSpeed', value: e.power, percent: true }
       // 9 / 10: HP / MP per second — the states of the healing and mana potions
       if (e.subtype === 9) return { kind: 'regen', resource: 'hp', perSecond: e.power }
       if (e.subtype === 10) return { kind: 'regen', resource: 'mp', perSecond: e.power }
-      if (e.subtype === 0) return { kind: 'poison', perSecond: e.power }
+      if (e.subtype === 0 || e.subtype === 5)
+        return {
+          kind: 'poison',
+          perSecond: e.power,
+          dotKind: e.subtype === 5 ? 'blood' : 'poison',
+          percent: e.damageType === 2,
+          chance: e.hitrate === undefined ? undefined : e.hitrate / 10000,
+          requiresHitrate: true,
+        }
+      if (e.subtype === 13) return { kind: 'mpChange', power: e.power, percent: e.damageType === 2 }
       return null
     case 3:
-      return { kind: 'damage', percent: e.power }
+      return { kind: 'damage', percent: e.power, damageType: e.damageType, attackType: e.subtype }
+    case 5:
+      return e.subtype === 0 ? { kind: 'cure', state: 'poison' } : null
     case 4:
       // GameServer/Skill.cpp: MT_RECOVER accepts ONLYPOWER (0) and RATE (2), not ADDITION (1).
       if (e.damageType !== 0 && e.damageType !== 2) return null
@@ -179,24 +205,39 @@ export interface SkillRank {
   fireTime: number
   /** Seconds before it can be used again (counted from the start of the cast). */
   cooldown: number
+  /** SF_GUILD / SCT_NO_COOL_TIME skills bypass ordinary cooldown adjustments. */
+  fixedCooldown?: boolean
+  attackType?: 'melee' | 'ranged' | 'magic'
+  /** NPC source skill slot and chance out of 10000 (MobActivity.cpp:1736). */
+  npcSlot?: number
+  npcProbability?: number
   /** Seconds the stat changes, stun or poison last. */
   duration: number
   effects: SkillEffect[]
   auto: boolean
 }
 
-export function rankOf(skill: SkillDef, level: number): SkillLevelDef | undefined {
+export function rankOf(skill: Pick<SkillDef, 'levels'>, level: number): SkillLevelDef | undefined {
   return skill.levels.find((l) => l.level === level)
 }
 
 /** Interprets a skill at a level (t_skill timings are in 1/10 s). */
-export function skillRank(skill: SkillDef, level: number, auto = true): SkillRank {
+export function skillRank(
+  skill: Omit<SkillDef, 'classId'> & Partial<Pick<SkillDef, 'classId'>>,
+  level: number,
+  auto = true,
+): SkillRank {
   const rank = rankOf(skill, level) ?? skill.levels[0]!
   const effects = rank.effects.map(interpretEffect).filter((e): e is SkillEffect => e !== null)
-  const hurts = effects.some((e) => e.kind === 'damage' || e.kind === 'stun' || e.kind === 'poison')
+  const hurts = effects.some(
+    (e) => e.kind === 'damage' || e.kind === 'stun' || e.kind === 'poison' || e.kind === 'state',
+  )
   const stats = effects.filter((e) => e.kind === 'stat')
   const curses =
-    !hurts && stats.length > 0 && stats.every((e) => e.value < 0) && skill.targetType === 2
+    !hurts &&
+    stats.length > 0 &&
+    stats.every((e) => e.value < 0) &&
+    [2, 3, 6, 7, 11].includes(skill.targetType)
   const offensive = skill.type !== 3 && (hurts || curses)
   const kind: SkillKind =
     skill.type === 3
@@ -205,7 +246,7 @@ export function skillRank(skill: SkillDef, level: number, auto = true): SkillRan
         ? 'attack'
         : offensive
           ? 'debuff'
-          : effects.some((e) => e.kind === 'heal' || e.kind === 'mana')
+          : effects.some((e) => e.kind === 'heal' || e.kind === 'mana' || e.kind === 'cure')
             ? 'heal'
             : 'buff'
   const castTime = skill.readyTime / 10
@@ -219,7 +260,10 @@ export function skillRank(skill: SkillDef, level: number, auto = true): SkillRan
     hpCost: rank.hp,
     castTime,
     fireTime: skill.fireTime / 10,
-    cooldown: Math.max(castTime, skill.reuseTime / 10),
+    cooldown: skill.reuseTime / 10,
+    fixedCooldown:
+      ((skill.flag ?? 0) & (1 << 9)) !== 0 || ((skill.applyState ?? 0) & (1 << 7)) !== 0,
+    attackType: skill.type === 2 ? 'magic' : skill.type === 1 ? 'ranged' : 'melee',
     duration: rank.duration / 10,
     effects,
     auto,
@@ -233,7 +277,28 @@ export function skillRank(skill: SkillDef, level: number, auto = true): SkillRan
 export function isAvailable(skill: SkillDef, seen = new Set<number>()): boolean {
   if (seen.has(skill.id)) return true
   seen.add(skill.id)
-  const works = skill.levels.some((l) => l.effects.some((e) => interpretEffect(e) !== null))
+  // Spending SP must never silently buy only a fragment of a skill.
+  const works =
+    skill.levels.length > 0 &&
+    skill.levels.every(
+      (l) =>
+        l.effects.length > 0 &&
+        l.effects.every((raw) => {
+          const effect = interpretEffect(raw)
+          return (
+            effect !== null &&
+            !(
+              (effect.kind === 'stun' || effect.kind === 'state' || effect.kind === 'poison') &&
+              raw.hitrate === undefined
+            ) &&
+            !(
+              effect.kind === 'stat' &&
+              effect.stat === 'deadly' &&
+              lcData?.monsters.some((m) => m.constitution === undefined)
+            )
+          )
+        }),
+    )
   return (
     works &&
     skill.levels.every((l) =>
@@ -387,8 +452,15 @@ export function learnedRanks(
   learned: Readonly<Record<string, LearnedSkill>>,
 ): SkillRank[] {
   return skillsForClass(classId)
-    .filter((s) => learned[s.id] && isAvailable(s))
+    .filter((s) => learned[s.id])
     .map((s) => skillRank(s, learned[s.id]!.level, learned[s.id]!.auto))
+    .filter((r) =>
+      r.effects.some((e) => {
+        if (e.kind === 'stun' || e.kind === 'state') return e.chance !== undefined
+        if (e.kind === 'poison') return !e.requiresHitrate || e.chance !== undefined
+        return true
+      }),
+    )
 }
 
 /** What the hero holds: the weapon's kind (t_item.a_subtype_idx) or null, and a shield or not. */
@@ -445,6 +517,23 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
     const units = (stats.reuseTime ?? 0) * 10 + sum('reuseTime', false)
     s.reuseTime = (units + Math.trunc((units * sum('reuseTime', true)) / 100)) / 10
   }
+  if (effects.some((effect) => effect.stat === 'attackSpeed')) {
+    // Character.cpp:387–388. Integer pulse arithmetic, after the flat subtraction.
+    let pulses = Math.trunc(stats.attackInterval * 10) - Math.trunc(sum('attackSpeed', false))
+    pulses -= Math.trunc((pulses * sum('attackSpeed', true)) / 100)
+    s.attackInterval = pulses / 10
+  }
+  if (effects.some((effect) => effect.stat === 'hpRegen' || effect.stat === 'mpRegen')) {
+    s.recoveryGroups = [
+      ...(stats.recoveryGroups ?? []),
+      {
+        hpFlat: sum('hpRegen', false),
+        hpRate: sum('hpRegen', true),
+        mpFlat: sum('mpRegen', false),
+        mpRate: sum('mpRegen', true),
+      },
+    ]
+  }
   const grouped = new Set<StatKey>([
     'attack',
     'defense',
@@ -472,14 +561,33 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
     Object.assign(s, { [stat]: value })
   }
   // Synthetic fighters without a sheet retain the original single-channel fallback adapter.
-  if (!stats.clientContext || stats.clientContext.magicWeapon)
+  if (!stats.clientContext && stats.magicAttack === undefined)
     s.attack += sum('magicAttack', false) + (stats.attack * sum('magicAttack', true)) / 100
   if (!stats.clientContext) {
-    s.defense += sum('magicDefense', false) + (stats.defense * sum('magicDefense', true)) / 100
-    if (effects.some((effect) => effect.stat === 'magicHit'))
+    if (stats.physicalAttack !== undefined)
+      s.physicalAttack =
+        stats.physicalAttack +
+        sum('attack', false) +
+        Math.trunc((stats.physicalAttack * sum('attack', true)) / 100)
+    if (stats.physicalHit !== undefined)
+      s.physicalHit =
+        stats.physicalHit +
+        sum('hit', false) +
+        Math.trunc((stats.physicalHit * sum('hit', true)) / 100)
+    for (const key of ['magicAttack', 'magicDefense', 'magicHit', 'magicEvasion'] as const) {
+      const base = stats[key]
+      if (base !== undefined)
+        s[key] = base + sum(key, false) + Math.trunc((base * sum(key, true)) / 100)
+    }
+    if (stats.magicDefense === undefined)
+      s.defense += sum('magicDefense', false) + (stats.defense * sum('magicDefense', true)) / 100
+    if (stats.physicalAttack === undefined && effects.some((effect) => effect.stat === 'magicHit'))
       s.hit =
         (s.hit ?? 0) + sum('magicHit', false) + ((stats.hit ?? 0) * sum('magicHit', true)) / 100
-    if (effects.some((effect) => effect.stat === 'magicEvasion'))
+    if (
+      stats.physicalAttack === undefined &&
+      effects.some((effect) => effect.stat === 'magicEvasion')
+    )
       s.dodge =
         (s.dodge ?? 0) +
         sum('magicEvasion', false) +
@@ -501,11 +609,11 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
       case 'critMultiplier':
         s.critMultiplier += value / 100
         break
+      case 'deadly':
+        // Source weight is kept separately from critical damage.
+        break
       case 'attackSpeed':
-        // percent: +10 = 10% faster attacks; flat values are in 1/10 s
-        s.attackInterval = percent
-          ? s.attackInterval / Math.max(0.2, 1 + value / 100)
-          : s.attackInterval - value / 10
+        // Applied as one additive/rate group above.
         break
       case 'castTime':
         s.castTime = (s.castTime ?? 0) + value / 10
@@ -542,11 +650,7 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
     if (s[key] !== undefined) s[key] = Math.max(1, Math.trunc(s[key]))
   }
   applyClientStats(stats, s, effects)
-  if (s.client && s.clientContext) {
-    s.hit = s.clientContext.magicWeapon ? s.client.magicHit : s.client.physicalHit
-    s.dodge = s.clientContext.magicWeapon ? s.client.magicEvasion : s.client.physicalEvasion
-  }
-  return s
+  return bindCombatChannels(s)
 }
 
 /** Stat changes from the passive skills (they always apply). */

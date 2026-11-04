@@ -31,6 +31,19 @@ export interface ClientStatContext {
 export interface CombatStats {
   client?: ClientCombatStats
   clientContext?: ClientStatContext
+  /** Independent channels are also retained for NPCs, which have no character sheet context. */
+  magicAttack?: number
+  physicalAttack?: number
+  physicalHit?: number
+  magicDefense?: number
+  magicHit?: number
+  magicEvasion?: number
+  attackType?: 'melee' | 'ranged' | 'magic'
+  strongBonus?: number
+  hardBonus?: number
+  /** Passive then assist recovery groups; options apply last (PC.cpp:2408). */
+  recoveryGroups?: readonly { hpFlat: number; hpRate: number; mpFlat: number; mpRate: number }[]
+  recoveryOptions?: { hpFlat: number; hpRate: number; mpRate: number }
   maxHp: number
   attack: number
   defense: number
@@ -42,7 +55,7 @@ export interface CombatStats {
   critMultiplier: number
   /** Mana for skills (monsters have none). */
   maxMp?: number
-  /** HP and MP regenerated per second on top of the base regeneration (skills). */
+  /** Flat HP/MP recovery contribution per three-second natural recovery pulse. */
   hpRegen?: number
   mpRegen?: number
   /** Raw hit and avoidance ratings at equal levels. */
@@ -125,6 +138,8 @@ export interface MonsterDef {
   elite?: boolean
   /** Loot table: each entry is rolled separately on every kill. */
   drops?: MonsterDrop[]
+  /** Source fixed-width table, including empty slots; absent in older imports. */
+  dropSlots?: (MonsterDrop | null)[]
   /** Skill points for a kill, in 1/10 000 SP (LC t_npc.a_skill_point). */
   sp?: number
 }
@@ -248,9 +263,14 @@ export interface TitleDef {
 
 /** One effect of a skill level: t_magic (type, subtype, damage type) + t_magiclevel.a_power. */
 export interface SkillEffectDef {
+  magic?: number
+  magicLevel?: number
+  /** Separate source hit probability (1/10000), never inferred from power. */
+  hitrate?: number
+  hitType?: number
   type: number
   subtype: number
-  /** 1 = flat value, 2 = percent (as used by the LC data). */
+  /** Source MDT: 0 ONLYPOWER, 1 ADDITION, 2 RATE. */
   damageType: number
   power: number
 }
@@ -282,6 +302,9 @@ export interface SkillDef {
   readyTime: number
   fireTime: number
   reuseTime: number
+  /** Source flags; undefined means the old export did not preserve them. */
+  flag?: number
+  applyState?: number
   /** What the hero must wear to use it (t_skill.a_useWeaponType0/1, a_useState). */
   needs?: SkillNeeds
   /** Passives: what the hero must wear for them to work (a_appWeaponType0/1, a_appState). */

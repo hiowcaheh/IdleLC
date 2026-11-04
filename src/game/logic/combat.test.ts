@@ -676,14 +676,11 @@ describe('rare options in combat', () => {
     const start = engaged(caster([rank()], { cooldownReduction: 40, mpCostReduction: 50 }))
     const r = combatTick(start, 0.01, createRng(1))
     expect(r.events.some((e) => e.type === 'cast')).toBe(true)
-    expect(r.state.player.skillCooldowns[1]).toBeCloseTo(3 * 0.6, 1)
+    expect(r.state.player.skillCooldowns[1]).toBeCloseTo(1.7, 1)
     expect(r.state.player.mp).toBeCloseTo(100 - 5, 0)
-    // capped: never below half the cooldown
+    // Source reduction continues beyond 50%, rounded up to the next server pulse.
     const capped = engaged(caster([rank()], { cooldownReduction: 90 }))
-    expect(combatTick(capped, 0.01, createRng(1)).state.player.skillCooldowns[1]).toBeCloseTo(
-      1.5,
-      1,
-    )
+    expect(combatTick(capped, 0.01, createRng(1)).state.player.skillCooldowns[1]).toBeCloseTo(1, 1)
   })
 
   it('HP steal heals the hero by a share of the damage it deals', () => {

@@ -66,18 +66,90 @@ export function parseSkillTable(buffer) {
       throw new Error(`invalid or duplicate skills.lod id ${id}`)
     seen.add(id)
     const job = r.i32()
-    r.bytes(8) // second job and pet index
-    r.u8() // type
-    r.bytes(8) // flags and sorcerer form
+    const job2 = r.i32(),
+      petIndex = r.i32()
+    const type = r.u8()
+    const flag = r.i32(),
+      sorcerer = r.i32()
     const maxLevel = r.u8()
-    r.bytes(12 + 1) // three ranges, target type
-    r.bytes(12 + 15 + 4) // use state, two weapon types, three (magic, level) pairs, souls
-    r.bytes(4 + 16) // application state and ready/wait/fire/reuse times
+    const ranges = Array.from(r.floats(3))
+    const targetType = r.u8()
+    const useState = r.i32(),
+      weaponsRequired = [r.i32(), r.i32()]
+    const useMagic = Array.from({ length: 3 }, () => ({ magic: r.i32(), level: r.u8() }))
+    const souls = r.i32(),
+      applyState = r.i32()
+    const readyTime = r.i32(),
+      stillTime = r.i32(),
+      fireTime = r.i32(),
+      reuseTime = r.i32()
     const weapons = Array.from({ length: WEAPON_COUNT }, () => weaponData(r))
     const afterEffect = r.string()
     const icon = { texture: r.i32(), row: r.i32(), col: r.i32() }
-    r.bytes(maxLevel * LEVEL_BYTES)
-    records.push({ id, job, maxLevel, weapons, afterEffect, icon })
+    const levels = Array.from({ length: maxLevel }, (_, index) => {
+      const at = r.o
+      const hp = r.i32(),
+        mp = r.i32(),
+        gp = r.i32(),
+        duration = r.i32(),
+        dummyPower = r.i32()
+      const needItems = Array.from({ length: 2 }, () => ({ item: r.i32(), count: r.i32() }))
+      const learnLevel = r.i32(),
+        learnSp = r.i32()
+      const requires = Array.from({ length: 3 }, () => ({ skill: r.i32(), level: r.u8() }))
+      const learnItems = Array.from({ length: 3 }, () => ({ item: r.i32(), count: r.i32() }))
+      const learnAttributes = Array.from({ length: 4 }, () => r.i32())
+      const applyMagic = Array.from({ length: 3 }, () => ({ magic: r.i32(), level: r.u8() }))
+      const effects = Array.from({ length: 3 }, () => ({ magic: r.i32(), level: r.u8() }))
+      const learnGp = r.i32(),
+        attributes = Array.from({ length: 4 }, () => r.u8()),
+        targetMax = r.i32()
+      if (r.o - at !== LEVEL_BYTES) throw new Error('incorrect skill level boundary')
+      return {
+        level: index + 1,
+        hp,
+        mp,
+        gp,
+        duration,
+        dummyPower,
+        needItems,
+        learnLevel,
+        learnSp,
+        requires,
+        learnItems,
+        learnAttributes,
+        applyMagic,
+        effects,
+        learnGp,
+        attributes,
+        targetMax,
+      }
+    })
+    records.push({
+      id,
+      job,
+      job2,
+      petIndex,
+      type,
+      flag,
+      sorcerer,
+      maxLevel,
+      ranges,
+      targetType,
+      useState,
+      weaponsRequired,
+      useMagic,
+      souls,
+      applyState,
+      readyTime,
+      stillTime,
+      fireTime,
+      reuseTime,
+      weapons,
+      afterEffect,
+      icon,
+      levels,
+    })
   }
   throw new Error('missing skills.lod terminator')
 }

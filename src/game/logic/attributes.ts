@@ -61,7 +61,7 @@ export function classAttributes(
   ) as Attributes
 }
 
-/** Source m_dbHP/MP, used as option percentage bases; primary combat HP remains the idle adapter. */
+/** Source m_dbHP/MP for combat resources and fixed option percentage bases. */
 export function classResources(
   classId: ClassId,
   level: number,

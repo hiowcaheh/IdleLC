@@ -71,6 +71,7 @@ const STAT_LABELS: Record<StatKey, string> = {
   dodge: 'Evasion',
   critChance: 'Critical chance',
   critMultiplier: 'Critical damage',
+  deadly: 'Deadly rating',
   attackSpeed: 'Attack speed',
   castTime: 'Cast time adjustment',
   hpRegen: 'HP recovery',
@@ -154,18 +155,30 @@ export function describeEffect(effect: SkillEffect, rank: SkillRank): string {
   const lasting = rank.duration > 0 ? ` for ${seconds(rank.duration)}` : ''
   switch (effect.kind) {
     case 'damage':
-      return `Hits for +${effect.percent}% damage`
+      return effect.damageType === 1
+        ? `Additional attack power: ${effect.percent}`
+        : effect.damageType === 0
+          ? `Attack power: ${effect.percent}`
+          : `Attack power: ${effect.percent}%`
     case 'stat': {
       const who = rank.offensive ? 'Enemy ' : ''
       const label = who ? STAT_LABELS[effect.stat].toLowerCase() : STAT_LABELS[effect.stat]
       return `${who}${label} ${statValue(effect.stat, effect.value, effect.percent)}${rank.kind === 'passive' ? '' : lasting}`
     }
     case 'stun':
-      return effect.chance >= 1
-        ? `Stuns${lasting}`
-        : `${Math.round(effect.chance * 100)}% chance to stun${lasting}`
+      return effect.chance === undefined
+        ? `Stun${lasting} (chance data unavailable)`
+        : effect.chance >= 1
+          ? `Stuns${lasting}`
+          : `${Math.round(effect.chance * 100)}% chance to stun${lasting}`
     case 'poison':
-      return `Poison: ${effect.perSecond} damage per second${lasting}`
+      return `${effect.dotKind === 'blood' ? 'Bleed' : 'Poison'}: ${effect.perSecond}${effect.percent ? '% max HP' : ' damage'} per second${lasting}`
+    case 'state':
+      return `${effect.state[0]!.toUpperCase()}${effect.state.slice(1)}${lasting}${effect.chance === undefined ? ' (chance data unavailable)' : ` (${Math.round(effect.chance * 100)}%)`}`
+    case 'mpChange':
+      return `${effect.power} ${effect.percent ? '% max MP' : 'MP'} per second${lasting}`
+    case 'cure':
+      return 'Removes poison'
     case 'heal':
       return effect.percent
         ? `Restores ${effect.amount}% of max HP`

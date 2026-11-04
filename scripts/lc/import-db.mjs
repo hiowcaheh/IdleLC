@@ -16,6 +16,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildModelManifest, modelIdFromSmc } from './manifest.mjs'
 import { int, num, readTables } from './sql.mjs'
+import { sourceFields, sourceMagic, sourceNpc } from './source-records.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const MAX_LEVEL = 100
@@ -125,6 +126,7 @@ function buildData(tables) {
     monsters.push({
       id: `lc-${index}`,
       npcIndex: index,
+      ...sourceNpc(r),
       name,
       level: int(r.a_level),
       hp: int(r.a_hp),
@@ -272,6 +274,13 @@ function buildData(tables) {
   }
 
   const skills = buildSkills(tables)
+  const npcSkillIds = new Set(monsters.flatMap((m) => (m.skills ?? []).map((s) => s.id)))
+  const npcSkills = buildSkills(tables, npcSkillIds).map((definition) => {
+    const skill = { ...definition }
+    delete skill.classId
+    delete skill.icon
+    return skill
+  })
 
   // NPC shops: a_buy_rate = % of a_price the player pays, a_sell_rate = % the shop pays the player
   const mostCommon = (column) => {
@@ -299,6 +308,7 @@ function buildData(tables) {
     starterGear,
     gearReference,
     skills,
+    npcSkills,
   }
 }
 
@@ -670,7 +680,7 @@ function gearNeeds(key, type0, type1, state) {
   return weapons.length || weapon || shield ? { [key]: { weapons, weapon, shield } } : {}
 }
 
-function buildSkills(tables) {
+export function buildSkills(tables, npcIds = null) {
   const magics = new Map(tables.t_magic.map((r) => [int(r.a_index), r]))
   const magicPower = new Map(
     tables.t_magiclevel.map((r) => [`${int(r.a_index)}/${int(r.a_level)}`, r]),
@@ -686,23 +696,33 @@ function buildSkills(tables) {
   for (const r of tables.t_skill) {
     const job = int(r.a_job)
     const name = String(r.a_name_usa ?? '').trim()
-    if (job < 0 || job >= SKILL_CLASSES.length || int(r.a_job2) !== 0 || !name) continue
+    if (
+      npcIds
+        ? !npcIds.has(int(r.a_index))
+        : job < 0 || job >= SKILL_CLASSES.length || int(r.a_job2) !== 0 || !name
+    )
+      continue
     const rows = (levelsOf.get(int(r.a_index)) ?? []).sort(
       (a, b) => int(a.a_level) - int(b.a_level),
     )
-    if (rows.length === 0 || int(rows[0].a_learnLevel) > MAX_LEVEL) continue
+    if (rows.length === 0 || (!npcIds && int(rows[0].a_learnLevel) > MAX_LEVEL)) continue
     const levels = rows.map((l) => {
       const effects = []
       for (let k = 1; k <= 3; k++) {
         const magic = magics.get(int(l[`a_magicIndex${k}`]))
         if (!magic) continue
         const power = magicPower.get(`${int(magic.a_index)}/${int(l[`a_magicLevel${k}`])}`)
+        if (!power)
+          throw new Error(
+            `Missing t_magiclevel ${int(magic.a_index)}/${int(l[`a_magicLevel${k}`])}`,
+          )
         effects.push({
           magic: int(magic.a_index),
           type: int(magic.a_type),
           subtype: int(magic.a_subtype),
           damageType: int(magic.a_damagetype),
-          power: power ? int(power.a_power) : 0,
+          power: int(power.a_power),
+          ...sourceMagic(magic, power, int(l[`a_magicLevel${k}`])),
         })
       }
       const requires = []
@@ -719,6 +739,13 @@ function buildSkills(tables) {
         learnSp: int(l.a_learnSP),
         requires,
         effects,
+        ...sourceFields(l, {
+          targetMax: 'a_targetNum',
+          learnStrength: 'a_learnStr',
+          learnDexterity: 'a_learnDex',
+          learnIntelligence: 'a_learnInt',
+          learnConstitution: 'a_learnCon',
+        }),
       }
     })
     skills.push({
@@ -731,6 +758,16 @@ function buildSkills(tables) {
       readyTime: int(r.a_readyTime),
       fireTime: int(r.a_fireTime),
       reuseTime: int(r.a_reuseTime),
+      ...sourceFields(r, {
+        flag: 'a_flag',
+        useState: 'a_useState',
+        applyState: 'a_appState',
+        sorcerer: 'a_sorcerer',
+        stillTime: 'a_stillTime',
+        appRange: 'a_appRange',
+        fireRange: 'a_fireRange',
+        fireRange2: 'a_fireRange2',
+      }),
       ...gearNeeds('needs', r.a_useWeaponType0, r.a_useWeaponType1, r.a_useState),
       ...gearNeeds('passiveNeeds', r.a_appWeaponType0, r.a_appWeaponType1, r.a_appState),
       icon: {
@@ -803,7 +840,8 @@ async function main() {
   )
 }
 
-main().catch((error) => {
-  console.error(error)
-  process.exit(1)
-})
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url))
+  main().catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })

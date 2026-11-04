@@ -4,6 +4,7 @@ import { HashRouter } from 'react-router'
 import App from './App.tsx'
 import './index.css'
 import { lockZoom } from './ui/lockZoom.ts'
+import { SaveSessionGate } from './ui/SaveSessionGate.tsx'
 
 lockZoom()
 
@@ -12,9 +13,11 @@ if (!root) throw new Error('Missing #root element')
 
 createRoot(root).render(
   <StrictMode>
-    <HashRouter>
-      <App />
-    </HashRouter>
+    <SaveSessionGate>
+      <HashRouter>
+        <App />
+      </HashRouter>
+    </SaveSessionGate>
   </StrictMode>,
 )
 
