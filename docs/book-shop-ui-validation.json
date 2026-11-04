@@ -696,5 +696,46 @@
   "limits": [
     "Chromium with software WebGL; no physical Safari/iPhone run.",
     "Grade A and six seals remain random; controlled RNG is used only for validation."
-  ]
+  ],
+  "pwaCache": {
+    "page_errors": [],
+    "console_errors": [],
+    "http_errors": [],
+    "failed_requests": [],
+    "uiResponses": [
+      {
+        "url": "http://127.0.0.1:4188/IdleLC/ui/lc/book-window.webp?v=e2bf06fc",
+        "status": 200,
+        "serviceWorker": true
+      },
+      {
+        "url": "http://127.0.0.1:4188/IdleLC/ui/lc/sp-icon.webp?v=0d92d916",
+        "status": 200,
+        "serviceWorker": true
+      }
+    ],
+    "cache": {
+      "sp-icon": {
+        "old": {
+          "bytes": 2664,
+          "sha256": "a51b0e23b2a05532f6d6d2e237ab52311679b7fd4b305d573c93bc0ae2068f01"
+        },
+        "new": {
+          "bytes": 4188,
+          "sha256": "0d92d9162ed1822c1a823ba4f248d29a2b5721e5605fd0753e7c640cfbb30e05"
+        }
+      },
+      "book-window": {
+        "old": {
+          "bytes": 10504,
+          "sha256": "a32b148acd87da3e15d14b8ee068a5e7addbb5a579e7e3439418796130810cc3"
+        },
+        "new": {
+          "bytes": 9934,
+          "sha256": "e2bf06fc6abfa7ea3390a32f4bf69f49f4a0900b642fceb327a4e391f0fefc0b"
+        }
+      }
+    },
+    "passed": true
+  }
 }

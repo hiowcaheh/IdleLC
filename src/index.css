@@ -4834,7 +4834,7 @@ a.button {
   width: 20px;
   height: 20px;
   flex: none;
-  background: url('/ui/lc/sp-icon.webp') center / contain no-repeat;
+  background: url('/ui/lc/sp-icon.webp?v=0d92d916') center / contain no-repeat;
 }
 .character-stats__group[aria-label='Attributes'] dd {
   display: block;
@@ -5016,7 +5016,7 @@ a.button {
   border-radius: 1px;
 }
 .sheet--book {
-  border-image-source: url('/ui/lc/book-window.webp');
+  border-image-source: url('/ui/lc/book-window.webp?v=e2bf06fc');
 }
 .sheet--book .sheet__body {
   display: flex;

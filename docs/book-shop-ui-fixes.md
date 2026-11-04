@@ -29,6 +29,8 @@ SaveVersion pozostaje **14**. [Wyniki kontroli](book-shop-ui-validation.json).
    i kolorem kwoty.
 
 Przeliczone grafiki: `public/ui/lc/sp-icon.webp` i `book-window.webp`.
+Adresy tych dwóch grafik w CSS zawierają skrót SHA-256, aby pamięć PWA nie pokazała
+poprzedniego wycinka przy pierwszym otwarciu po aktualizacji.
 Reprodukcja:
 
 ```sh
@@ -96,6 +98,9 @@ poziomu. Brak migracji zapisu oraz nowych zależności.
   konsoli, żądań i HTTP. Przez GUI wykonano ulepszenie Self Heal, zakup Reviving
   Tiara 1955, zakup złotej lupy i odkrycie sprzętu. Po odświeżeniu zachowały się
   zarówno wyższy poziom skilla, jak i identyczny UID/zestaw/opcje przedmiotu.
+- PWA z aktywnym service workerem i starymi grafikami z `b0f10ab` w cache:
+  oba nowe adresy załadowały się od razu przez worker, z poprawnymi SHA-256.
+  Stare wpisy nie przesłoniły nowych obrazów. Bez błędów strony/konsoli/żądań/HTTP.
 
 Rozdzielenie scrolla sprawdzono w Chromium. Pozostaje kontrola odczucia gestów
 na fizycznym iPhonie właściciela; wynik testu nie jest deklaracją wykonania testu Safari.
