@@ -2304,6 +2304,13 @@ a.button {
   background: center / 100% 100% no-repeat;
 }
 
+/* the Character window's board: a little larger (to the window's inner edges) and lower */
+.sheet--character .equip-board {
+  --board-width: min(calc(100% + 24px), 420px);
+  width: var(--board-width);
+  margin: 18px 0 10px calc((100% - var(--board-width)) / 2);
+}
+
 .equip-board__slot {
   position: absolute;
   aspect-ratio: 1;
@@ -4379,10 +4386,9 @@ a.button {
 
 .book__reward {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    'kills status'
-    'items items';
+  /* one line: kills, the rewards (they wrap within their own cell) and the state or Claim */
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  grid-template-areas: 'kills items status';
   align-items: center;
   gap: 4px;
   min-height: 32px;
@@ -4441,9 +4447,11 @@ a.button {
 
 .book__claim {
   grid-area: status;
-  min-height: 30px;
-  padding: 2px 4px;
-  font-size: 11px;
+  min-height: 22px;
+  padding: 0 2px;
+  border-width: 3px 6px;
+  font-size: 10.5px;
+  line-height: 16px;
 }
 
 .hunt__book {
@@ -4816,15 +4824,31 @@ a.button {
 }
 .sheet--inventory .tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* all six tabs on one line, also on a phone (owner): smaller tab art corners and text */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 2px;
   border-bottom: 0;
 }
 .sheet--inventory .tabs__tab {
+  min-height: 30px;
   margin-bottom: 0;
+  padding: 4px 1px 5px;
+  border-image-width: 6px 8px;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.sheet--inventory .tabs__tab.is-active {
+  padding-bottom: 5px;
 }
 @media (min-width: 600px) {
   .sheet--inventory .tabs {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .sheet--inventory .tabs__tab {
+    min-height: 38px;
+    border-image-width: 8px 12px;
+    font-size: 13px;
   }
 }
 .sheet--client .shop__slot-title,
@@ -4942,9 +4966,31 @@ a.button {
     0 0 0 1px #3b423a,
     inset 0 0 4px #000;
 }
+/* the same green and glow as the active skills' frame (skills-slot-active), round: the client's
+   passive ring sits under the round icon and hardly shows. Drawn over the icon, so the grey filter
+   of a skill not learned yet doesn't dim it */
+.skills-slot--passive.is-learnable {
+  background-image: none;
+}
 .skills-slot--passive.is-learnable .skill-icon {
   border-color: transparent;
   box-shadow: none;
+}
+.skills-slot--passive.is-learnable::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow:
+    0 0 0 3px rgba(110, 255, 0, 0.65),
+    0 0 0 4px rgba(104, 200, 0, 0.35),
+    0 0 5px 3px rgba(104, 200, 0, 0.35);
+  pointer-events: none;
 }
 .skills-slot__rank {
   display: none;
@@ -5118,7 +5164,7 @@ a.button {
 }
 .book__reward-labels {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
   gap: 4px;
   font-size: 10px;
   color: #d9c392;
@@ -5145,7 +5191,7 @@ a.button {
 .bar--book {
   height: 28px;
   border: 0;
-  border-image: url('/ui/lc/book-progress.webp') 9 20 fill / 7px 14px stretch;
+  border-image: url('/ui/lc/book-progress.webp?v=2985f63d') 9 20 fill / 7px 14px stretch;
   background: none;
   border-radius: 0;
   overflow: visible;

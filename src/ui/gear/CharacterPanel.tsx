@@ -455,11 +455,11 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
               )
             })}
           </div>
-          <p className="sheet__meta">
-            {selected && !character.equipment[selected]
-              ? `${SLOT_LABELS[selected]}: nothing worn. The Inventory has your gear.`
-              : 'Tap a piece to see it.'}
-          </p>
+          {selected && !character.equipment[selected] && (
+            <p className="sheet__meta">
+              {SLOT_LABELS[selected]}: nothing worn. The Inventory has your gear.
+            </p>
+          )}
           {selected && character.equipment[selected] && (
             <Sheet
               centered

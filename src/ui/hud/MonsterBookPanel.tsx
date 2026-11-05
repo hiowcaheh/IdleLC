@@ -96,7 +96,8 @@ function BookRewards({ monsterId, kills }: { monsterId: string; kills: number })
         />
       )}
       <div className="book__reward-labels" aria-hidden="true">
-        <span>Kills / rewards</span>
+        <span>Kills</span>
+        <span>Rewards</span>
         <span>Status</span>
       </div>
       <ul className="book__reward-list">

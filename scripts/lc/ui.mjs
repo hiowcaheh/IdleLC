@@ -14,7 +14,8 @@ const loading = (name) => `Data\\Interface\\Loading\\${name}.tex`
  * name → [atlas, x, y, width, height, options?] (rectangles measured on the atlases); options:
  * `scale` (upscaled once here, sharpened so small icons stay crisp on phone screens), `quality`
  * (lossy WebP for pictures; the rest is lossless), `keyOut` (the dark blue background of an item
- * icon made transparent).
+ * icon made transparent), `minAlpha` (fainter pixels made fully transparent: the atlas's
+ * see-through halo around a piece, which shows as a lighter box on dark windows).
  */
 export const UI_PARTS = {
   window: [atlas('NewInventory'), 0, 0, 256, 408],
@@ -72,7 +73,7 @@ export const UI_PARTS = {
   'client-section': [atlas('QuestBook'), 0, 346, 155, 32],
   'book-paper': [atlas('ItemCollectionbook'), 246, 58, 480, 466, { quality: 85 }],
   'book-row': [atlas('ItemCollectionbook'), 13, 246, 193, 16],
-  'book-progress': [atlas('ItemCollectionbook'), 471, 778, 270, 34],
+  'book-progress': [atlas('ItemCollectionbook'), 471, 778, 270, 34, { minAlpha: 96 }],
   'book-fill': [atlas('ItemCollectionbook'), 32, 799, 168, 19],
   gift: [atlas('Cashshop'), 251, 358, 60, 60],
   'stat-plus': [atlas('skill_new'), 1213, 70, 13, 13, { scale: 3 }],
@@ -173,7 +174,7 @@ export async function buildUiParts(files) {
   for (const [name, [path, x, y, rectWidth, rectHeight, options = {}]] of Object.entries(
     UI_PARTS,
   )) {
-    const { scale = 1, quality, keyOut = false } = options
+    const { scale = 1, quality, keyOut = false, minAlpha = 0 } = options
     let height = rectHeight
     if (!textures.has(path)) {
       textures.set(path, files.resolve(path) ? parseTexture(files.read(path)) : null)
@@ -240,6 +241,9 @@ export async function buildUiParts(files) {
       for (let i = 0; i < pixels.length; i += 4) {
         pixels[i + 3] = Math.max(0, Math.min(255, (pixels[i] - pixels[i + 2] - 10) * 3))
       }
+    }
+    if (minAlpha > 0) {
+      for (let i = 3; i < pixels.length; i += 4) if (pixels[i] < minAlpha) pixels[i] = 0
     }
     let image = sharp(pixels, { raw: { width, height, channels: 4 } })
     if (scale !== 1) {
