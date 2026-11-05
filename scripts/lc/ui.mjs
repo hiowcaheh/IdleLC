@@ -68,6 +68,11 @@ export const UI_PARTS = {
   'skills-background': [atlas('skill_new'), 420, 80, 380, 450, { quality: 85 }],
   // Original panels and controls, measured on the 2015 atlases.
   'settings-window': [atlas('NewOption'), 0, 0, 256, 400],
+  // NewOption: the option window's check box (red when on), the same box empty, and its page's
+  // silver divider between groups of settings
+  check: [atlas('NewOption'), 287, 30, 14, 14, { scale: 3 }],
+  'check-off': [atlas('NewOption'), 287, 30, 14, 14, { scale: 3 }],
+  divider: [atlas('NewOption'), 11, 447, 192, 6],
   'book-window': [atlas('QuestBook'), 0, 0, 475, 331],
   'detail-window': [atlas('NewOption'), 270, 105, 178, 190],
   'client-section': [atlas('QuestBook'), 0, 346, 155, 32],
@@ -158,11 +163,21 @@ const CORNER = 8
 /** Parts of a piece shown empty: the player frame's bar tracks (the bars are drawn on top). */
 const EMPTY_AREAS = {
   'book-progress': [[20, 9, 230, 14]],
+  // the box without its red mark
+  'check-off': [[3, 3, 8, 8]],
   'player-frame': [
     [112, 31, 118, 8],
     [112, 44, 118, 8],
     [112, 57, 118, 8],
   ],
+}
+/**
+ * Areas [x, y, width, height] of a piece replaced by the mirror image of its other side: the
+ * skill window's own close button (skill_new.xml btn_close at 780,5 16×16) is baked into img_base,
+ * and the game draws the windows' close button itself; the frame is symmetric.
+ */
+const MIRRORED = {
+  'skills-window': [[776, 2, 24, 22]],
 }
 /** Brightness left in an empty bar track (grey, so it never looks like a dark fill). */
 const EMPTY_SHADE = 0.22
@@ -223,6 +238,14 @@ export async function buildUiParts(files) {
       for (let row = height - count; row < height; row++) {
         const from = (row * width + column) * 4
         for (let col = CORNER; col < width - CORNER; col++) {
+          pixels.copyWithin((row * width + col) * 4, from, from + 4)
+        }
+      }
+    }
+    for (const [mx, my, mw, mh] of MIRRORED[name] ?? []) {
+      for (let row = my; row < my + mh; row++) {
+        for (let col = mx; col < mx + mw; col++) {
+          const from = (row * width + (width - 1 - col)) * 4
           pixels.copyWithin((row * width + col) * 4, from, from + 4)
         }
       }

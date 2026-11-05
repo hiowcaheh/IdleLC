@@ -1424,6 +1424,15 @@ a.button {
   color: #b9ec8a;
 }
 
+/* Gold runs the whole width: its box starts with the boxes above and ends at the right edge. */
+.expedition-dialog__stats .is-gold {
+  grid-column: 1 / -1;
+}
+
+.expedition-dialog__stats .is-gold dd {
+  flex: 0 1 calc(50% + 102px);
+}
+
 .expedition-dialog__stats .is-bad dd {
   color: #ff9a8a;
 }
@@ -2509,25 +2518,25 @@ a.button {
   cursor: pointer;
 }
 
+/* The wallet of Shop, Appraiser and Inventory: one small client value box, right-aligned. */
 .shop__gold {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-left: auto;
-  margin-right: 12px;
-  font-weight: 800;
-  color: var(--gilt-bright);
-  font-variant-numeric: tabular-nums;
-}
-.sheet--shop .shop__gold {
-  min-width: 140px;
-  max-width: 100%;
   justify-content: flex-end;
-  margin-right: 0;
-  padding: 4px 8px;
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 24px;
+  margin: 0 0 0 auto;
+  padding: 0 8px;
   border: solid transparent;
   border-width: 3px 5px;
   border-image: url('/ui/lc/value-box.webp') 3 5 fill / 3px 5px stretch;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 18px;
+  color: var(--gilt-bright);
+  font-variant-numeric: tabular-nums;
 }
 .shop__seals {
   display: block;
@@ -2619,8 +2628,26 @@ a.button {
 }
 
 .potion-slot.is-auto .item-icon {
-  border-color: var(--gilt);
-  box-shadow: 0 0 4px rgba(232, 190, 96, 0.55);
+  border-color: #ffe788;
+  box-shadow:
+    0 0 0 1px #ffe788,
+    0 0 6px 2px rgba(255, 210, 90, 0.6);
+  animation: potion-auto-glow 1.6s ease-in-out infinite;
+}
+
+/* the slot the hero drinks from by itself breathes a golden glow */
+@keyframes potion-auto-glow {
+  50% {
+    box-shadow:
+      0 0 0 1px #fff1b8,
+      0 0 11px 4px rgba(255, 214, 110, 0.85);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .potion-slot.is-auto .item-icon {
+    animation: none;
+  }
 }
 
 .potion-slot:not(.is-auto) .item-icon,
@@ -2684,6 +2711,89 @@ a.button {
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 10px;
+}
+
+/* The client's check box (NewOption): on red, off empty. */
+.check-box {
+  appearance: none;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  border: 0;
+  background: url('/ui/lc/check-off.webp?v=95c65aa3') center / contain no-repeat;
+  cursor: pointer;
+}
+.check-box:checked {
+  background-image: url('/ui/lc/check.webp?v=eb6e1872');
+}
+.check-box:focus-visible {
+  outline: 2px solid var(--gilt-bright);
+  outline-offset: 2px;
+}
+.check-box:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+/* Potion slot window: AUTO as a check box, the potion in the slot lit up */
+.potion-picker__auto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 10px;
+  padding: 8px 10px;
+  border: 1px solid #76858266;
+  background: #141c22b3;
+  cursor: pointer;
+}
+.potion-picker__auto.is-on {
+  border-color: var(--gilt);
+  box-shadow: inset 0 0 10px rgba(255, 214, 110, 0.18);
+}
+.potion-picker__auto-label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--gilt-bright);
+}
+.potion-picker__auto-hint {
+  display: block;
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+.potion-picker .item-row.is-in-slot {
+  background: linear-gradient(90deg, rgba(255, 214, 110, 0.16), rgba(255, 214, 110, 0.03));
+  box-shadow:
+    inset 0 0 0 2px var(--gilt-bright),
+    0 0 10px rgba(255, 210, 100, 0.45);
+}
+.potion-picker .item-row.is-in-slot .item-icon {
+  box-shadow:
+    0 0 0 2px #ffe788,
+    0 0 8px 2px rgba(255, 210, 90, 0.65);
+}
+.potion-picker .item-row.is-in-slot .item-row__main:disabled {
+  opacity: 1;
+  filter: none;
+}
+.potion-picker__badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: 2px;
+  color: #1a120a;
+  background: var(--gilt-bright);
+  border-radius: 2px;
+}
+.potion-picker .item-row.is-auto .potion-picker__badge {
+  background: linear-gradient(#ffe788, #e0a83a);
 }
 
 /* Tabs (character card) */
@@ -4611,10 +4721,10 @@ a.button {
   inset: 0;
   z-index: 45;
   display: grid;
-  align-content: end;
+  align-content: center;
   justify-items: center;
-  gap: 16px;
-  padding: 24px var(--gutter) clamp(52px, 16vh, 152px);
+  gap: 18px;
+  padding: 24px 0 8vh;
   overflow: hidden;
   background: #171813;
 }
@@ -4624,12 +4734,15 @@ a.button {
 }
 
 .zone-loading__art {
-  position: absolute;
-  inset: 0;
-  background-position: center;
-  /* Keep the whole illustration and fill the viewport, including portrait screens. */
+  position: relative;
+  /* The whole illustration at its own proportions (944 × 344, the client's loading picture),
+     as wide as the screen and never enlarged out of shape: stretched to the whole screen it
+     looked zoomed in and blurred on phones. The name and bar sit under it. */
+  width: min(100vw, calc(60vh * 944 / 344));
+  aspect-ratio: 944 / 344;
   background-size: 100% 100%;
   background-repeat: no-repeat;
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.8);
   opacity: 0;
 }
 
@@ -4854,7 +4967,7 @@ a.button {
 
 /* The recovered skill_new.xml window, tabs, SP plate and distinct skill icon surrounds. */
 .sheet--skills {
-  border-image-source: url('/ui/lc/skills-window.webp');
+  border-image-source: url('/ui/lc/skills-window.webp?v=495ae2ec');
 }
 .sheet--skills .sheet__body {
   background:
@@ -5217,40 +5330,77 @@ a.button {
   border-image-source: url('/ui/lc/settings-window.webp');
 }
 .sheet--settings .setting {
-  background: #1d282fcc;
-  border: 1px solid #76858266;
-  padding: 12px;
-  margin-bottom: 12px;
-  border-radius: 1px;
+  /* groups of the client's option page, each closed by its silver divider */
+  margin: 0;
+  padding: 12px 4px 18px;
+  border: 0;
+  background: url('/ui/lc/divider.webp?v=8a5dd6de') bottom center / 100% 6px no-repeat;
+}
+.sheet--settings .setting--danger {
+  background: none;
 }
 .sheet--settings .setting__label {
   color: var(--gilt-bright);
-  padding: 0 4px;
+  padding: 0;
   font-family: var(--font-display);
   font-size: 13px;
 }
+/* graphics quality: the option window's check boxes, one picked */
 .sheet--settings .segmented {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 14px;
   border: 0;
   border-radius: 0;
   background: transparent;
+  overflow: visible;
 }
-.sheet--settings .segmented__option span {
+.sheet--settings .segmented__option span,
+.sheet--settings .segmented__option + .segmented__option span {
+  position: relative;
+  min-height: 32px;
+  padding: 6px 0 6px 36px;
   border: 0;
-  border-radius: 0;
-  border-image: url('/ui/lc/skills-tab.webp') 8 12 fill / 8px 12px stretch;
+  border-image: none;
+  background: none;
+  color: var(--parchment);
+  text-align: left;
+}
+.sheet--settings .segmented__option span::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  width: 26px;
+  height: 26px;
+  transform: translateY(-50%);
+  background: url('/ui/lc/check-off.webp?v=95c65aa3') center / contain no-repeat;
 }
 .sheet--settings .segmented__option input:checked + span {
-  border-image-source: url('/ui/lc/skills-tab-active.webp');
   background: none;
   color: #ffe788;
+  font-weight: 700;
+}
+.sheet--settings .segmented__option input:checked + span::before {
+  background-image: url('/ui/lc/check.webp?v=eb6e1872');
 }
 .sheet--settings .switch {
-  border-radius: 1px;
-  background: #141c20;
-  border-color: #9e8c60;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 0;
+  background: url('/ui/lc/check-off.webp?v=95c65aa3') center / contain no-repeat;
 }
 .sheet--settings .switch::after {
-  border-radius: 1px;
+  display: none;
+}
+.sheet--settings .switch:checked {
+  background-image: url('/ui/lc/check.webp?v=eb6e1872');
+}
+.sheet--settings .switch:focus-visible,
+.sheet--settings .segmented__option input:focus-visible + span {
+  outline: 2px solid var(--gilt-bright);
+  outline-offset: 2px;
 }
 .sheet--book {
   border-image-source: url('/ui/lc/book-window.webp?v=e2bf06fc');

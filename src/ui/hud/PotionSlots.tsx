@@ -101,20 +101,31 @@ function PotionSlotPicker({ group, onClose }: { group: PotionGroup; onClose(): v
   }
 
   return (
-    <Sheet title={`${LABELS[group]} slot`} titleId="potion-slot-title" onClose={onClose}>
+    <Sheet
+      title={`${LABELS[group]} slot`}
+      titleId="potion-slot-title"
+      className="sheet--client potion-picker"
+      onClose={onClose}
+    >
       <p className="sheet__meta">
         Your hero drinks only the potion in this slot, in fights and on expeditions.
       </p>
-      <div className="potion-picker__actions">
-        <button
-          type="button"
-          className={`button${current.auto ? ' button--gold' : ''}`}
-          aria-pressed={current.auto}
+      <label className={`potion-picker__auto${current.auto ? ' is-on' : ''}`}>
+        <span>
+          <span className="potion-picker__auto-label">AUTO</span>
+          <span className="potion-picker__auto-hint">
+            {current.auto ? 'Drinks it by itself' : 'Only when you drink it from the bag'}
+          </span>
+        </span>
+        <input
+          type="checkbox"
+          className="check-box"
+          checked={current.auto}
           disabled={busy}
-          onClick={() => put({ ...current, auto: !current.auto })}
-        >
-          Drink automatically: {current.auto ? 'on' : 'off'}
-        </button>
+          onChange={() => put({ ...current, auto: !current.auto })}
+        />
+      </label>
+      <div className="potion-picker__actions">
         {current.itemId !== null && (
           <button
             type="button"
@@ -132,7 +143,10 @@ function PotionSlotPicker({ group, onClose }: { group: PotionGroup; onClose(): v
             const inSlot = itemId === current.itemId
             const tooHigh = item.level > character.level
             return (
-              <li key={itemId} className={`item-row item-row--button${inSlot ? ' is-open' : ''}`}>
+              <li
+                key={itemId}
+                className={`item-row item-row--button${inSlot ? ' is-open is-in-slot' : ''}${inSlot && current.auto ? ' is-auto' : ''}`}
+              >
                 <button
                   type="button"
                   className="item-row__main"
@@ -144,12 +158,16 @@ function PotionSlotPicker({ group, onClose }: { group: PotionGroup; onClose(): v
                   <span className="item-row__body">
                     <span className="item-row__name">
                       {item.name} ×{fmt(count)}
+                      {inSlot && (
+                        <span className="potion-picker__badge">
+                          {current.auto ? 'In slot · AUTO' : 'In slot'}
+                        </span>
+                      )}
                     </span>
                     <span className="item-row__meta">
                       {[
                         item.potion && potionLine(item.potion),
                         tooHigh ? `from level ${item.level}` : null,
-                        inSlot ? 'in the slot' : null,
                       ]
                         .filter(Boolean)
                         .join(' · ')}

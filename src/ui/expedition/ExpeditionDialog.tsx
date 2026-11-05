@@ -100,7 +100,7 @@ export function ExpeditionDialog({
     ['Deaths', fmt(estimate.deathsPerHour), estimate.deathsPerHour > 0 ? 'is-bad' : undefined],
     ['EXP', fmt(estimate.expPerHour), 'is-exp'],
     ['SP', formatSp(estimate.spPerHour)],
-    ['Gold', <Gold amount={estimate.goldPerHour} />],
+    ['Gold', <Gold amount={estimate.goldPerHour} />, 'is-gold'],
   ]
 
   return (

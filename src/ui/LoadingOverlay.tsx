@@ -5,7 +5,7 @@ export function LoadingOverlay() {
   if (!active) return null
   return (
     <div className="loading" role="status">
-      <p className="loading__text">Loading models…</p>
+      <p className="loading__text">Loading IdleLC…</p>
       <div className="loading__track">
         <div className="loading__fill" style={{ transform: `scaleX(${progress / 100})` }} />
       </div>

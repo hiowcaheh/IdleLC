@@ -139,11 +139,12 @@ export function ZoneLoading() {
         }
       }}
     >
-      {art && shown.artReady && (
+      {art && (
+        // the picture's place is kept while it decodes, so the name and bar don't move
         <div
           className="zone-loading__art"
           aria-hidden="true"
-          style={{ backgroundImage: `url(${artUrl(art)})` }}
+          style={shown.artReady ? { backgroundImage: `url(${artUrl(art)})` } : undefined}
         />
       )}
       <p className="zone-loading__name">{ZONES[shown.zoneId]?.name ?? ''}</p>
