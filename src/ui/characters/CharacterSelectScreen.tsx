@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router'
 import { CLASSES, classPortrait } from '../../game/data/classes.ts'
 import { ZONES } from '../../game/data/zones.ts'
 import { MAX_CHARACTERS } from '../../game/logic/character.ts'
+import { wornTitle } from '../../game/logic/titles.ts'
+import { armorUpgradePlus } from '../../scene/upgradeEffects.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { ClassPortrait } from '../hud/ClassPortrait.tsx'
 import { ClassPreview } from './ClassPreview.tsx'
@@ -15,6 +17,8 @@ export function CharacterSelectScreen() {
   const navigate = useNavigate()
   const [selectedId, setSelectedId] = useState<string | null>(characters[0]?.id ?? null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  // titles run out by the clock: the screen's time, read once when it opens
+  const [now] = useState(() => Date.now())
   const [busy, setBusy] = useState(false)
 
   // coming back here (browser Back, "Change character") ends the current session
@@ -59,9 +63,13 @@ export function CharacterSelectScreen() {
         </header>
 
         {selected ? (
+          // as in the game: worn gear with its upgrade effects and the worn title's effect
           <ClassPreview
             classId={selected.classId}
             items={Object.values(selected.equipment).map((piece) => piece.itemId)}
+            weaponPlus={selected.equipment.weapon?.plus ?? 0}
+            armorPlus={armorUpgradePlus(selected.equipment)}
+            titleEffect={wornTitle(selected, now)?.effect}
           />
         ) : (
           <div className="class-preview class-preview--empty">
