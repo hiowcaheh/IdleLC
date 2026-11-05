@@ -61,6 +61,44 @@ const LAYER_TEXTURE = 256
 /** Side of the mask sheets (four layer masks per RGBA sheet). */
 const MASK_SIZE = 512
 
+/**
+ * A layer mask scaled to the sheet's side, one byte per pixel. sharp turns a one-channel raw image
+ * into three channels when it resizes it: without taking one back, every row read the next row's
+ * bytes and the ground showed stripes and squares (owner's report from Egeha, 2026-11-05).
+ */
+export async function scaleMask({ size, data }) {
+  return sharp(data, { raw: { width: size, height: size, channels: 1 } })
+    .resize(MASK_SIZE, MASK_SIZE)
+    .extractChannel(0)
+    .raw()
+    .toBuffer()
+}
+
+/**
+ * The masks of layers 1… (layer 0 is the base) packed four to a lossless RGBA sheet:
+ * { 'masks-0.webp': …, … }. `--only masks` rewrites just these.
+ */
+export async function maskSheets(terrain) {
+  const out = {}
+  for (let first = 1, n = 0; first < terrain.layers.length; first += 4, n++) {
+    const sheet = Buffer.alloc(MASK_SIZE * MASK_SIZE * 4)
+    for (let k = 0; k < 4; k++) {
+      const layer = terrain.layers[first + k]
+      if (!layer) continue
+      const scaled = await scaleMask(layer.mask)
+      for (let i = 0; i < MASK_SIZE * MASK_SIZE; i++) sheet[i * 4 + k] = scaled[i]
+    }
+    out[`masks-${n}.webp`] = await sharp(sheet, {
+      raw: { width: MASK_SIZE, height: MASK_SIZE, channels: 4 },
+    })
+      // exact: WebP otherwise rewrites the colour under transparent pixels (the A mask's 0s),
+      // which cut squares and lines into the other three masks
+      .webp({ lossless: true, exact: true })
+      .toBuffer()
+  }
+  return out
+}
+
 /** Terrain height in metres at a point (bilinear between the height map's vertices). */
 export function heightAt(terrain, x, z) {
   const fx = Math.min(terrain.width - 1.001, Math.max(0, x / terrain.cellX))
@@ -183,26 +221,9 @@ export async function buildTerrain(files, wtrPath, arenaOptions) {
       .toBuffer()
     layers.push({ texture: `layer-${i}.webp`, tile: layer.repeat * terrain.cellX })
   }
-  // masks of layers 1… (layer 0 is the base) packed four to a sheet, R G B A
-  const masks = []
-  for (let first = 1; first < terrain.layers.length; first += 4) {
-    const sheet = Buffer.alloc(MASK_SIZE * MASK_SIZE * 4)
-    for (let k = 0; k < 4; k++) {
-      const layer = terrain.layers[first + k]
-      if (!layer) continue
-      const { size, data } = layer.mask
-      const scaled = await sharp(data, { raw: { width: size, height: size, channels: 1 } })
-        .resize(MASK_SIZE, MASK_SIZE)
-        .raw()
-        .toBuffer()
-      for (let i = 0; i < MASK_SIZE * MASK_SIZE; i++) sheet[i * 4 + k] = scaled[i]
-    }
-    const name = `masks-${masks.length}.webp`
-    out[name] = await sharp(sheet, { raw: { width: MASK_SIZE, height: MASK_SIZE, channels: 4 } })
-      .webp({ lossless: true })
-      .toBuffer()
-    masks.push(name)
-  }
+  const sheets = await maskSheets(terrain)
+  Object.assign(out, sheets)
+  const masks = Object.keys(sheets)
   out['heights.bin'] = Buffer.from(terrain.heights.buffer)
   out['terrain.json'] = Buffer.from(
     JSON.stringify(

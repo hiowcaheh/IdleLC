@@ -19,7 +19,8 @@
  *                          `icons` = item and skill icons, `ui` = interface pieces, `fx` = effect textures
  *   --batch <json>         select the model ids in a reviewed recovery batch (instead of --only)
  *   --strict               fail models with missing or unreadable dependencies
- *   --map <id>             with --only terrain, convert just this map (juno or dratan)
+ *   --map <id>             with --only terrain / nav / masks, convert just this map
+ *                          `masks` = only the terrain layer masks (masks-<n>.webp) of the maps
  *   --smc <path>           convert one .smc (client path or file); with --anims <a,b> to pick clips
  *   --max-texture <px>     longest texture side (default 1024)
  *
@@ -46,7 +47,7 @@ import { parseSkillAnims } from './skill-anims.mjs'
 import { parseSmc } from './smc.mjs'
 import { chooseAnimSets } from './source-choice.mjs'
 import { buildNav, navObstacles, walkableShare } from './nav.mjs'
-import { buildTerrain, parseTerrain } from './terrain.mjs'
+import { buildTerrain, maskSheets, parseTerrain } from './terrain.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const GENERATED = path.join(ROOT, 'src/game/data/generated')
@@ -218,8 +219,8 @@ function parseArgs(argv) {
     else if (flag === '--help' || flag === '-h') args.help = true
     else throw new Error(`unknown option ${flag}`)
   }
-  if (args.map && (!MAPS[args.map] || !(args.only?.has('terrain') || args.only?.has('nav'))))
-    throw new Error('--map needs a known map and --only terrain or nav')
+  if (args.map && (!MAPS[args.map] || !['terrain', 'nav', 'masks'].some((o) => args.only?.has(o))))
+    throw new Error('--map needs a known map and --only terrain, nav or masks')
   if (args.batch) {
     if (args.only) throw new Error('--batch and --only cannot be combined')
     const batch = JSON.parse(fs.readFileSync(args.batch, 'utf8'))
@@ -305,7 +306,7 @@ function listJobs(args, data, files, itemModels, icons, skillAnims) {
       (j.gear && args.only.has('gear')) ||
       (j.starter && args.only.has('starter')),
   )
-  const selectors = new Set(['gear', 'starter', 'icons', 'ui', 'fx', 'terrain', 'nav'])
+  const selectors = new Set(['gear', 'starter', 'icons', 'ui', 'fx', 'terrain', 'nav', 'masks'])
   for (const id of args.only)
     if (!selectors.has(id) && !selected.some((job) => job.id === id))
       throw new Error(`requested model is unavailable: ${id}`)
@@ -402,7 +403,7 @@ async function main() {
   // `--only icons` / `--only ui` / `--only terrain` (or several) convert no models
   const iconsOnly =
     args.only !== undefined &&
-    [...args.only].every((o) => ['icons', 'ui', 'fx', 'terrain', 'nav'].includes(o))
+    [...args.only].every((o) => ['icons', 'ui', 'fx', 'terrain', 'nav', 'masks'].includes(o))
   // A selective asset conversion must not rewrite unrelated skill metadata.
   const updatesSkills =
     !args.smc && (!args.only || [...args.only].some((id) => id.startsWith('class-')))
@@ -537,6 +538,22 @@ async function main() {
             `${props.json.instances.length} placed, ${size} KB`,
         )
       }
+    }
+  }
+
+  // `--only masks`: just the layer masks of each map (hunting grounds and props stay as they are)
+  if (!args.smc && args.only?.has('masks') && !args.only.has('terrain')) {
+    for (const [map, def] of Object.entries(MAPS)) {
+      if (args.map && args.map !== map) continue
+      if (!files.resolve(def.wtr)) {
+        console.log(`masks ${map}: ${def.wtr} is not in the client folder(s)`)
+        continue
+      }
+      const sheets = await maskSheets(parseTerrain(files.read(def.wtr)))
+      const dir = path.join(ROOT, 'public', 'maps', map)
+      for (const [name, content] of Object.entries(sheets))
+        fs.writeFileSync(path.join(dir, name), content)
+      console.log(`masks ${map}: ${Object.keys(sheets).join(', ')}`)
     }
   }
 

@@ -8,7 +8,7 @@ import { parseMesh } from './mesh.mjs'
 import { buildModel, inverseBindMatrix, outwardIndices } from './model.mjs'
 import { parseAnimSet, parseSkeleton } from './ska.mjs'
 import { parseSmc } from './smc.mjs'
-import { heightAt, parseTerrain } from './terrain.mjs'
+import { heightAt, parseTerrain, scaleMask } from './terrain.mjs'
 import { decodeDxt, parseTexture } from './texture.mjs'
 import {
   animSetFile,
@@ -726,5 +726,17 @@ describe('terrain', () => {
     expect(t.layers[1].mask.data[1000]).toBe(128)
     // bilinear between vertices: (3, 3) m is the middle of the first cell
     expect(heightAt(t, 3, 3)).toBeCloseTo(((0 + 2 + 6 + 8) / 4) * 0.5)
+  })
+
+  it('scales a mask to the sheet one byte per pixel, rows kept in place', async () => {
+    // left half 0, right half 255: every scaled row must read the same
+    const data = Buffer.alloc(256 * 256)
+    for (let y = 0; y < 256; y++) data.fill(255, y * 256 + 128, y * 256 + 256)
+    const scaled = await scaleMask({ size: 256, data })
+    expect(scaled.length).toBe(512 * 512)
+    for (const y of [0, 1, 255, 511]) {
+      expect(scaled[y * 512 + 10]).toBe(0)
+      expect(scaled[y * 512 + 500]).toBe(255)
+    }
   })
 })

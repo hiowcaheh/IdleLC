@@ -7,7 +7,7 @@ import {
   SRGBColorSpace,
   type Texture,
 } from 'three'
-import { loadMap, mapBase, type TerrainMeta } from './lcMap.ts'
+import { loadMap, mapFile, type TerrainMeta } from './lcMap.ts'
 import { terrainGeometries } from './lcTerrainGeometry.ts'
 
 // Dratan has 11 layers + 3 mask sheets; one shadow map still fits a 16-sampler mobile GPU.
@@ -20,8 +20,8 @@ const LAYERS = 11
 function useSplatMaterial(map: string, meta: TerrainMeta) {
   const urls = useMemo(
     () => [
-      ...meta.layers.slice(0, LAYERS).map((l) => mapBase(map) + l.texture),
-      ...meta.masks.map((m) => mapBase(map) + m),
+      ...meta.layers.slice(0, LAYERS).map((l) => mapFile(map, l.texture)),
+      ...meta.masks.map((m) => mapFile(map, m)),
     ],
     [map, meta],
   )

@@ -53,8 +53,8 @@ export const mapBase = (map: string) => `${import.meta.env.BASE_URL}maps/${map}/
  * Changed whenever a converter run rewrites a map's description, props or walkable grid: the
  * service worker answers from its cache first, so a new address makes the next start fetch them.
  */
-const MAP_REVISION = '2026-11-05-spawns'
-/** A map file that converter runs rewrite (terrain.json, props, nav.bin), with the revision. */
+const MAP_REVISION = '2026-11-05-masks'
+/** A map file that converter runs rewrite (terrain.json, masks, props, nav.bin), with the revision. */
 export const mapFile = (map: string, name: string) => `${mapBase(map)}${name}?v=${MAP_REVISION}`
 const maps = new Map<string, Promise<LcMap>>()
 /** Maps already fetched, for what needs them at once (planning a run). */
