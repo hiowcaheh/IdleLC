@@ -51,6 +51,7 @@ export type StatKey =
   | 'hpRegen'
   | 'mpRegen'
   | 'cooldownReduction'
+  | 'cooldownFree'
   | 'mpCostReduction'
   | 'hpSteal'
   | 'mpSteal'
@@ -640,6 +641,9 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
       case 'stoneResistance':
       case 'silenceResistance':
         s[stat] = Math.min(80, (s[stat] ?? 0) + value)
+        break
+      case 'cooldownFree':
+        s.cooldownFree = value > 0
         break
       case 'blockChance':
       case 'cooldownReduction':

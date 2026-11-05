@@ -89,6 +89,8 @@ export interface CombatStats {
   blockChance?: number
   /** % shorter skill cooldowns and % less mana for skills (rare options). */
   cooldownReduction?: number
+  /** Skills are ready again at once (the 100 Cooldown Reduction Potion, own rule). */
+  cooldownFree?: boolean
   mpCostReduction?: number
   /** % of the damage dealt that comes back as HP / MP (rare options). */
   hpSteal?: number
@@ -213,6 +215,8 @@ export interface PotionDef {
   realTime?: boolean
   /** Boosts: SF_NOTDUPLICATE, no second one while it works. */
   exclusive?: boolean
+  /** Boosts: skills have no cooldown while it works (own rule, owner's request 2026-11-05). */
+  noCooldown?: boolean
 }
 
 /** An item option 1:1 from t_option. */

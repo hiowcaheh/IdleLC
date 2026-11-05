@@ -1,6 +1,5 @@
 import type { PotionDef } from '../../game/data/types.ts'
-import { HP_POTION_BELOW, MP_POTION_BELOW } from '../../game/logic/combat.ts'
-import { interpretEffect, type StatEffect } from '../../game/logic/skills.ts'
+import { HP_POTION_BELOW, MP_POTION_BELOW, boostEffect } from '../../game/logic/combat.ts'
 import { statLine, statParts } from '../skills/format.ts'
 
 const time = (seconds: number) =>
@@ -12,12 +11,7 @@ const time = (seconds: number) =>
 
 /** A boost potion's stat changes ("Attack speed +15%, Run speed +1.5 m/s"). */
 function boostStats(potion: PotionDef): string {
-  return (potion.effects ?? [])
-    .flatMap((e) => {
-      const effect = interpretEffect(e)
-      return effect?.kind === 'stat' ? [statLine(effect as StatEffect)] : []
-    })
-    .join(', ')
+  return boostEffect(0, '', potion, potion.duration).stats.map(statLine).join(', ')
 }
 const resource = (potion: PotionDef) =>
   potion.kind === 'hp' || potion.kind === 'hpRegen' ? 'HP' : 'MP'
@@ -36,10 +30,7 @@ export function potionRows(potion: PotionDef): [string, string][] {
   const what = resource(potion)
   const rows: [string, string][] =
     potion.kind === 'boost'
-      ? (potion.effects ?? []).flatMap((e) => {
-          const effect = interpretEffect(e)
-          return effect?.kind === 'stat' ? [statParts(effect as StatEffect)] : []
-        })
+      ? boostEffect(0, '', potion, potion.duration).stats.map(statParts)
       : potion.kind === 'hp' || potion.kind === 'mp'
         ? [
             [`${what} per second`, `+${potion.power}`],

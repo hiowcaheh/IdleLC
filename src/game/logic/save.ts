@@ -279,7 +279,7 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
       raw.allocatedStats,
       Math.min(MAX_LEVEL, Math.max(1, int(raw.level, 1))),
     ),
-    gold: int(raw.gold, 0),
+    gold: int(raw.gold, 0) + withdrawnRefund(raw.inventory),
     createdAt,
     lastPlayedAt: num(raw.lastPlayedAt, createdAt),
     location,
@@ -468,13 +468,30 @@ function sanitizeExpedition(raw: unknown): Expedition | null {
 }
 
 /** Valid stacks only, merged per item. */
+/**
+ * Items IdleLC sold for a while and then took out of the game, with the gold each one paid back:
+ * the own 100% Cast Potion (2026-11-05, the owner chose the 100 Cooldown Reduction Potion instead).
+ */
+const WITHDRAWN_ITEMS: Readonly<Record<number, number>> = { 90001: 50_000 }
+
+/** Gold for the withdrawn items in a saved bag. */
+function withdrawnRefund(raw: unknown): number {
+  let gold = 0
+  for (const entry of Array.isArray(raw) ? raw : []) {
+    if (!isRecord(entry)) continue
+    const price = WITHDRAWN_ITEMS[int(entry.itemId, 0)]
+    if (price) gold += price * Math.max(0, int(entry.count, 0))
+  }
+  return gold
+}
+
 function sanitizeInventory(raw: unknown): ItemStack[] {
   const stacks: ItemStack[] = []
   for (const entry of Array.isArray(raw) ? raw : []) {
     if (!isRecord(entry)) continue
     const itemId = int(entry.itemId, 0)
     const count = int(entry.count, 0)
-    if (itemId > 0 && count > 0) stacks.push({ itemId, count })
+    if (itemId > 0 && count > 0 && !WITHDRAWN_ITEMS[itemId]) stacks.push({ itemId, count })
   }
   return addToInventory([], stacks)
 }

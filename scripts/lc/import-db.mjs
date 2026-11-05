@@ -59,37 +59,11 @@ const OWN_PRICES = new Map([
   [6916, 50_000],
 ])
 /**
- * Items the database does not have, added on the owner's request (own, 2026-11-05): a potion that
- * makes skills ready at once — skill cast speed +100% (MST_STAT_SKILLSPD rate 100: doFuncSkill.cpp
- * readyTime × (100 − skillSpeed) / 100), lasting and kept like the cash cooldown potions. Its icon
- * is t_item 1315's.
+ * Boost potions that work by the owner's rule instead of the server's formula (own, 2026-11-05):
+ * the 100 Cooldown Reduction Potion takes skill cooldowns to nothing. Its STAT37 power 100 would
+ * only make them ×150/250 × 100/200 = 0.3 as long (Skill.cpp).
  */
-const OWN_ITEMS = [
-  {
-    id: 90001,
-    name: '100% Cast Potion',
-    type: 6,
-    subtype: 5,
-    slot: -1,
-    level: 0,
-    jobFlag: 511,
-    flag: 0,
-    price: 50_000,
-    stats: [0, 0, 0, 0, 0],
-    icon: { atlas: 3, row: 10, col: 1 },
-    potion: {
-      kind: 'boost',
-      power: 0,
-      duration: 3600,
-      cooldown: 10,
-      skill: 90001,
-      effects: [{ type: 0, subtype: 23, damageType: 2, power: 100 }],
-      keepOnDeath: true,
-      realTime: true,
-      exclusive: true,
-    },
-  },
-]
+const NO_COOLDOWN_POTIONS = new Set([6916])
 /** t_skill.a_flag bits a boost potion keeps (Skill.h): kept at death, real time, not twice. */
 const SF_ABSTIME = 1 << 3
 const SF_NOTDUPLICATE = 1 << 4
@@ -365,8 +339,6 @@ function buildData(tables) {
       ...(rareOf(r).length > 0 ? { rare: rareOf(r) } : {}),
       ...(titleOfItem.has(int(r.a_index)) ? { title: titleOfItem.get(int(r.a_index)) } : {}),
     }))
-  // own items on the owner's request (not in the database)
-  for (const own of OWN_ITEMS) if (!items.some((i) => i.id === own.id)) items.push(own)
   const rareSets = buildRareSets(
     tables.t_rareoption,
     new Set(items.flatMap((i) => (i.rare ?? []).map(([set]) => set))),
@@ -622,6 +594,7 @@ function buildPotions(tables, itemRows, usable) {
         ...(flag & SF_NOCANCEL ? { keepOnDeath: true } : {}),
         ...(flag & SF_ABSTIME ? { realTime: true } : {}),
         ...(flag & SF_NOTDUPLICATE ? { exclusive: true } : {}),
+        ...(NO_COOLDOWN_POTIONS.has(int(r.a_index)) ? { noCooldown: true } : {}),
       })
       continue
     }

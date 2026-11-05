@@ -134,10 +134,10 @@ const EVERYWHERE = [HEAVEN_STONE_ID]
 /**
  * Boost potions every IdleLC shop offers (owner's requests, 2026-11-05): 2138 Platinum Adrenaline
  * (only Juno's merchant in t_shopitem), 2845 Super Haste Potion and 6916 100 Cooldown Reduction
- * Potion (cash items in the database, own prices) and the own 100% Cast Potion. Potion of Haste
- * comes with the towns' goods (t_shopitem).
+ * Potion (cash items in the database, own prices). Potion of Haste comes with the towns' goods
+ * (t_shopitem).
  */
-const BOOST_GOODS = [2138, 2845, 6916, 90001]
+const BOOST_GOODS = [2138, 2845, 6916]
 
 /** Only sets and seals with positive source weights can be obtained after appraisal. */
 export function shopRareInfo(itemId: number) {

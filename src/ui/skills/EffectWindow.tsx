@@ -1,7 +1,10 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { getItem } from '../../game/data/items.ts'
 import { getSkill } from '../../game/data/skills.ts'
-import { isHarmful, type Side } from '../../game/logic/combat.ts'
+import { effectiveStats, isHarmful, type Side } from '../../game/logic/combat.ts'
+import { combatSession } from '../../game/session/combatSession.ts'
+import { STAT_TOAST_MS, toast } from '../../state/toasts.ts'
+import { statChanges, withStatChanges } from '../statChanges.tsx'
 import { useGameStore } from '../../state/gameStore.ts'
 import { skillRank } from '../../game/logic/skills.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
@@ -17,6 +20,7 @@ import { useCombatTicker } from './useCombatTicker.ts'
 export function EffectWindow({ side, id, onClose }: { side: Side; id: string; onClose(): void }) {
   const effect = useCombatTicker(250)[side].effects.find((e) => effectKey(e) === id)
   const removeEffect = useGameStore((s) => s.removeEffect)
+  const [confirming, setConfirming] = useState(false)
   const ended = effect === undefined
   useEffect(() => {
     if (ended) onClose()
@@ -60,16 +64,48 @@ export function EffectWindow({ side, id, onClose }: { side: Side; id: string; on
       </div>
       {side === 'player' && !isHarmful(effect) && (
         <div className="effect-window__actions">
-          <button
-            type="button"
-            className="button button--wide"
-            onClick={() => {
-              if (removeEffect({ skillId: effect.skillId, itemId: effect.itemId })) onClose()
-            }}
-          >
+          <button type="button" className="button button--wide" onClick={() => setConfirming(true)}>
             Remove effect
           </button>
         </div>
+      )}
+      {confirming && (
+        <Sheet
+          centered
+          title="Remove effect"
+          titleId="remove-effect-title"
+          onClose={() => setConfirming(false)}
+        >
+          <p className="confirm__text">
+            Remove {effect.name}? {effect.itemId !== undefined ? 'The potion is used up. ' : ''}
+            Its bonuses end now.
+          </p>
+          <div className="item-row__actions">
+            <button
+              type="button"
+              className="button button--gold"
+              onClick={() => {
+                const before = effectiveStats(combatSession.state.player)
+                if (!removeEffect({ skillId: effect.skillId, itemId: effect.itemId })) return
+                const after = effectiveStats(combatSession.state.player)
+                const changes = statChanges(before, after)
+                // what the hero lost, in red
+                toast(
+                  withStatChanges(`${effect.name} removed.`, changes),
+                  'info',
+                  changes.length ? STAT_TOAST_MS : undefined,
+                )
+                setConfirming(false)
+                onClose()
+              }}
+            >
+              Remove
+            </button>
+            <button type="button" className="button" onClick={() => setConfirming(false)}>
+              Cancel
+            </button>
+          </div>
+        </Sheet>
       )}
     </Sheet>
   )

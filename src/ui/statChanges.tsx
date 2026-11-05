@@ -55,7 +55,11 @@ const METRICS: Metric[] = [
     lowerIsBetter: true,
   },
   { label: 'Cast speed', value: (s) => s.castSpeed, unit: '%' },
-  { label: 'Cooldown bonus', value: (s) => s.cooldownReduction, unit: '%' },
+  {
+    label: 'Cooldown bonus',
+    value: (s) => (s.cooldownFree ? 100 : s.cooldownReduction),
+    unit: '%',
+  },
   { label: 'Skill MP saved', value: (s) => s.mpCostReduction, unit: '%' },
   { label: 'Block chance', value: (s) => s.blockChance, unit: '%' },
   { label: 'Stun resistance', value: (s) => s.stunResistance, unit: '%' },

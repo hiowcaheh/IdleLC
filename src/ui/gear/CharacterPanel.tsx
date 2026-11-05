@@ -168,7 +168,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
       'Cooldown adjustment',
       `${(stats.reuseTime ?? 0) > 0 ? '+' : ''}${(stats.reuseTime ?? 0).toFixed(1)} s`,
     ],
-    ['Cooldown bonus', signed(stats.cooldownReduction ?? 0)],
+    ['Cooldown bonus', stats.cooldownFree ? '100%' : signed(stats.cooldownReduction ?? 0)],
     ['Skill MP cost', signed(-capped(stats.mpCostReduction, MAX_MP_COST_REDUCTION))],
   ]
   const recoveryRows: StatRow[] = [
@@ -425,41 +425,64 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
           role="tabpanel"
           id="character-panel-equipment"
           aria-labelledby="character-tab-equipment"
-          className="equip-stage"
+          className="equip-tab"
         >
-          <div
-            className="equip-board"
-            style={{
-              backgroundImage: `url(${import.meta.env.BASE_URL}ui/lc/equip-${character.classId}.webp)`,
-            }}
-          >
+          <h3 className="character-stats__heading">Equipment</h3>
+          <div className="equip-frame">
+            <div
+              className="equip-board"
+              style={{
+                backgroundImage: `url(${import.meta.env.BASE_URL}ui/lc/equip-${character.classId}.webp)`,
+              }}
+            >
+              {slots.map((slot) => {
+                const piece = character.equipment[slot]
+                const [x, y] = FRAMES[slot]
+                const name = piece ? pieceName(piece.itemId, piece.plus, piece.rare) : 'empty'
+                return (
+                  <div
+                    key={slot}
+                    className="equip-board__slot"
+                    style={{
+                      left: `${(x / BOARD.width) * 100}%`,
+                      top: `${(y / BOARD.height) * 100}%`,
+                      width: `${(BOARD.frame / BOARD.width) * 100}%`,
+                    }}
+                  >
+                    <ItemSlot
+                      item={piece ? getItem(piece.itemId) : undefined}
+                      plus={piece?.plus}
+                      tone={piece ? nameTone(piece) : ''}
+                      selected={selected === slot}
+
+                      label={`${SLOT_LABELS[slot]}: ${name}`}
+                      onClick={() => setSelected(selected === slot ? null : slot)}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+          <h3 className="character-stats__heading">Worn</h3>
+          <ul className="equip-list" aria-label="Worn gear">
             {slots.map((slot) => {
               const piece = character.equipment[slot]
-              const [x, y] = FRAMES[slot]
-              const name = piece ? pieceName(piece.itemId, piece.plus, piece.rare) : 'empty'
               return (
-                <div
-                  key={slot}
-                  className="equip-board__slot"
-                  style={{
-                    left: `${(x / BOARD.width) * 100}%`,
-                    top: `${(y / BOARD.height) * 100}%`,
-                    width: `${(BOARD.frame / BOARD.width) * 100}%`,
-                  }}
-                >
-                  <ItemSlot
-                    item={piece ? getItem(piece.itemId) : undefined}
-                    plus={piece?.plus}
-                    tone={piece ? nameTone(piece) : ''}
-                    selected={selected === slot}
-
-                    label={`${SLOT_LABELS[slot]}: ${name}`}
+                <li key={slot}>
+                  <button
+                    type="button"
+                    className={`equip-list__row${selected === slot ? ' is-open' : ''}`}
                     onClick={() => setSelected(selected === slot ? null : slot)}
-                  />
-                </div>
+                  >
+                    <span className="equip-list__slot">{SLOT_LABELS[slot]}</span>
+                    <span className={`equip-list__name${piece ? nameTone(piece) : ' is-empty'}`}>
+                      {piece ? pieceName(piece.itemId, piece.plus, piece.rare) : 'Nothing worn'}
+                    </span>
+                  </button>
+                </li>
               )
             })}
-          </div>
+          </ul>
           {selected && !character.equipment[selected] && (
             <p className="sheet__meta">
               {SLOT_LABELS[selected]}: nothing worn. The Inventory has your gear.

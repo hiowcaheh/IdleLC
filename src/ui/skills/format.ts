@@ -78,6 +78,7 @@ const STAT_LABELS: Record<StatKey, string> = {
   hpRegen: 'HP recovery',
   mpRegen: 'MP recovery',
   cooldownReduction: 'Skill cooldown',
+  cooldownFree: 'Skill cooldown',
   mpCostReduction: 'Skill MP cost',
   hpSteal: 'HP steal',
   mpSteal: 'MP steal',
@@ -102,6 +103,8 @@ function statValue(stat: StatKey, value: number, percent: boolean): string {
       return signed(value / 10, ' s')
     case 'runSpeed':
       return signed(value / 10, ' m/s')
+    case 'cooldownFree':
+      return '−100%'
     case 'cooldownReduction': {
       // the reuse formula of Skill.cpp: × 150 / (150 + p) × 100 / (100 + p)
       const kept = (150 / (150 + value)) * (100 / (100 + value))

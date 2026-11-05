@@ -303,6 +303,8 @@ export function skillPreparationTime(rank: SkillRank, stats: CombatStats): numbe
 }
 
 export function skillCooldownTime(rank: SkillRank, stats: CombatStats): number {
+  // the 100 Cooldown Reduction Potion: no cooldown at all (own rule, owner's request 2026-11-05)
+  if (stats.cooldownFree && !rank.fixedCooldown) return 0
   let pulses = rank.cooldown * 10
   if (!rank.fixedCooldown) {
     pulses += (stats.reuseTime ?? 0) * 10
@@ -1142,10 +1144,18 @@ export function boostEffect(
     potion: 'boost',
     name,
     remaining,
-    stats: (potion.effects ?? []).flatMap((e) => {
-      const effect = interpretEffect(e)
-      return effect?.kind === 'stat' ? [effect] : []
-    }),
+    stats: [
+      ...(potion.effects ?? []).flatMap((e) => {
+        const effect = interpretEffect(e)
+        // no cooldown at all supersedes the potion's own cooldown reduction
+        if (potion.noCooldown && effect?.kind === 'stat' && effect.stat === 'cooldownReduction')
+          return []
+        return effect?.kind === 'stat' ? [effect] : []
+      }),
+      ...(potion.noCooldown
+        ? [{ kind: 'stat' as const, stat: 'cooldownFree' as const, value: 1, percent: false }]
+        : []),
+    ],
     stun: false,
     poison: 0,
     nextTick: POISON_TICK,

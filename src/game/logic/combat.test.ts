@@ -65,6 +65,14 @@ describe('combatTick', () => {
     expect(skillPreparationTime(skill, boosted)).toBeCloseTo(1.4)
     expect(skillCooldownTime(skill, boosted)).toBe(3)
     expect(skillPreparationTime(skill, stats({ castTime: -5 }))).toBe(0)
+    // the 100 Cooldown Reduction Potion (own rule): no cooldown, except fixed ones
+    expect(skillCooldownTime(skill, stats({ cooldownFree: true, cooldownReduction: 100 }))).toBe(0)
+    expect(
+      skillCooldownTime(
+        { ...skill, fixedCooldown: true } as SkillRank,
+        stats({ cooldownFree: true }),
+      ),
+    ).toBe(8)
   })
   it('does not mutate the input state', () => {
     const s = createCombat(strongPlayer, 'm', weakMonster)

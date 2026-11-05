@@ -2586,44 +2586,66 @@ a.button {
 }
 
 /*
- * The Character window's Equipment tab: the board on a stage of its own blue that fills the tab,
- * framed like the hero card above, the board's edges fading into it (no hard rectangle on grey).
+ * The Character window's Equipment tab, built like its Stats tab: the client's section bars, the
+ * class board in a frame like the hero card's, and the worn pieces listed under it.
  */
-.sheet--character .sheet__body {
-  display: flex;
-  flex-direction: column;
+.equip-tab > .character-stats__heading + * {
+  margin-top: 8px;
 }
-.equip-stage {
-  flex: 1 0 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 14px 0 12px;
+.equip-tab > * + .character-stats__heading {
+  margin-top: 12px;
+}
+.equip-frame {
+  padding: 6px;
   border-radius: 3px;
-  background:
-    radial-gradient(ellipse 70% 55% at 50% 45%, rgba(40, 96, 150, 0.45), transparent 75%),
-    linear-gradient(180deg, #0b1a2b, #08121e 60%, #0a1522);
-  box-shadow:
-    inset 0 0 0 1px rgba(150, 120, 80, 0.35),
-    inset 0 0 28px rgba(0, 0, 0, 0.7);
-}
-.equip-stage > .sheet__meta {
-  margin: 8px 12px 0;
-  text-align: center;
+  background: rgba(8, 10, 13, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(150, 120, 80, 0.35);
 }
 .sheet--character .equip-board {
-  --board-width: min(100%, 440px);
-  width: var(--board-width);
-  margin: 0 auto;
-  /* the texture's thin brown frame fades into the stage */
-  -webkit-mask-image:
-    linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent),
-    linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent),
-    linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
-  mask-composite: intersect;
+  width: 100%;
+  margin: 0;
+}
+.equip-list {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.equip-list__row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 2px;
+  background: #1b252dcc;
+  box-shadow: inset 0 0 0 1px #73715c5c;
+  color: var(--parchment);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.equip-list__row.is-open {
+  box-shadow: inset 0 0 0 1px var(--gilt);
+}
+.equip-list__slot {
+  flex: none;
+  width: 84px;
+  color: var(--parchment-dim);
+}
+.equip-list__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+.equip-list__name.is-empty {
+  font-weight: 400;
+  color: var(--parchment-dim);
 }
 
 .equip-board__slot {
@@ -2782,27 +2804,9 @@ a.button {
   border-color: var(--bronze-dim);
 }
 
+/* the slot the hero drinks from by itself: a plain gold frame (no pulsing, owner's request) */
 .potion-slot.is-auto .item-icon {
   border-color: #ffe788;
-  box-shadow:
-    0 0 0 1px #ffe788,
-    0 0 6px 2px rgba(255, 210, 90, 0.6);
-  animation: potion-auto-glow 1.6s ease-in-out infinite;
-}
-
-/* the slot the hero drinks from by itself breathes a golden glow */
-@keyframes potion-auto-glow {
-  50% {
-    box-shadow:
-      0 0 0 1px #fff1b8,
-      0 0 11px 4px rgba(255, 214, 110, 0.85);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .potion-slot.is-auto .item-icon {
-    animation: none;
-  }
 }
 
 .potion-slot:not(.is-auto) .item-icon,
@@ -4199,9 +4203,10 @@ a.button {
   color: #ff6b5e;
 }
 
-/* an item's window: its actions a little below the card */
+/* an item's window: its actions a little below the card, as wide as the card's boxes */
 .item-details .item-row__actions {
   margin-top: 14px;
+  padding: 0;
 }
 
 /* identify with a magnifying glass: the glass with how many you have, and how sure it is */

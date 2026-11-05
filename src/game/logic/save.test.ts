@@ -19,6 +19,18 @@ const withCharacter = (): SaveData => {
 }
 
 describe('loadSave', () => {
+  it('pays back the withdrawn 100% Cast Potion and takes it out of the bag', () => {
+    const save = withCharacter()
+    save.characters[0]!.gold = 1000
+    save.characters[0]!.inventory = [
+      { itemId: 90001, count: 2 },
+      { itemId: 44, count: 3 },
+    ]
+    const hero = loadSave(serializeSave(save), NOW).save.characters[0]!
+    expect(hero.gold).toBe(101_000)
+    expect(hero.inventory).toEqual([{ itemId: 44, count: 3 }])
+  })
+
   it('creates an empty account when nothing is stored', () => {
     const r = loadSave(null, NOW)
     expect(r.status).toBe('new')
