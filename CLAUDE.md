@@ -1,5 +1,14 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-05, później (Claude Code): [spawny, trasy, dystans, wzmocnienia, GUI](docs/spawns-routes-ranged-boosts.md).
+Zrzut 2016 **zaimportowany w całości** (decyzja właściciela; drop ~4–5× rzadszy, trudniejsze NPC).
+Dratan/Merac/Egeha: walka w spawnach `t_npc_regen` (`terrain.json` `spawns`), Juno bez zmian.
+Bieg między spotami = metry trasy A* (`nav.bin`, `navigation.ts`) przy Run speed — nie skracać.
+Zasięgi ataku z serwera: zasięg > 5 m strzela od razu, potwór dobiega (`closing`). Mikstury
+Haste / Adrenaline / 100 Cooldown jako `boost` z flagami źródła, stan w `CharacterData.boosts`.
+Mapy po konwersji: podbij `MAP_REVISION` (`lcMap.ts`). Loader stref: cały obrazek w proporcjach
+(zastępuje `100% 100%`). SaveVersion **14**.
+
 Aktualizacja 2026-11-05 (Claude Code): [zrzut bazy 2016](docs/db-2016-dump.md) — pełny
 `newproject_data.sql` jest u właściciela (ten sam plik co pierwszy import; starszy importer gubił
 kolumny). Zawiera `t_npc_regen` (pasuje 1:1 do terenu Dratan/Merac/Egeha), `hitrate` skilli

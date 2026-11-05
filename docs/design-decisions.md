@@ -45,6 +45,16 @@ pełnego importu („Wprowadź wszystkie 4 po kolei”):
   (trasa omija drzewa, skały, budynki, urwiska i wodę; siatka z pliku atrybutów klienta `.sat`
   dla Dratan/Merac, z nachylenia i obiektów dla Juno/Egeha).
 
+Wdrożone tego samego dnia na polecenie właściciela (szczegóły:
+[spawns-routes-ranged-boosts.md](spawns-routes-ranged-boosts.md)):
+
+- **Walka z dystansu**: zasięgi i dobieganie potwora według kodu serwera (bez własnych liczb).
+- **Loader stref**: cały obrazek we własnych proporcjach zamiast `100% 100%` (właściciel: „oddal widok,
+  jest przybliżony i rozmazany”).
+- **Mikstury-wzmocnienia** (D20, do potwierdzenia): Haste i Adrenalina w sklepach z `t_shopitem`
+  (ceny z bazy); „100% cast” zinterpretowano jako **100 Cooldown Reduction Potion** (w bazie brak
+  mikstury STAT23), sprzedawaną wszędzie za **własne 50 000 gold** (w bazie cash item, cena 0).
+
 ## Rozstrzygnięcia właściciela — 2026-11-04
 
 - **D09/D10:** polecenie obejmuje źródłowe różnice poziomu i losowanie nagród solo.

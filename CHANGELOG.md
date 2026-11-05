@@ -1,5 +1,27 @@
 # Historia zmian
 
+## 2026-11-05 (Claude Code): spawny i trasy, walka z dystansu, wzmocnienia, partia GUI
+
+Punkt wyjścia `0be9812`. Commity `63377de`, `9dd82c1`, `3a29b80`, `bf73c70`, `4ab0d3a`, `67671a3`.
+Pełny opis: [docs/spawns-routes-ranged-boosts.md](docs/spawns-routes-ranged-boosts.md).
+
+1. **Zrzut bazy 2016 — wszystkie 4 etapy** (decyzja właściciela): `lc-data.json` z pełnego importu
+   (spawny, `hitrate`, drop według 20 slotów ~4–5× rzadszy, CON/magic avoid/ataki i skille NPC).
+2. **Dratan, Merac, Egeha**: walka w punkcie spawnu potwora z `t_npc_regen`; Juno bez zmian.
+3. **Bieg między spotami** trwa tyle, ile trasa po mapie przy Run speed (A* po `nav.bin` z pliku
+   atrybutów klienta albo nachylenia/obiektów/rzeki); trasa omija wodę, drzewa, skały i urwiska.
+4. **Walka z dystansu**: Healer (20 m), Mage (15 m), Rogue z kuszą (15 m) strzelają od razu, potwór
+   dobiega z prędkością z bazy; zasięgi z kodu serwera (+2 m dla broni dystansowych/magicznych od +8).
+5. **GUI**: jeden X w Skills, pole AUTO i podświetlenie mikstury w slocie, Settings na elementach
+   okna opcji klienta, loader stref w proporcjach obrazka, mała wspólna ramka złota, Gold na całą
+   szerokość w Expedition, „Loading IdleLC”.
+6. **Mikstury**: Potion of Haste, Platinum Adrenaline i 100 Cooldown Reduction Potion z efektami,
+   czasem i flagami z bazy; stan zapisywany (`boosts`). W bazie nie ma mikstury szybkości rzucania.
+7. **Komunikaty** po zakładaniu/zdejmowaniu, ulepszaniu, tytułach i miksturach pokazują zmiany
+   statystyk na zielono/czerwono.
+
+Weryfikacja: `npm run check` (**453 testy / 52 pliki**), Chromium 390×844. SaveVersion **14**.
+
 ## 2026-11-05 (Claude Code): sześć poprawek GUI i sprawdzenie zrzutu bazy 2016
 
 Punkt wyjścia `fd6e1ee`. Commity `45eb188`, `da0ebd7` oraz dokumentacja.

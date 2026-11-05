@@ -1,5 +1,14 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+Aktualizacja 2026-11-05, później (Claude Code): [spawny, trasy, dystans, wzmocnienia](spawns-routes-ranged-boosts.md).
+**Pełny import zrzutu 2016 jest wykonany** (właściciel zatwierdził 4 etapy; poniższa notatka o
+„celowo nieprzeimportowanym” `lc-data.json` jest historyczna). Dratan/Merac/Egeha walczą w spawnach,
+bieg między spotami to metry trasy A* po `nav.bin` przy Run speed (`travel` w `CombatState`),
+bohaterowie z zasięgiem > 5 m strzelają, zanim potwór dobiegnie (`closing`). Nowe mikstury-wzmocnienia
+(`PotionDef.kind = 'boost'`, `CharacterData.boosts`), komunikaty zmian statystyk (`ui/statChanges.tsx`),
+elementy `NewOption` w Settings. Przy zmianie map przez konwerter podbij `MAP_REVISION` w `lcMap.ts`.
+SaveVersion **14**.
+
 Aktualizacja 2026-11-05 (Claude Code): [zrzut bazy 2016](db-2016-dump.md) i sześć poprawek GUI
 (changelog). **Pełny SQL jest dostępny** u właściciela (Drive `133EYk_OXU3qxzKu8OpDTw1wlf_NH5ffE`,
 SHA-256 `newproject_data.sql` `0cae2afd…d85d`); to ten sam plik co pierwszy import, a brakujące pola
