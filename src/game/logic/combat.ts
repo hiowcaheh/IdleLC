@@ -135,6 +135,11 @@ export interface CombatState {
   phaseTime: number
   /** Going to another spot: metres of the run (the route over the map) and metres run so far. */
   travel?: { distance: number; done: number }
+  /**
+   * Fighting a hero who shoots from range: metres the monster still runs before it can strike
+   * (absent once it is there, and for heroes who walk up to the monster).
+   */
+  closing?: number
   player: Fighter
   monster: Fighter
   monsterId: string
@@ -146,7 +151,8 @@ export type EffectKind = 'buff' | 'debuff' | 'stun' | 'poison'
 
 export type CombatEvent =
   | { type: 'spawn'; monsterId: string }
-  | { type: 'engage' }
+  /** The fight starts; `gap`: metres the monster runs in while a ranged hero already shoots. */
+  | { type: 'engage'; gap?: number }
   | { type: 'attack'; source: Side }
   | {
       type: 'cast'
@@ -258,12 +264,37 @@ export function approachTime(state: Pick<CombatState, 'player'>): number {
   return movementTime(TIMINGS.approach, effectiveStats(state.player))
 }
 
-/** Run speed in metres a second, with the class's base and its option and assist bonuses. */
+/**
+ * Run speed in metres a second: a hero's with the class's base and its option and assist bonuses,
+ * a monster's from the database.
+ */
 export function runSpeed(stats: CombatStats): number {
   return Math.max(
     0.1,
-    stats.client?.runSpeed ?? BASE_RUN_SPEED * (1 + (stats.moveSpeed ?? 0) / 100),
+    stats.client?.runSpeed ??
+      (stats.npcRunSpeed ?? BASE_RUN_SPEED) * (1 + (stats.moveSpeed ?? 0) / 100),
   )
+}
+
+/**
+ * Heroes whose attack reaches further than this (metres) fight from where they stand: Healer 20,
+ * Mage 15, a Rogue with a crossbow 15. Titan, Knight, a Rogue with daggers (2.3) and Sorcerer (3)
+ * walk up to the monster.
+ */
+export const RANGED_REACH = 5
+
+/**
+ * Metres a monster runs before it can strike a hero who fights from range: the hero opens fire at
+ * its attack range and the monster comes on until it is within its own (MobActivity.cpp MobMoveTo:
+ * the distance less the attack range). 0 for heroes who walk up to the monster.
+ */
+export function openingGap(
+  player: Pick<Fighter, 'stats'>,
+  monster: Pick<Fighter, 'stats'>,
+): number {
+  const reach = player.stats.attackRange ?? 0
+  if (reach <= RANGED_REACH) return 0
+  return Math.max(0, reach - (monster.stats.attackRange ?? 0))
 }
 
 /** Run speed of a hero without a client sheet (metres a second; the source's Titan and Knight). */
@@ -472,6 +503,36 @@ export function combatTick(state: CombatState, dt: number, rng: Rng): TickResult
 function enter(s: CombatState, phase: CombatPhase): void {
   s.phase = phase
   s.phaseTime = 0
+  delete s.closing
+}
+
+/**
+ * The fight begins: the hero swings at once, the monster after its initiative. `gap`: metres the
+ * monster still runs in (a hero fighting from range), during which only the hero strikes.
+ */
+function engage(s: CombatState, events: CombatEvent[], gap: number): void {
+  s.player.cooldown = 0
+  s.player.impactIn = null
+  s.player.casting = null
+  s.monster.cooldown = s.monster.stats.attackInterval * TIMINGS.monsterInitiative
+  s.monster.impactIn = null
+  enter(s, 'fighting')
+  s.player.combatMode = true
+  if (gap > 0) s.closing = gap
+  events.push(gap > 0 ? { type: 'engage', gap } : { type: 'engage' })
+}
+
+/**
+ * The monster runs in at its speed (not while stunned or held). True when it is within reach and
+ * may act this step.
+ */
+function closeIn(s: CombatState, dt: number): boolean {
+  if (s.closing === undefined) return true
+  const held = isStunned(s.monster) || s.monster.effects.some((e) => e.state === 'hold')
+  const left = held ? s.closing : s.closing - dt * runSpeed(effectiveStats(s.monster))
+  if (left > EPSILON) s.closing = left
+  else delete s.closing
+  return false
 }
 
 /**
@@ -579,23 +640,17 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
       regen(s.player, dt, false)
       if (reached(s.phaseTime, TIMINGS.spawning)) {
         s.monster = freshFighter(s.monster)
-        enter(s, 'approach')
         events.push({ type: 'spawn', monsterId: s.monsterId })
+        // a hero who fights from range opens fire while the monster comes on; others walk up
+        const gap = openingGap(s.player, s.monster)
+        if (gap > 0) engage(s, events, gap)
+        else enter(s, 'approach')
       }
       return
 
     case 'approach':
       regen(s.player, dt, true)
-      if (reached(s.phaseTime, approachTime(s))) {
-        s.player.cooldown = 0
-        s.player.impactIn = null
-        s.player.casting = null
-        s.monster.cooldown = s.monster.stats.attackInterval * TIMINGS.monsterInitiative
-        s.monster.impactIn = null
-        enter(s, 'fighting')
-        s.player.combatMode = true
-        events.push({ type: 'engage' })
-      }
+      if (reached(s.phaseTime, approachTime(s))) engage(s, events, 0)
       return
 
     case 'fighting':
@@ -604,6 +659,8 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
       if (poisonStep(s, 'player', dt, events)) return
       if (poisonStep(s, 'monster', dt, events)) return
       if (fighterStep(s, 'player', dt, rng, events)) return
+      // still running in towards a hero who shoots from range: it can't strike yet
+      if (!closeIn(s, dt)) return
       fighterStep(s, 'monster', dt, rng, events)
       return
 

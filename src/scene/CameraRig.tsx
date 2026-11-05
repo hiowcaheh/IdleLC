@@ -16,6 +16,12 @@ const MAX_BIG_ZOOM = 2.6
  */
 const VIEW_SHIFT_TALL = 0.13
 const VIEW_SHIFT_WIDE = 0.05
+/**
+ * Farthest the view centres away from the hero towards the monster (metres): a monster running in
+ * from a ranged hero's reach (up to 22 m) stays in sight ahead without the hero leaving the frame.
+ */
+const MAX_FOCUS_SHIFT = 3
+const towardMonster = new Vector3()
 
 /** Third-person camera that keeps both fighters in frame; pulls back on portrait screens. */
 export function CameraRig() {
@@ -58,7 +64,12 @@ export function CameraRig() {
       (aspect < 0.7 ? 1.65 : aspect < 1 ? 1.35 : aspect < 1.4 ? 1.1 : 1) * ZOOM_OUT * zoom.current
 
     desiredFocus.current.copy(view.player)
-    if (view.monsterVisible) desiredFocus.current.lerp(view.monster, 0.5)
+    if (view.monsterVisible) {
+      towardMonster.subVectors(view.monster, view.player).multiplyScalar(0.5)
+      if (towardMonster.lengthSq() > MAX_FOCUS_SHIFT * MAX_FOCUS_SHIFT)
+        towardMonster.setLength(MAX_FOCUS_SHIFT)
+      desiredFocus.current.add(towardMonster)
+    }
     desired.current.copy(CAMERA_OFFSET).multiplyScalar(distance).add(desiredFocus.current)
 
     const k = initialized.current ? 1 - Math.exp(-Math.min(delta, 0.1) * 3) : 1

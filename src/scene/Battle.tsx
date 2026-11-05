@@ -5,7 +5,7 @@ import { gearLooks } from '../game/assets/gear.ts'
 import { getModel, playerModelId } from '../game/assets/manifest.ts'
 import { getMonster } from '../game/data/monsters.ts'
 import { getItem } from '../game/data/items.ts'
-import { TIMINGS, effectiveStats, type Side } from '../game/logic/combat.ts'
+import { TIMINGS, effectiveStats, isStunned, runSpeed, type Side } from '../game/logic/combat.ts'
 import { wornTitle } from '../game/logic/titles.ts'
 import { combatSession } from '../game/session/combatSession.ts'
 import { VisibleClock } from '../game/session/visibleClock.ts'
@@ -22,7 +22,7 @@ import { SkillEffects } from './SkillEffects.tsx'
 import { armorUpgradePlus } from './upgradeEffects.ts'
 import { approachProgress } from './approachMotion.ts'
 import { ARENA_RADIUS } from './terrain.ts'
-import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
+import { SCREEN_AHEAD, SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
 /** How far the player runs to reach a newly spawned monster. */
 const RUN_DISTANCE = 3.8
@@ -102,6 +102,10 @@ export function Battle() {
   const motion = useRef({
     approachFrom: new Vector3(),
     engageAt: new Vector3(),
+    /** A monster running in at a hero who shoots from range: its way to the hero and stop distance. */
+    closeDir: new Vector3(),
+    closeStop: 0,
+    closing: false,
     appear: 1,
     sink: -1,
     hudTimer: 0,
@@ -146,6 +150,14 @@ export function Battle() {
       motion.current.approachFrom.set(0, 0, 0)
       motion.current.engageAt.copy(SCREEN_RIGHT).multiplyScalar(RUN_DISTANCE)
       if (combat.phase !== 'approach') view.player.copy(motion.current.engageAt)
+      if (combat.phase === 'fighting' && combat.closing !== undefined) {
+        // mid-way through a monster's run at a hero who shoots from range
+        const m = motion.current
+        view.player.set(0, 0, 0)
+        m.closeDir.copy(SCREEN_AHEAD).applyAxisAngle(UP, 0.5)
+        m.closeStop = engage
+        m.closing = true
+      }
     }
   }, [])
 
@@ -193,7 +205,21 @@ export function Battle() {
           break
         }
         case 'engage':
-          view.player.copy(m.engageAt)
+          if (e.gap) {
+            // a hero who shoots from range stays put; the monster appears at the hero's reach,
+            // ahead of the camera and to one side, and runs in while the hero already shoots
+            const engage = engageDistance(combatSession.state.monsterId, playerModelRef.current)
+            const side = Math.random() < 0.5 ? -1 : 1
+            m.closeDir.copy(SCREEN_AHEAD).applyAxisAngle(UP, side * (0.35 + Math.random() * 0.3))
+            m.closeStop = engage
+            m.closing = true
+            view.monster.copy(view.player).addScaledVector(m.closeDir, engage + e.gap)
+            view.monster.y = view.groundY(view.monster.x, view.monster.z)
+            monsterGroup.current?.rotation.set(0, yawTowards(view.monster, view.player), 0)
+            monster.current?.setBase('run')
+          } else {
+            view.player.copy(m.engageAt)
+          }
           player.current?.setBase('idle')
           break
         case 'attack':
@@ -299,6 +325,21 @@ export function Battle() {
     if (combat.phase === 'approach') {
       const t = approachProgress(combat, clock.current.interpolationSeconds, timeScale)
       view.player.lerpVectors(m.approachFrom, m.engageAt, t)
+    }
+
+    if (m.closing) {
+      // the monster running in at a hero who shoots from range, drawn between logic steps
+      const running = combat.phase === 'fighting' && combat.closing !== undefined
+      const held =
+        isStunned(combat.monster) || combat.monster.effects.some((e) => e.state === 'hold')
+      const ahead = held ? 0 : view.interpolationSeconds * runSpeed(effectiveStats(combat.monster))
+      const left = running ? Math.max(0, combat.closing! - ahead) : 0
+      view.monster.copy(view.player).addScaledVector(m.closeDir, m.closeStop + left)
+      view.monster.y = view.groundY(view.monster.x, view.monster.z)
+      if (!running) {
+        m.closing = false
+        if (combat.phase === 'fighting') monster.current?.setBase('idle')
+      }
     }
 
     for (const side of ['player', 'monster'] as const) {

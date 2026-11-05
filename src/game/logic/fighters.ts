@@ -1,4 +1,5 @@
 /** Combat stats of a character or monster, from the game data. */
+import { heroAttackRange } from './attackRange.ts'
 import { CLASSES } from '../data/classes.ts'
 import { getItem } from '../data/items.ts'
 import { lcData } from '../data/lcSource.ts'
@@ -97,9 +98,16 @@ export function playerFighter(hero: Hero, now = Date.now()): FighterInit {
     ...stats,
     ...clientStatChannels(stats, classId, level, equipment, options),
   })
+  const weaponPiece = equipment?.weapon
   return {
     level,
-    stats: applyStats(detailed, passiveEffects(ranks)),
+    stats: {
+      ...applyStats(detailed, passiveEffects(ranks)),
+      attackRange: heroAttackRange(
+        classId,
+        weaponPiece && weapon ? { subtype: weapon.subtype, plus: weaponPiece.plus ?? 0 } : null,
+      ),
+    },
     skills: ranks.filter((r) => r.kind !== 'passive' && (!skillBar || skillBar.includes(r.id))),
     potions: potionSupply(hero),
   }

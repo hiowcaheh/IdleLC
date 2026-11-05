@@ -271,7 +271,9 @@ function MapGround({ map, zoneId, monsterId }: { map: string; zoneId: string; mo
     if (!running) m.from = m.to
     m.shown = [x, z]
     setShownGround(map, m.shown)
-    group.current?.position.set(-x, -groundHeight(data, x, z), -z)
+    const base = groundHeight(data, x, z)
+    group.current?.position.set(-x, -base, -z)
+    view.groundY = (lx, lz) => groundHeight(data, x + lx, z + lz) - base
   })
   return (
     <group ref={group}>

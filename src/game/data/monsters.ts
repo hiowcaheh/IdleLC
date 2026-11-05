@@ -87,6 +87,8 @@ export function fromLc(m: LcMonster): MonsterDef {
       attackInterval: Math.max(0.6, m.attackSpeed / 10),
       critChance: 0.05,
       critMultiplier: 1.5,
+      ...(m.attackArea === undefined ? {} : { attackRange: m.attackArea }),
+      ...(m.runSpeed ? { npcRunSpeed: m.runSpeed } : {}),
     },
     exp: m.exp,
     gold: m.gold,

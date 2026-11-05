@@ -9,6 +9,7 @@ import {
   skillCooldownTime,
   travelTime,
   travelProgress,
+  openingGap,
   carryVitals,
   changeMonster,
   choosePotion,
@@ -78,6 +79,49 @@ describe('combatTick', () => {
     r = combatTick(r.state, TIMINGS.approach + 0.01, rng)
     expect(r.state.phase).toBe('fighting')
     expect(r.events[0]).toEqual({ type: 'engage' })
+  })
+
+  it('a hero who fights from range opens fire at once while the monster runs in', () => {
+    const rng = createRng(1)
+    // a Healer's reach (20 m) against a monster that hits from 1 m and runs 4 m/s
+    const healer = { level: 10, stats: stats({ attack: 1, attackRange: 20 }) }
+    const runner = {
+      level: 1,
+      stats: stats({ maxHp: 10_000, attack: 2, attackRange: 1, npcRunSpeed: 4 }),
+    }
+    const start = combatTick(createCombat(healer, 'm', runner), TIMINGS.spawning + 0.01, rng)
+    expect(start.state.phase).toBe('fighting')
+    expect(start.events).toContainEqual({ type: 'spawn', monsterId: 'm' })
+    expect(start.events).toContainEqual({ type: 'engage', gap: 19 })
+    expect(start.state.closing).toBeCloseTo(19, 0)
+    // 19 m at 4 m/s: the monster strikes only after about 4.75 s, the hero from the start
+    const early = run(start.state, 4.5, rng)
+    expect(early.events.some((e) => e.type === 'attack' && e.source === 'player')).toBe(true)
+    expect(early.events.some((e) => e.type === 'attack' && e.source === 'monster')).toBe(false)
+    expect(early.state.closing).toBeCloseTo(1, 0)
+    const later = run(early.state, 1.5, rng)
+    expect(later.state.closing).toBeUndefined()
+    expect(later.events.some((e) => e.type === 'attack' && e.source === 'monster')).toBe(true)
+  })
+
+  it('heroes who walk up to the monster still run to it first', () => {
+    const knight = { level: 10, stats: stats({ attack: 50, attackRange: 2.3 }) }
+    const r = combatTick(
+      createCombat(knight, 'm', weakMonster),
+      TIMINGS.spawning + 0.01,
+      createRng(1),
+    )
+    expect(r.state.phase).toBe('approach')
+    expect(
+      openingGap({ stats: stats({ attackRange: 15 }) }, { stats: stats({ attackRange: 1 }) }),
+    ).toBe(14)
+    expect(
+      openingGap({ stats: stats({ attackRange: 3 }) }, { stats: stats({ attackRange: 1 }) }),
+    ).toBe(0)
+    // a monster that reaches as far as the hero does not need to run in
+    expect(
+      openingGap({ stats: stats({ attackRange: 15 }) }, { stats: stats({ attackRange: 20 }) }),
+    ).toBe(0)
   })
 
   it('player swings first; damage lands after the impact delay', () => {

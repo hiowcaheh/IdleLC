@@ -86,6 +86,13 @@ export interface CombatStats {
   mpSteal?: number
   /** % faster running to the monster (rare options). */
   moveSpeed?: number
+  /**
+   * Metres it hits from with a normal attack: a hero's class and weapon (PC.cpp CalcStatus,
+   * Config.h ATTACK_RANGE_*), a monster's t_npc.a_attack_area.
+   */
+  attackRange?: number
+  /** Metres a second a monster runs (t_npc.a_run_speed); heroes run at client.runSpeed. */
+  npcRunSpeed?: number
 }
 
 export type ClassId = 'titan' | 'knight' | 'healer' | 'mage' | 'rogue' | 'sorcerer'
