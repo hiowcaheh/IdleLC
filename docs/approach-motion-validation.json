@@ -1,0 +1,157 @@
+{
+  "date": "2026-11-05",
+  "baseCommit": "d0d2a5d16e0a377f6c9124d7652ac3306d130300",
+  "saveVersion": 14,
+  "commands": {
+    "check": "passed",
+    "testsPassed": 435,
+    "testFiles": 49,
+    "build": "passed",
+    "productionProbeLeaks": []
+  },
+  "isolationTest": {
+    "environment": "Chromium; actual Battle/Character/CameraRig with real LC models and clips; world and GPU drawing disabled by an external test-only probe to isolate motion sampling. Prepared test saves, no player save modified.",
+    "phoneFPSBenchmark": false,
+    "before": [
+      {
+        "classId": "healer",
+        "framesRecorded": 576,
+        "medianFrameMs": 16.699999999720603,
+        "approachFramePairs": 167,
+        "positionChanged": 54,
+        "positionUnchanged": 113,
+        "rotationPairsFirst300ms": 60,
+        "rotationChanged": 18,
+        "approachRunClipSpeed": [1],
+        "travelRunClipSpeed": [1],
+        "stationaryPairsAtDestination": 6,
+        "stationaryPairsBeforeDestination": 107
+      }
+    ],
+    "afterMatched": [
+      {
+        "classId": "healer",
+        "framesRecorded": 393,
+        "medianFrameMs": 16.699999999720603,
+        "approachFramePairs": 123,
+        "positionChanged": 123,
+        "positionUnchanged": 0,
+        "rotationPairsFirst300ms": 44,
+        "rotationChanged": 44,
+        "approachRunClipSpeed": [1],
+        "travelRunClipSpeed": [1],
+        "stationaryPairsAtDestination": 0,
+        "stationaryPairsBeforeDestination": 0
+      }
+    ],
+    "afterSixClasses": [
+      {
+        "classId": "healer",
+        "framesRecorded": 338,
+        "medianFrameMs": 19.049999999813735,
+        "approachFramePairs": 114,
+        "positionChanged": 114,
+        "positionUnchanged": 0,
+        "rotationPairsFirst300ms": 46,
+        "rotationChanged": 46,
+        "approachRunClipSpeed": [1],
+        "travelRunClipSpeed": [1],
+        "stationaryPairsAtDestination": 0,
+        "stationaryPairsBeforeDestination": 0
+      },
+      {
+        "classId": "titan",
+        "framesRecorded": 508,
+        "medianFrameMs": 16.600000000093132,
+        "approachFramePairs": 164,
+        "positionChanged": 163,
+        "positionUnchanged": 1,
+        "rotationPairsFirst300ms": 50,
+        "rotationChanged": 33,
+        "approachRunClipSpeed": [1],
+        "travelRunClipSpeed": [1],
+        "stationaryPairsAtDestination": 1,
+        "stationaryPairsBeforeDestination": 0
+      },
+      {
+        "classId": "knight",
+        "framesRecorded": 563,
+        "medianFrameMs": 16.699999999720603,
+        "approachFramePairs": 126,
+        "positionChanged": 126,
+        "positionUnchanged": 0,
+        "rotationPairsFirst300ms": 37,
+        "rotationChanged": 37,
+        "approachRunClipSpeed": [1],
+        "travelRunClipSpeed": [1],
+        "stationaryPairsAtDestination": 0,
+        "stationaryPairsBeforeDestination": 0
+      },
+      {
+        "classId": "mage",
+        "framesRecorded": 600,
+        "medianFrameMs": 16.699999999720603,
+        "approachFramePairs": 195,
+        "positionChanged": 195,
+        "positionUnchanged": 0,
+        "rotationPairsFirst300ms": 60,
+        "rotationChanged": 60,
+        "approachRunClipSpeed": [1],
+        "travelRunClipSpeed": [1],
+        "stationaryPairsAtDestination": 0,
+        "stationaryPairsBeforeDestination": 0
+      },
+      {
+        "classId": "rogue",
+        "framesRecorded": 599,
+        "medianFrameMs": 16.699999999720603,
+        "approachFramePairs": 177,
+        "positionChanged": 177,
+        "positionUnchanged": 0,
+        "rotationPairsFirst300ms": 60,
+        "rotationChanged": 60,
+        "approachRunClipSpeed": [1],
+        "travelRunClipSpeed": [1],
+        "stationaryPairsAtDestination": 0,
+        "stationaryPairsBeforeDestination": 0
+      },
+      {
+        "classId": "sorcerer",
+        "framesRecorded": 600,
+        "medianFrameMs": 16.699999999720603,
+        "approachFramePairs": 168,
+        "positionChanged": 165,
+        "positionUnchanged": 3,
+        "rotationPairsFirst300ms": 59,
+        "rotationChanged": 59,
+        "approachRunClipSpeed": [1],
+        "travelRunClipSpeed": [1],
+        "stationaryPairsAtDestination": 3,
+        "stationaryPairsBeforeDestination": 0
+      }
+    ]
+  },
+  "productionSmoke": {
+    "errors": [],
+    "consoleErrors": [],
+    "httpErrors": [],
+    "requestFailures": [],
+    "killsDuringSmoke": 2,
+    "nextSpot": {
+      "zoneId": "lc-zone-0",
+      "monsterId": "lc-146"
+    },
+    "contextLost": false,
+    "completed": true
+  },
+  "diagnostics": {
+    "errors": 0,
+    "consoleErrors": 0,
+    "httpErrors": 0,
+    "requestFailures": 0
+  },
+  "limits": [
+    "No physical iPhone/Safari test.",
+    "Isolated sampling measurements are not a production GPU FPS benchmark."
+  ]
+}

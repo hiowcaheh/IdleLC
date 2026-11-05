@@ -5,7 +5,7 @@ import { gearLooks } from '../game/assets/gear.ts'
 import { getModel, playerModelId } from '../game/assets/manifest.ts'
 import { getMonster } from '../game/data/monsters.ts'
 import { getItem } from '../game/data/items.ts'
-import { TIMINGS, approachTime, effectiveStats, type Side } from '../game/logic/combat.ts'
+import { TIMINGS, effectiveStats, type Side } from '../game/logic/combat.ts'
 import { wornTitle } from '../game/logic/titles.ts'
 import { combatSession } from '../game/session/combatSession.ts'
 import { VisibleClock } from '../game/session/visibleClock.ts'
@@ -20,7 +20,8 @@ import { ModelBoundary } from './ModelBoundary.tsx'
 import { placeLabel, type SceneLabelId } from './labelAnchors.ts'
 import { SkillEffects } from './SkillEffects.tsx'
 import { armorUpgradePlus } from './upgradeEffects.ts'
-import { ARENA_RADIUS, smoothstep } from './terrain.ts'
+import { approachProgress } from './approachMotion.ts'
+import { ARENA_RADIUS } from './terrain.ts'
 import { SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
 /** How far the player runs to reach a newly spawned monster. */
@@ -192,6 +193,7 @@ export function Battle() {
           break
         }
         case 'engage':
+          view.player.copy(m.engageAt)
           player.current?.setBase('idle')
           break
         case 'attack':
@@ -280,7 +282,8 @@ export function Battle() {
       return
     }
     const realDt = Math.min(delta, 0.1)
-    const dt = clock.current.read(performance.now()) * useGameStore.getState().timeScale
+    const timeScale = useGameStore.getState().timeScale
+    const dt = clock.current.read(performance.now()) * timeScale
     const events = combatSession.tick(dt)
     if (events.length > 0) combatEvents.emit(events)
 
@@ -293,7 +296,7 @@ export function Battle() {
     }
 
     if (combat.phase === 'approach') {
-      const t = smoothstep(0, 1, combat.phaseTime / approachTime(combat))
+      const t = approachProgress(combat, clock.current.interpolationSeconds, timeScale)
       view.player.lerpVectors(m.approachFrom, m.engageAt, t)
     }
 
@@ -321,7 +324,7 @@ export function Battle() {
       const target = combat.phase === 'approach' ? m.engageAt : view.monster
       if (combat.phase === 'traveling') turn(pg, view.travelYaw, realDt)
       else if (view.monsterVisible && view.player.distanceToSquared(target) > 0.01)
-        turn(pg, yawTowards(view.player, target), dt)
+        turn(pg, yawTowards(view.player, target), realDt * timeScale)
     }
 
     const mg = monsterGroup.current

@@ -27,4 +27,9 @@ export class VisibleClock {
     this.pending = Math.max(0, this.pending - seconds)
     return seconds
   }
+
+  /** Unsimulated fraction for rendering only; never consume time or extrapolate a backlog. */
+  get interpolationSeconds(): number {
+    return this.visible && this.pending < SIMULATION_STEP ? this.pending : 0
+  }
 }

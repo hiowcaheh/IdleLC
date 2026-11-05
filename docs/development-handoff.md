@@ -1,5 +1,13 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+Aktualizacja 2026-11-05: [płynne podbieganie](approach-motion-fix.md).
+Właściciel doprecyzował, że szarpie postać na spocie przy poprawnym FPS.
+`Battle` odczytywało pozycję i obrót tylko w krokach 50 ms, podczas gdy klip biegu
+działał normalnie. `VisibleClock` udostępnia teraz wyłącznie do renderowania
+resztę czasu; `approachProgress` wygładza ruch bez zmiany symulacji, a obrót
+korzysta z czasu klatki. Podróż między spotami i `Character` nie były zmieniane.
+Sprawdzono sześć klas, blokady ruchu, różne prędkości i dev time scale.
+
 Aktualizacja 2026-11-05: [bieganie, Inventory i przyciski](running-inventory-fixes.md).
 `MapProps` korzysta z `mapPropVisibility`: komórki przestrzenne, stała kolejność,
 bufory `DynamicDrawUsage`, aktualizacje tylko używanego prefiksu zmienionych modeli.

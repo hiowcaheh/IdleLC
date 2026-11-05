@@ -1,5 +1,16 @@
 # Historia zmian
 
+## 2026-11-05: płynne podbieganie do kolejnego potwora
+
+- Pozycja i obrót postaci podczas podbiegania aktualizują się w każdej klatce.
+  Wcześniej oba elementy przeskakiwały w krokach logiki co 50 ms.
+- Rysowanie pozycji uwzględnia niewykorzystany ułamek czasu; logika walki,
+  czas dojścia zależny od Run speed i oryginalne tempo klipu biegu są zachowane.
+- Uwzględniono stun, stone, hold, ukrytą kartę i zaległy czas symulacji.
+- Zbadano ruch sześciu klas i oddzielnie pełną scenę produkcyjną.
+
+[Pomiary i walidacja](docs/approach-motion-fix.md). SaveVersion **14**.
+
 ## 2026-11-05: bieganie, zakładki Inventory i przyciski
 
 [Zakres, pomiary i ograniczenia](docs/running-inventory-fixes.md).

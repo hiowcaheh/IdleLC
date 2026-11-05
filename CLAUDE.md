@@ -1,5 +1,12 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-05: [płynne podbieganie do potwora](docs/approach-motion-fix.md).
+Logika nadal pracuje w krokach 50 ms. Pozycja podczas `approach` korzysta
+z reszty czasu renderowania `VisibleClock.interpolationSeconds`, a obrót z czasu
+klatki. Nie zmieniać kroku symulacji ani tempa klipów w celu wygładzenia ruchu.
+`approachProgress` uwzględnia Run speed, dev time scale i blokady ruchu.
+Na `engage` postać dochodzi dokładnie do celu. SaveVersion nadal **14**.
+
 Aktualizacja 2026-11-05: [bieganie, Inventory i przyciski](docs/running-inventory-fixes.md).
 Obiekty mapy mają indeks przestrzenny, zmienne bufory i częściowe aktualizacje
 wyłącznie zmienionych modeli. Zachować promień 120 m, korytarz kamery i kolejność
