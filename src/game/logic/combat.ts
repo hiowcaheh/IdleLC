@@ -322,6 +322,13 @@ export function travelTime(state: Pick<CombatState, 'player' | 'travel'>): numbe
   return (state.travel?.distance ?? TRAVEL_METRES) / runSpeed(effectiveStats(state.player))
 }
 
+/** Seconds the run to another spot still takes at the hero's run speed now; 0 outside a run. */
+export function travelSecondsLeft(state: Pick<CombatState, 'phase' | 'player' | 'travel'>): number {
+  if (state.phase !== 'traveling') return 0
+  const left = (state.travel?.distance ?? TRAVEL_METRES) - (state.travel?.done ?? 0)
+  return Math.max(0, left) / runSpeed(effectiveStats(state.player))
+}
+
 /** How far through its run to another spot the hero is (0…1); 1 outside a run. */
 export function travelProgress(
   state: Pick<CombatState, 'phase' | 'player' | 'travel'>,

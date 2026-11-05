@@ -2,7 +2,7 @@ import type { AttributeKey } from '../game/logic/attributes.ts'
 import { create } from 'zustand'
 import { ZONES } from '../game/data/zones.ts'
 import type { AfkResult } from '../game/logic/afk.ts'
-import type { CharacterData, NewCharacter } from '../game/logic/character.ts'
+import type { CharacterData, CharacterLocation, NewCharacter } from '../game/logic/character.ts'
 import type { PotionGroup, PotionSlot } from '../game/logic/potions.ts'
 import {
   effectiveStats,
@@ -21,7 +21,7 @@ import type { PieceSale, PurchaseResult, SaleResult } from '../game/logic/shop.t
 import type { BookClaim } from '../game/logic/book.ts'
 import type { TitleUse } from '../game/logic/titles.ts'
 import { createDefaultSave } from '../game/logic/save.ts'
-import { farthestSpot, isSpotOpen, isZoneOpen } from '../game/logic/spots.ts'
+import { isSpotOpen, isZoneOpen, zoneSpots } from '../game/logic/spots.ts'
 import { gameService } from '../game/service/index.ts'
 import { combatSession } from '../game/session/combatSession.ts'
 import { planTravel } from '../scene/travelRoute.ts'
@@ -220,15 +220,28 @@ export const useGameStore = create<GameStore>((set, get) => {
     }
   })
 
+  /**
+   * The spot the hero last stood at while it runs to another one: an expedition started on the way
+   * begins there, so leaving at once can't skip the run (owner's report 2026-11-05).
+   */
+  let runFrom: CharacterLocation | null = null
+  const running = () => combatSession.state.phase === 'traveling'
+
   const travel = (zoneId: string, monsterId: string) => {
     const character = get().character
     if (!character || character.expedition) return
     const location = { zoneId, monsterId }
-    if (zoneId !== character.location.zoneId && !isZoneOpen(character, zoneId)) return
+    const newZone = zoneId !== character.location.zoneId
+    if (newZone && !isZoneOpen(character, zoneId)) return
     if (!isSpotOpen(character, location)) return
-    // on the zone's map the hero runs the route there, around what can't be crossed
-    const distance =
-      monsterId === combatSession.state.monsterId ? undefined : planTravel(zoneId, monsterId)
+    // on the zone's map the hero runs the route there, around what can't be crossed; another map
+    // is a jump behind its loading screen
+    const distance = newZone
+      ? 0
+      : monsterId === combatSession.state.monsterId
+        ? undefined
+        : planTravel(zoneId, monsterId)
+    runFrom = newZone ? null : running() && runFrom ? runFrom : character.location
     combatEvents.emit(combatSession.setMonster(monsterId, distance))
     applyCharacter({ ...character, location })
     set({ hud: toHud(combatSession.state) })
@@ -337,11 +350,19 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     async startExpedition() {
-      const character = get().character
+      let character = get().character
       if (!character || character.expedition) return
       reportCombat(0, 0)
       try {
-        applyCharacter(await enqueue(() => gameService.startAfk(character.id)))
+        // started on the way to another spot: the hero goes from the spot it left
+        if (running() && runFrom) {
+          const from = runFrom
+          runFrom = null
+          character = await enqueue(() => gameService.travel(character!.id, from))
+          applyCharacter(character)
+        }
+        const id = character.id
+        applyCharacter(await enqueue(() => gameService.startAfk(id)))
         combatEvents.emit([{ type: 'reset' }])
       } catch (error) {
         logError(error)
@@ -472,7 +493,8 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     selectZone(zoneId, monsterId) {
       const character = get().character
-      const target = monsterId ?? (character && farthestSpot(character, zoneId))
+      // a new map always starts at its first spot (owner's rule 2026-11-05)
+      const target = monsterId ?? (character && zoneSpots(zoneId)[0])
       if (ZONES[zoneId] && target) travel(zoneId, target)
     },
 

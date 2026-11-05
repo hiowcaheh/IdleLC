@@ -9,6 +9,7 @@ import {
   skillCooldownTime,
   travelTime,
   travelProgress,
+  travelSecondsLeft,
   openingGap,
   carryVitals,
   changeMonster,
@@ -222,10 +223,13 @@ describe('changeMonster', () => {
     expect(half.state.phase).toBe('traveling')
     expect(travelProgress(half.state)).toBeCloseTo(0.5)
     expect(travelProgress(half.state, 5)).toBeCloseTo(0.75)
+    expect(travelSecondsLeft(r.state)).toBeCloseTo(20)
+    expect(travelSecondsLeft(half.state)).toBeCloseTo(10)
     const there = combatTick(half.state, 10.01, createRng(1))
     expect(there.events).toContainEqual({ type: 'arrive' })
     expect(there.state.travel).toBeUndefined()
     expect(travelProgress(there.state)).toBe(1)
+    expect(travelSecondsLeft(there.state)).toBe(0)
   })
 
   it('a faster run on the way only shortens what is left of it', () => {

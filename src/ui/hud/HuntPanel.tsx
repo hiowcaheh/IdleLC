@@ -19,6 +19,8 @@ import { WorldMapPanel } from './WorldMapPanel.tsx'
 export function HuntPanel() {
   const character = useGameStore((s) => s.character)
   const selectMonster = useGameStore((s) => s.selectMonster)
+  // no expedition on the way to another spot (it would skip the run)
+  const running = useGameStore((s) => s.hud.phase === 'traveling')
   const [expeditionOpen, setExpeditionOpen] = useState(false)
   const [shopOpen, setShopOpen] = useState(false)
   const [appraiserOpen, setAppraiserOpen] = useState(false)
@@ -130,7 +132,13 @@ export function HuntPanel() {
           Book
           {claimable > 0 && <span className="icon-button__badge">{claimable}</span>}
         </button>
-        <button type="button" className="hunt__expedition" onClick={() => setExpeditionOpen(true)}>
+        <button
+          type="button"
+          className="hunt__expedition"
+          disabled={running}
+          title={running ? 'Reach the spot first' : undefined}
+          onClick={() => setExpeditionOpen(true)}
+        >
           Expedition
         </button>
       </div>

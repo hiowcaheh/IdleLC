@@ -78,6 +78,7 @@ export function ExpeditionDialog({
   onClose(): void
 }) {
   const startExpedition = useGameStore((s) => s.startExpedition)
+  const running = useGameStore((s) => s.hud.phase === 'traveling')
   const { zoneId, monsterId } = character.location
   const monster = getMonster(monsterId)
   const estimate = useHourlyEstimate(character, monsterId)
@@ -85,7 +86,7 @@ export function ExpeditionDialog({
   const [busy, setBusy] = useState(false)
 
   const onSend = async () => {
-    if (busy) return
+    if (busy || running) return
     setBusy(true)
     try {
       await startExpedition()
@@ -176,7 +177,12 @@ export function ExpeditionDialog({
         <button type="button" className="button" onClick={onClose}>
           Cancel
         </button>
-        <button type="button" className="button button--gold" onClick={onSend} disabled={busy}>
+        <button
+          type="button"
+          className="button button--gold"
+          onClick={onSend}
+          disabled={busy || running}
+        >
           Send
         </button>
       </div>
