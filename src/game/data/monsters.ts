@@ -86,7 +86,11 @@ export function fromLc(m: LcMonster): MonsterDef {
       ...(m.attackType === undefined
         ? {}
         : { attackType: (['melee', 'ranged', 'magic'] as const)[m.attackType] }),
-      attackInterval: Math.max(0.6, m.attackSpeed / 10),
+      // MobActivity.cpp:495: the next swing once speed × 15 / 10 pulses (0.1 s) have passed
+      attackInterval: Math.max(0.1, Math.trunc((m.attackSpeed * 15) / 10) / 10),
+      ...(m.attackLevel === undefined || m.defenseLevel === undefined
+        ? {}
+        : { gearLevels: { attack: m.attackLevel, defense: m.defenseLevel } }),
       critChance: 0.05,
       critMultiplier: 1.5,
       ...(m.attackArea === undefined ? {} : { attackRange: m.attackArea }),

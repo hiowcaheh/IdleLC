@@ -102,6 +102,18 @@ export interface CombatStats {
    * Config.h ATTACK_RANGE_*), a monster's t_npc.a_attack_area.
    */
   attackRange?: number
+  /**
+   * GetDamage's defense of each attack type before the level bonus (Battle_GetDamage.cpp:877–902,
+   * 1306–1330): eq defense + melee / range defense options, eq resist + resist options, after
+   * passive and assist rates. Heroes only; the level bonus (3 × level, level / 2) is added there.
+   */
+  defenseChannels?: { melee: number; range: number; magic: number }
+  /**
+   * Levels of the attack and defense gear (GetAttackLevel / GetDefenseLevel): a hero's weapon and
+   * highest armor piece (2 × level without armor), a monster's t_npc.a_attacklevel / a_defenselevel.
+   * Gear far above the wearer's level weakens it (Battle_GetDamage.cpp:904–926).
+   */
+  gearLevels?: { attack: number; defense: number }
   /** Metres a second a monster runs (t_npc.a_run_speed); heroes run at client.runSpeed. */
   npcRunSpeed?: number
 }

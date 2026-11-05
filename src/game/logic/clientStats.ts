@@ -8,7 +8,7 @@ import type { ClassId, ClientCombatStats, ClientStatContext, CombatStats } from 
 import { classAttributes } from './attributes.ts'
 import { pieceStats, upgradeBonuses } from './itemUpgrades.ts'
 import type { Equipment } from './equipment.ts'
-import { optionValue, type ItemOption } from './options.ts'
+import { levelReduction, optionValue, type ItemOption } from './options.ts'
 import { classRatingChannels } from './ratings.ts'
 import { classRecovery } from './recovery.ts'
 import type { StatEffect, StatKey } from './skills.ts'
@@ -30,7 +30,10 @@ export function clientStatChannels(
   level: number,
   equipment: Equipment | undefined,
   options: readonly ItemOption[],
-): Pick<CombatStats, 'client' | 'clientContext' | 'recoveryOptions'> {
+): Pick<
+  CombatStats,
+  'client' | 'clientContext' | 'recoveryOptions' | 'defenseChannels' | 'gearLevels'
+> {
   const attributes = { ...classAttributes(classId, level), ...stats }
   const weaponPiece = equipment?.weapon
   const weapon = weaponPiece && getItem(weaponPiece.itemId).gear
@@ -41,11 +44,16 @@ export function clientStatChannels(
   let armor = 0,
     resist = 0,
     rawArmor = 0,
-    rawResist = 0
+    rawResist = 0,
+    // CPC::GetDefenseLevel: the highest level of the six armor pieces, 2 × level without any
+    armorLevel = 0
+  const itemLevel = (piece: { itemId: number; options?: readonly ItemOption[] }) =>
+    Math.max(1, getItem(piece.itemId).level - levelReduction(piece.options))
   for (const [slot, piece] of Object.entries(equipment ?? {})) {
     if (!piece || slot === 'weapon' || slot.startsWith('accessory')) continue
     const gear = getItem(piece.itemId).gear
     if (!gear) continue
+    armorLevel = Math.max(armorLevel, itemLevel(piece))
     rawArmor += gear.defense
     rawResist += gear.magicDefense
     const values = pieceStats(piece).total
@@ -83,6 +91,8 @@ export function clientStatChannels(
     walkSpeed: 1.5,
   }
   const recoveryOptions = { hpFlat: 0, hpRate: 0, mpFlat: 0, mpRate: 0 }
+  // GetDamage's defenses (m_eqDefense + m_opDMelee / m_opDRange, m_eqResist + m_opResist)
+  const defenseChannels = { melee: armor, range: armor, magic: resist }
   const recoveryBase = classRecovery(classId, level)
   for (const option of options) {
     const value = optionValue(option)
@@ -125,10 +135,13 @@ export function clientStatChannels(
       // The status packet sums the melee and ranged defense option counters.
       case 11:
         client.physicalDefense += value * 2
+        defenseChannels.melee += value
+        defenseChannels.range += value
         break
       case 12:
       case 13:
         client.physicalDefense += value
+        defenseChannels[option.type === 12 ? 'melee' : 'range'] += value
         break
       case 14:
         if (!ranged) client.physicalEvasion += value
@@ -144,6 +157,7 @@ export function clientStatChannels(
         break
       case 18:
         client.magicDefense += value
+        defenseChannels.magic += value
         break
       case 19:
         client.magicEvasion += value
@@ -159,6 +173,9 @@ export function clientStatChannels(
       case 22:
         client.physicalDefense += value * 2
         client.magicDefense += value
+        defenseChannels.melee += value
+        defenseChannels.range += value
+        defenseChannels.magic += value
         break
       case 23:
         client.physicalEvasion += value
@@ -180,6 +197,9 @@ export function clientStatChannels(
       case 74:
         client.physicalDefense += 2 * Math.trunc((rawArmor * value) / 100)
         client.magicDefense += Math.trunc((rawResist * value) / 100)
+        defenseChannels.melee += Math.trunc((rawArmor * value) / 100)
+        defenseChannels.range += Math.trunc((rawArmor * value) / 100)
+        defenseChannels.magic += Math.trunc((rawResist * value) / 100)
         break
       case 75:
         client.physicalHit += Math.trunc((ratings.physicalHit * value) / 100)
@@ -199,7 +219,16 @@ export function clientStatChannels(
   client.magicHit += hitBonus
   client.criticalRating += Math.trunc((client.criticalRating * context.criticalOptionRate) / 100)
   client.deadlyRating += Math.trunc((client.deadlyRating * context.deadlyOptionRate) / 100)
-  return { client, clientContext: context, recoveryOptions }
+  return {
+    client,
+    clientContext: context,
+    recoveryOptions,
+    defenseChannels,
+    gearLevels: {
+      attack: weaponPiece ? itemLevel(weaponPiece) : 0,
+      defense: armorLevel > 0 ? armorLevel : level * 2,
+    },
+  }
 }
 
 /** Keep the selected normal attack and both defensive channels tied to the source sheet. */
@@ -304,6 +333,14 @@ export function applyClientStats(
   for (const effect of effects.filter((effect) => effect.stat === 'moveSpeed'))
     client.runSpeed *= 1 + effect.value / 100
   after.client = client
+  // the same passive / assist group on GetDamage's defenses (rate on the pre-addition value)
+  const channels = before.defenseChannels
+  if (channels)
+    after.defenseChannels = {
+      melee: apply(channels.melee, 'defense'),
+      range: apply(channels.range, 'defense'),
+      magic: apply(channels.magic, 'magicDefense'),
+    }
   after.clientContext = { ...context, criticalGroups, deadlyGroups }
   after.moveSpeed = (client.runSpeed / RUN_SPEED[context.classId] - 1) * 100
 }

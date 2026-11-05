@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { CLASSES } from '../data/classes.ts'
 import type { CombatStats } from '../data/types.ts'
 import {
+  npcDamage,
   MAX_LEVEL,
   baseDamage,
   hitChance,
@@ -141,5 +142,71 @@ describe('rollAttack', () => {
 describe('regenPerSecond', () => {
   it('is 3% of max HP per second', () => {
     expect(regenPerSecond(200)).toBeCloseTo(6)
+  })
+})
+
+describe('npcDamage (GetDamage, NPC attacker against a hero)', () => {
+  const npc = (over: Partial<CombatStats> = {}): CombatStats => ({
+    maxHp: 9500,
+    attack: 375,
+    physicalAttack: 375,
+    magicAttack: 120,
+    defense: 1700,
+    attackInterval: 1.8,
+    critChance: 0,
+    critMultiplier: 1,
+    strength: 158,
+    dexterity: 200,
+    intelligence: 148,
+    attackType: 'melee',
+    gearLevels: { attack: 51, defense: 51 },
+    ...over,
+  })
+  const hero = (over: Partial<CombatStats> = {}): CombatStats => ({
+    maxHp: 1650,
+    attack: 268,
+    defense: 897,
+    attackInterval: 1,
+    critChance: 0,
+    critMultiplier: 2,
+    defenseChannels: { melee: 744, range: 700, magic: 40 },
+    gearLevels: { attack: 49, defense: 51 },
+    ...over,
+  })
+  const at = (stats: CombatStats, level = 51) => ({ level, stats })
+
+  it('melee: STR × 10 / 15 + attack × hit share − (defense + 3 × level) / 3.5', () => {
+    // 105 + 375 − (744 + 153) / 3.5 = 223.7
+    expect(npcDamage(at(npc()), at(hero()))).toBe(223)
+    // hard: 375 × 15 / 10 = 562
+    expect(npcDamage(at(npc()), at(hero()), undefined, 'hard')).toBe(410)
+  })
+
+  it('range uses DEX and the ranged defense, magic INT and the whole resist + level / 2', () => {
+    // 133 + 375 − (700 + 153) / 3.5 = 264.3
+    expect(npcDamage(at(npc({ attackType: 'ranged' })), at(hero()))).toBe(264)
+    // 98 + (120 − (40 + 25))
+    expect(npcDamage(at(npc({ attackType: 'magic' })), at(hero()))).toBe(153)
+  })
+
+  it('weakens attack and defense of gear far above its wearer, adds the ADDITION power', () => {
+    // attack 5–8 levels above: halved
+    expect(npcDamage(at(npc({ gearLevels: { attack: 57, defense: 51 } })), at(hero()))).toBe(
+      Math.trunc(105 + 187 - 897 / 3.5),
+    )
+    // no armor: defense level 2 × 51, 51 levels above: a tenth of the defense
+    expect(npcDamage(at(npc()), at(hero({ gearLevels: { attack: 49, defense: 102 } })))).toBe(
+      Math.trunc(105 + 375 - (74 + 15) / 3.5),
+    )
+    // MDT_ADDITION: attack × (100 + level) / 100 + power
+    expect(npcDamage(at(npc()), at(hero()), { power: 100, type: 1 })).toBe(
+      Math.trunc(105 + Math.trunc((375 * 151) / 100 + 100) - 897 / 3.5),
+    )
+  })
+
+  it('needs the NPC attributes and the hero channels, and never deals under 1', () => {
+    expect(npcDamage(at(npc({ strength: undefined })), at(hero()))).toBeNull()
+    expect(npcDamage(at(npc()), at(hero({ defenseChannels: undefined })))).toBeNull()
+    expect(npcDamage(at(npc({ physicalAttack: 1, strength: 1 })), at(hero()))).toBe(1)
   })
 })

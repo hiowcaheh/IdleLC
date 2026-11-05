@@ -100,6 +100,82 @@ export interface DamagePower {
   type: number
 }
 
+/** The hit type's share of the attack, in GetDamage's integer arithmetic (A × 8 / 10 …). */
+const HIT_SHARE: Record<SourceHitType, readonly [number, number]> = {
+  weak: [8, 10],
+  normal: [1, 1],
+  strong: [13, 10],
+  hard: [15, 10],
+  critical: [20, 10],
+  deadly: [25, 10],
+}
+const share = (attack: number, hitType: SourceHitType) =>
+  Math.trunc((attack * HIT_SHARE[hitType][0]) / HIT_SHARE[hitType][1])
+
+/** Battle_GetDamage.cpp:904–911: an attacker whose weapon is 5+ levels above it hits weaker. */
+export function attackLevelPenalty(attack: number, levelsAbove: number): number {
+  if (levelsAbove >= 13) return Math.trunc(attack / 10)
+  if (levelsAbove >= 9) return Math.trunc((attack * 3) / 10)
+  if (levelsAbove >= 5) return Math.trunc(attack / 2)
+  return attack
+}
+
+/** Battle_GetDamage.cpp:913–926: armor 6+ levels above its wearer defends less. */
+export function defenseLevelPenalty(defense: number, levelsAbove: number): number {
+  if (levelsAbove >= 16) return Math.trunc(defense / 10)
+  if (levelsAbove >= 11) return Math.trunc((defense * 3) / 10)
+  if (levelsAbove >= 6) return Math.trunc(defense / 2)
+  return defense
+}
+
+/**
+ * A monster's hit on a hero, GetDamage's NPC branch (Battle_GetDamage.cpp:569–581,816–1004,
+ * 1230–1444): the NPC's STR (melee) / DEX (range) / INT (magic) × 10 / 15, plus its attack scaled
+ * by the hit type, minus the hero's defense / 3.5 (magic: minus the whole resist). The hero's
+ * defense is its gear and options plus 3 × level (resist: level / 2, CCharacter's getter), both
+ * weakened when the armor is far above the hero's level. No ±10% roll; at least 1.
+ */
+export function npcDamage(
+  attacker: AttackRollInput,
+  defender: AttackRollInput,
+  effect?: DamagePower,
+  hitType: SourceHitType = 'normal',
+): number | null {
+  const a = attacker.stats,
+    d = defender.stats,
+    channels = d.defenseChannels
+  if (
+    a.clientContext ||
+    !channels ||
+    a.strength === undefined ||
+    a.dexterity === undefined ||
+    a.intelligence === undefined
+  )
+    return null
+  const type = a.attackType ?? 'melee'
+  const magic = type === 'magic'
+  let attack = magic ? (a.magicAttack ?? a.attack) : (a.physicalAttack ?? a.attack)
+  attack = attackLevelPenalty(attack, (a.gearLevels?.attack ?? 0) - attacker.level)
+  // MDT_ADDITION (Battle_GetDamage.cpp:860–864); a lone MDT_RATE does not scale the attack
+  if (effect?.type === 1)
+    attack = Math.trunc((attack * (100 + attacker.level)) / 100 + Math.max(1, effect.power))
+  const below = (d.gearLevels?.defense ?? 0) - defender.level
+  if (magic) {
+    const resist =
+      defenseLevelPenalty(channels.magic, below) +
+      defenseLevelPenalty(Math.trunc(defender.level / 2), below)
+    return Math.max(1, Math.trunc((a.intelligence * 10) / 15) + (share(attack, hitType) - resist))
+  }
+  const defense =
+    defenseLevelPenalty(type === 'ranged' ? channels.range : channels.melee, below) +
+    defenseLevelPenalty(defender.level * 3, below)
+  const stat = type === 'ranged' ? a.dexterity : a.strength
+  return Math.max(
+    1,
+    Math.trunc(Math.trunc((stat * 10) / 15) + share(attack, hitType) - defense / 3.5),
+  )
+}
+
 /** Solo, unpromoted PC branches of Battle_GetDamage.cpp:608–650,863–903,1288–1330. */
 export function sourceSkillDamage(
   attacker: AttackRollInput,
@@ -112,6 +188,8 @@ export function sourceSkillDamage(
     context = a.clientContext
   const power = Math.max(1, effect?.power ?? 0)
   if (effect?.type === 0) return power
+  const fromNpc = npcDamage(attacker, defender, effect, hitType)
+  if (fromNpc !== null) return fromNpc
   if (!context || !a.client) {
     // Synthetic fighters have no equipment/attribute split. Preserve that explicit test adapter.
     const attack =
@@ -139,7 +217,15 @@ export function sourceSkillDamage(
   const hit = ratings.hit,
     avoid = ratings.avoid
   if (hit + avoid > 0) weapon = Math.trunc(weapon * (1 + hit / (hit + avoid)))
-  const defense = magic ? (d.magicDefense ?? d.defense) : d.defense
+  // a monster's own armor level against its level (Battle_GetDamage.cpp:913–926)
+  const defense = d.clientContext
+    ? magic
+      ? (d.magicDefense ?? d.defense)
+      : d.defense
+    : defenseLevelPenalty(
+        magic ? (d.magicDefense ?? d.defense) : d.defense,
+        (d.gearLevels?.defense ?? 0) - defender.level,
+      )
   const contribution = magic
     ? attributePart
     : Math.trunc((attribute * 10) / (['titan', 'knight'].includes(context.classId) ? 20 : 15))
@@ -190,9 +276,17 @@ export function rollAttack(
     variance *
     multiplier *
     (sourceType ? HIT_MULTIPLIER[sourceType] : crit ? attacker.stats.critMultiplier : 1)
-  let damage = attacker.stats.clientContext
-    ? sourceSkillDamage(attacker, defender, undefined, sourceType ?? (crit ? 'critical' : 'normal'))
-    : Math.max(1, Math.round(raw))
+  const fromNpc = sourceType ? npcDamage(attacker, defender, undefined, sourceType) : null
+  let damage =
+    fromNpc ??
+    (attacker.stats.clientContext
+      ? sourceSkillDamage(
+          attacker,
+          defender,
+          undefined,
+          sourceType ?? (crit ? 'critical' : 'normal'),
+        )
+      : Math.max(1, Math.round(raw)))
   // Battle_GetDamage.cpp:1559–1568: blocking halves normal damage, after integer damage calculation.
   if (
     !skill &&
