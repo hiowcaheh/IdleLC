@@ -1,4 +1,7 @@
-/** SelectHitType_Adult, Battle_GetDamage.cpp:1844–2007 (unpromoted PC / ordinary NPC). */
+/**
+ * SelectHitType_Adult, Battle_GetDamage.cpp:1843–2007: a hero's or a monster's normal attack (skills
+ * always hit normal there). Pure.
+ */
 import type { CombatStats } from '../data/types.ts'
 import { classAttributes } from './attributes.ts'
 import { rollInt, type Rng } from './rng.ts'
@@ -13,6 +16,9 @@ export const HIT_MULTIPLIER: Record<SourceHitType, number> = {
   deadly: 2.5,
 }
 
+/** nOffense*BaseForNPC, Battle_GetDamage.cpp:1852–1854. */
+const NPC_BASE = { strength: 38, dexterity: 28, intelligence: 28 }
+
 export function sourceHitWeights(
   attacker: { level: number; stats: CombatStats },
   defender: { stats: CombatStats },
@@ -22,17 +28,24 @@ export function sourceHitWeights(
     context = a.clientContext
   // Missing NPC attributes are a source-data gap, never an assumed zero or inferred level curve.
   if (
-    !context ||
     a.strength === undefined ||
     a.dexterity === undefined ||
     a.intelligence === undefined ||
     d.constitution === undefined
   )
     return null
-  const base = classAttributes(context.classId, 1)
   const magic = a.attackType === 'magic'
+  // Hero attackers use their class's level-1 attributes, NPCs 38 STR / 28 DEX / 28 INT.
+  const base = context
+    ? classAttributes(context.classId, 1)
+    : {
+        strength: NPC_BASE.strength,
+        dexterity: NPC_BASE.dexterity,
+        intelligence: NPC_BASE.intelligence,
+      }
   const statBase = magic ? base.intelligence : base.strength
-  const durability = Math.trunc(d.constitution / 3)
+  // m_con / 3 + m_opStrong (option 104); the passive "stronger" addition has no IdleLC skill yet.
+  const durability = Math.trunc(d.constitution / 3) + (d.toughness ?? 0)
   const weights = [
     50 + Math.trunc((attacker.level - 1) / 2) + durability,
     575 + attacker.level - 1 + durability,
@@ -43,6 +56,11 @@ export function sourceHitWeights(
     90 + Math.trunc(((a.dexterity - base.dexterity) * 9) / 10),
     60 + Math.trunc(((a.dexterity - base.dexterity) * 6) / 10),
   ]
+  if (!context) {
+    // Battle_GetDamage.cpp:1983–1993: only bosses and mid-bosses land critical and deadly hits.
+    if (!a.boss) weights[4] = weights[5] = 0
+    return weights.map((value) => Math.max(0, Math.trunc(value)))
+  }
   weights[4]! += Math.trunc((weights[4]! * context.criticalOptionRate) / 100)
   weights[5]! += Math.trunc((weights[5]! * context.deadlyOptionRate) / 100)
   // This branch in the supplied November-2018 code uses the rate directly, unlike CmdMsg's sheet.

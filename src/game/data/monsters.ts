@@ -81,6 +81,8 @@ export function fromLc(m: LcMonster): MonsterDef {
       ...(m.dexterity === undefined ? {} : { dexterity: m.dexterity }),
       ...(m.intelligence === undefined ? {} : { intelligence: m.intelligence }),
       ...(m.constitution === undefined ? {} : { constitution: m.constitution }),
+      // NPC_MBOSS (1 << 20) / NPC_BOSS (1 << 21), Config.h:382–383
+      ...(((m.flag ?? 0) & ((1 << 20) | (1 << 21))) !== 0 ? { boss: true } : {}),
       ...(m.attackType === undefined
         ? {}
         : { attackType: (['melee', 'ranged', 'magic'] as const)[m.attackType] }),

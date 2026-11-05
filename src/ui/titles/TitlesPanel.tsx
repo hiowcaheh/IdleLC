@@ -104,7 +104,7 @@ export function TitlesPanel({ onClose }: { onClose(): void }) {
                       {wearing ? 'Worn · ' : ''}
                       {expiresAt === null ? 'Permanent' : `${titleTimeLeft(expiresAt, now)} left`}
                     </span>
-                    <OptionList options={title.options} classId={character.classId} />
+                    <OptionList options={title.options} classId={character.classId} title />
                   </span>
                   <button
                     type="button"

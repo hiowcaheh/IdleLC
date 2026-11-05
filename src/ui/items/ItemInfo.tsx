@@ -79,7 +79,7 @@ export function ItemInfo({
   }
   const title = item.title === undefined ? undefined : getTitle(item.title)
   if (title) rows.push({ label: 'Lasts', value: titleDuration(title.days) })
-  const lines = optionLines(options ?? title?.options, character.classId)
+  const lines = optionLines(options ?? title?.options, character.classId, !options && !!title)
 
   return (
     <div className="item-info">

@@ -93,10 +93,8 @@ export const OPTION_EFFECTS: Record<number, OptionEffect> = {
   21: { stat: 'hit' }, // Hit Rate
   22: { stat: 'defense' }, // Defense
   23: { stat: 'dodge' }, // Evasion
-  // special options of the rare sets
-  24: { stat: 'mpSteal' }, // MP Steal (%)
-  25: { stat: 'hpSteal' }, // HP Steal (%)
-  50: { stat: 'hpRegen' }, // HP Regen
+  // 24 and 25 are OPTION_NOT_USED in Config.h: neither gear nor a title reads them.
+  50: { stat: 'hpRegen' }, // HP Regen (flat, after the rates)
   51: { stat: 'mpSteal' }, // MP Absorption (%)
   52: { stat: 'hpSteal' }, // HP Absorption (%)
   55: { stat: 'critChance' }, // Increase Critical Chance (1/10 %)
@@ -125,6 +123,34 @@ export const OPTION_EFFECTS: Record<number, OptionEffect> = {
   79: { stat: 'hpRegen', percent: true },
   80: { stat: 'mpRegen', percent: true },
   99: { stat: 'strength' }, // All four attributes, expanded below
+  106: { stat: 'maxHp' }, // Increase Vital Power: flat maximum HP (Option.cpp:753)
+}
+
+/**
+ * Options the server applies outside the stat sheet (Option.cpp:738–752, Character.cpp:1919–1932):
+ * 101 shortens harmful effects, 102/103 add flat recovery after the rates, 104 adds toughness to
+ * the defender's weak/normal hit weights, 105 adds to the hard hit weight. 102 and 103 are summed
+ * by clientStatChannels.
+ */
+export const SPECIAL_OPTIONS = new Set([101, 102, 103, 104, 105])
+
+/** What a title's option does differently from the same option on gear (CPC::ApplyTitle). */
+export const TITLE_RULES = {
+  /** m_opIncreaseInven: set by a title, read nowhere (gear puts it into flat HP recovery). */
+  noEffect: new Set([50]),
+  /** m_opStr…m_opCon only: the status packet shows it, m_str…m_con and HP/MP stay the same. */
+  shownOnly: new Set([99]),
+}
+
+/** The server effects of options 101, 104 and 105 (summed; 0 when absent). */
+export function specialOptionStats(options: readonly ItemOption[]): {
+  debuffTimeReduction: number
+  toughness: number
+  hardBonus: number
+} {
+  const sum = (type: number) =>
+    options.reduce((total, o) => total + (o.type === type ? optionValue(o) : 0), 0)
+  return { debuffTimeReduction: sum(101), toughness: sum(104), hardBonus: sum(105) }
 }
 
 /**

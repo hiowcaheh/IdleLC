@@ -22,12 +22,16 @@ const client =
   (s: CombatStats): number | undefined =>
     s.client?.[key]
 
+/** An attribute as the Character window shows it (with a title's shown-only All Stats). */
+const shownAttribute = (s: CombatStats, value: number | undefined) =>
+  value === undefined ? undefined : value + (s.shownAttributeBonus ?? 0)
+
 /** The stats of the Character window, in its order. */
 const METRICS: Metric[] = [
-  { label: 'Strength', value: (s) => s.strength },
-  { label: 'Dexterity', value: (s) => s.dexterity },
-  { label: 'Intelligence', value: (s) => s.intelligence },
-  { label: 'Constitution', value: (s) => s.constitution },
+  { label: 'Strength', value: (s) => shownAttribute(s, s.strength) },
+  { label: 'Dexterity', value: (s) => shownAttribute(s, s.dexterity) },
+  { label: 'Intelligence', value: (s) => shownAttribute(s, s.intelligence) },
+  { label: 'Constitution', value: (s) => shownAttribute(s, s.constitution) },
   { label: 'Health', value: (s) => s.maxHp },
   { label: 'Mana', value: (s) => s.maxMp },
   { label: 'Physical attack', value: client('physicalAttack') },

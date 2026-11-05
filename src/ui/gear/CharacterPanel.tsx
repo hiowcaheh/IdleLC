@@ -114,19 +114,17 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
       value === undefined || before === undefined ? undefined : change(value, before, digits),
     ]
   }
+  // A title's All Stats is shown on the attributes without changing combat (CmdMsg.cpp:539).
+  const shown = (key: 'strength' | 'dexterity' | 'intelligence' | 'constitution'): StatRow => {
+    const value = (stats[key] ?? 0) + (stats.shownAttributeBonus ?? 0)
+    const label = key[0]!.toUpperCase() + key.slice(1)
+    return [label, fmt(value), change(value, (base[key] ?? 0) + (base.shownAttributeBonus ?? 0))]
+  }
   const attributeRows: StatRow[] = [
-    ['Strength', fmt(stats.strength ?? 0), change(stats.strength ?? 0, base.strength ?? 0)],
-    ['Dexterity', fmt(stats.dexterity ?? 0), change(stats.dexterity ?? 0, base.dexterity ?? 0)],
-    [
-      'Intelligence',
-      fmt(stats.intelligence ?? 0),
-      change(stats.intelligence ?? 0, base.intelligence ?? 0),
-    ],
-    [
-      'Constitution',
-      fmt(stats.constitution ?? 0),
-      change(stats.constitution ?? 0, base.constitution ?? 0),
-    ],
+    shown('strength'),
+    shown('dexterity'),
+    shown('intelligence'),
+    shown('constitution'),
   ]
   const resourceRows: StatRow[] = [
     ['Health', fmt(stats.maxHp), change(stats.maxHp, base.maxHp)],

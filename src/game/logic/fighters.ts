@@ -12,7 +12,7 @@ import { bindCombatChannels, clientStatChannels } from './clientStats.ts'
 import { statsForLevel } from './balance.ts'
 import type { FighterInit, PotionSupply } from './combat.ts'
 import { wielded, type Equipment } from './equipment.ts'
-import { optionEffects } from './options.ts'
+import { TITLE_RULES, optionEffects, optionValue, specialOptionStats } from './options.ts'
 import type { ItemStack } from './loot.ts'
 import { POTION_GROUPS, countOwned, potionGroup, type PotionSlots } from './potions.ts'
 import {
@@ -75,10 +75,16 @@ export function playerFighter(hero: Hero, now = Date.now()): FighterInit {
   const base = statsForLevel(CLASSES[classId], level)
   const points = hero.allocatedStats ?? {}
   const resources = classResources(classId, level, points)
+  // CPC::ApplyTitle: a title's option 50 does nothing and its All Stats (99) is only shown.
+  const worn = titleOptions(activeTitleId(hero, now))
   const options = [
     ...Object.values(equipment ?? {}).flatMap((piece) => piece?.options ?? []),
-    ...titleOptions(activeTitleId(hero, now)),
+    ...worn.filter((o) => !TITLE_RULES.noEffect.has(o.type) && !TITLE_RULES.shownOnly.has(o.type)),
   ]
+  const shownAttributeBonus = worn
+    .filter((o) => TITLE_RULES.shownOnly.has(o.type))
+    .reduce((sum, o) => sum + optionValue(o), 0)
+  const special = specialOptionStats(options)
   const weapon = equipment?.weapon && getItem(equipment.weapon.itemId).gear
   const stats = applyStats(
     {
@@ -87,13 +93,18 @@ export function playerFighter(hero: Hero, now = Date.now()): FighterInit {
       critMultiplier: 2,
       attackInterval: weapon?.attackInterval ?? 1.2,
       strongBonus: (equipment?.weapon?.plus ?? 0) >= 10 ? 300 : 0,
-      hardBonus: (equipment?.weapon?.plus ?? 0) >= 12 ? 400 : 0,
+      // PC.cpp:3584 (+12 weapon) and option 105 (m_plusHard)
+      hardBonus: ((equipment?.weapon?.plus ?? 0) >= 12 ? 400 : 0) + special.hardBonus,
+      ...(special.toughness ? { toughness: special.toughness } : {}),
+      ...(special.debuffTimeReduction ? { debuffTimeReduction: special.debuffTimeReduction } : {}),
+      ...(shownAttributeBonus ? { shownAttributeBonus } : {}),
       ...classAttributes(classId, level, points),
       ...classRatings(classId, level),
     },
     // The channel-specific equipment options are applied once by clientStatChannels below.
     optionEffects(
-      options.filter((o) => ![50, 56, 57, 79, 80].includes(o.type)),
+      // recovery, critical and deadly options live on the source sheet (clientStatChannels)
+      options.filter((o) => ![50, 55, 56, 57, 66, 79, 80].includes(o.type)),
       classId,
       level,
       equipment,

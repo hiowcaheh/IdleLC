@@ -43,7 +43,16 @@ export interface CombatStats {
   hardBonus?: number
   /** Passive then assist recovery groups; options apply last (PC.cpp:2408). */
   recoveryGroups?: readonly { hpFlat: number; hpRate: number; mpFlat: number; mpRate: number }[]
-  recoveryOptions?: { hpFlat: number; hpRate: number; mpRate: number }
+  /** Option recovery: rates, then the flat m_opRecoverHP/MP_NoRate (PC.cpp:2440–2447). */
+  recoveryOptions?: { hpFlat: number; hpRate: number; mpFlat?: number; mpRate: number }
+  /** Option 101 (1/100 %): harmful effects whose only flag is SF_NOTHELP last shorter (Assist.cpp). */
+  debuffTimeReduction?: number
+  /** Option 104 (m_opStrong): added to the defender's weak/normal hit weights. */
+  toughness?: number
+  /** NPC_BOSS / NPC_MBOSS: only such monsters can land critical and deadly hits. */
+  boss?: boolean
+  /** A title's All Stats option: shown on the four attributes, no combat effect (CPC::ApplyTitle). */
+  shownAttributeBonus?: number
   maxHp: number
   attack: number
   defense: number

@@ -949,12 +949,17 @@ function applyEffects(
     mpPerSecond <= 0
   )
     return
+  // Assist.cpp:103–109: remain − remain × option 101 / 10000, in the source's 1/10 s units.
+  const shorter = skill.reducibleDebuff ? (effectiveStats(f).debuffTimeReduction ?? 0) : 0
+  const tenths = Math.round(skill.duration * 10)
+  const remaining =
+    shorter > 0 ? (tenths - Math.trunc((tenths * shorter) / 10000)) / 10 : skill.duration
   f.effects = [
     ...f.effects.filter((e) => e.skillId !== skill.id),
     {
       skillId: skill.id,
       name: skill.name,
-      remaining: skill.duration,
+      remaining,
       stats,
       stun,
       state,

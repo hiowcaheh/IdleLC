@@ -82,13 +82,18 @@ export function clientStatChannels(
     runSpeed: RUN_SPEED[classId],
     walkSpeed: 1.5,
   }
-  const recoveryOptions = { hpFlat: 0, hpRate: 0, mpRate: 0 }
+  const recoveryOptions = { hpFlat: 0, hpRate: 0, mpFlat: 0, mpRate: 0 }
   const recoveryBase = classRecovery(classId, level)
   for (const option of options) {
     const value = optionValue(option)
     switch (option.type) {
+      // Option.cpp:475 and :741–746: both go to m_opRecoverHP_NoRate / m_opRecoverMP_NoRate.
       case 50:
+      case 102:
         recoveryOptions.hpFlat += value
+        break
+      case 103:
+        recoveryOptions.mpFlat += value
         break
       case 56:
         recoveryOptions.hpRate += value

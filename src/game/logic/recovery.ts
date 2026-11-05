@@ -26,6 +26,7 @@ export function naturalRecovery(stats: CombatStats, active: boolean): { hp: numb
     if (options.hpRate > 0) hp += Math.trunc((hp * options.hpRate) / 100)
     if (options.mpRate > 0) mp += Math.trunc((mp * options.mpRate) / 100)
     if (options.hpFlat > 0) hp += options.hpFlat
+    if ((options.mpFlat ?? 0) > 0) mp += options.mpFlat!
   }
   return { hp: Math.max(0, hp), mp: Math.max(0, mp) }
 }

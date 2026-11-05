@@ -192,6 +192,9 @@ export function interpretEffect(e: SkillEffectDef): SkillEffect | null {
 export type SkillKind = 'attack' | 'debuff' | 'buff' | 'heal' | 'passive'
 
 /** A skill at one level, ready for combat. */
+/** Skill.h SF_NOTHELP: a harmful skill. */
+const SF_NOTHELP = 1 << 2
+
 export interface SkillRank {
   id: number
   name: string
@@ -215,6 +218,11 @@ export interface SkillRank {
   npcProbability?: number
   /** Seconds the stat changes, stun or poison last. */
   duration: number
+  /**
+   * t_skill.a_flag is exactly SF_NOTHELP: option 101 shortens it on the target
+   * (CAssistList::Add, Assist.cpp:103–109).
+   */
+  reducibleDebuff?: boolean
   effects: SkillEffect[]
   auto: boolean
 }
@@ -267,6 +275,7 @@ export function skillRank(
       ((skill.flag ?? 0) & (1 << 9)) !== 0 || ((skill.applyState ?? 0) & (1 << 7)) !== 0,
     attackType: skill.type === 2 ? 'magic' : skill.type === 1 ? 'ranged' : 'melee',
     duration: rank.duration / 10,
+    ...(skill.flag === SF_NOTHELP ? { reducibleDebuff: true } : {}),
     effects,
     auto,
   }

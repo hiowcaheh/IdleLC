@@ -16,6 +16,8 @@ import { GRADES, isRare } from '../../game/logic/rare.ts'
 import {
   LEVEL_OPTION,
   OPTION_EFFECTS,
+  SPECIAL_OPTIONS,
+  TITLE_RULES,
   optionHelps,
   optionValue,
   type ItemOption,
@@ -152,36 +154,48 @@ function optionAmount(type: number, value: number): string {
 function optionParts(type: number, value: number): [string, string] {
   const name = getOption(type)?.name ?? `Option ${type}`
   const effect = OPTION_EFFECTS[type]
-  const tenths = (v: number) => `${Number((v / 10).toFixed(1))}%`
   if (type === LEVEL_OPTION) return [name, `−${fmt(value)}`]
-  if (type === 82 || type === 83) return [name, `+${fmt(value)}%`]
+  // Util_Help.cpp GetPaciveOptionType: critical/deadly are a percent of the rating (CmdMsg.cpp:837),
+  // PvP absorption and debuff time are shown in 1/100 %.
+  if (type === 55 || type === 66 || type === 82 || type === 83) return [name, `+${fmt(value)}%`]
+  if (type === 100 || type === 101) return [name, `+${(value / 100).toFixed(2)}%`]
   if (effect?.percent || (effect && PERCENT_STATS.has(effect.stat)))
     return [name, `+${fmt(value)}%`]
-  if (effect?.stat === 'critChance') {
-    return [name, `+${tenths(value)}`]
-  }
   return [name, `+${fmt(value)}`]
 }
 
-/** The options of a piece with whether they help the class (and why not). */
+/** Options the server reads nowhere (Config.h OPTION_NOT_USED_24 / _25). */
+const UNUSED_OPTIONS = new Set([24, 25])
+
+/**
+ * The options of a piece (or of a title, `title`) with whether they help the class and why not.
+ * A title's option 50 does nothing and its All Stats is only shown (CPC::ApplyTitle).
+ */
 export function optionLines(
   options: readonly ItemOption[] | undefined,
   classId: CharacterData['classId'],
+  title = false,
 ): { text: string; name: string; amount: string; helps: boolean; note?: string }[] {
   return (options ?? []).map((o) => {
-    const helps = optionHelps(o, classId)
-    const works =
-      o.type === LEVEL_OPTION ||
-      o.type === 82 ||
-      o.type === 83 ||
-      OPTION_EFFECTS[o.type] !== undefined
     const [name, amount] = optionParts(o.type, optionValue(o))
+    const special = SPECIAL_OPTIONS.has(o.type) || o.type === 82 || o.type === 83
+    const note = UNUSED_OPTIONS.has(o.type)
+      ? 'Unused by the game'
+      : title && TITLE_RULES.noEffect.has(o.type)
+        ? 'No effect on a title'
+        : title && TITLE_RULES.shownOnly.has(o.type)
+          ? 'Shown on the attributes only'
+          : o.type === LEVEL_OPTION || special || optionHelps(o, classId)
+            ? undefined
+            : OPTION_EFFECTS[o.type] !== undefined
+              ? 'No effect for your class'
+              : 'No effect in IdleLC yet'
     return {
       text: `${name} ${amount}`,
       name,
       amount,
-      helps,
-      ...(helps ? {} : { note: works ? 'No effect for your class' : 'No effect in IdleLC yet' }),
+      helps: note === undefined,
+      ...(note ? { note } : {}),
     }
   })
 }
