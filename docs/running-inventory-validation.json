@@ -1,0 +1,175 @@
+{
+  "date": "2026-11-05",
+  "baseCommit": "da53b1ae8c81bb39af73198634c5c51a9df7b7c3",
+  "saveVersion": 14,
+  "performance": {
+    "environment": "Chromium with software SwiftShader, 390x844, Low quality, prepared isolated saves; developer instrumentation injected only by external test server.",
+    "comparisons": [
+      {
+        "map": "Juno",
+        "before": {
+          "walks": 4,
+          "travelFrames": 15,
+          "refreshes": 12,
+          "uploadCalls": 139,
+          "uploadBytes": 3538752,
+          "bytesPerRefresh": 294896.0,
+          "meanRefreshMs": 0.42499999950329465,
+          "medianFrameMs": 488.1000000014901,
+          "cpuReplay": {
+            "calls": 150,
+            "samples": [74.10000000149012, 22.099999994039536, 50.80000000447035]
+          }
+        },
+        "after": {
+          "walks": 4,
+          "travelFrames": 13,
+          "refreshes": 13,
+          "uploadCalls": 127,
+          "uploadBytes": 131456,
+          "bytesPerRefresh": 10112.0,
+          "meanRefreshMs": 0.26923076808452606,
+          "medianFrameMs": 498.29999999701977,
+          "cpuReplay": {
+            "calls": 150,
+            "samples": [9.400000005960464, 9.799999997019768, 7.5]
+          }
+        },
+        "bytesPerRefreshReductionPercent": 96.570994520102
+      },
+      {
+        "map": "Merac",
+        "before": {
+          "walks": 4,
+          "travelFrames": 18,
+          "refreshes": 17,
+          "uploadCalls": 566,
+          "uploadBytes": 8344896,
+          "bytesPerRefresh": 490876.23529411765,
+          "meanRefreshMs": 1.3647058816517101,
+          "medianFrameMs": 387.6499999985099,
+          "cpuReplay": {
+            "calls": 150,
+            "samples": [84.29999999701977, 25.399999998509884, 40.29999999701977]
+          }
+        },
+        "after": {
+          "walks": 4,
+          "travelFrames": 17,
+          "refreshes": 12,
+          "uploadCalls": 146,
+          "uploadBytes": 424576,
+          "bytesPerRefresh": 35381.333333333336,
+          "meanRefreshMs": 0.4666666655490796,
+          "medianFrameMs": 412.69999999552965,
+          "cpuReplay": {
+            "calls": 150,
+            "samples": [105.60000000149012, 35, 57.899999998509884]
+          }
+        },
+        "bytesPerRefreshReductionPercent": 92.79220895423182
+      }
+    ],
+    "gridValidation": [
+      {
+        "map": "juno",
+        "placements": 5151,
+        "queries": 407,
+        "meanCandidates": 444.1670761670762,
+        "meanVisible": 249.3046683046683,
+        "examinedFraction": 0.08622929065561565,
+        "exactRadiusMatch": true
+      },
+      {
+        "map": "dratan",
+        "placements": 264,
+        "queries": 451,
+        "meanCandidates": 30.11751662971175,
+        "meanVisible": 17.83370288248337,
+        "examinedFraction": 0.11408150238527179,
+        "exactRadiusMatch": true
+      },
+      {
+        "map": "merac",
+        "placements": 5667,
+        "queries": 242,
+        "meanCandidates": 715.0123966942149,
+        "meanVisible": 369.11570247933884,
+        "examinedFraction": 0.12617123640272013,
+        "exactRadiusMatch": true
+      },
+      {
+        "map": "egeha",
+        "placements": 5205,
+        "queries": 154,
+        "meanCandidates": 464.7012987012987,
+        "meanVisible": 284.87012987012986,
+        "examinedFraction": 0.0892797884152351,
+        "exactRadiusMatch": true
+      }
+    ],
+    "limitations": [
+      "No physical iPhone/Safari measurement.",
+      "Software-rendered FPS did not improve; frame times are not representative of a phone.",
+      "CPU-only replay timings were noisy; the Merac replay did not show a consistent improvement.",
+      "Measured reductions concern selection candidates and GPU buffer uploads, not a guaranteed FPS gain."
+    ]
+  },
+  "productionUI": {
+    "viewports": [
+      {
+        "width": 320,
+        "height": 740
+      },
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 1280,
+        "height": 900
+      }
+    ],
+    "inventoryCategories": ["All", "Weapons", "Armor", "Jewelry", "Potions", "Other"],
+    "originalTabArt": true,
+    "fixedWindowHeight": true,
+    "transactions": [
+      {
+        "action": "buy potion",
+        "goldChange": -440,
+        "quantityChange": 1
+      },
+      {
+        "action": "sell potion",
+        "goldChange": 176,
+        "quantityChange": -1
+      }
+    ],
+    "dotFreePriceActions": true,
+    "coinIconsRetained": true,
+    "egehaRoundTrip": ["lc-287", "lc-288"]
+  },
+  "diagnostics": {
+    "errors": 0,
+    "consoleErrors": 0,
+    "httpErrors": 0,
+    "requestFailures": 0
+  },
+  "originalSpawns": {
+    "status": "blocked_missing_source_data",
+    "required": "t_npc_regen or newproject_data.sql",
+    "serverReference": "GameServer/Zone.cpp:381-398, November 2018",
+    "clientReference": "Common/header/def_npc.h:46-54, stNpcHelp: index and zoneNum, no coordinates",
+    "mapsRequested": ["Dratan", "Merac", "Egeha"],
+    "arenaFilesChanged": false,
+    "junoChanged": false,
+    "userLinkRequested": true
+  },
+  "commands": {
+    "check": "passed",
+    "testFiles": 48,
+    "testsPassed": 422,
+    "build": "passed",
+    "productionProbeLeaks": []
+  }
+}

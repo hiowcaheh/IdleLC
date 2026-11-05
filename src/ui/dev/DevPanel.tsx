@@ -37,7 +37,7 @@ export function DevPanel() {
         onClick={() => setOpen(true)}
         aria-label="Show developer tools"
       >
-        DEV ×{timeScale} · Lv {level}
+        DEV ×{timeScale} Lv {level}
       </button>
     )
   }

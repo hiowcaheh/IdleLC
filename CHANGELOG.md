@@ -1,5 +1,20 @@
 # Historia zmian
 
+## 2026-11-05: bieganie, zakładki Inventory i przyciski
+
+[Zakres, pomiary i ograniczenia](docs/running-inventory-fixes.md).
+
+- Otoczenie mapy korzysta z indeksu przestrzennego i aktualizuje tylko zmienione
+  modele oraz używane fragmenty buforów. Zachowano zasięg, obiekty i ich kolejność.
+- W próbach Juno/Merac ilość danych buforów na odświeżenie spadła o 93–97%.
+  To pomiar obciążenia renderera, bez deklarowania wzrostu FPS na telefonie.
+- Inventory ma oryginalne grafiki zakładek: dwa rzędy na telefonie, jeden na desktopie.
+- Przyciski zakupu, sprzedaży i nauki skilli pokazują tekst oraz koszt bez kropki.
+- Sprawdzono pliki spawnów: dokładne współrzędne wymagają brakującej tabeli
+  `t_npc_regen`. Rozmieszczenie potworów pozostaje bez zmian do otrzymania danych.
+
+SaveVersion **14**, bez zmiany mechaniki, szybkości biegu i zapisu postaci.
+
 ## 2026-11-04: loader, Merac i osiem zgłoszeń GUI
 
 Punkt wyjścia `c744b39`. [Zakres i sprawdzenia](docs/ui-merac-fixes.md).

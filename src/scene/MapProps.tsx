@@ -5,10 +5,12 @@ import {
   Box3,
   BufferAttribute,
   DoubleSide,
+  DynamicDrawUsage,
   Euler,
   InstancedMesh,
   Matrix4,
   Quaternion,
+  Sphere,
   Vector3,
   type BufferGeometry,
   type Material,
@@ -16,30 +18,22 @@ import {
   type MeshStandardMaterial,
 } from 'three'
 import { levelShift, loadProps, mapBase, type LcMap, type MapProps } from './lcMap.ts'
-import { CAMERA_OFFSET } from './viewState.ts'
+import {
+  PropGrid,
+  selectProps,
+  writePropInstances,
+  type PropLocation,
+} from './mapPropVisibility.ts'
 
-/** Props this far from the hunting ground (metres) are drawn; the fog hides the rest. */
-const VIEW_REACH = 120
 /** The props are picked again once the ground under the hero has moved this far (metres). */
 const REFRESH_STEP = 2
-/**
- * Tall props (trees, walls, houses) between the camera and the fight are left out: the stretch of
- * ground from a little behind the hero to past the camera, this wide around its middle line.
- */
-const VIEW_BEHIND = 6
-const VIEW_AHEAD = 26
-const VIEW_MARGIN = 3
-const TO_CAMERA = new Vector3(CAMERA_OFFSET.x, 0, CAMERA_OFFSET.z).normalize()
 
 const DEG = Math.PI / 180
 
-interface Placed {
-  model: number
-  x: number
-  z: number
-  /** Ground radius (metres) of a tall prop; 0 for grass and flowers. */
-  radius: number
+interface Placed extends PropLocation {
   matrix: Matrix4
+  /** Bounds of the whole model at this placement, shared by its material parts. */
+  bounds: Sphere
 }
 
 /** One mesh of a model, its node transforms baked in: drawn as instances. */
@@ -67,13 +61,6 @@ function withFloatPositions(source: BufferGeometry): BufferGeometry {
     geometry.setAttribute(name, new BufferAttribute(values, 3))
   }
   return geometry
-}
-
-/** Is a tall prop at (dx, dz) from the hero in the way of the camera? */
-function blocksView(dx: number, dz: number, radius: number): boolean {
-  const along = Math.max(-VIEW_BEHIND, Math.min(VIEW_AHEAD, dx * TO_CAMERA.x + dz * TO_CAMERA.z))
-  const off = Math.hypot(dx - TO_CAMERA.x * along, dz - TO_CAMERA.z * along)
-  return off < radius + VIEW_MARGIN
 }
 
 /**
@@ -108,9 +95,10 @@ function PropsInstances({
   const gltf = useGLTF(`${mapBase(map)}props.glb`)
 
   // each model's meshes with their node transforms baked in, and its size
-  const { parts, sizes } = useMemo(() => {
+  const { parts, sizes, bounds } = useMemo(() => {
     const parts: Part[] = []
     const sizes: Vector3[] = []
+    const bounds: Sphere[] = []
     gltf.scene.updateMatrixWorld(true)
     props.models.forEach(({ id }, model) => {
       const holder = gltf.scene.getObjectByName(id)
@@ -127,32 +115,36 @@ function PropsInstances({
         parts.push({ model, geometry, material })
       })
       sizes.push(box.isEmpty() ? new Vector3() : box.getSize(new Vector3()))
+      bounds.push(box.getBoundingSphere(new Sphere()))
     })
-    return { parts, sizes }
+    return { parts, sizes, bounds }
   }, [gltf, props])
 
   // where every prop stands: on the map's ground, raised or lowered with a levelled hunting ground
   const placed = useMemo<Placed[]>(() => {
     const euler = new Euler(0, 0, 0, 'YXZ')
     const rotation = new Quaternion()
-    return props.instances.map(([model, x, y, z, heading, pitch, banking, ...stretch]) => {
+    return props.instances.map(([model, x, y, z, heading, pitch, banking, ...stretch], id) => {
       const [sx, sy = sx, sz = sx] = stretch as [number, number?, number?]
       // Serious Engine angles: heading about +Y, then pitch about X, then banking about Z
       euler.set(pitch! * DEG, heading! * DEG, banking! * DEG)
       const size = sizes[model!]!
+      const matrix = new Matrix4().compose(
+        new Vector3(x, y! + levelShift(data, x!, z!), z),
+        rotation.setFromEuler(euler),
+        new Vector3(sx, sy, sz),
+      )
       return {
+        id,
         model: model!,
         x: x!,
         z: z!,
         radius: props.models[model!]!.low ? 0 : Math.hypot(size.x * sx, size.z * sz) / 2,
-        matrix: new Matrix4().compose(
-          new Vector3(x, y! + levelShift(data, x!, z!), z),
-          rotation.setFromEuler(euler),
-          new Vector3(sx, sy, sz),
-        ),
+        matrix,
+        bounds: bounds[model!]!.clone().applyMatrix4(matrix),
       }
     })
-  }, [props, sizes, data])
+  }, [props, sizes, bounds, data])
 
   const capacity = useMemo(() => {
     const counts = props.models.map(() => 0)
@@ -160,33 +152,49 @@ function PropsInstances({
     return counts
   }, [props, placed])
 
+  const grid = useMemo(() => new PropGrid(placed), [placed])
+  const selection = useMemo(
+    () =>
+      capacity.map((count, model) => ({
+        shown: [] as Placed[],
+        previous: new Int32Array(count),
+        count: 0,
+        bounds: new Sphere(),
+        parts: parts.flatMap((part, k) => (part.model === model ? [k] : [])),
+      })),
+    [capacity, parts],
+  )
+  const shown = useMemo(() => selection.map((s) => s.shown), [selection])
   const meshes = useRef<(InstancedMesh | null)[]>([])
   const last = useRef<[number, number] | null>(null)
 
   const refresh = (cx: number, cz: number) => {
-    const shown = props.models.map(() => [] as Matrix4[])
-    for (const p of placed) {
-      const dx = p.x - cx
-      const dz = p.z - cz
-      if (dx * dx + dz * dz > VIEW_REACH * VIEW_REACH) continue
-      if (p.radius > 0 && blocksView(dx, dz, p.radius)) continue
-      shown[p.model]!.push(p.matrix)
+    selectProps(grid, cx, cz, shown)
+    for (const s of selection) {
+      const list = s.shown
+      if (s.count === list.length && list.every((p, i) => s.previous[i] === p.id)) continue
+      s.bounds.makeEmpty()
+      for (let i = 0; i < list.length; i++) {
+        s.previous[i] = list[i]!.id
+        s.bounds.union(list[i]!.bounds)
+      }
+      s.count = list.length
+      for (const k of s.parts) {
+        const mesh = meshes.current[k]
+        if (mesh) writePropInstances(mesh, list, s.bounds)
+      }
     }
-    parts.forEach((part, k) => {
-      const mesh = meshes.current[k]
-      if (!mesh) return
-      const list = shown[part.model]!
-      list.forEach((matrix, i) => mesh.setMatrixAt(i, matrix))
-      mesh.count = list.length
-      mesh.instanceMatrix.needsUpdate = true
-      mesh.computeBoundingSphere()
-    })
     last.current = [cx, cz]
   }
 
   useLayoutEffect(() => {
     last.current = null
-    return () => parts.forEach((part) => part.geometry.dispose())
+    for (const mesh of meshes.current) mesh?.instanceMatrix.setUsage(DynamicDrawUsage)
+    return () =>
+      parts.forEach((part) => {
+        part.geometry.dispose()
+        part.material.dispose()
+      })
   }, [parts])
 
   useFrame(() => {

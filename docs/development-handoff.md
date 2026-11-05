@@ -1,5 +1,15 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+Aktualizacja 2026-11-05: [bieganie, Inventory i przyciski](running-inventory-fixes.md).
+`MapProps` korzysta z `mapPropVisibility`: komórki przestrzenne, stała kolejność,
+bufory `DynamicDrawUsage`, aktualizacje tylko używanego prefiksu zmienionych modeli.
+Nie skrócono zasięgu ani nie zmieniono jakości grafiki. Pomiar na programowym
+Chromium potwierdza redukcję przesyłanych danych, bez potwierdzenia FPS na iPhonie.
+Inventory ma zakładki klienta i responsywny układ. Przyciski kosztów bez separatorów.
+Dokładne pozycje Dratan/Merac/Egeha wymagają `t_npc_regen`; nowe pytanie o link
+do tabeli/zrzutu skierowano do właściciela. Nie wyprowadzać współrzędnych NPC
+z pozycji drzew, miasta, `mobhelp.lod` ani historycznej korelacji wysokości Dratan.
+
 Aktualizacja 2026-11-04: [loader, Merac i osiem zgłoszeń GUI](ui-merac-fixes.md).
 Cała ilustracja loadera wypełnia ekran przez `100% 100%`, bez zoomu i marginesów.
 Zastępuje to wszystkie starsze opisy `contain`/rozmytego tła oraz `cover`.

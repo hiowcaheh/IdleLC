@@ -165,8 +165,8 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
     })
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'unidentified', label: `Unidentified · ${fmt(pendingCount)}` },
-    { id: 'identified', label: `Identified · ${fmt(identified.length)}` },
+    { id: 'unidentified', label: `Unidentified (${fmt(pendingCount)})` },
+    { id: 'identified', label: `Identified (${fmt(identified.length)})` },
   ]
 
   return (
@@ -339,7 +339,7 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
               </div>
               <button
                 type="button"
-                className="button button--wide"
+                className="button button--wide button--cost"
                 disabled={busy || chosen.length === 0}
                 onClick={() => setConfirmSale(true)}
               >
@@ -347,7 +347,8 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
                   'Select pieces to sell'
                 ) : (
                   <>
-                    Sell {chosen.length} selected · <Gold amount={value} prefix="+" />
+                    <span>Sell {chosen.length} selected</span>
+                    <Gold amount={value} prefix="+" />
                   </>
                 )}
               </button>

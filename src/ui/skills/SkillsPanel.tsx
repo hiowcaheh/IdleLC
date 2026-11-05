@@ -282,7 +282,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
               {available && state.next && (
                 <button
                   type="button"
-                  className="button button--gold"
+                  className="button button--gold button--cost"
                   disabled={busy || !state.canLearn}
                   onClick={() =>
                     run(
@@ -291,7 +291,8 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
                     )
                   }
                 >
-                  {learned ? 'Upgrade' : 'Learn'} · {state.next.learnSp} SP
+                  <span>{learned ? 'Upgrade' : 'Learn'}</span>
+                  <span>{state.next.learnSp} SP</span>
                 </button>
               )}
               {current && current.kind !== 'passive' && onBar && (

@@ -1,5 +1,14 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-05: [bieganie, Inventory i przyciski](docs/running-inventory-fixes.md).
+Obiekty mapy mają indeks przestrzenny, zmienne bufory i częściowe aktualizacje
+wyłącznie zmienionych modeli. Zachować promień 120 m, korytarz kamery i kolejność
+oryginalnych obiektów; obsłużyć wyzerowanie i ponowne powiększenie listy instancji.
+Inventory korzysta z zakładek GUI klienta. Ceny i koszty przycisków mają odstęp,
+bez kropki pomiędzy etykietą a wartością. Dokładne spawny Dratan/Merac/Egeha
+czekają na `t_npc_regen`: dostępne pliki klienta nie zawierają tych współrzędnych.
+Nie przestawiać aren na zgadywane punkty. Juno pozostaje bez zmian.
+
 Najnowszy etap: [loader, Merac i osiem zgłoszeń GUI](docs/ui-merac-fixes.md).
 Loader rozciąga całą ilustrację do ekranu (`100% 100%`), bez cropa/zoomu ani
 rozmytych marginesów. To zastępuje wcześniejsze `contain`/`cover`. Merac ma już

@@ -151,11 +151,12 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
             )}
             <button
               type="button"
-              className="button button--gold"
+              className="button button--gold button--cost"
               disabled={busy || away || !afford}
               onClick={() => buy(item.id, 1)}
             >
-              Buy · <Gold amount={price} />
+              <span>Buy</span>
+              <Gold amount={price} />
             </button>
             {!item.gear && (
               <button

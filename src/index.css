@@ -3116,6 +3116,14 @@ a.button {
   filter: grayscale(0.7) brightness(0.75);
 }
 
+.button--cost {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
 .item-icon {
   border: none;
   border-radius: 0;
@@ -4805,6 +4813,19 @@ a.button {
   border-image-source: url('/ui/lc/skills-tab-active.webp');
   color: #ffe788;
   box-shadow: none;
+}
+.sheet--inventory .tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-bottom: 0;
+}
+.sheet--inventory .tabs__tab {
+  margin-bottom: 0;
+}
+@media (min-width: 600px) {
+  .sheet--inventory .tabs {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
 }
 .sheet--client .shop__slot-title,
 .sheet--client .character-stats__heading,

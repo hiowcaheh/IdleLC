@@ -285,7 +285,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
             {sellPrice(piece.itemId) > 0 && (
               <button
                 type="button"
-                className="button"
+                className="button button--cost"
                 disabled={busy}
                 onClick={() =>
                   run(async () => {
@@ -294,7 +294,8 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                   })
                 }
               >
-                Sell · <Gold amount={sellPrice(piece.itemId)} prefix="+" />
+                <span>Sell</span>
+                <Gold amount={sellPrice(piece.itemId)} prefix="+" />
               </button>
             )}
           </div>
@@ -370,20 +371,22 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
             <>
               <button
                 type="button"
-                className="button"
+                className="button button--cost"
                 disabled={busy}
                 onClick={() => sell([{ itemId: stack.itemId, count: 1 }])}
               >
-                Sell 1 · <Gold amount={price} prefix="+" />
+                <span>Sell 1</span>
+                <Gold amount={price} prefix="+" />
               </button>
               {stack.count > 1 && (
                 <button
                   type="button"
-                  className="button"
+                  className="button button--cost"
                   disabled={busy}
                   onClick={() => sell([{ itemId: stack.itemId, count: stack.count }])}
                 >
-                  Sell all ×{fmt(stack.count)} · <Gold amount={price * stack.count} prefix="+" />
+                  <span>Sell all ×{fmt(stack.count)}</span>
+                  <Gold amount={price * stack.count} prefix="+" />
                 </button>
               )}
             </>
@@ -398,7 +401,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   return (
     <Sheet
       title="Inventory"
-      className="sheet--fixed"
+      className="sheet--fixed sheet--client sheet--inventory"
       titleId="inventory-title"
       onClose={onClose}
       extra={
@@ -468,11 +471,12 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
         <>
           <button
             type="button"
-            className="button button--wide inventory__sell-all"
+            className="button button--wide button--cost inventory__sell-all"
             disabled={busy}
             onClick={() => setConfirmAll(true)}
           >
-            {sellAllLabel} · <Gold amount={value} prefix="+" />
+            <span>{sellAllLabel}</span>
+            <Gold amount={value} prefix="+" />
           </button>
           <p className="sheet__meta inventory__keep-note">
             Kept: gear your class can wear, potions, upgrade stones and magnifying glasses.
