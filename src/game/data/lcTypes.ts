@@ -32,6 +32,11 @@ export interface LcMonster {
   magicAvoid?: number
   attackLevel?: number
   defenseLevel?: number
+  /** t_npc.a_attack_area: how far it hits from (metres). */
+  attackArea?: number
+  /** t_npc.a_walk_speed / a_run_speed (metres a second). */
+  walkSpeed?: number
+  runSpeed?: number
   dropSlots?: LcDrop[]
   skills?: { slot: number; id: number; level: number; prob: number }[]
   /** t_npc.a_attackSpeed — most likely tenths of a second between attacks. */
@@ -48,6 +53,8 @@ export interface LcMonster {
   /** t_npc.a_motion_* clip names; `attack` holds a_motion_attack and a_motion_attack2. */
   animations: Record<string, string | string[] | undefined>
   zones: string[]
+  /** Where it hunts in each zone: the middle of its biggest group of spawns (t_npc_regen), [x, z]. */
+  spawns?: Record<string, [number, number]>
   drops: LcDrop[]
 }
 

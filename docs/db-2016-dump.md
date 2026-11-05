@@ -1,8 +1,15 @@
 # Zrzut bazy z lutego 2016 (`newproject_data.sql`): co zawiera i co zmieniłby pełny import
 
-Data: 2026-11-05. Sprawdził Claude Code na prośbę właściciela. **Nic z tego nie jest jeszcze
-włączone w grze** — dane gry (`src/game/data/generated/lc-data.json`) są bez zmian. Ten dokument
-opisuje wynik sprawdzenia i decyzje, które musi podjąć właściciel przed pełnym importem.
+Data: 2026-11-05. Sprawdził Claude Code na prośbę właściciela.
+
+> **Stan (2026-11-05, później tego dnia): wszystkie cztery etapy są wdrożone** — właściciel
+> zatwierdził je („Wprowadź wszystkie 4 po kolei”). `lc-data.json` pochodzi z pełnego importu
+> obecnym importerem (`npm run import-lc-db -- --dump <zrzut>`), łącznie z `spawns`, `attackArea`,
+> `walkSpeed` i `runSpeed` potworów. Decyzje D01/D02/D04/D08/D24 zapisano w
+> [rejestrze](design-decisions.md). Opis poniżej zostaje jako zapis pomiarów sprzed importu.
+
+Pierwotny opis (przed decyzją): ten dokument opisywał wynik sprawdzenia i decyzje, które musiał
+podjąć właściciel przed pełnym importem.
 
 ## Pochodzenie
 
@@ -78,3 +85,17 @@ po imporcie trzeba osobno sprawdzić grę na prawdziwych danych.
 Etapy 3–4 wymagają zgody właściciela (zmiana balansu, rejestr decyzji). Przed etapem 1–2 importer
 trzeba uruchomić tak, żeby nie włączyć od razu 3–4 (np. flaga importu lub reguła w kodzie) — nie
 zmieniać `lc-data.json` jednym pełnym importem bez tej decyzji.
+
+## Wdrożenie (2026-11-05)
+
+- **Etap 1 — spawny:** importer zapisuje dla każdego potwora i strefy punkt polowania
+  (`spawns`, `import-db.mjs` `huntingPoint`: wiersze `t_npc_regen` warstwy 0 łączone w grupy co
+  40 m, największa grupa wg `a_total_num`, jej medoid). Konwerter terenu (`--only terrain --map
+dratan|merac|egeha`) używa tych punktów jako aren w kolejności spotów (`terrain.json`
+  `"spawns": true`), a gra stawia walkę dokładnie w spawnie potwora (`huntingGround`). Juno zostaje
+  na własnych arenach (jej spawny są z innej wersji mapy).
+- **Etap 2 — hitrate:** w danych; kontrola nauki przepuszcza teraz więcej skilli (pomiar wyżej).
+- **Etap 3 — drop według źródła:** `dropSlots` są w danych, więc `rollSourceDrops` (cztery próby
+  wśród 20 slotów) działa dla wszystkich potworów z pełnym wierszem.
+- **Etap 4 — NPC:** CON, magic avoid, typ ataku i skille potworów (`npcSkills`, `monsterFighter`)
+  działają na prawdziwych danych.

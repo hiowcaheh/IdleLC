@@ -108,6 +108,7 @@ export function fromLc(m: LcMonster): MonsterDef {
         }
       : {}),
     sp: m.sp ?? 0,
+    ...(m.spawns && Object.keys(m.spawns).length > 0 ? { spawns: m.spawns } : {}),
   }
 }
 

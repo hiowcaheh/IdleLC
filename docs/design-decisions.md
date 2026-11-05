@@ -31,6 +31,20 @@ Stan rejestru: 2026-11-02, punkt odniesienia implementacji `c9944c9`. Celem jest
 
 „Oryginał” w tym dokumencie oznacza odczytane źródła November 2018, z uwzględnieniem ich ograniczeń i flag. Nie potwierdzono, że każda reguła działała identycznie na serwerze prywatnego klienta 2015. Dla brakujących wartości DB nie wybieramy liczb na podstawie nazw.
 
+## Rozstrzygnięcia właściciela — 2026-11-05
+
+Po sprawdzeniu [zrzutu bazy 2016](db-2016-dump.md) właściciel zatwierdził wszystkie cztery etapy
+pełnego importu („Wprowadź wszystkie 4 po kolei”):
+
+- **D08:** drop według źródła — cztery próby wśród pełnych 20 slotów (także pustych). Łupy z potworów
+  spadają ok. 4–5× rzadziej niż przy losowaniu każdego wpisu; Smelting Stone i akcesoria bez zmian.
+- **D01/D02/D04:** prawdziwe CON, magic avoid, ataki magiczne i skille potworów z bazy. Część
+  potworów (zwłaszcza magicznych) jest wyraźnie groźniejsza; balans nie jest wyrównywany.
+- **D24:** Dratan, Merac i Egeha — walka w punkcie spawnu potwora z `t_npc_regen`; Juno zostaje na
+  własnych arenach. Bieg między spotami trwa tyle, ile wynika z Run speed i długości trasy po mapie
+  (trasa omija drzewa, skały, budynki, urwiska i wodę; siatka z pliku atrybutów klienta `.sat`
+  dla Dratan/Merac, z nachylenia i obiektów dla Juno/Egeha).
+
 ## Rozstrzygnięcia właściciela — 2026-11-04
 
 - **D09/D10:** polecenie obejmuje źródłowe różnice poziomu i losowanie nagród solo.

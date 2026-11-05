@@ -40,6 +40,10 @@ export function sourceNpc(row) {
     magicAvoid: 'a_magicavoid',
     attackLevel: 'a_attacklevel',
     defenseLevel: 'a_defenselevel',
+    // metres: how far it hits from (m_attackArea) and how fast it walks / runs (m/s)
+    attackArea: 'a_attack_area',
+    walkSpeed: 'a_walk_speed',
+    runSpeed: 'a_run_speed',
   })
   const slots = Array.from({ length: 20 }, (_, i) => {
     const item = row[`a_item_${i}`],

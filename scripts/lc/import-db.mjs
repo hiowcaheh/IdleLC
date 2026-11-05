@@ -95,14 +95,57 @@ function parseArgs(argv) {
   return args
 }
 
+/** Spawn points closer than this (metres) belong to one hunting ground. */
+const SPAWN_LINK = 40
+
+/**
+ * Where a monster hunts in a zone: the spawn point (t_npc_regen, ground layer) in the middle of its
+ * biggest group of spawns (by how many monsters the group keeps up), as [x, z] map metres.
+ */
+export function huntingPoint(points) {
+  if (points.length === 0) return null
+  const parent = points.map((_, i) => i)
+  const find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])))
+  for (let i = 0; i < points.length; i++) {
+    for (let j = i + 1; j < points.length; j++) {
+      const [ax, az] = points[i]
+      const [bx, bz] = points[j]
+      if (Math.hypot(ax - bx, az - bz) <= SPAWN_LINK) parent[find(i)] = find(j)
+    }
+  }
+  const groups = new Map()
+  points.forEach((p, i) => {
+    const root = find(i)
+    groups.set(root, [...(groups.get(root) ?? []), p])
+  })
+  const weight = (group) => group.reduce((sum, p) => sum + Math.max(1, p[2]), 0)
+  const biggest = [...groups.values()].sort((a, b) => weight(b) - weight(a))[0]
+  let best = biggest[0]
+  let bestSum = Infinity
+  for (const p of biggest) {
+    const sum = biggest.reduce((total, q) => total + Math.hypot(p[0] - q[0], p[1] - q[1]), 0)
+    if (sum < bestSum) [best, bestSum] = [p, sum]
+  }
+  return [Math.round(best[0] * 10) / 10, Math.round(best[1] * 10) / 10]
+}
+
 function buildData(tables) {
   const npcs = new Map(tables.t_npc.map((r) => [int(r.a_index), r]))
   const zoneOfNpc = new Map()
+  /** npc index → zone → spawn points [x, z, how many] on the ground layer */
+  const spawnsOfNpc = new Map()
   for (const r of tables.t_npc_regen) {
     const zone = int(r.a_zone_num)
     const list = zoneOfNpc.get(int(r.a_npc_idx)) ?? new Set()
     list.add(zone)
     zoneOfNpc.set(int(r.a_npc_idx), list)
+    if (int(r.a_y_layer) !== 0) continue
+    const byZone = spawnsOfNpc.get(int(r.a_npc_idx)) ?? new Map()
+    byZone.set(zone, [
+      ...(byZone.get(zone) ?? []),
+      [num(r.a_pos_x), num(r.a_pos_z), int(r.a_total_num)],
+    ])
+    spawnsOfNpc.set(int(r.a_npc_idx), byZone)
   }
 
   const fieldIndexes = new Set(FIELD_ZONES.map((z) => z.index))
@@ -156,6 +199,13 @@ function buildData(tables) {
         die: r.a_motion_die,
       },
       zones: zones.map((z) => `lc-zone-${z}`),
+      // the hunting ground in each zone, from the spawn table (map metres)
+      spawns: Object.fromEntries(
+        zones.flatMap((z) => {
+          const point = huntingPoint(spawnsOfNpc.get(index)?.get(z) ?? [])
+          return point ? [[`lc-zone-${z}`, point]] : []
+        }),
+      ),
       drops,
     })
   }

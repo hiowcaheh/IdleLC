@@ -142,6 +142,8 @@ export interface MonsterDef {
   dropSlots?: (MonsterDrop | null)[]
   /** Skill points for a kill, in 1/10 000 SP (LC t_npc.a_skill_point). */
   sp?: number
+  /** Where it is hunted in each zone, map metres [x, z] (t_npc_regen; zones whose map it fits). */
+  spawns?: Record<string, readonly [number, number]>
 }
 
 export interface MonsterDrop {
