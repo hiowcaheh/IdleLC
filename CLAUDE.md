@@ -1,5 +1,14 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-05 (Claude Code): [zrzut bazy 2016](docs/db-2016-dump.md) — pełny
+`newproject_data.sql` jest u właściciela (ten sam plik co pierwszy import; starszy importer gubił
+kolumny). Zawiera `t_npc_regen` (pasuje 1:1 do terenu Dratan/Merac/Egeha), `hitrate` skilli
+i statystyki/drop/skille NPC. **Nie importować go jednym pełnym importem bez decyzji właściciela** —
+zmienia drop (~4–5× rzadziej) i trudność części NPC. GUI z tej sesji: Book (próg, nagrody i Claim
+w jednym wierszu), Inventory (6 zakładek w linii), Character (pasek EXP bez obwódki, plansza sprzętu
+większa, bez „Tap a piece”), zielona ramka pasywnych jak aktywnych, okno Expedition w stylu klienta.
+Przy zmianie grafiki z `public/ui/lc/` dodawaj `?v=<hash>` w CSS (cache PWA). SaveVersion **14**.
+
 Aktualizacja 2026-11-05: [płynne podbieganie do potwora](docs/approach-motion-fix.md).
 Logika nadal pracuje w krokach 50 ms. Pozycja podczas `approach` korzysta
 z reszty czasu renderowania `VisibleClock.interpolationSeconds`, a obrót z czasu

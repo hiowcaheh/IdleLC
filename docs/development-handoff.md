@@ -1,5 +1,15 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+Aktualizacja 2026-11-05 (Claude Code): [zrzut bazy 2016](db-2016-dump.md) i sześć poprawek GUI
+(changelog). **Pełny SQL jest dostępny** u właściciela (Drive `133EYk_OXU3qxzKu8OpDTw1wlf_NH5ffE`,
+SHA-256 `newproject_data.sql` `0cae2afd…d85d`); to ten sam plik co pierwszy import, a brakujące pola
+wynikały ze starszej wersji importera. Obecny importer wypełnia z niego `t_npc_regen`, `hitrate`,
+CON/magic avoid, 20 slotów dropu i skille NPC, ale **`lc-data.json` celowo nie został przeimportowany**:
+zmienia balans (drop ~4–5× rzadszy, część NPC groźniejsza). Czekamy na decyzję właściciela co do etapów
+w raporcie; spawny Dratan/Merac/Egeha pasują 1:1 do terenu i są pierwszym bezpiecznym krokiem.
+GUI: Book jednym wierszem, Inventory jedną linią zakładek, Character bez napisu i z większą planszą,
+zielona ramka pasywnych, okno Expedition w stylu klienta. SaveVersion **14**.
+
 Aktualizacja 2026-11-05: [płynne podbieganie](approach-motion-fix.md).
 Właściciel doprecyzował, że szarpie postać na spocie przy poprawnym FPS.
 `Battle` odczytywało pozycję i obrót tylko w krokach 50 ms, podczas gdy klip biegu

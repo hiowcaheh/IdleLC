@@ -1,5 +1,34 @@
 # Historia zmian
 
+## 2026-11-05 (Claude Code): sześć poprawek GUI i sprawdzenie zrzutu bazy 2016
+
+Punkt wyjścia `fd6e1ee`. Commity `45eb188`, `da0ebd7` oraz dokumentacja.
+
+1. **Book:** próg zabójstw, nagrody i Claim w jednym wierszu (kolumny Kills / Rewards / Status),
+   mniejszy Claim; nic na siebie nie nachodzi.
+2. **Inventory:** wszystkie sześć zakładek klienta w jednej linii także na telefonie (mniejsze rogi
+   grafiki i tekst; od 600 px poprzedni rozmiar).
+3. **Character:** pasek EXP w nagłówku nie ma już jaśniejszego prostokąta — wycinek `book-progress`
+   gubi półprzezroczystą obwódkę z atlasu (`ui.mjs`, opcja `minAlpha`), adres z `?v=` dla cache PWA.
+4. **Character → Equipment:** usunięty napis „Tap a piece to see it”; plansza sprzętu zajmuje pełną
+   wewnętrzną szerokość okna i jest niżej (ta sama grafika i ikony, bez dodatkowego skalowania ikon).
+   Komunikat o pustym slocie zostaje, gdy gracz go wybierze.
+5. **Skills:** pasywny skill do nauczenia ma ten sam zielony kolor i poświatę co aktywny (okrągły
+   pierścień nad ikoną, więc szary filtr nienauczonego skilla go nie przygasza).
+6. **Expedition:** okno w ramce klienta (pasek tytułu, X), sekcje jak w Character, pola wartości
+   (Kills, Deaths, EXP, SP, Gold na godzinę), lista mikstur z ikonami (slot, ilość w torbie, zużycie
+   na godzinę, na jak długo starczy / AUTO off / brak w torbie) oraz przyciski klienta Cancel i Send.
+
+**Zrzut bazy 2016** (Drive właściciela): to ten sam `newproject_data.sql`, z którego zrobiono pierwszy
+import — tylko starszy importer pomijał część kolumn. Zawiera `t_npc_regen` (spawny pasują 1:1 do
+terenu Dratan, Merac i Egeha; Juno nie), `hitrate` skilli oraz CON/hit/dodge/magic avoid, 20 slotów
+dropu i skille potworów. **Nie zaimportowano go do gry**: pełny import zmienia balans (łupy ok. 4–5×
+rzadziej, część potworów wyraźnie groźniejsza). Pomiary i proponowane etapy:
+[docs/db-2016-dump.md](docs/db-2016-dump.md).
+
+Weryfikacja: `npm run check` (**435 testów / 49 plików**), zrzuty Chromium 390×844 każdego okna.
+SaveVersion **14**, bez zmian zapisu i reguł gry.
+
 ## 2026-11-05: płynne podbieganie do kolejnego potwora
 
 - Pozycja i obrót postaci podczas podbiegania aktualizują się w każdej klatce.
