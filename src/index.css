@@ -1700,6 +1700,14 @@ a.button {
   color: #b8d8ff;
 }
 
+.afk__stats > .afk__stat--lost {
+  grid-column: 1 / -1;
+}
+
+.afk__stat--lost dd {
+  color: #ff7d6b;
+}
+
 .afk__level {
   margin-bottom: 12px;
   padding: 8px;

@@ -68,6 +68,15 @@ export function AfkSummary() {
             <dt>Skill points</dt>
             <dd>+{formatSp(result.sp)} SP</dd>
           </div>
+          {(result.lost.exp > 0 || result.lost.sp > 0) && (
+            <div className="afk__stat--lost">
+              <dt>Lost on death</dt>
+              <dd>
+                −{fmt(result.lost.exp)} EXP
+                {result.lost.sp > 0 ? ` · −${formatSp(result.lost.sp)} SP` : ''}
+              </dd>
+            </div>
+          )}
         </dl>
 
         {result.levelsGained > 0 && (

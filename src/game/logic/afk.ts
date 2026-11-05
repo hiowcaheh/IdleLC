@@ -3,6 +3,7 @@
  * same auto-combat as watched play. Finite supplies, level-ups and expiring titles take effect
  * at their actual simulation times. Pure; the server will run it too.
  */
+import { deathLoss } from './death.ts'
 import { boostEffects, boostsOf, liveBoosts } from './boosts.ts'
 import { getMonster } from '../data/monsters.ts'
 import type { CharacterData } from './character.ts'
@@ -81,6 +82,8 @@ export interface AfkResult {
   drops: ItemStack[]
   /** Potions drunk (taken from the inventory). */
   potionsUsed: ItemStack[]
+  /** EXP and SP (1/10 000) the deaths took (death.ts). */
+  lost: { exp: number; sp: number }
   character: CharacterData
 }
 
@@ -126,6 +129,7 @@ export function simulateAfk(
   let totalExp = 0,
     gold = 0,
     sp = 0
+  const lost = { exp: 0, sp: 0 }
   const items = new Map<number, number>()
   const used = new Map<number, number>()
   // Rewards have their own stream, as they do in LocalGameService during watched combat.
@@ -160,6 +164,14 @@ export function simulateAfk(
     const tick = combatTick(state, step, battleRng)
     state = tick.state
     done += step
+    // a death costs EXP and SP as on the server, at the moment it happens
+    for (const e of tick.events) {
+      if (e.type !== 'death' || e.who !== 'player') continue
+      const loss = deathLoss(current.level, current.exp, character.sp + sp - lost.sp)
+      current = { ...current, exp: current.exp - loss.exp }
+      lost.exp += loss.exp
+      lost.sp += loss.sp
+    }
     const killCount = tick.events.filter((e) => e.type === 'death' && e.who === 'monster').length
     if (killCount === 0) continue
     collectPotions()
@@ -209,6 +221,7 @@ export function simulateAfk(
     levelBefore: character.level,
     levelsGained: current.level - character.level,
     drops,
+    lost,
     potionsUsed: [...used]
       .map(([itemId, count]) => ({ itemId, count }))
       .sort((a, b) => a.itemId - b.itemId),
@@ -221,7 +234,7 @@ export function simulateAfk(
             }
           : {}),
         gold: character.gold + gold,
-        sp: character.sp + sp,
+        sp: character.sp + sp - lost.sp,
         ...recordKills(
           character,
           character.expedition ?? character.location,

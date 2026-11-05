@@ -26,6 +26,8 @@ import { gameService } from '../game/service/index.ts'
 import { combatSession } from '../game/session/combatSession.ts'
 import { planTravel } from '../scene/travelRoute.ts'
 import { combatEvents } from './combatEvents.ts'
+import { toast } from './toasts.ts'
+import { formatSp } from '../ui/skills/format.ts'
 
 /** Low-frequency combat snapshot for the DOM HUD (the 3D scene reads the session directly). */
 export interface CombatHud {
@@ -167,6 +169,13 @@ export const useGameStore = create<GameStore>((set, get) => {
 
   const applyResult = (result: CombatResult) => {
     applyCharacter(result.character)
+    // the server's death penalty (death.ts)
+    if (result.lost.exp > 0 || result.lost.sp > 0)
+      toast(
+        `You died and lost ${result.lost.exp.toLocaleString('en-US')} EXP` +
+          (result.lost.sp > 0 ? ` and ${formatSp(result.lost.sp)} SP.` : '.'),
+        'error',
+      )
     combatEvents.emit(
       result.optionsGained.map(({ itemId, option }) => ({
         type: 'optionGained' as const,

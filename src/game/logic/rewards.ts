@@ -3,6 +3,7 @@
  * (later: a Supabase function) checks the report against the clock and pays out. Pure.
  */
 import { reportedBoosts, type OwnedBoost } from './boosts.ts'
+import { deathLoss } from './death.ts'
 import { getItem } from '../data/items.ts'
 import type { MonsterDef } from '../data/types.ts'
 import { clamp } from './balance.ts'
@@ -60,6 +61,8 @@ export interface CombatResult {
   potionsUsed: ItemStack[]
   /** Options worn pieces gained from the play time of the report. */
   optionsGained: OptionGain[]
+  /** EXP and SP (1/10 000) the report's deaths took (death.ts). */
+  lost: { exp: number; sp: number }
 }
 
 /** Extra rewards in % on top of the database's: EXP, skill points, gold and drop chances. */
@@ -205,6 +208,16 @@ export function applyCombatReport(
   const { inventory, taken } = takeFromInventory(character.inventory, potions)
   const played = applyPlayTime(character, playSeconds, rng)
   const bag = stowDrops({ inventory, gear: played.character.gear }, drops, rng)
+  // each death of the report after its kills (Battle_ProcDead_PC.cpp)
+  let left = { exp: reward.remainingExp, sp: character.sp + sp }
+  const lost = { exp: 0, sp: 0 }
+  for (let i = 0; i < deaths; i++) {
+    const loss = deathLoss(reward.level, left.exp, left.sp)
+    if (loss.exp === 0 && loss.sp === 0) break
+    left = { exp: left.exp - loss.exp, sp: left.sp - loss.sp }
+    lost.exp += loss.exp
+    lost.sp += loss.sp
+  }
   const boosts =
     report.boosts === undefined
       ? {}
@@ -222,9 +235,9 @@ export function applyCombatReport(
       ...bag,
       ...boosts,
       level: reward.level,
-      exp: reward.remainingExp,
+      exp: left.exp,
       gold: character.gold + gold,
-      sp: character.sp + sp,
+      sp: left.sp,
       ...recordKills(character, character.location, kills, deaths),
     },
     kills,
@@ -235,5 +248,6 @@ export function applyCombatReport(
     drops,
     potionsUsed: taken,
     optionsGained: played.gained,
+    lost,
   }
 }
