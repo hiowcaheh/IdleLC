@@ -1204,6 +1204,113 @@ a.button {
   color: var(--parchment-dim);
 }
 
+/* a potion: its effects one per row, then when it is drunk (one line each) */
+.potion-info {
+  flex-basis: 100%;
+  display: grid;
+  gap: 6px;
+}
+.potion-info__rows {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 6px 9px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(150, 120, 80, 0.4);
+}
+.potion-info__rows > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+.potion-info__rows dt {
+  color: var(--parchment);
+}
+.potion-info__rows dd {
+  margin: 0;
+  font-weight: 800;
+  color: #8fe36a;
+}
+.potion-info__rows > div:last-child dd {
+  color: var(--parchment);
+  font-weight: 700;
+}
+.potion-notes {
+  flex-basis: 100%;
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0 0 0 16px;
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+
+/* an effect's window: take a buff or potion off */
+.effect-window__actions {
+  display: flex;
+  margin-top: 12px;
+}
+.effect-window__actions .button {
+  flex: 1;
+  min-height: 40px;
+}
+
+/* a button on its own row (Wear under the stat changes) */
+.item-row__actions .button--wide {
+  flex-basis: 100%;
+}
+
+/* "If you wear it": the changes one per line, better green and worse red */
+.wear-compare {
+  flex-basis: 100%;
+  display: grid;
+  gap: 4px;
+  padding: 6px 9px 7px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(150, 120, 80, 0.4);
+}
+.wear-compare__title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gilt);
+}
+.wear-compare__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 2px 14px;
+  margin: 0;
+}
+.wear-compare__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+.wear-compare__row dt {
+  color: var(--parchment);
+}
+.wear-compare__row dd {
+  margin: 0;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.wear-compare__row.is-up dd {
+  color: #8fe36a;
+}
+.wear-compare__row.is-down dd {
+  color: #ff7d6b;
+}
+.wear-compare__none,
+.wear-compare__note {
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+
 .button--gold {
   border-color: var(--gilt);
   color: var(--gilt-bright);
@@ -2478,11 +2585,45 @@ a.button {
   background: center / 100% 100% no-repeat;
 }
 
-/* the Character window's board: a little larger (to the window's inner edges) and lower */
+/*
+ * The Character window's Equipment tab: the board on a stage of its own blue that fills the tab,
+ * framed like the hero card above, the board's edges fading into it (no hard rectangle on grey).
+ */
+.sheet--character .sheet__body {
+  display: flex;
+  flex-direction: column;
+}
+.equip-stage {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 0 12px;
+  border-radius: 3px;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 45%, rgba(40, 96, 150, 0.45), transparent 75%),
+    linear-gradient(180deg, #0b1a2b, #08121e 60%, #0a1522);
+  box-shadow:
+    inset 0 0 0 1px rgba(150, 120, 80, 0.35),
+    inset 0 0 28px rgba(0, 0, 0, 0.7);
+}
+.equip-stage > .sheet__meta {
+  margin: 8px 12px 0;
+  text-align: center;
+}
 .sheet--character .equip-board {
-  --board-width: min(calc(100% + 24px), 420px);
+  --board-width: min(100%, 440px);
   width: var(--board-width);
-  margin: 18px 0 10px calc((100% - var(--board-width)) / 2);
+  margin: 0 auto;
+  /* the texture's thin brown frame fades into the stage */
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent),
+    linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent),
+    linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+  mask-composite: intersect;
 }
 
 .equip-board__slot {
@@ -2718,13 +2859,6 @@ a.button {
 
 .skill-slot.is-blocked {
   filter: grayscale(1) brightness(0.55);
-}
-
-.potion-picker__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 10px;
 }
 
 /* The client's check box (NewOption): on red, off empty. */
@@ -5384,6 +5518,19 @@ a.button {
 }
 .sheet--settings .setting--danger {
   background: none;
+}
+/* one divider per group (graphics; the switches; character and save), none between rows */
+.sheet--settings .setting--row,
+.sheet--settings .setting--plain {
+  padding: 8px 4px;
+  background: none;
+}
+.sheet--settings .setting--row.setting--group-end {
+  padding-bottom: 16px;
+  background: url('/ui/lc/divider.webp?v=8a5dd6de') bottom center / 100% 6px no-repeat;
+}
+.sheet--settings .setting--plain {
+  padding-top: 14px;
 }
 .sheet--settings .setting__label {
   color: var(--gilt-bright);

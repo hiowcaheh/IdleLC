@@ -9,7 +9,7 @@ import { getTitle } from '../../game/data/titles.ts'
 import { SLOT_LABELS, fmt, gearStats, nameTone, optionLines, pieceName } from '../gear/format.ts'
 import { ItemIcon } from './ItemIcon.tsx'
 import { TYPE_LABELS } from './itemTypes.ts'
-import { potionLine } from './potionText.ts'
+import { potionRows } from './potionText.ts'
 import { titleDuration, titleStyle } from '../titles/format.ts'
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -60,7 +60,10 @@ export function ItemInfo({
     })
   }
   for (const [label, value] of gearStats(itemId, plus, rare)) rows.push({ label, value })
-  if (item.potion) rows.push({ label: 'Effect', value: potionLine(item.potion) })
+  // a potion's effects one per row, then how long it lasts
+  if (item.potion)
+    for (const [label, value] of potionRows(item.potion))
+      rows.push({ label, value, tone: label === 'Lasts' ? '' : ' is-good' })
   const level = gear ? requiredLevel(itemId, options) : item.level
   if (level > 1 && item.type !== 'material') {
     rows.push({

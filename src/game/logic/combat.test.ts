@@ -20,9 +20,11 @@ import {
   healPlayer,
   killMonster,
   effectiveStats,
+  removeEffect,
   potionsLeft,
   takePotionsUsed,
   updatePlayer,
+  type ActiveEffect,
   type CombatEvent,
   type CombatState,
   type FighterInit,
@@ -838,5 +840,47 @@ describe('carryVitals', () => {
     expect(carryVitals(hurt, next, 3600).player.hp).toBe(1000)
     const dead = { ...hurt, player: { ...hurt.player, hp: 0 } }
     expect(carryVitals(dead, next, 0).player.hp).toBe(1)
+  })
+})
+
+describe('removeEffect', () => {
+  const effect = (over: Partial<ActiveEffect>): ActiveEffect => ({
+    skillId: 7,
+    name: 'Effect',
+    remaining: 30,
+    stats: [],
+    stun: false,
+    poison: 0,
+    nextTick: 1,
+    ...over,
+  })
+
+  it('takes a buff or potion off the hero, not curses or stuns', () => {
+    const s = createCombat(strongPlayer, 'a', weakMonster)
+    const buffed: CombatState = {
+      ...s,
+      player: {
+        ...s.player,
+        hp: 150,
+        effects: [
+          effect({ stats: [{ kind: 'stat', stat: 'maxHp', value: 50, percent: false }] }),
+          effect({ skillId: 0, itemId: 391, potion: 'boost' }),
+          effect({ skillId: 9, stun: true }),
+          effect({
+            skillId: 10,
+            stats: [{ kind: 'stat', stat: 'attack', value: -5, percent: false }],
+          }),
+        ],
+      },
+    }
+    const noBuff = removeEffect(buffed, 'player', { skillId: 7 })!
+    expect(noBuff.player.effects.map((e) => e.skillId)).toEqual([0, 9, 10])
+    // HP falls back under the lower maximum
+    expect(noBuff.player.hp).toBe(100)
+    const noPotion = removeEffect(buffed, 'player', { skillId: 0, itemId: 391 })!
+    expect(noPotion.player.effects.map((e) => e.itemId)).not.toContain(391)
+    expect(removeEffect(buffed, 'player', { skillId: 9 })).toBeNull()
+    expect(removeEffect(buffed, 'player', { skillId: 10 })).toBeNull()
+    expect(removeEffect(buffed, 'player', { skillId: 99 })).toBeNull()
   })
 })

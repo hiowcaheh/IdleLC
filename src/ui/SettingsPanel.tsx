@@ -85,7 +85,7 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
         />
       </label>
 
-      <label className="setting setting--row">
+      <label className="setting setting--row setting--group-end">
         <span>
           <span className="setting__label">Developer tools</span>
           <span className="setting__hint">Game speed, level and any monster, for testing</span>
@@ -98,7 +98,7 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
         />
       </label>
 
-      <div className="setting">
+      <div className="setting setting--plain">
         <button type="button" className="button button--wide" onClick={onChangeCharacter}>
           Change character
         </button>

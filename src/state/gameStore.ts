@@ -101,6 +101,8 @@ interface GameStore {
   devAddGold(amount: number): void
   devAddSp(amount: number): void
   devKillTarget(): void
+  /** Takes a buff or potion effect off the hero (not curses or stuns); false when it can't. */
+  removeEffect(which: { skillId: number; itemId?: number }): boolean
   devHeal(): void
   devSimulateAfk(seconds: number): void
   /** Opens every hunting spot, then goes to the one given. */
@@ -190,11 +192,12 @@ export const useGameStore = create<GameStore>((set, get) => {
    * Fight outcomes and the potions drunk go to the service, which decides the rewards and takes the
    * potions from the bag.
    */
-  const reportCombat = (kills: number, deaths: number) => {
+  /** Reports the fight; `always` also when nothing was killed or drunk (the boosts changed). */
+  const reportCombat = (kills: number, deaths: number, always = false) => {
     const character = get().character
     if (!character) return
     const potions = combatSession.takePotionsUsed()
-    if (kills === 0 && deaths === 0 && potions.length === 0) return
+    if (!always && kills === 0 && deaths === 0 && potions.length === 0) return
     const report = {
       monsterId: combatSession.state.monsterId,
       kills,
@@ -543,6 +546,14 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (get().character?.expedition) return
       combatEvents.emit(combatSession.killTarget())
       set({ hud: toHud(combatSession.state) })
+    },
+
+    removeEffect(which) {
+      if (get().character?.expedition || !combatSession.removeEffect(which)) return false
+      set({ hud: toHud(combatSession.state) })
+      // a boost potion taken off leaves the save too
+      if (which.itemId !== undefined) reportCombat(0, 0, true)
+      return true
     },
 
     devHeal() {

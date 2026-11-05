@@ -425,6 +425,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
           role="tabpanel"
           id="character-panel-equipment"
           aria-labelledby="character-tab-equipment"
+          className="equip-stage"
         >
           <div
             className="equip-board"

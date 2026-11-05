@@ -125,18 +125,6 @@ function PotionSlotPicker({ group, onClose }: { group: PotionGroup; onClose(): v
           onChange={() => put({ ...current, auto: !current.auto })}
         />
       </label>
-      <div className="potion-picker__actions">
-        {current.itemId !== null && (
-          <button
-            type="button"
-            className="button"
-            disabled={busy}
-            onClick={() => put({ ...current, itemId: null })}
-          >
-            Empty the slot
-          </button>
-        )}
-      </div>
       {owned.length > 0 ? (
         <ul className="item-list">
           {owned.map(({ itemId, count, item }) => {

@@ -10,9 +10,11 @@ import { toast } from '../../state/toasts.ts'
 import { BuyDialog } from '../items/BuyDialog.tsx'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { TYPE_LABELS } from '../items/itemTypes.ts'
-import { potionLine, potionText } from '../items/potionText.ts'
+import { PotionInfo } from '../items/PotionNotes.tsx'
+import { potionLine } from '../items/potionText.ts'
 import { Sheet } from '../Sheet.tsx'
-import { SLOT_LABELS, compareText, fmt, gearLine, nameTone, wearProblem } from './format.ts'
+import { SLOT_LABELS, fmt, gearLine, nameTone, wearProblem } from './format.ts'
+import { WearCompare } from './WearCompare.tsx'
 
 /** The display slot of a shop slot (the accessory places share one label). */
 const slotKey = (slot: GearSlot): EquipSlot => (slot === 'accessory' ? 'accessory1' : slot)
@@ -112,13 +114,13 @@ export function ShopPanel({ onClose }: { onClose(): void }) {
         </button>
         {open && (
           <div className="item-row__actions">
-            {item.gear && (
-              <p className="item-row__note">
-                {problem ??
-                  `If you wear it: ${compareText(character, { itemId: item.id, plus: 0 })}`}
-              </p>
-            )}
-            {item.potion && <p className="item-row__note">{potionText(item.potion)}</p>}
+            {item.gear &&
+              (problem ? (
+                <p className="item-row__note">{problem}</p>
+              ) : (
+                <WearCompare character={character} piece={{ itemId: item.id, plus: 0 }} />
+              ))}
+            {item.potion && <PotionInfo potion={item.potion} />}
             {item.magnifier && (
               <p className="item-row__note">
                 Identifies one rare item at the Appraiser

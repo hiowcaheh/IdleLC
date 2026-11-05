@@ -12,6 +12,7 @@ import type { CombatStats, EquipSlot } from '../../game/data/types.ts'
 import type { CharacterData } from '../../game/logic/character.ts'
 import { checkWear, requiredLevel, type GearPiece } from '../../game/logic/equipment.ts'
 import { playerFighter } from '../../game/logic/fighters.ts'
+import { statChanges, type StatChange } from '../statChanges.tsx'
 import { GRADES, isRare } from '../../game/logic/rare.ts'
 import {
   LEVEL_OPTION,
@@ -200,35 +201,18 @@ export function optionLines(
   })
 }
 
-/** How the hero's attack, defense and speed would change by wearing a piece ("Attack +12"). */
-export function compareText(
+/** How the hero's stats (as the Character window shows them) would change by wearing a piece. */
+export function wearChanges(
   character: CharacterData,
   piece: Pick<GearPiece, 'itemId' | 'plus' | 'options' | 'rare'>,
-): string {
+): StatChange[] {
   const gear = getItem(piece.itemId).gear
-  if (!gear) return ''
+  if (!gear) return []
   const slots = slotsFor(gear)
   const slot = slots.find((s) => !character.equipment[s]) ?? slots[0]!
   const before = heroStats(character)
   const equipment = { ...character.equipment, [slot]: { uid: 'preview', ...piece } }
   // Equipping dual swords also removes the shield, including its options.
   if (gear.slot === 'weapon' && gear.subtype === DUAL_SWORDS) delete equipment.shield
-  const after = playerFighter({ ...character, equipment }).stats
-  const parts: string[] = []
-  const delta = (label: string, a: number, b: number) => {
-    const d = Math.round(b - a)
-    if (d !== 0) parts.push(`${label} ${d > 0 ? '+' : '−'}${fmt(Math.abs(d))}`)
-  }
-  delta('Attack', before.attack, after.attack)
-  delta('Defense', before.defense, after.defense)
-  delta('HP', before.maxHp, after.maxHp)
-  delta('MP', before.maxMp ?? 0, after.maxMp ?? 0)
-  delta('Hit Rate', before.hit ?? 0, after.hit ?? 0)
-  delta('Evasion', before.dodge ?? 0, after.dodge ?? 0)
-  if (Math.abs(after.attackInterval - before.attackInterval) > 0.001) {
-    parts.push(
-      `${after.attackInterval.toFixed(1)} s per hit (now ${before.attackInterval.toFixed(1)})`,
-    )
-  }
-  return parts.length ? parts.join(' · ') : 'No change'
+  return statChanges(before, playerFighter({ ...character, equipment }).stats)
 }

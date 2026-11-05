@@ -1,7 +1,8 @@
 import { useEffect } from 'react'
 import { getItem } from '../../game/data/items.ts'
 import { getSkill } from '../../game/data/skills.ts'
-import type { Side } from '../../game/logic/combat.ts'
+import { isHarmful, type Side } from '../../game/logic/combat.ts'
+import { useGameStore } from '../../state/gameStore.ts'
 import { skillRank } from '../../game/logic/skills.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { Sheet } from '../Sheet.tsx'
@@ -15,6 +16,7 @@ import { useCombatTicker } from './useCombatTicker.ts'
  */
 export function EffectWindow({ side, id, onClose }: { side: Side; id: string; onClose(): void }) {
   const effect = useCombatTicker(250)[side].effects.find((e) => effectKey(e) === id)
+  const removeEffect = useGameStore((s) => s.removeEffect)
   const ended = effect === undefined
   useEffect(() => {
     if (ended) onClose()
@@ -56,6 +58,19 @@ export function EffectWindow({ side, id, onClose }: { side: Side; id: string; on
         )}
         {skill?.description && <p className="effect-window__text">{skill.description}</p>}
       </div>
+      {side === 'player' && !isHarmful(effect) && (
+        <div className="effect-window__actions">
+          <button
+            type="button"
+            className="button button--wide"
+            onClick={() => {
+              if (removeEffect({ skillId: effect.skillId, itemId: effect.itemId })) onClose()
+            }}
+          >
+            Remove effect
+          </button>
+        </div>
+      )}
     </Sheet>
   )
 }

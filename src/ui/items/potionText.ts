@@ -1,7 +1,7 @@
 import type { PotionDef } from '../../game/data/types.ts'
 import { HP_POTION_BELOW, MP_POTION_BELOW } from '../../game/logic/combat.ts'
 import { interpretEffect, type StatEffect } from '../../game/logic/skills.ts'
-import { statLine } from '../skills/format.ts'
+import { statLine, statParts } from '../skills/format.ts'
 
 const time = (seconds: number) =>
   seconds >= 60 && seconds % 60 === 0
@@ -31,28 +31,44 @@ export function potionLine(potion: PotionDef): string {
     : `${resource(potion)} recovery +${potion.power} · ${time(potion.duration)}`
 }
 
-/** What the potion does and when the hero drinks it. */
-export function potionText(potion: PotionDef): string {
+/** What the potion does, one effect per row, then how long it lasts: [label, value]. */
+export function potionRows(potion: PotionDef): [string, string][] {
+  const what = resource(potion)
+  const rows: [string, string][] =
+    potion.kind === 'boost'
+      ? (potion.effects ?? []).flatMap((e) => {
+          const effect = interpretEffect(e)
+          return effect?.kind === 'stat' ? [statParts(effect as StatEffect)] : []
+        })
+      : potion.kind === 'hp' || potion.kind === 'mp'
+        ? [
+            [`${what} per second`, `+${potion.power}`],
+            [`${what} in all`, `+${potion.power * potion.duration}`],
+          ]
+        : [[`${what} recovery`, `+${potion.power}`]]
+  return [...rows, ['Lasts', time(potion.duration)]]
+}
+
+/** When the hero drinks it and what happens to it, one sentence per line. */
+export function potionNotes(potion: PotionDef): string[] {
   const what = resource(potion)
   switch (potion.kind) {
     case 'hp':
     case 'mp': {
       const below = potion.kind === 'hp' ? HP_POTION_BELOW : MP_POTION_BELOW
-      return `Restores ${potion.power} ${what} per second for ${time(potion.duration)} (${potion.power * potion.duration} ${what}). Your hero drinks it in fights below ${percent(below)} ${what}.`
+      return [`Your hero drinks it in fights below ${percent(below)} ${what}.`]
     }
     case 'hpRegen':
     case 'mpRegen':
-      return `${what} recovery +${potion.power} for ${time(potion.duration)}. Your hero drinks it in fights when ${what} is not full.`
+      return [`Your hero drinks it in fights when ${what} is not full.`]
     case 'boost':
       return [
-        `${boostStats(potion)} for ${time(potion.duration)}. Drink it from the bag.`,
+        'Drink it from the bag.',
         potion.keepOnDeath ? 'It stays when your hero dies.' : 'It ends when your hero dies.',
         potion.realTime
           ? 'Its time runs by the clock, also while the game is closed.'
           : 'Its time runs while you play and on expeditions.',
-        potion.exclusive ? 'Only one at a time.' : null,
+        ...(potion.exclusive ? ['Only one at a time.'] : []),
       ]
-        .filter(Boolean)
-        .join(' ')
   }
 }

@@ -122,6 +122,11 @@ function statValue(stat: StatKey, value: number, percent: boolean): string {
 }
 
 /** One stat change as a line ("Run speed +1 m/s"). */
+/** A stat change as its name and amount apart: ["Run speed", "+1.0 m/s"]. */
+export function statParts(effect: StatEffect): [string, string] {
+  return [STAT_LABELS[effect.stat], statValue(effect.stat, effect.value, effect.percent)]
+}
+
 export function statLine(effect: StatEffect): string {
   return `${STAT_LABELS[effect.stat]} ${statValue(effect.stat, effect.value, effect.percent)}`
 }

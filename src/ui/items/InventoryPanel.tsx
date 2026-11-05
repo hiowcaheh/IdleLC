@@ -25,17 +25,12 @@ import type { ItemStack } from '../../game/logic/loot.ts'
 import { sellPrice, stacksValue } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { STAT_TOAST_MS, toast } from '../../state/toasts.ts'
-import {
-  compareText,
-  heroStats,
-  nameTone,
-  pieceName,
-  rareLabel,
-  wearProblem,
-} from '../gear/format.ts'
-import { potionLine, potionText } from './potionText.ts'
+import { heroStats, nameTone, pieceName, rareLabel, wearProblem } from '../gear/format.ts'
+import { PotionNotes } from './PotionNotes.tsx'
+import { potionLine } from './potionText.ts'
 import { Sheet } from '../Sheet.tsx'
 import { ItemIcon } from './ItemIcon.tsx'
+import { WearCompare } from '../gear/WearCompare.tsx'
 import { ItemInfo } from './ItemInfo.tsx'
 import { ItemSlot } from './ItemSlot.tsx'
 
@@ -215,15 +210,22 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
     const problem = wearProblem(character, itemId, options)
     return (
       <>
-        <p className="item-row__note">
-          {problem ?? `If you wear it: ${compareText(character, { itemId, plus, options, rare })}`}
-          {!problem && isRare(itemId) && rare === undefined
-            ? ', unidentified: its options appear when the Appraiser identifies it.'
-            : ''}
-        </p>
+        {problem ? (
+          <p className="item-row__note">{problem}</p>
+        ) : (
+          <WearCompare
+            character={character}
+            piece={{ itemId, plus, options, rare }}
+            note={
+              isRare(itemId) && rare === undefined
+                ? 'Unidentified: its options appear when the Appraiser identifies it.'
+                : undefined
+            }
+          />
+        )}
         <button
           type="button"
-          className="button button--gold"
+          className="button button--gold button--wide"
           disabled={busy || away || problem !== null}
           onClick={() => wear(source, pieceName(itemId, plus, rare))}
         >
@@ -326,7 +328,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
           {item.gear && wearActions(stack.itemId, 0, { itemId: stack.itemId })}
           {item.potion && (
             <>
-              <p className="item-row__note">{potionText(item.potion)}</p>
+              <PotionNotes potion={item.potion} />
               <button
                 type="button"
                 className="button button--gold"

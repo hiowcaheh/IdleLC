@@ -242,6 +242,44 @@ export function effectiveStats(f: Fighter): CombatStats {
       )
 }
 
+/**
+ * Whether an effect only hurts or hinders its fighter (a curse, stun, poison, a lower stat):
+ * those stay until they run out; buffs and potions can be taken off.
+ */
+export function isHarmful(effect: ActiveEffect): boolean {
+  return (
+    effect.stun ||
+    effect.state !== undefined ||
+    effect.poison > 0 ||
+    effect.mpChange !== undefined ||
+    effect.stats.some((s) =>
+      s.stat === 'castTime' || s.stat === 'reuseTime' ? s.value > 0 : s.value < 0,
+    )
+  )
+}
+
+/** Takes a buff or potion effect off a fighter (by its skill, or by its potion's item). */
+export function removeEffect(
+  state: CombatState,
+  side: Side,
+  which: { skillId: number; itemId?: number },
+): CombatState | null {
+  const fighter = state[side]
+  const match = (e: ActiveEffect) =>
+    which.itemId !== undefined
+      ? e.itemId === which.itemId
+      : e.itemId === undefined && e.skillId === which.skillId
+  const effect = fighter.effects.find(match)
+  if (!effect || isHarmful(effect)) return null
+  const next = copyFighter(fighter)
+  next.effects = fighter.effects.filter((e) => !match(e))
+  // HP and MP may not stay above a lowered maximum
+  const stats = effectiveStats(next)
+  next.hp = Math.min(next.hp, stats.maxHp)
+  next.mp = Math.min(next.mp, stats.maxMp ?? 0)
+  return { ...state, [side]: next }
+}
+
 export function isStunned(f: Fighter): boolean {
   return f.effects.some((e) => e.stun || e.state === 'stone')
 }

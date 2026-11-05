@@ -11,6 +11,7 @@ import {
   drinkPotion,
   healPlayer,
   killMonster,
+  removeEffect,
   takePotionsUsed,
   updatePlayer,
   type CombatEvent,
@@ -118,6 +119,14 @@ export class CombatSession {
   }
 
   /** The potions drunk since the last call, to report; they stay off the supply until settled. */
+  /** The player takes a buff or potion effect off the hero; false when it can't be. */
+  removeEffect(which: { skillId: number; itemId?: number }): boolean {
+    const next = removeEffect(this.combat, 'player', which)
+    if (!next) return false
+    this.combat = next
+    return true
+  }
+
   takePotionsUsed(): ItemStack[] {
     const { state, used } = takePotionsUsed(this.combat)
     this.combat = state
