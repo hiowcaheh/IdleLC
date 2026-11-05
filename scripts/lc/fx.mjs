@@ -32,6 +32,9 @@ export const FX_TEXTURES = {
   'plus-ring-healer': tex('Texture', 'Healer_weapon_plus_ring'),
   'plus-ring-mage': tex('Texture', 'Mage_weapon_plus_ring'),
   'plus-ring-rogue': tex('Texture', 'rogue_weapon_plus_ring'),
+  // the smoke under the feet of a hero with a run speed boost (Effect.dat "DK Normal State",
+  // particles dkBottomFog' — src/scene/RunSmoke.tsx); alpha blended, its alpha is the shape
+  'run-smoke': tex('Particle', 'pef_20'),
 }
 
 /** Longest side of an effect texture (they are small on screen). */

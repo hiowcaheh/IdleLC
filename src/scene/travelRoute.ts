@@ -26,6 +26,11 @@ export function currentRoute(): TravelRoute | null {
   return route
 }
 
+/** The point of the map under the hero now (null without a map). */
+export function shownGround(): MapPoint | null {
+  return shown.at
+}
+
 /** The scene's report of where the map stands under the hero. */
 export function setShownGround(map: string, at: MapPoint): void {
   shown.map = map

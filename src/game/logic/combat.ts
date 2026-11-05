@@ -280,6 +280,13 @@ export function removeEffect(
   return { ...state, [side]: next }
 }
 
+/** Whether a buff or potion on the fighter makes it run faster (the scene's smoke at its feet). */
+export function hasRunBoost(fighter: Pick<Fighter, 'effects'>): boolean {
+  return fighter.effects.some((e) =>
+    e.stats.some((s) => (s.stat === 'runSpeed' || s.stat === 'moveSpeed') && s.value > 0),
+  )
+}
+
 export function isStunned(f: Fighter): boolean {
   return f.effects.some((e) => e.stun || e.state === 'stone')
 }

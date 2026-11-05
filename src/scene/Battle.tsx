@@ -22,6 +22,7 @@ import { SkillEffects } from './SkillEffects.tsx'
 import { armorUpgradePlus } from './upgradeEffects.ts'
 import { approachProgress } from './approachMotion.ts'
 import { ARENA_RADIUS } from './terrain.ts'
+import { RunSmoke } from './RunSmoke.tsx'
 import { SCREEN_AHEAD, SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
 /** How far the player runs to reach a newly spawned monster. */
@@ -448,6 +449,9 @@ export function Battle() {
       <LevelUpEffect />
       <Suspense fallback={null}>
         <SkillEffects />
+      </Suspense>
+      <Suspense fallback={null}>
+        <RunSmoke />
       </Suspense>
     </>
   )
