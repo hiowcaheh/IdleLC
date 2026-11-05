@@ -5,7 +5,7 @@ import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
 import { ATTRIBUTE_KEYS } from '../../game/logic/attributes.ts'
 import { availableStatPoints } from '../../game/logic/statPoints.ts'
 import { naturalRecovery } from '../../game/logic/recovery.ts'
-import { MAX_MP_COST_REDUCTION, effectiveStats } from '../../game/logic/combat.ts'
+import { effectiveStats } from '../../game/logic/combat.ts'
 import { GameError } from '../../game/logic/character.ts'
 import {
   MAX_PLUS,
@@ -97,8 +97,6 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   const hpRecovery = recovery.hp + perTick('hpPerSecond')
   const mpRecovery = recovery.mp + perTick('mpPerSecond')
   const signed = (value: number) => `${value < 0 ? '−' : '+'}${percent(Math.abs(value))}`
-  // rare options with the caps combat applies
-  const capped = (value: number | undefined, cap: number) => Math.min(cap * 100, value ?? 0)
   type StatRow = [string, string, string?]
   const clientRow = (
     label: string,
@@ -169,7 +167,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
       `${(stats.reuseTime ?? 0) > 0 ? '+' : ''}${(stats.reuseTime ?? 0).toFixed(1)} s`,
     ],
     ['Cooldown bonus', stats.cooldownFree ? '100%' : signed(stats.cooldownReduction ?? 0)],
-    ['Skill MP cost', signed(-capped(stats.mpCostReduction, MAX_MP_COST_REDUCTION))],
+    ['Skill MP cost', signed(-Math.min(100, stats.mpCostReduction ?? 0))],
   ]
   const recoveryRows: StatRow[] = [
     [

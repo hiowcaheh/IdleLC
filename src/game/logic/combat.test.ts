@@ -21,6 +21,8 @@ import {
   killMonster,
   effectiveStats,
   removeEffect,
+  canPaySkill,
+  skillMpCost,
   potionsLeft,
   takePotionsUsed,
   updatePlayer,
@@ -763,7 +765,10 @@ describe('rare options in combat', () => {
     const r = combatTick(start, 0.01, createRng(1))
     expect(r.events.some((e) => e.type === 'cast')).toBe(true)
     expect(r.state.player.skillCooldowns[1]).toBeCloseTo(1.7, 1)
-    expect(r.state.player.mp).toBeCloseTo(100 - 5, 0)
+    // MP is paid when the skill fires, not when it starts (doFuncSkill.cpp:1807)
+    expect(r.state.player.mp).toBe(100)
+    const fired = combatTick(r.state, 0.5, createRng(1))
+    expect(fired.state.player.mp).toBeCloseTo(100 - 5, 0)
     // Source reduction continues beyond 50%, rounded up to the next server pulse.
     const capped = engaged(caster([rank()], { cooldownReduction: 90 }))
     expect(combatTick(capped, 0.01, createRng(1)).state.player.skillCooldowns[1]).toBeCloseTo(1, 1)
@@ -890,5 +895,20 @@ describe('removeEffect', () => {
     expect(removeEffect(buffed, 'player', { skillId: 9 })).toBeNull()
     expect(removeEffect(buffed, 'player', { skillId: 10 })).toBeNull()
     expect(removeEffect(buffed, 'player', { skillId: 99 })).toBeNull()
+  })
+})
+
+describe('skill costs (doFuncSkill.cpp)', () => {
+  const rank = (over: Partial<SkillRank>) => ({ mpCost: 30, hpCost: 0, ...over }) as SkillRank
+  it('needs MP strictly above the cost and HP above an HP cost', () => {
+    expect(canPaySkill({ hp: 50, mp: 30 }, rank({}), stats())).toBe(false)
+    expect(canPaySkill({ hp: 50, mp: 31 }, rank({}), stats())).toBe(true)
+    expect(canPaySkill({ hp: 1, mp: 1 }, rank({ mpCost: 0 }), stats())).toBe(true)
+    expect(canPaySkill({ hp: 0, mp: 0 }, rank({ mpCost: 0 }), stats())).toBe(false)
+    expect(canPaySkill({ hp: 40, mp: 99 }, rank({ hpCost: 40 }), stats())).toBe(false)
+  })
+  it('takes the option off in whole points, without a cap', () => {
+    expect(skillMpCost(rank({ mpCost: 33 }), stats({ mpCostReduction: 10 }))).toBe(30)
+    expect(skillMpCost(rank({ mpCost: 33 }), stats({ mpCostReduction: 120 }))).toBe(0)
   })
 })

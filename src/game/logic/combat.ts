@@ -60,9 +60,6 @@ export const MP_POTION_BELOW = 0.3
 /** Seconds between two poison ticks. */
 export const POISON_TICK = 1
 
-/** Mana cap remains the owner's adapter; skill cooldowns use IsReady without a 50% cap. */
-export const MAX_MP_COST_REDUCTION = 0.75
-
 /** Largest simulated step; bigger dt values are split so event order stays correct. */
 const MAX_STEP = 0.05
 
@@ -293,8 +290,19 @@ export function isStunned(f: Fighter): boolean {
 
 /** Mana a skill costs the fighter (rare option "Decrease MP Consumption"). */
 export function skillMpCost(rank: SkillRank, stats: CombatStats): number {
-  const reduction = Math.min(MAX_MP_COST_REDUCTION, (stats.mpCostReduction ?? 0) / 100)
-  return rank.mpCost * (1 - reduction)
+  // doFuncSkill.cpp:982–1001: need − trunc(need × option / 100), never below 0
+  const cost = rank.mpCost
+  const option = stats.mpCostReduction ?? 0
+  return Math.max(0, option > 0 ? cost - Math.trunc((cost * option) / 100) : cost)
+}
+
+/**
+ * Whether the fighter can pay for a skill now (doFuncSkill.cpp:980–1003,1664–1685): MP strictly
+ * above the cost (even a free skill needs some), HP above an HP cost when there is one. Checked
+ * when the skill is chosen and again when it fires.
+ */
+export function canPaySkill(f: Pick<Fighter, 'hp' | 'mp'>, rank: SkillRank, stats: CombatStats) {
+  return f.mp > skillMpCost(rank, stats) && (rank.hpCost === 0 || f.hp > rank.hpCost)
 }
 
 /** Skill preparation and reuse are shared by the battle and its details window. */
@@ -792,7 +800,14 @@ function fighterStep(
     self.impactIn = null
     const skill = self.casting
     self.casting = null
-    return skill ? landSkill(s, side, skill, rng, events) : landSwing(s, side, rng, events)
+    if (!skill) return landSwing(s, side, rng, events)
+    // FIRE: the costs are checked again and paid only now (doFuncSkill.cpp:1664,1804–1807), so
+    // a cast a stun cut short costs nothing
+    const stats = effectiveStats(self)
+    if (!canPaySkill(self, skill, stats)) return false
+    self.mp -= skillMpCost(skill, stats)
+    self.hp -= skill.hpCost
+    return landSkill(s, side, skill, rng, events)
   }
 
   if (self.cooldown <= 0) {
@@ -802,8 +817,7 @@ function fighterStep(
       // wind-up (shortened by cast-speed skills), then it lands like a swing
       const windUp = skillPreparationTime(skill, stats)
       const landsIn = windUp + TIMINGS.impactDelay
-      self.mp -= skillMpCost(skill, stats)
-      self.hp -= skill.hpCost
+      // the cooldown runs from READY (Skill.cpp:803); MP and HP are paid at FIRE
       self.skillCooldowns[skill.id] = skillCooldownTime(skill, stats)
       self.casting = skill
       self.impactIn = landsIn
@@ -1215,11 +1229,7 @@ export function chooseSkill(self: Fighter, target: Fighter, rng?: Rng): SkillRan
   const stats = effectiveStats(self)
   const ready = self.skills.filter(
     (r) =>
-      r.auto &&
-      r.kind !== 'passive' &&
-      !self.skillCooldowns[r.id] &&
-      self.mp >= skillMpCost(r, stats) &&
-      self.hp > r.hpCost,
+      r.auto && r.kind !== 'passive' && !self.skillCooldowns[r.id] && canPaySkill(self, r, stats),
   )
   if (ready.length === 0) return null
   if (self.skills.some((s) => s.npcSlot !== undefined)) {
@@ -1227,8 +1237,7 @@ export function chooseSkill(self: Fighter, target: Fighter, rng?: Rng): SkillRan
     for (let slot = 0; slot < 4; slot++) {
       const roll = rollInt(rng, 1, 10000)
       const rank = ready.find((s) => s.npcSlot === slot)
-      if (rank && self.mp > skillMpCost(rank, stats) && roll <= (rank.npcProbability ?? 0))
-        return rank
+      if (rank && canPaySkill(self, rank, stats) && roll <= (rank.npcProbability ?? 0)) return rank
     }
     return null
   }
