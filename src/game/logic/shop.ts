@@ -132,11 +132,12 @@ export function tierWindow(tiers: readonly ShopTier[], level: number): ShopTier[
 const EVERYWHERE = [HEAVEN_STONE_ID]
 
 /**
- * t_item 6916 "100 Cooldown Reduction Potion": no merchant of the database sells it (a cash shop
- * item there); IdleLC's shops offer it everywhere at an own price (owner's request, 2026-11-05).
- * Potion of Haste and Platinum Adrenaline come with the towns' own goods (t_shopitem).
+ * Boost potions every IdleLC shop offers (owner's requests, 2026-11-05): 2138 Platinum Adrenaline
+ * (only Juno's merchant in t_shopitem), 2845 Super Haste Potion and 6916 100 Cooldown Reduction
+ * Potion (cash items in the database, own prices) and the own 100% Cast Potion. Potion of Haste
+ * comes with the towns' goods (t_shopitem).
  */
-const COOLDOWN_POTION_ID = 6916
+const BOOST_GOODS = [2138, 2845, 6916, 90001]
 
 /** Only sets and seals with positive source weights can be obtained after appraisal. */
 export function shopRareInfo(itemId: number) {
@@ -213,7 +214,7 @@ export function shopOffer(
       ...new Set([
         ...shopItems(character.location.zoneId).filter((id) => !getItem(id).gear),
         ...EVERYWHERE,
-        ...(ITEMS[COOLDOWN_POTION_ID] ? [COOLDOWN_POTION_ID] : []),
+        ...BOOST_GOODS.filter((id) => ITEMS[id]),
         ...shopMagnifiers(),
       ]),
     ],
