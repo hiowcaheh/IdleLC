@@ -1,5 +1,14 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+Aktualizacja 2026-11-05, wieczór (Claude Code): [15 zgłoszeń właściciela](owner-batch-2026-11-05-evening.md).
+Opcje tytułów i specjalne są liczone jak w `CPC::ApplyTitle` / `ApplyOptionValue` (rejestr D16
+rozstrzygnięty); `SPECIAL_OPTIONS`, `TITLE_RULES`, `specialOptionStats` w `options.ts`. Normalne ciosy
+potworów przechodzą przez `sourceHitWeights` (gałąź NPC, `stats.boss`), więc dawne własne 5% × 1,5
+krytyka potworów już nie działa. Sklep: Adrenalina, Super Haste, 100 Cooldown i własna 100% Cast (90001)
+wszędzie. Maski terenu przebudowane (`--only masks`), maski i warstwy z `?v=`. Wyprawa w biegu startuje
+ze spotu wyjścia (`runFrom`), nowa mapa od pierwszego spotu. Buffy i mikstury można zdjąć
+(`removeEffect`). SaveVersion **14**.
+
 Aktualizacja 2026-11-05, później (Claude Code): [spawny, trasy, dystans, wzmocnienia](spawns-routes-ranged-boosts.md).
 **Pełny import zrzutu 2016 jest wykonany** (właściciel zatwierdził 4 etapy; poniższa notatka o
 „celowo nieprzeimportowanym” `lc-data.json` jest historyczna). Dratan/Merac/Egeha walczą w spawnach,

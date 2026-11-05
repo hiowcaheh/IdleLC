@@ -1,5 +1,12 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-05, wieczór (Claude Code): [15 zgłoszeń](docs/owner-batch-2026-11-05-evening.md).
+Opcje tytułów/sprzętu według `CPC::ApplyTitle` / `ApplyOptionValue` (24/25 bez efektu, tytuł 50
+bez efektu, tytuł 99 tylko wyświetlany, 101–106 działają); ciosy potworów mają źródłowe typy
+(krytyk tylko bossy). Wyprawa nie startuje w biegu (`runFrom`), nowa mapa od pierwszego spotu.
+Maski terenu: `scaleMask` + WebP `exact`, przebudowa `--only masks`; po zmianie map podbij
+`MAP_REVISION`. Własny przedmiot 90001 (100% Cast). Dym biegu: `RunSmoke.tsx`. SaveVersion **14**.
+
 Aktualizacja 2026-11-05, później (Claude Code): [spawny, trasy, dystans, wzmocnienia, GUI](docs/spawns-routes-ranged-boosts.md).
 Zrzut 2016 **zaimportowany w całości** (decyzja właściciela; drop ~4–5× rzadszy, trudniejsze NPC).
 Dratan/Merac/Egeha: walka w spawnach `t_npc_regen` (`terrain.json` `spawns`), Juno bez zmian.

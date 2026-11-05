@@ -1,5 +1,23 @@
 # Historia zmian
 
+## 2026-11-05 wieczór (Claude Code): 15 zgłoszeń — tytuły 1:1, bieg, GUI, teren, dym
+
+Punkt wyjścia `b1bbc0e`. Commity `4069ec7`, `d6a791a`, `abf96ad`, `baffd2a`, `c446eb9`, `2ebf847`,
+`76cf06f`. Pełny opis: [docs/owner-batch-2026-11-05-evening.md](docs/owner-batch-2026-11-05-evening.md).
+
+1. **Opcje tytułów i specjalne według serwera**: 342 → 855 Critical rating jest poprawne (+150%),
+   poprawiony opis; 24/25 bez efektu; tytuł: 50 bez efektu, 99 tylko wyświetlane; 101–106 działają.
+   Ciosy potworów mają źródłowe typy (krytyk tylko u bossów), co pozwala działać Toughness.
+2. **Bieg**: licznik czasu, wyprawa zablokowana w biegu (a gdyby ruszyła, to ze spotu startowego),
+   nowa mapa zawsze od pierwszego spotu.
+3. **Teren**: maski warstw wszystkich map naprawione (kreski i kwadraty na ziemi), `MAP_REVISION`.
+4. **Mikstury**: Super Haste (1 h), własna 100% Cast Potion, Adrenalina wszędzie; okno mikstury
+   w wierszach; dym pod stopami przy wzmocnieniu biegu jak w kliencie; Remove effect dla buffów.
+5. **GUI**: porównanie „If you wear it” zielone/czerwone z Wear pod spodem, Settings bez nadmiaru
+   linii, slot mikstury tylko z AUTO, Equipment wtopione w okno, efekty na ekranie wyboru postaci.
+
+Weryfikacja: `npm run check` (**464 testy / 53 pliki**), Chromium 390×844. SaveVersion **14**.
+
 ## 2026-11-05 (Claude Code): spawny i trasy, walka z dystansu, wzmocnienia, partia GUI
 
 Punkt wyjścia `0be9812`. Commity `63377de`, `9dd82c1`, `3a29b80`, `bf73c70`, `4ab0d3a`, `67671a3`.

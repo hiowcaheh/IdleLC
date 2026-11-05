@@ -31,6 +31,18 @@ Stan rejestru: 2026-11-02, punkt odniesienia implementacji `c9944c9`. Celem jest
 
 „Oryginał” w tym dokumencie oznacza odczytane źródła November 2018, z uwzględnieniem ich ograniczeń i flag. Nie potwierdzono, że każda reguła działała identycznie na serwerze prywatnego klienta 2015. Dla brakujących wartości DB nie wybieramy liczb na podstawie nazw.
 
+## Rozstrzygnięcia właściciela — 2026-11-05, wieczór
+
+Właściciel: tytuły i mikstury mają działać „1:1 tak jak w plikach serwerowych”. Wdrożone
+([owner-batch-2026-11-05-evening.md](owner-batch-2026-11-05-evening.md)):
+
+- **D16 rozstrzygnięte według źródła**: 24/25 bez efektu, 55/66 jako procent wag critical/deadly
+  (opis „+150%” jak w kliencie), na tytule 50 bez efektu, a 99 tylko wyświetlane; 101–106 działają.
+  Ciosy potworów używają źródłowych typów ciosu (krytyk/śmiertelny tylko bossy i pół-bossy).
+- **Wybór mapy** zawsze prowadzi na jej pierwszy spot (wcześniej: najdalszy otwarty).
+- **Własne, do korekty cen później**: 100% Cast Potion (id 90001, brak w bazie) i ceny 50 000 dla
+  Super Haste / 100 Cooldown / 100% Cast (w bazie cash itemy).
+
 ## Rozstrzygnięcia właściciela — 2026-11-05
 
 Po sprawdzeniu [zrzutu bazy 2016](db-2016-dump.md) właściciel zatwierdził wszystkie cztery etapy
