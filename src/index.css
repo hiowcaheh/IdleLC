@@ -3877,6 +3877,32 @@ a.button {
   color: #ff8a7a;
 }
 
+/* what an action changed in the hero's stats: better green, worse red */
+.stat-toast {
+  display: grid;
+  gap: 3px;
+}
+.stat-toast__changes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px 12px;
+  font-size: 13px;
+}
+.stat-toast__change.is-up {
+  color: #8fe36a;
+}
+.stat-toast__change.is-down {
+  color: #ff7d6b;
+}
+.stat-toast__change strong {
+  font-weight: 800;
+}
+.stat-toast__more {
+  color: var(--parchment-dim);
+  font-weight: 600;
+}
+
 @keyframes toast-slide {
   0% {
     transform: translateX(110vw);

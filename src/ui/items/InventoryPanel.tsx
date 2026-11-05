@@ -1,3 +1,6 @@
+import { effectiveStats } from '../../game/logic/combat.ts'
+import { combatSession } from '../../game/session/combatSession.ts'
+import { statChanges, withStatChanges } from '../statChanges.tsx'
 import { Gold } from '../Gold.tsx'
 import { useState } from 'react'
 import {
@@ -21,9 +24,16 @@ import type { DrinkProblem } from '../../game/logic/combat.ts'
 import type { ItemStack } from '../../game/logic/loot.ts'
 import { sellPrice, stacksValue } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
-import { toast } from '../../state/toasts.ts'
-import { compareText, nameTone, pieceName, rareLabel, wearProblem } from '../gear/format.ts'
-import { potionText } from './potionText.ts'
+import { STAT_TOAST_MS, toast } from '../../state/toasts.ts'
+import {
+  compareText,
+  heroStats,
+  nameTone,
+  pieceName,
+  rareLabel,
+  wearProblem,
+} from '../gear/format.ts'
+import { potionLine, potionText } from './potionText.ts'
 import { Sheet } from '../Sheet.tsx'
 import { ItemIcon } from './ItemIcon.tsx'
 import { ItemInfo } from './ItemInfo.tsx'
@@ -153,7 +163,12 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
     if (busy) return
     setBusy(true)
     try {
-      toast(await action())
+      // wearing, taking off or upgrading: what it changed in the hero's stats, under the message
+      const before = heroStats(character)
+      const message = await action()
+      const after = useGameStore.getState().character
+      const changes = after ? statChanges(before, heroStats(after)) : []
+      toast(withStatChanges(message, changes), 'info', changes.length ? STAT_TOAST_MS : undefined)
     } catch (error) {
       toast(
         error instanceof GameError
@@ -317,11 +332,18 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                 className="button button--gold"
                 disabled={busy || away}
                 onClick={() => {
+                  const before = effectiveStats(combatSession.state.player)
                   const problem = drinkPotion(stack.itemId)
-                  toast(
-                    problem ? DRINK_PROBLEMS[problem] : `You drink ${item.name}.`,
-                    problem ? 'error' : 'info',
-                  )
+                  if (problem) {
+                    toast(DRINK_PROBLEMS[problem], 'error')
+                    return
+                  }
+                  // a boost changes stats; healing and mana potions restore over time
+                  const changes =
+                    item.potion!.kind === 'boost'
+                      ? statChanges(before, effectiveStats(combatSession.state.player))
+                      : [{ label: '', text: potionLine(item.potion!), good: true }]
+                  toast(withStatChanges(`You drink ${item.name}.`, changes), 'info', STAT_TOAST_MS)
                 }}
               >
                 Drink

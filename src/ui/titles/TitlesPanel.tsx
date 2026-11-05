@@ -4,7 +4,9 @@ import { getTitle } from '../../game/data/titles.ts'
 import { wornTitle } from '../../game/logic/titles.ts'
 import { GameError } from '../../game/logic/character.ts'
 import { useGameStore } from '../../state/gameStore.ts'
-import { toast } from '../../state/toasts.ts'
+import { STAT_TOAST_MS, toast } from '../../state/toasts.ts'
+import { heroStats } from '../gear/format.ts'
+import { statChanges, withStatChanges } from '../statChanges.tsx'
 import { OptionList } from '../gear/OptionList.tsx'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { Sheet } from '../Sheet.tsx'
@@ -46,8 +48,19 @@ export function TitlesPanel({ onClose }: { onClose(): void }) {
     if (busy) return
     setBusy(true)
     try {
+      const before = useGameStore.getState().character
       await setTitle(titleId)
-      toast(titleId === null ? 'Title taken off.' : `You wear ${getTitle(titleId)?.name}.`)
+      const after = useGameStore.getState().character
+      // what the title's options change in the hero's stats, under the message
+      const changes = before && after ? statChanges(heroStats(before), heroStats(after)) : []
+      toast(
+        withStatChanges(
+          titleId === null ? 'Title taken off.' : `You wear ${getTitle(titleId)?.name}.`,
+          changes,
+        ),
+        'info',
+        changes.length ? STAT_TOAST_MS : undefined,
+      )
     } catch (error) {
       toast(
         error instanceof GameError ? 'That is not possible right now.' : 'Something went wrong.',

@@ -16,7 +16,8 @@ import {
 } from '../../game/logic/equipment.ts'
 import { rewardBonuses } from '../../game/logic/rewards.ts'
 import { useGameStore } from '../../state/gameStore.ts'
-import { toast } from '../../state/toasts.ts'
+import { STAT_TOAST_MS, toast } from '../../state/toasts.ts'
+import { statChanges, withStatChanges } from '../statChanges.tsx'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { ItemInfo } from '../items/ItemInfo.tsx'
 import { ItemSlot } from '../items/ItemSlot.tsx'
@@ -208,7 +209,12 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
     if (busy) return
     setBusy(true)
     try {
-      toast(await action())
+      // taking off or upgrading: what it changed in the hero's stats, under the message
+      const before = heroStats(character)
+      const message = await action()
+      const after = useGameStore.getState().character
+      const changes = after ? statChanges(before, heroStats(after)) : []
+      toast(withStatChanges(message, changes), 'info', changes.length ? STAT_TOAST_MS : undefined)
     } catch (error) {
       toast(
         error instanceof GameError ? 'That is not possible right now.' : 'Something went wrong.',

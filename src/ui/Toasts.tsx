@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom'
-import { useToasts } from '../state/toasts.ts'
+import { TOAST_MS, useToasts } from '../state/toasts.ts'
 import { GoldMessage } from './Gold.tsx'
 
 /** The messages of the windows' actions, sliding across the screen over everything else. */
@@ -8,7 +8,11 @@ export function Toasts() {
   return createPortal(
     <div className="toasts" role="status" aria-live="polite">
       {toasts.map((t) => (
-        <p key={t.id} className={`toast toast--${t.tone}`}>
+        <p
+          key={t.id}
+          className={`toast toast--${t.tone}`}
+          style={t.ms === TOAST_MS ? undefined : { animationDuration: `${t.ms}ms` }}
+        >
           <GoldMessage>{t.content}</GoldMessage>
         </p>
       ))}
