@@ -118,6 +118,8 @@ const STAT_SUBTYPES: Record<number, StatKey> = {
   19: 'attack',
   22: 'maxHp450',
   23: 'castSpeed',
+  // MST_STAT_SKILLCOOLTIME: m_skillCooltime, the same reuse formula as "Decrease skill delay"
+  37: 'cooldownReduction',
 }
 
 /** What one t_magic effect does in IdleLC, or null when it has no counterpart here (yet). */

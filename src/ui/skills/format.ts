@@ -9,6 +9,7 @@ import {
   missingSkills,
   skillRank,
   type SkillEffect,
+  type StatEffect,
   type SkillKind,
   type SkillRank,
   type StatKey,
@@ -101,6 +102,11 @@ function statValue(stat: StatKey, value: number, percent: boolean): string {
       return signed(value / 10, ' s')
     case 'runSpeed':
       return signed(value / 10, ' m/s')
+    case 'cooldownReduction': {
+      // the reuse formula of Skill.cpp: × 150 / (150 + p) × 100 / (100 + p)
+      const kept = (150 / (150 + value)) * (100 / (100 + value))
+      return signed(-Math.round((1 - kept) * 100), '%')
+    }
     case 'castSpeed':
     case 'blockChance':
     case 'stunResistance':
@@ -113,6 +119,11 @@ function statValue(stat: StatKey, value: number, percent: boolean): string {
     default:
       return signed(value)
   }
+}
+
+/** One stat change as a line ("Run speed +1 m/s"). */
+export function statLine(effect: StatEffect): string {
+  return `${STAT_LABELS[effect.stat]} ${statValue(effect.stat, effect.value, effect.percent)}`
 }
 
 /**

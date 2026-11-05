@@ -131,6 +131,13 @@ export function tierWindow(tiers: readonly ShopTier[], level: number): ShopTier[
  */
 const EVERYWHERE = [HEAVEN_STONE_ID]
 
+/**
+ * t_item 6916 "100 Cooldown Reduction Potion": no merchant of the database sells it (a cash shop
+ * item there); IdleLC's shops offer it everywhere at an own price (owner's request, 2026-11-05).
+ * Potion of Haste and Platinum Adrenaline come with the towns' own goods (t_shopitem).
+ */
+const COOLDOWN_POTION_ID = 6916
+
 /** Only sets and seals with positive source weights can be obtained after appraisal. */
 export function shopRareInfo(itemId: number) {
   const sets = (getItem(itemId).rare ?? []).flatMap(({ set, weight }) => {
@@ -206,6 +213,7 @@ export function shopOffer(
       ...new Set([
         ...shopItems(character.location.zoneId).filter((id) => !getItem(id).gear),
         ...EVERYWHERE,
+        ...(ITEMS[COOLDOWN_POTION_ID] ? [COOLDOWN_POTION_ID] : []),
         ...shopMagnifiers(),
       ]),
     ],
@@ -249,12 +257,12 @@ export function applyBuy(character: CharacterData, itemId: number, count: number
 
 /** Group consumables by effect, then order each family from small to large. */
 export function sortedShopGoods(ids: readonly number[]): number[] {
-  const order = { hp: 0, mp: 1, hpRegen: 2, mpRegen: 3 }
+  const order = { hp: 0, mp: 1, hpRegen: 2, mpRegen: 3, boost: 4 }
   const key = (id: number) => {
     const item = getItem(id)
     return item.potion
       ? [order[item.potion.kind], item.potion.power, item.potion.duration, item.level, item.price]
-      : [item.magnifier ? 5 : 4, item.price, item.level]
+      : [item.magnifier ? 6 : 5, item.price, item.level]
   }
   return [...ids].sort((a, b) => {
     const ka = key(a),

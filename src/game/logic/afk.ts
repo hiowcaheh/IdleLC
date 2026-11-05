@@ -3,6 +3,7 @@
  * same auto-combat as watched play. Finite supplies, level-ups and expiring titles take effect
  * at their actual simulation times. Pure; the server will run it too.
  */
+import { boostEffects, boostsOf, liveBoosts } from './boosts.ts'
 import { getMonster } from '../data/monsters.ts'
 import type { CharacterData } from './character.ts'
 import {
@@ -134,6 +135,10 @@ export function simulateAfk(
     monster.id,
     monsterFighter(monster.id),
   )
+  // the boost potions working when the hero set off go on counting down on the expedition
+  const boosts = boostEffects(current.boosts, startedAt)
+  if (boosts.length > 0)
+    state = { ...state, player: { ...state.player, effects: [...state.player.effects, ...boosts] } }
   const collectPotions = () => {
     const taken = takePotionsUsed(state)
     state = taken.state
@@ -210,6 +215,11 @@ export function simulateAfk(
     character: pruneTitles(
       {
         ...current,
+        ...(current.boosts
+          ? {
+              boosts: liveBoosts(boostsOf(state.player.effects, startedAt + seconds * 1000), now),
+            }
+          : {}),
         gold: character.gold + gold,
         sp: character.sp + sp,
         ...recordKills(

@@ -2,6 +2,7 @@
  * Combat rewards. The browser only animates the fight and reports its outcome; the service
  * (later: a Supabase function) checks the report against the clock and pays out. Pure.
  */
+import { reportedBoosts, type OwnedBoost } from './boosts.ts'
 import { getItem } from '../data/items.ts'
 import type { MonsterDef } from '../data/types.ts'
 import { clamp } from './balance.ts'
@@ -40,6 +41,8 @@ export interface CombatReport {
   deaths: number
   /** Potions drunk in the fights (taken from the inventory, at most what it holds). */
   potions?: ItemStack[]
+  /** Boost potions working on the hero now, to keep (logic/boosts.ts). */
+  boosts?: OwnedBoost[]
 }
 
 export interface CombatResult {
@@ -202,10 +205,22 @@ export function applyCombatReport(
   const { inventory, taken } = takeFromInventory(character.inventory, potions)
   const played = applyPlayTime(character, playSeconds, rng)
   const bag = stowDrops({ inventory, gear: played.character.gear }, drops, rng)
+  const boosts =
+    report.boosts === undefined
+      ? {}
+      : {
+          boosts: reportedBoosts(
+            character.boosts,
+            taken.map((p) => p.itemId),
+            report.boosts,
+            now,
+          ),
+        }
   return {
     character: {
       ...played.character,
       ...bag,
+      ...boosts,
       level: reward.level,
       exp: reward.remainingExp,
       gold: character.gold + gold,

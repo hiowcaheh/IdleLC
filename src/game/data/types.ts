@@ -188,12 +188,22 @@ export interface GearDef {
  * recovery (per 5 s tick).
  */
 export interface PotionDef {
-  kind: 'hp' | 'mp' | 'hpRegen' | 'mpRegen'
+  /** `boost`: a timed stat change (Haste, Adrenaline, cooldown potions), never drunk by itself. */
+  kind: 'hp' | 'mp' | 'hpRegen' | 'mpRegen' | 'boost'
   power: number
   /** Seconds the effect lasts. */
   duration: number
   /** Seconds before the next potion of the kind (t_skill.a_reuseTime). */
   cooldown: number
+  /** Boosts: the skill the potion casts (one effect per skill) and its stat changes (t_magic). */
+  skill?: number
+  effects?: SkillEffectDef[]
+  /** Boosts: SF_NOCANCEL, it outlasts the hero's death. */
+  keepOnDeath?: boolean
+  /** Boosts: SF_ABSTIME, it runs out by the clock, also while the game is closed. */
+  realTime?: boolean
+  /** Boosts: SF_NOTDUPLICATE, no second one while it works. */
+  exclusive?: boolean
 }
 
 /** An item option 1:1 from t_option. */

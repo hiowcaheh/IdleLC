@@ -8,7 +8,7 @@ import { BOOK_MILESTONES } from '../data/bookRewards.ts'
 import { CLASSES } from '../data/classes.ts'
 import { MONSTERS } from '../data/monsters.ts'
 import { MAX_LEVEL } from '../data/progression.ts'
-import { getItem, getOption, getRareSet, slotsFor } from '../data/items.ts'
+import { ITEMS, getItem, getOption, getRareSet, slotsFor } from '../data/items.ts'
 import { getSkill } from '../data/skills.ts'
 import { getTitle } from '../data/titles.ts'
 import type { ClassId, EquipSlot } from '../data/types.ts'
@@ -40,6 +40,7 @@ import {
   type PotionSlots,
 } from './potions.ts'
 import { zoneSpots } from './spots.ts'
+import type { OwnedBoost } from './boosts.ts'
 import type { OwnedTitle } from './titles.ts'
 import {
   SKILL_BAR_SIZE,
@@ -303,10 +304,33 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     potionSlots: sanitizePotionSlots(raw.potionSlots),
     optionProgress: Math.min(OPTION_PLAY_SECONDS, Math.max(0, num(raw.optionProgress, 0))),
     ...sanitizeTitles(raw.titles, raw.activeTitle),
+    ...sanitizeBoosts(raw.boosts),
     titlesEarned: (Array.isArray(raw.titlesEarned) ? raw.titlesEarned : [])
       .map((id: unknown) => int(id, -1))
       .filter((id, i, all) => getTitle(id) !== undefined && all.indexOf(id) === i),
   })
+}
+
+/** Boost potions still working (logic/boosts.ts): known boost items, at most their duration. */
+function sanitizeBoosts(raw: unknown): { boosts?: OwnedBoost[] } {
+  if (!Array.isArray(raw)) return {}
+  const boosts: OwnedBoost[] = []
+  for (const entry of raw) {
+    if (!isRecord(entry)) continue
+    const itemId = int(entry.itemId, -1)
+    const potion = ITEMS[itemId]?.potion
+    const remaining = num(entry.remaining, 0)
+    if (potion?.kind !== 'boost' || !(remaining > 0) || boosts.some((b) => b.itemId === itemId))
+      continue
+    const until =
+      typeof entry.until === 'number' && Number.isFinite(entry.until) ? entry.until : null
+    boosts.push({
+      itemId,
+      remaining: Math.min(potion.duration, remaining),
+      ...(potion.realTime && until !== null ? { until } : {}),
+    })
+  }
+  return boosts.length > 0 ? { boosts } : {}
 }
 
 /**

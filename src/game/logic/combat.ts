@@ -20,7 +20,13 @@ import {
 } from './balance.ts'
 import { chance, rollInt, type Rng } from './rng.ts'
 import { naturalRecovery } from './recovery.ts'
-import { applyStats, type SkillKind, type SkillRank, type StatEffect } from './skills.ts'
+import {
+  applyStats,
+  interpretEffect,
+  type SkillKind,
+  type SkillRank,
+  type StatEffect,
+} from './skills.ts'
 
 export type Side = 'player' | 'monster'
 export type CombatPhase = 'traveling' | 'spawning' | 'approach' | 'fighting' | 'victory' | 'defeat'
@@ -106,6 +112,8 @@ export interface ActiveEffect {
   /** HP and MP restored per second (healing and mana potions). */
   hpPerSecond?: number
   mpPerSecond?: number
+  /** A boost potion's SF_NOCANCEL: the hero's death does not end it. */
+  keepOnDeath?: boolean
 }
 
 export interface Fighter extends FighterInit {
@@ -123,7 +131,8 @@ export interface Fighter extends FighterInit {
   /** Seconds before each skill can be used again, by skill id. */
   skillCooldowns: Record<number, number>
   /** Seconds before another potion of the kind can be drunk. */
-  potionCooldowns: Partial<Record<PotionKind, number>>
+  /** Seconds until a potion of the kind (a boost: of the skill, `boost:<skill>`) may be drunk. */
+  potionCooldowns: Partial<Record<string, number>>
   /** Potions drunk and not yet taken off the supply (takePotionsUsed), by item id. */
   potionsUsed: Record<number, number>
   effects: ActiveEffect[]
@@ -351,7 +360,7 @@ function revived(f: Fighter): Fighter {
     cooldown: 0,
     impactIn: null,
     casting: null,
-    effects: [],
+    effects: f.effects.filter((e) => e.keepOnDeath),
   }
 }
 
@@ -579,11 +588,10 @@ function tickCooldowns(f: Fighter, dt: number): void {
     if (left > 0) f.skillCooldowns[id] = left
     else delete f.skillCooldowns[id]
   }
-  for (const kind in f.potionCooldowns) {
-    const k = kind as PotionKind
-    const left = f.potionCooldowns[k]! - dt
-    if (left > 0) f.potionCooldowns[k] = left
-    else delete f.potionCooldowns[k]
+  for (const key in f.potionCooldowns) {
+    const left = f.potionCooldowns[key]! - dt
+    if (left > 0) f.potionCooldowns[key] = left
+    else delete f.potionCooldowns[key]
   }
 }
 
@@ -693,7 +701,8 @@ function endFight(s: CombatState, loser: Side, events: CombatEvent[]): void {
     enter(s, 'victory')
   } else {
     s.deaths += 1
-    s.player.effects = []
+    // the server clears the hero's buffs at death, but not SF_NOCANCEL ones (Assist.cpp ClearAssist)
+    s.player.effects = s.player.effects.filter((e) => e.keepOnDeath)
     enter(s, 'defeat')
   }
 }
@@ -1024,7 +1033,16 @@ function drinkPotions(f: Fighter, events: CombatEvent[]): void {
 function applyPotion(f: Fighter, { itemId, name, potion }: PotionSupply, events: CombatEvent[]) {
   const kind = potion.kind
   f.potionsUsed[itemId] = (f.potionsUsed[itemId] ?? 0) + 1
-  f.potionCooldowns[kind] = potion.cooldown
+  f.potionCooldowns[cooldownKey(potion)] = potion.cooldown
+  if (kind === 'boost') {
+    // the skill's buff: a second one of the same skill takes the place of the first (AddAssist)
+    f.effects = [
+      ...f.effects.filter((e) => !(e.potion === 'boost' && e.skillId === potion.skill)),
+      boostEffect(itemId, name, potion, potion.duration),
+    ]
+    events.push({ type: 'potion', itemId, name, kind })
+    return
+  }
   const regenStat = kind === 'hpRegen' ? 'hpRegen' : kind === 'mpRegen' ? 'mpRegen' : null
   f.effects = [
     ...f.effects,
@@ -1048,6 +1066,37 @@ function applyPotion(f: Fighter, { itemId, name, potion }: PotionSupply, events:
 }
 
 /**
+ * Which reuse timer a potion starts: healing and mana potions share one per kind, a boost potion
+ * has its skill's own (each item skill keeps its reuse time on the server).
+ */
+const cooldownKey = (potion: PotionDef) =>
+  potion.kind === 'boost' ? `boost:${potion.skill ?? 0}` : potion.kind
+
+/** The effect a boost potion gives, with `remaining` seconds of it left. */
+export function boostEffect(
+  itemId: number,
+  name: string,
+  potion: PotionDef,
+  remaining: number,
+): ActiveEffect {
+  return {
+    skillId: potion.skill ?? 0,
+    itemId,
+    potion: 'boost',
+    name,
+    remaining,
+    stats: (potion.effects ?? []).flatMap((e) => {
+      const effect = interpretEffect(e)
+      return effect?.kind === 'stat' ? [effect] : []
+    }),
+    stun: false,
+    poison: 0,
+    nextTick: POISON_TICK,
+    ...(potion.keepOnDeath ? { keepOnDeath: true } : {}),
+  }
+}
+
+/**
  * Why the hero can't drink a potion now: dead, level too low, none left, its kind cooling down or
  * still working.
  */
@@ -1068,11 +1117,17 @@ export function drinkPotion(
       ? 'dead'
       : potionsLeft(f, supply) <= 0
         ? 'none-left'
-        : f.potionCooldowns[kind]
+        : f.potionCooldowns[cooldownKey(supply.potion)]
           ? 'cooldown'
-          : f.effects.some((e) => e.potion === kind)
-            ? 'working'
-            : null
+          : kind === 'boost'
+            ? // SF_NOTDUPLICATE: not while the same skill works; others take its place
+              supply.potion.exclusive &&
+              f.effects.some((e) => e.potion === 'boost' && e.skillId === supply.potion.skill)
+              ? 'working'
+              : null
+            : f.effects.some((e) => e.potion === kind)
+              ? 'working'
+              : null
   if (problem) return { state, events: [], problem }
   const next = copyState(state)
   const events: CombatEvent[] = []

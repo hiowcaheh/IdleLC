@@ -43,6 +43,23 @@ const WEAPON_SLOT = 2
 /** t_item 84 "Smelting Stone" and 85 "Heaven Stone" (sold in Juno) upgrade weapons and armor. */
 const UPGRADE_STONES = new Set([84, 85])
 /**
+ * Potions that lend a timed boost (owner's request, 2026-11-05): 391 "Potion of Haste" (skill 70,
+ * run speed; sold in the towns), 2138 "Platinum Adrenaline" (skill 429, attack and run speed; sold
+ * in Juno) and 6916 "100 Cooldown Reduction Potion" (skill 1340 level 5, STAT37 skill cool time;
+ * the database has no skill cast speed potion). Their effects, durations and flags come from
+ * t_skill / t_skillLevel / t_magic.
+ */
+const BOOST_POTIONS = new Set([391, 2138, 6916])
+/**
+ * IdleLC prices of items the database gives no gold price (own, owner's request 2026-11-05): the
+ * cooldown potion is a cash shop item there.
+ */
+const OWN_PRICES = new Map([[6916, 50_000]])
+/** t_skill.a_flag bits a boost potion keeps (Skill.h): kept at death, real time, not twice. */
+const SF_ABSTIME = 1 << 3
+const SF_NOTDUPLICATE = 1 << 4
+const SF_NOCANCEL = 1 << 5
+/**
  * t_item 1838 "Magnifying glass" (may fail) and 1839 "Golden magnifying glass" (always works) identify
  * rare items. LC sells them in town shops; IdleLC's shop offers them in every zone (own decision).
  */
@@ -264,6 +281,7 @@ function buildData(tables) {
       usedItems.add(int(r.a_index))
   }
   UPGRADE_STONES.forEach((id) => usedItems.add(id))
+  BOOST_POTIONS.forEach((id) => usedItems.add(id))
   const titles = buildTitles(tables.t_title, itemRows)
   titles.forEach((t) => usedItems.add(t.item))
   const titleOfItem = new Map(titles.map((t) => [t.item, t.id]))
@@ -305,7 +323,7 @@ function buildData(tables) {
       level: int(r.a_level),
       jobFlag: int(r.a_job_flag),
       flag: int(r.a_flag),
-      price: int(r.a_price),
+      price: OWN_PRICES.get(int(r.a_index)) ?? int(r.a_price),
       stats: [0, 1, 2, 3, 4].map((k) => int(r[`a_num_${k}`])),
       icon: { atlas: int(r.a_texture_id), row: int(r.a_texture_row), col: int(r.a_texture_col) },
       ...(potions.has(int(r.a_index)) ? { potion: potions.get(int(r.a_index)) } : {}),
@@ -531,9 +549,45 @@ function buildPotions(tables, itemRows, usable) {
   )
   const magics = new Map(tables.t_magic.map((r) => [int(r.a_index), r]))
   const powers = new Map(tables.t_magiclevel.map((r) => [`${int(r.a_index)}/${int(r.a_level)}`, r]))
+  const levels = new Map(tables.t_skilllevel.map((r) => [`${int(r.a_index)}/${int(r.a_level)}`, r]))
   const potions = new Map()
   for (const r of itemRows.values()) {
     if (int(r.a_type_idx) !== 6 || !usable(r)) continue
+    if (BOOST_POTIONS.has(int(r.a_index))) {
+      // the skill level the item casts (t_item.a_num_1), its stat changes as skill effects
+      const skill = skills.get(int(r.a_num_0))
+      const level = levels.get(`${int(r.a_num_0)}/${Math.max(1, int(r.a_num_1))}`)
+      if (!skill || !level) continue
+      const effects = [1, 2, 3].flatMap((k) => {
+        const magic = magics.get(int(level[`a_magicIndex${k}`]))
+        if (!magic) return []
+        const magicLevel = int(level[`a_magicLevel${k}`])
+        const power = powers.get(`${int(magic.a_index)}/${magicLevel}`)
+        return [
+          {
+            magic: int(magic.a_index),
+            magicLevel,
+            type: int(magic.a_type),
+            subtype: int(magic.a_subtype),
+            damageType: int(magic.a_damagetype),
+            power: power ? int(power.a_power) : 0,
+          },
+        ]
+      })
+      const flag = int(skill.a_flag)
+      potions.set(int(r.a_index), {
+        kind: 'boost',
+        power: 0,
+        duration: int(level.a_durtime) / 10,
+        cooldown: int(skill.a_reuseTime) / 10,
+        skill: int(skill.a_index),
+        effects,
+        ...(flag & SF_NOCANCEL ? { keepOnDeath: true } : {}),
+        ...(flag & SF_ABSTIME ? { realTime: true } : {}),
+        ...(flag & SF_NOTDUPLICATE ? { exclusive: true } : {}),
+      })
+      continue
+    }
     const skill = skills.get(int(r.a_num_0))
     const level = level1.get(int(r.a_num_0))
     const magic = level && magics.get(int(level.a_magicIndex1))

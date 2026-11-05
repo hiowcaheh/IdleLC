@@ -195,7 +195,14 @@ export const useGameStore = create<GameStore>((set, get) => {
     if (!character) return
     const potions = combatSession.takePotionsUsed()
     if (kills === 0 && deaths === 0 && potions.length === 0) return
-    const report = { monsterId: combatSession.state.monsterId, kills, deaths, potions }
+    const report = {
+      monsterId: combatSession.state.monsterId,
+      kills,
+      deaths,
+      potions,
+      // what is left of the boost potions, kept in the save
+      boosts: combatSession.boosts(),
+    }
     enqueue(() => gameService.reportCombat(character.id, report))
       .then(applyResult)
       .catch(logError)

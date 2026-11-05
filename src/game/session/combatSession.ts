@@ -2,6 +2,7 @@
  * The fight on screen. It runs in the browser only (it is the animation of the hunt);
  * its outcome is reported to the GameService, which decides the rewards.
  */
+import { boostEffects, boostsOf, type OwnedBoost } from '../logic/boosts.ts'
 import {
   carryVitals,
   changeMonster,
@@ -50,14 +51,22 @@ export class CombatSession {
   /** Starts a fresh fight for a character against a monster (entering the game). */
   start(hero: Hero, monsterId: string): void {
     this.trackTitle(hero)
-    this.combat = createCombat(this.fighter(hero), monsterId, monsterFighter(monsterId))
+    this.combat = withBoosts(
+      createCombat(this.fighter(hero), monsterId, monsterFighter(monsterId)),
+      hero,
+    )
   }
 
   /** A fresh fight after `awaySeconds` away (expedition), keeping the hero's HP and MP. */
   resume(hero: Hero, monsterId: string, awaySeconds: number): void {
     this.trackTitle(hero)
     const next = createCombat(this.fighter(hero), monsterId, monsterFighter(monsterId))
-    this.combat = carryVitals(this.combat, next, awaySeconds)
+    this.combat = withBoosts(carryVitals(this.combat, next, awaySeconds), hero)
+  }
+
+  /** The boost potions working on the hero now, for the save (logic/boosts.ts). */
+  boosts(): OwnedBoost[] {
+    return boostsOf(this.combat.player.effects, Date.now())
   }
 
   tick(dt: number): CombatEvent[] {
@@ -157,3 +166,10 @@ export class CombatSession {
 }
 
 export const combatSession = new CombatSession()
+
+/** A fresh fight with the boost potions the save keeps working on the hero. */
+function withBoosts(state: CombatState, hero: Hero): CombatState {
+  const effects = boostEffects(hero.boosts, Date.now())
+  if (effects.length === 0) return state
+  return { ...state, player: { ...state.player, effects: [...state.player.effects, ...effects] } }
+}

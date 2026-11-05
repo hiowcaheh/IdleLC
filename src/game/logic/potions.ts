@@ -34,7 +34,7 @@ export function potionGroup(kind: PotionDef['kind']): PotionGroup {
 /** Whether the item is a potion of the group's slot. */
 export function fitsSlot(itemId: number, group: PotionGroup): boolean {
   const potion = getItem(itemId).potion
-  return potion !== undefined && potionGroup(potion.kind) === group
+  return potion !== undefined && potion.kind !== 'boost' && potionGroup(potion.kind) === group
 }
 
 /** How many of an item the bag holds. */

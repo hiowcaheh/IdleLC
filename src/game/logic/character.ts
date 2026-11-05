@@ -2,6 +2,7 @@
  * Player characters. One record = one future `characters` table row (docs/supabase.md).
  * Pure — creation rules are checked here so the server can run the same code.
  */
+import type { OwnedBoost } from './boosts.ts'
 import type { Attributes } from './attributes.ts'
 import { EMPTY_ALLOCATED_STATS } from './statPoints.ts'
 import { CLASSES } from '../data/classes.ts'
@@ -78,6 +79,8 @@ export interface CharacterData {
   potionSlots: PotionSlots
   /** Seconds of active play toward the next option on a worn piece (logic/options.ts). */
   optionProgress: number
+  /** Boost potions working on the hero (logic/boosts.ts); absent in older saves. */
+  boosts?: OwnedBoost[]
   /** Titles the character has (logic/titles.ts), and the worn one (shown under the name). */
   titles: OwnedTitle[]
   activeTitle: number | null

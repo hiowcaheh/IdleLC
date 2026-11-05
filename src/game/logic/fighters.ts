@@ -1,4 +1,5 @@
 /** Combat stats of a character or monster, from the game data. */
+import type { OwnedBoost } from './boosts.ts'
 import { heroAttackRange } from './attackRange.ts'
 import { CLASSES } from '../data/classes.ts'
 import { getItem } from '../data/items.ts'
@@ -37,6 +38,8 @@ export interface Hero {
   skillBar?: readonly number[]
   /** The bag: the potions of the quick slots come from it. */
   inventory?: readonly ItemStack[]
+  /** Boost potions working on the hero (logic/boosts.ts). */
+  boosts?: readonly OwnedBoost[]
   potionSlots?: PotionSlots
   /** The worn title: its options count like gear options. */
   activeTitle?: number | null
@@ -55,7 +58,14 @@ export function potionSupply({ level, inventory = [], potionSlots }: Hero): Poti
     const item = getItem(itemId)
     const potion = item.potion
     const count = countOwned(inventory, itemId)
-    if (!potion || potionGroup(potion.kind) !== group || count <= 0 || level < item.level) return []
+    if (
+      !potion ||
+      potion.kind === 'boost' ||
+      potionGroup(potion.kind) !== group ||
+      count <= 0 ||
+      level < item.level
+    )
+      return []
     return [{ itemId, name: item.name, count, potion }]
   })
 }
