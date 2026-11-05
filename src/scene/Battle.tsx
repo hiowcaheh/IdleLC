@@ -289,6 +289,7 @@ export function Battle() {
 
     const combat = combatSession.state
     const m = motion.current
+    view.interpolationSeconds = clock.current.interpolationSeconds * timeScale
 
     if (combat.phase === 'traveling') {
       // the hero runs on the spot (the ground moves under it), back at the arena's centre

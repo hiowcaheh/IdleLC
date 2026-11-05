@@ -17,7 +17,7 @@ import {
   type Mesh,
   type MeshStandardMaterial,
 } from 'three'
-import { levelShift, loadProps, mapBase, type LcMap, type MapProps } from './lcMap.ts'
+import { levelShift, loadProps, mapFile, type LcMap, type MapProps } from './lcMap.ts'
 import {
   PropGrid,
   selectProps,
@@ -92,7 +92,7 @@ function PropsInstances({
   props: MapProps
   at: { readonly current: { shown: [number, number] } }
 }) {
-  const gltf = useGLTF(`${mapBase(map)}props.glb`)
+  const gltf = useGLTF(mapFile(map, 'props.glb'))
 
   // each model's meshes with their node transforms baked in, and its size
   const { parts, sizes, bounds } = useMemo(() => {

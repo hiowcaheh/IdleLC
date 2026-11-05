@@ -74,7 +74,7 @@ export function heightAt(terrain, x, z) {
 }
 
 /** How much of a layer covers a point (0…1). */
-function coverage(layer, size, x, z) {
+export function coverage(layer, size, x, z) {
   const { size: side, data } = layer.mask
   const i = Math.min(side - 1, Math.floor((x / size) * side))
   const j = Math.min(side - 1, Math.floor((z / size) * side))
@@ -165,7 +165,8 @@ export function pickArenas(terrain, options) {
 
 /**
  * Files of one map for public/maps/<map>/: terrain.json, heights.bin, layer-<n>.webp,
- * masks-<n>.webp. `files` reads client paths; `arenas` options as in pickArenas.
+ * masks-<n>.webp. `files` reads client paths; `arenas` options as in pickArenas, or
+ * `arenaOptions.arenas` the hunting grounds themselves.
  */
 export async function buildTerrain(files, wtrPath, arenaOptions) {
   const terrain = parseTerrain(files.read(wtrPath))
@@ -212,7 +213,10 @@ export async function buildTerrain(files, wtrPath, arenaOptions) {
         heightScale: terrain.heightScale,
         layers,
         masks,
-        arenas: pickArenas(terrain, arenaOptions),
+        // the hunting grounds: given (a zone's spawn points) or picked on clear, level ground
+        arenas: arenaOptions.arenas ?? pickArenas(terrain, arenaOptions),
+        // the spawn table fits this map: each monster is hunted at its own spawn point
+        ...(arenaOptions.arenas ? { spawns: true } : {}),
       },
       null,
       2,

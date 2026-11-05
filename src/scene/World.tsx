@@ -24,8 +24,10 @@ import { LcTerrain } from './LcTerrain.tsx'
 import { groundHeight, loadMap } from './lcMap.ts'
 import { MapPropsLayer } from './MapProps.tsx'
 import { ModelBoundary } from './ModelBoundary.tsx'
-import { travelTime } from '../game/logic/combat.ts'
+import { travelProgress as runProgress } from '../game/logic/combat.ts'
+import { pointAlong } from '../game/logic/navigation.ts'
 import { combatSession } from '../game/session/combatSession.ts'
+import { currentRoute, groundOf, setShownGround } from './travelRoute.ts'
 import { ROCKS, TERRAIN_SIZE, TREES, smoothstep, terrainHeight, type Prop } from './terrain.ts'
 import { SCREEN_RIGHT, view } from './viewState.ts'
 
@@ -227,37 +229,49 @@ function Rocks() {
 
 /** Travel progress 0…1 while the hero goes to another spot (combat phase "traveling"), else 1. */
 function travelProgress(): number {
-  const c = combatSession.state
-  return c.phase === 'traveling' ? Math.min(1, c.phaseTime / travelTime(c)) : 1
+  return runProgress(combatSession.state, view.interpolationSeconds)
 }
 
 const easeInOut = (t: number) => t * t * (3 - 2 * t)
 
 /**
  * A zone drawn on the client's terrain with the trees, walls and houses of its world file: the map
- * moves under the hero so the spot's hunting ground (the map's arenas in spot order) is where the
- * fight is. Going to another spot, the map slides from the old ground to the new one while the hero
- * runs.
+ * moves under the hero so the monster's hunting ground (its spawn point, or the map's arena of its
+ * spot) is where the fight is. Going to another spot, the map slides along the planned route
+ * (travelRoute.ts: around trees, cliffs and water, at the hero's run speed) while the hero runs and
+ * turns with it.
  */
-function MapGround({ map, spot }: { map: string; spot: number }) {
+function MapGround({ map, zoneId, monsterId }: { map: string; zoneId: string; monsterId: string }) {
   const data = use(loadMap(map))
-  const { arenas } = data.meta
-  const target = arenas[Math.max(0, spot) % arenas.length]!
+  const target = groundOf(data.meta, zoneId, monsterId)
   const group = useRef<Group>(null)
+  // without a planned route (the map came in on the way) the map slides straight
   const trip = useRef({ from: target, to: target, shown: target })
   useFrame(() => {
     const m = trip.current
-    if (m.to !== target) {
+    if (m.to[0] !== target[0] || m.to[1] !== target[1]) {
       // a new spot: the trip starts where the map is now
       m.from = m.shown
       m.to = target
     }
-    const t = easeInOut(travelProgress())
-    const x = m.from[0] + (m.to[0] - m.from[0]) * t
-    const z = m.from[1] + (m.to[1] - m.from[1]) * t
+    const route = currentRoute()
+    const running = combatSession.state.phase === 'traveling'
+    let x: number
+    let z: number
+    if (running && route && route.map === map) {
+      const { at, yaw } = pointAlong(route.points, travelProgress() * route.length)
+      ;[x, z] = at
+      view.travelYaw = yaw
+    } else {
+      const t = running ? easeInOut(travelProgress()) : 1
+      x = m.from[0] + (m.to[0] - m.from[0]) * t
+      z = m.from[1] + (m.to[1] - m.from[1]) * t
+      if (running) view.travelYaw = Math.atan2(m.to[0] - m.from[0], m.to[1] - m.from[1])
+    }
+    if (!running) m.from = m.to
     m.shown = [x, z]
+    setShownGround(map, m.shown)
     group.current?.position.set(-x, -groundHeight(data, x, z), -z)
-    if (m.from !== m.to) view.travelYaw = Math.atan2(m.to[0] - m.from[0], m.to[1] - m.from[1])
   })
   return (
     <group ref={group}>
@@ -321,13 +335,13 @@ const VEIL_AHEAD = new Vector3()
 
 export function World({
   zone,
-  spot = 0,
+  monsterId,
   shadows,
   ultra = false,
 }: {
   zone: ZoneDef
-  /** The hunting spot's place among the zone's spots (picks the map's hunting ground). */
-  spot?: number
+  /** The monster hunted (picks the map's hunting ground). */
+  monsterId: string
   shadows: boolean
   /** Ultra graphics: finer shadows and motes of light drifting over the hunting ground. */
   ultra?: boolean
@@ -343,7 +357,7 @@ export function World({
       <Sun shadows={shadows} ultra={ultra} />
       {zone.map ? (
         <Suspense fallback={<Ground env={env} />}>
-          <MapGround map={zone.map} spot={spot} />
+          <MapGround map={zone.map} zoneId={zone.id} monsterId={monsterId} />
         </Suspense>
       ) : (
         <ProceduralGround env={env} />

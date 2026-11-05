@@ -2,6 +2,7 @@
  * A map's terrain from the client (public/maps/<map>/, written by `npm run convert-lc -- --only
  * terrain`): its description, heights and hunting grounds.
  */
+import type { NavGrid } from '../game/logic/navigation.ts'
 import { smoothstep } from './terrain.ts'
 
 /** public/maps/<map>/terrain.json (scripts/lc/terrain.mjs). */
@@ -16,8 +17,15 @@ export interface TerrainMeta {
   layers: { texture: string; tile: number }[]
   /** Masks of layers 1…, four per RGBA sheet. */
   masks: string[]
-  /** Hunting grounds [x, z] in map metres in spot order: the first nearest the town, each next close by. */
+  /**
+   * Hunting grounds [x, z] in map metres in spot order: the monsters' spawn points where the spawn
+   * table fits the map (Dratan, Merac, Egeha), else picked on clear ground near the town first.
+   */
   arenas: [number, number][]
+  /** True when the arenas are the spawn table's points: each monster is hunted at its own. */
+  spawns?: boolean
+  /** The walkable grid (nav.bin, scripts/lc/nav.mjs) for the runs between spots. */
+  nav?: { file: string; cell: number; width: number; height: number }
 }
 
 export interface LcMap {
@@ -26,6 +34,8 @@ export interface LcMap {
   ground: Float32Array
   /** The client's own heights in metres (what the world file's props stand on). */
   raw: Float32Array
+  /** Where the hero can run (null: the map has no grid; runs go straight). */
+  nav: NavGrid | null
 }
 
 /**
@@ -39,7 +49,16 @@ export interface MapProps {
 }
 
 export const mapBase = (map: string) => `${import.meta.env.BASE_URL}maps/${map}/`
+/**
+ * Changed whenever a converter run rewrites a map's description, props or walkable grid: the
+ * service worker answers from its cache first, so a new address makes the next start fetch them.
+ */
+const MAP_REVISION = '2026-11-05-spawns'
+/** A map file that converter runs rewrite (terrain.json, props, nav.bin), with the revision. */
+export const mapFile = (map: string, name: string) => `${mapBase(map)}${name}?v=${MAP_REVISION}`
 const maps = new Map<string, Promise<LcMap>>()
+/** Maps already fetched, for what needs them at once (planning a run). */
+const loaded = new Map<string, LcMap>()
 
 /** The fight's ground: level inside, blending into the map's own shape further out (metres). */
 const LEVEL_RADIUS = 12
@@ -77,19 +96,54 @@ export function loadMap(map: string): Promise<LcMap> {
   let promise = maps.get(map)
   if (!promise) {
     promise = Promise.all([
-      fetch(`${mapBase(map)}terrain.json`).then((r) => r.json() as Promise<TerrainMeta>),
+      fetch(mapFile(map, 'terrain.json')).then((r) => r.json() as Promise<TerrainMeta>),
       fetch(`${mapBase(map)}heights.bin`).then((r) => r.arrayBuffer()),
-    ]).then(([meta, buffer]) => {
+    ]).then(async ([meta, buffer]) => {
       const heights = new Uint16Array(buffer)
-      return {
+      const data: LcMap = {
         meta,
         ground: levelledGround(meta, heights),
         raw: Float32Array.from(heights, (h) => h * meta.heightScale),
+        nav: await loadNav(map, meta),
       }
+      loaded.set(map, data)
+      return data
     })
     maps.set(map, promise)
   }
   return promise
+}
+
+/** The map's walkable grid; null without one (or when it can't be read: runs go straight). */
+async function loadNav(map: string, meta: TerrainMeta): Promise<NavGrid | null> {
+  if (!meta.nav) return null
+  const { file, cell, width, height } = meta.nav
+  try {
+    const response = await fetch(mapFile(map, file))
+    if (!response.ok) return null
+    const bits = new Uint8Array(await response.arrayBuffer())
+    return bits.length >= Math.ceil((width * height) / 8) ? { width, height, cell, bits } : null
+  } catch {
+    return null
+  }
+}
+
+/** The map when it has been fetched already, else null. */
+export function loadedMap(map: string): LcMap | null {
+  return loaded.get(map) ?? null
+}
+
+/**
+ * Where a monster is hunted on its zone's map: its spawn point when the map's hunting grounds are
+ * the spawn table's (Dratan, Merac, Egeha), else the map's hunting ground of its spot (Juno).
+ */
+export function huntingGround(
+  meta: TerrainMeta,
+  spawn: readonly [number, number] | undefined,
+  spot: number,
+): [number, number] {
+  if (meta.spawns && spawn) return [spawn[0], spawn[1]]
+  return meta.arenas[Math.max(0, spot) % meta.arenas.length]!
 }
 
 const props = new Map<string, Promise<MapProps | null>>()
@@ -98,7 +152,7 @@ const props = new Map<string, Promise<MapProps | null>>()
 export function loadProps(map: string): Promise<MapProps | null> {
   let promise = props.get(map)
   if (!promise) {
-    promise = fetch(`${mapBase(map)}props.json`)
+    promise = fetch(mapFile(map, 'props.json'))
       .then((r) => (r.ok ? (r.json() as Promise<MapProps>) : null))
       .catch(() => null)
     props.set(map, promise)

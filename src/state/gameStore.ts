@@ -24,6 +24,7 @@ import { createDefaultSave } from '../game/logic/save.ts'
 import { farthestSpot, isSpotOpen, isZoneOpen } from '../game/logic/spots.ts'
 import { gameService } from '../game/service/index.ts'
 import { combatSession } from '../game/session/combatSession.ts'
+import { planTravel } from '../scene/travelRoute.ts'
 import { combatEvents } from './combatEvents.ts'
 
 /** Low-frequency combat snapshot for the DOM HUD (the 3D scene reads the session directly). */
@@ -218,7 +219,10 @@ export const useGameStore = create<GameStore>((set, get) => {
     const location = { zoneId, monsterId }
     if (zoneId !== character.location.zoneId && !isZoneOpen(character, zoneId)) return
     if (!isSpotOpen(character, location)) return
-    combatEvents.emit(combatSession.setMonster(monsterId))
+    // on the zone's map the hero runs the route there, around what can't be crossed
+    const distance =
+      monsterId === combatSession.state.monsterId ? undefined : planTravel(zoneId, monsterId)
+    combatEvents.emit(combatSession.setMonster(monsterId, distance))
     applyCharacter({ ...character, location })
     set({ hud: toHud(combatSession.state) })
     enqueue(() => gameService.travel(character.id, location))

@@ -14,6 +14,11 @@ export const view = {
   cameraSettled: false,
   /** Where the hero runs while going to another hunting spot (yaw, radians). */
   travelYaw: 0,
+  /**
+   * Game seconds since the fight's last logic step (VisibleClock, with the dev time scale): what is
+   * drawn moves on between the 50 ms steps.
+   */
+  interpolationSeconds: 0,
 }
 
 /** Camera position relative to what it looks at (scaled up on narrow screens). */

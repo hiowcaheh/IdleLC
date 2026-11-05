@@ -133,6 +133,8 @@ export interface CombatState {
   phase: CombatPhase
   /** Seconds spent in the current phase. */
   phaseTime: number
+  /** Going to another spot: metres of the run (the route over the map) and metres run so far. */
+  travel?: { distance: number; done: number }
   player: Fighter
   monster: Fighter
   monsterId: string
@@ -256,14 +258,41 @@ export function approachTime(state: Pick<CombatState, 'player'>): number {
   return movementTime(TIMINGS.approach, effectiveStats(state.player))
 }
 
-/** Run speed in metres/second drives both kinds of movement, including class and assist bonuses. */
-export function movementTime(secondsAtBaseSpeed: number, stats: CombatStats): number {
-  const speed = stats.client?.runSpeed ?? 6 * (1 + (stats.moveSpeed ?? 0) / 100)
-  return (secondsAtBaseSpeed * 6) / Math.max(0.1, speed)
+/** Run speed in metres a second, with the class's base and its option and assist bonuses. */
+export function runSpeed(stats: CombatStats): number {
+  return Math.max(
+    0.1,
+    stats.client?.runSpeed ?? BASE_RUN_SPEED * (1 + (stats.moveSpeed ?? 0) / 100),
+  )
 }
 
-export function travelTime(state: Pick<CombatState, 'player'>): number {
-  return movementTime(TIMINGS.travel, effectiveStats(state.player))
+/** Run speed of a hero without a client sheet (metres a second; the source's Titan and Knight). */
+const BASE_RUN_SPEED = 6
+
+/** Run speed in metres/second drives both kinds of movement, including class and assist bonuses. */
+export function movementTime(secondsAtBaseSpeed: number, stats: CombatStats): number {
+  return (secondsAtBaseSpeed * BASE_RUN_SPEED) / runSpeed(stats)
+}
+
+/** Metres of a run to another spot when its route is unknown (a zone drawn without a map). */
+export const TRAVEL_METRES = TIMINGS.travel * BASE_RUN_SPEED
+
+/** Seconds a whole run to another spot takes at the hero's run speed now. */
+export function travelTime(state: Pick<CombatState, 'player' | 'travel'>): number {
+  return (state.travel?.distance ?? TRAVEL_METRES) / runSpeed(effectiveStats(state.player))
+}
+
+/** How far through its run to another spot the hero is (0…1); 1 outside a run. */
+export function travelProgress(
+  state: Pick<CombatState, 'phase' | 'player' | 'travel'>,
+  extraSeconds = 0,
+): number {
+  if (state.phase !== 'traveling') return 1
+  const distance = state.travel?.distance ?? TRAVEL_METRES
+  if (distance <= 0) return 1
+  const blocked = isStunned(state.player) || state.player.effects.some((e) => e.state === 'hold')
+  const ahead = blocked ? 0 : extraSeconds * runSpeed(effectiveStats(state.player))
+  return Math.min(1, ((state.travel?.done ?? 0) + ahead) / distance)
 }
 
 export function createCombat(
@@ -295,11 +324,15 @@ function revived(f: Fighter): Fighter {
   }
 }
 
-/** Switch to a different monster; the current one disappears and the new one spawns. */
+/**
+ * Switch to a different monster; the current one disappears, the hero runs `distance` metres to it
+ * (its route over the map; TRAVEL_METRES when unknown) and it spawns.
+ */
 export function changeMonster(
   state: CombatState,
   monsterId: string,
   monster: FighterInit,
+  distance: number = TRAVEL_METRES,
 ): TickResult {
   const events: CombatEvent[] =
     state.phase === 'spawning' || state.phase === 'traveling' ? [] : [{ type: 'despawn' }]
@@ -314,6 +347,7 @@ export function changeMonster(
       ...state,
       phase: 'traveling',
       phaseTime: 0,
+      travel: { distance: Math.max(0, distance), done: 0 },
       player,
       monster: freshFighter(monster),
       monsterId,
@@ -527,13 +561,19 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
   if (s.phase !== 'fighting' && s.phase !== 'defeat') poisonStep(s, 'player', dt, events)
 
   switch (s.phase) {
-    case 'traveling':
+    case 'traveling': {
       regen(s.player, dt, true)
-      if (reached(s.phaseTime, travelTime(s))) {
+      // metres at the speed of the moment: a speed potion drunk on the way shortens what is left
+      const run = s.travel ?? { distance: TRAVEL_METRES, done: 0 }
+      const done = movementBlocked ? run.done : run.done + dt * runSpeed(effectiveStats(s.player))
+      s.travel = { distance: run.distance, done }
+      if (done >= run.distance - EPSILON) {
         enter(s, 'spawning')
+        delete s.travel
         events.push({ type: 'arrive' })
       }
       return
+    }
 
     case 'spawning':
       regen(s.player, dt, false)

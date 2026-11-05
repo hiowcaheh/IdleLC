@@ -12,6 +12,7 @@ function map(width: number, height: number): LcMap {
     meta: { width, height, cell: 6, heightScale: 1, layers: [], masks: [], arenas: [] },
     ground,
     raw: ground,
+    nav: null,
   }
 }
 

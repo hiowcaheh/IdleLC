@@ -8,6 +8,7 @@ import {
   skillPreparationTime,
   skillCooldownTime,
   travelTime,
+  travelProgress,
   carryVitals,
   changeMonster,
   choosePotion,
@@ -166,6 +167,33 @@ describe('changeMonster', () => {
     const there = combatTick(r.state, TIMINGS.travel + 0.01, createRng(1))
     expect(there.state.phase).toBe('spawning')
     expect(there.events).toEqual([{ type: 'arrive' }])
+  })
+
+  it("runs the route's metres at the hero's run speed", () => {
+    const s = createCombat(strongPlayer, 'a', weakMonster)
+    // no client sheet: 6 m/s
+    const r = changeMonster(s, 'b', weakMonster, 120)
+    expect(travelTime(r.state)).toBeCloseTo(20)
+    const half = combatTick(r.state, 10, createRng(1))
+    expect(half.state.phase).toBe('traveling')
+    expect(travelProgress(half.state)).toBeCloseTo(0.5)
+    expect(travelProgress(half.state, 5)).toBeCloseTo(0.75)
+    const there = combatTick(half.state, 10.01, createRng(1))
+    expect(there.events).toContainEqual({ type: 'arrive' })
+    expect(there.state.travel).toBeUndefined()
+    expect(travelProgress(there.state)).toBe(1)
+  })
+
+  it('a faster run on the way only shortens what is left of it', () => {
+    const s = createCombat(strongPlayer, 'a', weakMonster)
+    const r = changeMonster(s, 'b', weakMonster, 120)
+    const half = combatTick(r.state, 10, createRng(1)).state
+    const quick = {
+      ...half,
+      player: { ...half.player, stats: { ...half.player.stats, moveSpeed: 100 } },
+    }
+    expect(travelProgress(quick)).toBeCloseTo(0.5)
+    expect(combatTick(quick, 5.01, createRng(1)).events).toContainEqual({ type: 'arrive' })
   })
 
   it('revives the player when switching during defeat', () => {

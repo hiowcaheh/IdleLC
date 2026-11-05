@@ -68,9 +68,15 @@ export class CombatSession {
     return events
   }
 
-  setMonster(monsterId: string): CombatEvent[] {
+  /** Sets off for another monster, `distance` metres away (its route over the map) when known. */
+  setMonster(monsterId: string, distance?: number): CombatEvent[] {
     if (monsterId === this.combat.monsterId) return []
-    const { state, events } = changeMonster(this.combat, monsterId, monsterFighter(monsterId))
+    const { state, events } = changeMonster(
+      this.combat,
+      monsterId,
+      monsterFighter(monsterId),
+      distance,
+    )
     this.combat = state
     return events
   }

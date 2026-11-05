@@ -45,7 +45,8 @@ import { buildProps, obstacles, placedModels } from './props.mjs'
 import { parseSkillAnims } from './skill-anims.mjs'
 import { parseSmc } from './smc.mjs'
 import { chooseAnimSets } from './source-choice.mjs'
-import { buildTerrain } from './terrain.mjs'
+import { buildNav, navObstacles, walkableShare } from './nav.mjs'
+import { buildTerrain, parseTerrain } from './terrain.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const GENERATED = path.join(ROOT, 'src/game/data/generated')
@@ -82,10 +83,17 @@ const MAPS = {
     town: [1170, 1015],
     townRadius: 280,
     avoidLayers: [2, 8],
+    // the river bed's texture: no running through the water
+    waterLayers: [8],
+    // the client's StartZone attribute map belongs to the older Juno layout (like the spawn table):
+    // walkable ground comes from slope, trees and buildings instead
   },
   dratan: {
     wtr: 'Data\\World\\Dratan\\Dratan.wtr',
     wld: 'Data\\World\\Dratan\\Dratan.wld',
+    // the spawn table fits this terrain: each monster fights where it spawns (lc-data spawns)
+    spawnZone: 'lc-zone-4',
+    sat: 'Data\\World\\Dratan\\Dratan_3072_3072_0_1F.sat',
     count: 42,
     view: [-0.354, -0.935],
     // The world file's main settlement; arenas use the same clear-ground policy as Juno.
@@ -96,6 +104,8 @@ const MAPS = {
   merac: {
     wtr: 'Data\\World\\Merac\\Merac.wtr',
     wld: 'Data\\World\\Merac\\Merac.wld',
+    spawnZone: 'lc-zone-7',
+    sat: 'Data\\World\\Merac\\Merac_1536_1536_0.sat',
     count: 23,
     view: [-0.354, -0.935],
     // w3_gate_A's settlement entrance in Merac.wld; routes remain IdleLC hunting spots.
@@ -106,6 +116,8 @@ const MAPS = {
   egeha: {
     wtr: 'Data\\World\\Egeha\\Egeha.wtr',
     wld: 'Data\\World\\Egeha\\Egeha.wld',
+    // no attribute map in the client: walkable ground from slope, trees and buildings
+    spawnZone: 'lc-zone-15',
     count: 15,
     view: [-0.354, -0.935],
     // Egeha_start_00's placement in Egeha.wld.
@@ -114,6 +126,69 @@ const MAPS = {
     avoidLayers: [],
   },
 }
+/**
+ * Monsters without a hunting spot, as in src/game/data/zones.ts: the event monsters and the raid
+ * bosses.
+ */
+const NO_SPOT = new Set([
+  ...['lc-1105', 'lc-454', 'lc-1633'],
+  ...['lc-308', 'lc-152', 'lc-309', 'lc-1339', 'lc-331', 'lc-504', 'lc-505', 'lc-1553'],
+])
+
+/**
+ * A zone's hunting grounds: its monsters' spawn points (lc-data `spawns`) in the game's spot order
+ * (src/game/data/zones.ts huntingOrder: level, plain before elite, HP, attack, database order), so
+ * the props cover the runs between neighbouring spots.
+ */
+function spawnGrounds(data, zoneId) {
+  const zone = data?.zones.find((z) => z.id === zoneId)
+  const monsters = new Map((data?.monsters ?? []).map((m) => [m.id, m]))
+  const key = (m) => [m.level, m.elite ? 1 : 0, m.hp, m.attack]
+  const ids = (zone?.monsterIds ?? [])
+    .filter((id) => !NO_SPOT.has(id) && monsters.get(id)?.spawns?.[zoneId])
+    .map((id, i) => ({ m: monsters.get(id), i }))
+    .sort((a, b) => {
+      const ka = key(a.m)
+      const kb = key(b.m)
+      for (let k = 0; k < ka.length; k++) if (ka[k] !== kb[k]) return ka[k] - kb[k]
+      return a.i - b.i
+    })
+  if (ids.length === 0) throw new Error(`no spawn points for ${zoneId} (run import-lc-db)`)
+  return ids.map(({ m }) => m.spawns[zoneId])
+}
+
+/**
+ * Writes public/maps/<map>/nav.bin (the walkable grid, scripts/lc/nav.mjs) and its entry in the
+ * map's terrain.json; reports how many hunting grounds stand on walkable ground.
+ */
+function writeNav(files, map, def, world) {
+  const dir = path.join(ROOT, 'public', 'maps', map)
+  const metaFile = path.join(dir, 'terrain.json')
+  const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'))
+  const size = (meta.width - 1) * meta.cell
+  let source
+  if (def.sat && files.resolve(def.sat)) {
+    const satSize = Number(/_(\d+)_\d+_\d+(?:_\w+)?\.sat$/i.exec(def.sat)?.[1])
+    source = { sat: files.read(def.sat), satSize }
+  } else {
+    source = {
+      terrain: parseTerrain(files.read(def.wtr)),
+      waterLayers: def.waterLayers ?? [],
+      obstacles: navObstacles(world),
+    }
+  }
+  const nav = buildNav({ size, ...source })
+  fs.writeFileSync(path.join(dir, 'nav.bin'), nav.bits)
+  meta.nav = { file: 'nav.bin', cell: nav.cell, width: nav.width, height: nav.height }
+  fs.writeFileSync(metaFile, JSON.stringify(meta, null, 2))
+  const share = walkableShare(nav, meta.arenas)
+  console.log(
+    `nav ${map}: ${nav.width}×${nav.height} cells of ${nav.cell} m from ` +
+      `${source.sat ? 'the attribute map' : 'slope and props'}, ` +
+      `${Math.round(share * 100)}% of ${meta.arenas.length} hunting grounds walkable`,
+  )
+}
+
 /** Class portraits sheet (relative to public/). */
 const PORTRAITS_FILE = 'icons/lc/portraits.webp'
 
@@ -143,8 +218,8 @@ function parseArgs(argv) {
     else if (flag === '--help' || flag === '-h') args.help = true
     else throw new Error(`unknown option ${flag}`)
   }
-  if (args.map && (!MAPS[args.map] || !args.only?.has('terrain')))
-    throw new Error('--map needs a known map and --only terrain')
+  if (args.map && (!MAPS[args.map] || !(args.only?.has('terrain') || args.only?.has('nav'))))
+    throw new Error('--map needs a known map and --only terrain or nav')
   if (args.batch) {
     if (args.only) throw new Error('--batch and --only cannot be combined')
     const batch = JSON.parse(fs.readFileSync(args.batch, 'utf8'))
@@ -230,7 +305,7 @@ function listJobs(args, data, files, itemModels, icons, skillAnims) {
       (j.gear && args.only.has('gear')) ||
       (j.starter && args.only.has('starter')),
   )
-  const selectors = new Set(['gear', 'starter', 'icons', 'ui', 'fx', 'terrain'])
+  const selectors = new Set(['gear', 'starter', 'icons', 'ui', 'fx', 'terrain', 'nav'])
   for (const id of args.only)
     if (!selectors.has(id) && !selected.some((job) => job.id === id))
       throw new Error(`requested model is unavailable: ${id}`)
@@ -327,7 +402,7 @@ async function main() {
   // `--only icons` / `--only ui` / `--only terrain` (or several) convert no models
   const iconsOnly =
     args.only !== undefined &&
-    [...args.only].every((o) => ['icons', 'ui', 'fx', 'terrain'].includes(o))
+    [...args.only].every((o) => ['icons', 'ui', 'fx', 'terrain', 'nav'].includes(o))
   // A selective asset conversion must not rewrite unrelated skill metadata.
   const updatesSkills =
     !args.smc && (!args.only || [...args.only].some((id) => id.startsWith('class-')))
@@ -434,14 +509,21 @@ async function main() {
       }
       // the world file's trees, walls and houses: hunting grounds keep clear of them
       const world = def.wld && files.resolve(def.wld) ? placedModels(files, def.wld).placed : []
-      const out = await buildTerrain(files, def.wtr, { ...def, obstacles: obstacles(world) })
+      // a zone whose spawn table fits the terrain fights where its monsters spawn
+      const spawned = def.spawnZone ? spawnGrounds(data, def.spawnZone) : null
+      const out = await buildTerrain(files, def.wtr, {
+        ...def,
+        obstacles: obstacles(world),
+        ...(spawned ? { arenas: spawned } : {}),
+      })
       const dir = path.join(ROOT, 'public', 'maps', map)
       fs.mkdirSync(dir, { recursive: true })
       for (const [name, content] of Object.entries(out))
         fs.writeFileSync(path.join(dir, name), content)
       const { arenas } = JSON.parse(out['terrain.json'].toString())
-      if (arenas.length < def.count)
+      if (!spawned && arenas.length < def.count)
         throw new Error(`terrain ${map}: only ${arenas.length} of ${def.count} hunting grounds`)
+      writeNav(files, map, def, world)
       console.log(
         `terrain ${map}: ${Object.keys(out).length} files, ${arenas.length} hunting grounds`,
       )
@@ -455,6 +537,16 @@ async function main() {
             `${props.json.instances.length} placed, ${size} KB`,
         )
       }
+    }
+  }
+
+  // `--only nav`: just the walkable grid (nav.bin) of each map, its terrain.json gets the entry
+  if (!args.smc && args.only?.has('nav') && !args.only.has('terrain')) {
+    for (const [map, def] of Object.entries(MAPS)) {
+      if (args.map && args.map !== map) continue
+      if (!files.resolve(def.wtr)) continue
+      const world = def.wld && files.resolve(def.wld) ? placedModels(files, def.wld).placed : []
+      writeNav(files, map, def, world)
     }
   }
 
