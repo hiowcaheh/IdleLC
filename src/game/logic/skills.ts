@@ -259,6 +259,8 @@ export interface SkillRank {
   reducibleDebuff?: boolean
   /** Skill.h SF_NOT_BOSS: it cannot be used on a boss. */
   notBoss?: boolean
+  /** Its t_magic records and levels (CAssistList::CanApply / DelDuplicate). */
+  magics?: readonly { magic: number; level: number }[]
   /**
    * The hero's release clip (lc-skill-motion.json): its length and the moment its blow lands, in
    * seconds before the cast speed. The client plays it to the end before the hero acts again.
@@ -266,6 +268,15 @@ export interface SkillRank {
   motion?: { fire: number; impact?: number }
   effects: SkillEffect[]
   auto: boolean
+}
+
+function magicsOfRank(rank: SkillLevelDef) {
+  const magics = rank.effects.flatMap((e) =>
+    e.magic !== undefined && e.magicLevel !== undefined
+      ? [{ magic: e.magic, level: e.magicLevel }]
+      : [],
+  )
+  return magics.length ? { magics } : {}
 }
 
 export function rankOf(skill: Pick<SkillDef, 'levels'>, level: number): SkillLevelDef | undefined {
@@ -330,6 +341,7 @@ export function skillRank(
     duration: rank.duration / 10,
     ...(skill.flag === SF_NOTHELP ? { reducibleDebuff: true } : {}),
     ...(((skill.flag ?? 0) & SF_NOT_BOSS) !== 0 ? { notBoss: true } : {}),
+    ...magicsOfRank(rank),
     ...(lcSkillMotion?.[skill.id] ? { motion: lcSkillMotion[skill.id] } : {}),
     effects,
     auto,

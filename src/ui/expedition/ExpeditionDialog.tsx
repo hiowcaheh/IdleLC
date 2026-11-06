@@ -117,7 +117,9 @@ export function ExpeditionDialog({
         you are away, up to {duration(AFK_MAX_SECONDS)}. Come back any time to collect.
       </p>
 
-      <h3 className="expedition-dialog__heading">Expected per hour</h3>
+      <h3 className="expedition-dialog__heading">
+        {estimate.boosts.length > 0 ? 'Expected in the first hour' : 'Expected per hour'}
+      </h3>
       <dl className="expedition-dialog__stats">
         {rewards.map(([label, value, tone]) => (
           <div key={label} className={tone}>
@@ -126,6 +128,30 @@ export function ExpeditionDialog({
           </div>
         ))}
       </dl>
+
+      {estimate.boosts.length > 0 && (
+        <>
+          <h3 className="expedition-dialog__heading">Boosts on the expedition</h3>
+          <ul className="expedition-dialog__supplies">
+            {estimate.boosts.map((boost) => (
+              <li key={boost.itemId} className="expedition-dialog__supply">
+                <ItemIcon item={getItem(boost.itemId)} size={30} />
+                <span className="expedition-dialog__supply-text">
+                  <span className="expedition-dialog__supply-name">{boost.name}</span>
+                  <span className="expedition-dialog__supply-meta">
+                    Works on the hunt while it lasts
+                  </span>
+                </span>
+                <span className="expedition-dialog__supply-use">
+                  <span className="expedition-dialog__lasts">
+                    {boost.seconds >= 3600 ? 'The whole hour' : duration(boost.seconds)}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
 
       <h3 className="expedition-dialog__heading">Potions per hour</h3>
       {potions.length === 0 ? (

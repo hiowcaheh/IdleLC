@@ -15,6 +15,7 @@ export const DRINK_PROBLEMS: Record<DrinkProblem | 'away', string> = {
   'none-left': 'None left.',
   cooldown: 'A potion of this kind is cooling down.',
   working: 'A potion of this kind is still working.',
+  stronger: 'A stronger effect of this kind is working.',
 }
 
 const time = (seconds: number) =>

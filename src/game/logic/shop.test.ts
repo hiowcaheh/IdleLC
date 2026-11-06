@@ -113,7 +113,7 @@ describe('buying', () => {
       { slot: 'helmet', tiers: [{ level: 2, items: [7] }] },
     ])
     // the zone's goods, the boost potions and the magnifying glasses every shop sells
-    expect(offer.goods).toEqual([85, 43, 44, 484, 490, 2138, 6916, 1838, 1839])
+    expect(offer.goods).toEqual([85, 43, 44, 484, 490, 2138, 2845, 6916, 1838, 1839])
     expect(buyPrice(7)).toBe(200)
     const { character } = applyBuy(knight({ gold: 500 }), 7, 2)
     expect(character.gold).toBe(100)

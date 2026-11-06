@@ -68,6 +68,16 @@ export function AfkSummary() {
             <dt>Skill points</dt>
             <dd>+{formatSp(result.sp)} SP</dd>
           </div>
+          {result.boosts?.length ? (
+            <div>
+              <dt>Boosts</dt>
+              <dd>
+                {result.boosts
+                  .map((b) => `${getItem(b.itemId).name} ${duration(b.seconds)}`)
+                  .join(' · ')}
+              </dd>
+            </div>
+          ) : null}
           {(result.lost.exp > 0 || result.lost.sp > 0) && (
             <div className="afk__stat--lost">
               <dt>Lost on death</dt>

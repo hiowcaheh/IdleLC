@@ -145,3 +145,24 @@ describe('boost potions', () => {
     ])
   })
 })
+
+describe('the same magic at another level (CAssistList::CanApply / DelDuplicate)', () => {
+  it('Super Haste keeps the Potion of Haste out', () => {
+    const fast = drinkPotion(fight(), supply(2845)).state
+    const r = drinkPotion(fast, supply(391))
+    expect(r.problem).toBe('stronger')
+    expect(r.state.player.effects.map((e) => e.itemId)).toEqual([2845])
+  })
+
+  it('Super Haste takes the place of a working Potion of Haste', () => {
+    const slow = drinkPotion(fight(), supply(391)).state
+    const r = drinkPotion(slow, supply(2845))
+    expect(r.problem).toBeNull()
+    expect(r.state.player.effects.map((e) => e.itemId)).toEqual([2845])
+  })
+
+  it('saved boosts keep their magic levels', () => {
+    const [effect] = boostEffects([{ itemId: 2845, remaining: 60, until: 61_000 }], 1000)
+    expect(effect!.magics).toEqual([{ magic: 119, level: 7 }])
+  })
+})

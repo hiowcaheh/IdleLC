@@ -12,6 +12,7 @@ import {
   createCombat,
   takePotionsUsed,
   updatePlayer,
+  type ActiveEffect,
   type FighterInit,
 } from './combat.ts'
 import { monsterFighter, playerFighter, type Hero } from './fighters.ts'
@@ -48,9 +49,19 @@ export function measureHuntRate(
   monster: FighterInit,
   rng: Rng,
   sampleSeconds = HUNT_SAMPLE_SECONDS,
+  effects: readonly ActiveEffect[] = [],
 ): HuntRate {
   const potions = player.potions?.map((p) => ({ ...p, count: SAMPLE_POTIONS }))
   let state = createCombat({ ...player, potions }, 'sample', monster)
+  // boosts working for the whole sample
+  if (effects.length > 0)
+    state = {
+      ...state,
+      player: {
+        ...state.player,
+        effects: effects.map((e) => ({ ...e, remaining: sampleSeconds + 1 })),
+      },
+    }
   const step = 0.1
   for (let t = 0; t < sampleSeconds; t += step) state = combatTick(state, step, rng).state
   const perHour = 3600 / sampleSeconds
@@ -84,6 +95,8 @@ export interface AfkResult {
   potionsUsed: ItemStack[]
   /** EXP and SP (1/10 000) the deaths took (death.ts). */
   lost: { exp: number; sp: number }
+  /** Seconds of the expedition each boost potion worked, by item. */
+  boosts: { itemId: number; seconds: number }[]
   character: CharacterData
 }
 
@@ -91,9 +104,15 @@ export interface HourlyEstimate extends HuntRate {
   expPerHour: number
   goldPerHour: number
   spPerHour: number
+  /** Boost potions working now and how many seconds of the first hour each still covers. */
+  boosts: { itemId: number; name: string; seconds: number }[]
 }
 
-/** What an hour of hunting `monsterId` is worth to the hero (level and skills) right now. */
+/**
+ * What the first hour of hunting `monsterId` is worth to the hero (level, skills, gear) with the
+ * boost potions working now: each stretch of the hour is measured with the boosts still running
+ * in it, as the expedition will play it (simulateAfk counts them down the same way).
+ */
 export function estimateHourly(
   hero: Hero,
   monsterId: string,
@@ -101,7 +120,24 @@ export function estimateHourly(
   now = Date.now(),
 ): HourlyEstimate {
   const current = { ...hero, activeTitle: activeTitleId(hero, now) }
-  const rate = measureHuntRate(playerFighter(current, now), monsterFighter(monsterId), rng)
+  const player = playerFighter(current, now)
+  const monster = monsterFighter(monsterId)
+  const boosts = boostEffects(hero.boosts, now)
+  const hour = 3600
+  const ends = [...new Set(boosts.map((b) => Math.min(hour, b.remaining)))].sort((a, b) => a - b)
+  if (ends[ends.length - 1] !== hour) ends.push(hour)
+  const rate: HuntRate = { killsPerHour: 0, deathsPerHour: 0, potionsPerHour: {} }
+  let from = 0
+  for (const to of ends) {
+    const share = (to - from) / hour
+    const working = boosts.filter((b) => b.remaining >= to - 1e-6)
+    const part = measureHuntRate(player, monster, rng, HUNT_SAMPLE_SECONDS, working)
+    rate.killsPerHour += part.killsPerHour * share
+    rate.deathsPerHour += part.deathsPerHour * share
+    for (const [id, count] of Object.entries(part.potionsPerHour))
+      rate.potionsPerHour[Number(id)] = (rate.potionsPerHour[Number(id)] ?? 0) + count * share
+    from = to
+  }
   const reward = killReward(getMonster(monsterId), current, now)
   const kills = rate.killsPerHour * AFK_EFFICIENCY
   return {
@@ -109,6 +145,11 @@ export function estimateHourly(
     expPerHour: kills * reward.exp,
     goldPerHour: kills * reward.gold,
     spPerHour: kills * reward.sp,
+    boosts: boosts.map((b) => ({
+      itemId: b.itemId!,
+      name: b.name,
+      seconds: Math.min(hour, b.remaining),
+    })),
   }
 }
 
@@ -149,6 +190,7 @@ export function simulateAfk(
     current = { ...current, inventory: takeFromInventory(current.inventory, taken.used).inventory }
     for (const { itemId, count } of taken.used) used.set(itemId, (used.get(itemId) ?? 0) + count)
   }
+  const boostTime = new Map<number, number>()
   let done = 0
   while (done < seconds - 1e-9) {
     const time = startedAt + done * 1000
@@ -161,6 +203,9 @@ export function simulateAfk(
     const expiry = current.titles.find((t) => t.id === current.activeTitle)?.expiresAt
     const untilExpiry = expiry == null ? Infinity : (expiry - time) / 1000
     const step = Math.min(0.05, seconds - done, Math.max(0.000001, untilExpiry))
+    for (const e of state.player.effects)
+      if (e.potion === 'boost' && e.itemId !== undefined)
+        boostTime.set(e.itemId, (boostTime.get(e.itemId) ?? 0) + step)
     const tick = combatTick(state, step, battleRng)
     state = tick.state
     done += step
@@ -222,6 +267,9 @@ export function simulateAfk(
     levelsGained: current.level - character.level,
     drops,
     lost,
+    boosts: [...boostTime]
+      .map(([itemId, worked]) => ({ itemId, seconds: Math.round(worked) }))
+      .filter((b) => b.seconds > 0),
     potionsUsed: [...used]
       .map(([itemId, count]) => ({ itemId, count }))
       .sort((a, b) => a.itemId - b.itemId),

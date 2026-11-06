@@ -15,7 +15,7 @@ export function useHourlyEstimate(hero: Hero, monsterId: string): HourlyEstimate
     )
     return () => window.clearTimeout(timer)
   }, [hero.activeTitle, hero.titles, now])
-  const key = heroKey(hero, now)
+  const key = `${heroKey(hero, now)}|${JSON.stringify(hero.boosts ?? [])}`
   return useMemo(
     () => estimateHourly(hero, monsterId, createRng(hero.level * 7919 + monsterId.length), now),
     // the hero object changes on every save; its key only when the estimate would

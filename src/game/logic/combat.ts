@@ -133,6 +133,8 @@ export interface ActiveEffect {
   mpPerSecond?: number
   /** A boost potion's SF_NOCANCEL: the hero's death does not end it. */
   keepOnDeath?: boolean
+  /** The t_magic records (index and level) of the skill behind it, for CAssistList::CanApply. */
+  magics?: readonly { magic: number; level: number }[]
   /** Free dungeon selections expire with the run and never become owned potion boosts. */
   dungeon?: true
   visual?: 'Angel_wing03'
@@ -330,6 +332,28 @@ export function removeEffect(
   next.hp = Math.min(next.hp, stats.maxHp)
   next.mp = Math.min(next.mp, stats.maxMp ?? 0)
   return { ...state, [side]: next }
+}
+
+/**
+ * CAssistList::CanApply (Assist.cpp:180–215): an effect can't land while one with the same magic
+ * at a higher level works (Super Haste's run speed keeps out the Potion of Haste's).
+ */
+export function strongerWorking(
+  f: Pick<Fighter, 'effects'>,
+  magics: readonly { magic: number; level: number }[] | undefined,
+): boolean {
+  if (!magics?.length) return false
+  return f.effects.some((e) =>
+    e.magics?.some((m) => magics.some((n) => n.magic === m.magic && n.level < m.level)),
+  )
+}
+
+/** CAssistList::DelDuplicate: what an effect with these magics replaces (same magic). */
+function sharesMagic(
+  effect: ActiveEffect,
+  magics: readonly { magic: number; level: number }[] | undefined,
+): boolean {
+  return !!magics?.length && !!effect.magics?.some((m) => magics.some((n) => n.magic === m.magic))
 }
 
 /** Whether a buff or potion on the fighter makes it run faster (the scene's smoke at its feet). */
@@ -1404,6 +1428,8 @@ export function applyEffects(
   events: CombatEvent[],
 ): void {
   if (skill.duration <= 0) return
+  // a stronger effect of the same magic keeps this one out (CAssistList::CanApply)
+  if (strongerWorking(f, skill.magics)) return
   const stats = skill.effects.filter((e): e is StatEffect => e.kind === 'stat')
   const stunEffect = skill.effects.find((e) => e.kind === 'stun')
   const stateEffect = skill.effects.find((e) => e.kind === 'state')
@@ -1459,11 +1485,12 @@ export function applyEffects(
   const remaining =
     shorter > 0 ? (tenths - Math.trunc((tenths * shorter) / 10000)) / 10 : skill.duration
   f.effects = [
-    ...f.effects.filter((e) => e.skillId !== skill.id),
+    ...f.effects.filter((e) => e.skillId !== skill.id && !sharesMagic(e, skill.magics)),
     {
       skillId: skill.id,
       name: skill.name,
       remaining,
+      ...(skill.magics?.length ? { magics: skill.magics } : {}),
       stats,
       stun,
       state,
@@ -1545,9 +1572,13 @@ function applyPotion(f: Fighter, { itemId, name, potion }: PotionSupply, events:
   f.potionCooldowns[cooldownKey(potion)] = potion.cooldown
   if (kind === 'boost') {
     // the skill's buff: a second one of the same skill takes the place of the first (AddAssist)
+    const effect = boostEffect(itemId, name, potion, potion.duration)
     f.effects = [
-      ...f.effects.filter((e) => !(e.potion === 'boost' && e.skillId === potion.skill)),
-      boostEffect(itemId, name, potion, potion.duration),
+      ...f.effects.filter(
+        (e) =>
+          !(e.potion === 'boost' && e.skillId === potion.skill) && !sharesMagic(e, effect.magics),
+      ),
+      effect,
     ]
     events.push({ type: 'potion', itemId, name, kind })
     return
@@ -1610,14 +1641,31 @@ export function boostEffect(
     poison: 0,
     nextTick: POISON_TICK,
     ...(potion.keepOnDeath ? { keepOnDeath: true } : {}),
+    ...magicsOf(potion.effects),
   }
+}
+
+function magicsOf(effects: readonly { magic?: number; magicLevel?: number }[] | undefined) {
+  const magics = (effects ?? []).flatMap((e) =>
+    e.magic !== undefined && e.magicLevel !== undefined
+      ? [{ magic: e.magic, level: e.magicLevel }]
+      : [],
+  )
+  return magics.length ? { magics } : {}
 }
 
 /**
  * Why the hero can't drink a potion now: dead, level too low, none left, its kind cooling down or
  * still working.
  */
-export type DrinkProblem = 'dead' | 'level-too-low' | 'none-left' | 'cooldown' | 'working'
+export type DrinkProblem =
+  | 'dead'
+  | 'level-too-low'
+  | 'none-left'
+  | 'cooldown'
+  | 'working'
+  /** A stronger effect of the same magic works (CAssistList::CanApply). */
+  | 'stronger'
 
 /**
  * The player has the hero drink a potion from the bag (`supply.count`: how many the bag holds). Same
@@ -1641,7 +1689,9 @@ export function drinkPotion(
               supply.potion.exclusive &&
               f.effects.some((e) => e.potion === 'boost' && e.skillId === supply.potion.skill)
               ? 'working'
-              : null
+              : strongerWorking(f, boostEffect(0, '', supply.potion, 0).magics)
+                ? 'stronger'
+                : null
             : f.effects.some((e) => e.potion === kind)
               ? 'working'
               : null
@@ -1701,7 +1751,9 @@ export function chooseSkill(self: Fighter, target: Fighter, rng?: Rng): SkillRan
     r.effects.some((e) => e.kind === 'summon' && canSummon(self, e.element)),
   )
   if (summon) return summon
-  const buff = ready.find((r) => r.kind === 'buff' && !summons(r) && !on(self, r.id))
+  const buff = ready.find(
+    (r) => r.kind === 'buff' && !summons(r) && !on(self, r.id) && !strongerWorking(self, r.magics),
+  )
   if (buff) return buff
   // a skill that only cancels another (Charge) waits until the monster readies one (own rule)
   const onlyCancels = (r: SkillRank) =>

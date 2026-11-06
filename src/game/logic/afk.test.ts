@@ -210,3 +210,32 @@ describe('simulateAfk', () => {
     expect(none).toMatchObject({ kills: 0, exp: 0, gold: 0, drops: [], levelsGained: 0 })
   })
 })
+
+describe('boost potions on an expedition', () => {
+  const hero = createCharacterData({ name: 'Brom', classId: 'knight' }, 'id', 0)
+  const now = 1_000_000
+  // the 100 Cooldown Reduction Potion with half an hour left (SF_ABSTIME: until)
+  const boosted = { ...hero, boosts: [{ itemId: 6916, remaining: 1800, until: now + 1_800_000 }] }
+
+  it('the estimate measures the first hour with the boost while it lasts', () => {
+    const plain = estimateHourly(hero, hero.location.monsterId, createRng(4), now)
+    const withBoost = estimateHourly(boosted, hero.location.monsterId, createRng(4), now)
+    expect(withBoost.boosts).toEqual([{ itemId: 6916, name: getItem(6916).name, seconds: 1800 }])
+    expect(withBoost.killsPerHour).toBeGreaterThanOrEqual(plain.killsPerHour)
+    expect(plain.boosts).toEqual([])
+  })
+
+  it('the expedition hunts with it for as long as it works, and says so', () => {
+    const away = { ...boosted, expedition: { ...hero.location, startedAt: now } }
+    const result = simulateAfk(away, 3600, createRng(2), now + 3_600_000)
+    expect(result.boosts).toEqual([{ itemId: 6916, seconds: 1800 }])
+    const without = simulateAfk(
+      { ...hero, expedition: { ...hero.location, startedAt: now } },
+      3600,
+      createRng(2),
+      now + 3_600_000,
+    )
+    expect(without.boosts).toEqual([])
+    expect(result.kills).toBeGreaterThanOrEqual(without.kills)
+  })
+})
