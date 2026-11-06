@@ -51,7 +51,7 @@ import {
   type LearnedSkill,
 } from './skills.ts'
 
-export const SAVE_VERSION = 15
+export const SAVE_VERSION = 16
 
 export type GraphicsQuality = 'auto' | 'low' | 'high' | 'ultra'
 
@@ -192,6 +192,8 @@ export const MIGRATIONS: Record<number, Migration> = {
   13: (save) => save,
   // v15: independent dungeon entries, interrupted-run checkpoint and local best scores.
   14: (save) => save,
+  // v16: per-character Buffer levels, spendable dungeon points and lifetime ranking score.
+  15: (save) => save,
 }
 
 export const DEFAULT_SETTINGS: Settings = { quality: 'auto', showDamageNumbers: true }

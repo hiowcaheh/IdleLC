@@ -22,6 +22,12 @@ import {
   createDungeonRun,
   dungeonBuffRank,
   dungeonBuffDefinition,
+  dungeonBuffLevel,
+  dungeonCheckpoint,
+  emptyDungeonProgress,
+  recordDungeon,
+  upgradeDungeonBuff,
+  DUNGEON_BUFF_UPGRADE_COST,
   dungeonAreaTargets,
   dungeonRunsLeft,
   dungeonStep,
@@ -50,12 +56,12 @@ function enemyAt(state: DungeonRun, x: number, hp = 1) {
   return { uid: state.nextUid++, monsterId: 'lc-35', x, z: 0, fighter, deadFor: -1 }
 }
 
-function fixture(level = 30) {
+function fixture(level = 30, patch: Partial<ReturnType<typeof hero>> = {}) {
   let time = NOW
   let value: string | null = serializeSave({
     ...createDefaultSave(NOW),
     activeCharacterId: 'd',
-    characters: [hero(level)],
+    characters: [{ ...hero(level), ...patch }],
   })
   const storage: KeyValueStorage = {
     getItem: () => value,
@@ -137,7 +143,7 @@ describe('dungeons on the original database', () => {
     expect(picked.choices).toHaveLength(3)
   })
 
-  it('offers three distinct, existing, cross-class buffs including high ranks', () => {
+  it('offers distinct cross-class buffs at rank one, including advanced class definitions', () => {
     expect(DUNGEON_BUFFS.length).toBeGreaterThanOrEqual(19)
     expect(new Set(DUNGEON_BUFFS.map((id) => dungeonBuffDefinition(id)!.classId)).size).toBe(6)
     expect(
@@ -156,6 +162,7 @@ describe('dungeons on the original database', () => {
     expect(next.buffs).toHaveLength(19)
     expect(new Set(next.buffs).size).toBe(19)
     expect(next.player.effects).toHaveLength(19)
+    expect(DUNGEON_BUFFS.every((id) => dungeonBuffRank(id).level === 1)).toBe(true)
     for (const effect of next.player.effects) {
       expect(effect.stats).toEqual(
         dungeonBuffRank(effect.skillId).effects.filter((e) => e.kind === 'stat'),
@@ -274,6 +281,146 @@ describe('dungeons on the original database', () => {
     expect(next.elapsed).toBe(600)
     expect(next.ended).toBe('completed')
     expect(dungeonStep(next, 0.05, STILL, rng()).run).toBe(next)
+  })
+})
+
+describe('per-character Buffer and lifetime dungeon points', () => {
+  const buff = DUNGEON_BUFFS.find((id) => dungeonBuffDefinition(id)!.levels.length > 1)!
+  const completed = (id = 'complete', score = 100) => ({
+    ...dungeonCheckpoint(run()),
+    runId: id,
+    seconds: 600,
+    score,
+    outcome: 'completed' as const,
+    endedAt: NOW,
+  })
+
+  it('credits completed rounds once, spends only the wallet, and accumulates future scores', () => {
+    const first = recordDungeon(emptyDungeonProgress(), completed())
+    expect(first).toMatchObject({ points: 100, totalPoints: 100 })
+    const upgraded = upgradeDungeonBuff({ ...hero(), dungeons: first }, buff)
+    expect(upgraded.dungeons).toMatchObject({
+      points: 100 - DUNGEON_BUFF_UPGRADE_COST,
+      totalPoints: 100,
+      buffLevels: { [buff]: 2 },
+    })
+    expect(first.points).toBe(100)
+    const second = recordDungeon(upgraded.dungeons!, completed('second', 37))
+    expect(second).toMatchObject({ points: 137 - DUNGEON_BUFF_UPGRADE_COST, totalPoints: 137 })
+    expect(recordDungeon(second, completed('second', 37))).toEqual(second)
+    let many = second
+    for (let n = 0; n < 35; n++) many = recordDungeon(many, completed(`later-${n}`, 1))
+    expect(many.history).toHaveLength(30)
+    expect(sanitizeDungeonProgress(many)).toMatchObject({
+      points: 172 - DUNGEON_BUFF_UPGRADE_COST,
+      totalPoints: 172,
+    })
+    for (const outcome of ['left', 'interrupted', 'defeated'] as const) {
+      const progress = recordDungeon(second, { ...completed(outcome, 75), outcome })
+      expect(progress.points).toBe(second.points)
+      expect(progress.totalPoints).toBe(second.totalPoints)
+    }
+  })
+
+  it('freezes purchased ranks on entry and applies exactly that source rank on selection', () => {
+    const character = {
+      ...hero(),
+      dungeons: { ...emptyDungeonProgress(), points: 100, totalPoints: 100 },
+    }
+    const upgraded = upgradeDungeonBuff(character, buff)
+    const fresh = createDungeonRun(character, 'belfist', 'fresh', NOW)
+    const trained = createDungeonRun(upgraded, 'belfist', 'trained', NOW)
+    expect(dungeonBuffLevel(character.dungeons, buff)).toBe(1)
+    expect(trained.buffLevels[buff]).toBe(2)
+    for (const [state, rank] of [
+      [fresh, 1],
+      [trained, 2],
+    ] as const) {
+      state.pendingLevels = 1
+      state.choices = [buff]
+      const chosen = chooseDungeonBuff(state, buff, rng())
+      expect(chosen.player.effects[0]!.stats).toEqual(
+        dungeonBuffRank(buff, rank).effects.filter((e) => e.kind === 'stat'),
+      )
+    }
+    upgraded.dungeons!.buffLevels[buff] = 3
+    expect(trained.buffLevels[buff]).toBe(2)
+  })
+
+  it('validates funds, maximum rank and allowed buffs without spending on rejection', () => {
+    const character = { ...hero(), dungeons: emptyDungeonProgress() }
+    expect(() => upgradeDungeonBuff(character, buff)).toThrow('dungeon-points')
+    character.dungeons.points = character.dungeons.totalPoints = 1000
+    character.dungeons.buffLevels[buff] = dungeonBuffDefinition(buff)!.levels.at(-1)!.level
+    expect(() => upgradeDungeonBuff(character, buff)).toThrow('dungeon-buff-max')
+    expect(() => upgradeDungeonBuff(character, -1)).toThrow('unknown-dungeon-buff')
+    expect(character.dungeons.points).toBe(1000)
+  })
+
+  it('persists upgrades per character, prevents buying inside a run, and preserves points over reset', async () => {
+    const f = fixture(30, {
+      dungeons: { ...emptyDungeonProgress(), points: 100, totalPoints: 100 },
+    })
+    await f.service.load()
+    const other = await f.service.createCharacter({ name: 'BufferOther', classId: 'knight' })
+    expect(other.dungeons).toMatchObject({ points: 0, totalPoints: 0, buffLevels: {} })
+    await expect(f.service.upgradeDungeonBuff(other.id, buff)).rejects.toThrow('dungeon-points')
+    await f.service.upgradeDungeonBuff('d', buff)
+    const stored = f.read().dungeons!
+    expect(stored).toMatchObject({ points: 0, totalPoints: 100, buffLevels: { [buff]: 2 } })
+    const entered = await f.service.startDungeon('d', 'belfist')
+    expect(entered.run!.buffLevels[buff]).toBe(2)
+    await expect(f.service.upgradeDungeonBuff('d', buff)).rejects.toThrow('in-dungeon')
+    const reloaded = new LocalGameService(f.storage, { now: f.now, rng: rng() })
+    const recovered = await reloaded.load()
+    expect(recovered.save.characters[0]!.dungeons).toMatchObject({
+      points: 0,
+      totalPoints: 100,
+      buffLevels: { [buff]: 2 },
+      active: null,
+    })
+    f.day()
+    await reloaded.startDungeon('d', 'belfist')
+    expect(f.read().dungeons).toMatchObject({
+      points: 0,
+      totalPoints: 100,
+      buffLevels: { [buff]: 2 },
+    })
+  })
+
+  it('migrates v15 recorded completions once and rejects malformed wallet and buff levels', () => {
+    const legacy = {
+      ...emptyDungeonProgress(),
+      history: [completed('legacy', 121), { ...completed('quit', 19), outcome: 'left' as const }],
+    }
+    const old = Object.fromEntries(
+      Object.entries(legacy).filter(
+        ([key]) => !['points', 'totalPoints', 'buffLevels'].includes(key),
+      ),
+    )
+    const raw = {
+      ...createDefaultSave(NOW),
+      saveVersion: 15,
+      characters: [{ ...hero(), dungeons: old }],
+    }
+    const migrated = loadSave(JSON.stringify(raw), NOW)
+    expect(migrated.status).toBe('migrated')
+    expect(migrated.save.characters[0]!.dungeons).toMatchObject({
+      points: 121,
+      totalPoints: 121,
+      buffLevels: {},
+    })
+    const next = loadSave(serializeSave(migrated.save), NOW)
+    expect(next.save.characters[0]!.dungeons).toEqual(migrated.save.characters[0]!.dungeons)
+    expect(
+      sanitizeDungeonProgress({
+        ...legacy,
+        points: Infinity,
+        totalPoints: -5,
+        buffLevels: { [buff]: 9999, '-1': 3 },
+      }),
+    ).toMatchObject({ points: 121, totalPoints: 121, buffLevels: {} })
+    expect(sanitizeDungeonProgress({ ...legacy, points: 500, totalPoints: 121 }).points).toBe(121)
   })
 })
 

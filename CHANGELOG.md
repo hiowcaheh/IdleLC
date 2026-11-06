@@ -1,5 +1,20 @@
 # Historia zmian
 
+## 2026-11-06 (Codex): interfejs Dungeons, minimapa i Buffer
+
+SaveVersion **16**, migracja v15 zachowuje postępy. Szczegóły: [docs/dungeons.md](docs/dungeons.md).
+
+1. Q po prawej, grafiki podziemi z klienta, zakładki Dungeons / Buffer i więcej oryginalnych ramek.
+2. W rundzie tylko Opcje i torba w prawym menu. Podgląd aktualnych łupów z EXP/SP/złotem,
+   minimapa z graczem, mobami i kryształami, szersza belka pod buffami, joystick na środku u dołu.
+3. Pause na górze, Return / Leave oraz dwa potwierdzenia wyjścia.
+4. Buffy od poziomu 1, trwałe ulepszenia w Bufferze za punkty, osobno dla każdej postaci.
+   Saldo do wydania i łączny wynik rankingowy są niezależne; zakupy nie obniżają rankingu.
+   Domyślnie 100 punktów/poziom; punkty równe zabójstwom po pełnej rundzie.
+5. Monster Book: Worlds / Dungeons, 23 NPC z adnotacją podziemia, te same progi i nagrody.
+
+Weryfikacja: 523 testy / 59 plików, TypeScript, lint, format, próby Chromium 320/390/1280 px.
+
 ## 2026-11-06 (Codex): Dungeons, trzy podziemia i aktywna walka z hordą
 
 Po przeglądzie zmian Claude’a do `9ad20b8` i pełnej bazy z 2016. Opis i źródła:

@@ -11,7 +11,11 @@ const root = process.argv[2]
 if (!root) throw new Error('Usage: node scripts/lc/dungeon-art.mjs <client-folder>')
 const files = new ClientFiles([root])
 const ui = await buildUiParts(files)
-fs.writeFileSync('public/ui/lc/menu-dungeons.webp', ui['menu-dungeons'])
+// Trim the atlas cell's transparent gutter so the visible Q is centered in its button.
+await sharp(ui['menu-dungeons'])
+  .trim()
+  .webp({ lossless: true })
+  .toFile('public/ui/lc/menu-dungeons.webp')
 const textures = [
   ['belfist', 'Dungeon1', 'dengen1_tile14', 'd1_tile_wall02_1'],
   ['procyon', 'Dungeon2', 'D2_tile01', 'D2_wall01'],
@@ -20,6 +24,13 @@ const textures = [
 for (const [id, dir, floor, wall] of textures) {
   const out = path.join('public/dungeons', id)
   fs.mkdirSync(out, { recursive: true })
+  const art = parseTexture(
+    files.read(`Data\\Interface\\Loading\\D_0${textures.findIndex((d) => d[0] === id) + 1}.tex`),
+  )
+  await sharp(art.rgba, { raw: { width: art.width, height: art.height, channels: 4 } })
+    .extract({ left: 40, top: 16, width: 944, height: 344 })
+    .webp({ quality: 86 })
+    .toFile(path.join(out, 'loading.webp'))
   for (const [name, source] of [
     ['floor', floor],
     ['wall', wall],

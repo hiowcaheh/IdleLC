@@ -69,6 +69,7 @@ interface GameStore {
   startDungeon(id: DungeonId): Promise<void>
   advanceDungeon(seconds: number, input: DungeonPoint): Promise<void>
   chooseDungeonBuff(id: number): Promise<void>
+  upgradeDungeonBuff(id: number): Promise<void>
   finishDungeon(): Promise<void>
   dismissDungeonResult(): void
 
@@ -389,6 +390,10 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     async chooseDungeonBuff(id) {
       applyDungeon(await enqueue(() => gameService.chooseDungeonBuff(playedId(), id)))
+    },
+
+    async upgradeDungeonBuff(id) {
+      applyCharacter(await enqueue(() => gameService.upgradeDungeonBuff(playedId(), id)))
     },
 
     async finishDungeon() {

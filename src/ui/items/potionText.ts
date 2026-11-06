@@ -1,6 +1,21 @@
 import type { PotionDef } from '../../game/data/types.ts'
-import { HP_POTION_BELOW, MP_POTION_BELOW, boostEffect } from '../../game/logic/combat.ts'
+import {
+  HP_POTION_BELOW,
+  MP_POTION_BELOW,
+  boostEffect,
+  type DrinkProblem,
+} from '../../game/logic/combat.ts'
 import { statLine, statParts } from '../skills/format.ts'
+
+/** Shared by the inventory and the dungeon's potion bag. */
+export const DRINK_PROBLEMS: Record<DrinkProblem | 'away', string> = {
+  away: 'Your hero is on an expedition.',
+  dead: 'Your hero is down. Wait for the revival.',
+  'level-too-low': 'Your level is too low for this potion.',
+  'none-left': 'None left.',
+  cooldown: 'A potion of this kind is cooling down.',
+  working: 'A potion of this kind is still working.',
+}
 
 const time = (seconds: number) =>
   seconds >= 60 && seconds % 60 === 0

@@ -1,6 +1,4 @@
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
-import { Suspense, useEffect, useRef, useState, type PointerEvent } from 'react'
+import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import {
   DUNGEONS,
   DUNGEON_MAX_LEVEL,
@@ -18,21 +16,20 @@ import { dungeonSession } from '../../game/session/dungeonSession.ts'
 import { VisibleClock } from '../../game/session/visibleClock.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { toast } from '../../state/toasts.ts'
-import { Character } from '../../scene/Character.tsx'
-import { ModelBoundary } from '../../scene/ModelBoundary.tsx'
 import { Sheet } from '../Sheet.tsx'
 import { SkillIcon } from '../skills/SkillIcon.tsx'
-import { formatSp, statLine } from '../skills/format.ts'
+import { formatSp } from '../skills/format.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { getItem } from '../../game/data/items.ts'
 import { Gold } from '../Gold.tsx'
+import { BlessingEffects, DungeonBuffer } from './DungeonBuffer.tsx'
+import { DungeonMinimap } from './DungeonMinimap.tsx'
 import './dungeons.css'
 
 const minutes = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
 const errorText = (error: unknown) =>
   error instanceof Error ? error.message : 'The command could not be completed.'
-const previewPace = () => 1
 
 export function DungeonsButton({ onClick }: { onClick(): void }) {
   const away = useGameStore((s) => !!s.character?.expedition)
@@ -45,16 +42,16 @@ export function DungeonsButton({ onClick }: { onClick(): void }) {
       title="Dungeons"
       disabled={away || traveling}
       onClick={onClick}
-    >
-      <span>Dungeons</span>
-    </button>
+    />
   )
 }
 
 export function DungeonsPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)!
+  const characters = useGameStore((s) => s.save.characters)
   const start = useGameStore((s) => s.startDungeon)
   const [index, setIndex] = useState(0)
+  const [tab, setTab] = useState<'dungeons' | 'buffer'>('dungeons')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [, refreshDay] = useState(0)
@@ -80,133 +77,164 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
         if (!busy) onClose()
       }}
     >
-      <div className="dungeon-carousel" aria-label="Choose a dungeon">
+      <div className="tabs dungeon-tabs" role="tablist" aria-label="Dungeon pages">
         <button
           type="button"
-          className="button dungeon-arrow"
+          role="tab"
+          className={`tabs__tab${tab === 'dungeons' ? ' is-active' : ''}`}
+          aria-selected={tab === 'dungeons'}
+          onClick={() => setTab('dungeons')}
           disabled={busy}
-          onClick={() => turn(-1)}
-          aria-label="Previous dungeon"
         >
-          ‹
+          Dungeons
         </button>
-        <div className="dungeon-carousel__name" aria-live="polite">
-          <h3>{def.name}</h3>
-          <span>
-            {index + 1} / {DUNGEONS.length}
-          </span>
-        </div>
         <button
           type="button"
-          className="button dungeon-arrow"
+          role="tab"
+          className={`tabs__tab${tab === 'buffer' ? ' is-active' : ''}`}
+          aria-selected={tab === 'buffer'}
+          onClick={() => setTab('buffer')}
           disabled={busy}
-          onClick={() => turn(1)}
-          aria-label="Next dungeon"
         >
-          ›
+          Buffer
         </button>
       </div>
-      <div className={`dungeon-preview dungeon-preview--${def.id}`}>
-        <Canvas
-          key={def.id}
-          dpr={1}
-          camera={{ position: [0, 2.1, 5.8], fov: 36 }}
-          gl={{ antialias: false }}
-        >
-          <hemisphereLight args={['#f2debf', '#20212b', 2]} />
-          <directionalLight position={[3, 5, 4]} intensity={2.4} />
-          <ModelBoundary resetKey={def.id}>
-            <Suspense fallback={null}>
-              <Character
-                modelId={monsters[0]!.modelId}
-                scale={monsters[0]!.scale}
-                timeScale={previewPace}
-              />
-            </Suspense>
-          </ModelBoundary>
-          <OrbitControls
-            target={[0, 1.1, 0]}
-            autoRotate
-            autoRotateSpeed={1.5}
-            enablePan={false}
-            enableZoom={false}
-          />
-        </Canvas>
-        <span className="dungeon-preview__badge">Horde expedition</span>
-      </div>
-      <div className="dungeon-facts">
+      <div className="dungeon-wallet" aria-label="Dungeon points">
         <div>
-          <span>Entry level</span>
-          <strong className={locked ? 'is-bad' : 'is-good'}>Lv {def.minLevel}</strong>
+          <span>Available points</span>
+          <strong>{(character.dungeons?.points ?? 0).toLocaleString('en-US')}</strong>
         </div>
         <div>
-          <span>Duration</span>
-          <strong>10 minutes</strong>
-        </div>
-        <div>
-          <span>Entries today</span>
-          <strong>{left} / 2 left</strong>
-        </div>
-        <div>
-          <span>Original monsters</span>
-          <strong>
-            Lv {monsters[0]!.level}–{monsters.at(-1)!.level}
-          </strong>
+          <span>Lifetime ranking points</span>
+          <strong>{(character.dungeons?.totalPoints ?? 0).toLocaleString('en-US')}</strong>
         </div>
       </div>
-      <p className="dungeon-roster">{monsters.map((m) => m.name).join(', ')}</p>
-      <div className="dungeon-rules">
-        <p>
-          Survive 20 waves. Each kill scores 1 point. Collect the crystals to reach dungeon level 20
-          and choose class blessings.
-        </p>
-        <p>
-          Potions and your skills remain usable. Your equipped gear is locked. Blessings last until
-          this run ends.
-        </p>
-        <p>
-          Death ends the run. Earned EXP, SP, gold and loot are kept. Leaving or reloading uses the
-          entry. Daily entries reset at 00:00 UTC.
-        </p>
-      </div>
-      <section className="dungeon-ranking" aria-label="Dungeon ranking">
-        <h4>Best score in one run</h4>
-        <div>
-          <span>{character.name}</span>
-          <strong>{best ? `${best.score} points` : 'No runs recorded yet'}</strong>
-        </div>
-        <p>Local personal best. Global ranking will be added later.</p>
-      </section>
-      {error && (
-        <p className="form-error" role="alert">
-          {error}
-        </p>
+      {tab === 'buffer' ? (
+        <DungeonBuffer />
+      ) : (
+        <>
+          <div className="dungeon-carousel" aria-label="Choose a dungeon">
+            <button
+              type="button"
+              className="button dungeon-arrow"
+              disabled={busy}
+              onClick={() => turn(-1)}
+              aria-label="Previous dungeon"
+            >
+              ‹
+            </button>
+            <div className="dungeon-carousel__name" aria-live="polite">
+              <h3>{def.name}</h3>
+              <span>
+                {index + 1} / {DUNGEONS.length}
+              </span>
+            </div>
+            <button
+              type="button"
+              className="button dungeon-arrow"
+              disabled={busy}
+              onClick={() => turn(1)}
+              aria-label="Next dungeon"
+            >
+              ›
+            </button>
+          </div>
+          <div className="dungeon-preview">
+            <img
+              src={`${import.meta.env.BASE_URL}dungeons/${def.id}/loading.webp`}
+              alt={`${def.name}, original client map artwork`}
+            />
+            <span className="dungeon-preview__badge">Horde expedition</span>
+          </div>
+          <div className="dungeon-facts">
+            <div>
+              <span>Entry level</span>
+              <strong className={locked ? 'is-bad' : 'is-good'}>Lv {def.minLevel}</strong>
+            </div>
+            <div>
+              <span>Duration</span>
+              <strong>10 minutes</strong>
+            </div>
+            <div>
+              <span>Entries today</span>
+              <strong>{left} / 2 left</strong>
+            </div>
+            <div>
+              <span>Original monsters</span>
+              <strong>
+                Lv {monsters[0]!.level}–{monsters.at(-1)!.level}
+              </strong>
+            </div>
+          </div>
+          <div className="dungeon-rules">
+            <p>
+              Survive 20 waves. Each kill scores 1 point. Collect the crystals to reach dungeon
+              level 20 and choose class blessings. A completed run adds its score to your Buffer
+              wallet and lifetime ranking.
+            </p>
+            <p>
+              Potions and your skills remain usable. Your equipped gear is locked. Blessings last
+              until this run ends.
+            </p>
+            <p>
+              Death ends the run. Earned EXP, SP, gold and loot are kept. Leaving or reloading uses
+              the entry. Daily entries reset at 00:00 UTC.
+            </p>
+          </div>
+          <section className="dungeon-ranking" aria-label="Dungeon ranking">
+            <h4>Best score in one run</h4>
+            <div>
+              <span>{character.name}</span>
+              <strong>{best ? `${best.score} points` : 'No runs recorded yet'}</strong>
+            </div>
+            <h4 className="dungeon-ranking__lifetime">Lifetime ranking</h4>
+            <ol className="dungeon-ranking__list">
+              {[...characters]
+                .sort((a, b) => (b.dungeons?.totalPoints ?? 0) - (a.dungeons?.totalPoints ?? 0))
+                .map((c) => (
+                  <li key={c.id}>
+                    <span>{c.name}</span>
+                    <strong>{(c.dungeons?.totalPoints ?? 0).toLocaleString('en-US')} points</strong>
+                  </li>
+                ))}
+            </ol>
+            <p>
+              Local characters. Spending points in the Buffer does not change this ranking. Global
+              ranking will be added later.
+            </p>
+          </section>
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
+          <button
+            type="button"
+            className="button button--gold button--wide dungeon-enter"
+            disabled={busy || locked || left === 0 || !!character.expedition}
+            onClick={async () => {
+              setBusy(true)
+              setError('')
+              try {
+                await start(def.id)
+                onClose()
+              } catch (e) {
+                setError(errorText(e))
+              } finally {
+                setBusy(false)
+              }
+            }}
+          >
+            {busy
+              ? 'Entering…'
+              : locked
+                ? `Requires Lv ${def.minLevel}`
+                : left === 0
+                  ? 'No entries left today'
+                  : 'Enter dungeon'}
+          </button>
+        </>
       )}
-      <button
-        type="button"
-        className="button button--gold button--wide dungeon-enter"
-        disabled={busy || locked || left === 0 || !!character.expedition}
-        onClick={async () => {
-          setBusy(true)
-          setError('')
-          try {
-            await start(def.id)
-            onClose()
-          } catch (e) {
-            setError(errorText(e))
-          } finally {
-            setBusy(false)
-          }
-        }}
-      >
-        {busy
-          ? 'Entering…'
-          : locked
-            ? `Requires Lv ${def.minLevel}`
-            : left === 0
-              ? 'No entries left today'
-              : 'Enter dungeon'}
-      </button>
     </Sheet>
   )
 }
@@ -369,56 +397,53 @@ export function DungeonHud() {
   const finish = useGameStore((s) => s.finishDungeon)
   const choose = useGameStore((s) => s.chooseDungeonBuff)
   const [paused, setPaused] = useState(false)
-  const [leaving, setLeaving] = useState(false)
+  const [leaveStep, setLeaveStep] = useState(0)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   useEffect(() => {
-    dungeonSession.paused = paused || leaving
+    dungeonSession.paused = paused || leaveStep > 0
     dungeonSession.input = { x: 0, z: 0 }
     return () => {
       dungeonSession.paused = false
     }
-  }, [paused, leaving])
+  }, [paused, leaveStep])
   if (!run) return null
   const ratio = run.level === DUNGEON_MAX_LEVEL ? 1 : run.xp / dungeonXpNeeded(run.level)
   return (
     <>
-      <section className="dungeon-status" aria-label="Dungeon progress">
-        <div className="dungeon-status__heading">
-          <strong>{getDungeon(run.dungeonId)!.name}</strong>
-          <time>{minutes(Math.max(0, Math.ceil(DUNGEON_SECONDS - run.elapsed)))}</time>
-        </div>
-        <div className="dungeon-status__counts">
-          <span>Wave {run.wave || 1} / 20</span>
-          <strong>{run.score} points</strong>
-        </div>
-        <div
-          className="dungeon-xp"
-          role="progressbar"
-          aria-label="Dungeon level experience"
-          aria-valuenow={run.level === 20 ? 100 : Math.floor(ratio * 100)}
-          aria-valuemin={0}
-          aria-valuemax={100}
-        >
-          <span className="dungeon-xp__fill" style={{ width: `${ratio * 100}%` }} />
-          <span className="dungeon-xp__text">
-            Dungeon Lv {run.level} / 20{' '}
-            {run.level < 20 ? `(${run.xp}/${dungeonXpNeeded(run.level)})` : 'MAX'}
-          </span>
-        </div>
-      </section>
+      <div className="dungeon-overview">
+        <DungeonMinimap run={run} />
+        <section className="dungeon-status" aria-label="Dungeon progress">
+          <div className="dungeon-status__heading">
+            <strong>{getDungeon(run.dungeonId)!.name}</strong>
+            <time>{minutes(Math.max(0, Math.ceil(DUNGEON_SECONDS - run.elapsed)))}</time>
+          </div>
+          <div className="dungeon-status__counts">
+            <span>Wave {run.wave || 1} / 20</span>
+            <strong>{run.score} points</strong>
+          </div>
+          <div
+            className="dungeon-xp"
+            role="progressbar"
+            aria-label="Dungeon level experience"
+            aria-valuenow={run.level === 20 ? 100 : Math.floor(ratio * 100)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <span className="dungeon-xp__fill" style={{ width: `${ratio * 100}%` }} />
+            <span className="dungeon-xp__text">
+              Dungeon Lv {run.level} / 20{' '}
+              {run.level < 20 ? `(${run.xp}/${dungeonXpNeeded(run.level)})` : 'MAX'}
+            </span>
+          </div>
+        </section>
+      </div>
       <DungeonJoystick />
       <div className="dungeon-actions">
         <button type="button" className="button" onClick={() => setPaused(true)}>
           Pause
         </button>
-        <button type="button" className="button" onClick={() => setLeaving(true)}>
-          Leave
-        </button>
       </div>
-      <p className="dungeon-controls-note">
-        Move to collect crystals. Attacks and enabled skills are automatic.
-      </p>
       {run.choices.length > 0 && (
         <Sheet
           centered
@@ -433,7 +458,7 @@ export function DungeonHud() {
           </p>
           <div className="dungeon-blessings">
             {run.choices.map((id) => {
-              const rank = dungeonBuffRank(id)
+              const rank = dungeonBuffRank(id, run.buffLevels[id] ?? 1)
               const skill = dungeonBuffDefinition(id)!
               return (
                 <button
@@ -462,30 +487,7 @@ export function DungeonHud() {
                       </small>
                     </span>
                   </span>
-                  <span className="dungeon-blessing-card__effects">
-                    {rank.effects.map((e, i) =>
-                      e.kind === 'stat' ? (
-                        <span
-                          key={i}
-                          className={
-                            (
-                              e.stat === 'castTime' || e.stat === 'reuseTime'
-                                ? e.value > 0
-                                : e.value < 0
-                            )
-                              ? 'is-bad'
-                              : undefined
-                          }
-                        >
-                          {statLine(e)}
-                        </span>
-                      ) : e.kind === 'regen' ? (
-                        <span key={i}>
-                          +{e.perSecond} {e.resource.toUpperCase()} / s
-                        </span>
-                      ) : null,
-                    )}
-                  </span>
+                  <BlessingEffects rank={rank} />
                   <small>Until the run ends</small>
                 </button>
               )
@@ -498,23 +500,25 @@ export function DungeonHud() {
           )}
         </Sheet>
       )}
-      {(paused || leaving) && !run.choices.length && (
+      {(paused || leaveStep > 0) && !run.choices.length && (
         <Sheet
           centered
-          title={leaving ? 'Leave dungeon?' : 'Dungeon paused'}
+          title={leaveStep > 0 ? 'Leave dungeon?' : 'Dungeon paused'}
           titleId="dungeon-pause-title"
           className="sheet--client dungeon-pause"
           onClose={() => {
             if (!busy) {
-              setPaused(false)
-              setLeaving(false)
+              if (leaveStep > 0) setLeaveStep(0)
+              else setPaused(false)
             }
           }}
         >
           <p>
-            {leaving
-              ? 'Keep your earned rewards and end this run? The entry has already been used.'
-              : 'The timer and all combat are paused.'}
+            {leaveStep === 2
+              ? 'Final confirmation: end this run now? Your earned loot is kept, but this entry cannot be restored and an unfinished run awards no Buffer points.'
+              : leaveStep === 1
+                ? 'Are you sure you want to leave? This ends your current run.'
+                : 'The timer and all combat are paused.'}
           </p>
           <div className="dungeon-pause__actions">
             <button
@@ -522,31 +526,33 @@ export function DungeonHud() {
               className="button"
               disabled={busy}
               onClick={() => {
-                setPaused(false)
-                setLeaving(false)
+                if (leaveStep > 0) setLeaveStep(0)
+                else setPaused(false)
               }}
             >
-              Continue
+              {leaveStep > 0 ? 'Cancel' : 'Return'}
             </button>
-            {leaving && (
-              <button
-                type="button"
-                className="button button--gold"
-                disabled={busy}
-                onClick={async () => {
-                  setBusy(true)
-                  try {
-                    await finish()
-                  } catch (e) {
-                    toast(errorText(e), 'error')
-                  } finally {
-                    setBusy(false)
-                  }
-                }}
-              >
-                End run
-              </button>
-            )}
+            <button
+              type="button"
+              className="button button--gold"
+              disabled={busy}
+              onClick={async () => {
+                if (leaveStep < 2) {
+                  setLeaveStep((n) => n + 1)
+                  return
+                }
+                setBusy(true)
+                try {
+                  await finish()
+                } catch (e) {
+                  toast(errorText(e), 'error')
+                } finally {
+                  setBusy(false)
+                }
+              }}
+            >
+              {leaveStep === 2 ? 'Leave dungeon' : leaveStep === 1 ? 'Yes, leave' : 'Leave'}
+            </button>
           </div>
         </Sheet>
       )}
@@ -581,6 +587,11 @@ export function DungeonResult() {
         {result.score}
         <span>points</span>
       </div>
+      <p className="dungeon-results__points">
+        {result.outcome === 'completed'
+          ? `+${result.score} Buffer points and lifetime ranking points`
+          : 'Complete the full 10 minutes to earn Buffer and lifetime ranking points.'}
+      </p>
       <div className="dungeon-facts">
         <div>
           <span>Time survived</span>

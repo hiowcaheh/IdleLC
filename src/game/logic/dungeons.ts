@@ -74,6 +74,10 @@ export interface DungeonProgress {
   best: Partial<Record<DungeonId, DungeonRecord>>
   history: DungeonRecord[]
   active: DungeonCheckpoint | null
+  /** Spendable currency and lifetime ranking score are deliberately independent. */
+  points: number
+  totalPoints: number
+  buffLevels: Record<number, number>
 }
 export interface DungeonRun {
   id: string
@@ -85,6 +89,8 @@ export interface DungeonRun {
   pendingLevels: number
   choices: number[]
   buffs: number[]
+  /** Buffer levels are frozen on entry, just like equipment. */
+  buffLevels: Record<number, number>
   wave: number
   remainingSpawns: number
   spawnIn: number
@@ -123,6 +129,9 @@ export const emptyDungeonProgress = (): DungeonProgress => ({
   best: {},
   history: [],
   active: null,
+  points: 0,
+  totalPoints: 0,
+  buffLevels: {},
 })
 
 export function dailyProgress(progress: DungeonProgress | undefined, now: number): DungeonProgress {
@@ -161,10 +170,36 @@ export const DUNGEON_BUFFS = Object.values(BUFF_DEFINITIONS)
   })
   .map((s) => s.id)
 
-export function dungeonBuffRank(id: number) {
+export const DUNGEON_BUFF_UPGRADE_COST = 100
+
+export function dungeonBuffLevel(progress: DungeonProgress | undefined, id: number): number {
+  return progress?.buffLevels[id] ?? 1
+}
+
+export function dungeonBuffRank(id: number, level = 1) {
   const skill = dungeonBuffDefinition(id)
   if (!skill || !DUNGEON_BUFFS.includes(id)) throw new GameError('unknown-dungeon-buff')
-  return skillRank(skill, skill.levels.at(-1)!.level, false)
+  return skillRank(skill, level, false)
+}
+
+export function upgradeDungeonBuff(character: CharacterData, id: number): CharacterData {
+  if (character.dungeons?.active) throw new GameError('in-dungeon')
+  const skill = dungeonBuffDefinition(id)
+  if (!skill || !DUNGEON_BUFFS.includes(id)) throw new GameError('unknown-dungeon-buff')
+  const progress = character.dungeons ?? emptyDungeonProgress()
+  const level = dungeonBuffLevel(progress, id)
+  if (!skill.levels.some((rank) => rank.level === level + 1))
+    throw new GameError('dungeon-buff-max', 'This blessing is already at its maximum level.')
+  if (progress.points < DUNGEON_BUFF_UPGRADE_COST)
+    throw new GameError('dungeon-points', 'Not enough dungeon points.')
+  return {
+    ...character,
+    dungeons: {
+      ...progress,
+      points: progress.points - DUNGEON_BUFF_UPGRADE_COST,
+      buffLevels: { ...progress.buffLevels, [id]: level + 1 },
+    },
+  }
 }
 
 function offerBuffs(run: DungeonRun, rng: Rng): void {
@@ -188,7 +223,7 @@ export function chooseDungeonBuff(run: DungeonRun, id: number, rng: Rng): Dungeo
   applyEffects(
     next.player,
     'player',
-    { ...dungeonBuffRank(id), duration: DUNGEON_SECONDS - run.elapsed },
+    { ...dungeonBuffRank(id, run.buffLevels[id] ?? 1), duration: DUNGEON_SECONDS - run.elapsed },
     rng,
     [],
   )
@@ -224,6 +259,7 @@ export function createDungeonRun(
     pendingLevels: 0,
     choices: [],
     buffs: [],
+    buffLevels: { ...character.dungeons?.buffLevels },
     wave: 0,
     remainingSpawns: 0,
     spawnIn: 0,
@@ -520,8 +556,11 @@ export function dungeonCheckpoint(run: DungeonRun): DungeonCheckpoint {
 export function recordDungeon(progress: DungeonProgress, record: DungeonRecord): DungeonProgress {
   if (progress.history.some((r) => r.runId === record.runId)) return { ...progress, active: null }
   const best = progress.best[record.dungeonId]
+  const earned = record.outcome === 'completed' ? record.score : 0
   return {
     ...progress,
+    points: progress.points + earned,
+    totalPoints: progress.totalPoints + earned,
     active: null,
     best:
       !best || record.score > best.score
@@ -572,11 +611,30 @@ export function sanitizeDungeonProgress(raw: unknown): DungeonProgress {
       .filter(([id, n]) => getDungeon(id) && Number.isInteger(n) && n >= 0)
       .map(([id, n]) => [id, Math.min(2, n)]),
   )
+  const validPoints = (n: unknown): n is number => Number.isSafeInteger(n) && (n as number) >= 0
+  // v15 had no wallet. Credit its completed, recorded rounds once on migration.
+  const legacyPoints = history.reduce(
+    (sum, r) => sum + (r.outcome === 'completed' ? r.score : 0),
+    0,
+  )
+  const totalPoints = validPoints(p.totalPoints) ? p.totalPoints : legacyPoints
+  const points = Math.min(validPoints(p.points) ? p.points : legacyPoints, totalPoints)
+  const buffLevels = Object.fromEntries(
+    Object.entries(p.buffLevels ?? {}).filter(
+      ([id, level]) =>
+        DUNGEON_BUFFS.includes(Number(id)) &&
+        Number.isInteger(level) &&
+        !!dungeonBuffDefinition(Number(id))?.levels.some((rank) => rank.level === level),
+    ),
+  )
   return {
     day: typeof p.day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(p.day) ? p.day : '',
     entries,
     history,
     best,
     active: record(p.active) ? p.active : null,
+    points,
+    totalPoints,
+    buffLevels,
   }
 }

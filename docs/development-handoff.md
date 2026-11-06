@@ -1,5 +1,16 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Najnowszy etap: Dungeons UI / Buffer, 2026-11-06, v16
+
+[Dungeons](dungeons.md) mają Q po prawej, grafiki klienta zamiast NPC, minimapę,
+podgląd łupów w torbie, Pause z dwoma potwierdzeniami Leave i centralny joystick.
+Monster Book rozdziela Worlds / Dungeons. Buffy domyślnie na 1; trwałe źródłowe
+poziomy kupowane w Bufferze per postać i kopiowane na wejściu. Saldo points jest
+wydawane, totalPoints wyłącznie rośnie i zasila lokalny ranking. Własne ustawienie
+początkowe: pełna runda daje score punktów, ulepszenie kosztuje 100. SaveVersion 16
+z migracją v15 i jednorazowym zaliczeniem zachowanych ukończeń. Globalny ranking
+nadal wymaga przyszłego backendu.
+
 ## Najnowszy etap: Dungeons, 2026-11-06
 
 Po zmianach Claude’a do `9ad20b8` dodano [Dungeons](dungeons.md): Belfist Temple,

@@ -1,7 +1,39 @@
 # Dungeons: Belfist Temple, Procyon Shrine, Maargadum
 
-Wdrożenie z 2026-11-06, po przeglądzie zmian Claude’a do `9ad20b8`. SaveVersion **15**.
+Wdrożenie z 2026-11-06, po przeglądzie zmian Claude’a do `9ad20b8`. Aktualny SaveVersion **16**.
 To nowy, aktywny tryb hordowy IdleLC. Nie zastępuje polowania na spotach ani wypraw AFK.
+
+## Interfejs i Buffer, aktualizacja v16
+
+- Q jest wyśrodkowane w przycisku w prawej kolumnie menu. Okno wyboru ma zakładki
+  Dungeons / Buffer, źródłowe grafiki podziemi z `Data/Interface/Loading/D_01`, `D_02`,
+  `D_03` zamiast podglądu NPC oraz ramki/przyciski/zakładki z istniejących atlasów klienta.
+- Podczas rundy w prawej kolumnie zostają Opcje i torba. Torba pokazuje bieżące EXP,
+  złoto, SP, przedmioty z nazwami i liczbami; otwarcie zatrzymuje czas. Nagrody są już
+  zapisane, okno nie wypłaca ich ponownie. Każda kwota złota ma istniejący komponent Gold.
+  Zakładka Potions pozwala nadal ręcznie wypijać posiadane mikstury, również wzmacniające,
+  po ukryciu przycisku Inventory. Zachowuje normalne koszty i blokady serwisu.
+- Pause na górze otwiera Return / Leave. Leave wymaga dwóch kolejnych potwierdzeń.
+  Anulowanie wraca do pauzy. Joystick jest na środku u dołu; gałka używa ramki TopUI.
+- Minimapka nad belką wyniku pokazuje faktyczne pozycje gracza, żywych NPC i kryształów,
+  w tych samych współrzędnych i okręgu co arena. Belka ma pełną dostępną szerokość;
+  nad nią pozostaje miejsce na dwa rzędy buffów (dłuższa lista przewija się).
+- Monster Book ma Worlds / Dungeons, a w drugiej zakładce wszystkie 23 źródłowe NPC
+  z podziałem na trzy podziemia i adnotacją Dungeon monster. Zabójstwa już trafiały do
+  wspólnych statystyk. Progi 10 / 100 / 1000 / 10000 oraz nagrody pozostają identyczne.
+- Każdy buff zaczyna na poziomie 1. Buffer kupuje kolejne poziomy osobno dla postaci,
+  wspólnie dla trzech podziemi, do najwyższego istniejącego poziomu źródłowego. Pokazuje
+  efekty obecnego i następnego poziomu. Poziomy są kopiowane na wejściu i nie można
+  ich kupować w trakcie rundy. Wartości efektów nie są mnożone własnym wzorem.
+- Domyślne własne reguły nowego systemu: pełne 600 sekund daje punkty równe wynikowi
+  (1/zabójstwo), jeden zakup poziomu kosztuje 100 punktów. Rezygnacja, śmierć i reload
+  zachowują łupy, ale nie dają punktów Buffera. Saldo `points` spada przy zakupie;
+  `totalPoints` wyłącznie rośnie po ukończeniu. Lokalny ranking postaci używa totalPoints.
+  To ustawienia tego nowego trybu, nie odtworzona mechanika waluty oryginalnego serwera.
+
+Migracja v15 → v16 uzupełnia portfel i poziomy. Zakończone rundy zachowane w starej
+historii dostają punkty raz; zachowane zostają limity, rekordy, przedmioty i postacie.
+Po utworzeniu licznik całkowity jest niezależny od limitu 30 przechowywanych wyników.
 
 ## Ustalenia właściciela
 
@@ -46,8 +78,8 @@ podziemiem działa nadal według istniejących reguł serwera.
   `3 + floor((poziom - 1) * 1.25)`.
 - Awans zatrzymuje czas, ruch, efekty i walkę. Gracz wybiera jeden z trzech różnych
   buffów. Wybrane ID znika z puli do końca rundy; niewybrane może wrócić. Pula zawiera
-  30 obsługiwanych buffów sześciu klas, także zaawansowanych, z ich najwyższymi
-  źródłowymi rangami. Nie wydajemy SP i nie uczymy tych skilli na stałe. Wybrane
+  30 obsługiwanych buffów sześciu klas, także zaawansowanych, z rangą 1 lub rangą
+  kupioną wcześniej w Bufferze. Nie wydajemy SP i nie uczymy tych skilli na stałe. Wybrane
   błogosławieństwa kumulują się w tym własnym trybie hordowym.
 - Buff wyboru trwa do końca rundy. Każdy efekt tymczasowy jest ograniczony pozostałym
   czasem rundy. Wyjście, śmierć i przerwanie usuwają efekty, również wypite boosty.
@@ -117,14 +149,14 @@ Modele konwertuje się `convert-lc --only <lista modeli>` jak pozostałe NPC.
 Stan żywej walki należy do `LocalGameService`; scena animuje otrzymane snapshoty.
 Checkpoint zawiera wynik, czas, poziom i sumę już wypłaconych nagród. Zapis jest
 atomowy z postępem postaci: po zabójstwie/miksturze/wyborze i co najwyżej po sekundzie
-aktywnej gry. Zapis v14 migruje do v15 bez utraty postaci, przedmiotów i postępów.
+aktywnej gry. Zapis v14/v15 migruje do v16 bez utraty postaci, przedmiotów i postępów.
 Zamknięcie rundy nie wypłaca nic drugi raz.
 
 Przechowujemy do 30 wyników i najlepszy wynik jednego podejścia dla każdego podziemia.
-Okno ma miejsce pod ranking i pokazuje obecnie osobisty rekord lokalny. Nie udaje
-rankingu online. Backend, globalny ranking i jego weryfikacja pozostają na później.
+Okno pokazuje osobisty rekord i lokalny ranking postaci według całkowitych punktów.
+Backend, globalny ranking i jego weryfikacja pozostają na później.
 
-## Weryfikacja
+## Weryfikacja pierwszego wdrożenia v15
 
 - Testy używają prawdziwego eksportu bazy (osobny mock `lcSource`, zwykłe testy projektu
   nadal korzystają z danych zastępczych). Zestaw obejmuje roster/statystyki/drop, 19
@@ -151,3 +183,24 @@ Rundy przeglądarkowe przyspieszano istniejącym trybem deweloperskim. Były to 
 postacie testowe, z odpowiednim źródłowym sprzętem +15; nie pomiar balansu postaci
 startowej. Renderowanie w headless Chromium/SwiftShader nie zastępuje pomiaru FPS
 na fizycznym telefonie.
+
+## Weryfikacja aktualizacji v16
+
+- `npm run check`: 523 testy / 59 plików, lint, format i TypeScript.
+- Chromium/WebGL2: 320×740, 390×844, 1280×900. Q po prawej, nowe grafiki, Buffer,
+  zakup poziomu 1 → 2 za 100 punktów bez obniżenia totalPoints, wszystkie trzy listy
+  NPC w Book i odbiór nagrody za 10 zabójstw, torba, zatrzymanie czasu, dwa
+  potwierdzenia Leave, centralny joystick i zmiana pozycji znacznika minimapy.
+  Brak błędów JS/konsoli/HTTP i poziomego overflow.
+- Belfist / Knight 20, sprzęt źródłowy +15, 320 px: 600 sekund, 161 zabójstw,
+  poziom podziemia 15, 240 359 EXP, 4243 złota, 21,506 SP i 8 przedmiotów.
+  Po wcześniejszym zakupie saldo 0 → 161, lifetime ranking 100 → 261.
+- Testy logiki obejmują źródłowe rangi 1/2, brak zmiany poziomu podczas aktywnej rundy,
+  brak podwójnego zaliczenia, zachowanie sumy po wypadnięciu starych wyników z historii,
+  limity poziomów i środków, osobne postacie, reload i migrację v15 bez ponownej zapłaty.
+- Osobny test produkcyjnego buildu przez GUI, 320/1280 px: poziom 2 → 3 za 100 punktów,
+  saldo 161 → 61, ranking stale 261. Reload zachowuje poziom i oba liczniki. Sprawdzone
+  blokowanie zmiany postaci w Opcjach oraz brak kolizji Pause z ramką gracza.
+- Produkcyjna torba Potions: Potion of Haste 2 → 1 i aktywny efekt po wypiciu,
+  bez spadku punktów i bez zmiany sprzętu. Zweryfikowane wszystkie trzy grafiki
+  karuzeli z klienta, w rozmiarach 320/1280 px, bez błędów strony i zasobów.

@@ -24,6 +24,7 @@ import { TitlesPanel } from './titles/TitlesPanel.tsx'
 import { Toasts } from './Toasts.tsx'
 import { PerfOverlay } from './perf/PerfOverlay.tsx'
 import { ZoneLoading } from './ZoneLoading.tsx'
+import { DungeonLootButton } from './dungeons/DungeonLoot.tsx'
 import {
   DungeonsButton,
   DungeonsPanel,
@@ -61,7 +62,6 @@ export function GameScreen() {
       {character && !character.expedition && <RewardFeed />}
 
       <div className="hud">
-        {!dungeon && <DungeonsButton onClick={() => setDungeonsOpen(true)} />}
         {dungeon && <DungeonHud />}
         <div className="hud__top">
           <PlayerFrame />
@@ -77,47 +77,53 @@ export function GameScreen() {
                 <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" />
               </svg>
             </button>
-            <button
-              type="button"
-              className="icon-button hud__menu hud__menu--titles"
-              onClick={() => setTitlesOpen(true)}
-              aria-label="Titles"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M6 4 H18 V20 H6 Z M9 8 H15 M9 12 H15 M9 16 H13" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="icon-button hud__menu hud__menu--skills"
-              onClick={() => setSkillsOpen(true)}
-              aria-label={learnable > 0 ? `Skills (${learnable} to learn)` : 'Skills'}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 6.5 C10 5 7 4.5 4 5 V18.5 C7 18 10 18.5 12 20 C14 18.5 17 18 20 18.5 V5 C17 4.5 14 5 12 6.5 Z M12 6.5 V20" />
-              </svg>
-              {learnable > 0 && <span className="icon-button__badge">{learnable}</span>}
-            </button>
-            <button
-              type="button"
-              className="icon-button hud__menu hud__menu--inventory"
-              onClick={() => setInventoryOpen(true)}
-              aria-label="Inventory"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M8 8 V6.5 a4 4 0 0 1 8 0 V8 M5 8 H19 L18 20 H6 Z M9.5 12 H14.5" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="icon-button hud__menu hud__menu--character"
-              onClick={() => setCharacterOpen(true)}
-              aria-label="Character and gear"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M6 11 C6 6.5 8.5 4 12 4 C15.5 4 18 6.5 18 11 V15 H14.5 V12 H9.5 V15 H6 Z M8 15 V20 M16 15 V20 M12 12 V20" />
-              </svg>
-            </button>
+            {dungeon && <DungeonLootButton />}
+            {!dungeon && (
+              <>
+                <button
+                  type="button"
+                  className="icon-button hud__menu hud__menu--titles"
+                  onClick={() => setTitlesOpen(true)}
+                  aria-label="Titles"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 4 H18 V20 H6 Z M9 8 H15 M9 12 H15 M9 16 H13" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  className="icon-button hud__menu hud__menu--skills"
+                  onClick={() => setSkillsOpen(true)}
+                  aria-label={learnable > 0 ? `Skills (${learnable} to learn)` : 'Skills'}
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 6.5 C10 5 7 4.5 4 5 V18.5 C7 18 10 18.5 12 20 C14 18.5 17 18 20 18.5 V5 C17 4.5 14 5 12 6.5 Z M12 6.5 V20" />
+                  </svg>
+                  {learnable > 0 && <span className="icon-button__badge">{learnable}</span>}
+                </button>
+                <button
+                  type="button"
+                  className="icon-button hud__menu hud__menu--inventory"
+                  onClick={() => setInventoryOpen(true)}
+                  aria-label="Inventory"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8 8 V6.5 a4 4 0 0 1 8 0 V8 M5 8 H19 L18 20 H6 Z M9.5 12 H14.5" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  className="icon-button hud__menu hud__menu--character"
+                  onClick={() => setCharacterOpen(true)}
+                  aria-label="Character and gear"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 11 C6 6.5 8.5 4 12 4 C15.5 4 18 6.5 18 11 V15 H14.5 V12 H9.5 V15 H6 Z M8 15 V20 M16 15 V20 M12 12 V20" />
+                  </svg>
+                </button>
+                <DungeonsButton onClick={() => setDungeonsOpen(true)} />
+              </>
+            )}
           </div>
         </div>
         {!expedition && (

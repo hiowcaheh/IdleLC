@@ -23,7 +23,9 @@ Surowe pliki klienta i zrzut bazy nie są w repo.
 Dungeons (2026-11-06): `public/dungeons/` zawiera sześć tekstur posadzek/ścian z
 `Data/World/Dungeon1`, `Dungeon2`, `Dungeon3`, wyeksportowanych przez
 `scripts/lc/dungeon-art.mjs`. `public/ui/lc/menu-dungeons.webp` to oryginalne Q
-z TopUI (`UIRadar.cpp`, RADER_QUESTNPC). Dwadzieścia nowych GLB w `public/models/lc/`
+z TopUI (`UIRadar.cpp`, RADER_QUESTNPC). Grafiki wyboru `public/dungeons/*/loading.webp`
+pochodzą z `Data/Interface/Loading/D_01.tex`, `D_02.tex`, `D_03.tex` (wycięcie 40,16,944,344).
+Dwadzieścia nowych GLB w `public/models/lc/`
 pochodzi z modeli potworów tego samego klienta 2015. Są objęte powyższą decyzją
 właściciela dotyczącą konwersji zasobów LC, nie licencją CC0.
 

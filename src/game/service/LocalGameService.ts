@@ -5,6 +5,7 @@ import {
   dungeonCheckpoint,
   dungeonStep,
   chooseDungeonBuff,
+  upgradeDungeonBuff,
   recordDungeon,
   type DungeonPoint,
   type DungeonRun,
@@ -323,6 +324,11 @@ export class LocalGameService implements GameService {
       dungeons: { ...c.dungeons!, active: dungeonCheckpoint(run) },
     }))
     return { character: copy(character), run: copy(run), events: [] }
+  }
+
+  async upgradeDungeonBuff(characterId: string, skillId: number): Promise<CharacterData> {
+    this.notOnExpedition(characterId)
+    return copy(this.update(characterId, (c) => upgradeDungeonBuff(c, skillId)))
   }
 
   async drinkDungeonPotion(characterId: string, itemId: number): Promise<DungeonUpdate> {

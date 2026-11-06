@@ -21,14 +21,13 @@ import {
 } from '../../game/logic/equipment.ts'
 import type { ItemOption } from '../../game/logic/options.ts'
 import { isRare, type IdentifyTarget } from '../../game/logic/rare.ts'
-import type { DrinkProblem } from '../../game/logic/combat.ts'
 import type { ItemStack } from '../../game/logic/loot.ts'
 import { sellPrice, stacksValue } from '../../game/logic/shop.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { STAT_TOAST_MS, toast } from '../../state/toasts.ts'
 import { heroStats, nameTone, pieceName, rareLabel, wearProblem } from '../gear/format.ts'
 import { PotionNotes } from './PotionNotes.tsx'
-import { potionLine } from './potionText.ts'
+import { DRINK_PROBLEMS, potionLine } from './potionText.ts'
 import { Sheet } from '../Sheet.tsx'
 import { ItemIcon } from './ItemIcon.tsx'
 import { WearCompare } from '../gear/WearCompare.tsx'
@@ -77,16 +76,6 @@ const byType = (a: ItemDef, b: ItemDef) =>
   TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type) ||
   (a.gear && b.gear ? b.level - a.level : 0) ||
   a.name.localeCompare(b.name)
-
-/** What the bag says when the hero can't drink a potion now. */
-const DRINK_PROBLEMS: Record<DrinkProblem | 'away', string> = {
-  away: 'Your hero is on an expedition.',
-  dead: 'Your hero is down. Wait for the revival.',
-  'level-too-low': 'Your level is too low for this potion.',
-  'none-left': 'None left.',
-  cooldown: 'A potion of this kind is cooling down.',
-  working: 'A potion of this kind is still working.',
-}
 
 /**
  * The character's bag like the client's: a grid of slots (single pieces first, then stacks); the

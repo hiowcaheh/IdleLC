@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import { Suspense, useState, type ReactNode } from 'react'
 import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
+import { DUNGEONS } from '../../game/data/dungeons.ts'
 import { bookRewards } from '../../game/data/bookRewards.ts'
 import { getItem } from '../../game/data/items.ts'
 import { claimedRewards, nextReward } from '../../game/logic/book.ts'
@@ -160,12 +161,19 @@ function elementName(packed = 0): string {
 
 export function MonsterBookPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)
+  const [category, setCategory] = useState<'worlds' | 'dungeons'>('worlds')
   const [zoneId, setZoneId] = useState(character?.location.zoneId ?? '')
   const [picked, setPicked] = useState(character?.location.monsterId ?? '')
   if (!character) return null
 
-  const spots = zoneSpots(zoneId)
-  const open = openSpotCount(character, zoneId)
+  const dungeon =
+    category === 'dungeons' ? (DUNGEONS.find((d) => d.zoneId === zoneId) ?? DUNGEONS[0]!) : null
+  const areas =
+    category === 'dungeons'
+      ? DUNGEONS.map((d) => ({ id: d.zoneId, name: d.name, monsterIds: d.monsterIds }))
+      : Object.values(ZONES)
+  const spots = dungeon ? [...dungeon.monsterIds] : zoneSpots(zoneId)
+  const open = dungeon ? spots.length : openSpotCount(character, zoneId)
   const monsterId = spots.includes(picked) ? picked : spots[0]!
   const monster = getMonster(monsterId)
   const index = spots.indexOf(monsterId)
@@ -180,7 +188,10 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
     ['Base gold', <Gold amount={monster.gold} />],
     ['Attack element', elementName(monster.stats.attackElement)],
     ['Defense element', elementName(monster.stats.defenseElement)],
-    ['Spot', `${index + 1}${index >= open ? ' · locked' : ''}`],
+    [
+      dungeon ? 'Dungeon' : 'Spot',
+      dungeon ? dungeon.name : `${index + 1}${index >= open ? ' · locked' : ''}`,
+    ],
   ]
 
   return (
@@ -190,8 +201,30 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
       onClose={onClose}
       className="sheet--fixed sheet--client sheet--book"
     >
+      <div className="tabs book__categories" role="tablist" aria-label="Monster categories">
+        {(['worlds', 'dungeons'] as const).map((kind) => (
+          <button
+            key={kind}
+            type="button"
+            role="tab"
+            className={`tabs__tab${kind === category ? ' is-active' : ''}`}
+            aria-selected={kind === category}
+            onClick={() => {
+              setCategory(kind)
+              const area =
+                kind === 'dungeons'
+                  ? { id: DUNGEONS[0]!.zoneId, monsterIds: DUNGEONS[0]!.monsterIds }
+                  : (ZONES[character.location.zoneId] ?? Object.values(ZONES)[0]!)
+              setZoneId(area.id)
+              setPicked(area.monsterIds[0] ?? '')
+            }}
+          >
+            {kind === 'worlds' ? 'Worlds' : 'Dungeons'}
+          </button>
+        ))}
+      </div>
       <div className="book__zones" role="tablist" aria-label="Zones">
-        {Object.values(ZONES).map((zone) => (
+        {areas.map((zone) => (
           <button
             key={zone.id}
             type="button"
@@ -208,8 +241,9 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
         ))}
       </div>
       <p className="sheet__meta">
-        {ZONES[zoneId]?.name}: {fmt(zoneKills)} monsters defeated · spots {open} / {spots.length}{' '}
-        open
+        {dungeon
+          ? `${dungeon.name}: Dungeon monsters, entry Lv ${dungeon.minLevel}. ${fmt(zoneKills)} defeated.`
+          : `${ZONES[zoneId]?.name}: ${fmt(zoneKills)} monsters defeated · spots ${open} / ${spots.length} open`}
       </p>
       <div className="book">
         <ul className="book__list" aria-label="Monsters" tabIndex={0}>
@@ -258,6 +292,7 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
             {monster.name}
             {monster.elite && <span className="book__elite">Elite</span>}
           </h3>
+          {dungeon && <p className="book__dungeon-note">Dungeon monster · {dungeon.name}</p>}
           <p className="book__kills">
             <span className="book__kills-count">{fmt(kills)}</span>
             <span className="book__kills-label">defeated</span>

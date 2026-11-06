@@ -42,6 +42,7 @@ export interface GameService {
   /** Active, visible time only. A zero step checkpoints the run when the page becomes hidden. */
   advanceDungeon(characterId: string, seconds: number, input: DungeonPoint): Promise<DungeonUpdate>
   chooseDungeonBuff(characterId: string, skillId: number): Promise<DungeonUpdate>
+  upgradeDungeonBuff(characterId: string, skillId: number): Promise<CharacterData>
   drinkDungeonPotion(characterId: string, itemId: number): Promise<DungeonUpdate>
   finishDungeon(characterId: string): Promise<DungeonUpdate>
   /** Sends the character on an AFK expedition to its current hunting spot. */

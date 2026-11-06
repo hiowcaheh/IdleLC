@@ -22,6 +22,7 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
   const updateSettings = useGameStore((s) => s.updateSettings)
   const resetSave = useGameStore((s) => s.resetSave)
   const leaveGame = useGameStore((s) => s.leaveGame)
+  const inDungeon = useGameStore((s) => !!s.dungeon)
   const navigate = useNavigate()
   const devTools = useDevTools((s) => s.enabled)
   const perfInfo = usePerfOverlay((s) => s.enabled)
@@ -46,6 +47,7 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
   }
 
   const onChangeCharacter = async () => {
+    if (inDungeon) return
     await leaveGame()
     navigate('/characters')
   }
@@ -115,9 +117,19 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
       </label>
 
       <div className="setting setting--plain">
-        <button type="button" className="button button--wide" onClick={onChangeCharacter}>
+        <button
+          type="button"
+          className="button button--wide"
+          disabled={inDungeon}
+          onClick={onChangeCharacter}
+        >
           Change character
         </button>
+        {inDungeon && (
+          <p className="setting__hint">
+            Leave the dungeon through Pause before changing characters.
+          </p>
+        )}
       </div>
 
       <div className="setting setting--danger">

@@ -1,5 +1,15 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-06 (Codex): Dungeons UI / Buffer, SaveVersion **16**.
+Q po prawej, grafiki Loading/D_01–03, minimapa, torba łupów, Pause i dwa potwierdzenia
+Leave, joystick na środku. Monster Book ma Worlds / Dungeons i 23 NPC z tymi samymi
+nagrodami. Buffy startują na 1; `dungeons.buffLevels` przechowuje kupione źródłowe
+poziomy per postać, kopiowane na wejściu. Ulepszenia w serwisie zabronione w rundzie.
+Domyślnie koszt 100 pkt/poziom, punkty po pełnych 600 s równe wynikowi. Saldo `points`
+i rankingowe `totalPoints` są osobne; zakupy nie zmieniają totalPoints. Migracja
+jednorazowo przyznaje punkty za ukończenia zachowane w historii v15. Ranking lokalny
+postaci, globalny nadal przyszły. [Dokumentacja](docs/dungeons.md).
+
 Aktualizacja 2026-11-06 (Codex): [Dungeons](docs/dungeons.md), SaveVersion **15**.
 Belfist/Procyon/Maargadum (strefy źródłowe 1/3/9; progi 1/15/30 właściciela), aktywna
 runda hordowa 600 s, kryształy i poziom 1–20, trzy buffy do wyboru z pauzą, Q z TopUI.
