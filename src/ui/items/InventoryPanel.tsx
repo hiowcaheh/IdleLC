@@ -1,5 +1,6 @@
 import { effectiveStats } from '../../game/logic/combat.ts'
 import { combatSession } from '../../game/session/combatSession.ts'
+import { dungeonSession } from '../../game/session/dungeonSession.ts'
 import { statChanges, withStatChanges } from '../statChanges.tsx'
 import { Gold } from '../Gold.tsx'
 import { useState } from 'react'
@@ -108,6 +109,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   if (!character) return null
   const inventory = character.inventory
   const away = character.expedition !== null
+  const dungeonLocked = !!character.dungeons?.active
   const entries: BagEntry[] = [
     ...character.gear.map((piece): BagEntry => ({
       key: `piece-${piece.uid}`,
@@ -226,7 +228,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
         <button
           type="button"
           className="button button--gold button--wide"
-          disabled={busy || away || problem !== null}
+          disabled={busy || away || dungeonLocked || problem !== null}
           onClick={() => wear(source, pieceName(itemId, plus, rare))}
         >
           Wear
@@ -250,7 +252,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
             key={glassId}
             type="button"
             className={`button identify-button${glassId === GOLDEN_MAGNIFIER_ID ? ' button--gold' : ''}`}
-            disabled={busy || away || have < 1}
+            disabled={busy || away || dungeonLocked || have < 1}
             onClick={() =>
               run(async () => {
                 const result = await identifyItems(glassId, [target])
@@ -333,19 +335,35 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                 type="button"
                 className="button button--gold"
                 disabled={busy || away}
-                onClick={() => {
-                  const before = effectiveStats(combatSession.state.player)
-                  const problem = drinkPotion(stack.itemId)
-                  if (problem) {
-                    toast(DRINK_PROBLEMS[problem], 'error')
-                    return
+                onClick={async () => {
+                  setBusy(true)
+                  try {
+                    const before = effectiveStats(
+                      (dungeonSession.combat() ?? combatSession.state).player,
+                    )
+                    const problem = await drinkPotion(stack.itemId)
+                    if (problem) {
+                      toast(DRINK_PROBLEMS[problem], 'error')
+                      return
+                    }
+                    // a boost changes stats; healing and mana potions restore over time
+                    const changes =
+                      item.potion!.kind === 'boost'
+                        ? statChanges(
+                            before,
+                            effectiveStats((dungeonSession.combat() ?? combatSession.state).player),
+                          )
+                        : [{ label: '', text: potionLine(item.potion!), good: true }]
+                    toast(
+                      withStatChanges(`You drink ${item.name}.`, changes),
+                      'info',
+                      STAT_TOAST_MS,
+                    )
+                  } catch (error) {
+                    toast(error instanceof Error ? error.message : 'Potion unavailable.', 'error')
+                  } finally {
+                    setBusy(false)
                   }
-                  // a boost changes stats; healing and mana potions restore over time
-                  const changes =
-                    item.potion!.kind === 'boost'
-                      ? statChanges(before, effectiveStats(combatSession.state.player))
-                      : [{ label: '', text: potionLine(item.potion!), good: true }]
-                  toast(withStatChanges(`You drink ${item.name}.`, changes), 'info', STAT_TOAST_MS)
                 }}
               >
                 Drink

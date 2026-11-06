@@ -348,6 +348,8 @@ export interface SkillLevelDef {
   learnSp: number
   requires: { skill: number; level: number }[]
   effects: SkillEffectDef[]
+  /** Maximum targets from t_skilllevel.a_targetNum, including the primary target. */
+  targetMax?: number
 }
 
 /** A class skill, 1:1 from t_skill + t_skilllevel. Interpreted by src/game/logic/skills.ts. */
@@ -359,6 +361,10 @@ export interface SkillDef {
   /** t_skill.a_type: 0 melee, 1 ranged, 2 magic, 3 passive. */
   type: number
   targetType: number
+  /** Area radius/length in metres, t_skill.a_appRange. */
+  appRange?: number
+  fireRange?: number
+  fireRange2?: number
   /** Timings in 1/10 s. */
   readyTime: number
   fireTime: number

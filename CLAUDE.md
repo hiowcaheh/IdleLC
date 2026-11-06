@@ -1,5 +1,15 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-06 (Codex): [Dungeons](docs/dungeons.md), SaveVersion **15**.
+Belfist/Procyon/Maargadum (strefy źródłowe 1/3/9; progi 1/15/30 właściciela), aktywna
+runda hordowa 600 s, kryształy i poziom 1–20, trzy buffy do wyboru z pauzą, Q z TopUI.
+Limity 2/dzień/podziemie/postać (UTC), śmierć kończy rundę i zachowuje wszystkie nagrody.
+`LocalGameService` posiada walkę, blokuje sprzęt i zapisuje checkpointy; reload kończy
+podejście jako `interrupted`. Bez AFK i bez omijania biegu między spotami. `dungeonBuffs`
+to osobna pula również zaawansowanych buffów, nie rozszerzenie normalnej nauki klas.
+Nie zmieniać wcześniejszych NPC/lootów/119 skilli. Tylko trzy podziemia, ranking na razie
+osobisty lokalny. Areny mają własny układ z teksturami klienta, nie pełny plan WLD.
+
 Aktualizacja 2026-11-06 (Claude Code): [walka z serwera, skille, żywiołaki](docs/combat-skills-summons.md).
 Ciosy potworów `npcDamage`, kara za śmierć, koszt skilla przy wystrzale, żywioły `nAttrTbl`. Działają
 Far Seeing, Combat Reflection, Charge, Veteran's Composure i żywiołaki Sorcerera (`summons.ts`,

@@ -1,4 +1,22 @@
 import { allocateStatPoint, sanitizeAllocatedStats } from '../logic/statPoints.ts'
+import {
+  createDungeonRun,
+  dailyProgress,
+  dungeonCheckpoint,
+  dungeonStep,
+  chooseDungeonBuff,
+  recordDungeon,
+  type DungeonPoint,
+  type DungeonRun,
+  type DungeonUpdate,
+  type DungeonEvent,
+  type DungeonEnd,
+} from '../logic/dungeons.ts'
+import type { DungeonId } from '../data/dungeons.ts'
+import { drinkPotion, updatePlayer } from '../logic/combat.ts'
+import { playerFighter, potionSupply } from '../logic/fighters.ts'
+import { getItem } from '../data/items.ts'
+import { rewardKills } from '../logic/rewards.ts'
 import type { AttributeKey } from '../logic/attributes.ts'
 import { MONSTERS } from '../data/monsters.ts'
 import { MAX_LEVEL } from '../data/progression.ts'
@@ -26,7 +44,7 @@ import {
 } from '../logic/rewards.ts'
 import { applyIdentify, type IdentifyResult, type IdentifyTarget } from '../logic/rare.ts'
 import { createRng, type Rng } from '../logic/rng.ts'
-import { addToInventory, type ItemStack } from '../logic/loot.ts'
+import { addToInventory, stowDrops, takeFromInventory, type ItemStack } from '../logic/loot.ts'
 import {
   applyBuy,
   applySale,
@@ -79,6 +97,8 @@ export class LocalGameService implements GameService {
   private readonly now: () => number
   private readonly rng: Rng
   private timeScale = 1
+  private readonly dungeonRuns = new Map<string, DungeonRun>()
+  private dungeonSavedAt = 0
 
   constructor(storage: KeyValueStorage, options: { now?: () => number; rng?: Rng } = {}) {
     this.storage = storage
@@ -92,11 +112,29 @@ export class LocalGameService implements GameService {
     const { save, status } = loadSave(this.persisted, this.now())
     this.save = {
       ...save,
-      characters: save.characters.map((c) =>
-        applyLevelTitles(c.expedition ? c : pruneTitles(c, this.now()), this.now()),
-      ),
+      characters: save.characters.map((c) => {
+        // Rewards and entries were saved together. Reload cannot replay or refund a run.
+        const checkpoint = c.dungeons?.active
+        const recovered =
+          checkpoint && c.dungeons
+            ? {
+                ...c,
+                boosts: [],
+                lastPlayedAt: this.now(),
+                dungeons: recordDungeon(c.dungeons, {
+                  ...checkpoint,
+                  endedAt: this.now(),
+                  outcome: 'interrupted',
+                }),
+              }
+            : c
+        return applyLevelTitles(
+          recovered.expedition ? recovered : pruneTitles(recovered, this.now()),
+          this.now(),
+        )
+      }),
     }
-    if (status !== 'loaded') this.persist()
+    if (status !== 'loaded' || save.characters.some((c) => c.dungeons?.active)) this.persist()
     return { save: copy(this.save), status }
   }
 
@@ -110,7 +148,7 @@ export class LocalGameService implements GameService {
   }
 
   async deleteCharacter(characterId: string): Promise<void> {
-    this.character(characterId)
+    if (this.character(characterId).dungeons?.active) throw new GameError('in-dungeon')
     this.save = {
       ...this.save,
       characters: this.save.characters.filter((c) => c.id !== characterId),
@@ -121,6 +159,9 @@ export class LocalGameService implements GameService {
   }
 
   async setActiveCharacter(characterId: string | null): Promise<void> {
+    const current = this.save.activeCharacterId
+    if (current && current !== characterId && this.character(current).dungeons?.active)
+      throw new GameError('in-dungeon', 'Leave the dungeon before switching characters.')
     if (characterId !== null) this.character(characterId)
     this.save = { ...this.save, activeCharacterId: characterId }
     this.persist()
@@ -163,6 +204,207 @@ export class LocalGameService implements GameService {
     return copy({ ...result, character: updated })
   }
 
+  async startDungeon(characterId: string, dungeonId: DungeonId): Promise<DungeonUpdate> {
+    const character = this.notOnExpedition(characterId)
+    const run = createDungeonRun(character, dungeonId, newId(), this.now())
+    const p = dailyProgress(character.dungeons, this.now())
+    const updated = this.update(characterId, (c) => ({
+      ...c,
+      lastPlayedAt: this.now(),
+      dungeons: {
+        ...p,
+        entries: { ...p.entries, [dungeonId]: (p.entries[dungeonId] ?? 0) + 1 },
+        active: dungeonCheckpoint(run),
+      },
+    }))
+    this.dungeonRuns.set(characterId, run)
+    this.dungeonSavedAt = this.now()
+    return { character: copy(updated), run: copy(run), events: [] }
+  }
+
+  async advanceDungeon(
+    characterId: string,
+    seconds: number,
+    input: DungeonPoint,
+  ): Promise<DungeonUpdate> {
+    let run = this.liveDungeon(characterId)
+    if (!Number.isFinite(seconds) || seconds < 0 || seconds > 5 * Math.max(1, this.timeScale))
+      throw new GameError('invalid-dungeon-time')
+    let character = this.character(characterId)
+    run = { ...run, player: { ...run.player, potions: potionSupply(character) } }
+    const events: DungeonEvent[] = []
+    let remaining = seconds
+    let important = seconds === 0
+    while (remaining > 1e-8 && !run.ended && !run.choices.length) {
+      const step = Math.min(0.05, remaining)
+      remaining -= step
+      const tick = dungeonStep(run, step, input, this.rng)
+      run = tick.run
+      events.push(...tick.events)
+      const inventory = takeFromInventory(character.inventory, tick.potions).inventory
+      character = { ...character, inventory }
+      for (const monsterId of tick.kills) {
+        const reward = rewardKills(character, MONSTERS[monsterId]!, 1, this.rng, this.now())
+        const bag = stowDrops(character, reward.drops, this.rng)
+        character = {
+          ...character,
+          ...bag,
+          level: reward.level,
+          exp: reward.remainingExp,
+          gold: character.gold + reward.gold,
+          sp: character.sp + reward.sp,
+          stats: {
+            ...character.stats,
+            kills: character.stats.kills + 1,
+            monsterKills: {
+              ...character.stats.monsterKills,
+              [monsterId]: (character.stats.monsterKills[monsterId] ?? 0) + 1,
+            },
+          },
+        }
+        const drops = new Map(run.rewards.drops.map((d) => [d.itemId, d.count]))
+        for (const drop of reward.drops)
+          drops.set(drop.itemId, (drops.get(drop.itemId) ?? 0) + drop.count)
+        run.rewards = {
+          ...run.rewards,
+          exp: run.rewards.exp + reward.exp,
+          gold: run.rewards.gold + reward.gold,
+          sp: run.rewards.sp + reward.sp,
+          drops: [...drops].map(([itemId, count]) => ({ itemId, count })),
+        }
+      }
+      const enemy = run.enemies.find((e) => e.fighter.hp > 0)
+      // Keep resources, casts and effects; update real character levels and remaining potion supply.
+      if (tick.kills.length || tick.potions.length) {
+        const dummy = enemy?.fighter ?? run.player
+        run.player = updatePlayer(
+          {
+            phase: 'fighting',
+            phaseTime: 0,
+            player: run.player,
+            monster: dummy,
+            monsterId: enemy?.monsterId ?? '',
+            kills: 0,
+            deaths: 0,
+          },
+          playerFighter(character, this.now()),
+        ).player
+        important = true
+      }
+      character = {
+        ...character,
+        stats: {
+          ...character.stats,
+          playSeconds: character.stats.playSeconds + step / Math.max(1, this.timeScale),
+        },
+      }
+    }
+    this.dungeonRuns.set(characterId, run)
+    character = this.update(
+      characterId,
+      () => ({
+        ...character,
+        lastPlayedAt: this.now(),
+        dungeons: { ...character.dungeons!, active: dungeonCheckpoint(run) },
+      }),
+      important || !!run.choices.length || this.now() - this.dungeonSavedAt >= 1000,
+    )
+    if (important || run.choices.length || this.now() - this.dungeonSavedAt >= 1000)
+      this.dungeonSavedAt = this.now()
+    if (run.ended) return this.closeDungeon(characterId, run.ended, events)
+    return { character: copy(character), run: copy(run), events }
+  }
+
+  async chooseDungeonBuff(characterId: string, skillId: number): Promise<DungeonUpdate> {
+    const run = chooseDungeonBuff(this.liveDungeon(characterId), skillId, this.rng)
+    this.dungeonRuns.set(characterId, run)
+    const character = this.update(characterId, (c) => ({
+      ...c,
+      dungeons: { ...c.dungeons!, active: dungeonCheckpoint(run) },
+    }))
+    return { character: copy(character), run: copy(run), events: [] }
+  }
+
+  async drinkDungeonPotion(characterId: string, itemId: number): Promise<DungeonUpdate> {
+    const run = this.liveDungeon(characterId)
+    if (run.choices.length) throw new GameError('dungeon-paused', 'Choose a blessing first.')
+    const character = this.character(characterId)
+    const item = getItem(itemId)
+    const count = character.inventory.find((s) => s.itemId === itemId)?.count ?? 0
+    if (!item.potion || !count || character.level < item.level)
+      throw new GameError('potion-unavailable')
+    const result = drinkPotion(
+      {
+        phase: 'fighting',
+        phaseTime: 0,
+        player: run.player,
+        monster: run.player,
+        monsterId: '',
+        kills: 0,
+        deaths: 0,
+      },
+      { itemId, name: item.name, count, potion: item.potion },
+    )
+    if (result.problem) throw new GameError(result.problem)
+    run.player = result.state.player
+    run.player.effects = run.player.effects.map((e) => ({
+      ...e,
+      remaining: Math.min(e.remaining, 600 - run.elapsed),
+    }))
+    run.player.potionsUsed = {}
+    const updated = this.update(characterId, (c) => ({
+      ...c,
+      inventory: takeFromInventory(c.inventory, [{ itemId, count: 1 }]).inventory,
+    }))
+    const init = playerFighter(updated, this.now())
+    run.player.potions = init.potions
+    return {
+      character: copy(updated),
+      run: copy(run),
+      events: result.events.map((event) => ({ enemyUid: null, event })),
+    }
+  }
+
+  async finishDungeon(characterId: string): Promise<DungeonUpdate> {
+    this.liveDungeon(characterId)
+    return this.closeDungeon(characterId, 'left')
+  }
+
+  private liveDungeon(characterId: string): DungeonRun {
+    const run = this.dungeonRuns.get(characterId)
+    if (!run || !this.character(characterId).dungeons?.active) throw new GameError('no-dungeon')
+    return run
+  }
+
+  private refreshDungeonPlayer(character: CharacterData): void {
+    const run = this.dungeonRuns.get(character.id)
+    if (!run) return
+    const init = playerFighter(character, this.now())
+    run.player = { ...run.player, stats: init.stats, skills: init.skills, potions: init.potions }
+  }
+
+  private closeDungeon(
+    characterId: string,
+    outcome: DungeonEnd,
+    events: DungeonEvent[] = [],
+  ): DungeonUpdate {
+    const run = this.liveDungeon(characterId)
+    // Owner's dungeon rule: death ends the entry and keeps all rewards already earned.
+    const lost = { exp: 0, sp: 0 }
+    const record = { ...dungeonCheckpoint(run), outcome, endedAt: this.now(), lost }
+    const character = this.update(characterId, (current) => ({
+      ...current,
+      boosts: [],
+      exp: current.exp - lost.exp,
+      sp: current.sp - lost.sp,
+      stats: { ...current.stats, deaths: current.stats.deaths + (outcome === 'defeated' ? 1 : 0) },
+      lastPlayedAt: this.now(),
+      dungeons: recordDungeon(current.dungeons!, record),
+    }))
+    this.dungeonRuns.delete(characterId)
+    return { character: copy(character), run: null, events, result: copy(record) }
+  }
+
   async startAfk(characterId: string): Promise<CharacterData> {
     const character = this.notOnExpedition(characterId)
     const now = this.now()
@@ -201,23 +443,31 @@ export class LocalGameService implements GameService {
   }
 
   async allocateStatPoint(characterId: string, attribute: AttributeKey): Promise<CharacterData> {
-    const character = this.notOnExpedition(characterId)
-    return copy(this.update(characterId, () => allocateStatPoint(character, attribute)))
+    const character = this.notOnExpedition(characterId, true)
+    const updated = this.update(characterId, () => allocateStatPoint(character, attribute))
+    this.refreshDungeonPlayer(updated)
+    return copy(updated)
   }
 
   async learnSkill(characterId: string, skillId: number): Promise<CharacterData> {
-    const learned = applyLearn(this.notOnExpedition(characterId), skillId)
-    return copy(this.update(characterId, () => learned))
+    const learned = applyLearn(this.notOnExpedition(characterId, true), skillId)
+    const character = this.update(characterId, () => learned)
+    this.refreshDungeonPlayer(character)
+    return copy(character)
   }
 
   async setSkillAuto(characterId: string, skillId: number, auto: boolean): Promise<CharacterData> {
-    const changed = applyAuto(this.notOnExpedition(characterId), skillId, auto)
-    return copy(this.update(characterId, () => changed))
+    const changed = applyAuto(this.notOnExpedition(characterId, true), skillId, auto)
+    const character = this.update(characterId, () => changed)
+    this.refreshDungeonPlayer(character)
+    return copy(character)
   }
 
   async setSkillBar(characterId: string, skillIds: number[]): Promise<CharacterData> {
-    const changed = applyBar(this.notOnExpedition(characterId), skillIds)
-    return copy(this.update(characterId, () => changed))
+    const changed = applyBar(this.notOnExpedition(characterId, true), skillIds)
+    const character = this.update(characterId, () => changed)
+    this.refreshDungeonPlayer(character)
+    return copy(character)
   }
 
   async equipItem(
@@ -252,13 +502,18 @@ export class LocalGameService implements GameService {
   }
 
   async redeemTitleItem(characterId: string, itemId: number): Promise<TitleUse> {
+    if (this.character(characterId).dungeons?.active)
+      throw new GameError('in-dungeon', 'Titles are locked for this run.')
     const use = applyUseTitleItem(this.character(characterId), itemId, this.now())
     const updated = this.update(characterId, () => use.character)
     return copy({ ...use, character: updated })
   }
 
   async setTitle(characterId: string, titleId: number | null): Promise<CharacterData> {
-    const changed = applyWearTitle(this.character(characterId), titleId, this.now())
+    const character = this.character(characterId)
+    if (character.dungeons?.active)
+      throw new GameError('in-dungeon', 'Titles are locked for this run.')
+    const changed = applyWearTitle(character, titleId, this.now())
     return copy(this.update(characterId, () => changed))
   }
 
@@ -273,8 +528,10 @@ export class LocalGameService implements GameService {
     group: PotionGroup,
     slot: PotionSlot,
   ): Promise<CharacterData> {
-    const changed = applyPotionSlot(this.notOnExpedition(characterId), group, slot)
-    return copy(this.update(characterId, () => changed))
+    const changed = applyPotionSlot(this.notOnExpedition(characterId, true), group, slot)
+    const character = this.update(characterId, () => changed)
+    this.refreshDungeonPlayer(character)
+    return copy(character)
   }
 
   async sellGear(characterId: string, uids: string[]): Promise<PieceSale> {
@@ -301,6 +558,7 @@ export class LocalGameService implements GameService {
 
   async resetSave(): Promise<SaveData> {
     this.save = createDefaultSave(this.now())
+    this.dungeonRuns.clear()
     this.persist()
     return copy(this.save)
   }
@@ -380,15 +638,21 @@ export class LocalGameService implements GameService {
     return character.expedition ? character : pruneTitles(character, this.now())
   }
 
-  private notOnExpedition(characterId: string): CharacterData {
+  private notOnExpedition(characterId: string, allowDungeon = false): CharacterData {
     const character = this.character(characterId)
     if (character.expedition) throw new GameError('on-expedition', `${characterId} is away`)
+    if (character.dungeons?.active && !allowDungeon)
+      throw new GameError(
+        'in-dungeon',
+        'Equipment and field activities are locked until you leave the dungeon.',
+      )
     return character
   }
 
   private update(
     characterId: string,
     change: (character: CharacterData) => CharacterData,
+    persist = true,
   ): CharacterData {
     // run-out titles go and level titles come with every change
     const now = this.now()
@@ -398,7 +662,7 @@ export class LocalGameService implements GameService {
       ...this.save,
       characters: this.save.characters.map((c) => (c.id === characterId ? next : c)),
     }
-    this.persist()
+    if (persist) this.persist()
     return next
   }
 

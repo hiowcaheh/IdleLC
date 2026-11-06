@@ -78,6 +78,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
   if (!character) return null
 
   const away = character.expedition !== null
+  const locked = away || !!character.dungeons?.active
   const points = availableStatPoints(character)
   // the fight's stats include the buffs on the hero right now; the gear-only ones are the base
   const base = heroStats(character)
@@ -248,7 +249,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
             <button
               type="button"
               className="button"
-              disabled={busy || away}
+              disabled={busy || locked}
               onClick={() =>
                 run(async () => {
                   await unequipItem(slot)
@@ -263,7 +264,7 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
               <button
                 type="button"
                 className="button button--gold upgrade-button"
-                disabled={busy || away || stones < 1 || piece.plus >= MAX_PLUS}
+                disabled={busy || locked || stones < 1 || piece.plus >= MAX_PLUS}
                 onClick={() => upgrade(slot, piece)}
               >
                 <span className="upgrade-button__text">
@@ -496,6 +497,9 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
             </Sheet>
           )}
           {away && <p className="sheet__meta">Gear can't be changed during an expedition.</p>}
+          {character.dungeons?.active && (
+            <p className="sheet__meta">Equipment is locked for this dungeon run.</p>
+          )}
         </div>
       )}
       {speedHelpOpen && <SpeedHelp onClose={() => setSpeedHelpOpen(false)} />}

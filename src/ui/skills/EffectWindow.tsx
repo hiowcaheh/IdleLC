@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getItem } from '../../game/data/items.ts'
 import { getSkill } from '../../game/data/skills.ts'
+import { dungeonBuffDefinition } from '../../game/logic/dungeons.ts'
 import { effectiveStats, isHarmful, type Side } from '../../game/logic/combat.ts'
 import { combatSession } from '../../game/session/combatSession.ts'
 import { STAT_TOAST_MS, toast } from '../../state/toasts.ts'
@@ -20,13 +21,17 @@ import { useCombatTicker } from './useCombatTicker.ts'
 export function EffectWindow({ side, id, onClose }: { side: Side; id: string; onClose(): void }) {
   const effect = useCombatTicker(250)[side].effects.find((e) => effectKey(e) === id)
   const removeEffect = useGameStore((s) => s.removeEffect)
+  const inDungeon = useGameStore((s) => !!s.dungeon)
   const [confirming, setConfirming] = useState(false)
   const ended = effect === undefined
   useEffect(() => {
     if (ended) onClose()
   }, [ended, onClose])
   if (!effect) return null
-  const skill = effect.itemId === undefined ? getSkill(effect.skillId) : undefined
+  const skill =
+    effect.itemId === undefined
+      ? (getSkill(effect.skillId) ?? dungeonBuffDefinition(effect.skillId))
+      : undefined
   const kind = skill ? skillRank(skill, 1).kind : 'buff'
   const what = effect.itemId !== undefined ? 'Potion' : effect.stun ? 'Stun' : KIND_LABELS[kind]
   const rows = activeEffectRows(effect)
@@ -62,7 +67,10 @@ export function EffectWindow({ side, id, onClose }: { side: Side; id: string; on
         )}
         {skill?.description && <p className="effect-window__text">{skill.description}</p>}
       </div>
-      {side === 'player' && !isHarmful(effect) && (
+      {inDungeon && (
+        <p className="sheet__meta">Temporary effects end when this dungeon run ends.</p>
+      )}
+      {side === 'player' && !isHarmful(effect) && !inDungeon && (
         <div className="effect-window__actions">
           <button type="button" className="button button--wide" onClick={() => setConfirming(true)}>
             Remove effect

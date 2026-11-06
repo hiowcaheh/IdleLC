@@ -366,6 +366,25 @@
       "tint": {}
     },
     {
+      "id": "dryzombi",
+      "file": "dryzombi.glb?v=a4af674087",
+      "scale": 1,
+      "animations": {
+        "idle": "zombi",
+        "walk": "m_zm_walk01",
+        "run": "m_zm_walk01",
+        "attack": [
+          "m_zm_att01"
+        ],
+        "hit": "m_zm_da01",
+        "die": "m_zm_die01"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 0.500320444349498,
+      "tint": {}
+    },
+    {
       "id": "yeti",
       "file": "yeti.glb?v=5c425f3138",
       "scale": 1,
@@ -445,6 +464,44 @@
       "tint": {}
     },
     {
+      "id": "swordandshield",
+      "file": "swordandshield.glb?v=01c26f093f",
+      "scale": 1,
+      "animations": {
+        "idle": "m_d1_ss",
+        "walk": "m_d1_ss_run",
+        "run": "m_d1_ss_run",
+        "attack": [
+          "m_d1_ss_att01"
+        ],
+        "hit": "m_d1_ss_da",
+        "die": "m_d1_ss_die"
+      },
+      "attackImpact": 0.5333280086517335,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "greenzombi",
+      "file": "greenzombi.glb?v=540e8169ab",
+      "scale": 1,
+      "animations": {
+        "idle": "m_zm02",
+        "walk": "m_zm02_run",
+        "run": "m_zm02_run",
+        "attack": [
+          "m_zm02_att01"
+        ],
+        "hit": "m_zm02_da",
+        "die": "m_zm02_die"
+      },
+      "attackImpact": 0.4480000019073487,
+      "height": 2,
+      "radius": 0.7035737174596393,
+      "tint": {}
+    },
+    {
       "id": "wyvernhigh",
       "file": "wyvernhigh.glb?v=c9446f3fed",
       "scale": 1,
@@ -461,6 +518,25 @@
       "attackImpact": 0.6,
       "height": 2,
       "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "mummy",
+      "file": "mummy.glb?v=a47a794360",
+      "scale": 1,
+      "animations": {
+        "idle": "m_d1_mu",
+        "walk": "m_d1_mu_walk",
+        "run": "m_d1_mu_walk",
+        "attack": [
+          "m_d1_mu_att01"
+        ],
+        "hit": "m_d1_mu_da",
+        "die": "m_d1_mu_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 0.554155095065157,
       "tint": {}
     },
     {
@@ -525,6 +601,26 @@
       "tint": {}
     },
     {
+      "id": "swordandroundshield",
+      "file": "swordandroundshield.glb?v=9610c43820",
+      "scale": 1,
+      "animations": {
+        "idle": "m_d1_sf",
+        "walk": "m_d1_sf_walk",
+        "run": "m_d1_sf_run",
+        "attack": [
+          "m_d1_sf_att01",
+          "m_d1_sf_att02"
+        ],
+        "hit": "m_d1_sf_da",
+        "die": "m_d1_sf_die"
+      },
+      "attackImpact": 0.5333280086517335,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "jaguar_dk",
       "file": "jaguar_dk.glb?v=41e6ac8e58",
       "scale": 1,
@@ -584,6 +680,45 @@
       "tint": {}
     },
     {
+      "id": "spearman",
+      "file": "spearman.glb?v=9984bbd8fc",
+      "scale": 1,
+      "animations": {
+        "idle": "m_d1_sw",
+        "walk": "m_d1_sw_run",
+        "run": "m_d1_sw_run",
+        "attack": [
+          "m_d1_sw_att01",
+          "m_d1_sw_att02"
+        ],
+        "hit": "m_d1_sw_da",
+        "die": "m_d1_sw_die"
+      },
+      "attackImpact": 0.3999959945678711,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "shortsword",
+      "file": "shortsword.glb?v=04512509ce",
+      "scale": 1,
+      "animations": {
+        "idle": "m_orc_f",
+        "walk": "m_orc_f_run",
+        "run": "m_orc_f_run",
+        "attack": [
+          "m_orc_f_att01"
+        ],
+        "hit": "m_orc_f_da",
+        "die": "m_orc_f_die2"
+      },
+      "attackImpact": 0.5999939918518067,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "m_harpyboss",
       "file": "m_harpyboss.glb?v=333084287c",
       "scale": 1,
@@ -604,6 +739,25 @@
       "tint": {}
     },
     {
+      "id": "fist",
+      "file": "fist.glb?v=001ead6e52",
+      "scale": 1,
+      "animations": {
+        "idle": "m_orc_f",
+        "walk": "m_orc_f_run",
+        "run": "m_orc_f_run",
+        "attack": [
+          "m_orc_f_att03"
+        ],
+        "hit": "m_orc_f_da",
+        "die": "m_orc_f_die2"
+      },
+      "attackImpact": 0.5999939918518067,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "fox01",
       "file": "fox01.glb?v=f0d1928336",
       "scale": 1,
@@ -619,6 +773,25 @@
       },
       "attackImpact": 0.6,
       "height": 1.0690023499252297,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "doubleaxe",
+      "file": "doubleaxe.glb?v=59dcb592c1",
+      "scale": 1,
+      "animations": {
+        "idle": "m_orc_f",
+        "walk": "m_orc_f_run",
+        "run": "m_orc_f_run",
+        "attack": [
+          "m_orc_f_att02"
+        ],
+        "hit": "m_orc_f_da",
+        "die": "m_orc_f_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
       "radius": 1,
       "tint": {}
     },
@@ -681,6 +854,25 @@
         "die": "scamp_die"
       },
       "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "glaive",
+      "file": "glaive.glb?v=70ef963015",
+      "scale": 1,
+      "animations": {
+        "idle": "m_orc_f",
+        "walk": "m_orc_f_run",
+        "run": "m_orc_f_run",
+        "attack": [
+          "m_orc_f_att04"
+        ],
+        "hit": "m_orc_f_da",
+        "die": "m_orc_f_die"
+      },
+      "attackImpact": 0.5999939918518067,
       "height": 2,
       "radius": 1,
       "tint": {}
@@ -1055,6 +1247,27 @@
       "tint": {}
     },
     {
+      "id": "vandersnach",
+      "file": "vandersnach.glb?v=a85bfc2d42",
+      "scale": 1,
+      "animations": {
+        "idle": "vandersnach_idle_01",
+        "idle2": "vandersnach_idle_02",
+        "walk": "vandersnach_walk",
+        "run": "vandersnach_run",
+        "attack": [
+          "vandersnach_att_01",
+          "vandersnach_att_02"
+        ],
+        "hit": "vandersnach_dam",
+        "die": "vandersnach_die"
+      },
+      "attackImpact": 0.3999959945678711,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "gnoll_sw",
       "file": "gnoll_sw.glb?v=59e82dad40",
       "scale": 1,
@@ -1071,6 +1284,169 @@
         "die": "gnoll_sw_die"
       },
       "attackImpact": 0.4799952030181885,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "vandersnachanka",
+      "file": "vandersnachanka.glb?v=8cd8d75d80",
+      "scale": 1,
+      "animations": {
+        "idle": "vandersnachanka_idle_01",
+        "idle2": "vandersnachanka_idle_02",
+        "walk": "vandersnachanka_walk",
+        "run": "vandersnachanka_run",
+        "attack": [
+          "vandersnachanka_att_01",
+          "vandersnachanka_att_02"
+        ],
+        "hit": "vandersnachanka_dam",
+        "die": "vandersnachanka_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.8732871486556597,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "brooarcher",
+      "file": "brooarcher.glb?v=f28f3e1606",
+      "scale": 1,
+      "animations": {
+        "idle": "brooarcher_idle01",
+        "walk": "brooarcher_walk",
+        "run": "brooarcher_run",
+        "attack": [
+          "brooarcher_att01",
+          "brooarcher_att02"
+        ],
+        "hit": "brooarcher_dam",
+        "die": "brooarcher_die"
+      },
+      "attackImpact": 0.3999959945678711,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "vandersnachandroo",
+      "file": "vandersnachandroo.glb?v=7779d89d4e",
+      "scale": 1,
+      "animations": {
+        "idle": "vandersnachandroo_idle_01",
+        "idle2": "vandersnachandroo_idle_02",
+        "walk": "vandersnachandroo_walk",
+        "run": "vandersnachandroo_run",
+        "attack": [
+          "vandersnachandroo_att_01",
+          "vandersnachandroo_att_02"
+        ],
+        "hit": "vandersnachandroo_dam",
+        "die": "vandersnachandroo_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "deadammorlancer",
+      "file": "deadammorlancer.glb?v=ccd4ceea41",
+      "scale": 1,
+      "animations": {
+        "idle": "deadammorlancer_idle_01",
+        "idle2": "deadammorlancer_idle_02",
+        "walk": "deadammorlancer_walk",
+        "run": "deadammorlancer_run",
+        "attack": [
+          "deadammorlancer_att_01",
+          "deadammorlancer_att_02"
+        ],
+        "hit": "deadammorlancer_dam",
+        "die": "deadammorlancer_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "broobutcher",
+      "file": "broobutcher.glb?v=2e34312f27",
+      "scale": 1,
+      "animations": {
+        "idle": "broobutcher_idle01",
+        "walk": "broobutcher_walk",
+        "run": "broobutcher_run",
+        "attack": [
+          "broobutcher_att01",
+          "broobutcher_att02"
+        ],
+        "hit": "broobutcher_dam",
+        "die": "broobutcher_die"
+      },
+      "attackImpact": 0.4666619777679444,
+      "height": 2,
+      "radius": 0.827021088290048,
+      "tint": {}
+    },
+    {
+      "id": "broowizard",
+      "file": "broowizard.glb?v=0967f87d1a",
+      "scale": 1,
+      "animations": {
+        "idle": "broowizard_idle01",
+        "walk": "broowizard_walk",
+        "run": "broowizard_run",
+        "attack": [
+          "broowizard_att01",
+          "broowizard_att02"
+        ],
+        "hit": "broowizard_dam",
+        "die": "broowizard_die"
+      },
+      "attackImpact": 0.4666619777679444,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "deadammorsoldier",
+      "file": "deadammorsoldier.glb?v=cda984dc3d",
+      "scale": 1,
+      "animations": {
+        "idle": "deadammorsoldier_idle01",
+        "walk": "deadammorsoldier_walk",
+        "run": "deadammorsoldier_run",
+        "attack": [
+          "deadammorsoldier_att01",
+          "deadammorsoldier_att02"
+        ],
+        "hit": "deadammorsoldier_dam",
+        "die": "deadammorsoldier_die"
+      },
+      "attackImpact": 0.5333280086517335,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "broolord",
+      "file": "broolord.glb?v=7fdf8b26b3",
+      "scale": 1,
+      "animations": {
+        "idle": "broolord_idle01",
+        "walk": "broolord_walk",
+        "run": "broolord_run",
+        "attack": [
+          "broolord_att01",
+          "broolord_att02"
+        ],
+        "hit": "broolord_dam",
+        "die": "broolord_die"
+      },
+      "attackImpact": 0.5333280086517335,
       "height": 2,
       "radius": 1,
       "tint": {}
@@ -1153,6 +1529,25 @@
       },
       "attackImpact": 0.5199947834014893,
       "height": 0.8033082064271981,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "deathknight",
+      "file": "deathknight.glb?v=915e7f7991",
+      "scale": 1,
+      "animations": {
+        "idle": "dn_idle_01",
+        "walk": "dn_walk",
+        "run": "dn_run",
+        "attack": [
+          "dn_att_01",
+          "dn_att_02"
+        ],
+        "die": "dn_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
       "radius": 1,
       "tint": {}
     },

@@ -20,4 +20,11 @@ Na decyzję właściciela (2026-10-29) w repo są też zasoby wygenerowane z kli
 
 Surowe pliki klienta i zrzut bazy nie są w repo.
 
+Dungeons (2026-11-06): `public/dungeons/` zawiera sześć tekstur posadzek/ścian z
+`Data/World/Dungeon1`, `Dungeon2`, `Dungeon3`, wyeksportowanych przez
+`scripts/lc/dungeon-art.mjs`. `public/ui/lc/menu-dungeons.webp` to oryginalne Q
+z TopUI (`UIRadar.cpp`, RADER_QUESTNPC). Dwadzieścia nowych GLB w `public/models/lc/`
+pochodzi z modeli potworów tego samego klienta 2015. Są objęte powyższą decyzją
+właściciela dotyczącą konwersji zasobów LC, nie licencją CC0.
+
 Czcionki (Cinzel, Alegreya Sans) ładowane z Google Fonts — licencja SIL Open Font License 1.1.

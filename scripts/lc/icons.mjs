@@ -120,7 +120,11 @@ export const ICON_KINDS = [
   {
     kind: 'skills',
     file: 'icons/lc/skills.webp',
-    entries: (data) => data.skills ?? [],
+    entries: (data) => [
+      ...new Map(
+        [...(data.skills ?? []), ...(data.dungeonBuffs ?? [])].map((s) => [s.id, s]),
+      ).values(),
+    ],
     atlasPath: (id) => `Data\\Interface\\SkillBtn${id}.tex`,
   },
 ]

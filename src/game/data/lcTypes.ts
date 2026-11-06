@@ -99,6 +99,8 @@ export interface LcData {
   shop?: { sellRate: number; buyRate: number }
   /** Class skills (base classes), see scripts/lc/import-db.mjs buildSkills. */
   skills?: LcSkill[]
+  /** Active class buffs, including advanced classes; used only for dungeon blessings. */
+  dungeonBuffs?: LcSkill[]
   npcSkills?: Omit<LcSkill, 'classId' | 'icon'>[]
   /** Item ids the NPC shops of each field zone sell (gear and the upgrade stone), by zone id. */
   shops?: Record<string, number[]>
@@ -148,6 +150,7 @@ export interface LcSkill {
     learnSp: number
     requires: { skill: number; level: number }[]
     effects: SkillEffectDef[]
+    targetMax?: number
   }[]
 }
 

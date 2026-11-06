@@ -11,6 +11,8 @@ import type { IdentifyResult, IdentifyTarget } from '../logic/rare.ts'
 import type { PieceSale, PurchaseResult, SaleResult } from '../logic/shop.ts'
 import type { BookClaim } from '../logic/book.ts'
 import type { TitleUse } from '../logic/titles.ts'
+import type { DungeonId } from '../data/dungeons.ts'
+import type { DungeonPoint, DungeonUpdate } from '../logic/dungeons.ts'
 
 /**
  * Everything that changes the saved game goes through this contract, and every call is
@@ -36,6 +38,12 @@ export interface GameService {
    * potions drunk out of the bag.
    */
   reportCombat(characterId: string, report: CombatReport): Promise<CombatResult>
+  startDungeon(characterId: string, dungeonId: DungeonId): Promise<DungeonUpdate>
+  /** Active, visible time only. A zero step checkpoints the run when the page becomes hidden. */
+  advanceDungeon(characterId: string, seconds: number, input: DungeonPoint): Promise<DungeonUpdate>
+  chooseDungeonBuff(characterId: string, skillId: number): Promise<DungeonUpdate>
+  drinkDungeonPotion(characterId: string, itemId: number): Promise<DungeonUpdate>
+  finishDungeon(characterId: string): Promise<DungeonUpdate>
   /** Sends the character on an AFK expedition to its current hunting spot. */
   startAfk(characterId: string): Promise<CharacterData>
   /**

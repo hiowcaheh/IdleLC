@@ -4,6 +4,7 @@
  * When the shape changes: bump SAVE_VERSION and add a migration from the previous version.
  */
 import { sanitizeAllocatedStats } from './statPoints.ts'
+import { sanitizeDungeonProgress } from './dungeons.ts'
 import { BOOK_MILESTONES } from '../data/bookRewards.ts'
 import { CLASSES } from '../data/classes.ts'
 import { MONSTERS } from '../data/monsters.ts'
@@ -50,7 +51,7 @@ import {
   type LearnedSkill,
 } from './skills.ts'
 
-export const SAVE_VERSION = 14
+export const SAVE_VERSION = 15
 
 export type GraphicsQuality = 'auto' | 'low' | 'high' | 'ultra'
 
@@ -189,6 +190,8 @@ export const MIGRATIONS: Record<number, Migration> = {
   12: (save) => save,
   // v14: allocated attributes; existing levels grant their unspent points without losing progress.
   13: (save) => save,
+  // v15: independent dungeon entries, interrupted-run checkpoint and local best scores.
+  14: (save) => save,
 }
 
 export const DEFAULT_SETTINGS: Settings = { quality: 'auto', showDamageNumbers: true }
@@ -305,6 +308,7 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     optionProgress: Math.min(OPTION_PLAY_SECONDS, Math.max(0, num(raw.optionProgress, 0))),
     ...sanitizeTitles(raw.titles, raw.activeTitle),
     ...sanitizeBoosts(raw.boosts),
+    dungeons: sanitizeDungeonProgress(raw.dungeons),
     titlesEarned: (Array.isArray(raw.titlesEarned) ? raw.titlesEarned : [])
       .map((id: unknown) => int(id, -1))
       .filter((id, i, all) => getTitle(id) !== undefined && all.indexOf(id) === i),

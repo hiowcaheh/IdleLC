@@ -242,7 +242,7 @@ export interface TickResult {
   events: CombatEvent[]
 }
 
-function freshFighter(init: FighterInit): Fighter {
+export function freshFighter(init: FighterInit): Fighter {
   return {
     level: init.level,
     stats: init.stats,
@@ -264,7 +264,7 @@ function freshFighter(init: FighterInit): Fighter {
 }
 
 /** A copy that can be changed without touching the original (combatTick is pure). */
-function copyFighter(f: Fighter): Fighter {
+export function copyFighter(f: Fighter): Fighter {
   return {
     ...f,
     skillCooldowns: { ...f.skillCooldowns },
@@ -650,6 +650,58 @@ export function combatTick(state: CombatState, dt: number, rng: Rng): TickResult
   return { state: s, events }
 }
 
+/** Shared by the dungeon's many actors. Advance each actor's clocks exactly once per step. */
+export function advanceActor(
+  fighter: Fighter,
+  side: Side,
+  dt: number,
+  events: CombatEvent[],
+): void {
+  tickCooldowns(fighter, dt)
+  tickSummons(fighter, dt, events)
+  regen(fighter, dt, true)
+  for (const amount of tickEffects(fighter, dt)) {
+    const damage = Math.min(Math.max(0, fighter.hp - 1), Math.max(0, Math.trunc(amount)))
+    fighter.hp -= damage
+    events.push({ type: 'hit', target: side, amount: damage, crit: false, poison: true })
+  }
+  if (side === 'player') drinkPotions(fighter, events)
+}
+
+/** Resolve one actor against its current target using the same source damage, skills and costs. */
+export function actAgainst(
+  state: CombatState,
+  side: Side,
+  dt: number,
+  rng: Rng,
+  events: CombatEvent[],
+  inRange: boolean,
+  distance?: number,
+): SkillRank | null {
+  if (side === 'player' && inRange) summonsStep(state, dt, rng, events)
+  if (state.monster.hp <= 0 || state.player.hp <= 0) return null
+  const self = state[side]
+  const rank = self.casting
+  const fires =
+    rank &&
+    self.impactIn !== null &&
+    self.impactIn <= dt &&
+    !isStunned(self) &&
+    canPaySkill(self, rank, effectiveStats(self))
+  fighterStep(state, side, dt, rng, events, inRange, distance)
+  return fires ? rank : null
+}
+
+/** Additional targets of the same paid cast; each gets its own source hit/damage/effect rolls. */
+export function landAreaSkill(
+  state: CombatState,
+  rank: SkillRank,
+  rng: Rng,
+  events: CombatEvent[],
+): void {
+  landSkill(state, 'player', rank, rng, events)
+}
+
 function enter(s: CombatState, phase: CombatPhase): void {
   s.phase = phase
   s.phaseTime = 0
@@ -875,6 +927,8 @@ function fighterStep(
   dt: number,
   rng: Rng,
   events: CombatEvent[],
+  inRange = true,
+  distance?: number,
 ): boolean {
   const self = side === 'player' ? s.player : s.monster
   const target = side === 'player' ? s.monster : s.player
@@ -900,7 +954,24 @@ function fighterStep(
 
   if (self.cooldown <= 0) {
     const stats = effectiveStats(self)
-    const skill = chooseSkill(self, target, rng)
+    const skill = chooseSkill(
+      distance === undefined && inRange
+        ? self
+        : {
+            ...self,
+            skills: self.skills?.filter(
+              (r) =>
+                !r.offensive ||
+                (inRange &&
+                  (distance === undefined ||
+                    r.range === undefined ||
+                    distance <= Math.max(1.8, r.range))),
+            ),
+          },
+      target,
+      rng,
+    )
+    if (!skill && !inRange) return false
     // the monster turns on whom it hates most as it starts the swing or the cast
     if (side === 'monster') {
       const aim = aimFor(s)
@@ -1321,7 +1392,7 @@ function taunt(s: CombatState, skill: SkillRank): void {
 }
 
 /** Puts a skill's lasting effects (stats, stun, poison) on a fighter for the skill's duration. */
-function applyEffects(
+export function applyEffects(
   f: Fighter,
   side: Side,
   skill: SkillRank,

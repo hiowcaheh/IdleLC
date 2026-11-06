@@ -245,6 +245,8 @@ export interface SkillRank {
   /** SF_GUILD / SCT_NO_COOL_TIME skills bypass ordinary cooldown adjustments. */
   fixedCooldown?: boolean
   attackType?: 'melee' | 'ranged' | 'magic'
+  /** Source skill reach; self areas use appRange, target skills their weapon's fireRange. */
+  range?: number
   /** NPC source skill slot and chance out of 10000 (MobActivity.cpp:1736). */
   npcSlot?: number
   npcProbability?: number
@@ -318,6 +320,13 @@ export function skillRank(
     fixedCooldown:
       ((skill.flag ?? 0) & (1 << 9)) !== 0 || ((skill.applyState ?? 0) & (1 << 7)) !== 0,
     attackType: skill.type === 2 ? 'magic' : skill.type === 1 ? 'ranged' : 'melee',
+    ...(skill.fireRange !== undefined || skill.appRange !== undefined
+      ? {
+          range: [1, 11].includes(skill.targetType)
+            ? (skill.appRange ?? 0)
+            : (skill.fireRange ?? 0),
+        }
+      : {}),
     duration: rank.duration / 10,
     ...(skill.flag === SF_NOTHELP ? { reducibleDebuff: true } : {}),
     ...(((skill.flag ?? 0) & SF_NOT_BOSS) !== 0 ? { notBoss: true } : {}),

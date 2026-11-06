@@ -57,7 +57,15 @@ const TEXT_ROW_HEIGHT = 0.3
 const BAR_LIFT = 0.22
 
 /** The played character is away on an AFK expedition: no fight on screen. */
-const isAway = () => useGameStore.getState().character?.expedition != null
+const isAway = () => {
+  const s = useGameStore.getState()
+  return (
+    s.character?.expedition != null ||
+    s.dungeon != null ||
+    s.dungeonEntering ||
+    s.dungeonResult != null
+  )
+}
 
 function yawTowards(from: Vector3, to: Vector3): number {
   return Math.atan2(to.x - from.x, to.z - from.z)

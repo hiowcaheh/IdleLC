@@ -1,5 +1,27 @@
 # Historia zmian
 
+## 2026-11-06 (Codex): Dungeons, trzy podziemia i aktywna walka z hordą
+
+Po przeglądzie zmian Claude’a do `9ad20b8` i pełnej bazy z 2016. Opis i źródła:
+[docs/dungeons.md](docs/dungeons.md). SaveVersion **15**, migracja v14 zachowuje postępy.
+
+1. Belfist Temple (wejście od 1), Procyon Shrine (15), Maargadum (30), osobne okno
+   wyboru ze strzałkami, oryginalne Q po lewej oraz miejsce pod ranking i lokalny rekord.
+2. Runda 10 aktywnych minut, 20 fal, joystick/WASD, automatyczne ataki i skille,
+   oryginalne 23 NPC / 20 modeli, nagrody według dotychczasowych reguł źródłowych.
+3. Kryształy i poziom podziemia 1–20. Awans zatrzymuje grę do wyboru jednego z trzech
+   buffów sześciu klas, także zaawansowanych. Wybrany buff nie wraca do puli; efekty
+   znikają po zakończeniu. Obszary skilli mają źródłowe zasięgi, kąty i limity celów.
+4. Dwa wejścia dziennie na podziemie **na postać**, reset UTC. Śmierć kończy rundę
+   i zachowuje zdobyte EXP/SP/złoto/przedmioty, zgodnie z odpowiedzią właściciela.
+   Ekwipunek jest zablokowany także w serwisie, mikstury i skille działają.
+5. Checkpointy i jednokrotne nagrody. Reload przerywa podejście, zachowując nagrody
+   i wykorzystane wejście. Ukryta karta, wybór buffa i pauza zatrzymują czas.
+
+Weryfikacja: `npm run check` (518 testów / 59 plików), build i pełne rundy w Chromium
+na ekranach 320, 390 i 1280 px. Areny hordowe używają zasobów oryginału; szczegóły
+świadomych reguł tego nowego trybu i ograniczenia testów zapisano w dokumentacji.
+
 ## 2026-11-06 (Claude Code): walka z serwera, brakujące skille, żywiołaki Sorcerera
 
 Punkt wyjścia `445f599`. Commity `1cc02e0`, `6555b24`, `bfe732d`, `9708ca3`, `87cfbbf`, `d2ad688`,

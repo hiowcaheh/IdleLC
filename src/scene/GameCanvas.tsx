@@ -11,6 +11,7 @@ import { Battle } from './Battle.tsx'
 import { CameraRig } from './CameraRig.tsx'
 import { PerfProbe } from './PerfProbe.tsx'
 import { World } from './World.tsx'
+import { DungeonScene } from './DungeonScene.tsx'
 
 function preloadModel(modelId: string): void {
   useGLTF.preload(modelUrl(getModel(modelId)))
@@ -45,6 +46,7 @@ function QualityCanvas({
 }) {
   const [dpr, setDpr] = useState(() => maxDpr(quality))
   const monsterId = useGameStore((s) => s.character?.location.monsterId ?? '')
+  const dungeonId = useGameStore((s) => s.dungeon?.dungeonId)
   const shadows = quality !== 'low'
 
   useEffect(() => {
@@ -70,11 +72,19 @@ function QualityCanvas({
       )}
       {/* ultra: soft shadow edges that widen away from what casts them */}
       {quality === 'ultra' && <SoftShadows size={14} samples={10} focus={0.4} />}
-      <World zone={zone} monsterId={monsterId} shadows={shadows} ultra={quality === 'ultra'} />
-      <Suspense fallback={null}>
-        <Battle />
-      </Suspense>
-      <CameraRig />
+      {dungeonId ? (
+        <Suspense fallback={null}>
+          <DungeonScene key={dungeonId} id={dungeonId} />
+        </Suspense>
+      ) : (
+        <>
+          <World zone={zone} monsterId={monsterId} shadows={shadows} ultra={quality === 'ultra'} />
+          <Suspense fallback={null}>
+            <Battle />
+          </Suspense>
+          <CameraRig />
+        </>
+      )}
       <PerfProbe />
     </Canvas>
   )

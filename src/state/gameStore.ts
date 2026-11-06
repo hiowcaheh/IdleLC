@@ -1,4 +1,12 @@
 import type { AttributeKey } from '../game/logic/attributes.ts'
+import type { DungeonId } from '../game/data/dungeons.ts'
+import type {
+  DungeonPoint,
+  DungeonRecord,
+  DungeonRun,
+  DungeonUpdate,
+} from '../game/logic/dungeons.ts'
+import { dungeonSession } from '../game/session/dungeonSession.ts'
 import { create } from 'zustand'
 import { ZONES } from '../game/data/zones.ts'
 import type { AfkResult } from '../game/logic/afk.ts'
@@ -55,6 +63,14 @@ interface GameStore {
   levelUp: { level: number; key: number } | null
   /** Rewards of the expedition the character just came back from, shown until dismissed. */
   afkResult: AfkResult | null
+  dungeon: DungeonRun | null
+  dungeonResult: DungeonRecord | null
+  dungeonEntering: boolean
+  startDungeon(id: DungeonId): Promise<void>
+  advanceDungeon(seconds: number, input: DungeonPoint): Promise<void>
+  chooseDungeonBuff(id: number): Promise<void>
+  finishDungeon(): Promise<void>
+  dismissDungeonResult(): void
 
   init(): Promise<void>
   createCharacter(input: NewCharacter): Promise<CharacterData>
@@ -90,7 +106,7 @@ interface GameStore {
   /** Claims a monster's next monster book reward. */
   claimBookReward(monsterId: string): Promise<BookClaim>
   /** The hero drinks a potion from the bag now (the bag updates with the next report). */
-  drinkPotion(itemId: number): DrinkProblem | 'away' | null
+  drinkPotion(itemId: number): Promise<DrinkProblem | 'away' | null>
   selectMonster(monsterId: string): void
   selectZone(zoneId: string, monsterId?: string): void
   syncCombat(combat: CombatState): void
@@ -157,13 +173,55 @@ export const useGameStore = create<GameStore>((set, get) => {
       character: current?.id === character.id ? character : current,
     })
     if (current?.id !== character.id) return
-    if (heroKey(current) !== heroKey(character)) {
+    if (heroKey(current) !== heroKey(character) && !character.dungeons?.active) {
       combatSession.setPlayer(character)
       set({ hud: toHud(combatSession.state) })
       if (character.level > current.level) {
         set({ levelUp: { level: character.level, key: Date.now() } })
         combatEvents.emit([{ type: 'levelUp', level: character.level }])
       }
+    }
+  }
+
+  const applyDungeon = (update: DungeonUpdate) => {
+    const before = get().character
+    // Equipment cannot change in a run. Keep stable identities for skinned gear and its materials.
+    if (before && JSON.stringify(before.equipment) === JSON.stringify(update.character.equipment))
+      update.character.equipment = before.equipment
+    const previous = dungeonSession.state
+    dungeonSession.set(update.run, update.events)
+    applyCharacter(update.character)
+    set({ dungeon: update.run, dungeonResult: update.result ?? get().dungeonResult })
+    if (update.run) {
+      const combat = dungeonSession.combat()!
+      set({ hud: toHud(combat) })
+      if (before && update.character.level > before.level)
+        set({ levelUp: { level: update.character.level, key: Date.now() } })
+      const old = previous?.rewards
+      const reward = update.run.rewards
+      const drops = reward.drops.flatMap((drop) => {
+        const count = drop.count - (old?.drops.find((d) => d.itemId === drop.itemId)?.count ?? 0)
+        return count > 0 ? [{ itemId: drop.itemId, count }] : []
+      })
+      if (
+        old &&
+        (reward.exp !== old.exp || reward.gold !== old.gold || reward.sp !== old.sp || drops.length)
+      )
+        combatEvents.emit([
+          {
+            type: 'reward',
+            exp: reward.exp - old.exp,
+            gold: reward.gold - old.gold,
+            sp: reward.sp - old.sp,
+            levelsGained: update.character.level - (before?.level ?? update.character.level),
+            drops,
+          },
+        ])
+    } else {
+      dungeonSession.reset()
+      combatSession.start(update.character, update.character.location.monsterId)
+      combatEvents.emit([{ type: 'reset' }])
+      set({ hud: toHud(combatSession.state) })
     }
   }
 
@@ -204,7 +262,7 @@ export const useGameStore = create<GameStore>((set, get) => {
   /** Reports the fight; `always` also when nothing was killed or drunk (the boosts changed). */
   const reportCombat = (kills: number, deaths: number, always = false) => {
     const character = get().character
-    if (!character) return
+    if (!character || character.dungeons?.active) return
     const potions = combatSession.takePotionsUsed()
     if (!always && kills === 0 && deaths === 0 && potions.length === 0) return
     const report = {
@@ -241,7 +299,8 @@ export const useGameStore = create<GameStore>((set, get) => {
 
   const travel = (zoneId: string, monsterId: string) => {
     const character = get().character
-    if (!character || character.expedition) return
+    if (!character || character.expedition || character.dungeons?.active || get().dungeonEntering)
+      return
     const location = { zoneId, monsterId }
     const newZone = zoneId !== character.location.zoneId
     if (newZone && !isZoneOpen(character, zoneId)) return
@@ -304,12 +363,50 @@ export const useGameStore = create<GameStore>((set, get) => {
     timeScale: 1,
     levelUp: null,
     afkResult: null,
+    dungeon: null,
+    dungeonResult: null,
+    dungeonEntering: false,
+
+    async startDungeon(id) {
+      if (get().dungeonEntering || get().dungeon) return
+      const character = get().character
+      if (!character || character.expedition) return
+      if (running()) throw new Error('Finish travelling before entering a dungeon.')
+      reportCombat(0, 0, true)
+      set({ dungeonEntering: true, dungeonResult: null })
+      try {
+        applyDungeon(await enqueue(() => gameService.startDungeon(character.id, id)))
+      } finally {
+        set({ dungeonEntering: false })
+      }
+    },
+
+    async advanceDungeon(seconds, input) {
+      const character = get().character
+      if (!character || !get().dungeon) return
+      applyDungeon(await enqueue(() => gameService.advanceDungeon(character.id, seconds, input)))
+    },
+
+    async chooseDungeonBuff(id) {
+      applyDungeon(await enqueue(() => gameService.chooseDungeonBuff(playedId(), id)))
+    },
+
+    async finishDungeon() {
+      applyDungeon(await enqueue(() => gameService.finishDungeon(playedId())))
+    },
+
+    dismissDungeonResult() {
+      set({ dungeonResult: null })
+    },
 
     init() {
       initializing ??= (async () => {
         const { save, status } = await enqueue(() => gameService.load())
         set({ save, loadStatus: status })
         if (save.activeCharacterId) await get().enterGame(save.activeCharacterId)
+        const recovered = get().character?.dungeons?.history[0]
+        if (recovered?.outcome === 'interrupted' && recovered.endedAt >= Date.now() - 10000)
+          set({ dungeonResult: recovered })
         set({ ready: true })
       })()
       return initializing
@@ -335,13 +432,18 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     async enterGame(characterId) {
+      if (get().character?.id === characterId && get().dungeon) return
       await enqueue(() => gameService.setActiveCharacter(characterId))
       const save = get().save
       const character = save.characters.find((c) => c.id === characterId)
       if (!character) return
+      dungeonSession.reset()
       combatSession.start(character, character.location.monsterId)
       set({
         character,
+        dungeon: null,
+        dungeonResult: null,
+        dungeonEntering: false,
         afkResult: null,
         save: { ...save, activeCharacterId: characterId },
         hud: toHud(combatSession.state),
@@ -349,9 +451,14 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     async leaveGame() {
+      if (get().dungeon) await get().finishDungeon()
+      dungeonSession.reset()
       reportCombat(0, 0)
       set({
         character: null,
+        dungeon: null,
+        dungeonResult: null,
+        dungeonEntering: false,
         timeScale: 1,
         levelUp: null,
         afkResult: null,
@@ -363,7 +470,7 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     async startExpedition() {
       let character = get().character
-      if (!character || character.expedition) return
+      if (!character || character.expedition || character.dungeons?.active) return
       reportCombat(0, 0)
       try {
         // started on the way to another spot: the hero goes from the spot it left
@@ -453,9 +560,14 @@ export const useGameStore = create<GameStore>((set, get) => {
       applyCharacter(await enqueue(() => gameService.setPotionSlot(id, group, slot)))
     },
 
-    drinkPotion(itemId) {
+    async drinkPotion(itemId) {
       const character = get().character
       if (!character || character.expedition) return 'away'
+      if (character.dungeons?.active) {
+        if (get().dungeon?.choices.length) return 'cooldown'
+        applyDungeon(await enqueue(() => gameService.drinkDungeonPotion(character.id, itemId)))
+        return null
+      }
       const { events, problem } = combatSession.drink(character, itemId)
       if (problem) return problem
       combatEvents.emit(events)
@@ -525,9 +637,19 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     async resetSave() {
       const save = await enqueue(() => gameService.resetSave())
+      dungeonSession.reset()
       gameService.dev?.setTimeScale(1)
       combatEvents.emit([{ type: 'reset' }])
-      set({ save, character: null, timeScale: 1, afkResult: null, levelUp: null })
+      set({
+        save,
+        character: null,
+        dungeon: null,
+        dungeonResult: null,
+        dungeonEntering: false,
+        timeScale: 1,
+        afkResult: null,
+        levelUp: null,
+      })
     },
 
     setTimeScale(scale) {
@@ -558,6 +680,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     removeEffect(which) {
+      if (get().dungeon) return false
       if (get().character?.expedition || !combatSession.removeEffect(which)) return false
       set({ hud: toHud(combatSession.state) })
       // a boost potion taken off leaves the save too

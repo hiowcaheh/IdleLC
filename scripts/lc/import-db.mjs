@@ -37,6 +37,13 @@ const FIELD_ZONES = [
   { index: 42, name: 'Alber' }, // 6259 "Alber (Trouble Spot)"
 ]
 
+/** Original dungeon rosters (t_string 343 / 345 / 1201); entry levels are IdleLC rules. */
+const DUNGEON_ZONES = [
+  { index: 1, name: 'Belfist Temple' },
+  { index: 3, name: 'Procyon Shrine' },
+  { index: 9, name: 'Maargadum' },
+]
+
 /** t_item.a_wearing slots IdleLC equips: 0 helmet, 1 armor, 2 weapon, 3 pants, 4 shield, 5 gloves, 6 boots. */
 const GEAR_SLOTS = [0, 1, 2, 3, 4, 5, 6]
 const WEAPON_SLOT = 2
@@ -174,7 +181,7 @@ function buildData(tables) {
     spawnsOfNpc.set(int(r.a_npc_idx), byZone)
   }
 
-  const fieldIndexes = new Set(FIELD_ZONES.map((z) => z.index))
+  const fieldIndexes = new Set([...FIELD_ZONES, ...DUNGEON_ZONES].map((z) => z.index))
   const monsters = []
   const usedItems = new Set()
   for (const [index, r] of npcs) {
@@ -237,16 +244,18 @@ function buildData(tables) {
   }
   monsters.sort((a, b) => a.level - b.level || a.npcIndex - b.npcIndex)
 
-  const zones = FIELD_ZONES.map((z) => {
-    const list = monsters.filter((m) => m.zones.includes(`lc-zone-${z.index}`))
-    return {
-      id: `lc-zone-${z.index}`,
-      index: z.index,
-      name: z.name,
-      minLevel: list.length ? Math.max(1, Math.min(...list.map((m) => m.level))) : 1,
-      monsterIds: list.map((m) => m.id),
-    }
-  }).filter((z) => z.monsterIds.length > 0)
+  const zones = [...FIELD_ZONES, ...DUNGEON_ZONES]
+    .map((z) => {
+      const list = monsters.filter((m) => m.zones.includes(`lc-zone-${z.index}`))
+      return {
+        id: `lc-zone-${z.index}`,
+        index: z.index,
+        name: z.name,
+        minLevel: list.length ? Math.max(1, Math.min(...list.map((m) => m.level))) : 1,
+        monsterIds: list.map((m) => m.id),
+      }
+    })
+    .filter((z) => z.monsterIds.length > 0)
 
   const itemRows = new Map(tables.t_item.map((r) => [int(r.a_index), r]))
   const isGear = (r) =>
@@ -351,6 +360,16 @@ function buildData(tables) {
   }
 
   const skills = buildSkills(tables)
+  // Run-only pool: advanced buffs never enter the ordinary class learning list.
+  const dungeonBuffs = buildSkills(tables, null, true).filter((s) => {
+    const last = s.levels.at(-1)
+    return (
+      s.type !== 3 &&
+      last.duration > 0 &&
+      last.effects.length > 0 &&
+      last.effects.every((e) => e.type === 0 || e.type === 1)
+    )
+  })
   const npcSkillIds = new Set(monsters.flatMap((m) => (m.skills ?? []).map((s) => s.id)))
   const npcSkills = buildSkills(tables, npcSkillIds).map((definition) => {
     const skill = { ...definition }
@@ -385,6 +404,7 @@ function buildData(tables) {
     starterGear,
     gearReference,
     skills,
+    dungeonBuffs,
     npcSkills,
   }
 }
@@ -794,7 +814,7 @@ function gearNeeds(key, type0, type1, state) {
   return weapons.length || weapon || shield ? { [key]: { weapons, weapon, shield } } : {}
 }
 
-export function buildSkills(tables, npcIds = null) {
+export function buildSkills(tables, npcIds = null, dungeon = false) {
   const magics = new Map(tables.t_magic.map((r) => [int(r.a_index), r]))
   const magicPower = new Map(
     tables.t_magiclevel.map((r) => [`${int(r.a_index)}/${int(r.a_level)}`, r]),
@@ -813,13 +833,14 @@ export function buildSkills(tables, npcIds = null) {
     if (
       npcIds
         ? !npcIds.has(int(r.a_index))
-        : job < 0 || job >= SKILL_CLASSES.length || int(r.a_job2) !== 0 || !name
+        : job < 0 || job >= SKILL_CLASSES.length || (!dungeon && int(r.a_job2) !== 0) || !name
     )
       continue
     const rows = (levelsOf.get(int(r.a_index)) ?? []).sort(
       (a, b) => int(a.a_level) - int(b.a_level),
     )
-    if (rows.length === 0 || (!npcIds && int(rows[0].a_learnLevel) > MAX_LEVEL)) continue
+    if (rows.length === 0 || (!npcIds && !dungeon && int(rows[0].a_learnLevel) > MAX_LEVEL))
+      continue
     const levels = rows.map((l) => {
       const effects = []
       for (let k = 1; k <= 3; k++) {

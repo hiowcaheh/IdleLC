@@ -164,7 +164,10 @@ function animate(p: Particle, camera: Camera, realDt: number): void {
  * debuffed target, rising stars around a buff and a healing circle — in the caster's class colour;
  * and the golden burst of a level up.
  */
-export function SkillEffects() {
+export function SkillEffects({
+  events = combatEvents,
+  pace,
+}: { events?: Pick<typeof combatEvents, 'subscribe'>; pace?: () => number } = {}) {
   const textures = useTexture(FX_URLS, inSrgb) as Record<Fx, Texture>
   const group = useRef<Group>(null)
   const pool = useRef<Particle[]>([])
@@ -486,7 +489,7 @@ export function SkillEffects() {
       else if (kind === 'heal') healing(source)
     }
 
-    return combatEvents.subscribe((e) => {
+    return events.subscribe((e) => {
       if (e.type === 'cast') {
         const windUp = e.castTime - TIMINGS.impactDelay
         if (e.kind === 'passive') return
@@ -527,9 +530,10 @@ export function SkillEffects() {
         for (const p of pool.current) p.age = p.life
       }
     })
-  }, [textures])
+  }, [textures, events])
 
   useFrame(({ camera }, delta) => {
+    if (pace && pace() === 0) return
     const realDt = Math.min(delta, 0.1)
     const now = (clock.current += realDt * useGameStore.getState().timeScale)
     if (landings.current.some((l) => l.at <= now)) {

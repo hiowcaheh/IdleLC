@@ -1,5 +1,15 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Najnowszy etap: Dungeons, 2026-11-06
+
+Po zmianach Claude’a do `9ad20b8` dodano [Dungeons](dungeons.md): Belfist Temple,
+Procyon Shrine i Maargadum, osobną walkę hordową, joystick, kryształy, 19 wyborów
+buffów i limity dzienne na postać. SaveVersion **15**; szczegóły migracji, danych,
+blokad, źródłowych obszarów skilli i testów są w tym dokumencie. Nagrody są wypłacane
+na bieżąco, nie ponownie po podsumowaniu. Reload przerywa rundę, nigdy nie nalicza AFK.
+Śmierć zachowuje wszystkie zdobyte nagrody (odpowiedź właściciela); kara za śmierć
+na zwykłych spotach pozostaje. Ranking globalny i dalsze podziemia czekają na później.
+
 Aktualizacja 2026-11-06 (Claude Code): [walka z serwera, skille, żywiołaki](combat-skills-summons.md).
 Ciosy potworów to `npcDamage` (gałąź NPC `GetDamage`), kara za śmierć `death.ts`, koszt skilla przy
 wystrzale (`canPaySkill`), żywioły `elementDamage`. Nowe efekty skilli: `reflect`, `interrupt`,

@@ -24,6 +24,13 @@ import { TitlesPanel } from './titles/TitlesPanel.tsx'
 import { Toasts } from './Toasts.tsx'
 import { PerfOverlay } from './perf/PerfOverlay.tsx'
 import { ZoneLoading } from './ZoneLoading.tsx'
+import {
+  DungeonsButton,
+  DungeonsPanel,
+  DungeonHud,
+  DungeonRuntime,
+  DungeonResult,
+} from './dungeons/Dungeons.tsx'
 
 export function GameScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -31,6 +38,8 @@ export function GameScreen() {
   const [skillsOpen, setSkillsOpen] = useState(false)
   const [characterOpen, setCharacterOpen] = useState(false)
   const [titlesOpen, setTitlesOpen] = useState(false)
+  const [dungeonsOpen, setDungeonsOpen] = useState(false)
+  const dungeon = useGameStore((s) => s.dungeon)
   const devTools = useDevTools((s) => s.enabled)
   const character = useGameStore((s) => s.character)
   const expedition = character?.expedition ?? null
@@ -44,13 +53,16 @@ export function GameScreen() {
   )
 
   return (
-    <div className="game">
+    <div className={`game${dungeon ? ' game--dungeon' : ''}`}>
       <GameCanvas />
       <PerfOverlay />
-      {character && !character.expedition && <SceneLabels />}
+      <DungeonRuntime />
+      {character && !character.expedition && !dungeon && <SceneLabels />}
       {character && !character.expedition && <RewardFeed />}
 
       <div className="hud">
+        {!dungeon && <DungeonsButton onClick={() => setDungeonsOpen(true)} />}
+        {dungeon && <DungeonHud />}
         <div className="hud__top">
           <PlayerFrame />
           <div className="hud__buttons">
@@ -122,9 +134,9 @@ export function GameScreen() {
           ) : (
             <div className="hud__dock">
               {/* over the skill bar, clear of the names over the fighters */}
-              <StatusLine />
+              {!dungeon && <StatusLine />}
               <SkillBar />
-              <HuntPanel />
+              {!dungeon && <HuntPanel />}
             </div>
           )}
           {devTools && <DevPanel />}
@@ -138,6 +150,8 @@ export function GameScreen() {
       {skillsOpen && <SkillsPanel onClose={() => setSkillsOpen(false)} />}
       {characterOpen && <CharacterPanel onClose={() => setCharacterOpen(false)} />}
       {titlesOpen && <TitlesPanel onClose={() => setTitlesOpen(false)} />}
+      {dungeonsOpen && <DungeonsPanel onClose={() => setDungeonsOpen(false)} />}
+      <DungeonResult />
       <AfkSummary />
       <Toasts />
     </div>

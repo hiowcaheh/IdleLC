@@ -5,6 +5,7 @@ import { CLASSES } from '../data/classes.ts'
 import { getItem } from '../data/items.ts'
 import { lcData } from '../data/lcSource.ts'
 import { getMonster } from '../data/monsters.ts'
+import { getSkill } from '../data/skills.ts'
 import type { ClassId } from '../data/types.ts'
 import { classAttributes, classResources, type Attributes } from './attributes.ts'
 import { classRatings } from './ratings.ts'
@@ -143,7 +144,18 @@ export function playerFighter(hero: Hero, now = Date.now()): FighterInit {
       ...(reflect ? { reflect } : {}),
     },
     ...(summonStats ? { summonStats } : {}),
-    skills: ranks.filter((r) => r.kind !== 'passive' && (!skillBar || skillBar.includes(r.id))),
+    skills: ranks
+      .filter((r) => r.kind !== 'passive' && (!skillBar || skillBar.includes(r.id)))
+      .map((rank) => {
+        const def = getSkill(rank.id)
+        return def &&
+          weapon &&
+          def.needs?.weapons[1] === weapon.subtype &&
+          def.fireRange2 !== undefined &&
+          ![1, 11].includes(def.targetType)
+          ? { ...rank, range: def.fireRange2 }
+          : rank
+      }),
     potions: potionSupply(hero),
   }
 }

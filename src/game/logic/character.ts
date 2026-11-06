@@ -3,6 +3,7 @@
  * Pure — creation rules are checked here so the server can run the same code.
  */
 import type { OwnedBoost } from './boosts.ts'
+import { emptyDungeonProgress, type DungeonProgress } from './dungeons.ts'
 import type { Attributes } from './attributes.ts'
 import { EMPTY_ALLOCATED_STATS } from './statPoints.ts'
 import { CLASSES } from '../data/classes.ts'
@@ -81,6 +82,8 @@ export interface CharacterData {
   optionProgress: number
   /** Boost potions working on the hero (logic/boosts.ts); absent in older saves. */
   boosts?: OwnedBoost[]
+  /** Daily entries and local records. Active runs are closed on reload, never simulated offline. */
+  dungeons?: DungeonProgress
   /** Titles the character has (logic/titles.ts), and the worn one (shown under the name). */
   titles: OwnedTitle[]
   activeTitle: number | null
@@ -159,6 +162,7 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     activeTitle: null,
     titlesEarned: [],
     optionProgress: 0,
+    dungeons: emptyDungeonProgress(),
   }
   // a new character wears "Newbie" for its first days (when the data has it)
   const welcomed = grantTitle(character, NEWBIE_TITLE, now)
