@@ -8,7 +8,7 @@ import { ItemIcon } from '../items/ItemIcon.tsx'
 
 /** How long a group takes to rise through the feed (keep in step with the CSS animation). */
 const RISE_MS = 3600
-const MAX_GROUPS = 6
+const MAX_GROUPS = 8
 
 interface Line {
   kind: 'exp' | 'sp' | 'gold' | 'item' | 'option'
@@ -28,8 +28,8 @@ const spText = (units: number) =>
   (units / SP_UNIT).toLocaleString('en-US', { maximumFractionDigits: 4 })
 
 /**
- * What a kill brought — drops with their icons, EXP, SP, gold — rising up the right side of the
- * screen; options worn gear gains from play time too.
+ * What a kill brought (drops with their icons, EXP, SP, gold) in a list on the left of the screen,
+ * the newest at the bottom; options worn gear gains from play time too.
  */
 export function RewardFeed() {
   const [groups, setGroups] = useState<Group[]>([])
@@ -64,15 +64,16 @@ export function RewardFeed() {
               ),
             }
           }),
-          ...(e.exp > 0 ? [{ kind: 'exp' as const, content: `+${fmt(e.exp)} EXP` }] : []),
-          ...(e.sp > 0 ? [{ kind: 'sp' as const, content: `+${spText(e.sp)} SP` }] : []),
-          ...(e.gold > 0
+          // EXP, SP and gold of a kill share one line, so fast kills stay a short list
+          ...(e.exp > 0 || e.sp > 0 || e.gold > 0
             ? [
                 {
-                  kind: 'gold' as const,
+                  kind: 'exp' as const,
                   content: (
                     <>
-                      <Gold amount={e.gold} prefix="+" />
+                      {e.exp > 0 && <span>+{fmt(e.exp)} EXP</span>}
+                      {e.sp > 0 && <span className="reward-feed__sp">+{spText(e.sp)} SP</span>}
+                      {e.gold > 0 && <Gold amount={e.gold} prefix="+" />}
                     </>
                   ),
                 },

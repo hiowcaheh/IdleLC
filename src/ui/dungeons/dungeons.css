@@ -1,5 +1,11 @@
+/* a second column at the top, left of Settings (owner's request) */
+.game .hud__buttons {
+  position: relative;
+}
 .game .icon-button.hud__menu--dungeons {
-  position: static;
+  position: absolute;
+  top: 0;
+  right: calc(100% + 8px);
   width: 32px;
   height: 32px;
   pointer-events: auto;
@@ -416,12 +422,9 @@
 .dungeon-target small {
   margin-left: 4px;
 }
-/* one line of effects as everywhere (index.css .effect-scroll), clear of the minimap */
+/* one line of effects as wide as the player frame, as everywhere (index.css .effect-scroll) */
 .game--dungeon .player-frame__effects {
   pointer-events: auto;
-}
-.game--dungeon .effect-scroll {
-  width: min(340px, calc(100vw - 128px));
 }
 .sheet-backdrop--center .sheet.dungeon-blessing {
   width: min(100%, 860px);

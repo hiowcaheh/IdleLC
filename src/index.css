@@ -3307,38 +3307,45 @@ a.button {
   color: #8fe36a;
 }
 
-/* Rewards of a kill rising up the left side (ui/hud/RewardFeed.tsx) */
+/*
+ * Rewards of kills on the left side (ui/hud/RewardFeed.tsx): each kill's group joins the bottom
+ * of a list, the older ones move up one under another (no overlap however fast the kills come)
+ * and fade out at the top.
+ */
 .reward-feed {
-  --rise: 30vh;
   position: absolute;
   left: calc(10px + var(--safe-left));
-  top: 34%;
-  height: var(--rise);
+  top: 30%;
+  height: 34vh;
   width: min(52vw, 220px);
   margin: 0;
   padding: 0;
   list-style: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 5px;
   overflow: hidden;
   pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%);
+  mask-image: linear-gradient(to bottom, transparent, #000 22%);
 }
 
 .reward-feed__group {
-  position: absolute;
-  left: 0;
-  bottom: 0;
+  flex: none;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 3px;
+  gap: 2px;
   max-width: 100%;
-  opacity: 0;
-  animation: reward-rise 3.6s ease-out both;
+  animation: reward-in 3.6s ease-out both;
 }
 
 .reward-feed__entry {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   max-width: 100%;
   white-space: nowrap;
   font-size: 13px;
@@ -3358,8 +3365,13 @@ a.button {
   color: #f2d870;
 }
 
-.reward-feed__entry--sp {
+.reward-feed__entry--sp,
+.reward-feed__sp {
   color: #8fe36a;
+}
+
+.reward-feed__entry--exp .gold {
+  color: var(--gilt-bright);
 }
 
 .reward-feed__entry--gold {
@@ -3370,19 +3382,19 @@ a.button {
   color: #8fd2ff;
 }
 
-@keyframes reward-rise {
+@keyframes reward-in {
   0% {
-    transform: translateY(0);
+    transform: translateY(10px);
     opacity: 0;
   }
-  10% {
+  8% {
+    transform: none;
     opacity: 1;
   }
-  75% {
+  80% {
     opacity: 1;
   }
   100% {
-    transform: translateY(calc(-1 * var(--rise) + 100%));
     opacity: 0;
   }
 }
@@ -3764,10 +3776,11 @@ a.button {
     0 0 1px #000;
 }
 
-/* buffs right under the frame (their row keeps its place) */
+/* buffs right under the frame (their row keeps its place), as wide as the frame (owner's rule) */
 .player-frame__effects {
+  width: min(66vw, 256px);
   min-height: 26px;
-  padding: 2px 6px 0;
+  padding: 2px 0 0 4px;
 }
 
 .player-frame__effects .effect-row {
@@ -3782,7 +3795,7 @@ a.button {
   --fade-left: 0px;
   --fade-right: 0px;
   position: relative;
-  width: min(340px, calc(100vw - var(--safe-left) - var(--safe-right) - 64px));
+  width: 100%;
 }
 
 .effect-scroll .effect-row {
@@ -3838,11 +3851,11 @@ a.button {
 }
 
 .effect-scroll__more--right {
-  right: -4px;
+  right: -2px;
 }
 
 .effect-scroll__more--left {
-  left: -4px;
+  left: -2px;
   background-image: url('/ui/lc/page-left.webp');
 }
 
