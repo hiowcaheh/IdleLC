@@ -24,6 +24,8 @@ export const view = {
    * map's terrain where a zone has one (set by World), flat elsewhere.
    */
   groundY: (_x: number, _z: number): number => 0,
+  /** Where the hero's elementals stand (scene/Summons.tsx), by elemental. */
+  summons: new Map<number, Vector3>(),
 }
 
 /** Camera position relative to what it looks at (scaled up on narrow screens). */

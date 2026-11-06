@@ -134,6 +134,86 @@
       "tint": {}
     },
     {
+      "id": "summonfire",
+      "file": "summonfire.glb?v=e8bcbea8bc",
+      "scale": 1,
+      "animations": {
+        "idle": "summon_fire_idle01",
+        "walk": "summon_fire_run",
+        "run": "summon_fire_run",
+        "attack": [
+          "summon_fire_att01",
+          "summon_fire_att02"
+        ],
+        "hit": "summon_fire_dam",
+        "die": "summon_fire_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.0563066499832148,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "summonwind",
+      "file": "summonwind.glb?v=e924824ac7",
+      "scale": 1,
+      "animations": {
+        "idle": "summon_wind_idle01",
+        "walk": "summon_wind_walk",
+        "run": "summon_wind_run",
+        "attack": [
+          "summon_wind_att01",
+          "summon_wind_att02"
+        ],
+        "hit": "summon_wind_dam",
+        "die": "summon_wind_die"
+      },
+      "attackImpact": 0.6,
+      "height": 0.28443250831629385,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "summonland",
+      "file": "summonland.glb?v=db508b6954",
+      "scale": 1,
+      "animations": {
+        "idle": "summon_earth_idle01",
+        "walk": "summon_earth_run",
+        "run": "summon_earth_run",
+        "attack": [
+          "summon_earth_att01",
+          "summon_earth_att02"
+        ],
+        "hit": "summon_earth_dam",
+        "die": "summon_earth_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 0.9033173619800409,
+      "tint": {}
+    },
+    {
+      "id": "summonwater",
+      "file": "summonwater.glb?v=17cb4d4b17",
+      "scale": 1,
+      "animations": {
+        "idle": "summon_water_idle01",
+        "walk": "summon_water_walk",
+        "run": "summon_water_run",
+        "attack": [
+          "summon_water_att01",
+          "Summon_water_att02"
+        ],
+        "hit": "summon_water_dam",
+        "die": "summon_water_die"
+      },
+      "attackImpact": 0.6,
+      "height": 1.7910092471083712,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "fox",
       "file": "fox.glb?v=201d4eb356",
       "scale": 1,

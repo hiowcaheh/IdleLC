@@ -12,6 +12,7 @@ import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
 import { getBounds } from '@gltf-transform/functions'
 import { MeshoptDecoder } from 'meshoptimizer'
 import { CLASS_MODELS } from './classes.mjs'
+import { SUMMON_MODELS } from './summons.mjs'
 import { animationCandidates } from './source-choice.mjs'
 
 export const MODELS_BASE_URL = 'models/lc/'
@@ -32,7 +33,12 @@ export const modelIdFromSmc = (smc) =>
 
 /** Model id → logical animation map, for the classes and every monster model in the data. */
 export function wantedModels(data) {
-  const wanted = new Map(Object.entries(CLASS_MODELS).map(([id, def]) => [id, def.animations]))
+  const wanted = new Map(
+    [...Object.entries(CLASS_MODELS), ...Object.entries(SUMMON_MODELS)].map(([id, def]) => [
+      id,
+      def.animations,
+    ]),
+  )
   for (const m of data?.monsters ?? []) if (!wanted.has(m.model)) wanted.set(m.model, m.animations)
   return wanted
 }

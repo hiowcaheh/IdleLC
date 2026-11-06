@@ -36,6 +36,7 @@ import { dedup, meshopt, prune, resample, weld } from '@gltf-transform/functions
 import { MeshoptDecoder, MeshoptEncoder } from 'meshoptimizer'
 import sharp from 'sharp'
 import { CLASS_MODELS, gearClass } from './classes.mjs'
+import { SUMMON_MODELS } from './summons.mjs'
 import { ClientFiles } from './client.mjs'
 import { ICON_KINDS, buildIconSheet, buildPortraitSheet, iconColor } from './icons.mjs'
 import { buildFxTextures } from './fx.mjs'
@@ -255,6 +256,9 @@ function listJobs(args, data, files, itemModels, icons, skillAnims) {
     ],
     fallbackAnimSets: def.fallbackAnimSets,
   }))
+  // the Sorcerer's elementals (SlaveInfo.cpp)
+  for (const [id, def] of Object.entries(SUMMON_MODELS))
+    jobs.push({ id, smc: def.smc, animations: Object.values(def.animations).flat() })
   const monsters = new Map()
   for (const m of data?.monsters ?? []) {
     const job = monsters.get(m.model) ?? {

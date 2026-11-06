@@ -23,6 +23,7 @@ import { armorUpgradePlus } from './upgradeEffects.ts'
 import { approachProgress } from './approachMotion.ts'
 import { ARENA_RADIUS } from './terrain.ts'
 import { RunSmoke } from './RunSmoke.tsx'
+import { Summons } from './Summons.tsx'
 import { SCREEN_AHEAD, SCREEN_RIGHT, resetView, view } from './viewState.ts'
 
 /** How far the player runs to reach a newly spawned monster. */
@@ -382,7 +383,10 @@ export function Battle() {
       const sinkDepth = m.sink >= 0 ? m.sink * m.sink * 1.2 : 0
       mg.position.set(view.monster.x, view.monster.y - sinkDepth, view.monster.z)
       mg.scale.setScalar(0.2 + 0.8 * rise)
-      if (combat.phase !== 'victory') turn(mg, yawTowards(view.monster, view.player), dt)
+      // it faces the one it swings at: the hero, or an elemental it hates more
+      const aim = combat.monster.aimAt
+      const faced = (aim !== undefined && view.summons.get(aim)) || view.player
+      if (combat.phase !== 'victory') turn(mg, yawTowards(view.monster, faced), dt)
     }
 
     view.playerHeight = player.current?.height() ?? view.playerHeight
@@ -458,6 +462,7 @@ export function Battle() {
       <Suspense fallback={null}>
         <RunSmoke />
       </Suspense>
+      <Summons />
     </>
   )
 }
