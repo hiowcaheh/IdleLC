@@ -27,6 +27,8 @@ import { levelTone } from '../ui/hud/levelColor.ts'
 import { useFloatingTexts } from '../state/floatingTexts.ts'
 import { Character, type CharacterHandle } from './Character.tsx'
 import { DamageNumbers } from './DamageNumbers.tsx'
+import { ClientFxLayer } from './clientFx/ClientFx.tsx'
+import { castClientSkill } from './clientFx/skillFx.ts'
 import { activeArtifactVisual } from './artifactEffects.ts'
 import { HpBar3D } from './HpBar3D.tsx'
 import { SkillEffects } from './SkillEffects.tsx'
@@ -110,6 +112,20 @@ export function DungeonScene({ id }: { id: DungeonId }) {
           const monster = enemyUid === null ? undefined : enemyHandles.current.get(enemyUid)
           if (e.type === 'attack') (e.source === 'player' ? hero.current : monster)?.attack()
           else if (e.type === 'cast') {
+            // the client's effect groups of the skill, between the caster and its target
+            const targetUid = dungeonSession.state?.targetUid
+            const enemy = () =>
+              enemyUid !== null
+                ? enemyHandles.current.get(enemyUid)
+                : targetUid !== null && targetUid !== undefined
+                  ? enemyHandles.current.get(targetUid)
+                  : undefined
+            castClientSkill(
+              e.skillId,
+              () => (e.source === 'player' ? hero.current : enemy()),
+              () => (e.source === 'player' ? enemy() : hero.current),
+              { windUp: e.windUp, landsIn: e.castTime },
+            )
             const actor = e.source === 'player' ? hero.current : monster
             if (
               actor &&
@@ -251,6 +267,7 @@ export function DungeonScene({ id }: { id: DungeonId }) {
         )
       })}
       <DamageNumbers />
+      <ClientFxLayer pace={dungeonPace} />
       <group ref={playerGroup}>
         <Character
           ref={hero}
