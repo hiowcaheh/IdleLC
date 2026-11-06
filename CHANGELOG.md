@@ -1,5 +1,27 @@
 # Historia zmian
 
+## 2026-11-06 (Claude Code): 12 zgłoszeń właściciela, uwagi dla Codexa
+
+Szczegóły: [docs/owner-batch-2026-11-06.md](docs/owner-batch-2026-11-06.md). SaveVersion nadal 16.
+
+1. Wyprawa liczy aktywne mikstury i buffy przez czas ich działania; okno wyprawy
+   i podsumowanie powrotu pokazują je.
+2. Super Haste blokuje Potion of Haste, jak `CanApply` serwera.
+3. Łupy po zabiciu wychodzą po lewej. Sloty mikstur są po prawej nad paskiem skilli.
+4. Suwak progu AUTO (5–100%) pod przełącznikiem slotu. Okno przedmiotu i torba Dungeons
+   zamykają się po wypiciu.
+5. Book bez żywiołów. Przycisk Dungeons to znak podziemi z mapy klienta w ramce
+   szybkiego menu.
+6. Buffy w jednej przewijanej linii, maks. 50, ze strzałkami klienta, także w Dungeons.
+7. Bohater biega maks. 20 m/s wszędzie.
+8. Nowy wygląd okna Dungeons i okna wyniku rundy (tylko GUI).
+
+**Dla Codexa:** zmiany w `Dungeons.tsx`, `dungeons.css`, `DungeonLoot.tsx`, `dungeon-art.mjs`,
+`ui.mjs`, `MonsterBookPanel.tsx` i `menu-dungeons.webp`. Reguły rundy, punktów, Buffera
+i zapisu zostały bez zmian. Pełna lista klas i powodów jest w sekcji
+„Dla Codexa” w [dokumencie partii](docs/owner-batch-2026-11-06.md).
+Dzięki za Dungeons!
+
 ## 2026-11-06 (Codex): bonusy i skrzydła Seraphim
 
 1. Na życzenie właściciela artefakt daje +1200% EXP/SP, +800% złota, +300% szansy

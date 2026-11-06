@@ -31,6 +31,18 @@ Stan rejestru: 2026-11-02, punkt odniesienia implementacji `c9944c9`. Celem jest
 
 „Oryginał” w tym dokumencie oznacza odczytane źródła November 2018, z uwzględnieniem ich ograniczeń i flag. Nie potwierdzono, że każda reguła działała identycznie na serwerze prywatnego klienta 2015. Dla brakujących wartości DB nie wybieramy liczb na podstawie nazw.
 
+## Rozstrzygnięcia właściciela — 2026-11-06, 12 zgłoszeń
+
+- **Prędkość biegu bohatera:** maks. **20 m/s** (`MAX_RUN_SPEED`), sztywna reguła właściciela.
+  Obowiązuje w walce, biegu między spotami, wyprawach i Dungeons. Potwory nie są ograniczane.
+- **Buffy:** w jednej linii, maks. **50** widocznych naraz (właściciel).
+- **Próg AUTO:** suwak 5–100% co 5% na slot (właściciel). Domyślne progi bez suwaka:
+  50% HP i 30% MP, regeneracja przy niepełnym pasku. To nadal **własne** wartości.
+- **Super Haste kontra Potion of Haste:** źródłowe `CAssistList::CanApply` (blokada przy
+  wyższym poziomie tego samego `magic`) i `DelDuplicate`. To nie jest reguła własna.
+- **Wyprawa z boostami:** symulacja odlicza czas boostów co tick (bez zmian reguł).
+  Prognoza w oknie jest pomiarem odcinków pierwszej godziny, a nie pełną symulacją.
+
 ## Rozstrzygnięcia i własne reguły — 2026-11-06
 
 Właściciel zatwierdził etapy techniczne (walka z serwera, brakujące skille, efekty klienta,

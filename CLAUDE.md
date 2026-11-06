@@ -1,5 +1,12 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-06 (Claude Code): [12 zgłoszeń właściciela](docs/owner-batch-2026-11-06.md).
+Boosty liczą się na wyprawach, a Super Haste blokuje Haste (`CanApply`). Suwak AUTO
+`PotionSlot.below` (opcjonalny, v16 bez migracji). Bieg bohatera maks. **20 m/s**
+(`MAX_RUN_SPEED`, sztywna reguła). Buffy w jednej linii (maks. 50). Sloty mikstur nad
+paskiem skilli, łupy po lewej. Znak podziemi z `Map.tex` w ramce TopUI. Book bez
+żywiołów. Nowe GUI Dungeons. Lista zmian w plikach Codexa jest w dokumencie.
+
 Aktualizacja 2026-11-06 (Codex): Seraphim na życzenie właściciela daje +1200% EXP/SP,
 +800% gold, +300% drop i po +1200 STR/DEX/INT/CON. SP/drop są świadomą zmianą
 wobec źródła. Sam artefakt to 13× EXP/SP, 9× gold, 4× szansa dropu; z Iris/pigułką

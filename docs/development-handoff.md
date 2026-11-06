@@ -1,5 +1,21 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Najnowszy etap: 12 zgłoszeń właściciela (Claude Code), 2026-11-06
+
+[Szczegóły i lista zmian w plikach Codexa](owner-batch-2026-11-06.md).
+
+- **Wyprawy:** liczą i raportują aktywne boosty. Prognoza pierwszej godziny jest liczona
+  odcinkami.
+- **Mikstury i buffy:** `strongerWorking` / `sharesMagic` = `CanApply` / `DelDuplicate`.
+  Opcjonalny `PotionSlot.below` (5–100%, bez migracji).
+- **Ruch:** `MAX_RUN_SPEED` 20 m/s w `runSpeed()`.
+- **Buffy:** jedna linia `.effect-scroll` (maks. 50).
+- **Interfejs:** sloty mikstur w `hud__dock`, łupy po lewej, przycisk Dungeons ze znaku
+  mapy klienta.
+- **Wygląd Dungeons:** `.dungeon-hero` / `.dungeon-page` / `.dungeon-results__plate`.
+
+Zmiany GUI nie dotykają logiki rundy ani zapisu v16. 543 testy / 61 plików.
+
 ## Najnowszy etap: moc Seraphim i skrzydła, 2026-11-06
 
 Na życzenie właściciela Seraphim: +1200% EXP/SP, +800% złota, +300% drop,
