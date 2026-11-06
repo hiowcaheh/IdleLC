@@ -1,5 +1,18 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Najnowszy etap: druga partia Dungeons/HUD (Claude Code), 2026-11-06
+
+[Szczegóły](owner-batch-2026-11-06.md#druga-partia-tego-dnia-15-zgłoszeń).
+
+- **Fale:** podwójne, następna 5 s po wyczyszczeniu, powtórka fali 20 (`nextWaveIn`).
+- **Mikstury w rundzie:** tap na slocie pije, a nazwa unosi się nad bohaterem.
+- **Okno Dungeons:** top 3 z trofeum klienta, nowe wycinki grafik.
+- **Runda:** status obok minimapy, sakiewka torby.
+- **HUD:** `ScrollStrip`, łupy jako lista.
+- **Dev:** reset wejść.
+
+545 testów / 61 plików.
+
 ## Najnowszy etap: 12 zgłoszeń właściciela (Claude Code), 2026-11-06
 
 [Szczegóły i lista zmian w plikach Codexa](owner-batch-2026-11-06.md).

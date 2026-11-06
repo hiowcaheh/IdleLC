@@ -1,5 +1,14 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-06, druga partia (Claude Code): [15 zgłoszeń](docs/owner-batch-2026-11-06.md).
+
+- **Fale Dungeons (reguła właściciela):** `2 × (4 + fala)`, następna 5 s po wyczyszczeniu
+  (najpóźniej po 30 s), po 20 powtórka. Pole `DungeonRun.nextWaveIn`.
+- **Mikstury w rundzie:** tap na slocie = picie, przytrzymanie = ustawienia.
+- **Okno Dungeons:** top 3 z `trophy.webp`, grafiki Belfist/Procyon z `LOADING_CROPS`.
+- **Komponenty:** `ScrollStrip` dla przewijanych rzędów.
+- **Dev:** reset wejść do podziemi.
+
 Aktualizacja 2026-11-06 (Claude Code): [12 zgłoszeń właściciela](docs/owner-batch-2026-11-06.md).
 Boosty liczą się na wyprawach, a Super Haste blokuje Haste (`CanApply`). Suwak AUTO
 `PotionSlot.below` (opcjonalny, v16 bez migracji). Bieg bohatera maks. **20 m/s**

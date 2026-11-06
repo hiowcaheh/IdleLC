@@ -31,6 +31,18 @@ Stan rejestru: 2026-11-02, punkt odniesienia implementacji `c9944c9`. Celem jest
 
 „Oryginał” w tym dokumencie oznacza odczytane źródła November 2018, z uwzględnieniem ich ograniczeń i flag. Nie potwierdzono, że każda reguła działała identycznie na serwerze prywatnego klienta 2015. Dla brakujących wartości DB nie wybieramy liczb na podstawie nazw.
 
+## Rozstrzygnięcia właściciela — 2026-11-06, druga partia
+
+- **Fale Dungeons:** dwa razy więcej potworów (`2 × (4 + fala)`). Następna fala 5 s po
+  wyczyszczeniu (właściciel).
+  - **Własne:** zachowany 30 s harmonogram jako najpóźniejszy start.
+  - **Własne:** powtórka fali 20 do końca 600 s.
+  - **Własne:** limit 16 żywych potworów naraz bez zmian (wydajność).
+- **Mikstury w rundzie:** tap na slocie pije miksturę (jak szybkie sloty klienta w walce).
+  **Własne:** przytrzymanie otwiera ustawienia. Poza Dungeons tap nadal otwiera ustawienia.
+- **Ranking:** tylko top 3, z trofeum klienta (`trophy.tex`, Royal Rumble). Kolory srebra
+  i brązu to **własny** filtr CSS, bo klient nie ma osobnych grafik.
+
 ## Rozstrzygnięcia właściciela — 2026-11-06, 12 zgłoszeń
 
 - **Prędkość biegu bohatera:** maks. **20 m/s** (`MAX_RUN_SPEED`), sztywna reguła właściciela.

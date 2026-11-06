@@ -1,5 +1,33 @@
 # Historia zmian
 
+## 2026-11-06 (Claude Code): druga partia, 15 zgłoszeń (Dungeons i HUD)
+
+Szczegóły i lista zmian w plikach Codexa: [docs/owner-batch-2026-11-06.md](docs/owner-batch-2026-11-06.md),
+sekcja „Druga partia”. SaveVersion nadal 16.
+
+1. **Fale:** dwa razy więcej potworów na falę. Następna fala przychodzi 5 s po wyczyszczeniu
+   poprzedniej, najpóźniej po 30 s. Po fali 20 ostatnia powtarza się do końca.
+2. **Mikstury w rundzie:** dotknięcie slotu HP/MP pije, przytrzymanie otwiera ustawienia.
+   Nazwa wypitej mikstury unosi się nad bohaterem.
+3. **Okno Dungeons:**
+   - napisy „Ranking” i „Monsters level”;
+   - top 3 z trofeum klienta w złocie, srebrze i brązie;
+   - pełne grafiki Belfist i Procyon z nazwą pod obrazkiem.
+4. **Runda:**
+   - status obok minimapy;
+   - licznik kryształów po prawej stronie paska;
+   - sakiewka jako ikona torby;
+   - wybór błogosławieństw przewijany w bok ze strzałką.
+5. **HUD:**
+   - pasek buffów tak szeroki jak ramka gracza;
+   - przycisk Dungeons obok Settings;
+   - łupy listowane jeden pod drugim.
+6. **Narzędzia dev:** reset dzisiejszych wejść do podziemi.
+
+**Dla Codexa:** zmienione `dungeons.ts` (fale, `nextWaveIn`), `Dungeons.tsx`, `dungeons.css`,
+`DungeonScene.tsx`, `DungeonLoot.tsx` i `dungeon-art.mjs`. Doszedł też nowy `ScrollStrip.tsx`.
+Pełna lista jest w dokumencie partii.
+
 ## 2026-11-06 (Claude Code): 12 zgłoszeń właściciela, uwagi dla Codexa
 
 Szczegóły: [docs/owner-batch-2026-11-06.md](docs/owner-batch-2026-11-06.md). SaveVersion nadal 16.

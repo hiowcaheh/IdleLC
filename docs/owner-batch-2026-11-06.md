@@ -88,3 +88,75 @@ wspólnych miejsc, bez ruszania reguł rundy, punktów, Buffera i zapisu:
   - `potionSupply` przekazuje próg suwaka do `refreshDungeonPlayer`.
   - `drinkPotion` może zwrócić `'stronger'` (Super Haste kontra Haste).
   - Sloty mikstur są w `hud__dock` nad paskiem skilli.
+
+## Druga partia tego dnia: 15 zgłoszeń
+
+Commity `eab0c6d` … `9a95bda`. SaveVersion nadal **16** (`DungeonRun.nextWaveIn` żyje tylko
+w pamięci rundy). 545 testów / 61 plików, próby Chromium 390 × 844 i 1100 × 760.
+
+1. **Pasek buffów** kończy się razem z ramką gracza (`min(66vw, 256px)`), także w Dungeons.
+2. **„Lifetime ranking points”** zmienione na **„Ranking”**.
+3. **Ranking:** pokazuje tylko top 3. Wiersze mają ramki z pól wartości klienta, a każde miejsce
+   trofeum klienta: puchar zwycięzcy Royal Rumble z `trophy.tex` (`UIRadar.cpp`).
+   1. miejsce jest złote, 2. srebrne, 3. brązowe (filtr CSS), z numerem na plakietce klienta.
+4. **Przycisk Dungeons** jest w drugim pionie na górze, po lewej od Settings.
+5. **Napis:** „Original monsters” zmienione na „Monsters level”.
+6. Ranking w oknie: patrz pkt 3.
+7. **Grafiki Belfist i Procyon:** nowe wycinki z `D_01` / `D_02`, z całymi posągami, bez
+   postrzępionego brzegu Procyon i bez godła wydawcy. Nazwa podziemia jest teraz pod obrazkiem,
+   nie na nim. Maargadum bez zmian, URL ma `?v=2`.
+8. **Pasek rundy jest węższy**, a minimapa stoi w tej samej linii. Całość przesunięta pod rząd
+   buffów.
+9. **Licznik kryształów** `x / y` jest na prawym końcu paska poziomu. Poziom zostaje po lewej.
+10. **Torba łupów w rundzie** ma inną ikonę: sakiewkę z przedmiotu 4787 (Yellow Pouch of
+    Material, `ItemBtn6`), zamiast plecaka Inventory.
+11. **Łupy po zabiciu** listują się jeden pod drugim, bez nakładania się. EXP, SP i złoto
+    jednego zabicia są w jednej linii, a starsze wpisy znikają u góry.
+12. **Mikstury w Dungeons.** Logika działała: auto-picie przy progu jest potwierdzone w próbie.
+    Brakowało jednak widocznego sygnału, a dotknięcie slotu otwierało ustawienia. Teraz:
+    - w rundzie dotknięcie slotu HP/MP **wypija** miksturę;
+    - przytrzymanie slotu (lub prawy klik) otwiera ustawienia AUTO / suwak;
+    - nazwa wypitej mikstury unosi się nad bohaterem, jak na polu walki.
+
+    Uwaga: mikstura leczy przez 15 s (np. +33 HP/s), a horda może zadawać więcej.
+
+13. **Wybór błogosławieństw (skille)** na telefonie leży w jednym rzędzie przewijanym w bok,
+    ze strzałką klienta (nowy `ScrollStrip`), zamiast kart jedna pod drugą. Etykiety potworów
+    nie wychodzą już nad okna.
+14. **Fale (własna reguła właściciela):**
+    - **dwa razy więcej** potworów na falę (`2 × (4 + fala)`, czyli 10 … 48);
+    - następna fala przychodzi **5 s po wyczyszczeniu** poprzedniej, najpóźniej po 30 s jak dotąd;
+    - po fali 20 ostatnia fala powtarza się do końca czasu.
+
+    Limit 16 żywych potworów naraz został (wydajność telefonu). Więcej zabójstw daje więcej
+    punktów Buffera.
+
+15. **Narzędzia dev:** przycisk „Reset dungeon entries” oddaje dzisiejsze wejścia. Historia
+    i rekordy zostają.
+
+### Dla Codexa (druga partia)
+
+- **`dungeons.ts`:**
+  - fale korzystają z `dungeonWaveSize` i `DUNGEON_NEXT_WAVE_DELAY` (`data/dungeons.ts`)
+    oraz nowego pola `DungeonRun.nextWaveIn`;
+  - test górnej granicy wyniku liczy teraz jeden spawn na 0,65 s, zamiast sumy 290.
+- **`LocalGameService.dev.resetDungeonEntries`** (interfejs `DevCommands`) i przycisk
+  w `DevPanel`.
+- **`DungeonScene.tsx`:**
+  - `<DamageNumbers />` i nazwa mikstury przy zdarzeniu `potion`;
+  - etykiety celów mają `zIndexRange={[9, 0]}`.
+- **`Dungeons.tsx`:**
+  - `.dungeon-hero__art` + podpis pod obrazkiem;
+  - `.dungeon-podium` (top 3) zamiast `.dungeon-ranking__list`;
+  - pasek XP z `.dungeon-xp__count`;
+  - wybór błogosławieństw w `ScrollStrip`;
+  - `ART_VERSION` w URL grafik.
+- **`dungeons.css`:**
+  - `.dungeon-overview` to wiersz (status + minimapa), `top: 118px`;
+  - `.dungeon-blessings` jest flexem przewijanym w bok (klasy `--count-*` nie mają już znaczenia);
+  - ikona `.dungeon-loot-button`;
+  - przycisk Dungeons ma `position: absolute` przy Settings.
+- **`dungeon-art.mjs`:**
+  - `LOADING_CROPS` per podziemie;
+  - dodatkowo zapisuje `trophy.webp` i `menu-dungeon-loot.webp` (części w `ui.mjs`).
+- **`DungeonLoot.tsx`:** przycisk torby bez klasy `hud__menu--inventory`.
