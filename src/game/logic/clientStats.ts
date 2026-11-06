@@ -82,6 +82,8 @@ export function clientStatChannels(
         : MAGIC_WEAPONS.has(subtype),
     criticalOptionRate: 0,
     deadlyOptionRate: 0,
+    equipmentMagic: weaponValues?.total.magicAttack ?? 0,
+    equipmentDefense: Math.trunc(armor),
   }
   const dexGrowth = attributes.dexterity - classAttributes(classId, 1).dexterity
   const client: ClientCombatStats = {

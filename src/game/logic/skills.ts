@@ -105,6 +105,8 @@ export type SkillEffect =
    * nothing; the skill's other effects still land.
    */
   | { kind: 'taunt'; power: number }
+  /** MST_OTHER_SUMMON: calls an elemental (0 fire, 1 wind, 2 earth, 3 water) to fight alongside. */
+  | { kind: 'summon'; element: 0 | 1 | 2 | 3 }
 
 /** t_magic.a_type 0 (stat change): subtype → the stat it changes. */
 const STAT_SUBTYPES: Record<number, StatKey> = {
@@ -189,6 +191,8 @@ export function interpretEffect(e: SkillEffectDef): SkillEffect | null {
       if (e.subtype === 1 && e.hitrate !== undefined)
         return { kind: 'interrupt', chance: e.hitrate / 10000 }
       if (e.subtype === 8) return { kind: 'taunt', power: e.power }
+      if (e.subtype === 9 && [0, 1, 2, 3].includes(e.power))
+        return { kind: 'summon', element: e.power as 0 | 1 | 2 | 3 }
       // MT_OTHER / MST_OTHER_REFLEX: APPVAL(hcReflex) and the hit rate as its chance (Character.cpp:1363)
       if (e.subtype === 4 && e.hitrate !== undefined && (e.damageType === 1 || e.damageType === 2))
         return {
@@ -318,8 +322,8 @@ export function skillRank(
 }
 
 /**
- * False when one of the skill's effects has no counterpart in IdleLC (summons, resurrection,
- * invisibility) or when it builds on such a skill; `unavailableReason` says which.
+ * False when one of the skill's effects has no counterpart in IdleLC (resurrection, invisibility)
+ * or when it builds on such a skill; `unavailableReason` says which.
  */
 export function isAvailable(skill: SkillDef, seen = new Set<number>()): boolean {
   if (seen.has(skill.id)) return true
@@ -366,9 +370,6 @@ export function unavailableReason(skill: SkillDef): string {
   // MST_ASSIST_INVISIBLE: the hero's next attack ends it (Battle.cpp CancelInvisible)
   if (raw.some((e) => e.type === 2 && e.subtype === 15))
     return 'Invisibility ends with your next attack, so it changes nothing in a one-on-one fight yet.'
-  // MST_OTHER_SUMMON
-  if (raw.some((e) => e.type === 6 && e.subtype === 9))
-    return 'Summoned elementals do not fight in IdleLC yet.'
   const missing = skill.levels
     .flatMap((l) => l.requires)
     .map((r) => getSkill(r.skill))

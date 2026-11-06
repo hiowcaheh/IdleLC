@@ -237,9 +237,6 @@ describe('skills that still have no counterpart', () => {
       ),
     ).toMatch(/party member/)
     expect(
-      unavailableReason(definition({ effects: [effect({ type: 6, subtype: 9, power: 0 })] })),
-    ).toMatch(/elementals/)
-    expect(
       unavailableReason(definition({ effects: [effect({ type: 2, subtype: 15, power: 0 })] })),
     ).toMatch(/Invisibility/)
   })

@@ -1,6 +1,7 @@
 import { WEAPON_KINDS } from '../../game/data/items.ts'
 import type { SkillDef, SkillLevelDef } from '../../game/data/types.ts'
 import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
+import { ELEMENTAL_NAMES, passiveAppliesTo, passiveElementals } from '../../game/logic/summons.ts'
 import type { CharacterData } from '../../game/logic/character.ts'
 import type { ActiveEffect } from '../../game/logic/combat.ts'
 import {
@@ -25,6 +26,15 @@ export function needsText(skill: SkillDef): string | null {
     needs.shield ? 'a shield' : null,
   ].filter(Boolean)
   return parts.length ? parts.join(', ') : null
+}
+
+/** Whom a Sorcerer's passive strengthens besides (or instead of) the hero, or null. */
+export function elementalNote(skill: SkillDef): string | null {
+  const elementals = passiveElementals(skill.id)
+  if (skill.type !== 3 || elementals.length === 0) return null
+  if (passiveAppliesTo(skill.id, 'hero'))
+    return elementals.length === 4 ? 'Also strengthens your elementals' : null
+  return `Strengthens your ${elementals.map((t) => ELEMENTAL_NAMES[t]).join(' and ')}, not you`
 }
 
 /** Skill points with one decimal (they come in tenths of a point per kill). */
@@ -213,6 +223,8 @@ export function describeEffect(effect: SkillEffect, rank: SkillRank): string {
       return `Restores ${effect.perSecond} ${effect.resource === 'hp' ? 'HP' : 'MP'} per second${lasting}`
     case 'interrupt':
       return `${Math.round(effect.chance * 100)}% chance to cancel the skill the enemy is preparing`
+    case 'summon':
+      return `Calls a ${ELEMENTAL_NAMES[effect.element]} to fight at your side for 20 min`
     case 'taunt':
       return 'Draws the enemy to you (a monster here already fights only you)'
     case 'reflect':

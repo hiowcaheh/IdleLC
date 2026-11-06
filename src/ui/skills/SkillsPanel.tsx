@@ -21,7 +21,15 @@ import {
 import { useGameStore } from '../../state/gameStore.ts'
 import { toast } from '../../state/toasts.ts'
 import { wielded } from '../../game/logic/equipment.ts'
-import { KIND_LABELS, describeEffect, formatSp, learnState, needsText, seconds } from './format.ts'
+import {
+  KIND_LABELS,
+  describeEffect,
+  elementalNote,
+  formatSp,
+  learnState,
+  needsText,
+  seconds,
+} from './format.ts'
 import { Sheet } from '../Sheet.tsx'
 import { SkillIcon } from './SkillIcon.tsx'
 
@@ -268,6 +276,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
                 {fits ? '' : '; not with the gear you wear now'}
               </p>
             )}
+            {elementalNote(skill) && <p className="skill-row__note">{elementalNote(skill)}</p>}
             {!available && <p className="skill-row__note">{unavailableReason(skill)}</p>}
             {current && (
               <RankDetails title={`Level ${current.level}`} rank={current} stats={stats} />

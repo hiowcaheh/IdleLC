@@ -101,8 +101,12 @@ describe('interpretEffect', () => {
     })
   })
 
-  it('returns null for effects IdleLC does not have (summons and unsupported families)', () => {
-    expect(interpretEffect({ type: 6, subtype: 9, damageType: 0, power: 2 })).toBeNull()
+  it('returns null for effects IdleLC does not have (resurrection and unsupported families)', () => {
+    expect(interpretEffect({ type: 5, subtype: 6, damageType: 2, power: 30 })).toBeNull()
+    expect(interpretEffect({ type: 6, subtype: 9, damageType: 0, power: 2 })).toEqual({
+      kind: 'summon',
+      element: 2,
+    })
     expect(interpretEffect({ type: 0, subtype: 9, damageType: 1, power: 3 })).toMatchObject({
       kind: 'stat',
       stat: 'runSpeed',
@@ -192,13 +196,13 @@ describe('skillRank', () => {
     }
     expect(skillRank(curse, 1)).toMatchObject({ kind: 'debuff', offensive: true, castTime: 0 })
     expect(isAvailable(curse)).toBe(true)
-    const summon = {
+    const invisibility = {
       ...curse,
       levels: [
-        { ...curse.levels[0]!, effects: [{ type: 6, subtype: 9, damageType: 0, power: 1 }] },
+        { ...curse.levels[0]!, effects: [{ type: 2, subtype: 15, damageType: 0, power: 0 }] },
       ],
     }
-    expect(isAvailable(summon)).toBe(false)
+    expect(isAvailable(invisibility)).toBe(false)
   })
 })
 

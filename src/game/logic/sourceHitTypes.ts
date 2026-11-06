@@ -43,7 +43,8 @@ export function sourceHitWeights(
         dexterity: NPC_BASE.dexterity,
         intelligence: NPC_BASE.intelligence,
       }
-  const statBase = magic ? base.intelligence : base.strength
+  // an elemental's magic counts from its summoner's STR base (Battle_GetDamage.cpp:1919–1928)
+  const statBase = magic && !context?.elemental ? base.intelligence : base.strength
   // m_con / 3 + m_opStrong (option 104); the passive "stronger" addition has no IdleLC skill yet.
   const durability = Math.trunc(d.constitution / 3) + (d.toughness ?? 0)
   const weights = [

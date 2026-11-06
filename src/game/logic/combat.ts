@@ -19,6 +19,14 @@ import {
   skillDamageMultiplier,
 } from './balance.ts'
 import { chance, rollInt, type Rng } from './rng.ts'
+import {
+  ELEMENTAL_NAMES,
+  ELEMENTAL_RECOVER_HP,
+  SUMMON_DELAY,
+  SUMMON_DURATION,
+  elementalBlocks,
+  type ElementalType,
+} from './summons.ts'
 import { naturalRecovery } from './recovery.ts'
 import {
   applyStats,
@@ -85,6 +93,25 @@ export interface FighterInit {
   skills?: readonly SkillRank[]
   /** Potions the fighter drinks by itself (the hero). */
   potions?: readonly PotionSupply[]
+  /** The stats an elemental gets when the hero summons it, by elemental (a Sorcerer's). */
+  summonStats?: Partial<Record<ElementalType, CombatStats>>
+}
+
+/** A Sorcerer's elemental fighting at the hero's side (CElemental). */
+export interface Summon {
+  element: ElementalType
+  name: string
+  level: number
+  stats: CombatStats
+  hp: number
+  /** Seconds until the next swing may start, and until the current one lands (null: idle). */
+  cooldown: number
+  impactIn: number | null
+  /** Seconds before it leaves (SUMMON_DURATION). */
+  remaining: number
+  recoveryIn: number
+  /** The monster's hate towards it. */
+  hate: number
 }
 
 /** A buff, debuff, stun, poison or potion on a fighter. */
@@ -133,6 +160,14 @@ export interface Fighter extends FighterInit {
   /** Potions drunk and not yet taken off the supply (takePotionsUsed), by item id. */
   potionsUsed: Record<number, number>
   effects: ActiveEffect[]
+  /** The hero's elementals. */
+  summons?: Summon[]
+  /** Seconds before an elemental of the kind may come again (SUMMON_DELAY). */
+  summonDelay?: Partial<Record<ElementalType, number>>
+  /** The monster's hate towards the hero (its NPC attack list), reset for each new monster. */
+  hate?: number
+  /** The monster: the elemental its current swing or cast is aimed at (none: the hero). */
+  aimAt?: ElementalType
 }
 
 export interface CombatState {
@@ -159,7 +194,8 @@ export type CombatEvent =
   | { type: 'spawn'; monsterId: string }
   /** The fight starts; `gap`: metres the monster runs in while a ranged hero already shoots. */
   | { type: 'engage'; gap?: number }
-  | { type: 'attack'; source: Side }
+  /** `at`: the monster swings at this elemental instead of the hero. */
+  | { type: 'attack'; source: Side; at?: ElementalType }
   | {
       type: 'cast'
       source: Side
@@ -168,6 +204,7 @@ export type CombatEvent =
       kind: SkillKind
       /** Seconds until it lands. */
       castTime: number
+      at?: ElementalType
     }
   | {
       type: 'hit'
@@ -179,8 +216,16 @@ export type CombatEvent =
       poison?: boolean
       /** Damage a Combat Reflection sent back. */
       reflected?: boolean
+      /** Dealt by this elemental of the hero. */
+      by?: ElementalType
     }
-  | { type: 'miss'; target: Side }
+  | { type: 'miss'; target: Side; by?: ElementalType }
+  /** An elemental comes, swings, is hit or missed by the monster, leaves or falls. */
+  | { type: 'summon'; element: ElementalType; name: string }
+  | { type: 'summonAttack'; element: ElementalType }
+  | { type: 'summonHit'; element: ElementalType; amount: number; crit: boolean }
+  | { type: 'summonMiss'; element: ElementalType }
+  | { type: 'summonGone'; element: ElementalType; died: boolean }
   /** A Charge cancelled the skill the fighter was readying. */
   | { type: 'interrupt'; target: Side; skillId: number }
   | { type: 'heal'; target: Side; amount: number; mana?: boolean }
@@ -215,6 +260,7 @@ function freshFighter(init: FighterInit): Fighter {
     potionCooldowns: {},
     potionsUsed: {},
     effects: [],
+    ...(init.summonStats ? { summonStats: init.summonStats } : {}),
   }
 }
 
@@ -226,6 +272,8 @@ function copyFighter(f: Fighter): Fighter {
     potionCooldowns: { ...f.potionCooldowns },
     potionsUsed: { ...f.potionsUsed },
     effects: f.effects.map((e) => ({ ...e })),
+    ...(f.summons ? { summons: f.summons.map((x) => ({ ...x })) } : {}),
+    ...(f.summonDelay ? { summonDelay: { ...f.summonDelay } } : {}),
   }
 }
 
@@ -479,6 +527,7 @@ export function updatePlayer(state: CombatState, player: FighterInit): CombatSta
       stats: player.stats,
       skills: player.skills,
       potions: player.potions,
+      summonStats: player.summonStats,
       hp: old.hp <= 0 ? 0 : Math.max(1, Math.round(player.stats.maxHp * hpRatio)),
       mp: oldMaxMp > 0 ? Math.round((maxMp * old.mp) / oldMaxMp) : maxMp,
     },
@@ -693,6 +742,7 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
     (isStunned(s.player) || s.player.effects.some((e) => e.state === 'hold'))
   if (!movementBlocked) s.phaseTime += dt
   tickCooldowns(s.player, dt)
+  tickSummons(s.player, dt, events)
   if (s.phase !== 'fighting' && s.phase !== 'defeat') poisonStep(s, 'player', dt, events)
 
   switch (s.phase) {
@@ -714,6 +764,9 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
       regen(s.player, dt, false)
       if (reached(s.phaseTime, TIMINGS.spawning)) {
         s.monster = freshFighter(s.monster)
+        // a new monster: an empty attack list
+        s.player.hate = 0
+        for (const x of s.player.summons ?? []) x.hate = 0
         events.push({ type: 'spawn', monsterId: s.monsterId })
         // a hero who fights from range opens fire while the monster comes on; others walk up
         const gap = openingGap(s.player, s.monster)
@@ -735,6 +788,7 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
       if (fighterStep(s, 'player', dt, rng, events)) return
       // still running in towards a hero who shoots from range: it can't strike yet
       if (!closeIn(s, dt)) return
+      if (summonsStep(s, dt, rng, events)) return
       fighterStep(s, 'monster', dt, rng, events)
       return
 
@@ -760,6 +814,8 @@ function endFight(s: CombatState, loser: Side, events: CombatEvent[]): void {
   s.player.impactIn = null
   s.player.casting = null
   s.monster.impactIn = null
+  delete s.monster.aimAt
+  for (const x of s.player.summons ?? []) x.impactIn = null
   events.push({ type: 'death', who: loser })
   if (loser === 'monster') {
     s.kills += 1
@@ -769,6 +825,8 @@ function endFight(s: CombatState, loser: Side, events: CombatEvent[]): void {
     s.deaths += 1
     // the server clears the hero's buffs at death, but not SF_NOCANCEL ones (Assist.cpp ClearAssist)
     s.player.effects = s.player.effects.filter((e) => e.keepOnDeath)
+    // and sends the elementals away (Battle_ProcDead_PC.cpp:567–568)
+    for (const x of [...(s.player.summons ?? [])]) dismiss(s.player, x.element, false, events)
     enter(s, 'defeat')
   }
 }
@@ -817,6 +875,13 @@ function fighterStep(
   if (self.cooldown <= 0) {
     const stats = effectiveStats(self)
     const skill = chooseSkill(self, target, rng)
+    // the monster turns on whom it hates most as it starts the swing or the cast
+    if (side === 'monster') {
+      const aim = aimFor(s)
+      if (aim === undefined) delete self.aimAt
+      else self.aimAt = aim
+    }
+    const at = side === 'monster' && self.aimAt !== undefined ? { at: self.aimAt } : {}
     if (skill) {
       // wind-up (shortened by cast-speed skills), then it lands like a swing
       const windUp = skillPreparationTime(skill, stats)
@@ -836,11 +901,12 @@ function fighterStep(
         name: skill.name,
         kind: skill.kind,
         castTime: landsIn,
+        ...at,
       })
     } else {
       self.cooldown += stats.attackInterval
       self.impactIn = TIMINGS.impactDelay
-      events.push({ type: 'attack', source: side })
+      events.push({ type: 'attack', source: side, ...at })
     }
   }
   return false
@@ -858,23 +924,11 @@ function strike(
   attackType?: CombatStats['attackType'],
 ): boolean | null {
   const self = side === 'player' ? s.player : s.monster
+  if (side === 'monster' && s.monster.aimAt !== undefined)
+    return strikeSummon(s, s.monster.aimAt, rng, events, multiplier, skill, power, attackType)
   const targetSide: Side = side === 'player' ? 'monster' : 'player'
   const target = side === 'player' ? s.monster : s.player
-  const original = effectiveStats(self)
-  const selected = attackType
-    ? {
-        ...original,
-        attackType,
-        attack:
-          attackType === 'magic'
-            ? (original.magicAttack ?? original.attack)
-            : (original.client?.physicalAttack ?? original.physicalAttack ?? original.attack),
-        hit:
-          attackType === 'magic'
-            ? (original.magicHit ?? original.hit)
-            : (original.client?.physicalHit ?? original.physicalHit ?? original.hit),
-      }
-    : original
+  const selected = attackStats(self, attackType)
   const result = rollAttack(
     { level: self.level, stats: selected },
     { level: target.level, stats: effectiveStats(target) },
@@ -889,6 +943,7 @@ function strike(
   }
   if (multiplier <= 0) return false
   target.hp = Math.max(0, target.hp - result.damage)
+  if (side === 'player') addHate(s, s.player, result.damage)
   steal(self, result.damage)
   events.push({
     type: 'hit',
@@ -901,6 +956,203 @@ function strike(
   if (target.hp > 0) return reflect(s, side, rng, events, result.damage)
   endFight(s, targetSide, events)
   return true
+}
+
+/** The attack a fighter makes with a skill of the given attack type (or its normal one). */
+function attackStats(self: Fighter, attackType?: CombatStats['attackType']): CombatStats {
+  const original = effectiveStats(self)
+  return attackType
+    ? {
+        ...original,
+        attackType,
+        attack:
+          attackType === 'magic'
+            ? (original.magicAttack ?? original.attack)
+            : (original.client?.physicalAttack ?? original.physicalAttack ?? original.attack),
+        hit:
+          attackType === 'magic'
+            ? (original.magicHit ?? original.hit)
+            : (original.client?.physicalHit ?? original.physicalHit ?? original.hit),
+      }
+    : original
+}
+
+/** Battle.cpp:1319 HATE_FIRST_ATTACK: the first to hurt a monster tops its list. */
+const HATE_FIRST_ATTACK = 1500
+
+/**
+ * ApplyHateByDamage (Battle.cpp:1335–1357): 10 000 × damage / the monster's maximum HP, at least 1,
+ * and HATE_FIRST_ATTACK more for whoever hurts it first.
+ */
+function addHate(s: CombatState, who: { hate?: number }, damage: number): void {
+  const listed = (s.player.hate ?? 0) > 0 || (s.player.summons ?? []).some((x) => x.hate > 0)
+  const maxHp = effectiveStats(s.monster).maxHp
+  who.hate =
+    (who.hate ?? 0) +
+    Math.max(1, Math.trunc((10000 * damage) / maxHp)) +
+    (listed ? 0 : HATE_FIRST_ATTACK)
+}
+
+/** The monster turns on whoever it hates most (Battle.cpp:2606–2609); the hero when none is ahead. */
+function aimFor(s: CombatState): ElementalType | undefined {
+  let top = s.player.hate ?? 0
+  let aim: ElementalType | undefined
+  for (const x of s.player.summons ?? []) {
+    if (x.hate > top) {
+      top = x.hate
+      aim = x.element
+    }
+  }
+  return aim
+}
+
+/** The monster's swing or skill on an elemental: damage only. Null when it missed or is gone. */
+function strikeSummon(
+  s: CombatState,
+  element: ElementalType,
+  rng: Rng,
+  events: CombatEvent[],
+  multiplier: number,
+  skill: boolean,
+  power?: { power: number; type: number },
+  attackType?: CombatStats['attackType'],
+): boolean | null {
+  const summon = s.player.summons?.find((x) => x.element === element)
+  if (!summon) return null
+  const result = rollAttack(
+    { level: s.monster.level, stats: attackStats(s.monster, attackType) },
+    { level: summon.level, stats: summon.stats },
+    rng,
+    multiplier,
+    skill,
+    power,
+  )
+  if (result.kind === 'miss') {
+    events.push({ type: 'summonMiss', element })
+    return null
+  }
+  if (multiplier <= 0) return false
+  summon.hp = Math.max(0, summon.hp - result.damage)
+  events.push({
+    type: 'summonHit',
+    element,
+    amount: result.damage,
+    crit: result.kind === 'crit' || result.kind === 'deadly',
+  })
+  // Battle_ProcDead_Elemental.cpp:55: a fallen elemental is sent away
+  if (summon.hp <= 0) dismiss(s.player, element, true, events)
+  return false
+}
+
+/** UnsummonElemental (PC.cpp:5207–5246): it leaves and SUMMON_DELAY starts for its kind. */
+function dismiss(
+  hero: Fighter,
+  element: ElementalType,
+  died: boolean,
+  events: CombatEvent[],
+): void {
+  if (!hero.summons?.some((x) => x.element === element)) return
+  hero.summons = hero.summons.filter((x) => x.element !== element)
+  hero.summonDelay = { ...hero.summonDelay, [element]: SUMMON_DELAY }
+  events.push({ type: 'summonGone', element, died })
+}
+
+/** CanSummonElemental: its kind is not waiting out SUMMON_DELAY and nothing present blocks it. */
+export function canSummon(
+  hero: Pick<Fighter, 'summons' | 'summonDelay' | 'summonStats'>,
+  element: ElementalType,
+): boolean {
+  return (
+    hero.summonStats?.[element] !== undefined &&
+    !(hero.summonDelay?.[element] ?? 0) &&
+    !(hero.summons ?? []).some((x) => elementalBlocks(x.element, element))
+  )
+}
+
+/** SummonElemental (PC.cpp:5140–5205): it comes at full HP with the stats of this moment. */
+function summonElemental(hero: Fighter, element: ElementalType, events: CombatEvent[]): void {
+  const stats = hero.summonStats?.[element]
+  if (!stats || !canSummon(hero, element)) return
+  hero.summons = [
+    ...(hero.summons ?? []),
+    {
+      element,
+      name: ELEMENTAL_NAMES[element],
+      level: hero.level,
+      stats,
+      hp: stats.maxHp,
+      cooldown: 0,
+      impactIn: null,
+      remaining: SUMMON_DURATION,
+      recoveryIn: REGEN_TICK_SECONDS,
+      hate: 0,
+    },
+  ]
+  events.push({ type: 'summon', element, name: ELEMENTAL_NAMES[element] })
+}
+
+/** Time passes for the elementals in every phase: they leave after 20 minutes and recover HP. */
+function tickSummons(hero: Fighter, dt: number, events: CombatEvent[]): void {
+  if (hero.summonDelay) {
+    for (const key of Object.keys(hero.summonDelay)) {
+      const element = Number(key) as ElementalType
+      const left = (hero.summonDelay[element] ?? 0) - dt
+      if (left > EPSILON) hero.summonDelay[element] = left
+      else delete hero.summonDelay[element]
+    }
+  }
+  for (const x of [...(hero.summons ?? [])]) {
+    x.remaining -= dt
+    if (x.remaining <= EPSILON) {
+      dismiss(hero, x.element, false, events)
+      continue
+    }
+    x.recoveryIn -= dt
+    while (x.recoveryIn <= EPSILON) {
+      x.recoveryIn += REGEN_TICK_SECONDS
+      x.hp = Math.min(x.stats.maxHp, x.hp + ELEMENTAL_RECOVER_HP)
+    }
+  }
+}
+
+/** The elementals swing at the monster. Returns true when one of them killed it. */
+function summonsStep(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): boolean {
+  for (const x of [...(s.player.summons ?? [])]) {
+    x.cooldown -= dt
+    if (x.impactIn !== null) {
+      x.impactIn -= dt
+      if (x.impactIn > 0) continue
+      x.impactIn = null
+      const result = rollAttack(
+        { level: x.level, stats: x.stats },
+        { level: s.monster.level, stats: effectiveStats(s.monster) },
+        rng,
+      )
+      if (result.kind === 'miss') {
+        events.push({ type: 'miss', target: 'monster', by: x.element })
+        continue
+      }
+      s.monster.hp = Math.max(0, s.monster.hp - result.damage)
+      addHate(s, x, result.damage)
+      events.push({
+        type: 'hit',
+        target: 'monster',
+        amount: result.damage,
+        crit: result.kind === 'crit',
+        ...(result.kind === 'deadly' ? { deadly: true } : {}),
+        by: x.element,
+      })
+      if (s.monster.hp > 0) continue
+      endFight(s, 'monster', events)
+      return true
+    }
+    if (x.cooldown <= 0) {
+      x.cooldown = Math.max(0, x.cooldown) + x.stats.attackInterval
+      x.impactIn = TIMINGS.impactDelay
+      events.push({ type: 'summonAttack', element: x.element })
+    }
+  }
+  return false
 }
 
 /**
@@ -921,6 +1173,7 @@ function reflect(
   const amount = back.flat + Math.trunc((damage * back.rate) / 100)
   if (amount <= 0) return false
   attacker.hp = Math.max(0, attacker.hp - amount)
+  if (attackerSide === 'monster') addHate(s, s.player, amount)
   events.push({ type: 'hit', target: attackerSide, amount, crit: false, reflected: true })
   if (attacker.hp > 0) return false
   endFight(s, attackerSide, events)
@@ -958,18 +1211,24 @@ function landSkill(
       damage?.damageType === undefined
         ? undefined
         : { power: damage.percent, type: damage.damageType }
+    // a monster's skill on an elemental: its damage only
+    const atSummon = side === 'monster' && s.monster.aimAt !== undefined
     const outcome = strike(s, side, rng, events, multiplier, true, power, skill.attackType)
     if (outcome === null) return false // missed
     if (outcome) return true
+    if (atSummon) return false
     const target = targetSide === 'player' ? s.player : s.monster
     interrupt(target, targetSide, skill, rng, events)
+    if (side === 'player') taunt(s, skill)
     applyEffects(target, targetSide, skill, rng, events)
     return false
   }
 
   const stats = effectiveStats(self)
   for (const e of skill.effects) {
-    if (e.kind === 'cure') {
+    if (e.kind === 'summon') {
+      summonElemental(self, e.element, events)
+    } else if (e.kind === 'cure') {
       self.effects = self.effects.filter((fx) => !(fx.poison > 0 && fx.dotKind !== 'blood'))
     } else if (e.kind === 'heal') {
       const before = self.hp
@@ -1012,6 +1271,26 @@ function interrupt(
   events.push({ type: 'interrupt', target: side, skillId: target.casting.id })
   target.casting = null
   target.impactIn = null
+}
+
+/**
+ * MST_OTHER_TOUNT (Skill.cpp:2291–2327): whoever the monster hated most takes the hero's hate, and
+ * the hero's becomes that top hate plus the skill's power, so it turns back from an elemental.
+ */
+function taunt(s: CombatState, skill: SkillRank): void {
+  const power = skill.effects.find((e) => e.kind === 'taunt')?.power
+  if (power === undefined) return
+  const own = s.player.hate ?? 0
+  let top: { hate?: number } = s.player
+  let max = own
+  for (const x of s.player.summons ?? []) {
+    if (x.hate > max) {
+      max = x.hate
+      top = x
+    }
+  }
+  top.hate = own
+  s.player.hate = max + power
 }
 
 /** Puts a skill's lasting effects (stats, stun, poison) on a fighter for the skill's duration. */
@@ -1315,7 +1594,12 @@ export function chooseSkill(self: Fighter, target: Fighter, rng?: Rng): SkillRan
       ),
   )
   if (heal) return heal
-  const buff = ready.find((r) => r.kind === 'buff' && !on(self, r.id))
+  const summons = (r: SkillRank) => r.effects.some((e) => e.kind === 'summon')
+  const summon = ready.find((r) =>
+    r.effects.some((e) => e.kind === 'summon' && canSummon(self, e.element)),
+  )
+  if (summon) return summon
+  const buff = ready.find((r) => r.kind === 'buff' && !summons(r) && !on(self, r.id))
   if (buff) return buff
   // a skill that only cancels another (Charge) waits until the monster readies one (own rule)
   const onlyCancels = (r: SkillRank) =>

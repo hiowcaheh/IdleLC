@@ -26,6 +26,9 @@ import {
   type LearnedSkill,
 } from './skills.ts'
 import { activeTitleId, titleOptions, type OwnedTitle } from './titles.ts'
+import { elementalStats, passiveAppliesTo, type ElementalType } from './summons.ts'
+import type { CombatStats } from '../data/types.ts'
+import type { SkillRank } from './skills.ts'
 
 /** What the hero's fighter depends on (a CharacterData fits). */
 export interface Hero {
@@ -127,15 +130,41 @@ export function playerFighter(hero: Hero, now = Date.now()): FighterInit {
     ),
   })
   const reflect = passiveReflect(ranks)
+  // a Sorcerer's passives strengthen the hero, its elementals or both (SSF_APP_*)
+  const final = applyStats(
+    detailed,
+    passiveEffects(ranks.filter((r) => passiveAppliesTo(r.id, 'hero'))),
+  )
+  const summonStats = elementalsOf(ranks, level, detailed, final)
   return {
     level,
     stats: {
-      ...applyStats(detailed, passiveEffects(ranks)),
+      ...final,
       ...(reflect ? { reflect } : {}),
     },
+    ...(summonStats ? { summonStats } : {}),
     skills: ranks.filter((r) => r.kind !== 'passive' && (!skillBar || skillBar.includes(r.id))),
     potions: potionSupply(hero),
   }
+}
+
+/** The stats each elemental the hero can summon would come with, with the passives meant for it. */
+function elementalsOf(
+  ranks: readonly SkillRank[],
+  level: number,
+  detailed: CombatStats,
+  final: CombatStats,
+): Partial<Record<ElementalType, CombatStats>> | undefined {
+  let out: Partial<Record<ElementalType, CombatStats>> | undefined
+  for (const rank of ranks) {
+    for (const effect of rank.effects) {
+      if (effect.kind !== 'summon') continue
+      const passives = passiveEffects(ranks.filter((r) => passiveAppliesTo(r.id, effect.element)))
+      const stats = elementalStats(effect.element, level, detailed, final, passives)
+      if (stats) out = { ...out, [effect.element]: stats }
+    }
+  }
+  return out
 }
 
 /** Changes whenever the hero's fighter would (level, skills, auto settings, bar, gear, potions). */

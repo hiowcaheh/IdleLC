@@ -25,6 +25,11 @@ export interface ClientStatContext {
   deadlyOptionRate: number
   criticalGroups?: readonly { flat: number; rate: number }[]
   deadlyGroups?: readonly { flat: number; rate: number }[]
+  /** m_eqMagic and m_eqDefense: the weapon's magic attack and the armor's defense, before options. */
+  equipmentMagic?: number
+  equipmentDefense?: number
+  /** A Sorcerer's elemental (SelectHitType_Adult's MSG_CHAR_ELEMENTAL branch). */
+  elemental?: boolean
 }
 
 /** Stats that drive auto-combat. Shared by player classes and monsters. */
