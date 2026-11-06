@@ -48,29 +48,27 @@
   background: #11161a;
   overflow: hidden;
 }
-.dungeon-hero img {
+.dungeon-hero__art {
+  position: relative;
+}
+.dungeon-hero__art img {
   display: block;
   width: 100%;
-  /* a little taller than the art, the bottom under the caption */
-  aspect-ratio: 944 / 400;
+  aspect-ratio: 944 / 358;
   object-fit: cover;
-  object-position: 50% 30%;
 }
 .dungeon-hero__caption {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 26px 46px 8px;
+  position: relative;
+  padding: 7px 12px 8px;
   text-align: center;
-  background: linear-gradient(to top, #0c1014f2 30%, #0c101400);
-  pointer-events: none;
+  background: linear-gradient(#0c1014, #151b20);
+  border-top: 1px solid #00000080;
 }
 .dungeon-hero__caption h3 {
   margin: 0;
   color: #f4e2b4;
   font-family: var(--font-heading);
-  font-size: clamp(20px, 5vw, 28px);
+  font-size: clamp(20px, 5vw, 26px);
   line-height: 1.15;
   text-shadow: 0 2px 6px #000;
 }
@@ -226,42 +224,55 @@
   background: #c9a868;
   transform: rotate(45deg);
 }
-.dungeon-ranking__list {
+/* the top three in the client's value boxes, the client trophy in gold, silver and bronze */
+.dungeon-podium {
   display: grid;
-  gap: 4px;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
-  counter-reset: rank;
 }
-.dungeon-ranking__list li {
-  counter-increment: rank;
+.dungeon-podium__place {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) auto;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
-  padding: 5px 8px;
-  border: 1px solid #494d4c;
-  background: #171d25;
+  padding: 2px 6px 2px 2px;
+  border: solid transparent;
+  border-width: 5px 8px;
+  border-image: url('/ui/lc/value-box.webp') 4 8 fill / 5px 8px stretch;
   font-size: 13px;
 }
-.dungeon-ranking__list li::before {
-  content: counter(rank);
+.dungeon-podium__place.is-you .dungeon-podium__name {
+  color: #f2d58e;
+}
+.dungeon-podium__trophy {
+  position: relative;
+  width: 34px;
+  height: 32px;
+  background: url('/ui/lc/trophy.webp?v=27aab531') center / contain no-repeat;
+}
+.dungeon-podium__place--2 .dungeon-podium__trophy {
+  filter: grayscale(1) brightness(1.3) contrast(1.05);
+}
+.dungeon-podium__place--3 .dungeon-podium__trophy {
+  filter: sepia(0.7) saturate(1.6) hue-rotate(-18deg) brightness(0.8);
+}
+.dungeon-podium__number {
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
   display: grid;
   place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 1px solid #8d7a59;
-  color: #f2d58e;
-  font-size: 11px;
+  width: 16px;
+  height: 16px;
+  background: url('/ui/lc/badge.webp') center / 100% 100% no-repeat;
+  color: #fff;
+  font-size: 10px;
   font-weight: 800;
+  line-height: 1;
 }
-.dungeon-ranking__list li.is-you {
-  border-color: #a88a5c;
-  background: #2a2a24;
-}
-.dungeon-ranking__list span {
+.dungeon-podium__name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

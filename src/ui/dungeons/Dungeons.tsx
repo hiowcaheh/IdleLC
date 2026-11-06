@@ -29,6 +29,9 @@ import { BlessingEffects, DungeonBuffer } from './DungeonBuffer.tsx'
 import { DungeonMinimap } from './DungeonMinimap.tsx'
 import './dungeons.css'
 
+/** Bumped when the dungeon art is cut again (dungeon-art.mjs), past the PWA's cached copy. */
+const ART_VERSION = 2
+
 const minutes = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
 const errorText = (error: unknown) =>
@@ -108,7 +111,7 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
           <strong>{(character.dungeons?.points ?? 0).toLocaleString('en-US')}</strong>
         </div>
         <div>
-          <span>Lifetime ranking points</span>
+          <span>Ranking</span>
           <strong>{(character.dungeons?.totalPoints ?? 0).toLocaleString('en-US')}</strong>
         </div>
       </div>
@@ -124,29 +127,32 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
                 style={{ '--dungeon-color': def.color } as CSSProperties}
                 aria-label="Choose a dungeon"
               >
-                <img
-                  src={`${import.meta.env.BASE_URL}dungeons/${def.id}/loading.webp`}
-                  alt={`${def.name}, original client map artwork`}
-                />
-                <button
-                  type="button"
-                  className="dungeon-hero__arrow dungeon-hero__arrow--left"
-                  disabled={busy}
-                  onClick={() => turn(-1)}
-                  aria-label="Previous dungeon"
-                />
-                <button
-                  type="button"
-                  className="dungeon-hero__arrow dungeon-hero__arrow--right"
-                  disabled={busy}
-                  onClick={() => turn(1)}
-                  aria-label="Next dungeon"
-                />
+                <div className="dungeon-hero__art">
+                  <img
+                    src={`${import.meta.env.BASE_URL}dungeons/${def.id}/loading.webp?v=${ART_VERSION}`}
+                    alt={`${def.name}, original client map artwork`}
+                  />
+                  <button
+                    type="button"
+                    className="dungeon-hero__arrow dungeon-hero__arrow--left"
+                    disabled={busy}
+                    onClick={() => turn(-1)}
+                    aria-label="Previous dungeon"
+                  />
+                  <button
+                    type="button"
+                    className="dungeon-hero__arrow dungeon-hero__arrow--right"
+                    disabled={busy}
+                    onClick={() => turn(1)}
+                    aria-label="Next dungeon"
+                  />
+                  {locked && <span className="dungeon-hero__lock">Lv {def.minLevel}</span>}
+                </div>
+                {/* the name under the art, so the hall's statues are not hidden behind it */}
                 <div className="dungeon-hero__caption" aria-live="polite">
                   <h3>{def.name}</h3>
                   <span>Horde expedition</span>
                 </div>
-                {locked && <span className="dungeon-hero__lock">Lv {def.minLevel}</span>}
               </div>
               <ol className="dungeon-pager" aria-label="Dungeons">
                 {DUNGEONS.map((d, i) => (
@@ -172,7 +178,7 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
                   <dd className={locked ? 'is-bad' : 'is-good'}>Lv {def.minLevel}</dd>
                 </div>
                 <div>
-                  <dt>Original monsters</dt>
+                  <dt>Monsters level</dt>
                   <dd>
                     Lv {monsters[0]!.level}–{monsters.at(-1)!.level}
                   </dd>
@@ -222,12 +228,20 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
               </section>
               <section className="dungeon-ranking" aria-label="Dungeon ranking">
                 <h4>Lifetime ranking</h4>
-                <ol className="dungeon-ranking__list">
+                {/* the three best characters, each with the client's trophy in its place's metal */}
+                <ol className="dungeon-podium">
                   {[...characters]
                     .sort((a, b) => (b.dungeons?.totalPoints ?? 0) - (a.dungeons?.totalPoints ?? 0))
-                    .map((c) => (
-                      <li key={c.id} className={c.id === character.id ? 'is-you' : undefined}>
-                        <span>{c.name}</span>
+                    .slice(0, 3)
+                    .map((c, i) => (
+                      <li
+                        key={c.id}
+                        className={`dungeon-podium__place dungeon-podium__place--${i + 1}${c.id === character.id ? ' is-you' : ''}`}
+                      >
+                        <span className="dungeon-podium__trophy" aria-label={`Place ${i + 1}`}>
+                          <span className="dungeon-podium__number">{i + 1}</span>
+                        </span>
+                        <span className="dungeon-podium__name">{c.name}</span>
                         <strong>
                           {(c.dungeons?.totalPoints ?? 0).toLocaleString('en-US')} points
                         </strong>
@@ -667,7 +681,7 @@ export function DungeonResult() {
         style={
           {
             '--dungeon-color': dungeon.color,
-            '--dungeon-art': `url(${import.meta.env.BASE_URL}dungeons/${dungeon.id}/loading.webp)`,
+            '--dungeon-art': `url(${import.meta.env.BASE_URL}dungeons/${dungeon.id}/loading.webp?v=${ART_VERSION})`,
           } as CSSProperties
         }
       >

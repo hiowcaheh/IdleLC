@@ -41,6 +41,8 @@ export const UI_PARTS = {
   'menu-dungeons': [atlas('Map'), 67, 91, 32, 36, { scale: 2 }],
   // UIPlayerInfo.cpp m_btnQuickMenu: a 22 × 22 TopUI quick-menu button (System), for its frame.
   'menu-frame': [atlas('TopUI'), 156, 222, 22, 22],
+  // UIRadar.cpp _createTrophyData: the Royal Rumble winner's trophy (trophy.tex), for the ranking.
+  trophy: [atlas('trophy'), 21, 19, 330, 307, { quality: 90 }],
   // questView.xml btn_left / btn_right, normal UV state.
   'page-left': [atlas('Quest'), 193, 944, 11, 15, { scale: 4 }],
   'page-right': [atlas('Quest'), 207, 944, 11, 15, { scale: 4 }],

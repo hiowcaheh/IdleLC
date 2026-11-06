@@ -61,11 +61,21 @@ const root = process.argv[2]
 if (!root) throw new Error('Usage: node scripts/lc/dungeon-art.mjs <client-folder>')
 const files = new ClientFiles([root])
 const ui = await buildUiParts(files)
-for (const name of ['page-left', 'page-right'])
+for (const name of ['page-left', 'page-right', 'trophy'])
   fs.writeFileSync(`public/ui/lc/${name}.webp`, ui[name])
 await sharp(await dungeonButton(ui['menu-frame'], ui['menu-dungeons']))
   .webp({ lossless: true })
   .toFile('public/ui/lc/menu-dungeons.webp')
+/**
+ * The part of each D_0n loading picture shown in the Dungeons window, inside its ragged black
+ * border and above the publisher's emblem (y 378–405). Belfist and Procyon keep the statues at
+ * the bottom of the hall; Procyon's ragged left edge reaches x 53.
+ */
+const LOADING_CROPS = {
+  belfist: { left: 40, top: 18, width: 944, height: 358 },
+  procyon: { left: 58, top: 18, width: 908, height: 358 },
+  maargadum: { left: 40, top: 16, width: 944, height: 344 },
+}
 const textures = [
   ['belfist', 'Dungeon1', 'dengen1_tile14', 'd1_tile_wall02_1'],
   ['procyon', 'Dungeon2', 'D2_tile01', 'D2_wall01'],
@@ -78,7 +88,7 @@ for (const [id, dir, floor, wall] of textures) {
     files.read(`Data\\Interface\\Loading\\D_0${textures.findIndex((d) => d[0] === id) + 1}.tex`),
   )
   await sharp(art.rgba, { raw: { width: art.width, height: art.height, channels: 4 } })
-    .extract({ left: 40, top: 16, width: 944, height: 344 })
+    .extract(LOADING_CROPS[id])
     .webp({ quality: 86 })
     .toFile(path.join(out, 'loading.webp'))
   for (const [name, source] of [
