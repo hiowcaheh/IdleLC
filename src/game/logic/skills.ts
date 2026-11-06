@@ -5,7 +5,7 @@
  * Pure — the server will run the same code.
  */
 import { getSkill, skillsForClass } from '../data/skills.ts'
-import { lcData } from '../data/lcSource.ts'
+import { lcData, lcSkillMotion } from '../data/lcSource.ts'
 import type {
   ClassId,
   CombatStats,
@@ -257,6 +257,11 @@ export interface SkillRank {
   reducibleDebuff?: boolean
   /** Skill.h SF_NOT_BOSS: it cannot be used on a boss. */
   notBoss?: boolean
+  /**
+   * The hero's release clip (lc-skill-motion.json): its length and the moment its blow lands, in
+   * seconds before the cast speed. The client plays it to the end before the hero acts again.
+   */
+  motion?: { fire: number; impact?: number }
   effects: SkillEffect[]
   auto: boolean
 }
@@ -316,6 +321,7 @@ export function skillRank(
     duration: rank.duration / 10,
     ...(skill.flag === SF_NOTHELP ? { reducibleDebuff: true } : {}),
     ...(((skill.flag ?? 0) & SF_NOT_BOSS) !== 0 ? { notBoss: true } : {}),
+    ...(lcSkillMotion?.[skill.id] ? { motion: lcSkillMotion[skill.id] } : {}),
     effects,
     auto,
   }

@@ -191,6 +191,16 @@ export interface LcSkillAnim {
   fire: string
 }
 
+/**
+ * A class skill's release (lc-skill-motion.json, scripts/lc/skill-motion.mjs): the length of its
+ * fire clip and, when the client has one, the moment in it its blow lands (skills.lod
+ * fireobjDelay), both in seconds before the cast speed.
+ */
+export interface LcSkillMotion {
+  fire: number
+  impact?: number
+}
+
 /** Weapon and armor models written by `npm run convert-lc` (lc-gear.json). */
 export interface LcGearManifest {
   /** Relative to the app base URL, e.g. "models/lc/gear/". */

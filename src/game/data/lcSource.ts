@@ -8,6 +8,7 @@ import type {
   LcIconManifest,
   LcModelManifest,
   LcSkillAnim,
+  LcSkillMotion,
 } from './lcTypes.ts'
 
 const dataFiles = import.meta.glob<LcData>('./generated/lc-data.json', {
@@ -34,6 +35,11 @@ const skillAnimFiles = import.meta.glob<Record<string, LcSkillAnim>>(
   { eager: true, import: 'default' },
 )
 
+const skillMotionFiles = import.meta.glob<Record<string, LcSkillMotion>>(
+  './generated/lc-skill-motion.json',
+  { eager: true, import: 'default' },
+)
+
 const enabled = import.meta.env.VITE_LC_DATA !== '0'
 
 export const lcData: LcData | null = enabled ? (Object.values(dataFiles)[0] ?? null) : null
@@ -44,4 +50,7 @@ export const lcIcons: LcIconManifest | null = enabled ? (Object.values(iconFiles
 export const lcGear: LcGearManifest | null = enabled ? (Object.values(gearFiles)[0] ?? null) : null
 export const lcSkillAnims: Record<string, LcSkillAnim> | null = enabled
   ? (Object.values(skillAnimFiles)[0] ?? null)
+  : null
+export const lcSkillMotion: Record<string, LcSkillMotion> | null = enabled
+  ? (Object.values(skillMotionFiles)[0] ?? null)
   : null

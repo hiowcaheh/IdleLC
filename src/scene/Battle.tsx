@@ -230,7 +230,15 @@ export function Battle() {
         case 'cast':
           textAt(e.source, e.name, 'skill')
           // the skill's own clips from the client, else a swing timed to land with the skill
-          if (e.source === 'player' && player.current?.skill(e.skillId, e.castTime)) break
+          if (
+            e.source === 'player' &&
+            player.current?.skill(e.skillId, {
+              windUp: e.windUp,
+              landsIn: e.castTime,
+              releaseTime: e.releaseTime,
+            })
+          )
+            break
           if (e.kind === 'attack' || e.kind === 'debuff') {
             m.swingIn[e.source] = Math.max(0, e.castTime - TIMINGS.impactDelay)
           }

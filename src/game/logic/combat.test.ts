@@ -912,3 +912,48 @@ describe('skill costs (doFuncSkill.cpp)', () => {
     expect(skillMpCost(rank({ mpCost: 33 }), stats({ mpCostReduction: 120 }))).toBe(0)
   })
 })
+
+describe('the release animation of a skill (Player.es SkillAnimationEx)', () => {
+  const swing = rank({
+    castTime: 0,
+    cooldown: 0.5,
+    fireTime: 2.6,
+    motion: { fire: 2, impact: 1.2 },
+  })
+  const firstHit = (events: CombatEvent[]) =>
+    events.find((e) => e.type === 'hit' && e.target === 'monster' && e.skill)
+
+  it('lands the blow at its moment in the clip and waits for the whole clip', () => {
+    const before = run(engaged(caster([swing])), 1.15, createRng(1))
+    expect(before.events.find((e) => e.type === 'cast')).toMatchObject({
+      windUp: 0,
+      castTime: 1.2,
+      releaseTime: 2,
+    })
+    expect(firstHit(before.events)).toBeUndefined()
+    const after = run(before.state, 0.1, createRng(2))
+    expect(firstHit(after.events)).toBeDefined()
+    // attackInterval is 1 s, yet nothing starts before the 2 s clip has played
+    const rest = run(after.state, 0.7, createRng(3))
+    expect(
+      rest.events.some((e) => (e.type === 'cast' || e.type === 'attack') && e.source === 'player'),
+    ).toBe(false)
+    const next = run(rest.state, 0.15, createRng(4))
+    expect(next.events.some((e) => e.type === 'cast' && e.source === 'player')).toBe(true)
+  })
+
+  it('cast speed plays the clip faster: 50% halves the moment and the length', () => {
+    const quick = run(engaged(caster([swing], { castSpeed: 50 })), 0.05, createRng(1))
+    expect(quick.events.find((e) => e.type === 'cast')).toMatchObject({
+      castTime: 0.6,
+      releaseTime: 1,
+    })
+  })
+
+  it('without cooldowns the skills follow each other only after each full clip', () => {
+    const free = caster([swing], { cooldownFree: true })
+    const { events } = run(engaged(free), 6.05, createRng(5))
+    const casts = events.filter((e) => e.type === 'cast' && e.source === 'player')
+    expect(casts).toHaveLength(4) // at 0, 2, 4 and 6 s
+  })
+})

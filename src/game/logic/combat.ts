@@ -52,11 +52,6 @@ export const TIMINGS = {
   impactDelay: 0.4,
   /** Fraction of attackInterval the monster waits before its first swing. */
   monsterInitiative: 0.5,
-  /**
-   * Share of a skill's fire animation (t_skill.a_fireTime) the hero stays busy after it lands.
-   * 0: the client's skill clips are fitted into the fight's timing instead (scene/Character.tsx).
-   */
-  skillAnimationLock: 0,
 } as const
 
 /** The hero heals below this share of HP and restores mana below this share of MP. */
@@ -204,6 +199,10 @@ export type CombatEvent =
       kind: SkillKind
       /** Seconds until it lands. */
       castTime: number
+      /** Seconds of wind-up before the release starts. */
+      windUp: number
+      /** Seconds the release clip plays (the hero's skills with a client clip). */
+      releaseTime?: number
       at?: ElementalType
     }
   | {
@@ -358,6 +357,33 @@ export function canPaySkill(f: Pick<Fighter, 'hp' | 'mp'>, rank: SkillRank, stat
 }
 
 /** Skill preparation and reuse are shared by the battle and its details window. */
+/**
+ * The client's skill animation speed, (100 − skill speed) / 100 (Player.es SkillAnimationEx): a
+ * cast speed of 20% plays the release in 80% of its time. Never below a fifth (own guard: the
+ * animation always plays).
+ */
+export function skillAnimationPace(stats: CombatStats): number {
+  return Math.max(0.2, 1 - (stats.castSpeed ?? 0) / 100)
+}
+
+/**
+ * The release of a skill once its wind-up is over: when its blow lands and when the hero is free
+ * again (seconds from the release). With the client's clip the whole clip plays, at the cast speed,
+ * and the blow lands at its moment in it; without one it lands like a swing.
+ */
+export function skillRelease(
+  rank: Pick<SkillRank, 'motion'>,
+  stats: CombatStats,
+): { impact: number; done: number } {
+  const motion = rank.motion
+  if (!motion) return { impact: TIMINGS.impactDelay, done: TIMINGS.impactDelay }
+  const pace = skillAnimationPace(stats)
+  const done = motion.fire * pace
+  const impact =
+    motion.impact !== undefined ? motion.impact * pace : Math.min(TIMINGS.impactDelay, done)
+  return { impact, done }
+}
+
 export function skillPreparationTime(rank: SkillRank, stats: CombatStats): number {
   return Math.max(0, rank.castTime * (1 - (stats.castSpeed ?? 0) / 100) + (stats.castTime ?? 0))
 }
@@ -883,17 +909,16 @@ function fighterStep(
     }
     const at = side === 'monster' && self.aimAt !== undefined ? { at: self.aimAt } : {}
     if (skill) {
-      // wind-up (shortened by cast-speed skills), then it lands like a swing
+      // wind-up (shortened by cast speed), then the release: the blow lands at its moment and
+      // the hero acts again only when the whole release animation has played
       const windUp = skillPreparationTime(skill, stats)
-      const landsIn = windUp + TIMINGS.impactDelay
+      const release = skillRelease(skill, stats)
+      const landsIn = windUp + release.impact
       // the cooldown runs from READY (Skill.cpp:803); MP and HP are paid at FIRE
       self.skillCooldowns[skill.id] = skillCooldownTime(skill, stats)
       self.casting = skill
       self.impactIn = landsIn
-      self.cooldown += Math.max(
-        stats.attackInterval,
-        landsIn + skill.fireTime * TIMINGS.skillAnimationLock,
-      )
+      self.cooldown += Math.max(stats.attackInterval, windUp + release.done)
       events.push({
         type: 'cast',
         source: side,
@@ -901,6 +926,8 @@ function fighterStep(
         name: skill.name,
         kind: skill.kind,
         castTime: landsIn,
+        windUp,
+        ...(skill.motion ? { releaseTime: release.done } : {}),
         ...at,
       })
     } else {

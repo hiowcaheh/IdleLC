@@ -50,10 +50,11 @@ export interface CharacterHandle {
   /** Swing timed so the blow lands exactly TIMINGS.impactDelay after this call. */
   attack(): void
   /**
-   * The skill's own clips from the client (one clip, or a spell's wind-up then release), timed so
-   * the blow lands `landsIn` game seconds from now; false when the model has none for it.
+   * The skill's own clips from the client (one clip, or a spell's wind-up then release): the wind-up
+   * fills `windUp` game seconds, then the whole release clip plays in `releaseTime` (the cast speed's
+   * pace; without it, timed so its blow lands with the hit). False when the model has none for it.
    */
-  skill(skillId: number, landsIn: number): boolean
+  skill(skillId: number, timing: SkillTiming): boolean
   /** Hit reaction: red flash, flinch, and the "hit" clip if the model has one. */
   hit(crit: boolean): void
   die(): void
@@ -62,6 +63,15 @@ export interface CharacterHandle {
   revive(): void
   /** Model height in world units (after scaling). */
   height(): number
+}
+
+/** When a cast's phases play, in game seconds from now (combat 'cast' event). */
+export interface SkillTiming {
+  windUp: number
+  /** Seconds until the blow lands. */
+  landsIn: number
+  /** Seconds the whole release clip takes; absent: fitted so the blow lands with the hit. */
+  releaseTime?: number
 }
 
 const FLASH_COLOR = new Color('#ff3b1f')
@@ -373,18 +383,24 @@ export function Character({
         if (state.dead || !action) return
         playOnce(action, model.attackImpact / TIMINGS.impactDelay, 0.08)
       },
-      skill(skillId, landsIn) {
+      skill(skillId, { windUp, landsIn, releaseTime }) {
         const anim = lcSkillAnims?.[skillId]
         const fire = clipAction(anim?.fire)
         if (!anim || !fire || state.dead) return false
         const ready = clipAction(anim.ready)
+        // the client plays the whole release at the cast speed (Player.es: length × skill speed)
         const release = (inSeconds: number) =>
-          playOnce(fire, clampSpeed((fire.getClip().duration * SKILL_IMPACT_AT) / inSeconds), 0.08)
-        const windUp = landsIn - TIMINGS.impactDelay
+          playOnce(
+            fire,
+            releaseTime
+              ? fire.getClip().duration / Math.max(0.05, releaseTime)
+              : clampSpeed((fire.getClip().duration * SKILL_IMPACT_AT) / inSeconds),
+            0.08,
+          )
         const still = clipAction(anim.still)
         const releaseAfter = (inSeconds: number) => ({
           in: inSeconds,
-          start: () => release(TIMINGS.impactDelay),
+          start: () => release(landsIn - windUp),
         })
         if (ready && still && windUp > ready.getClip().duration * 1.2) {
           // a long spell: the wind-up at its own pace, then the caster holds it until the release
@@ -403,7 +419,7 @@ export function Character({
           state.pending = releaseAfter(windUp)
         } else {
           state.pending = null
-          release(Math.max(0.1, landsIn))
+          release(Math.max(0.1, landsIn - Math.max(0, windUp)))
         }
         return true
       },
