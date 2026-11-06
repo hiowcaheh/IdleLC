@@ -31,6 +31,15 @@ describe('potionSupply', () => {
     expect(potionSupply(regen).map((p) => p.itemId)).toEqual([490])
   })
 
+  it("hands the slot slider's share to the fight as a fraction of the bar", () => {
+    const set = {
+      ...knight,
+      inventory: bag,
+      potionSlots: { ...slots(43, 484), mp: { itemId: 484, auto: true, below: 45 } },
+    }
+    expect(potionSupply(set).map((p) => p.below)).toEqual([undefined, 0.45])
+  })
+
   it('leaves out slots whose automatic use is off, empty or used up', () => {
     const hpOff = {
       ...knight,

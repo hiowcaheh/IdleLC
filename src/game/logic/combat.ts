@@ -79,6 +79,11 @@ export interface PotionSupply {
   name: string
   count: number
   potion: PotionDef
+  /**
+   * Share of HP / MP (0–1) the hero drinks it below, from the quick slot's slider; unset: healing
+   * below HP_POTION_BELOW, mana below MP_POTION_BELOW, recovery whenever the bar is not full.
+   */
+  below?: number
 }
 
 export interface FighterInit {
@@ -1525,10 +1530,10 @@ function potionValue(potion: PotionDef): number {
 }
 
 /**
- * The potion of a kind to drink now, or null: healing below HP_POTION_BELOW, mana below
- * MP_POTION_BELOW, recovery potions while HP / MP is not full — only when no potion of the kind is
- * working and its cooldown is over. Picks the smallest potion that covers what is missing (the
- * strongest when none does; recovery potions: the strongest).
+ * The potion of a kind to drink now, or null: below the share the slot sets (healing below
+ * HP_POTION_BELOW and mana below MP_POTION_BELOW by default, recovery potions while HP / MP is not
+ * full) — only when no potion of the kind is working and its cooldown is over. Picks the smallest
+ * potion that covers what is missing (the strongest when none does; recovery potions: the strongest).
  */
 export function choosePotion(
   f: Fighter,
@@ -1536,20 +1541,19 @@ export function choosePotion(
   stats: CombatStats = effectiveStats(f),
 ): PotionSupply | null {
   if (!f.potions || f.potionCooldowns[kind] || f.effects.some((e) => e.potion === kind)) return null
-  const maxMp = stats.maxMp ?? 0
-  const missing = kind === 'hp' || kind === 'hpRegen' ? stats.maxHp - f.hp : maxMp - f.mp
-  const low =
-    kind === 'hp'
-      ? f.hp < stats.maxHp * HP_POTION_BELOW
-      : kind === 'mp'
-        ? f.mp < maxMp * MP_POTION_BELOW
-        : missing > 0
-  if (!low) return null
   const owned = f.potions
     .filter((p) => p.potion.kind === kind && potionsLeft(f, p) > 0)
     .sort((a, b) => potionValue(a.potion) - potionValue(b.potion))
   if (owned.length === 0) return null
+  const health = kind === 'hp' || kind === 'hpRegen'
+  const max = health ? stats.maxHp : (stats.maxMp ?? 0)
+  const value = health ? f.hp : f.mp
+  const below =
+    owned.find((p) => p.below !== undefined)?.below ??
+    (kind === 'hp' ? HP_POTION_BELOW : kind === 'mp' ? MP_POTION_BELOW : 1)
+  if (!(value < max * below)) return null
   if (kind === 'hpRegen' || kind === 'mpRegen') return owned[owned.length - 1]!
+  const missing = max - value
   return owned.find((p) => potionValue(p.potion) >= missing) ?? owned[owned.length - 1]!
 }
 

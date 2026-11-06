@@ -335,6 +335,8 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                       toast(DRINK_PROBLEMS[problem], 'error')
                       return
                     }
+                    // drunk: the item window closes (owner's request), the toast says what it did
+                    setSelected(null)
                     // a boost changes stats; healing and mana potions restore over time
                     const changes =
                       item.potion!.kind === 'boost'

@@ -15,6 +15,11 @@ export interface PotionSlot {
   itemId: number | null
   /** The hero drinks it by itself. */
   auto: boolean
+  /**
+   * The share of HP / MP (in %) the hero drinks it below; unset: the potion's default
+   * (DEFAULT_BELOW). 100 means whenever the bar is not full.
+   */
+  below?: number
 }
 
 export type PotionSlots = Record<PotionGroup, PotionSlot>
@@ -24,6 +29,36 @@ export const POTION_GROUPS: readonly PotionGroup[] = ['hp', 'mp']
 export const EMPTY_POTION_SLOTS: PotionSlots = {
   hp: { itemId: null, auto: true },
   mp: { itemId: null, auto: true },
+}
+
+/** Lowest share (%) a slot's slider goes down to, and its step. */
+export const BELOW_MIN = 5
+export const BELOW_STEP = 5
+
+/**
+ * When the hero drinks a potion of a kind by itself (% of the bar): healing below half the HP,
+ * mana below 30% MP (own rules, as before the slider), recovery potions whenever the bar is not full.
+ */
+export const DEFAULT_BELOW: Record<PotionDef['kind'], number> = {
+  hp: 50,
+  mp: 30,
+  hpRegen: 100,
+  mpRegen: 100,
+  boost: 100,
+}
+
+/** A slider share in BELOW_STEP steps between BELOW_MIN and 100, or undefined for none. */
+export function cleanBelow(value: unknown): number | undefined {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return undefined
+  const stepped = Math.round(value / BELOW_STEP) * BELOW_STEP
+  return Math.min(100, Math.max(BELOW_MIN, stepped))
+}
+
+/** The share (%) a slot's potion is drunk below: the slider's, else the potion's default. */
+export function slotBelow(slot: PotionSlot, group: PotionGroup): number {
+  if (slot.below !== undefined) return slot.below
+  const kind = slot.itemId === null ? undefined : getItem(slot.itemId).potion?.kind
+  return DEFAULT_BELOW[kind ?? group]
 }
 
 /** The slot a potion goes in: healing and HP recovery → HP, mana and MP recovery → MP. */
@@ -67,12 +102,16 @@ export function applyPotionSlot(
   slot: PotionSlot,
 ): CharacterData {
   const { itemId, auto } = slot
+  const below = cleanBelow(slot.below)
   if (itemId !== null) {
     if (!fitsSlot(itemId, group)) throw new GameError('wrong-potion', `item ${itemId}`)
     if (countOwned(character.inventory, itemId) <= 0) throw new GameError('not-owned')
   }
   return {
     ...character,
-    potionSlots: { ...character.potionSlots, [group]: { itemId, auto: Boolean(auto) } },
+    potionSlots: {
+      ...character.potionSlots,
+      [group]: { itemId, auto: Boolean(auto), ...(below !== undefined ? { below } : {}) },
+    },
   }
 }

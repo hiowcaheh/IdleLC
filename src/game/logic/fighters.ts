@@ -58,7 +58,7 @@ export interface Hero {
 export function potionSupply({ level, inventory = [], potionSlots }: Hero): PotionSupply[] {
   if (!potionSlots) return []
   return POTION_GROUPS.flatMap((group) => {
-    const { itemId, auto } = potionSlots[group]
+    const { itemId, auto, below } = potionSlots[group]
     if (!auto || itemId === null) return []
     const item = getItem(itemId)
     const potion = item.potion
@@ -71,7 +71,15 @@ export function potionSupply({ level, inventory = [], potionSlots }: Hero): Poti
       level < item.level
     )
       return []
-    return [{ itemId, name: item.name, count, potion }]
+    return [
+      {
+        itemId,
+        name: item.name,
+        count,
+        potion,
+        ...(below !== undefined ? { below: below / 100 } : {}),
+      },
+    ]
   })
 }
 

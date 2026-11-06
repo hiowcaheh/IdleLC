@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { createCharacterData } from './character.ts'
-import { applyPotionSlot, fitsSlot, fullestPotion, potionGroup } from './potions.ts'
+import {
+  applyPotionSlot,
+  cleanBelow,
+  fitsSlot,
+  fullestPotion,
+  potionGroup,
+  slotBelow,
+} from './potions.ts'
 
 // placeholder data: 43 Small Healing Potion, 484 Small Mana Potion, 490 Small HP Recovery Potion
 const hero = {
@@ -45,5 +52,18 @@ describe('potion quick slots', () => {
     expect(() => applyPotionSlot(noMana, 'mp', { itemId: 484, auto: true })).toThrowError(
       /not-owned/,
     )
+  })
+
+  it("keeps the slider's share in 5% steps from 5% to 100%; unset is the potion's default", () => {
+    expect(cleanBelow(42)).toBe(40)
+    expect(cleanBelow(0)).toBe(5)
+    expect(cleanBelow(250)).toBe(100)
+    expect(cleanBelow('50')).toBeUndefined()
+    const set = applyPotionSlot(hero, 'hp', { itemId: 43, auto: true, below: 63 })
+    expect(set.potionSlots.hp).toEqual({ itemId: 43, auto: true, below: 65 })
+    expect(slotBelow(set.potionSlots.hp, 'hp')).toBe(65)
+    expect(slotBelow({ itemId: 43, auto: true }, 'hp')).toBe(50)
+    expect(slotBelow({ itemId: 490, auto: true }, 'hp')).toBe(100) // recovery: when not full
+    expect(slotBelow({ itemId: null, auto: true }, 'mp')).toBe(30)
   })
 })

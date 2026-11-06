@@ -97,7 +97,11 @@ export function DungeonLootButton() {
               ? 'Rewards earned during this run. They are already saved to your character. Time is paused while this window is open.'
               : 'Use potions from your inventory. Potions keep their original duration, including their remaining time after the run. Dungeon blessings end with the run.'}
           </p>
-          {tab === 'loot' ? <DungeonLootSummary rewards={run.rewards} /> : <DungeonPotions />}
+          {tab === 'loot' ? (
+            <DungeonLootSummary rewards={run.rewards} />
+          ) : (
+            <DungeonPotions onDrunk={() => setOpen(false)} />
+          )}
           <button type="button" className="button button--wide" onClick={() => setOpen(false)}>
             Return
           </button>
@@ -107,7 +111,8 @@ export function DungeonLootButton() {
   )
 }
 
-function DungeonPotions() {
+/** The bag's potions; a potion drunk closes the window, back to the run. */
+function DungeonPotions({ onDrunk }: { onDrunk(): void }) {
   const character = useGameStore((s) => s.character)!
   const drink = useGameStore((s) => s.drinkPotion)
   const [busy, setBusy] = useState(false)
@@ -135,7 +140,10 @@ function DungeonPotions() {
               try {
                 const problem = await drink(itemId)
                 if (problem) toast(DRINK_PROBLEMS[problem], 'error')
-                else toast(`${item.name} used.`)
+                else {
+                  toast(`${item.name} used.`)
+                  onDrunk()
+                }
               } catch (e) {
                 const key = e instanceof GameError ? e.code : ''
                 toast(

@@ -702,6 +702,19 @@ describe('potions in combat', () => {
     expect(effectiveStats(low.state.player).hpRegen).toBe(2)
   })
 
+  it("drinks at the share the quick slot's slider sets", () => {
+    const small = { ...potion(43, 'hp', 16), below: 0.8 }
+    expect(choosePotion(drinker([small], 790).player, 'hp')).toBe(small)
+    expect(choosePotion(drinker([small], 810).player, 'hp')).toBeNull()
+    const mana = { ...potion(484, 'mp', 8), below: 0.1 }
+    expect(choosePotion(drinker([mana], 1000, 20).player, 'mp')).toBeNull()
+    expect(choosePotion(drinker([mana], 1000, 9).player, 'mp')).toBe(mana)
+    // a recovery potion set to 50% waits for half the bar instead of drinking when not full
+    const recovery = { ...potion(490, 'hpRegen', 2, 5, 600), below: 0.5 }
+    expect(choosePotion(drinker([recovery], 900).player, 'hpRegen')).toBeNull()
+    expect(choosePotion(drinker([recovery], 400).player, 'hpRegen')).toBe(recovery)
+  })
+
   it('a stunned hero drinks nothing; monsters carry no potions', () => {
     const s = drinker([potion(43, 'hp', 16)], 100)
     s.player.effects = [

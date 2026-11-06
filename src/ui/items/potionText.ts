@@ -63,11 +63,17 @@ export function potionNotes(potion: PotionDef): string[] {
     case 'hp':
     case 'mp': {
       const below = potion.kind === 'hp' ? HP_POTION_BELOW : MP_POTION_BELOW
-      return [`Your hero drinks it in fights below ${percent(below)} ${what}.`]
+      return [
+        `In its quick slot with AUTO on, your hero drinks it in fights below ${percent(below)} ${what}.`,
+        "The slot's slider sets another share.",
+      ]
     }
     case 'hpRegen':
     case 'mpRegen':
-      return [`Your hero drinks it in fights when ${what} is not full.`]
+      return [
+        `In its quick slot with AUTO on, your hero drinks it in fights when ${what} is not full.`,
+        "The slot's slider sets a share to wait for.",
+      ]
     case 'boost':
       return [
         'Drink it from the bag.',

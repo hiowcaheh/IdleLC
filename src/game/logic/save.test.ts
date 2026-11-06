@@ -237,6 +237,19 @@ describe('loadSave', () => {
     })
   })
 
+  it("keeps a quick slot's drink share in slider steps, without one when none was set", () => {
+    const save = withCharacter()
+    const set = {
+      ...save.characters[0]!,
+      potionSlots: { hp: { itemId: 43, auto: true, below: 72 }, mp: { itemId: 484, below: 'x' } },
+    }
+    const r = loadSave(JSON.stringify({ ...save, characters: [set] }), NOW)
+    expect(r.save.characters[0]!.potionSlots).toEqual({
+      hp: { itemId: 43, auto: true, below: 70 },
+      mp: { itemId: 484, auto: true },
+    })
+  })
+
   it('gives version 7 characters an empty play-time counter', () => {
     const v7 = { ...withCharacter(), saveVersion: 7 }
     const old: Record<string, unknown> = {

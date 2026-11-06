@@ -34,6 +34,7 @@ import { addToInventory, type ItemStack } from './loot.ts'
 import { OPTION_PLAY_SECONDS } from './options.ts'
 import {
   POTION_GROUPS,
+  cleanBelow,
   fitsSlot,
   fullestPotion,
   type PotionGroup,
@@ -508,9 +509,11 @@ function sanitizePotionSlots(raw: unknown): PotionSlots {
   const slot = (group: PotionGroup): PotionSlot => {
     const entry = isRecord(slots[group]) ? slots[group] : {}
     const itemId = int(entry.itemId, 0)
+    const below = cleanBelow(entry.below)
     return {
       itemId: itemId > 0 && fitsSlot(itemId, group) ? itemId : null,
       auto: entry.auto !== false,
+      ...(below !== undefined ? { below } : {}),
     }
   }
   return Object.fromEntries(POTION_GROUPS.map((g) => [g, slot(g)])) as PotionSlots

@@ -2922,6 +2922,28 @@ a.button {
   font-size: 13px;
   color: var(--parchment-dim);
 }
+/* the slider under AUTO: the share of the bar the potion is drunk below */
+.potion-picker__below {
+  margin: -10px 0 10px;
+  padding: 8px 10px 4px;
+  border: 1px solid var(--gilt);
+  border-top: 0;
+  background: #141c22b3;
+}
+.potion-picker__below-label {
+  display: block;
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+.potion-picker__below-label b {
+  color: var(--gilt-bright);
+}
+.potion-picker__slider {
+  display: block;
+  width: 100%;
+  margin: 6px 0;
+  accent-color: var(--gilt);
+}
 .potion-picker .item-row.is-in-slot {
   background: linear-gradient(90deg, rgba(255, 214, 110, 0.16), rgba(255, 214, 110, 0.03));
   box-shadow:

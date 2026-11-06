@@ -1,12 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { getItem } from '../../game/data/items.ts'
 import type { ItemDef } from '../../game/data/types.ts'
 import { potionsLeft } from '../../game/logic/combat.ts'
 import {
+  BELOW_MIN,
+  BELOW_STEP,
   POTION_GROUPS,
   countOwned,
   fitsSlot,
+  slotBelow,
   type PotionGroup,
   type PotionSlot,
 } from '../../game/logic/potions.ts'
@@ -125,6 +128,15 @@ function PotionSlotPicker({ group, onClose }: { group: PotionGroup; onClose(): v
           onChange={() => put({ ...current, auto: !current.auto })}
         />
       </label>
+      {current.auto && (
+        <BelowSlider
+          // a saved share starts the slider over from it
+          key={slotBelow(current, group)}
+          group={group}
+          saved={slotBelow(current, group)}
+          onCommit={(below) => put({ ...current, below })}
+        />
+      )}
       {owned.length > 0 ? (
         <ul className="item-list">
           {owned.map(({ itemId, count, item }) => {
@@ -172,5 +184,55 @@ function PotionSlotPicker({ group, onClose }: { group: PotionGroup; onClose(): v
         </p>
       )}
     </Sheet>
+  )
+}
+
+/** The share of HP / MP the hero drinks the slot's potion below; saved when the thumb is let go. */
+function BelowSlider({
+  group,
+  saved,
+  onCommit,
+}: {
+  group: PotionGroup
+  saved: number
+  onCommit(below: number): void
+}) {
+  const [value, setValue] = useState(saved)
+  const input = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    // the input's own change event fires once, when the thumb is let go (React's fires per step)
+    const el = input.current
+    if (!el) return
+    const done = () => {
+      const below = Number(el.value)
+      if (below !== saved) onCommit(below)
+    }
+    el.addEventListener('change', done)
+    return () => el.removeEventListener('change', done)
+  }, [saved, onCommit])
+  const bar = group === 'hp' ? 'HP' : 'MP'
+  return (
+    <div className="potion-picker__below">
+      <span className="potion-picker__below-label">
+        {value >= 100 ? (
+          <>Drinks it whenever {bar} is not full</>
+        ) : (
+          <>
+            Drinks it below <b>{value}%</b> {bar}
+          </>
+        )}
+      </span>
+      <input
+        ref={input}
+        type="range"
+        className="potion-picker__slider"
+        aria-label={`Drink below this share of ${bar}`}
+        min={BELOW_MIN}
+        max={100}
+        step={BELOW_STEP}
+        value={value}
+        onChange={(e) => setValue(Number(e.target.value))}
+      />
+    </div>
   )
 }
