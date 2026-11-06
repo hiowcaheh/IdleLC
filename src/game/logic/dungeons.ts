@@ -1,5 +1,7 @@
 /** IdleLC's active horde mode. Original actors, skill effects and rewards; own waves and crystals. */
 import {
+  DUNGEON_NEXT_WAVE_DELAY,
+  dungeonWaveSize,
   DUNGEON_DAILY_RUNS,
   DUNGEON_MAX_ENEMIES,
   DUNGEON_MAX_LEVEL,
@@ -97,6 +99,8 @@ export interface DungeonRun {
   wave: number
   remainingSpawns: number
   spawnIn: number
+  /** Seconds until the next wave once this one is cleared; null while monsters are left. */
+  nextWaveIn: number | null
   nextUid: number
   targetUid: number | null
   player: Fighter
@@ -345,6 +349,7 @@ export function createDungeonRun(
     wave: 0,
     remainingSpawns: 0,
     spawnIn: 0,
+    nextWaveIn: null,
     nextUid: 1,
     targetUid: null,
     player,
@@ -492,11 +497,21 @@ export function dungeonStep(
     }
   }
 
-  const wave = Math.min(20, Math.floor(run.elapsed / DUNGEON_WAVE_SECONDS) + 1)
-  if (wave > next.wave) {
-    next.wave = wave
-    next.remainingSpawns += 4 + wave
+  // A wave comes 5 s after the last one is cleared, at the latest on its 30 s schedule; after
+  // wave 20 the last wave comes again until the time is up (owner's rules, 2026-11-06).
+  const scheduled = Math.min(20, Math.floor(run.elapsed / DUNGEON_WAVE_SECONDS) + 1)
+  const cleared =
+    next.wave > 0 && next.remainingSpawns === 0 && !next.enemies.some((e) => e.fighter.hp > 0)
+  next.nextWaveIn = cleared ? (next.nextWaveIn ?? DUNGEON_NEXT_WAVE_DELAY) - dt : null
+  if (
+    next.wave === 0 ||
+    scheduled > next.wave ||
+    (next.nextWaveIn !== null && next.nextWaveIn <= 1e-9)
+  ) {
+    next.wave = Math.min(20, next.wave + 1)
+    next.remainingSpawns += dungeonWaveSize(next.wave)
     next.spawnIn = 0
+    next.nextWaveIn = null
   }
   next.spawnIn -= dt
   if (

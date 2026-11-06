@@ -24,7 +24,9 @@ import { dungeonSession } from '../game/session/dungeonSession.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import type { ViewEvent } from '../state/combatEvents.ts'
 import { levelTone } from '../ui/hud/levelColor.ts'
+import { useFloatingTexts } from '../state/floatingTexts.ts'
 import { Character, type CharacterHandle } from './Character.tsx'
+import { DamageNumbers } from './DamageNumbers.tsx'
 import { activeArtifactVisual } from './artifactEffects.ts'
 import { HpBar3D } from './HpBar3D.tsx'
 import { SkillEffects } from './SkillEffects.tsx'
@@ -122,10 +124,26 @@ export function DungeonScene({ id }: { id: DungeonId }) {
           else if (e.type === 'death') (e.who === 'player' ? hero.current : monster)?.die()
           else if (e.type === 'summonAttack') summonHandles.current.get(e.element)?.attack()
           else if (e.type === 'summonHit') summonHandles.current.get(e.element)?.hit(e.crit)
+          else if (e.type === 'potion' && useGameStore.getState().save.settings.showDamageNumbers) {
+            // the potion's name over the hero, as in the field, so a drink is seen in the crowd
+            const height = hero.current?.height() ?? 2
+            useFloatingTexts
+              .getState()
+              .add(e.name, e.kind === 'hp' || e.kind === 'hpRegen' ? 'heal' : 'mana', [
+                view.player.x,
+                height + 0.6,
+                view.player.z,
+              ])
+          }
         }
       }),
     [],
   )
+  // texts of the field (or an earlier run) do not float over the arena
+  useEffect(() => {
+    useFloatingTexts.getState().clear()
+    return () => useFloatingTexts.getState().clear()
+  }, [])
 
   useFrame(({ camera }, delta) => {
     const s = dungeonSession.state
@@ -232,6 +250,7 @@ export function DungeonScene({ id }: { id: DungeonId }) {
           </group>
         )
       })}
+      <DamageNumbers />
       <group ref={playerGroup}>
         <Character
           ref={hero}

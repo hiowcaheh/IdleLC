@@ -20,6 +20,7 @@ export function DevPanel() {
   const monsterId = useGameStore((s) => s.character?.location.monsterId ?? '')
   const devTravel = useGameStore((s) => s.devTravel)
   const devAddTitleItem = useGameStore((s) => s.devAddTitleItem)
+  const devResetDungeonEntries = useGameStore((s) => s.devResetDungeonEntries)
   const level = useGameStore((s) => s.character?.level ?? 1)
   const devSetLevel = useGameStore((s) => s.devSetLevel)
   const devAddExp = useGameStore((s) => s.devAddExp)
@@ -138,6 +139,12 @@ export function DevPanel() {
         </button>
         <button type="button" className="dev-chip" onClick={() => devAddSp(10)}>
           +10 SP
+        </button>
+      </div>
+
+      <div className="dev-panel__row" role="group" aria-label="Dungeons">
+        <button type="button" className="dev-chip" onClick={devResetDungeonEntries}>
+          Reset dungeon entries
         </button>
       </div>
 

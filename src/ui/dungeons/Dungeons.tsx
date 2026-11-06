@@ -197,6 +197,10 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
                 <ul>
                   <li>Survive 20 waves. Each kill scores 1 point.</li>
                   <li>
+                    The next wave comes 5 seconds after you clear the last one, or on its own after
+                    30 seconds.
+                  </li>
+                  <li>
                     Collect the crystals to reach dungeon level 20 and choose class blessings.
                   </li>
                   <li>

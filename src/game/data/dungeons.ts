@@ -32,3 +32,7 @@ export const DUNGEON_MAX_LEVEL = 20
 export const DUNGEON_RADIUS = 28
 export const DUNGEON_MAX_ENEMIES = 16
 export const DUNGEON_WAVE_SECONDS = 30
+/** Seconds after a wave is cleared before the next one comes (owner's rule, 2026-11-06). */
+export const DUNGEON_NEXT_WAVE_DELAY = 5
+/** Monsters a wave sends: twice the earlier 4 + wave (owner's rule, 2026-11-06). */
+export const dungeonWaveSize = (wave: number) => 2 * (4 + wave)

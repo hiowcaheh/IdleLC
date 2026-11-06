@@ -128,6 +128,8 @@ interface GameStore {
   devTravel(zoneId: string, monsterId: string): void
   /** Puts a title's item in the bag. */
   devAddTitleItem(titleId: number): void
+  /** Gives back today's dungeon entries. */
+  devResetDungeonEntries(): void
 }
 
 function toHud(c: CombatState): CombatHud {
@@ -712,6 +714,10 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     devAddTitleItem(titleId) {
       dev((id) => gameService.dev?.addTitleItem(id, titleId))
+    },
+
+    devResetDungeonEntries() {
+      dev((id) => gameService.dev?.resetDungeonEntries(id))
     },
 
     devSimulateAfk(seconds) {

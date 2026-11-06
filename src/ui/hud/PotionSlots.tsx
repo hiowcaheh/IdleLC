@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { GameError } from '../../game/logic/errors.ts'
+import { toast } from '../../state/toasts.ts'
 import { createPortal } from 'react-dom'
 import { getItem } from '../../game/data/items.ts'
 import type { ItemDef } from '../../game/data/types.ts'
@@ -15,7 +17,7 @@ import {
 } from '../../game/logic/potions.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
-import { potionLine } from '../items/potionText.ts'
+import { DRINK_PROBLEMS, potionLine } from '../items/potionText.ts'
 import { Sheet } from '../Sheet.tsx'
 import { useCombatTicker } from '../skills/useCombatTicker.ts'
 
@@ -25,16 +27,48 @@ const EMPTY: ItemDef = { id: 0, name: 'Potion', type: 'potion', level: 0, price:
 
 const fmt = (n: number) => n.toLocaleString('en-US')
 
+/** Milliseconds a slot is held to open its settings in a dungeon (a tap drinks there). */
+const HOLD_MS = 450
+
 /**
  * The HP and MP potion quick slots: the potion the player put in each, how many are left and
  * whether the hero drinks it by itself. A tap opens the slot to choose its potion.
  */
 export function PotionSlots() {
   const character = useGameStore((s) => s.character)
+  const inDungeon = useGameStore((s) => !!s.dungeon)
+  const drinkPotion = useGameStore((s) => s.drinkPotion)
   const combat = useCombatTicker(500)
   const [open, setOpen] = useState<PotionGroup | null>(null)
+  // a held slot opens its settings; the tap that ends the hold does not drink too
+  const hold = useRef<{ timer: number; opened: boolean } | null>(null)
   if (!character) return null
   const away = character.expedition !== null
+
+  const startHold = (group: PotionGroup) => {
+    if (!inDungeon) return
+    const timer = window.setTimeout(() => {
+      if (hold.current) hold.current.opened = true
+      setOpen(group)
+    }, HOLD_MS)
+    hold.current = { timer, opened: false }
+  }
+  const endHold = () => {
+    if (hold.current) window.clearTimeout(hold.current.timer)
+  }
+  /** In a dungeon a tap drinks the slot's potion, like the client's quick slots in a fight. */
+  const drink = async (itemId: number) => {
+    try {
+      const problem = await drinkPotion(itemId)
+      if (problem) toast(DRINK_PROBLEMS[problem], 'error')
+    } catch (e) {
+      const code = e instanceof GameError ? e.code : ''
+      toast(
+        DRINK_PROBLEMS[code as keyof typeof DRINK_PROBLEMS] ?? 'This potion cannot be used now.',
+        'error',
+      )
+    }
+  }
 
   const slot = (group: PotionGroup) => {
     const { itemId, auto } = character.potionSlots[group]
@@ -49,15 +83,29 @@ export function PotionSlots() {
     const item = itemId === null ? EMPTY : getItem(itemId)
     const what = itemId === null ? 'empty' : `${item.name}: ${count}`
     const state = auto ? 'drunk automatically' : 'automatic use off'
+    const quick = inDungeon && itemId !== null
     return (
       <button
         key={group}
         type="button"
         className={`potion-slot potion-slot--${group}${auto ? ' is-auto' : ''}${count === 0 ? ' is-empty' : ''}`}
-        aria-label={`${LABELS[group]} slot: ${what}, ${state}`}
-        title={`${LABELS[group]} slot: ${what}, ${state} (tap to choose)`}
+        aria-label={`${LABELS[group]} slot: ${what}, ${state}${quick ? ', tap to drink, hold for settings' : ''}`}
+        title={`${LABELS[group]} slot: ${what}, ${state} (${quick ? 'tap to drink, hold for settings' : 'tap to choose'})`}
         disabled={away}
-        onClick={() => setOpen(group)}
+        onPointerDown={quick ? () => startHold(group) : undefined}
+        onPointerUp={quick ? endHold : undefined}
+        onPointerLeave={quick ? endHold : undefined}
+        onPointerCancel={quick ? endHold : undefined}
+        onContextMenu={(e) => {
+          // a long press or a right click opens the settings without the system menu
+          e.preventDefault()
+          if (quick) setOpen(group)
+        }}
+        onClick={() => {
+          if (!quick) return setOpen(group)
+          if (hold.current?.opened) return
+          void drink(itemId)
+        }}
       >
         <ItemIcon item={item} size={32} />
         {itemId !== null && <span className="potion-slot__count">{count}</span>}

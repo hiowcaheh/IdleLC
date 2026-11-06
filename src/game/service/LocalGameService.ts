@@ -648,6 +648,13 @@ export class LocalGameService implements GameService {
         })),
       )
     },
+    resetDungeonEntries: async (characterId) =>
+      copy(
+        this.update(characterId, (c) => ({
+          ...c,
+          dungeons: { ...dailyProgress(c.dungeons, this.now()), entries: {} },
+        })),
+      ),
     openAllSpots: async (characterId) =>
       copy(
         this.update(characterId, (c) => ({

@@ -7,7 +7,12 @@ vi.mock('../data/lcSource.ts', async () => ({
   lcModels: (await import('../data/generated/lc-models.json')).default,
 }))
 
-import { DUNGEONS, DUNGEON_MAX_ENEMIES } from '../data/dungeons.ts'
+import {
+  DUNGEONS,
+  DUNGEON_MAX_ENEMIES,
+  DUNGEON_NEXT_WAVE_DELAY,
+  dungeonWaveSize,
+} from '../data/dungeons.ts'
 import { ITEMS } from '../data/items.ts'
 import { lcData } from '../data/lcSource.ts'
 import { getMonster } from '../data/monsters.ts'
@@ -292,6 +297,27 @@ describe('dungeons on the original database', () => {
     expect(next.enemies.find((e) => e.uid === a.uid)!.fighter.aimAt).toBeUndefined()
     expect(next.enemies.find((e) => e.uid === b.uid)!.fighter.aimAt).toBe(0)
     expect(state.enemies[0]!.hate!.player).toBe(100)
+  })
+
+  it('sends twice the old wave size and the next wave 5 s after a clear, repeating wave 20', () => {
+    expect(dungeonWaveSize(1)).toBe(10)
+    expect(dungeonWaveSize(20)).toBe(48)
+    let state = dungeonStep(run(), 0.05, STILL, rng()).run
+    expect(state.wave).toBe(1)
+    expect(state.remainingSpawns + state.enemies.length).toBe(10)
+    // the wave is cleared early (all spawned and down): 5 s later the next one comes
+    state = { ...state, remainingSpawns: 0, enemies: [] }
+    const steps = Math.round(DUNGEON_NEXT_WAVE_DELAY / 0.05)
+    for (let i = 0; i < steps - 1; i++) state = dungeonStep(state, 0.05, STILL, rng()).run
+    expect(state.wave).toBe(1)
+    state = dungeonStep(state, 0.05, STILL, rng()).run
+    expect(state.wave).toBe(2)
+    expect(state.elapsed).toBeLessThan(10)
+    // a monster left stops the countdown; the 30 s schedule still brings the wave
+    state = { ...state, wave: 20, remainingSpawns: 0, enemies: [], nextWaveIn: 0.04 }
+    state = dungeonStep(state, 0.05, STILL, rng()).run
+    expect(state.wave).toBe(20)
+    expect(state.remainingSpawns + state.enemies.length).toBe(48)
   })
 
   it('ends at exactly 600 active seconds without another wave or bonus time', () => {
@@ -584,6 +610,19 @@ describe('saved dungeon commands', () => {
     expect(dungeonRunsLeft(f.read(), 'procyon', f.now())).toBe(2)
   })
 
+  it("the developer tool gives back the day's entries", async () => {
+    const f = fixture(14)
+    await f.service.load()
+    for (let n = 0; n < 2; n++) {
+      await f.service.startDungeon('d', 'belfist')
+      await f.service.finishDungeon('d')
+    }
+    expect(dungeonRunsLeft(f.read(), 'belfist', f.now())).toBe(0)
+    await f.service.dev!.resetDungeonEntries('d')
+    expect(dungeonRunsLeft(f.read(), 'belfist', f.now())).toBe(2)
+    expect(f.read().dungeons!.history).toHaveLength(2)
+  })
+
   it('locks gear and field/AFK commands in the service while leaving skill toggles usable', async () => {
     const f = fixture()
     await f.service.load()
@@ -711,7 +750,8 @@ describe('saved dungeon commands', () => {
       }
       expect(update.result!.score).toBeGreaterThan(0)
       if (update.result!.outcome === 'completed') expect(update.result!.score).toBeGreaterThan(100)
-      expect(update.result!.score).toBeLessThanOrEqual(290)
+      // waves come as soon as they are cleared now, but never more than one spawn per 0.65 s
+      expect(update.result!.score).toBeLessThanOrEqual(Math.ceil(600 / 0.65))
       expect(update.character.stats.kills - character.stats.kills).toBe(update.result!.score)
       expect(update.character.gold - character.gold).toBe(update.result!.gold)
       expect(update.character.sp - character.sp).toBe(update.result!.sp - update.result!.lost.sp)

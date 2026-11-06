@@ -113,6 +113,8 @@ export interface DevCommands {
   openAllSpots(characterId: string): Promise<CharacterData>
   /** Puts the item of a title in the bag. */
   addTitleItem(characterId: string, titleId: number): Promise<CharacterData>
+  /** Gives back today's dungeon entries (the runs already made are not undone). */
+  resetDungeonEntries(characterId: string): Promise<CharacterData>
 }
 
 /** Subset of the Web Storage API — lets tests use an in-memory store. */
