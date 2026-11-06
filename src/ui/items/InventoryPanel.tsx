@@ -1,6 +1,3 @@
-import { effectiveStats } from '../../game/logic/combat.ts'
-import { combatSession } from '../../game/session/combatSession.ts'
-import { dungeonSession } from '../../game/session/dungeonSession.ts'
 import { statChanges, withStatChanges } from '../statChanges.tsx'
 import { Gold } from '../Gold.tsx'
 import { useState } from 'react'
@@ -27,7 +24,7 @@ import { useGameStore } from '../../state/gameStore.ts'
 import { STAT_TOAST_MS, toast } from '../../state/toasts.ts'
 import { heroStats, nameTone, pieceName, rareLabel, wearProblem } from '../gear/format.ts'
 import { PotionNotes } from './PotionNotes.tsx'
-import { DRINK_PROBLEMS, potionLine } from './potionText.ts'
+import { drinkWithToast } from './drinkWithToast.ts'
 import { Sheet } from '../Sheet.tsx'
 import { ItemIcon } from './ItemIcon.tsx'
 import { WearCompare } from '../gear/WearCompare.tsx'
@@ -92,7 +89,6 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   const [selected, setSelected] = useState<string | null>(null)
   const [category, setCategory] = useState<Category>('all')
   const [confirmAll, setConfirmAll] = useState(false)
-  const drinkPotion = useGameStore((s) => s.drinkPotion)
   const [busy, setBusy] = useState(false)
 
   if (!character) return null
@@ -326,35 +322,9 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                 disabled={busy || away}
                 onClick={async () => {
                   setBusy(true)
-                  try {
-                    const before = effectiveStats(
-                      (dungeonSession.combat() ?? combatSession.state).player,
-                    )
-                    const problem = await drinkPotion(stack.itemId)
-                    if (problem) {
-                      toast(DRINK_PROBLEMS[problem], 'error')
-                      return
-                    }
-                    // drunk: the item window closes (owner's request), the toast says what it did
-                    setSelected(null)
-                    // a boost changes stats; healing and mana potions restore over time
-                    const changes =
-                      item.potion!.kind === 'boost'
-                        ? statChanges(
-                            before,
-                            effectiveStats((dungeonSession.combat() ?? combatSession.state).player),
-                          )
-                        : [{ label: '', text: potionLine(item.potion!), good: true }]
-                    toast(
-                      withStatChanges(`You drink ${item.name}.`, changes),
-                      'info',
-                      STAT_TOAST_MS,
-                    )
-                  } catch (error) {
-                    toast(error instanceof Error ? error.message : 'Potion unavailable.', 'error')
-                  } finally {
-                    setBusy(false)
-                  }
+                  // drunk: the item window closes (owner's request), the toast says what it did
+                  if (await drinkWithToast(stack.itemId)) setSelected(null)
+                  setBusy(false)
                 }}
               >
                 Drink

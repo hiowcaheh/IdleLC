@@ -4,6 +4,7 @@ import {
   DUNGEON_MAX_LEVEL,
   DUNGEON_SECONDS,
   getDungeon,
+  type DungeonId,
 } from '../../game/data/dungeons.ts'
 import { getMonster } from '../../game/data/monsters.ts'
 import {
@@ -15,6 +16,7 @@ import {
   dungeonSuperBuffDefinition,
   dungeonSuperEffect,
 } from '../../game/logic/dungeons.ts'
+import type { CharacterData } from '../../game/logic/character.ts'
 import { dungeonSession } from '../../game/session/dungeonSession.ts'
 import { VisibleClock } from '../../game/session/visibleClock.ts'
 import { useGameStore } from '../../state/gameStore.ts'
@@ -50,16 +52,19 @@ export function DungeonsButton({ onClick }: { onClick(): void }) {
       title="Dungeons"
       disabled={away || traveling}
       onClick={onClick}
-    />
+    >
+      <span className="hud__menu-label" aria-hidden="true">
+        Dungeons
+      </span>
+    </button>
   )
 }
 
 export function DungeonsPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)!
-  const characters = useGameStore((s) => s.save.characters)
   const start = useGameStore((s) => s.startDungeon)
   const [index, setIndex] = useState(0)
-  const [tab, setTab] = useState<'dungeons' | 'buffer'>('dungeons')
+  const [tab, setTab] = useState<'dungeons' | 'buffs'>('dungeons')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [, refreshDay] = useState(0)
@@ -99,12 +104,12 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
         <button
           type="button"
           role="tab"
-          className={`tabs__tab${tab === 'buffer' ? ' is-active' : ''}`}
-          aria-selected={tab === 'buffer'}
-          onClick={() => setTab('buffer')}
+          className={`tabs__tab${tab === 'buffs' ? ' is-active' : ''}`}
+          aria-selected={tab === 'buffs'}
+          onClick={() => setTab('buffs')}
           disabled={busy}
         >
-          Buffer
+          Buffs
         </button>
       </div>
       <div className="dungeon-wallet" aria-label="Dungeon points">
@@ -117,7 +122,7 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
           <strong>{(character.dungeons?.totalPoints ?? 0).toLocaleString('en-US')}</strong>
         </div>
       </div>
-      {tab === 'buffer' ? (
+      {tab === 'buffs' ? (
         <DungeonBuffer />
       ) : (
         <>
@@ -211,16 +216,14 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
                   <li>
                     Collect the crystals to reach dungeon level 20 and choose class blessings.
                   </li>
-                  <li>
-                    A completed run adds its score to your Buffer wallet and lifetime ranking.
-                  </li>
+                  <li>A completed run adds its score to your Buffs points and to the rankings.</li>
                   <li>
                     Potions and your skills remain usable. Your equipped gear is locked. Blessings
                     last until this run ends.
                   </li>
                   <li>
                     Levels 5, 10, 15 and 20 offer fixed super blessings. These cannot be upgraded in
-                    the Buffer. Your own potions keep their original duration.
+                    Buffs. Your own potions keep their original duration.
                   </li>
                   <li>
                     Death ends the run. Earned EXP, SP, gold and loot are kept. Leaving or reloading
@@ -228,33 +231,7 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
                   </li>
                 </ul>
               </section>
-              <section className="dungeon-ranking" aria-label="Dungeon ranking">
-                <h4>Lifetime ranking</h4>
-                {/* the three best characters, each with the client's trophy in its place's metal */}
-                <ol className="dungeon-podium">
-                  {[...characters]
-                    .sort((a, b) => (b.dungeons?.totalPoints ?? 0) - (a.dungeons?.totalPoints ?? 0))
-                    .slice(0, 3)
-                    .map((c, i) => (
-                      <li
-                        key={c.id}
-                        className={`dungeon-podium__place dungeon-podium__place--${i + 1}${c.id === character.id ? ' is-you' : ''}`}
-                      >
-                        <span className="dungeon-podium__trophy" aria-label={`Place ${i + 1}`}>
-                          <span className="dungeon-podium__number">{i + 1}</span>
-                        </span>
-                        <span className="dungeon-podium__name">{c.name}</span>
-                        <strong>
-                          {(c.dungeons?.totalPoints ?? 0).toLocaleString('en-US')} points
-                        </strong>
-                      </li>
-                    ))}
-                </ol>
-                <p>
-                  Local characters. Spending points in the Buffer does not change this ranking.
-                  Global ranking will be added later.
-                </p>
-              </section>
+              <DungeonRanking dungeonId={def.id} />
             </div>
           </div>
           {error && (
@@ -290,6 +267,76 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
         </>
       )}
     </Sheet>
+  )
+}
+
+/**
+ * The rankings under the rules: the shown dungeon's own (its completed runs only) and all
+ * dungeons together. Three places each; spending points in Buffs changes neither.
+ */
+function DungeonRanking({ dungeonId }: { dungeonId: DungeonId }) {
+  const characters = useGameStore((s) => s.save.characters)
+  const you = useGameStore((s) => s.character?.id)
+  const [scope, setScope] = useState<'dungeon' | 'all'>('dungeon')
+  const name = getDungeon(dungeonId)?.name ?? 'Dungeon'
+  // the tab says "Belfist Ranking", as the owner names it; the note keeps the full name
+  const short = name.split(' ')[0]
+  const points = (c: CharacterData) =>
+    scope === 'all'
+      ? (c.dungeons?.totalPoints ?? 0)
+      : (c.dungeons?.totalByDungeon?.[dungeonId] ?? 0)
+  const top = characters
+    .filter((c) => points(c) > 0)
+    .sort((a, b) => points(b) - points(a))
+    .slice(0, 3)
+  return (
+    <section className="dungeon-ranking" aria-label="Dungeon rankings">
+      <div className="tabs tabs--small dungeon-ranking__tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          className={`tabs__tab${scope === 'dungeon' ? ' is-active' : ''}`}
+          aria-selected={scope === 'dungeon'}
+          onClick={() => setScope('dungeon')}
+        >
+          {short} Ranking
+        </button>
+        <button
+          type="button"
+          role="tab"
+          className={`tabs__tab${scope === 'all' ? ' is-active' : ''}`}
+          aria-selected={scope === 'all'}
+          onClick={() => setScope('all')}
+        >
+          Dungeons Ranking
+        </button>
+      </div>
+      {/* the three best characters, each with the client's trophy in its place's metal */}
+      <ol className="dungeon-podium">
+        {[0, 1, 2].map((i) => {
+          const c = top[i]
+          return (
+            <li
+              key={c?.id ?? `empty-${i}`}
+              className={`dungeon-podium__place dungeon-podium__place--${i + 1}${c && c.id === you ? ' is-you' : ''}${c ? '' : ' is-empty'}`}
+            >
+              <span className="dungeon-podium__trophy" aria-label={`Place ${i + 1}`}>
+                <span className="dungeon-podium__number">{i + 1}</span>
+              </span>
+              <span className="dungeon-podium__name">{c ? c.name : 'Free place'}</span>
+              <strong>{c ? `${points(c).toLocaleString('en-US')} points` : '-'}</strong>
+            </li>
+          )
+        })}
+      </ol>
+      <p>
+        {scope === 'all'
+          ? 'All completed runs of every dungeon.'
+          : `Completed runs in ${name} only.`}{' '}
+        Local characters. Spending points in Buffs changes no ranking. Global ranking will be added
+        later.
+      </p>
+    </section>
   )
 }
 
@@ -517,7 +564,8 @@ export function DungeonHud() {
         </section>
       </div>
       <DungeonMinimap run={run} />
-      {nextWave !== null && (
+      {/* while a blessing is chosen or the run is paused, the window says it instead */}
+      {nextWave !== null && !run.choices.length && !paused && !leaveStep && (
         <div className="dungeon-wave-clear" role="status">
           <strong>Wave cleaned</strong>
           <small>
@@ -540,9 +588,17 @@ export function DungeonHud() {
           onClose={() => undefined}
         >
           <p className="dungeon-blessing__level">Dungeon level {dungeonChoiceLevel(run)}</p>
-          <p className="sheet__meta">
-            Time is paused. Choose one blessing for the rest of this run.
+          <p className="dungeon-blessing__paused">
+            <strong>Game paused</strong>
+            {nextWave !== null ? (
+              <span>
+                Wave {run.wave} cleaned. The next wave comes {nextWave} s after you choose.
+              </span>
+            ) : (
+              <span>Monsters wait until you choose.</span>
+            )}
           </p>
+          <p className="sheet__meta">Choose one blessing for the rest of this run.</p>
           {/* the choices side by side, scrolled with the client's arrows on a narrow screen */}
           <ScrollStrip
             className={`dungeon-blessings dungeon-blessings--count-${run.choices.length}`}
@@ -635,7 +691,7 @@ export function DungeonHud() {
         >
           <p>
             {leaveStep === 2
-              ? 'Final confirmation: end this run now? Your earned loot is kept, but this entry cannot be restored and an unfinished run awards no Buffer points.'
+              ? 'Final confirmation: end this run now? Your earned loot is kept, but this entry cannot be restored and an unfinished run awards no Buffs points.'
               : leaveStep === 1
                 ? 'Are you sure you want to leave? This ends your current run.'
                 : 'The timer and all combat are paused.'}
@@ -721,8 +777,8 @@ export function DungeonResult() {
       </div>
       <p className={`dungeon-results__points${result.outcome === 'completed' ? '' : ' is-missed'}`}>
         {result.outcome === 'completed'
-          ? `+${result.score} Buffer points and lifetime ranking points`
-          : 'Complete the full 10 minutes to earn Buffer and lifetime ranking points.'}
+          ? `+${result.score} Buffs points and ranking points`
+          : 'Complete the full 10 minutes to earn Buffs and ranking points.'}
       </p>
       <dl className="dungeon-facts">
         <div>

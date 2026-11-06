@@ -39,6 +39,9 @@ import {
   recordDungeon,
   upgradeDungeonBuff,
   DUNGEON_BUFF_UPGRADE_COST,
+  DUNGEON_BUFFS_ADDED,
+  DUNGEON_BUFFS_REMOVED,
+  dungeonBuffUpgradeCost,
   dungeonAreaTargets,
   dungeonRunsLeft,
   dungeonStep,
@@ -320,6 +323,21 @@ describe('dungeons on the original database', () => {
     expect(state.remainingSpawns + state.enemies.length).toBe(48)
   })
 
+  it('waits the full 5 s after a clear even when the 30 s schedule falls inside the wait', () => {
+    let state = dungeonStep(run(), 0.05, STILL, rng()).run
+    // cleared at 28 s: the schedule's wave 2 (due at 30 s) waits for the countdown
+    state = { ...state, elapsed: 28, remainingSpawns: 0, enemies: [], nextWaveIn: null }
+    for (let i = 0; i < 99; i++) state = dungeonStep(state, 0.05, STILL, rng()).run
+    expect(state.elapsed).toBeGreaterThan(30)
+    expect(state.wave).toBe(1)
+    state = dungeonStep(state, 0.05, STILL, rng()).run
+    expect(state.wave).toBe(2)
+    // a wave still fighting is hurried by the schedule as before
+    state = { ...state, elapsed: 60 }
+    state = dungeonStep(state, 0.05, STILL, rng()).run
+    expect(state.wave).toBe(3)
+  })
+
   it('ends at exactly 600 active seconds without another wave or bonus time', () => {
     const state = run()
     state.elapsed = 599.98
@@ -328,6 +346,67 @@ describe('dungeons on the original database', () => {
     expect(next.elapsed).toBe(600)
     expect(next.ended).toBe('completed')
     expect(dungeonStep(next, 0.05, STILL, rng()).run).toBe(next)
+  })
+})
+
+describe('owner rules of 2026-11-06 for Buffs and rankings', () => {
+  it('costs 100, 200, 300 … points per level and keeps Haste 1 and Battle Roar 1 out', () => {
+    expect([1, 2, 3, 4, 5].map(dungeonBuffUpgradeCost)).toEqual([100, 200, 300, 400, 500])
+    for (const id of DUNGEON_BUFFS_REMOVED) expect(DUNGEON_BUFFS).not.toContain(id)
+    // their places: Mana Recovery and Tyrant (MP drain included)
+    for (const id of DUNGEON_BUFFS_ADDED) expect(DUNGEON_BUFFS).toContain(id)
+    expect(dungeonBuffDefinition(225)).toBeDefined() // Haste 2's rank 1 stays readable for saves
+  })
+
+  it('pays back levels bought for a removed blessing and keeps lifetime points per dungeon', () => {
+    const saved = sanitizeDungeonProgress({
+      ...emptyDungeonProgress(),
+      points: 50,
+      totalPoints: 1000,
+      buffLevels: { 225: 2, 4: 3 },
+    })
+    expect(saved.points).toBe(50 + 100 + 200)
+    expect(saved.buffLevels).toEqual({})
+    const record = (dungeonId: 'belfist' | 'procyon', score: number, runId: string) => ({
+      ...dungeonCheckpoint(run()),
+      runId,
+      dungeonId,
+      seconds: 600,
+      score,
+      outcome: 'completed' as const,
+      endedAt: NOW,
+    })
+    let progress = recordDungeon(emptyDungeonProgress(), record('belfist', 120, 'a'))
+    progress = recordDungeon(progress, record('procyon', 80, 'b'))
+    progress = recordDungeon(progress, record('belfist', 30, 'c'))
+    expect(progress.totalByDungeon).toEqual({ belfist: 150, procyon: 80 })
+    // an older save without the split takes it from its recorded runs
+    const older: Partial<typeof progress> = { ...progress }
+    delete older.totalByDungeon
+    expect(sanitizeDungeonProgress(older).totalByDungeon).toEqual({ belfist: 150, procyon: 80 })
+  })
+
+  it('writes the refund once: the next load of the same save pays nothing more', () => {
+    const raw = {
+      ...createDefaultSave(NOW),
+      characters: [
+        {
+          ...hero(),
+          dungeons: {
+            ...emptyDungeonProgress(),
+            points: 0,
+            totalPoints: 500,
+            buffLevels: { 4: 2 },
+          },
+        },
+      ],
+    }
+    const first = loadSave(JSON.stringify(raw), NOW)
+    expect(first.status).toBe('migrated') // so the service writes it back
+    expect(first.save.characters[0]!.dungeons!.points).toBe(100)
+    const again = loadSave(serializeSave(first.save), NOW)
+    expect(again.status).toBe('loaded')
+    expect(again.save.characters[0]!.dungeons!.points).toBe(100)
   })
 })
 

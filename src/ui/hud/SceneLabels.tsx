@@ -8,14 +8,26 @@ import { levelTone } from './levelColor.ts'
 
 /**
  * The hero's name (and worn title under it) over its head, "Lv N Name" over the monster and the monster's curses under its HP
- * bar. The scene places them (scene/labelAnchors.ts); they stay hidden until it does.
+ * bar. The scene places them (scene/labelAnchors.ts); they stay hidden until it does. The field
+ * (Battle) and a dungeon run (DungeonScene) each place their own, so the same plate shows in both.
  */
 export function SceneLabels() {
   const name = useGameStore((s) => s.character?.name ?? '')
   const activeTitle = useGameStore((s) => s.character?.activeTitle ?? null)
   const title = activeTitle === null ? undefined : getTitle(activeTitle)
   const level = useGameStore((s) => s.character?.level ?? 1)
-  const monster = MONSTERS[useGameStore((s) => s.hud.monsterId)]
+  // in a dungeon run the label names the enemy the hero fights (DungeonScene places it)
+  const dungeon = useGameStore((s) => !!s.dungeon)
+  const dungeonTarget = useGameStore((s) => {
+    const run = s.dungeon
+    return run?.enemies.find((e) => e.uid === run.targetUid)?.monsterId
+  })
+  const fieldMonster = useGameStore((s) => s.hud.monsterId)
+  const monster = dungeon
+    ? dungeonTarget === undefined
+      ? undefined
+      : MONSTERS[dungeonTarget]
+    : MONSTERS[fieldMonster]
 
   return (
     <div className="scene-labels">
@@ -37,9 +49,11 @@ export function SceneLabels() {
           </span>
         )}
       </div>
-      <div ref={(el) => bindLabel('effects', el)} className="scene-label scene-label--effects">
-        <EffectRow side="monster" size={16} />
-      </div>
+      {!dungeon && (
+        <div ref={(el) => bindLabel('effects', el)} className="scene-label scene-label--effects">
+          <EffectRow side="monster" size={16} />
+        </div>
+      )}
     </div>
   )
 }

@@ -4,7 +4,7 @@
  * When the shape changes: bump SAVE_VERSION and add a migration from the previous version.
  */
 import { sanitizeAllocatedStats } from './statPoints.ts'
-import { sanitizeDungeonProgress } from './dungeons.ts'
+import { dungeonRefundDue, sanitizeDungeonProgress } from './dungeons.ts'
 import { BOOK_MILESTONES } from '../data/bookRewards.ts'
 import { CLASSES } from '../data/classes.ts'
 import { MONSTERS } from '../data/monsters.ts'
@@ -562,9 +562,13 @@ export function loadSave(stored: string | null, now = Date.now()): LoadResult {
   const migrated = applyMigrations(parsed, MIGRATIONS, SAVE_VERSION)
   if (!migrated) return { save: defaults, status: 'reset-invalid' }
 
+  // a refund for blessings the dungeon pool dropped must be written once, never paid twice
+  const refund =
+    Array.isArray(migrated.characters) &&
+    migrated.characters.some((c) => isRecord(c) && dungeonRefundDue(c.dungeons))
   return {
     save: sanitize(migrated, now),
-    status: version === SAVE_VERSION ? 'loaded' : 'migrated',
+    status: version === SAVE_VERSION && !refund ? 'loaded' : 'migrated',
   }
 }
 

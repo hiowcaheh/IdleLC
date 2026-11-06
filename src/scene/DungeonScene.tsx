@@ -1,4 +1,4 @@
-import { Html, useGLTF, useTexture } from '@react-three/drei'
+import { useGLTF, useTexture } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { Suspense, useEffect, useMemo, useRef } from 'react'
 import {
@@ -23,7 +23,6 @@ import { wornTitle } from '../game/logic/titles.ts'
 import { dungeonSession } from '../game/session/dungeonSession.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import type { ViewEvent } from '../state/combatEvents.ts'
-import { levelTone } from '../ui/hud/levelColor.ts'
 import { useFloatingTexts } from '../state/floatingTexts.ts'
 import { Character, type CharacterHandle } from './Character.tsx'
 import { DamageNumbers } from './DamageNumbers.tsx'
@@ -31,6 +30,7 @@ import { ClientFxLayer } from './clientFx/ClientFx.tsx'
 import { castClientSkill } from './clientFx/skillFx.ts'
 import { activeArtifactVisual } from './artifactEffects.ts'
 import { HpBar3D } from './HpBar3D.tsx'
+import { placeLabel, type SceneLabelId } from './labelAnchors.ts'
 import { SkillEffects } from './SkillEffects.tsx'
 import { armorUpgradePlus } from './upgradeEffects.ts'
 import { view } from './viewState.ts'
@@ -38,6 +38,7 @@ import { view } from './viewState.ts'
 const cameraTarget = new Vector3()
 const cameraAt = new Vector3()
 const crystalMatrix = new Object3D()
+const labelPoint = new Vector3()
 const dungeonPace = () =>
   dungeonSession.paused ||
   dungeonSession.menuOpen ||
@@ -140,8 +141,9 @@ export function DungeonScene({ id }: { id: DungeonId }) {
           else if (e.type === 'death') (e.who === 'player' ? hero.current : monster)?.die()
           else if (e.type === 'summonAttack') summonHandles.current.get(e.element)?.attack()
           else if (e.type === 'summonHit') summonHandles.current.get(e.element)?.hit(e.crit)
-          else if (e.type === 'potion' && useGameStore.getState().save.settings.showDamageNumbers) {
-            // the potion's name over the hero, as in the field, so a drink is seen in the crowd
+          else if (e.type === 'potion') {
+            // the potion's name over the hero, so a drink is seen in the crowd: always in a run,
+            // since an automatic drink is otherwise easy to miss (owner's report, 2026-11-06)
             const height = hero.current?.height() ?? 2
             useFloatingTexts
               .getState()
@@ -161,7 +163,7 @@ export function DungeonScene({ id }: { id: DungeonId }) {
     return () => useFloatingTexts.getState().clear()
   }, [])
 
-  useFrame(({ camera }, delta) => {
+  useFrame(({ camera, size }, delta) => {
     const s = dungeonSession.state
     const group = playerGroup.current
     if (!s || !group) return
@@ -231,11 +233,21 @@ export function DungeonScene({ id }: { id: DungeonId }) {
       cameraPlaced.current = true
     } else camera.position.lerp(cameraAt, 1 - Math.exp(-delta * 8))
     camera.lookAt(cameraTarget)
+
+    // the hero's name plate and title, and "Lv N Name" over the target, as on the field
+    // (ui/hud/SceneLabels.tsx), projected with the camera as it is now
+    camera.updateMatrixWorld()
+    const place = (id: SceneLabelId, px: number, py: number, pz: number, shown: boolean) => {
+      const p = labelPoint.set(px, py, pz).project(camera)
+      placeLabel(id, ((p.x + 1) / 2) * size.width, ((1 - p.y) / 2) * size.height, shown && p.z < 1)
+    }
+    place('player', x, view.playerHeight + 0.2, z, true)
+    const aim = target && target.fighter.hp > 0 ? enemyGroups.current.get(target.uid) : undefined
+    place('monster', aim?.position.x ?? 0, view.monsterHeight + 0.1, aim?.position.z ?? 0, !!aim)
   })
 
   const weapon = character.equipment.weapon
   const weaponSubtype = weapon ? getItem(weapon.itemId).gear?.subtype : undefined
-  const target = run?.enemies.find((e) => e.uid === run.targetUid)
   return (
     <>
       <color attach="background" args={['#12151a']} />
@@ -302,17 +314,6 @@ export function DungeonScene({ id }: { id: DungeonId }) {
             scale={getMonster(e.monsterId).scale}
             timeScale={dungeonPace}
           />
-          {target?.uid === e.uid && e.fighter.hp > 0 && (
-            <Html
-              center
-              position-y={2.5}
-              // under the HUD and its windows (drei's default range sits above everything)
-              zIndexRange={[9, 0]}
-              className={`dungeon-target level-tone--${levelTone(character.level, getMonster(e.monsterId).level)}`}
-            >
-              {getMonster(e.monsterId).name} <small>Lv {getMonster(e.monsterId).level}</small>
-            </Html>
-          )}
         </group>
       ))}
       {(run?.player.summons ?? []).map((summon) => (

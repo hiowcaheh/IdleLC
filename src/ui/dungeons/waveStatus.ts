@@ -1,8 +1,4 @@
-import {
-  DUNGEON_NEXT_WAVE_DELAY,
-  DUNGEON_SECONDS,
-  DUNGEON_WAVE_SECONDS,
-} from '../../game/data/dungeons.ts'
+import { DUNGEON_NEXT_WAVE_DELAY, DUNGEON_SECONDS } from '../../game/data/dungeons.ts'
 import type { DungeonRun } from '../../game/logic/dungeons.ts'
 
 type WaveState = Pick<
@@ -10,7 +6,10 @@ type WaveState = Pick<
   'wave' | 'elapsed' | 'remainingSpawns' | 'nextWaveIn' | 'ended'
 > & { enemies: readonly { fighter: { hp: number } }[] }
 
-/** Read the existing simulation clock, including a scheduled wave arriving before the 5 s wait. */
+/**
+ * Read the existing simulation clock. A cleared wave always waits its full 5 s (dungeonStep no
+ * longer lets the 30 s schedule cut the wait short, owner's report of 2026-11-06).
+ */
 export function nextDungeonWaveIn(run: WaveState): number | null {
   if (
     run.ended ||
@@ -19,11 +18,9 @@ export function nextDungeonWaveIn(run: WaveState): number | null {
     run.enemies.some((e) => e.fighter.hp > 0)
   )
     return null
-  const scheduled =
-    run.wave < 20 ? Math.max(0, run.wave * DUNGEON_WAVE_SECONDS - run.elapsed) : Infinity
   const remaining = Math.max(
     0,
-    Math.min(run.nextWaveIn ?? DUNGEON_NEXT_WAVE_DELAY, DUNGEON_NEXT_WAVE_DELAY, scheduled),
+    Math.min(run.nextWaveIn ?? DUNGEON_NEXT_WAVE_DELAY, DUNGEON_NEXT_WAVE_DELAY),
   )
   if (remaining >= DUNGEON_SECONDS - run.elapsed) return null
   return Math.max(1, Math.ceil(remaining))

@@ -27,8 +27,9 @@ describe('wave clear countdown', () => {
     expect(nextDungeonWaveIn({ ...cleared, nextWaveIn: 8 })).toBe(5)
   })
 
-  it('shows the earlier scheduled arrival and keeps the five-second wait for repeated wave 20', () => {
-    expect(nextDungeonWaveIn({ ...cleared, elapsed: 28.4, nextWaveIn: 4.6 })).toBe(2)
+  it('keeps the full five-second wait near the 30 s schedule and for repeated wave 20', () => {
+    // owner's report (2026-11-06): the notice must not vanish because the schedule came first
+    expect(nextDungeonWaveIn({ ...cleared, elapsed: 28.4, nextWaveIn: 4.6 })).toBe(5)
     expect(nextDungeonWaveIn({ ...cleared, wave: 2, elapsed: 11, nextWaveIn: 4.6 })).toBe(5)
     expect(nextDungeonWaveIn({ ...cleared, wave: 20, elapsed: 200, nextWaveIn: 4.6 })).toBe(5)
   })

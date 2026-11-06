@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { HEAVEN_STONE_ID, classSlots, getItem } from '../../game/data/items.ts'
-import type { ClientCombatStats, EquipSlot } from '../../game/data/types.ts'
+import type { ClientCombatStats, CombatStats, EquipSlot } from '../../game/data/types.ts'
 import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
 import { ATTRIBUTE_KEYS } from '../../game/logic/attributes.ts'
 import { availableStatPoints } from '../../game/logic/statPoints.ts'
@@ -158,7 +158,8 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
         ? `${change(stats.attackInterval, base.attackInterval, 2)} s`
         : undefined,
     ],
-    ['Movement bonus', signed(stats.moveSpeed ?? 0)],
+    // what the bonuses still add under the 20 m/s cap, not their uncapped sum
+    ['Movement bonus', signed(cappedMoveBonus(stats))],
     [
       'Cast time adjustment',
       `${castTime > 0 ? '+' : castTime < 0 ? '−' : ''}${Math.abs(castTime).toFixed(1)} s`,
@@ -506,4 +507,12 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
       {speedHelpOpen && <SpeedHelp onClose={() => setSpeedHelpOpen(false)} />}
     </Sheet>
   )
+}
+
+/** The movement bonus the hero really runs with: bonuses past MAX_RUN_SPEED do not count. */
+function cappedMoveBonus(stats: CombatStats): number {
+  const bonus = stats.moveSpeed ?? 0
+  const raw = stats.client?.runSpeed
+  if (!raw) return bonus
+  return Math.round(((runSpeed(stats) / raw) * (1 + bonus / 100) - 1) * 1000) / 10
 }

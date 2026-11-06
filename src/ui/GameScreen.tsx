@@ -58,7 +58,8 @@ export function GameScreen() {
       <GameCanvas />
       <PerfOverlay />
       <DungeonRuntime />
-      {character && !character.expedition && !dungeon && <SceneLabels />}
+      {/* a fresh set for the field and for a run, so neither shows the other's last place */}
+      {character && !character.expedition && <SceneLabels key={dungeon ? 'dungeon' : 'field'} />}
       {character && !character.expedition && <RewardFeed />}
 
       <div className="hud">

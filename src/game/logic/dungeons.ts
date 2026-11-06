@@ -82,6 +82,8 @@ export interface DungeonProgress {
   /** Spendable currency and lifetime ranking score are deliberately independent. */
   points: number
   totalPoints: number
+  /** Lifetime ranking points by dungeon (completed runs), for each dungeon's own ranking. */
+  totalByDungeon: Partial<Record<DungeonId, number>>
   buffLevels: Record<number, number>
 }
 export interface DungeonRun {
@@ -138,6 +140,7 @@ export const emptyDungeonProgress = (): DungeonProgress => ({
   active: null,
   points: 0,
   totalPoints: 0,
+  totalByDungeon: {},
   buffLevels: {},
 })
 
@@ -154,12 +157,24 @@ export function dungeonRunsLeft(
   return Math.max(0, DUNGEON_DAILY_RUNS - (dailyProgress(character.dungeons, now).entries[id] ?? 0))
 }
 
+/**
+ * Owner's rule (2026-11-06): the first ranks of Haste and Battle Roar leave the pool (Haste 2 and
+ * Battle Roar 2 stay); Mana Recovery and Tyrant (its MP drain included) take their places.
+ */
+export const DUNGEON_BUFFS_REMOVED: readonly number[] = [225, 4]
+export const DUNGEON_BUFFS_ADDED: readonly number[] = [224, 42]
+
 /** All fully understood, lasting, helpful active class buffs, including ranks above the hero. */
-const BUFF_DEFINITIONS: Record<number, SkillDef> = lcData?.dungeonBuffs
-  ? Object.fromEntries(
-      lcData.dungeonBuffs.map((s) => [s.id, { ...s, classId: s.classId as ClassId }]),
-    )
-  : SKILLS
+const BUFF_DEFINITIONS: Record<number, SkillDef> = Object.fromEntries([
+  ...(lcData?.dungeonBuffs
+    ? lcData.dungeonBuffs.map((s) => [s.id, { ...s, classId: s.classId as ClassId }] as const)
+    : Object.entries(SKILLS).map(([id, s]) => [Number(id), s] as const)
+  ).filter(([id]) => !DUNGEON_BUFFS_REMOVED.includes(Number(id))),
+  ...DUNGEON_BUFFS_ADDED.flatMap((id) => {
+    const skill = getSkill(id)
+    return skill ? [[id, skill] as const] : []
+  }),
+])
 export const dungeonBuffDefinition = (id: number): SkillDef | undefined =>
   BUFF_DEFINITIONS[id] ?? getSkill(id)
 export const DUNGEON_BUFFS = Object.values(BUFF_DEFINITIONS)
@@ -172,12 +187,18 @@ export const DUNGEON_BUFFS = Object.values(BUFF_DEFINITIONS)
       !rank.offensive &&
       rank.duration > 0 &&
       rank.effects.some((e) => (e.kind === 'stat' && e.value > 0) || e.kind === 'regen') &&
-      rank.effects.every((e) => ['stat', 'regen'].includes(e.kind))
+      // Tyrant's cost: MP drained each second while it works
+      rank.effects.every(
+        (e) => ['stat', 'regen'].includes(e.kind) || (e.kind === 'mpChange' && e.power < 0),
+      )
     )
   })
   .map((s) => s.id)
 
+/** Points for the first upgrade (level 1 → 2); each later one costs this much more. */
 export const DUNGEON_BUFF_UPGRADE_COST = 100
+/** Owner's rule (2026-11-06): 100, 200, 300, … points for levels 2, 3, 4, … */
+export const dungeonBuffUpgradeCost = (level: number) => DUNGEON_BUFF_UPGRADE_COST * level
 export const DUNGEON_SUPER_BUFFS: readonly LcDungeonSuperBuff[] = lcData?.dungeonSuperBuffs ?? []
 export const dungeonSuperBuffDefinition = (id: number) =>
   DUNGEON_SUPER_BUFFS.find((b) => b.id === id)
@@ -262,13 +283,13 @@ export function upgradeDungeonBuff(character: CharacterData, id: number): Charac
   const level = dungeonBuffLevel(progress, id)
   if (!skill.levels.some((rank) => rank.level === level + 1))
     throw new GameError('dungeon-buff-max', 'This blessing is already at its maximum level.')
-  if (progress.points < DUNGEON_BUFF_UPGRADE_COST)
-    throw new GameError('dungeon-points', 'Not enough dungeon points.')
+  const cost = dungeonBuffUpgradeCost(level)
+  if (progress.points < cost) throw new GameError('dungeon-points', 'Not enough dungeon points.')
   return {
     ...character,
     dungeons: {
       ...progress,
-      points: progress.points - DUNGEON_BUFF_UPGRADE_COST,
+      points: progress.points - cost,
       buffLevels: { ...progress.buffLevels, [id]: level + 1 },
     },
   }
@@ -498,14 +519,15 @@ export function dungeonStep(
   }
 
   // A wave comes 5 s after the last one is cleared, at the latest on its 30 s schedule; after
-  // wave 20 the last wave comes again until the time is up (owner's rules, 2026-11-06).
+  // wave 20 the last wave comes again until the time is up (owner's rules, 2026-11-06). Once a
+  // wave is cleared the full 5 s are waited out: the schedule only hurries a wave still fighting.
   const scheduled = Math.min(20, Math.floor(run.elapsed / DUNGEON_WAVE_SECONDS) + 1)
   const cleared =
     next.wave > 0 && next.remainingSpawns === 0 && !next.enemies.some((e) => e.fighter.hp > 0)
   next.nextWaveIn = cleared ? (next.nextWaveIn ?? DUNGEON_NEXT_WAVE_DELAY) - dt : null
   if (
     next.wave === 0 ||
-    scheduled > next.wave ||
+    (!cleared && scheduled > next.wave) ||
     (next.nextWaveIn !== null && next.nextWaveIn <= 1e-9)
   ) {
     next.wave = Math.min(20, next.wave + 1)
@@ -654,6 +676,10 @@ export function recordDungeon(progress: DungeonProgress, record: DungeonRecord):
     ...progress,
     points: progress.points + earned,
     totalPoints: progress.totalPoints + earned,
+    totalByDungeon: {
+      ...progress.totalByDungeon,
+      [record.dungeonId]: (progress.totalByDungeon?.[record.dungeonId] ?? 0) + earned,
+    },
     active: null,
     best:
       !best || record.score > best.score
@@ -664,6 +690,16 @@ export function recordDungeon(progress: DungeonProgress, record: DungeonRecord):
 }
 
 /** Validate only persisted summaries. Live actors are never restored or simulated offline. */
+/** A stored progress that still holds levels of a blessing the pool dropped (paid back on load). */
+export function dungeonRefundDue(raw: unknown): boolean {
+  const levels = raw && typeof raw === 'object' ? (raw as DungeonProgress).buffLevels : undefined
+  if (!levels || typeof levels !== 'object') return false
+  return Object.entries(levels).some(
+    ([id, level]) =>
+      DUNGEON_BUFFS_REMOVED.includes(Number(id)) && Number.isInteger(level) && Number(level) > 1,
+  )
+}
+
 export function sanitizeDungeonProgress(raw: unknown): DungeonProgress {
   const empty = emptyDungeonProgress()
   if (!raw || typeof raw !== 'object') return empty
@@ -711,7 +747,25 @@ export function sanitizeDungeonProgress(raw: unknown): DungeonProgress {
     0,
   )
   const totalPoints = validPoints(p.totalPoints) ? p.totalPoints : legacyPoints
-  const points = Math.min(validPoints(p.points) ? p.points : legacyPoints, totalPoints)
+  // levels bought for a blessing that left the pool are paid back at the old 100 a level
+  const refund = Object.entries(p.buffLevels ?? {}).reduce(
+    (sum, [id, level]) =>
+      DUNGEON_BUFFS_REMOVED.includes(Number(id)) && Number.isInteger(level) && level > 1
+        ? sum + (level - 1) * DUNGEON_BUFF_UPGRADE_COST
+        : sum,
+    0,
+  )
+  const points = Math.min((validPoints(p.points) ? p.points : legacyPoints) + refund, totalPoints)
+  // older saves: each dungeon's share from the recorded completed runs
+  const savedByDungeon = Object.entries(p.totalByDungeon ?? {}).filter(
+    ([id, n]) => getDungeon(id) && validPoints(n),
+  )
+  const totalByDungeon: Partial<Record<DungeonId, number>> = savedByDungeon.length
+    ? Object.fromEntries(savedByDungeon)
+    : history.reduce<Partial<Record<DungeonId, number>>>((sums, r) => {
+        if (r.outcome === 'completed') sums[r.dungeonId] = (sums[r.dungeonId] ?? 0) + r.score
+        return sums
+      }, {})
   const buffLevels = Object.fromEntries(
     Object.entries(p.buffLevels ?? {}).filter(
       ([id, level]) =>
@@ -728,6 +782,7 @@ export function sanitizeDungeonProgress(raw: unknown): DungeonProgress {
     active: record(p.active) ? p.active : null,
     points,
     totalPoints,
+    totalByDungeon,
     buffLevels,
   }
 }

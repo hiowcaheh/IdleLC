@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { getItem } from '../../game/data/items.ts'
 import type { DungeonRun } from '../../game/logic/dungeons.ts'
-import { GameError } from '../../game/logic/errors.ts'
 import { useGameStore } from '../../state/gameStore.ts'
-import { toast } from '../../state/toasts.ts'
 import { Gold } from '../Gold.tsx'
 import { Sheet } from '../Sheet.tsx'
 import { ItemIcon } from '../items/ItemIcon.tsx'
-import { DRINK_PROBLEMS, potionLine } from '../items/potionText.ts'
+import { drinkWithToast } from '../items/drinkWithToast.ts'
+import { potionLine } from '../items/potionText.ts'
 import { formatSp } from '../skills/format.ts'
 
 export function DungeonLootSummary({ rewards }: { rewards: DungeonRun['rewards'] }) {
@@ -97,11 +96,7 @@ export function DungeonLootButton() {
               ? 'Rewards earned during this run. They are already saved to your character. Time is paused while this window is open.'
               : 'Use potions from your inventory. Potions keep their original duration, including their remaining time after the run. Dungeon blessings end with the run.'}
           </p>
-          {tab === 'loot' ? (
-            <DungeonLootSummary rewards={run.rewards} />
-          ) : (
-            <DungeonPotions onDrunk={() => setOpen(false)} />
-          )}
+          {tab === 'loot' ? <DungeonLootSummary rewards={run.rewards} /> : <DungeonPotions />}
           <button type="button" className="button button--wide" onClick={() => setOpen(false)}>
             Return
           </button>
@@ -111,10 +106,12 @@ export function DungeonLootButton() {
   )
 }
 
-/** The bag's potions; a potion drunk closes the window, back to the run. */
-function DungeonPotions({ onDrunk }: { onDrunk(): void }) {
+/**
+ * The bag's potions. The window stays open after a drink (owner's request, 2026-11-06), so several
+ * can be drunk at once; the toast says what each changed, as on the field.
+ */
+function DungeonPotions() {
   const character = useGameStore((s) => s.character)!
-  const drink = useGameStore((s) => s.drinkPotion)
   const [busy, setBusy] = useState(false)
   const potions = character.inventory
     .map((s) => ({ ...s, item: getItem(s.itemId) }))
@@ -137,23 +134,8 @@ function DungeonPotions({ onDrunk }: { onDrunk(): void }) {
             aria-label={`Drink ${item.name}`}
             onClick={async () => {
               setBusy(true)
-              try {
-                const problem = await drink(itemId)
-                if (problem) toast(DRINK_PROBLEMS[problem], 'error')
-                else {
-                  toast(`${item.name} used.`)
-                  onDrunk()
-                }
-              } catch (e) {
-                const key = e instanceof GameError ? e.code : ''
-                toast(
-                  DRINK_PROBLEMS[key as keyof typeof DRINK_PROBLEMS] ??
-                    'This potion cannot be used right now.',
-                  'error',
-                )
-              } finally {
-                setBusy(false)
-              }
+              await drinkWithToast(itemId)
+              setBusy(false)
             }}
           >
             Drink

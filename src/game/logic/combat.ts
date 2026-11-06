@@ -1619,7 +1619,7 @@ function applyPotion(f: Fighter, { itemId, name, potion }: PotionSupply, events:
  * Which reuse timer a potion starts: healing and mana potions share one per kind, a boost potion
  * has its skill's own (each item skill keeps its reuse time on the server).
  */
-const cooldownKey = (potion: PotionDef) =>
+export const cooldownKey = (potion: PotionDef) =>
   potion.kind === 'boost' ? `boost:${potion.skill ?? 0}` : potion.kind
 
 /** The effect a boost potion gives, with `remaining` seconds of it left. */

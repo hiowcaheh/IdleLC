@@ -1,10 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
-import { GameError } from '../../game/logic/errors.ts'
-import { toast } from '../../state/toasts.ts'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { getItem } from '../../game/data/items.ts'
 import type { ItemDef } from '../../game/data/types.ts'
-import { potionsLeft } from '../../game/logic/combat.ts'
+import { cooldownKey, potionsLeft } from '../../game/logic/combat.ts'
 import {
   BELOW_MIN,
   BELOW_STEP,
@@ -17,7 +15,8 @@ import {
 } from '../../game/logic/potions.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
-import { DRINK_PROBLEMS, potionLine } from '../items/potionText.ts'
+import { drinkWithToast } from '../items/drinkWithToast.ts'
+import { potionLine } from '../items/potionText.ts'
 import { Sheet } from '../Sheet.tsx'
 import { useCombatTicker } from '../skills/useCombatTicker.ts'
 
@@ -37,7 +36,6 @@ const HOLD_MS = 450
 export function PotionSlots() {
   const character = useGameStore((s) => s.character)
   const inDungeon = useGameStore((s) => !!s.dungeon)
-  const drinkPotion = useGameStore((s) => s.drinkPotion)
   const combat = useCombatTicker(500)
   const [open, setOpen] = useState<PotionGroup | null>(null)
   // a held slot opens its settings; the tap that ends the hold does not drink too
@@ -56,19 +54,11 @@ export function PotionSlots() {
   const endHold = () => {
     if (hold.current) window.clearTimeout(hold.current.timer)
   }
-  /** In a dungeon a tap drinks the slot's potion, like the client's quick slots in a fight. */
-  const drink = async (itemId: number) => {
-    try {
-      const problem = await drinkPotion(itemId)
-      if (problem) toast(DRINK_PROBLEMS[problem], 'error')
-    } catch (e) {
-      const code = e instanceof GameError ? e.code : ''
-      toast(
-        DRINK_PROBLEMS[code as keyof typeof DRINK_PROBLEMS] ?? 'This potion cannot be used now.',
-        'error',
-      )
-    }
-  }
+  /**
+   * In a dungeon a tap drinks the slot's potion, like the client's quick slots in a fight, with
+   * the same toast as a drink from the bag (a boost's stats in green and red).
+   */
+  const drink = (itemId: number) => drinkWithToast(itemId)
 
   const slot = (group: PotionGroup) => {
     const { itemId, auto } = character.potionSlots[group]
@@ -81,6 +71,17 @@ export function PotionSlots() {
           ? potionsLeft(combat.player, supply)
           : countOwned(character.inventory, itemId)
     const item = itemId === null ? EMPTY : getItem(itemId)
+    // a drink is seen on the slot: how long its potion still works, and its reuse time
+    const potion = item.potion
+    const working = potion
+      ? combat.player.effects.find((e) => e.potion && e.itemId === itemId)
+      : undefined
+    const workingShare =
+      working && potion && potion.duration > 0
+        ? Math.min(1, working.remaining / potion.duration)
+        : 0
+    const reuse = potion ? (combat.player.potionCooldowns[cooldownKey(potion)] ?? 0) : 0
+    const reuseShare = potion && potion.cooldown > 0 ? Math.min(1, reuse / potion.cooldown) : 0
     const what = itemId === null ? 'empty' : `${item.name}: ${count}`
     const state = auto ? 'drunk automatically' : 'automatic use off'
     const quick = inDungeon && itemId !== null
@@ -88,7 +89,7 @@ export function PotionSlots() {
       <button
         key={group}
         type="button"
-        className={`potion-slot potion-slot--${group}${auto ? ' is-auto' : ''}${count === 0 ? ' is-empty' : ''}`}
+        className={`potion-slot potion-slot--${group}${auto ? ' is-auto' : ''}${count === 0 ? ' is-empty' : ''}${workingShare > 0 ? ' is-working' : ''}`}
         aria-label={`${LABELS[group]} slot: ${what}, ${state}${quick ? ', tap to drink, hold for settings' : ''}`}
         title={`${LABELS[group]} slot: ${what}, ${state} (${quick ? 'tap to drink, hold for settings' : 'tap to choose'})`}
         disabled={away}
@@ -108,6 +109,18 @@ export function PotionSlots() {
         }}
       >
         <ItemIcon item={item} size={32} />
+        {!away && reuseShare > 0 && (
+          <span
+            className="potion-slot__reuse"
+            style={{ '--reuse': `${reuseShare * 360}deg` } as CSSProperties}
+            aria-hidden="true"
+          />
+        )}
+        {!away && workingShare > 0 && (
+          <span className="potion-slot__working" aria-hidden="true">
+            <span style={{ width: `${workingShare * 100}%` }} />
+          </span>
+        )}
         {itemId !== null && <span className="potion-slot__count">{count}</span>}
         {itemId !== null && auto && <span className="potion-slot__auto">A</span>}
       </button>
