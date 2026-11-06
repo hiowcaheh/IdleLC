@@ -1,5 +1,11 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-06 (Claude Code): [walka z serwera, skille, żywiołaki](docs/combat-skills-summons.md).
+Ciosy potworów `npcDamage`, kara za śmierć, koszt skilla przy wystrzale, żywioły `nAttrTbl`. Działają
+Far Seeing, Combat Reflection, Charge, Veteran's Composure i żywiołaki Sorcerera (`summons.ts`,
+`Summons.tsx`; nienawiść potwora i prowokacja). Resurrection/Invisibility celowo niedostępne (solo).
+100 Cooldown Potion = brak cooldownu (właściciel), 90001 wycofana ze zwrotem. SaveVersion **14**.
+
 Aktualizacja 2026-11-05, wieczór (Claude Code): [15 zgłoszeń](docs/owner-batch-2026-11-05-evening.md).
 Opcje tytułów/sprzętu według `CPC::ApplyTitle` / `ApplyOptionValue` (24/25 bez efektu, tytuł 50
 bez efektu, tytuł 99 tylko wyświetlany, 101–106 działają); ciosy potworów mają źródłowe typy

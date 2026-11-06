@@ -31,6 +31,21 @@ Stan rejestru: 2026-11-02, punkt odniesienia implementacji `c9944c9`. Celem jest
 
 „Oryginał” w tym dokumencie oznacza odczytane źródła November 2018, z uwzględnieniem ich ograniczeń i flag. Nie potwierdzono, że każda reguła działała identycznie na serwerze prywatnego klienta 2015. Dla brakujących wartości DB nie wybieramy liczb na podstawie nazw.
 
+## Rozstrzygnięcia i własne reguły — 2026-11-06
+
+Właściciel zatwierdził etapy techniczne (walka z serwera, brakujące skille, efekty klienta,
+wydajność) oraz szybkie poprawki ([combat-skills-summons.md](combat-skills-summons.md)):
+
+- **100 Cooldown Reduction Potion** zeruje cooldowny skilli (właściciel; w bazie STAT37 daje
+  ok. 70%). Stałe cooldowny (`SF_GUILD`, `SCT_NO_COOL_TIME`) zostają.
+- **100% Cast Potion (90001) wycofana**; zapisy dostają 50 000 złota za każdą sztukę.
+- **Własne**: Charge na AUTO czeka, aż potwór przygotowuje skill; żywiołak bije co 2 s potwora
+  bohatera i dobiega razem z nim (na serwerze ciosy żywiołaka wysyła klient); skill potwora na
+  żywiołaku zadaje tylko obrażenia; nienawiść rośnie tylko od obrażeń (zrzut nie ma `a_hate`).
+- Bity `a_sorcerer` (komu działa pasywna Sorcerera) pochodzą z `skills.lod` klienta 2015, bo zrzut
+  2016 nie ma tej kolumny (`SORCERER_APPLY` w `summons.ts`).
+- Resurrection i Invisibility pozostają niedostępne: bez drużyny i bez sensu w walce jeden na jeden.
+
 ## Rozstrzygnięcia właściciela — 2026-11-05, wieczór
 
 Właściciel: tytuły i mikstury mają działać „1:1 tak jak w plikach serwerowych”. Wdrożone

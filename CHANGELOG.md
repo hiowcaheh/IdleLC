@@ -1,5 +1,23 @@
 # Historia zmian
 
+## 2026-11-06 (Claude Code): walka z serwera, brakujące skille, żywiołaki Sorcerera
+
+Punkt wyjścia `445f599`. Commity `1cc02e0`, `6555b24`, `bfe732d`, `9708ca3`, `87cfbbf`, `d2ad688`,
+`dd3564a`, `576f8c0`. Pełny opis: [docs/combat-skills-summons.md](docs/combat-skills-summons.md).
+
+1. **Szybkie poprawki**: bez poświaty slotów mikstur, Equipment z listą „Worn”, 100 Cooldown
+   Reduction Potion = skille od razu gotowe (własna reguła), 100% Cast Potion wycofana (zwrot
+   50 000 złota za sztukę), Remove effect z potwierdzeniem i czerwonym komunikatem spadków.
+2. **Walka jak na serwerze**: ciosy i tempo potworów (`GetDamage` NPC), kara za śmierć w walce
+   i na wyprawie, koszt skilla przy wystrzale, żywioły (`nAttrTbl`).
+3. **Skille**: Far Seeing, Combat Reflection, Charge, Veteran's Composure działają; Resurrection
+   i Invisibility mają w oknie Skills powód, dla którego nie działają solo.
+4. **Żywiołaki Sorcerera**: statystyki z `Elemental.cpp`, 20 min, przerwa 5 s, pary ogień/wiatr
+   kontra ziemia/woda, nienawiść potwora i prowokacja, pasywne „Empowered” tylko na żywiołaka;
+   modele klienta w scenie.
+
+Weryfikacja: `npm run check` (**493 testy / 56 plików**), Chromium 390×844. SaveVersion **14**.
+
 ## 2026-11-05 wieczór (Claude Code): 15 zgłoszeń — tytuły 1:1, bieg, GUI, teren, dym
 
 Punkt wyjścia `b1bbc0e`. Commity `4069ec7`, `d6a791a`, `abf96ad`, `baffd2a`, `c446eb9`, `2ebf847`,

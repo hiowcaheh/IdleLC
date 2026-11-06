@@ -1,5 +1,13 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+Aktualizacja 2026-11-06 (Claude Code): [walka z serwera, skille, żywiołaki](combat-skills-summons.md).
+Ciosy potworów to `npcDamage` (gałąź NPC `GetDamage`), kara za śmierć `death.ts`, koszt skilla przy
+wystrzale (`canPaySkill`), żywioły `elementDamage`. Nowe efekty skilli: `reflect`, `interrupt`,
+`taunt`, `summon`; stat `attackRange` (Far Seeing). Żywiołaki: `summons.ts` (statystyki, reguły),
+`Fighter.summons` / `summonDelay` / `hate` / `aimAt` w `combat.ts`, scena `Summons.tsx`, modele
+`summon*.glb` (`scripts/lc/summons.mjs`). Pasywne Sorcerera filtrowane bitami `SSF_APP_*`
+(`passiveAppliesTo`). 100 Cooldown = `cooldownFree`, 90001 wycofana ze zwrotem. SaveVersion **14**.
+
 Aktualizacja 2026-11-05, wieczór (Claude Code): [15 zgłoszeń właściciela](owner-batch-2026-11-05-evening.md).
 Opcje tytułów i specjalne są liczone jak w `CPC::ApplyTitle` / `ApplyOptionValue` (rejestr D16
 rozstrzygnięty); `SPECIAL_OPTIONS`, `TITLE_RULES`, `specialOptionStats` w `options.ts`. Normalne ciosy
