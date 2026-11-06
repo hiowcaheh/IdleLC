@@ -3774,6 +3774,78 @@ a.button {
   margin: 0;
 }
 
+/*
+ * The hero's effects in one line (owner's rule, also in dungeons), scrolled sideways; the side
+ * with more effects fades out under the client's page arrow, which scrolls on a tap.
+ */
+.effect-scroll {
+  --fade-left: 0px;
+  --fade-right: 0px;
+  position: relative;
+  width: min(340px, calc(100vw - var(--safe-left) - var(--safe-right) - 64px));
+}
+
+.effect-scroll .effect-row {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  /* room for the seconds under the icons */
+  padding: 0 0 4px;
+  touch-action: pan-x;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--fade-left),
+    #000 calc(100% - var(--fade-right)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--fade-left),
+    #000 calc(100% - var(--fade-right)),
+    transparent
+  );
+}
+
+.effect-scroll .effect-row::-webkit-scrollbar {
+  display: none;
+}
+
+.effect-scroll .effect-row__item {
+  flex: none;
+}
+
+.effect-scroll.has-more-left {
+  --fade-left: 26px;
+}
+
+.effect-scroll.has-more-right {
+  --fade-right: 26px;
+}
+
+.effect-scroll__more {
+  position: absolute;
+  top: 1px;
+  width: 16px;
+  height: 21px;
+  padding: 0;
+  border: 0;
+  background: url('/ui/lc/page-right.webp') center / 11px 15px no-repeat;
+  filter: drop-shadow(0 0 2px #000) drop-shadow(0 0 1px #000);
+  cursor: pointer;
+}
+
+.effect-scroll__more--right {
+  right: -4px;
+}
+
+.effect-scroll__more--left {
+  left: -4px;
+  background-image: url('/ui/lc/page-left.webp');
+}
+
 /* ---------- Bag and equipment slots (the client's slot frames) ---------- */
 
 .item-slot {

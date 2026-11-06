@@ -31,6 +31,8 @@ import {
   type CombatState,
   type FighterInit,
   type PotionSupply,
+  MAX_RUN_SPEED,
+  runSpeed,
 } from './combat.ts'
 import { createRng, type Rng } from './rng.ts'
 import { interpretEffect, type SkillRank } from './skills.ts'
@@ -847,6 +849,15 @@ describe('rare options in combat', () => {
     expect(combatTick(moved, step, createRng(1)).events).toContainEqual({ type: 'arrive' })
     const unboosted = changeMonster(slow, 'other', weakMonster).state
     expect(combatTick(unboosted, step, createRng(1)).state.phase).toBe('traveling')
+  })
+
+  it('a hero never runs faster than 20 m/s, however many boosts; monsters keep their speed', () => {
+    expect(MAX_RUN_SPEED).toBe(20)
+    const client = { runSpeed: 31.5 } as NonNullable<CombatStats['client']>
+    expect(runSpeed(stats({ client }))).toBe(20)
+    expect(runSpeed(stats({ client: { ...client, runSpeed: 14 } }))).toBe(14)
+    expect(runSpeed(stats({ moveSpeed: 400 }))).toBe(20) // a hero without a client sheet
+    expect(runSpeed(stats({ npcRunSpeed: 24 }))).toBe(24)
   })
 })
 

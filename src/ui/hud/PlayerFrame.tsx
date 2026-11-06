@@ -59,7 +59,7 @@ export function PlayerFrame() {
         </div>
       </div>
       <div className="player-frame__effects">
-        {!character.expedition && <EffectRow side="player" onPick={setPicked} />}
+        {!character.expedition && <EffectRow side="player" onPick={setPicked} line />}
       </div>
       {picked && <EffectWindow side="player" id={picked} onClose={closeEffect} />}
     </section>

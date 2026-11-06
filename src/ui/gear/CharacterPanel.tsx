@@ -5,7 +5,7 @@ import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
 import { ATTRIBUTE_KEYS } from '../../game/logic/attributes.ts'
 import { availableStatPoints } from '../../game/logic/statPoints.ts'
 import { naturalRecovery } from '../../game/logic/recovery.ts'
-import { effectiveStats } from '../../game/logic/combat.ts'
+import { effectiveStats, runSpeed } from '../../game/logic/combat.ts'
 import { GameError } from '../../game/logic/character.ts'
 import {
   MAX_PLUS,
@@ -149,7 +149,8 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
     ['Silence resistance', percent(stats.silenceResistance ?? 0)],
   ]
   const speedRows: StatRow[] = [
-    clientRow('Run speed', 'runSpeed', 1, ' m/s'),
+    // the speed the hero really runs at: at most MAX_RUN_SPEED (owner's rule)
+    ['Run speed', `${runSpeed(stats).toFixed(1)} m/s`, change(runSpeed(stats), runSpeed(base), 1)],
     [
       'Attack interval',
       `${stats.attackInterval.toFixed(2)} s`,

@@ -314,16 +314,12 @@
 .dungeon-target small {
   margin-left: 4px;
 }
+/* one line of effects as everywhere (index.css .effect-scroll), clear of the minimap */
 .game--dungeon .player-frame__effects {
-  width: min(340px, calc(100vw - 128px));
-  max-height: 58px;
-  overflow-y: auto;
   pointer-events: auto;
 }
-.game--dungeon .player-frame__effects .effect-row {
-  flex-wrap: wrap;
-  margin: 0;
-  padding-bottom: 3px;
+.game--dungeon .effect-scroll {
+  width: min(340px, calc(100vw - 128px));
 }
 .sheet-backdrop--center .sheet.dungeon-blessing {
   width: min(100%, 860px);

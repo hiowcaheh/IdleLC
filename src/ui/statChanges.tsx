@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { ClientCombatStats, CombatStats } from '../game/data/types.ts'
+import { runSpeed } from '../game/logic/combat.ts'
 
 /** One stat that changed: its name, the change as the Character window shows it, better or worse. */
 export interface StatChange {
@@ -46,7 +47,8 @@ const METRICS: Metric[] = [
   { label: 'Deadly rating', value: client('deadlyRating') },
   { label: 'Critical damage', value: (s) => s.critMultiplier * 100, unit: '%' },
   { label: 'Attack range', value: (s) => s.attackRange, digits: 1, unit: ' m' },
-  { label: 'Run speed', value: client('runSpeed'), digits: 1, unit: ' m/s' },
+  // at most MAX_RUN_SPEED, as the hero really runs
+  { label: 'Run speed', value: (s) => runSpeed(s), digits: 1, unit: ' m/s' },
   {
     label: 'Attack interval',
     value: (s) => s.attackInterval,

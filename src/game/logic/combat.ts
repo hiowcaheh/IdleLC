@@ -440,15 +440,21 @@ export function approachTime(state: Pick<CombatState, 'player'>): number {
 }
 
 /**
- * Run speed in metres a second: a hero's with the class's base and its option and assist bonuses,
- * a monster's from the database.
+ * The fastest a hero (and an elemental) runs, in metres a second, whatever potions, buffs and
+ * options add: the owner's fixed rule, in fights, on expeditions and in dungeons alike.
+ */
+export const MAX_RUN_SPEED = 20
+
+/**
+ * Run speed in metres a second: a hero's with the class's base and its option and assist bonuses
+ * (at most MAX_RUN_SPEED), a monster's from the database.
  */
 export function runSpeed(stats: CombatStats): number {
-  return Math.max(
-    0.1,
+  const monster = stats.client === undefined && stats.npcRunSpeed !== undefined
+  const speed =
     stats.client?.runSpeed ??
-      (stats.npcRunSpeed ?? BASE_RUN_SPEED) * (1 + (stats.moveSpeed ?? 0) / 100),
-  )
+    (stats.npcRunSpeed ?? BASE_RUN_SPEED) * (1 + (stats.moveSpeed ?? 0) / 100)
+  return Math.max(0.1, monster ? speed : Math.min(MAX_RUN_SPEED, speed))
 }
 
 /**
