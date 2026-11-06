@@ -1,5 +1,29 @@
 # Historia zmian
 
+## 2026-11-06 (Claude Code): efekty skilli prosto z klienta (etap 1: cząsteczki)
+
+1. **Eksport z klienta.** `scripts/lc/client-effects.mjs --client <klient 2015>` zapisuje
+   `public/fx/client/effects.json` i 165 tekstur WebP (`public/fx/client/tex/`). W eksporcie są
+   wszystkie grupy efektów, których używają skille klas i potworów (skills.lod: ready / fire /
+   after oraz efekty z kluczy klipów w `.bae`): 287 grup, 960 efektów i 464 systemy cząsteczek.
+2. **Port silnika cząsteczek klienta** (`src/scene/clientFx/particles.ts`, krok po kroku według
+   `CParticle*.cpp`):
+   - emitery: kula, stożek i walec;
+   - procesy: dynamic state, force, point goal, control i velocity;
+   - pochłanianie z typami ruchu i tablica losowa klienta.
+3. **Odtwarzacz i rysowanie.**
+   - `player.ts`: grupy efektów z czasami i tagami.
+   - `ParticleMeshes.ts`: quady zwrócone do kamery albo smugi, komórki tekstury, tryby mieszania
+     klienta 203/205/206/208.
+   - Tagi postaci (CENTER, RHAND, broń…) bierze ze źródłowych tagów Codexa (`placeSourceTag`).
+4. **Gdzie działa.**
+   - Na polu walki i w Dungeons, dla skilli bohatera i potworów.
+   - Skille z cząsteczkami z klienta nie używają już własnych efektów `SkillEffects`.
+   - TEST-HIT = środek celu. ARROWHEAD leci od dłoni do celu przez czas wystrzału.
+
+**Jeszcze nie:** modele MDL (plany, pierścienie: 219 użyć, 15 plików), modele SKA efektów (78),
+dźwięki, smugi broni (trace), orbity. Kolejne etapy są w `docs/development-handoff.md`.
+
 ## 2026-11-06 (Codex): mniejsza minimapa na dole Dungeons
 
 Minimapa zmniejszona z 90 do 72 px i przeniesiona na dół po lewej, nad paskiem

@@ -1,5 +1,11 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-06, wieczór (Claude Code): **efekty skilli z klienta, etap 1**.
+`scripts/lc/client-effects.mjs` → `public/fx/client/`, a port silnika cząsteczek jest
+w `src/scene/clientFx/`. Działa na polu i w Dungeons. Skille z danymi klienta pomijają własne
+`SkillEffects`. Następne: MDL (EFMD), SKA (EFSK), trace i orbity. Szczegóły w
+[przekazaniu](docs/development-handoff.md).
+
 Aktualizacja 2026-11-06 (Codex): minimapa Dungeons ma 72 px i jest na dole po lewej,
 nad paskiem skilli, obok joysticka. Panel statusu jest na pełną szerokość dawnego
 wiersza status + minimapa, z mniejszą wysokością. Zmienione tylko GUI, nadal v16.

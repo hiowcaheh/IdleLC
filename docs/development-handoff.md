@@ -1,5 +1,29 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Najnowszy etap: efekty skilli z klienta, etap 1 (Claude Code), 2026-11-06
+
+- **Eksport:** `scripts/lc/client-effects.mjs` (`--report` daje samo podsumowanie) zapisuje
+  `public/fx/client/effects.json` i `tex/*.webp`.
+  - Grupy skilli bierze ze skills.lod (ready / fire / after) i z kluczy klipów `.bae`.
+  - Efekty i systemy cząsteczek czyta z Effect.dat (czytniki `upgrade-effects.mjs` /
+    `title-particles.mjs`).
+  - Plik jest w `.prettierignore`.
+- **Runtime w `src/scene/clientFx/`:**
+  - `particles.ts`: czysty port CParticleGroup, testy w `particles.test.ts`.
+  - `player.ts`: CEffectGroup, czasy i tagi, cykl życia CEffect.
+  - `ParticleMeshes.ts`: rysowanie jak DrawPort_Particles.
+  - `skillFx.ts`: kolejność ready → clip keys → fire → after; tagi przez `placeSourceTag`, a gdy
+    tagu brak, punkt na wysokości modelu.
+  - `ClientFx.tsx`: warstwa w scenie.
+- **Uchwyt postaci:** `CharacterHandle.effectTarget()` zwraca kości i broń dla tagów.
+- **Do zrobienia, kolejno:**
+  1. czytnik MDL (MDATV010) i efekty EFMD (głównie PlaneAdd / PlaneAddFlat, flagi face-forward);
+  2. EFSK (modele SKA efektów przez istniejący tor SMC→GLB);
+  3. EFTR (trace broni), EFOB (orbity), EFSB (shock wave), EFLT (światło);
+  4. efekty tytułów i ulepszeń przez ten sam odtwarzacz (dziś mają własne adaptery Codexa).
+
+  Dźwięki (EFSN) są pomijane.
+
 ## Najnowszy etap: dolna minimapa i niższy panel Dungeons (Codex), 2026-11-06
 
 Na kolejną prośbę właściciela minimapa ma 72 px zamiast 90 i jest osobnym elementem
