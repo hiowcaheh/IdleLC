@@ -1,5 +1,19 @@
 # Historia zmian
 
+## 2026-11-06 (Codex): superbuffy i oryginalny czas mikstur w Dungeons
+
+1. Mikstury z ekwipunku zachowują źródłowy czas i pozostały efekt po rundzie/reload.
+   SF_ABSTIME zachowuje termin końcowy, SF_NOCANCEL działa przy śmierci. Darmowe
+   wybory podziemia są ograniczone do rundy i nie zapisują się jako własne mikstury.
+2. Specjalne wybory na poziomach 5/10/15/20: Platinum Blessed Iris (3× EXP), Platinum
+   Super Skill Pill (3× SP), Blue cube effect oraz najwyższy źródłowy Seraphim.
+   Stałe wartości z bazy/serwera, bez ulepszania punktami i bez powtórek.
+3. Symetryczne bitmapowe strzałki Quest.tex, brak licznika 1/3, więcej ramek klienta.
+4. Atlasy ikon otrzymują wersję zależną od zawartości, zgodną z indeksami nowego eksportu.
+
+SaveVersion pozostaje 16. Weryfikacja: 528 testów / 59 plików i próby przeglądarkowe.
+Szczegóły wartości, różnicy Archangel/Seraphim i testów: [docs/dungeons.md](docs/dungeons.md).
+
 ## 2026-11-06 (Codex): interfejs Dungeons, minimapa i Buffer
 
 SaveVersion **16**, migracja v15 zachowuje postępy. Szczegóły: [docs/dungeons.md](docs/dungeons.md).

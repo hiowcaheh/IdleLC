@@ -15,9 +15,15 @@ import { getSkill } from '../data/skills.ts'
 import { createCharacterData } from './character.ts'
 import { effectiveStats, freshFighter, runSpeed, skillMpCost } from './combat.ts'
 import { skillRank } from './skills.ts'
+import { rewardKills } from './rewards.ts'
 import { monsterFighter } from './fighters.ts'
 import {
   DUNGEON_BUFFS,
+  DUNGEON_SUPER_BUFFS,
+  dungeonChoiceLevel,
+  dungeonSuperBuffDefinition,
+  dungeonSuperEffect,
+  dungeonRewardMultipliers,
   chooseDungeonBuff,
   createDungeonRun,
   dungeonBuffRank,
@@ -154,18 +160,33 @@ describe('dungeons on the original database', () => {
     let next = dungeonStep(state, 0.05, STILL, rng()).run
     expect(next.level).toBe(20)
     const roll = rng()
+    const superOffers: [number, number][] = []
     while (next.choices.length) {
-      expect(new Set(next.choices).size).toBe(3)
+      const special = !!dungeonSuperBuffDefinition(next.choices[0]!)
+      if (special) superOffers.push([dungeonChoiceLevel(next), next.choices.length])
+      expect(new Set(next.choices).size).toBe(next.choices.length)
+      if (!special) expect(next.choices).toHaveLength(3)
       expect(next.choices.every((id) => !next.buffs.includes(id))).toBe(true)
       next = chooseDungeonBuff(next, next.choices[0]!, roll)
     }
     expect(next.buffs).toHaveLength(19)
     expect(new Set(next.buffs).size).toBe(19)
     expect(next.player.effects).toHaveLength(19)
+    expect(superOffers).toEqual([
+      [5, 4],
+      [10, 3],
+      [15, 2],
+      [20, 1],
+    ])
     expect(DUNGEON_BUFFS.every((id) => dungeonBuffRank(id).level === 1)).toBe(true)
     for (const effect of next.player.effects) {
+      const special = DUNGEON_SUPER_BUFFS.find((b) =>
+        b.itemId !== undefined ? b.itemId === effect.itemId : b.skillId === effect.skillId,
+      )
       expect(effect.stats).toEqual(
-        dungeonBuffRank(effect.skillId).effects.filter((e) => e.kind === 'stat'),
+        special
+          ? dungeonSuperEffect(special, 600, next.player.stats.clientContext?.classId).stats
+          : dungeonBuffRank(effect.skillId).effects.filter((e) => e.kind === 'stat'),
       )
       expect(effect.remaining).toBeCloseTo(600 - next.elapsed)
     }
@@ -424,6 +445,106 @@ describe('per-character Buffer and lifetime dungeon points', () => {
   })
 })
 
+describe('fixed source super blessings and potion timers', () => {
+  it('uses the real source powers, keeps super blessings out of the Buffer, and never grants dummy attack magic', () => {
+    expect(DUNGEON_SUPER_BUFFS.map((b) => b.id)).toEqual([-1416, -2453, -1075, -10953])
+    const iris = dungeonSuperBuffDefinition(-1416)!
+    const pill = dungeonSuperBuffDefinition(-2453)!
+    expect([iris.level, iris.rewards!.exp, pill.rewards!.sp]).toEqual([2, 200, 200])
+    expect(dungeonSuperEffect(iris, 600).stats).toEqual([])
+    expect(dungeonSuperEffect(pill, 600).stats).toEqual([])
+    expect(dungeonSuperEffect(dungeonSuperBuffDefinition(-1075)!, 600).stats).toEqual([
+      { kind: 'stat', stat: 'deadly', value: 200, percent: true },
+      { kind: 'stat', stat: 'attack', value: 200, percent: true },
+      { kind: 'stat', stat: 'magicAttack', value: 200, percent: true },
+    ])
+    const artifact = dungeonSuperBuffDefinition(-10953)!
+    expect(artifact).toMatchObject({
+      name: 'Artifact of Seraphim',
+      attributes: 1200,
+      rewards: { exp: 1200, sp: 0, gold: 800, drop: 0 },
+    })
+    for (const def of DUNGEON_SUPER_BUFFS) {
+      expect(() =>
+        upgradeDungeonBuff(
+          { ...hero(), dungeons: { ...emptyDungeonProgress(), points: 10000, totalPoints: 10000 } },
+          def.id,
+        ),
+      ).toThrow('unknown-dungeon-buff')
+    }
+  })
+
+  it('applies successive source reward multipliers to actual payouts and leaves ordinary rewards unchanged', () => {
+    const state = run()
+    state.player.effects = DUNGEON_SUPER_BUFFS.map((b) => dungeonSuperEffect(b, 600))
+    expect(dungeonRewardMultipliers(state)).toEqual({ exp: 39, sp: 3, gold: 9, drop: 1 })
+    const character = hero(10)
+    const monster = getMonster('lc-35')
+    const base = rewardKills(character, monster, 1, rng(), NOW)
+    const boosted = rewardKills(character, monster, 1, rng(), NOW, dungeonRewardMultipliers(state))
+    expect(boosted.exp).toBe(base.exp * 39)
+    expect(boosted.sp).toBe(base.sp * 3)
+    expect(boosted.gold).toBe(base.gold * 9)
+    expect(boosted.drops).toEqual(base.drops)
+    state.player.effects.forEach((e) => {
+      e.remaining = 0
+    })
+    expect(dungeonRewardMultipliers(state)).toEqual({ exp: 1, sp: 1, gold: 1, drop: 1 })
+  })
+
+  it('applies the artifact owner HP/MP coefficients together with its four flat attributes', () => {
+    const state = run()
+    const before = effectiveStats(state.player)
+    state.level = 5
+    state.pendingLevels = 1
+    state.choices = [-10953]
+    const next = chooseDungeonBuff(state, -10953, rng())
+    const after = effectiveStats(next.player)
+    // Source Healer: CON HP coefficient 7, INT/CON MP coefficients 9 and 2.
+    expect(after.maxHp - before.maxHp).toBe(1200 * 7)
+    expect(after.maxMp! - before.maxMp!).toBe(1200 * 11)
+    expect(after.strength! - before.strength!).toBe(1200)
+    expect(after.intelligence! - before.intelligence!).toBe(1200)
+    expect(after.client!.magicAttack - before.client!.magicAttack).toBe(800)
+  })
+
+  it('keeps personal potion duration on entry and near the end while a selected blessing expires with the round', () => {
+    const state = createDungeonRun(
+      { ...hero(), boosts: [{ itemId: 2138, remaining: 3300 }] },
+      'belfist',
+      'timers',
+      NOW,
+    )
+    expect(state.player.effects[0]!.remaining).toBe(3300)
+    state.elapsed = 590
+    state.pendingLevels = 1
+    state.choices = [DUNGEON_BUFFS[0]!]
+    const blessed = chooseDungeonBuff(state, state.choices[0]!, rng())
+    expect(blessed.player.effects.find((e) => e.dungeon)!.remaining).toBe(10)
+    const next = dungeonStep(blessed, 0.05, STILL, rng()).run
+    expect(next.player.effects.find((e) => e.itemId === 2138)!.remaining).toBeCloseTo(3299.95)
+    expect(next.player.effects.find((e) => e.dungeon)!.remaining).toBeCloseTo(9.95)
+  })
+
+  it('uses an absolute potion deadline during pauses without advancing the dungeon clock', async () => {
+    const f = fixture(30, { inventory: [{ itemId: 2845, count: 1 }] })
+    await f.service.load()
+    await f.service.startDungeon('d', 'belfist')
+    const used = await f.service.drinkDungeonPotion('d', 2845)
+    const until = used.character.boosts![0]!.until!
+    expect(until).toBe(NOW + 3600000)
+    f.tick(120)
+    const paused = await f.service.advanceDungeon('d', 0, STILL)
+    expect(paused.run!.elapsed).toBe(0)
+    expect(paused.run!.player.effects.find((e) => e.itemId === 2845)!.remaining).toBe(3480)
+    expect(paused.character.boosts![0]!.until).toBe(until)
+    f.tick(3600)
+    const expired = await f.service.advanceDungeon('d', 0, STILL)
+    expect(expired.run!.player.effects.some((e) => e.itemId === 2845)).toBe(false)
+    expect(expired.character.boosts).toEqual([])
+  })
+})
+
 describe('saved dungeon commands', () => {
   it('enforces levels and two entries per dungeon, per character and UTC day, including quits', async () => {
     const f = fixture(14)
@@ -465,10 +586,10 @@ describe('saved dungeon commands', () => {
     await expect(f.service.unequipItem('d', 'weapon')).resolves.toBeTruthy()
   })
 
-  it('consumes a real potion once, clears temporary effects and cannot refund the entry on reload', async () => {
+  it('consumes a long potion once, preserves its source duration over reload and cannot refund the entry', async () => {
     const f = fixture()
     await f.service.load()
-    const potion = Object.values(ITEMS).find((i) => i.potion?.kind === 'boost' && i.level <= 30)!
+    const potion = ITEMS[2138]!
     expect(potion).toBeTruthy()
     await f.service.buyItem('d', potion.id, 1).catch(async () => {
       await f.service.dev.addGold('d', 10000000)
@@ -477,18 +598,20 @@ describe('saved dungeon commands', () => {
     await f.service.startDungeon('d', 'belfist')
     const used = await f.service.drinkDungeonPotion('d', potion.id)
     expect(used.run!.player.effects.some((e) => e.itemId === potion.id)).toBe(true)
+    expect(used.run!.player.effects.find((e) => e.itemId === potion.id)!.remaining).toBe(3600)
     expect(used.character.inventory.some((i) => i.itemId === potion.id)).toBe(false)
     const restored = new LocalGameService(f.storage, { now: f.now, rng: rng() })
     const save = await restored.load()
     const c = save.save.characters[0]!
-    expect(c.boosts).toEqual([])
+    expect(c.boosts).toEqual([{ itemId: potion.id, remaining: 3600 }])
     expect(c.dungeons!.active).toBeNull()
     expect(c.dungeons!.entries.belfist).toBe(1)
     expect(c.dungeons!.history[0]!.outcome).toBe('interrupted')
     await restored.load()
     expect(f.read().dungeons!.history).toHaveLength(1)
     await restored.startDungeon('d', 'belfist')
-    await restored.finishDungeon('d')
+    const finished = await restored.finishDungeon('d')
+    expect(finished.character.boosts).toEqual([{ itemId: potion.id, remaining: 3600 }])
     await expect(restored.startDungeon('d', 'belfist')).rejects.toThrow('dungeon-daily-limit')
   })
 

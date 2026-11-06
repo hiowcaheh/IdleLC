@@ -95,7 +95,7 @@ export function DungeonLootButton() {
           <p className="sheet__meta">
             {tab === 'loot'
               ? 'Rewards earned during this run. They are already saved to your character. Time is paused while this window is open.'
-              : 'Use potions from your inventory. Time is paused while this window is open. Temporary effects end with this run.'}
+              : 'Use potions from your inventory. Potions keep their original duration, including their remaining time after the run. Dungeon blessings end with the run.'}
           </p>
           {tab === 'loot' ? <DungeonLootSummary rewards={run.rewards} /> : <DungeonPotions />}
           <button type="button" className="button button--wide" onClick={() => setOpen(false)}>

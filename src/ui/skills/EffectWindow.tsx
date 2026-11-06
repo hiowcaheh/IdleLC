@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getItem } from '../../game/data/items.ts'
 import { getSkill } from '../../game/data/skills.ts'
-import { dungeonBuffDefinition } from '../../game/logic/dungeons.ts'
+import { dungeonBuffDefinition, DUNGEON_SUPER_BUFFS } from '../../game/logic/dungeons.ts'
 import { effectiveStats, isHarmful, type Side } from '../../game/logic/combat.ts'
 import { combatSession } from '../../game/session/combatSession.ts'
 import { STAT_TOAST_MS, toast } from '../../state/toasts.ts'
@@ -33,7 +33,18 @@ export function EffectWindow({ side, id, onClose }: { side: Side; id: string; on
       ? (getSkill(effect.skillId) ?? dungeonBuffDefinition(effect.skillId))
       : undefined
   const kind = skill ? skillRank(skill, 1).kind : 'buff'
-  const what = effect.itemId !== undefined ? 'Potion' : effect.stun ? 'Stun' : KIND_LABELS[kind]
+  const special = effect.dungeon
+    ? DUNGEON_SUPER_BUFFS.find((b) =>
+        b.itemId !== undefined ? b.itemId === effect.itemId : b.skillId === effect.skillId,
+      )
+    : undefined
+  const what = effect.dungeon
+    ? 'Dungeon blessing'
+    : effect.itemId !== undefined
+      ? 'Potion'
+      : effect.stun
+        ? 'Stun'
+        : KIND_LABELS[kind]
   const rows = activeEffectRows(effect)
 
   return (
@@ -65,10 +76,12 @@ export function EffectWindow({ side, id, onClose }: { side: Side; id: string; on
             ))}
           </dl>
         )}
-        {skill?.description && <p className="effect-window__text">{skill.description}</p>}
+        {(skill?.description || special?.description) && (
+          <p className="effect-window__text">{skill?.description || special?.description}</p>
+        )}
       </div>
-      {inDungeon && (
-        <p className="sheet__meta">Temporary effects end when this dungeon run ends.</p>
+      {inDungeon && effect.dungeon && (
+        <p className="sheet__meta">This dungeon blessing ends when the run ends.</p>
       )}
       {side === 'player' && !isHarmful(effect) && !inDungeon && (
         <div className="effect-window__actions">

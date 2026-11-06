@@ -27,6 +27,7 @@ import {
   type CombatEvent,
   type CombatState,
   type Fighter,
+  type ActiveEffect,
 } from './combat.ts'
 import { playerFighter, monsterFighter } from './fighters.ts'
 import { boostEffects } from './boosts.ts'
@@ -34,6 +35,8 @@ import { interpretEffect, skillRank, type SkillRank } from './skills.ts'
 import type { ItemStack } from './loot.ts'
 import type { ElementalType } from './summons.ts'
 import { rollInt, type Rng } from './rng.ts'
+import type { LcDungeonSuperBuff } from '../data/lcTypes.ts'
+import { HP_COEFFICIENT, MP_COEFFICIENT } from './attributes.ts'
 
 export interface DungeonPoint {
   x: number
@@ -171,6 +174,70 @@ export const DUNGEON_BUFFS = Object.values(BUFF_DEFINITIONS)
   .map((s) => s.id)
 
 export const DUNGEON_BUFF_UPGRADE_COST = 100
+export const DUNGEON_SUPER_BUFFS: readonly LcDungeonSuperBuff[] = lcData?.dungeonSuperBuffs ?? []
+export const dungeonSuperBuffDefinition = (id: number) =>
+  DUNGEON_SUPER_BUFFS.find((b) => b.id === id)
+export const dungeonChoiceLevel = (run: DungeonRun) => run.level - run.pendingLevels + 1
+export const isDungeonSuperLevel = (level: number) => [5, 10, 15, 20].includes(level)
+
+export function dungeonSuperEffect(
+  buff: LcDungeonSuperBuff,
+  remaining: number,
+  classId?: ClassId,
+): ActiveEffect {
+  return {
+    skillId: buff.skillId ?? buff.id,
+    ...(buff.itemId === undefined ? {} : { itemId: buff.itemId }),
+    name: buff.name,
+    dungeon: true,
+    remaining,
+    stats: [
+      ...buff.effects.flatMap((raw) => {
+        const e = interpretEffect(raw)
+        return e?.kind === 'stat' ? [e] : []
+      }),
+      ...(buff.attributes
+        ? (['strength', 'dexterity', 'intelligence', 'constitution'] as const).map((stat) => ({
+            kind: 'stat' as const,
+            stat,
+            value: buff.attributes!,
+            percent: false,
+          }))
+        : []),
+      // ApplyArtifact: CON-derived HP and INT/CON-derived MP, after passives and before assists.
+      ...(buff.attributes && classId
+        ? [
+            {
+              kind: 'stat' as const,
+              stat: 'maxHp' as const,
+              value: buff.attributes * HP_COEFFICIENT[classId][3],
+              percent: false,
+            },
+            {
+              kind: 'stat' as const,
+              stat: 'maxMp' as const,
+              value: buff.attributes * (MP_COEFFICIENT[classId][2] + MP_COEFFICIENT[classId][3]),
+              percent: false,
+            },
+          ]
+        : []),
+    ],
+    ...(buff.rewards ? { rewards: { ...buff.rewards } } : {}),
+    stun: false,
+    poison: 0,
+    nextTick: 1,
+  }
+}
+
+/** Source cash EXP, SP and artefact bonuses are successive multipliers, not one summed percent. */
+export function dungeonRewardMultipliers(run: DungeonRun) {
+  const rates = { exp: 1, sp: 1, gold: 1, drop: 1 }
+  for (const e of run.player.effects)
+    if (e.remaining > 0 && e.rewards)
+      for (const key of ['exp', 'sp', 'gold', 'drop'] as const)
+        rates[key] *= 1 + e.rewards[key] / 100
+  return rates
+}
 
 export function dungeonBuffLevel(progress: DungeonProgress | undefined, id: number): number {
   return progress?.buffLevels[id] ?? 1
@@ -204,8 +271,11 @@ export function upgradeDungeonBuff(character: CharacterData, id: number): Charac
 
 function offerBuffs(run: DungeonRun, rng: Rng): void {
   if (run.pendingLevels <= 0 || run.choices.length) return
-  const pool = DUNGEON_BUFFS.filter((id) => !run.buffs.includes(id))
-  for (let n = 0; n < 3 && pool.length; n++)
+  const special = isDungeonSuperLevel(dungeonChoiceLevel(run)) && DUNGEON_SUPER_BUFFS.length > 0
+  const pool = (special ? DUNGEON_SUPER_BUFFS.map((b) => b.id) : DUNGEON_BUFFS).filter(
+    (id) => !run.buffs.includes(id),
+  )
+  for (let n = 0, count = special ? 4 : 3; n < count && pool.length; n++)
     run.choices.push(pool.splice(rollInt(rng, 0, pool.length - 1), 1)[0]!)
   if (!run.choices.length) run.pendingLevels = 0
 }
@@ -220,13 +290,27 @@ export function chooseDungeonBuff(run: DungeonRun, id: number, rng: Rng): Dungeo
     choices: [],
     pendingLevels: run.pendingLevels - 1,
   }
-  applyEffects(
-    next.player,
-    'player',
-    { ...dungeonBuffRank(id, run.buffLevels[id] ?? 1), duration: DUNGEON_SECONDS - run.elapsed },
-    rng,
-    [],
-  )
+  const special = dungeonSuperBuffDefinition(id)
+  if (special)
+    next.player.effects.push(
+      dungeonSuperEffect(
+        special,
+        DUNGEON_SECONDS - run.elapsed,
+        run.player.stats.clientContext?.classId,
+      ),
+    )
+  else
+    applyEffects(
+      next.player,
+      'player',
+      { ...dungeonBuffRank(id, run.buffLevels[id] ?? 1), duration: DUNGEON_SECONDS - run.elapsed },
+      rng,
+      [],
+    )
+  if (!special)
+    next.player.effects = next.player.effects.map((e) =>
+      e.skillId === id ? { ...e, dungeon: true } : e,
+    )
   offerBuffs(next, rng)
   return next
 }
@@ -245,10 +329,7 @@ export function createDungeonRun(
   if (dungeonRunsLeft(character, dungeonId, now) <= 0)
     throw new GameError('dungeon-daily-limit', 'No entries left today. Reset: 00:00 UTC.')
   const player = freshFighter(playerFighter(character, now))
-  player.effects = boostEffects(character.boosts ?? [], now).map((effect) => ({
-    ...effect,
-    remaining: Math.min(DUNGEON_SECONDS, effect.remaining),
-  }))
+  player.effects = boostEffects(character.boosts ?? [], now)
   return {
     id,
     dungeonId,
@@ -533,10 +614,6 @@ export function dungeonStep(
   for (const [id, count] of Object.entries(next.player.potionsUsed))
     if (count > 0) result.potions.push({ itemId: Number(id), count })
   next.player.potionsUsed = {}
-  next.player.effects = next.player.effects.map((effect) => ({
-    ...effect,
-    remaining: Math.min(effect.remaining, DUNGEON_SECONDS - next.elapsed),
-  }))
   if (next.player.hp <= 0) next.ended = 'defeated'
   else if (next.elapsed >= DUNGEON_SECONDS - 1e-6) next.ended = 'completed'
   if (next.ended) next.choices = []

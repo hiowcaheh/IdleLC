@@ -87,6 +87,21 @@ export interface LcItem {
   title?: number
 }
 
+export interface LcDungeonSuperBuff {
+  id: number
+  name: string
+  description: string
+  level: number
+  itemId?: number
+  skillId?: number
+  sourceDuration: number
+  effects: SkillEffectDef[]
+  sourceEffects?: SkillEffectDef[]
+  icon?: { atlas: number; row: number; col: number }
+  attributes?: number
+  rewards?: { exp: number; sp: number; gold: number; drop: number }
+}
+
 export interface LcData {
   version: 1
   generatedAt: string
@@ -101,6 +116,7 @@ export interface LcData {
   skills?: LcSkill[]
   /** Active class buffs, including advanced classes; used only for dungeon blessings. */
   dungeonBuffs?: LcSkill[]
+  dungeonSuperBuffs?: LcDungeonSuperBuff[]
   npcSkills?: Omit<LcSkill, 'classId' | 'icon'>[]
   /** Item ids the NPC shops of each field zone sell (gear and the upgrade stone), by zone id. */
   shops?: Record<string, number[]>
@@ -175,6 +191,7 @@ export interface LcModelManifest {
 export interface LcIconSheet {
   /** Sheet image, relative to the app base URL. */
   file: string
+  revision?: string
   /** Icon size in pixels. */
   size: number
   columns: number

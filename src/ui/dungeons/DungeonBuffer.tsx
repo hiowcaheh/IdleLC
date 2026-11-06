@@ -11,7 +11,7 @@ import { useGameStore } from '../../state/gameStore.ts'
 import { SkillIcon } from '../skills/SkillIcon.tsx'
 import { statLine } from '../skills/format.ts'
 
-export function BlessingEffects({ rank }: { rank: SkillRank }) {
+export function BlessingEffects({ rank }: { rank: Pick<SkillRank, 'effects'> }) {
   return (
     <span className="dungeon-blessing-card__effects">
       {rank.effects.map((e, i) =>

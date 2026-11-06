@@ -11,6 +11,8 @@ const root = process.argv[2]
 if (!root) throw new Error('Usage: node scripts/lc/dungeon-art.mjs <client-folder>')
 const files = new ClientFiles([root])
 const ui = await buildUiParts(files)
+for (const name of ['page-left', 'page-right'])
+  fs.writeFileSync(`public/ui/lc/${name}.webp`, ui[name])
 // Trim the atlas cell's transparent gutter so the visible Q is centered in its button.
 await sharp(ui['menu-dungeons'])
   .trim()

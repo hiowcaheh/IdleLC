@@ -151,6 +151,7 @@ export function rewardKills(
   kills: number,
   rng: Rng,
   now = Date.now(),
+  multipliers = { exp: 1, sp: 1, gold: 1, drop: 1 },
 ) {
   const bonuses = rewardBonuses(hero, now)
   const items = new Map<number, number>()
@@ -160,12 +161,17 @@ export function rewardKills(
     gold = 0,
     sp = 0
   for (let k = 0; k < kills; k++) {
-    const reward = rolledReward(monster, level, bonuses, rng)
+    const base = rolledReward(monster, level, bonuses, rng)
+    const reward = {
+      exp: Math.trunc(base.exp * multipliers.exp),
+      sp: Math.trunc(base.sp * multipliers.sp),
+      gold: Math.trunc(base.gold * multipliers.gold),
+    }
     exp += reward.exp
     gold += reward.gold
     sp += reward.sp
     if (levelRewardRates(level, monster.level).drops) {
-      for (const item of monsterDrops(monster, 1, rng))
+      for (const item of monsterDrops(monster, 1, rng, multipliers.drop))
         items.set(item.itemId, (items.get(item.itemId) ?? 0) + item.count)
     }
     // A level gained by this kill changes the penalties of the next kill, even in one report.

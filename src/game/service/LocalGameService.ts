@@ -4,6 +4,7 @@ import {
   dailyProgress,
   dungeonCheckpoint,
   dungeonStep,
+  dungeonRewardMultipliers,
   chooseDungeonBuff,
   upgradeDungeonBuff,
   recordDungeon,
@@ -13,6 +14,7 @@ import {
   type DungeonEvent,
   type DungeonEnd,
 } from '../logic/dungeons.ts'
+import { dungeonPotionBoosts, expireDungeonPotions } from '../logic/dungeonPotions.ts'
 import type { DungeonId } from '../data/dungeons.ts'
 import { drinkPotion, updatePlayer } from '../logic/combat.ts'
 import { playerFighter, potionSupply } from '../logic/fighters.ts'
@@ -120,7 +122,6 @@ export class LocalGameService implements GameService {
           checkpoint && c.dungeons
             ? {
                 ...c,
-                boosts: [],
                 lastPlayedAt: this.now(),
                 dungeons: recordDungeon(c.dungeons, {
                   ...checkpoint,
@@ -232,7 +233,14 @@ export class LocalGameService implements GameService {
     if (!Number.isFinite(seconds) || seconds < 0 || seconds > 5 * Math.max(1, this.timeScale))
       throw new GameError('invalid-dungeon-time')
     let character = this.character(characterId)
-    run = { ...run, player: { ...run.player, potions: potionSupply(character) } }
+    run = {
+      ...run,
+      player: {
+        ...run.player,
+        potions: potionSupply(character),
+        effects: expireDungeonPotions(run.player.effects, character.boosts, this.now()),
+      },
+    }
     const events: DungeonEvent[] = []
     let remaining = seconds
     let important = seconds === 0
@@ -245,7 +253,14 @@ export class LocalGameService implements GameService {
       const inventory = takeFromInventory(character.inventory, tick.potions).inventory
       character = { ...character, inventory }
       for (const monsterId of tick.kills) {
-        const reward = rewardKills(character, MONSTERS[monsterId]!, 1, this.rng, this.now())
+        const reward = rewardKills(
+          character,
+          MONSTERS[monsterId]!,
+          1,
+          this.rng,
+          this.now(),
+          dungeonRewardMultipliers(run),
+        )
         const bag = stowDrops(character, reward.drops, this.rng)
         character = {
           ...character,
@@ -300,11 +315,19 @@ export class LocalGameService implements GameService {
         },
       }
     }
+    const boosts = dungeonPotionBoosts(run.player.effects, character.boosts, this.now())
+    run.player.effects = run.player.effects.flatMap((effect) => {
+      if (effect.dungeon || effect.potion !== 'boost' || effect.itemId === undefined)
+        return [effect]
+      const own = boosts.find((b) => b.itemId === effect.itemId)
+      return own ? [{ ...effect, remaining: Math.min(effect.remaining, own.remaining) }] : []
+    })
     this.dungeonRuns.set(characterId, run)
     character = this.update(
       characterId,
       () => ({
         ...character,
+        boosts,
         lastPlayedAt: this.now(),
         dungeons: { ...character.dungeons!, active: dungeonCheckpoint(run) },
       }),
@@ -336,6 +359,7 @@ export class LocalGameService implements GameService {
     if (run.choices.length) throw new GameError('dungeon-paused', 'Choose a blessing first.')
     const character = this.character(characterId)
     const item = getItem(itemId)
+    run.player.effects = expireDungeonPotions(run.player.effects, character.boosts, this.now())
     const count = character.inventory.find((s) => s.itemId === itemId)?.count ?? 0
     if (!item.potion || !count || character.level < item.level)
       throw new GameError('potion-unavailable')
@@ -353,14 +377,11 @@ export class LocalGameService implements GameService {
     )
     if (result.problem) throw new GameError(result.problem)
     run.player = result.state.player
-    run.player.effects = run.player.effects.map((e) => ({
-      ...e,
-      remaining: Math.min(e.remaining, 600 - run.elapsed),
-    }))
     run.player.potionsUsed = {}
     const updated = this.update(characterId, (c) => ({
       ...c,
       inventory: takeFromInventory(c.inventory, [{ itemId, count: 1 }]).inventory,
+      boosts: dungeonPotionBoosts(run.player.effects, c.boosts, this.now(), itemId),
     }))
     const init = playerFighter(updated, this.now())
     run.player.potions = init.potions
@@ -400,7 +421,11 @@ export class LocalGameService implements GameService {
     const record = { ...dungeonCheckpoint(run), outcome, endedAt: this.now(), lost }
     const character = this.update(characterId, (current) => ({
       ...current,
-      boosts: [],
+      boosts: dungeonPotionBoosts(
+        run.player.effects.filter((e) => outcome !== 'defeated' || e.keepOnDeath),
+        current.boosts,
+        this.now(),
+      ),
       exp: current.exp - lost.exp,
       sp: current.sp - lost.sp,
       stats: { ...current.stats, deaths: current.stats.deaths + (outcome === 'defeated' ? 1 : 0) },

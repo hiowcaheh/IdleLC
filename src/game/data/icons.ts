@@ -16,7 +16,7 @@ export function iconSprite(sheet: LcIconSheet | undefined, id: number | string):
   if (!sheet || index === undefined) return null
   const { size, columns } = sheet
   return {
-    url: `${import.meta.env.BASE_URL}${sheet.file}`,
+    url: `${import.meta.env.BASE_URL}${sheet.file}${sheet.revision ? `?v=${sheet.revision}` : ''}`,
     x: (index % columns) * size,
     y: Math.floor(index / columns) * size,
     size,

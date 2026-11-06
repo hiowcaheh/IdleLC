@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url'
 import { buildModelManifest, modelIdFromSmc } from './manifest.mjs'
 import { int, num, readTables } from './sql.mjs'
 import { sourceFields, sourceMagic, sourceNpc } from './source-records.mjs'
+import { buildDungeonSuperBuffs, DUNGEON_SUPER_ITEMS } from './dungeon-super.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const MAX_LEVEL = 100
@@ -300,6 +301,7 @@ function buildData(tables) {
   }
   UPGRADE_STONES.forEach((id) => usedItems.add(id))
   BOOST_POTIONS.forEach((id) => usedItems.add(id))
+  DUNGEON_SUPER_ITEMS.forEach((id) => usedItems.add(id))
   const titles = buildTitles(tables.t_title, itemRows)
   titles.forEach((t) => usedItems.add(t.item))
   const titleOfItem = new Map(titles.map((t) => [t.item, t.id]))
@@ -405,6 +407,7 @@ function buildData(tables) {
     gearReference,
     skills,
     dungeonBuffs,
+    dungeonSuperBuffs: buildDungeonSuperBuffs(tables),
     npcSkills,
   }
 }

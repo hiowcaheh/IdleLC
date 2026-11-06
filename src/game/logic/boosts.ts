@@ -43,6 +43,7 @@ export function boostEffects(
 /** The boosts working in a fight, to keep in the save. */
 export function boostsOf(effects: readonly ActiveEffect[], now: number): OwnedBoost[] {
   return effects.flatMap((effect) => {
+    if (effect.dungeon) return []
     const potion =
       effect.potion === 'boost' && effect.itemId !== undefined && boostOf(effect.itemId)
     if (!potion || effect.remaining <= 0) return []

@@ -3,6 +3,55 @@
 Wdrożenie z 2026-11-06, po przeglądzie zmian Claude’a do `9ad20b8`. Aktualny SaveVersion **16**.
 To nowy, aktywny tryb hordowy IdleLC. Nie zastępuje polowania na spotach ani wypraw AFK.
 
+## Superbuffy i oryginalne czasy mikstur (2026-11-06)
+
+Poziomy 5 / 10 / 15 / 20 zastępują zwykły wybór wyborem superbuffa. Wybrane
+błogosławieństwo nie wraca: liczba dostępnych superbuffów wynosi kolejno 4 / 3 / 2 / 1.
+Pozostałe awanse nadal losują trzy klasyczne buffy. Poziom 20 oznacza maksymalnie
+15 zwykłych i 4 specjalne wybory. Również po podniesieniu kilku poziomów jednym zbiorem
+kryształów kolejka zachowuje właściwe progi. Wszystkie te wybory trwają do końca rundy.
+
+| Efekt                     | Źródło                                                           | Stała moc                                      |
+| ------------------------- | ---------------------------------------------------------------- | ---------------------------------------------- |
+| Platinum Blessed Iris     | item 1416, skill 349/2, magic 365/1                              | +200% EXP, 3× łącznie                          |
+| Platinum Super Skill Pill | item 2453, skill 468/1, magic 516/2                              | +200% SP, 3× łącznie                           |
+| Blue cube effect          | skill 1075/1, magic 949/1, 940/2, 991/2                          | +200% Deadly, ataku fizycznego i magicznego    |
+| Artifact of Seraphim      | item 10953, Artifact_Manager::ApplyArtifact, wariant właściciela | +1200 STR/DEX/INT/CON, +1200% EXP, +800% złota |
+
+W dostarczonym serwerze Archangel (10952) jest środkowym artefaktem; najwyższy to
+Seraphim. Nie ma bonusu SP/drop. Nie zastąpiono wartości źródłowych przypuszczalnym
++500% do wszystkiego. Zasoby artefaktu wynikają także z klasy: CON zwiększa HP,
+INT i CON zwiększają MP według `levelup_hp` / `levelup_mp` z PC.cpp. Wykorzystano
+istniejące tabele współczynników z attributes.ts. Działanie uwzględnia kolejność:
+zasoby po pasywach i przed procentowymi buffami asyst.
+
+W `Assist.cpp` Iris i pigułka SP mają specjalną interpretację; ich surowa magia
+wygląda jak zwiększenie ataku, ale nie jest używana jako atak. Import zachowuje surowe
+rekordy w sourceEffects i eksportuje właściwy bonus nagród. Kolejne bonusy nagród
+mnożą dotychczasową wypłatę IdleLC: Iris + Seraphim daje 3 × 13 EXP. Reguły różnicy
+poziomów i losowania dropu pozostają wspólne z pozostałą grą.
+
+Superbuffy są osobnym eksportem `dungeonSuperBuffs` i nie mają ulepszeń w Bufferze.
+ID wyborów są ujemne, aby nie kolidowały z listą klas. `ActiveEffect.dungeon` oznacza
+darmowy wybór, wykluczany z zapisu własnych mikstur przez boostsOf.
+
+Mikstury z plecaka mają swój czas z oryginału: np. Platinum Adrenaline 3600 s,
+Potion of Haste 200 s. Nie są przycinane do 600 s ani do pozostałego czasu rundy.
+Własny efekt i zużycie przedmiotu zapisują się razem; po wyjściu lub przerwaniu
+zostaje niewykorzystany czas. Przy śmierci stosowana jest flaga SF_NOCANCEL.
+Dla SF_ABSTIME zachowany jest pierwotny termin końcowy; pauza/okno odświeża tylko
+mikstury absolutne, bez postępu walki, zegara rundy i losowań. Względne czasy
+wstrzymują się wraz z grą. Wybrane darmowe buffy zawsze znikają po zakończeniu.
+
+Nie ma nowego schematu zapisu postaci: nadal v16. `OwnedBoost` zawierał już remaining
+oraz until. Nowa aktualizacja nie odzyskuje mikstur skasowanych przez poprzedni kod.
+
+Strzałki karuzeli to oryginalne bitmapy Quest.tex z questView.xml: lewa UV
+193,944,11,15, prawa 207,944,11,15. Symetryczna siatka ma kurczący się środkowy
+obszar nazwy; usunięto licznik 1/3. Panel, wartości i opisy korzystają z ramek
+QuestBook/NewCharacterInfo/skill_new. Atlasy ikon mają skrót zawartości w URL,
+żeby nowe pozycje ikon nie łączyły się z poprzednim obrazem w cache PWA.
+
 ## Interfejs i Buffer, aktualizacja v16
 
 - Q jest wyśrodkowane w przycisku w prawej kolumnie menu. Okno wyboru ma zakładki
@@ -21,7 +70,7 @@ To nowy, aktywny tryb hordowy IdleLC. Nie zastępuje polowania na spotach ani wy
 - Monster Book ma Worlds / Dungeons, a w drugiej zakładce wszystkie 23 źródłowe NPC
   z podziałem na trzy podziemia i adnotacją Dungeon monster. Zabójstwa już trafiały do
   wspólnych statystyk. Progi 10 / 100 / 1000 / 10000 oraz nagrody pozostają identyczne.
-- Każdy buff zaczyna na poziomie 1. Buffer kupuje kolejne poziomy osobno dla postaci,
+- Każdy zwykły buff klasowy zaczyna na poziomie 1. Buffer kupuje kolejne poziomy osobno dla postaci,
   wspólnie dla trzech podziemi, do najwyższego istniejącego poziomu źródłowego. Pokazuje
   efekty obecnego i następnego poziomu. Poziomy są kopiowane na wejściu i nie można
   ich kupować w trakcie rundy. Wartości efektów nie są mnożone własnym wzorem.
@@ -76,13 +125,13 @@ podziemiem działa nadal według istniejących reguł serwera.
   podziemia. Kryształy w promieniu 4,5 m lecą do postaci, zbierane są w promieniu 1,4 m.
   Podziemie zaczyna od poziomu 1 i EXP 0; limit to 20. Próg następnego poziomu:
   `3 + floor((poziom - 1) * 1.25)`.
-- Awans zatrzymuje czas, ruch, efekty i walkę. Gracz wybiera jeden z trzech różnych
+- Awans zatrzymuje czas, ruch, efekty i walkę. Poza progami superbuffów gracz wybiera jeden z trzech różnych
   buffów. Wybrane ID znika z puli do końca rundy; niewybrane może wrócić. Pula zawiera
   30 obsługiwanych buffów sześciu klas, także zaawansowanych, z rangą 1 lub rangą
   kupioną wcześniej w Bufferze. Nie wydajemy SP i nie uczymy tych skilli na stałe. Wybrane
   błogosławieństwa kumulują się w tym własnym trybie hordowym.
-- Buff wyboru trwa do końca rundy. Każdy efekt tymczasowy jest ograniczony pozostałym
-  czasem rundy. Wyjście, śmierć i przerwanie usuwają efekty, również wypite boosty.
+- Buff wyboru trwa do końca rundy. Wyjście, śmierć i przerwanie usuwają darmowe
+  wybory podziemia. Własne mikstury zachowują źródłowy czas i flagi śmierci.
   Pasywne cechy postaci, noszony sprzęt i tytuł pozostają.
 - Można używać mikstur, zmieniać ich sloty/AUTO, przełączać skille, uczyć dostępnych
   skilli i rozdawać punkty. Noszenie/zdejmowanie sprzętu, ulepszanie i identyfikacja
@@ -107,7 +156,7 @@ i referencje mocy sprzętu. Doszło 13 przedmiotów oraz 3 definicje skilli NPC.
 `dungeonBuffs` to osobny eksport 49 definicji aktywnych klasowych z `t_skill` / `t_skilllevel`
 i `t_magic` / `t_magiclevel`, również `a_job2 != 0` i powyżej 100. poziomu. Filtr gry
 odrzuca efekty nieobsługiwane i szkodliwe. Zaawansowane skille nie zostały dodane
-do zwykłej listy nauki. Ikony: 2069/2069 przedmiotów i zwykłe/dodatkowe skille z atlasów.
+do zwykłej listy nauki. Ikony po dodaniu superbuffów: 2072/2072 przedmiotów i zwykłe/dodatkowe skille z atlasów.
 
 Nagrody przechodzą przez tę samą `rewardKills` i `stowDrops`, co polowanie: osobne
 losowania EXP/SP/złota, kary różnicy poziomów i cztery próby wśród 20 slotów dropu.
@@ -204,3 +253,28 @@ na fizycznym telefonie.
 - Produkcyjna torba Potions: Potion of Haste 2 → 1 i aktywny efekt po wypiciu,
   bez spadku punktów i bez zmiany sprzętu. Zweryfikowane wszystkie trzy grafiki
   karuzeli z klienta, w rozmiarach 320/1280 px, bez błędów strony i zasobów.
+
+## Weryfikacja superbuffów i mikstur
+
+- `npm run check`: 528 testów / 59 plików, lint, format i TypeScript. Build poprawny.
+- Testy na źródłowym eksporcie: dokładne progi 5/10/15/20, brak powtórek,
+  blokada ulepszania superbuffów, wyłącznie EXP/SP dla Iris/pigułki, Cube +200%,
+  współczynniki HP/MP Seraphim, prawdziwe wypłaty nagród z mnożnikami, zachowanie
+  zwykłych nagród, mikstura >600 s na wejściu i przy końcu rundy, zapis po reload,
+  oryginalny deadline absolutny w pauzie.
+- GUI Chromium 320×740, 390×844 i 1280×900: symetria strzałek, brak licznika,
+  wszystkie 19 wyborów, specjalne pule 4/3/2/1, brak overflow i błędów zasobów.
+  Te przypadki korzystały z kontrolowanej porcji EXP kryształów w żywej logice
+  serwisu, aby objąć wszystkie progi; nie są pomiarem tempa zdobywania poziomów.
+- Osobna rzeczywista runda Belfist / Healer 80 ze źródłowym sprzętem +15 i dwoma
+  zakupionymi boosterami: 600 s, 201 zabójstw, poziom podziemia 17. Wybrane Cube
+  na 5, Seraphim na 10 i Iris na 15. Własne mikstury miały po rundzie około 3002 s.
+  Ta próba była przyspieszona ×20, bez dodawania EXP/kryształów w trakcie rundy.
+- Porównanie eksportu z poprzednią wersją: wszystkie wcześniejsze rekordy NPC,
+  zwykłych skilli, przedmiotów i inne wspólne pola danych są identyczne. Doszły
+  trzy pozycje przedmiotów do ikon oraz osobne definicje superbuffów.
+- Końcowy build produkcyjny, test wyłącznie przez GUI i WASD: Belfist / Healer 80,
+  390×844, pełne 600 s, 163 zabójstwa i poziom 15, bez dodawania EXP w trakcie.
+  Wybrane Cube/Seraphim/Iris na 5/10/15. Maksymalne HP po Seraphim 2085 → 10485
+  (źródłowe +8400 dla Healer). Mikstury miały po rundzie około 3004 s i przetrwały
+  reload. Darmowe efekty zniknęły. Brak błędów JS/konsoli/HTTP i overflow.

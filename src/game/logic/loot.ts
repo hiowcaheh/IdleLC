@@ -40,6 +40,7 @@ export function rollSourceDrops(
   slots: readonly (MonsterDrop | null)[],
   kills: number,
   rng: Rng,
+  multiplier = 1,
 ): ItemStack[] {
   if (slots.length !== 20) throw new Error('A source drop table must preserve all 20 slots')
   const counts = new Map<number, number>()
@@ -47,7 +48,7 @@ export function rollSourceDrops(
     for (let attempt = 0; attempt < 4; attempt++) {
       const drop = slots[rollInt(rng, 0, 19)]
       const roll = rollInt(rng, 1, 10000)
-      if (drop && roll <= Math.trunc(drop.chance * 10000))
+      if (drop && roll <= Math.trunc(drop.chance * 10000 * multiplier))
         counts.set(drop.itemId, (counts.get(drop.itemId) ?? 0) + 1)
     }
   return [...counts]
@@ -55,11 +56,20 @@ export function rollSourceDrops(
     .sort((a, b) => a.itemId - b.itemId)
 }
 
-export function monsterDrops(monster: MonsterDef, kills: number, rng: Rng): ItemStack[] {
-  if (!monster.dropSlots) return rollDrops(lootTable(monster), kills, rng)
+export function monsterDrops(
+  monster: MonsterDef,
+  kills: number,
+  rng: Rng,
+  multiplier = 1,
+): ItemStack[] {
+  const scale = (drops: MonsterDrop[]) =>
+    multiplier === 1
+      ? drops
+      : drops.map((d) => ({ ...d, chance: Math.min(1, d.chance * multiplier) }))
+  if (!monster.dropSlots) return rollDrops(scale(lootTable(monster)), kills, rng)
   return addToInventory(
-    rollSourceDrops(monster.dropSlots, kills, rng),
-    rollDrops([...GENERAL_DROPS, ...accessoryDrops()], kills, rng),
+    rollSourceDrops(monster.dropSlots, kills, rng, multiplier),
+    rollDrops(scale([...GENERAL_DROPS, ...accessoryDrops()]), kills, rng),
   )
 }
 

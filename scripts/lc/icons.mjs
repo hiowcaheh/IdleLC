@@ -5,6 +5,7 @@
  * Entries that share an icon share a cell.
  */
 import sharp from 'sharp'
+import { createHash } from 'node:crypto'
 import { parseTexture } from './texture.mjs'
 
 export const ICON_SIZE = 32
@@ -73,6 +74,8 @@ export async function buildIconSheet(files, entries, atlasPath, file) {
   const image = await sharp(pixels, { raw: { width, height, channels: 4 } })
     .webp({ quality: 90 })
     .toBuffer()
+  // A changed atlas must arrive with its new cell indices, including in an existing PWA cache.
+  sheet.revision = createHash('sha256').update(image).digest('hex').slice(0, 12)
   return { image, sheet, missingAtlases }
 }
 
@@ -122,7 +125,13 @@ export const ICON_KINDS = [
     file: 'icons/lc/skills.webp',
     entries: (data) => [
       ...new Map(
-        [...(data.skills ?? []), ...(data.dungeonBuffs ?? [])].map((s) => [s.id, s]),
+        [
+          ...(data.skills ?? []),
+          ...(data.dungeonBuffs ?? []),
+          ...(data.dungeonSuperBuffs ?? [])
+            .filter((s) => s.icon)
+            .map((s) => ({ ...s, id: s.skillId })),
+        ].map((s) => [s.id, s]),
       ).values(),
     ],
     atlasPath: (id) => `Data\\Interface\\SkillBtn${id}.tex`,

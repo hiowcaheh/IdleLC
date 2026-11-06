@@ -11,6 +11,9 @@ import {
   dungeonBuffDefinition,
   dungeonRunsLeft,
   dungeonXpNeeded,
+  dungeonChoiceLevel,
+  dungeonSuperBuffDefinition,
+  dungeonSuperEffect,
 } from '../../game/logic/dungeons.ts'
 import { dungeonSession } from '../../game/session/dungeonSession.ts'
 import { VisibleClock } from '../../game/session/visibleClock.ts'
@@ -121,13 +124,10 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
               onClick={() => turn(-1)}
               aria-label="Previous dungeon"
             >
-              ‹
+              <span className="dungeon-arrow__icon dungeon-arrow__icon--left" aria-hidden="true" />
             </button>
             <div className="dungeon-carousel__name" aria-live="polite">
               <h3>{def.name}</h3>
-              <span>
-                {index + 1} / {DUNGEONS.length}
-              </span>
             </div>
             <button
               type="button"
@@ -136,7 +136,7 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
               onClick={() => turn(1)}
               aria-label="Next dungeon"
             >
-              ›
+              <span className="dungeon-arrow__icon dungeon-arrow__icon--right" aria-hidden="true" />
             </button>
           </div>
           <div className="dungeon-preview">
@@ -175,6 +175,10 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
             <p>
               Potions and your skills remain usable. Your equipped gear is locked. Blessings last
               until this run ends.
+            </p>
+            <p>
+              Levels 5, 10, 15 and 20 offer fixed super blessings. These cannot be upgraded in the
+              Buffer. Your own potions keep their original duration.
             </p>
             <p>
               Death ends the run. Earned EXP, SP, gold and loot are kept. Leaving or reloading uses
@@ -290,11 +294,31 @@ export function DungeonRuntime() {
       frame = requestAnimationFrame(step)
     }
     frame = requestAnimationFrame(step)
+    const potionClock = window.setInterval(() => {
+      const store = useGameStore.getState()
+      if (
+        busy ||
+        disposed ||
+        !store.dungeon ||
+        !dungeonSession.ready ||
+        !store.character?.boosts?.some((b) => b.until !== undefined) ||
+        !(dungeonSession.paused || dungeonSession.menuOpen || store.dungeon.choices.length)
+      )
+        return
+      busy = true
+      void store
+        .advanceDungeon(0, { x: 0, z: 0 })
+        .catch(() => undefined)
+        .finally(() => {
+          busy = false
+        })
+    }, 1000)
     document.addEventListener('visibilitychange', visibility)
     window.addEventListener('pagehide', visibility)
     return () => {
       disposed = true
       cancelAnimationFrame(frame)
+      clearInterval(potionClock)
       document.removeEventListener('visibilitychange', visibility)
       window.removeEventListener('pagehide', visibility)
     }
@@ -409,6 +433,7 @@ export function DungeonHud() {
   }, [paused, leaveStep])
   if (!run) return null
   const ratio = run.level === DUNGEON_MAX_LEVEL ? 1 : run.xp / dungeonXpNeeded(run.level)
+  const superChoice = run.choices.some((id) => !!dungeonSuperBuffDefinition(id))
   return (
     <>
       <div className="dungeon-overview">
@@ -447,19 +472,30 @@ export function DungeonHud() {
       {run.choices.length > 0 && (
         <Sheet
           centered
-          title="Choose a blessing"
+          title={superChoice ? 'Choose a super blessing' : 'Choose a blessing'}
           titleId="dungeon-blessing-title"
-          className="sheet--client dungeon-blessing"
+          className={`sheet--client dungeon-blessing${superChoice ? ' dungeon-blessing--super' : ''}`}
           onClose={() => undefined}
         >
-          <p className="dungeon-blessing__level">Dungeon level {run.level}</p>
+          <p className="dungeon-blessing__level">Dungeon level {dungeonChoiceLevel(run)}</p>
           <p className="sheet__meta">
             Time is paused. Choose one blessing for the rest of this run.
           </p>
-          <div className="dungeon-blessings">
+          <div className={`dungeon-blessings dungeon-blessings--count-${run.choices.length}`}>
             {run.choices.map((id) => {
-              const rank = dungeonBuffRank(id, run.buffLevels[id] ?? 1)
-              const skill = dungeonBuffDefinition(id)!
+              const special = dungeonSuperBuffDefinition(id)
+              const rank = special
+                ? {
+                    name: special.name,
+                    level: special.level,
+                    effects: dungeonSuperEffect(
+                      special,
+                      600,
+                      run.player.stats.clientContext?.classId,
+                    ).stats,
+                  }
+                : dungeonBuffRank(id, run.buffLevels[id] ?? 1)
+              const skill = special ? null : dungeonBuffDefinition(id)!
               return (
                 <button
                   key={id}
@@ -479,15 +515,33 @@ export function DungeonHud() {
                   }}
                 >
                   <span className="dungeon-blessing-card__title">
-                    <SkillIcon id={id} kind="buff" size={44} />
+                    {special?.itemId ? (
+                      <ItemIcon item={getItem(special.itemId)} size={44} />
+                    ) : (
+                      <SkillIcon id={special?.skillId ?? id} kind="buff" size={44} />
+                    )}
                     <span>
                       <strong>{rank.name}</strong>
                       <small>
-                        {skill.classId}, rank {rank.level}
+                        {special
+                          ? 'Super blessing, fixed power'
+                          : `${skill!.classId}, rank ${rank.level}`}
                       </small>
                     </span>
                   </span>
                   <BlessingEffects rank={rank} />
+                  {special?.rewards && (
+                    <span className="dungeon-blessing-card__effects">
+                      {(['exp', 'sp', 'gold', 'drop'] as const)
+                        .filter((key) => special.rewards![key] > 0)
+                        .map((key) => (
+                          <span key={key}>
+                            {key.toUpperCase()} +{special.rewards![key]}% (×
+                            {1 + special.rewards![key] / 100})
+                          </span>
+                        ))}
+                    </span>
+                  )}
                   <small>Until the run ends</small>
                 </button>
               )
@@ -631,7 +685,8 @@ export function DungeonResult() {
         </p>
       )}
       <p className="sheet__meta">
-        Rewards are already in your bag. Dungeon blessings and temporary effects have been cleared.
+        Rewards are already in your bag. Dungeon blessings have ended. Your own potions keep their
+        remaining duration.
       </p>
       <button type="button" className="button button--gold button--wide" onClick={dismiss}>
         Return to the field

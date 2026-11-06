@@ -30,3 +30,9 @@ pochodzi z modeli potworów tego samego klienta 2015. Są objęte powyższą dec
 właściciela dotyczącą konwersji zasobów LC, nie licencją CC0.
 
 Czcionki (Cinzel, Alegreya Sans) ładowane z Google Fonts — licencja SIL Open Font License 1.1.
+
+Dungeons superbuffy (2026-11-06): `page-left.webp` i `page-right.webp` to strzałki
+z Quest.tex według questView.xml, UV 193,944,11,15 oraz 207,944,11,15. Katalog ikon
+rozszerzono o oryginalne komórki przedmiotów 1416/2453/10953 oraz skilla 1075;
+pochodzą z tych samych atlasów ItemBtn/SkillBtn klienta. Powyższa zgoda właściciela
+obejmuje także te konwersje.

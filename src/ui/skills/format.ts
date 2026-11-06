@@ -164,6 +164,14 @@ export function activeEffectRows(
     rows.push({ label: 'HP per second', value: `+${effect.hpPerSecond}`, bad: false })
   if (effect.mpPerSecond)
     rows.push({ label: 'MP per second', value: `+${effect.mpPerSecond}`, bad: false })
+  if (effect.rewards)
+    for (const [key, label] of [
+      ['exp', 'EXP'],
+      ['sp', 'SP'],
+      ['gold', 'Gold'],
+      ['drop', 'Drop chance'],
+    ] as const)
+      if (effect.rewards[key]) rows.push({ label, value: `+${effect.rewards[key]}%`, bad: false })
   if (effect.poison > 0)
     rows.push({ label: 'Poison damage', value: `−${effect.poison}`, bad: true })
   if (effect.stun) rows.push({ label: 'Stunned', value: 'No attacks', bad: true })

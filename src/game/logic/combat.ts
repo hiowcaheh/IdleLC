@@ -133,6 +133,9 @@ export interface ActiveEffect {
   mpPerSecond?: number
   /** A boost potion's SF_NOCANCEL: the hero's death does not end it. */
   keepOnDeath?: boolean
+  /** Free dungeon selections expire with the run and never become owned potion boosts. */
+  dungeon?: true
+  rewards?: { exp: number; sp: number; gold: number; drop: number }
 }
 
 export interface Fighter extends FighterInit {

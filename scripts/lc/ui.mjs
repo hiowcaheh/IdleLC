@@ -38,6 +38,9 @@ export const UI_PARTS = {
   'menu-system': [atlas('TopUI'), 156, 222, 22, 22, { scale: 4 }],
   // UIRadar.cpp RADER_QUESTNPC: the original cyan Q, framed by the TopUI badge in CSS.
   'menu-dungeons': [atlas('TopUI'), 649, 448, 14, 15, { scale: 4 }],
+  // questView.xml btn_left / btn_right, normal UV state.
+  'page-left': [atlas('Quest'), 193, 944, 11, 15, { scale: 4 }],
+  'page-right': [atlas('Quest'), 207, 944, 11, 15, { scale: 4 }],
   // actions.lod action 49 opens Titles: ActionBtn0, row 6, column 0 (32 px cells).
   'menu-titles': [atlas('ActionBtn0'), 0, 192, 32, 32, { scale: 4 }],
   // UIManager.cpp / ActorMgr.cpp: the three slices of the normal player name and title backgrounds.

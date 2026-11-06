@@ -1,5 +1,15 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Najnowszy etap: superbuffy i mikstury, 2026-11-06
+
+Szczegóły w [Dungeons](dungeons.md). Stałe superbuffy na 5/10/15/20, poza Bufferem,
+Iris/SP 3×, Cube +200%, źródłowy najwyższy Seraphim. Własne mikstury zachowują pełny
+czas po rundzie i reload; wyłącznie darmowe wybory są czyszczone. Deadline SF_ABSTIME
+oraz flagi śmierci są respektowane. Bitmapowe strzałki Quest, bez licznika pod nazwą.
+Nadal SaveVersion 16; dane już miały OwnedBoost. Importer dodaje tylko osobny katalog
+superbuffów i trzy pozycje przedmiotów do oryginalnych ikon. Atlasy mają hash w URL.
+528 testów / 59 plików. Ranking i koszt zwykłego Buffera pozostają jak w poprzednim etapie.
+
 ## Najnowszy etap: Dungeons UI / Buffer, 2026-11-06, v16
 
 [Dungeons](dungeons.md) mają Q po prawej, grafiki klienta zamiast NPC, minimapę,

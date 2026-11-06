@@ -1,5 +1,17 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-06 (Codex): superbuffy i mikstury Dungeons, nadal SaveVersion **16**.
+Poziomy 5/10/15/20: osobna stała pula Iris 1416 (349/2, +200% EXP), pigułka 2453
+(468/1, +200% SP), Blue cube 1075 (+200% atk/matk/Deadly), Seraphim 10953
+(+1200 atrybutów, +1200% EXP, +800% gold, współczynniki HP/MP z ApplyArtifact).
+Archangel 10952 jest niższym wariantem. Oryginał Seraphim nie daje SP/drop.
+`dungeonSuperBuffs`, ujemne ID wyborów, poza Bufferem, bez powtórek. Kolejka poziomów
+zachowuje progi przy skoku kilku lvli. `ActiveEffect.dungeon` usuwa darmowe efekty
+na koniec; własne potiony zachowują pełny czas i zapis w boosts. `dungeonPotions.ts`
+chroni deadline SF_ABSTIME; śmierć respektuje SF_NOCANCEL. EXP/SP mają source hardcoding,
+nie używać ich dummy magic jako ataku. Strzałki z questView.xml, brak 1/3, ikony z hash URL.
+[Dokumentacja](docs/dungeons.md). 528 testów / 59 plików.
+
 Aktualizacja 2026-11-06 (Codex): Dungeons UI / Buffer, SaveVersion **16**.
 Q po prawej, grafiki Loading/D_01–03, minimapa, torba łupów, Pause i dwa potwierdzenia
 Leave, joystick na środku. Monster Book ma Worlds / Dungeons i 23 NPC z tymi samymi

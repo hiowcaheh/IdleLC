@@ -13,31 +13,54 @@
 .sheet.dungeons-window {
   width: min(100%, 900px);
   max-width: 900px;
+  border-image-source: url('/ui/lc/book-window.webp');
 }
 .dungeon-carousel {
   display: grid;
-  grid-template-columns: 42px 1fr 42px;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  border: solid transparent;
+  border-width: 8px;
+  border-image: url('/ui/lc/panel.webp') 10 8 10 8 / 8px stretch;
+  background: #252d35;
+  padding: 6px;
 }
 .dungeon-carousel__name {
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  min-height: 46px;
   text-align: center;
 }
 .dungeon-carousel__name h3 {
-  margin: 0 0 3px;
+  margin: 0;
   color: #f0d59c;
   font-family: var(--font-heading);
-  font-size: clamp(21px, 4vw, 30px);
-}
-.dungeon-carousel__name > span {
-  color: #aaa28e;
-  font-size: 12px;
+  font-size: clamp(18px, 4vw, 28px);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 .dungeon-arrow {
+  display: grid;
+  place-items: center;
   min-width: 0;
-  height: 42px;
+  width: 42px;
+  height: 38px;
   padding: 0;
-  font-size: 30px;
+  line-height: 1;
+}
+.dungeon-arrow__icon {
+  display: block;
+  width: 11px;
+  height: 15px;
+  background: center / 100% 100% no-repeat;
+}
+.dungeon-arrow__icon--left {
+  background-image: url('/ui/lc/page-left.webp');
+}
+.dungeon-arrow__icon--right {
+  background-image: url('/ui/lc/page-right.webp');
 }
 .dungeon-preview {
   position: relative;
@@ -74,7 +97,9 @@
   gap: 8px;
   min-width: 0;
   padding: 7px 10px;
-  border: 1px solid #5c594d;
+  border: solid transparent;
+  border-width: 5px 8px;
+  border-image: url('/ui/lc/value-box.webp') 4 8 fill / 5px 8px stretch;
   background: #252a31;
 }
 .dungeon-facts > div > span:not(.gold) {
@@ -92,8 +117,10 @@
 }
 .dungeon-rules {
   padding: 3px 14px;
-  border-left: 2px solid #85734f;
-  background: #282c30;
+  border: solid transparent;
+  border-width: 8px;
+  border-image: url('/ui/lc/panel.webp') 10 8 10 8 / 8px stretch;
+  background: #282c30 url('/ui/lc/skills-background.webp') center / cover;
 }
 .dungeon-rules p {
   font-size: 13px;
@@ -110,6 +137,10 @@
   margin: 0 0 12px;
   color: #e9cb87;
   font-family: var(--font-heading);
+  padding: 7px 9px;
+  border: solid transparent;
+  border-width: 1px 3px;
+  border-image: url('/ui/lc/client-section.webp') 1 3 fill / 1px 3px stretch;
 }
 .dungeon-ranking > div {
   display: flex;
@@ -317,6 +348,19 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin-top: 20px;
+}
+.dungeon-blessings--count-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.dungeon-blessings--count-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.dungeon-blessings--count-1 {
+  grid-template-columns: 1fr;
+}
+.sheet-backdrop--center .sheet.dungeon-blessing--super {
+  width: min(100%, 1080px);
+  max-width: 1080px;
 }
 .dungeon-blessing-card {
   min-width: 0;
