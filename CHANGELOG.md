@@ -15,8 +15,10 @@ Punkt wyjścia `445f599`. Commity `1cc02e0`, `6555b24`, `bfe732d`, `9708ca3`, `8
 4. **Żywiołaki Sorcerera**: statystyki z `Elemental.cpp`, 20 min, przerwa 5 s, pary ogień/wiatr
    kontra ziemia/woda, nienawiść potwora i prowokacja, pasywne „Empowered” tylko na żywiołaka;
    modele klienta w scenie.
+5. **Wydajność**: teren czyta tylko warstwy, które są widoczne w danym miejscu (ten sam obraz),
+   Settings → Performance info pokazuje FPS i obciążenie sceny do pomiaru na telefonie.
 
-Weryfikacja: `npm run check` (**493 testy / 56 plików**), Chromium 390×844. SaveVersion **14**.
+Weryfikacja: `npm run check` (**496 testów / 57 plików**), Chromium 390×844. SaveVersion **14**.
 
 ## 2026-11-05 wieczór (Claude Code): 15 zgłoszeń — tytuły 1:1, bieg, GUI, teren, dym
 

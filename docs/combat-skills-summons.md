@@ -13,6 +13,7 @@ Claude Code, punkt wyjścia `445f599`. SaveVersion nadal **14** (bez nowych pól
 | `d2ad688` | Far Seeing, Combat Reflection, Charge, Veteran's Composure; powody w oknie Skills          |
 | `dd3564a` | żywiołaki Sorcerera w logice walki, nienawiść potwora, prowokacja, pasywne „Empowered”     |
 | `576f8c0` | żywiołaki w scenie: modele klienta, ruch, animacje, pasek HP                               |
+| `perf`    | teren czyta tylko widoczne warstwy, Settings → Performance info                            |
 
 ## Szybkie poprawki (zgłoszenie z 2026-11-05 wieczór)
 
@@ -78,6 +79,29 @@ Claude Code, punkt wyjścia `445f599`. SaveVersion nadal **14** (bez nowych pól
 co `ELEMENTAL_ATTACK_SPEED` w potwora bohatera; żywiołak dobiega razem z bohaterem (bez osobnej
 symulacji ruchu); skill potwora wymierzony w żywiołaka zadaje tylko obrażenia; brak `a_hate` skilli
 w zrzucie, więc nienawiść rośnie tylko od obrażeń; AUTO przywołuje pierwszy dostępny rodzaj.
+
+## Wydajność na telefonie
+
+- Pomiar w Chromium (390×844, profil CPU, także z CPU ×4): główny wątek jest bezczynny ok. 90%
+  czasu w walce i w biegu po mapie; JS gry (logika, `MapProps`, HUD) nie jest wąskim gardłem.
+  Obciążenie telefonu to GPU, głównie piksele terenu. Prawdziwego FPS na iPhonie stąd nie da się
+  zmierzyć (Chromium rysuje programowo przez swiftshader).
+- **Teren**: shader sumuje udział każdej warstwy (maska × to, co zostawiają warstwy wyżej) i czyta
+  teksturę warstwy tylko tam, gdzie udział > 0 (`terrainShader.ts`, `textureGrad`, te same mipmapy
+  i filtrowanie). Wynik taki sam jak dawny łańcuch `mix` (test równoważności); zwykle czytane są
+  2–3 z 7–12 warstw. Swiftshader: ok. 10% szybsze klatki na Juno.
+- **Settings → Performance info** (pamiętane w przeglądarce, nie w zapisie): FPS, najwolniejsza
+  klatka, wywołania rysowania, trójkąty i DPR, do odczytu na telefonie. Na Juno: ok. 45–90 wywołań
+  i 56 tys. trójkątów.
+
+## Następny etap: efekty skilli z plików klienta
+
+`scripts/lc/skill-effects.mjs` odczytuje dla 75 skilli nazwy efektów z `skills.lod` i animacji
+`.bae`; 70 grup `Effect.dat` daje się odczytać, 187 odpada w całości przez jeden nieobsługiwany
+element (dźwięk `EFSN`, światło `EFLT`, `EFOB`, `EFSB`). Plan: (1) pomijać dźwięki i światła
+w grupach zamiast odrzucać całą grupę, (2) wspólny odtwarzacz grup z czasem życia i punktami
+`_TAG_*` (cząstki z `TitleAura`, modele i ślady z `UpgradeAura`), (3) skille po kolei z porównaniem
+z klientem przez właściciela, z obecnymi efektami jako zapasem.
 
 ## Weryfikacja
 
