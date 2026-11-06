@@ -83,6 +83,7 @@ const STAT_LABELS: Record<StatKey, string> = {
   hpSteal: 'HP steal',
   mpSteal: 'MP steal',
   moveSpeed: 'Move speed',
+  attackRange: 'Attack range',
 }
 
 const signed = (n: number, unit = '') =>
@@ -103,6 +104,8 @@ function statValue(stat: StatKey, value: number, percent: boolean): string {
       return signed(value / 10, ' s')
     case 'runSpeed':
       return signed(value / 10, ' m/s')
+    case 'attackRange':
+      return signed(value, ' m')
     case 'cooldownFree':
       return '−100%'
     case 'cooldownReduction': {
@@ -208,6 +211,12 @@ export function describeEffect(effect: SkillEffect, rank: SkillRank): string {
         : `Restores ${effect.amount} MP`
     case 'regen':
       return `Restores ${effect.perSecond} ${effect.resource === 'hp' ? 'HP' : 'MP'} per second${lasting}`
+    case 'interrupt':
+      return `${Math.round(effect.chance * 100)}% chance to cancel the skill the enemy is preparing`
+    case 'taunt':
+      return 'Draws the enemy to you (a monster here already fights only you)'
+    case 'reflect':
+      return `${Number((effect.chance * 100).toFixed(2))}% chance to reflect ${effect.power}${effect.percent ? '% of the damage' : ' damage'} taken`
   }
 }
 

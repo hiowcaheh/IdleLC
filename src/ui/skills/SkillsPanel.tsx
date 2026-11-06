@@ -13,6 +13,7 @@ import { GameError } from '../../game/logic/character.ts'
 import {
   SKILL_BAR_SIZE,
   isAvailable,
+  unavailableReason,
   skillRank,
   worksWith,
   type SkillRank,
@@ -267,7 +268,7 @@ export function SkillsPanel({ onClose }: { onClose(): void }) {
                 {fits ? '' : '; not with the gear you wear now'}
               </p>
             )}
-            {!available && <p className="skill-row__note">This skill is not available yet.</p>}
+            {!available && <p className="skill-row__note">{unavailableReason(skill)}</p>}
             {current && (
               <RankDetails title={`Level ${current.level}`} rank={current} stats={stats} />
             )}

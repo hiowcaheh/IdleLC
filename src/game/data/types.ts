@@ -95,6 +95,11 @@ export interface CombatStats {
   /** % of the damage dealt that comes back as HP / MP (rare options). */
   hpSteal?: number
   mpSteal?: number
+  /**
+   * Combat Reflection (MST_OTHER_REFLEX): a fighter who survives a hit within 25 m sends back
+   * `flat + damage × rate / 100` with `chance` 0..1 (Battle.cpp:185–204).
+   */
+  reflect?: { chance: number; flat: number; rate: number }
   /** % faster running to the monster (rare options). */
   moveSpeed?: number
   /**

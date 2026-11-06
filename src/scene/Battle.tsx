@@ -260,6 +260,11 @@ export function Battle() {
         case 'miss':
           textAt(e.target, 'Miss', 'miss')
           break
+        case 'interrupt':
+          // the cancelled skill's swing is not played
+          m.swingIn[e.target] = -1
+          textAt(e.target, 'Cancelled', 'effect')
+          break
         case 'death':
           m.swingIn = { player: -1, monster: -1 }
           if (e.who === 'monster') {

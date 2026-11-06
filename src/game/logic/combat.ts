@@ -177,8 +177,12 @@ export type CombatEvent =
       deadly?: boolean
       skill?: boolean
       poison?: boolean
+      /** Damage a Combat Reflection sent back. */
+      reflected?: boolean
     }
   | { type: 'miss'; target: Side }
+  /** A Charge cancelled the skill the fighter was readying. */
+  | { type: 'interrupt'; target: Side; skillId: number }
   | { type: 'heal'; target: Side; amount: number; mana?: boolean }
   | { type: 'effect'; target: Side; skillId: number; name: string; kind: EffectKind }
   | { type: 'potion'; itemId: number; name: string; kind: PotionKind }
@@ -894,8 +898,32 @@ function strike(
     ...(result.kind === 'deadly' ? { deadly: true } : {}),
     ...(skill ? { skill } : {}),
   })
-  if (target.hp > 0) return false
+  if (target.hp > 0) return reflect(s, side, rng, events, result.damage)
   endFight(s, targetSide, events)
+  return true
+}
+
+/**
+ * A defender who survived the hit may send part of it back (Battle.cpp:185–204, within 25 m: every
+ * fight here). The reflected damage needs no roll to hit and is not reflected again. Returns true
+ * when it killed the attacker.
+ */
+function reflect(
+  s: CombatState,
+  attackerSide: Side,
+  rng: Rng,
+  events: CombatEvent[],
+  damage: number,
+): boolean {
+  const attacker = attackerSide === 'player' ? s.player : s.monster
+  const back = effectiveStats(attackerSide === 'player' ? s.monster : s.player).reflect
+  if (!back || !chance(rng, back.chance)) return false
+  const amount = back.flat + Math.trunc((damage * back.rate) / 100)
+  if (amount <= 0) return false
+  attacker.hp = Math.max(0, attacker.hp - amount)
+  events.push({ type: 'hit', target: attackerSide, amount, crit: false, reflected: true })
+  if (attacker.hp > 0) return false
+  endFight(s, attackerSide, events)
   return true
 }
 
@@ -933,7 +961,9 @@ function landSkill(
     const outcome = strike(s, side, rng, events, multiplier, true, power, skill.attackType)
     if (outcome === null) return false // missed
     if (outcome) return true
-    applyEffects(targetSide === 'player' ? s.player : s.monster, targetSide, skill, rng, events)
+    const target = targetSide === 'player' ? s.player : s.monster
+    interrupt(target, targetSide, skill, rng, events)
+    applyEffects(target, targetSide, skill, rng, events)
     return false
   }
 
@@ -957,6 +987,31 @@ function landSkill(
   }
   applyEffects(self, side, skill, rng, events)
   return false
+}
+
+/**
+ * The fighter is still readying a skill (the server's SKILL_CON_READY: before it fires), and will
+ * be for `lead` more seconds.
+ */
+export function readyingSkill(f: Pick<Fighter, 'casting' | 'impactIn'>, lead = 0): boolean {
+  return (
+    f.casting !== null && f.impactIn !== null && f.impactIn > TIMINGS.impactDelay + lead + EPSILON
+  )
+}
+
+/** MST_OTHER_SKILLCANCEL (Skill.cpp:2227–2237): a skill still being readied is cancelled. */
+function interrupt(
+  target: Fighter,
+  side: Side,
+  skill: SkillRank,
+  rng: Rng,
+  events: CombatEvent[],
+): void {
+  const cancel = skill.effects.find((e) => e.kind === 'interrupt')
+  if (!cancel || !target.casting || !readyingSkill(target) || !chance(rng, cancel.chance)) return
+  events.push({ type: 'interrupt', target: side, skillId: target.casting.id })
+  target.casting = null
+  target.impactIn = null
 }
 
 /** Puts a skill's lasting effects (stats, stun, poison) on a fighter for the skill's duration. */
@@ -1229,7 +1284,11 @@ export function chooseSkill(self: Fighter, target: Fighter, rng?: Rng): SkillRan
   const stats = effectiveStats(self)
   const ready = self.skills.filter(
     (r) =>
-      r.auto && r.kind !== 'passive' && !self.skillCooldowns[r.id] && canPaySkill(self, r, stats),
+      r.auto &&
+      r.kind !== 'passive' &&
+      !self.skillCooldowns[r.id] &&
+      canPaySkill(self, r, stats) &&
+      !(r.notBoss && target.stats.boss),
   )
   if (ready.length === 0) return null
   if (self.skills.some((s) => s.npcSlot !== undefined)) {
@@ -1258,7 +1317,17 @@ export function chooseSkill(self: Fighter, target: Fighter, rng?: Rng): SkillRan
   if (heal) return heal
   const buff = ready.find((r) => r.kind === 'buff' && !on(self, r.id))
   if (buff) return buff
-  const debuff = ready.find((r) => r.kind === 'debuff' && !on(target, r.id))
+  // a skill that only cancels another (Charge) waits until the monster readies one (own rule)
+  const onlyCancels = (r: SkillRank) =>
+    r.effects.some((e) => e.kind === 'interrupt') &&
+    !r.effects.some((e) => e.kind !== 'interrupt' && e.kind !== 'taunt')
+  const debuff = ready.find(
+    (r) =>
+      r.kind === 'debuff' &&
+      !on(target, r.id) &&
+      (!onlyCancels(r) ||
+        readyingSkill(target, skillPreparationTime(r, stats) + TIMINGS.impactDelay)),
+  )
   if (debuff) return debuff
   const attacks = ready.filter((r) => r.kind === 'attack')
   return attacks.length > 0 ? attacks.reduce((a, b) => (damageOf(b) > damageOf(a) ? b : a)) : null

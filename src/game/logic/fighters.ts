@@ -20,6 +20,7 @@ import {
   interpretEffect,
   learnedRanks,
   passiveEffects,
+  passiveReflect,
   skillRank,
   wieldableRanks,
   type LearnedSkill,
@@ -115,19 +116,22 @@ export function playerFighter(hero: Hero, now = Date.now()): FighterInit {
   // skills that need other gear (a shield, another weapon) are left out; estimates assume the gear fits
   const learned = learnedRanks(classId, skills)
   const ranks = equipment ? wieldableRanks(learned, wielded(equipment)) : learned
+  const weaponPiece = equipment?.weapon
   const detailed = bindCombatChannels({
     ...stats,
     ...clientStatChannels(stats, classId, level, equipment, options),
+    // the class range and the weapon's +8 first; passives such as Far Seeing add to it
+    attackRange: heroAttackRange(
+      classId,
+      weaponPiece && weapon ? { subtype: weapon.subtype, plus: weaponPiece.plus ?? 0 } : null,
+    ),
   })
-  const weaponPiece = equipment?.weapon
+  const reflect = passiveReflect(ranks)
   return {
     level,
     stats: {
       ...applyStats(detailed, passiveEffects(ranks)),
-      attackRange: heroAttackRange(
-        classId,
-        weaponPiece && weapon ? { subtype: weapon.subtype, plus: weaponPiece.plus ?? 0 } : null,
-      ),
+      ...(reflect ? { reflect } : {}),
     },
     skills: ranks.filter((r) => r.kind !== 'passive' && (!skillBar || skillBar.includes(r.id))),
     potions: potionSupply(hero),

@@ -64,6 +64,7 @@ export type StatKey =
   | 'stunResistance'
   | 'stoneResistance'
   | 'silenceResistance'
+  | 'attackRange'
 
 export interface StatEffect {
   kind: 'stat'
@@ -95,6 +96,15 @@ export type SkillEffect =
   | { kind: 'mana'; amount: number; percent?: true }
   /** HP or MP restored every second while the effect lasts (like healing and mana potions). */
   | { kind: 'regen'; resource: 'hp' | 'mp'; perSecond: number }
+  /** MST_OTHER_REFLEX: `chance` 0..1 to send back a flat amount or a percent of a hit taken. */
+  | { kind: 'reflect'; chance: number; power: number; percent: boolean }
+  /** MST_OTHER_SKILLCANCEL: `chance` 0..1 to cancel the skill the target is still readying. */
+  | { kind: 'interrupt'; chance: number }
+  /**
+   * MST_OTHER_TOUNT: hate towards the caster. A monster here fights the hero alone, so it changes
+   * nothing; the skill's other effects still land.
+   */
+  | { kind: 'taunt'; power: number }
 
 /** t_magic.a_type 0 (stat change): subtype → the stat it changes. */
 const STAT_SUBTYPES: Record<number, StatKey> = {
@@ -115,6 +125,8 @@ const STAT_SUBTYPES: Record<number, StatKey> = {
   14: 'deadly',
   15: 'magicHit',
   16: 'magicEvasion',
+  // MST_STAT_ATTACKDIST: metres added to m_attackRange (Character.cpp:459–460)
+  17: 'attackRange',
   18: 'attack',
   19: 'attack',
   22: 'maxHp450',
@@ -173,6 +185,19 @@ export function interpretEffect(e: SkillEffectDef): SkillEffect | null {
       return { kind: 'damage', percent: e.power, damageType: e.damageType, attackType: e.subtype }
     case 5:
       return e.subtype === 0 ? { kind: 'cure', state: 'poison' } : null
+    case 6:
+      if (e.subtype === 1 && e.hitrate !== undefined)
+        return { kind: 'interrupt', chance: e.hitrate / 10000 }
+      if (e.subtype === 8) return { kind: 'taunt', power: e.power }
+      // MT_OTHER / MST_OTHER_REFLEX: APPVAL(hcReflex) and the hit rate as its chance (Character.cpp:1363)
+      if (e.subtype === 4 && e.hitrate !== undefined && (e.damageType === 1 || e.damageType === 2))
+        return {
+          kind: 'reflect',
+          chance: e.hitrate / 10000,
+          power: e.power,
+          percent: e.damageType === 2,
+        }
+      return null
     case 4:
       // GameServer/Skill.cpp: MT_RECOVER accepts ONLYPOWER (0) and RATE (2), not ADDITION (1).
       if (e.damageType !== 0 && e.damageType !== 2) return null
@@ -195,6 +220,8 @@ export type SkillKind = 'attack' | 'debuff' | 'buff' | 'heal' | 'passive'
 /** A skill at one level, ready for combat. */
 /** Skill.h SF_NOTHELP: a harmful skill. */
 const SF_NOTHELP = 1 << 2
+/** Skill.h SF_NOT_BOSS. */
+const SF_NOT_BOSS = 1 << 15
 
 export interface SkillRank {
   id: number
@@ -224,6 +251,8 @@ export interface SkillRank {
    * (CAssistList::Add, Assist.cpp:103–109).
    */
   reducibleDebuff?: boolean
+  /** Skill.h SF_NOT_BOSS: it cannot be used on a boss. */
+  notBoss?: boolean
   effects: SkillEffect[]
   auto: boolean
 }
@@ -241,7 +270,12 @@ export function skillRank(
   const rank = rankOf(skill, level) ?? skill.levels[0]!
   const effects = rank.effects.map(interpretEffect).filter((e): e is SkillEffect => e !== null)
   const hurts = effects.some(
-    (e) => e.kind === 'damage' || e.kind === 'stun' || e.kind === 'poison' || e.kind === 'state',
+    (e) =>
+      e.kind === 'damage' ||
+      e.kind === 'stun' ||
+      e.kind === 'poison' ||
+      e.kind === 'state' ||
+      e.kind === 'interrupt',
   )
   const stats = effects.filter((e) => e.kind === 'stat')
   const curses =
@@ -277,14 +311,15 @@ export function skillRank(
     attackType: skill.type === 2 ? 'magic' : skill.type === 1 ? 'ranged' : 'melee',
     duration: rank.duration / 10,
     ...(skill.flag === SF_NOTHELP ? { reducibleDebuff: true } : {}),
+    ...(((skill.flag ?? 0) & SF_NOT_BOSS) !== 0 ? { notBoss: true } : {}),
     effects,
     auto,
   }
 }
 
 /**
- * False when none of the skill's effects exists in IdleLC yet (summons, movement speed,
- * resurrection…) — or when it builds on such a skill.
+ * False when one of the skill's effects has no counterpart in IdleLC (summons, resurrection,
+ * invisibility) or when it builds on such a skill; `unavailableReason` says which.
  */
 export function isAvailable(skill: SkillDef, seen = new Set<number>()): boolean {
   if (seen.has(skill.id)) return true
@@ -320,6 +355,26 @@ export function isAvailable(skill: SkillDef, seen = new Set<number>()): boolean 
       }),
     )
   )
+}
+
+/** Why a skill that isAvailable rejects does not work in IdleLC, as the Skills window tells it. */
+export function unavailableReason(skill: SkillDef): string {
+  const raw = skill.levels.flatMap((l) => l.effects)
+  // MST_CURE_REBIRTH on STT_PARTY_ONE: only a dead party member
+  if (raw.some((e) => e.type === 5 && e.subtype === 6))
+    return 'It brings back a fallen party member; IdleLC heroes hunt alone.'
+  // MST_ASSIST_INVISIBLE: the hero's next attack ends it (Battle.cpp CancelInvisible)
+  if (raw.some((e) => e.type === 2 && e.subtype === 15))
+    return 'Invisibility ends with your next attack, so it changes nothing in a one-on-one fight yet.'
+  // MST_OTHER_SUMMON
+  if (raw.some((e) => e.type === 6 && e.subtype === 9))
+    return 'Summoned elementals do not fight in IdleLC yet.'
+  const missing = skill.levels
+    .flatMap((l) => l.requires)
+    .map((r) => getSkill(r.skill))
+    .find((required) => required && !isAvailable(required))
+  if (missing) return `It builds on ${missing.name}, which does not work yet.`
+  return 'This skill is not available yet.'
 }
 
 /** Rank 1 of the class's free level-1 skills: every new character knows them. */
@@ -535,6 +590,11 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
     pulses -= Math.trunc((pulses * sum('attackSpeed', true)) / 100)
     s.attackInterval = pulses / 10
   }
+  if (effects.some((effect) => effect.stat === 'attackRange')) {
+    // Character.cpp:459–460: metres first, then the rate on the longer range (a float).
+    const range = (stats.attackRange ?? 0) + sum('attackRange', false)
+    s.attackRange = range + (range * sum('attackRange', true)) / 100
+  }
   if (effects.some((effect) => effect.stat === 'hpRegen' || effect.stat === 'mpRegen')) {
     s.recoveryGroups = [
       ...(stats.recoveryGroups ?? []),
@@ -615,6 +675,9 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
       case 'runSpeed':
         // The source-sheet channels are updated separately below.
         break
+      case 'attackRange':
+        // Applied as one additive/rate group above.
+        break
       case 'critChance':
         s.critChance += percent ? value / 100 : value / 1000
         break
@@ -666,6 +729,27 @@ export function applyStats(stats: CombatStats, effects: readonly StatEffect[]): 
   }
   applyClientStats(stats, s, effects)
   return bindCombatChannels(s)
+}
+
+/**
+ * Combat Reflection from the passive skills. The server sums the amounts but sets the chance from
+ * the last passive it applies (`hcReflexProb = realHitrateValue`, Character.cpp:1365).
+ */
+export function passiveReflect(
+  ranks: readonly SkillRank[],
+): { chance: number; flat: number; rate: number } | undefined {
+  let reflect: { chance: number; flat: number; rate: number } | undefined
+  for (const r of ranks) {
+    if (r.kind !== 'passive') continue
+    for (const e of r.effects) {
+      if (e.kind !== 'reflect') continue
+      reflect ??= { chance: 0, flat: 0, rate: 0 }
+      reflect.chance = e.chance
+      if (e.percent) reflect.rate += e.power
+      else reflect.flat += e.power
+    }
+  }
+  return reflect
 }
 
 /** Stat changes from the passive skills (they always apply). */
