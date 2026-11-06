@@ -3,6 +3,20 @@
 Wdrożenie z 2026-11-06, po przeglądzie zmian Claude’a do `9ad20b8`. Aktualny SaveVersion **16**.
 To nowy, aktywny tryb hordowy IdleLC. Nie zastępuje polowania na spotach ani wypraw AFK.
 
+## Aktualny układ rundy: minimapa na dole (2026-11-06)
+
+Po kolejnej prośbie właściciela minimapa jest mniejsza (72×72 zamiast 90×90 px)
+i znajduje się na dole po lewej, nad paskiem umiejętności. Uwzględnia bezpieczny
+obszar ekranu. Górny panel informacji zajmuje całą szerokość wcześniej dzieloną
+z minimapą. Zmniejszono jego pionowe odstępy i wysokość paska EXP, zachowując nazwę,
+czas rundy, falę, punkty, poziom i licznik kryształów oraz oryginalne ramki klienta.
+Komunikat końca fali jest odpowiednio wyżej. Zapis i logika gry pozostają bez zmian.
+Weryfikacja: 549 testów / 62 pliki i build. Chromium na buildzie produkcyjnym
+320×740, 390×844 i 1280×900, także z symulowanymi marginesami 47/34 px:
+panel 91 px wysokości, minimapa 72 px, brak kolizji z joystickiem, skillami i miksturami,
+brak overflow oraz błędów JS/konsoli/HTTP. Sprawdzono aktualizację pozycji gracza
+na minimapie i komunikat po rzeczywistym wyczyszczeniu pierwszej fali.
+
 ## Uzupełnienie po zmianach Claude’a: komunikat końca fali (2026-11-06)
 
 Przejrzano obie partie opisane w [notatkach Claude’a](owner-batch-2026-11-06.md),

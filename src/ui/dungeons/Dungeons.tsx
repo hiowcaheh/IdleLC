@@ -488,7 +488,6 @@ export function DungeonHud() {
   return (
     <>
       <div className="dungeon-overview">
-        <DungeonMinimap run={run} />
         <section className="dungeon-status" aria-label="Dungeon progress">
           <div className="dungeon-status__heading">
             <strong>{getDungeon(run.dungeonId)!.name}</strong>
@@ -517,6 +516,7 @@ export function DungeonHud() {
           </div>
         </section>
       </div>
+      <DungeonMinimap run={run} />
       {nextWave !== null && (
         <div className="dungeon-wave-clear" role="status">
           <strong>Wave cleaned</strong>

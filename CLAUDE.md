@@ -1,5 +1,9 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-06 (Codex): minimapa Dungeons ma 72 px i jest na dole po lewej,
+nad paskiem skilli, obok joysticka. Panel statusu jest na pełną szerokość dawnego
+wiersza status + minimapa, z mniejszą wysokością. Zmienione tylko GUI, nadal v16.
+
 Aktualizacja 2026-11-06 (Codex), po przeglądzie Claude’a do `d688757`: tylko brakujący
 komunikat „Wave cleaned” + „Next wave in N s” (maks. 5 s). `waveStatus.ts` czyta
 `nextWaveIn` i harmonogram, bez zmiany logiki fal. Zegar pauzuje z grą. Status obok

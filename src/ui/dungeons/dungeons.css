@@ -307,18 +307,12 @@
   top: calc(118px + var(--safe-top));
   left: calc(var(--gutter) + var(--safe-left));
   right: calc(var(--gutter) + var(--safe-right));
-  display: flex;
-  /* the run's status and the minimap side by side (owner's request) */
-  flex-direction: row-reverse;
-  align-items: flex-start;
-  gap: 6px;
   pointer-events: none;
 }
 .dungeon-status {
-  flex: 1 1 auto;
   min-width: 0;
   pointer-events: none;
-  padding: 8px 11px;
+  padding: 3px 9px;
   border: solid transparent;
   border-width: 8px;
   border-image: url('/ui/lc/panel.webp') 10 8 10 8 / 8px stretch;
@@ -337,11 +331,11 @@
 }
 .dungeon-status time {
   color: #f2e5c6;
-  font-size: 18px;
+  font-size: 16px;
   font-variant-numeric: tabular-nums;
 }
 .dungeon-status__counts {
-  margin: 5px 0 8px;
+  margin: 2px 0 4px;
   font-size: 12px;
   color: #bdb8aa;
 }
@@ -350,7 +344,7 @@
 }
 .dungeon-wave-clear {
   position: absolute;
-  top: calc(244px + var(--safe-top));
+  top: calc(224px + var(--safe-top));
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
@@ -384,7 +378,7 @@
 }
 .dungeon-xp {
   position: relative;
-  height: 27px;
+  height: 24px;
   background: center / 100% 100% url('/ui/lc/book-progress.webp?v=2026-11-05');
   padding: 4px;
   overflow: hidden;
@@ -696,9 +690,6 @@
   font-size: 13px;
 }
 @media (max-width: 540px) {
-  .dungeon-status {
-    padding: 5px 7px;
-  }
   .dungeon-status__heading strong {
     font-size: 15px;
   }
@@ -821,17 +812,20 @@
   font-variant-numeric: tabular-nums;
 }
 .dungeon-minimap {
-  flex: none;
-  width: 90px;
+  position: absolute;
+  left: calc(var(--gutter) + var(--safe-left));
+  bottom: calc(64px + var(--safe-bottom));
+  width: 72px;
   margin: 0;
+  pointer-events: none;
 }
 .dungeon-minimap svg {
   display: block;
-  width: 90px;
-  height: 90px;
+  width: 72px;
+  height: 72px;
   border: solid transparent;
-  border-width: 5px;
-  border-image: url('/ui/lc/panel.webp') 10 8 10 8 / 5px stretch;
+  border-width: 4px;
+  border-image: url('/ui/lc/panel.webp') 10 8 10 8 / 4px stretch;
   background: #12171c;
 }
 .dungeon-minimap__boundary {

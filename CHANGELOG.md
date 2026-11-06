@@ -1,5 +1,12 @@
 # Historia zmian
 
+## 2026-11-06 (Codex): mniejsza minimapa na dole Dungeons
+
+Minimapa zmniejszona z 90 do 72 px i przeniesiona na dół po lewej, nad paskiem
+umiejętności. Górny panel informacji wypełnia zwolnione miejsce i ma mniejsze
+odstępy oraz niższy pasek EXP. Zachowuje ramki klienta i wszystkie dotychczasowe informacje.
+Weryfikacja: 549 testów, build i próby produkcyjne 320/390/1280 px, także z marginesami ekranu.
+
 ## 2026-11-06 (Codex): komunikat po wyczyszczeniu fali
 
 Po przeglądzie notatek i zmian Claude’a do `d688757` uzupełniono brakujący napis

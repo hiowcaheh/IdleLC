@@ -1,5 +1,12 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Najnowszy etap: dolna minimapa i niższy panel Dungeons (Codex), 2026-11-06
+
+Na kolejną prośbę właściciela minimapa ma 72 px zamiast 90 i jest osobnym elementem
+HUD-u na dole po lewej. Górny status wypełnia dawny wspólny wiersz i ma mniejsze
+odstępy w pionie. Komunikat końca fali przesunięty odpowiednio wyżej. Zmiana GUI,
+bez zmiany reguł lub zapisu v16.
+
 ## Najnowszy etap: komunikat końca fali (Codex), 2026-11-06
 
 Przeczytano obie partie notatek Claude’a i pobrano `main` do `d688757`. Układ statusu
