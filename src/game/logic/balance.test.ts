@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { CLASSES } from '../data/classes.ts'
 import type { CombatStats } from '../data/types.ts'
 import {
+  elementDamage,
   npcDamage,
   MAX_LEVEL,
   baseDamage,
@@ -208,5 +209,22 @@ describe('npcDamage (GetDamage, NPC attacker against a hero)', () => {
     expect(npcDamage(at(npc({ strength: undefined })), at(hero()))).toBeNull()
     expect(npcDamage(at(npc()), at(hero({ defenseChannels: undefined })))).toBeNull()
     expect(npcDamage(at(npc({ physicalAttack: 1, strength: 1 })), at(hero()))).toBe(1)
+  })
+})
+
+describe('elementDamage (Battle_GetDamage.cpp nAttrTbl)', () => {
+  const mix = (element: number, level: number) => (level << 4) | element
+  it('multiplies by the table and the level ratio, no element as none level 1', () => {
+    expect(elementDamage(100)).toBe(100)
+    // a fire monster against an unaligned hero; the hero against an earth monster
+    expect(elementDamage(100, mix(1, 1), 0)).toBe(130)
+    expect(elementDamage(100, 0, mix(3, 1))).toBe(70)
+    expect(elementDamage(100, 0, mix(3, 2))).toBe(35)
+    expect(elementDamage(100, mix(6, 3), mix(5, 1))).toBe(450)
+    expect(elementDamage(1, 0, mix(1, 3))).toBe(1)
+  })
+  it('skips levels over 5 and unknown elements', () => {
+    expect(elementDamage(100, mix(1, 6), 0)).toBe(100)
+    expect(elementDamage(100, mix(7, 1), 0)).toBe(100)
   })
 })

@@ -114,6 +114,13 @@ export interface CombatStats {
    * Gear far above the wearer's level weakens it (Battle_GetDamage.cpp:904–926).
    */
   gearLevels?: { attack: number; defense: number }
+  /**
+   * Elements as the server packs them, (level << 4) | element (Skill.h AT_MIX; 0 none, 1 fire,
+   * 2 water, 3 earth, 4 wind, 5 dark, 6 light): a monster's from t_npc.a_attribute, a hero's
+   * from element options 87–98. Missing means none, level 1.
+   */
+  attackElement?: number
+  defenseElement?: number
   /** Metres a second a monster runs (t_npc.a_run_speed); heroes run at client.runSpeed. */
   npcRunSpeed?: number
 }

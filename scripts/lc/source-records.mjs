@@ -40,6 +40,8 @@ export function sourceNpc(row) {
     magicAvoid: 'a_magicavoid',
     attackLevel: 'a_attacklevel',
     defenseLevel: 'a_defenselevel',
+    // elements: attack in bits 8-15, defense in bits 0-7, each (level << 4) | element (Skill.h)
+    attribute: 'a_attribute',
     // metres: how far it hits from (m_attackArea) and how fast it walks / runs (m/s)
     attackArea: 'a_attack_area',
     walkSpeed: 'a_walk_speed',

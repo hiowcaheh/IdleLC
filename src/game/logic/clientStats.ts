@@ -22,6 +22,8 @@ const RUN_SPEED: Record<ClassId, number> = {
   sorcerer: 7,
 }
 const MAGIC_CLASSES: ClassId[] = ['healer', 'mage', 'sorcerer']
+/** Elements of the options fire, ice, storm, earth, darkness, light (wind is 4, earth 3). */
+const OPTION_ELEMENTS = [1, 2, 4, 3, 5, 6]
 const MAGIC_WEAPONS = new Set([2, 5, 12, 13, 14, 15])
 
 export function clientStatChannels(
@@ -32,7 +34,13 @@ export function clientStatChannels(
   options: readonly ItemOption[],
 ): Pick<
   CombatStats,
-  'client' | 'clientContext' | 'recoveryOptions' | 'defenseChannels' | 'gearLevels'
+  | 'client'
+  | 'clientContext'
+  | 'recoveryOptions'
+  | 'defenseChannels'
+  | 'gearLevels'
+  | 'attackElement'
+  | 'defenseElement'
 > {
   const attributes = { ...classAttributes(classId, level), ...stats }
   const weaponPiece = equipment?.weapon
@@ -93,6 +101,9 @@ export function clientStatChannels(
   const recoveryOptions = { hpFlat: 0, hpRate: 0, mpFlat: 0, mpRate: 0 }
   // GetDamage's defenses (m_eqDefense + m_opDMelee / m_opDRange, m_eqResist + m_opResist)
   const defenseChannels = { melee: armor, range: armor, magic: resist }
+  // Option.cpp:680–716: element options set the element (AT_MIX), the last one read wins
+  let attackElement = 0,
+    defenseElement = 0
   const recoveryBase = classRecovery(classId, level)
   for (const option of options) {
     const value = optionValue(option)
@@ -184,6 +195,22 @@ export function clientStatChannels(
       case 55:
         context.criticalOptionRate += value
         break
+      case 87:
+      case 88:
+      case 89:
+      case 90:
+      case 91:
+      case 92:
+        attackElement = ((value & 0xf) << 4) | OPTION_ELEMENTS[option.type - 87]!
+        break
+      case 93:
+      case 94:
+      case 95:
+      case 96:
+      case 97:
+      case 98:
+        defenseElement = ((value & 0xf) << 4) | OPTION_ELEMENTS[option.type - 93]!
+        break
       case 66:
         context.deadlyOptionRate += value
         break
@@ -224,6 +251,8 @@ export function clientStatChannels(
     clientContext: context,
     recoveryOptions,
     defenseChannels,
+    ...(attackElement ? { attackElement } : {}),
+    ...(defenseElement ? { defenseElement } : {}),
     gearLevels: {
       attack: weaponPiece ? itemLevel(weaponPiece) : 0,
       defense: armorLevel > 0 ? armorLevel : level * 2,

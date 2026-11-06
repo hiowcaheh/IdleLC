@@ -132,7 +132,11 @@ export const OPTION_EFFECTS: Record<number, OptionEffect> = {
  * the defender's weak/normal hit weights, 105 adds to the hard hit weight. 102 and 103 are summed
  * by clientStatChannels.
  */
-export const SPECIAL_OPTIONS = new Set([101, 102, 103, 104, 105])
+export const SPECIAL_OPTIONS = new Set([
+  101, 102, 103, 104, 105,
+  // elements (attack 87–92, defense 93–98), clientStats.ts
+  87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98,
+])
 
 /** What a title's option does differently from the same option on gear (CPC::ApplyTitle). */
 export const TITLE_RULES = {

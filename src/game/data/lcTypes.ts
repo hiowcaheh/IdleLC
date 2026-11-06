@@ -32,6 +32,8 @@ export interface LcMonster {
   magicAvoid?: number
   attackLevel?: number
   defenseLevel?: number
+  /** t_npc.a_attribute: attack element in bits 8–15, defense in 0–7, each (level << 4) | element. */
+  attribute?: number
   /** t_npc.a_attack_area: how far it hits from (metres). */
   attackArea?: number
   /** t_npc.a_walk_speed / a_run_speed (metres a second). */

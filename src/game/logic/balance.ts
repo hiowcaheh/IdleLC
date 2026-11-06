@@ -237,6 +237,33 @@ export function sourceSkillDamage(
   return Math.max(1, Math.trunc(attribute / 3), damage)
 }
 
+/** nAttrTbl, Battle_GetDamage.cpp:12–22: attack element (row) against defense element (column). */
+const ELEMENT_TABLE: readonly (readonly number[])[] = [
+  /* none  */ [1.0, 0.7, 0.7, 0.7, 0.7, 0.8, 0.8],
+  /* fire  */ [1.3, 1.0, 0.8, 1.2, 1.0, 1.1, 0.9],
+  /* water */ [1.3, 1.2, 1.0, 1.0, 0.8, 1.1, 0.9],
+  /* earth */ [1.3, 0.8, 1.0, 1.0, 1.2, 1.1, 0.9],
+  /* wind  */ [1.3, 1.0, 1.2, 0.8, 1.0, 1.1, 0.9],
+  /* dark  */ [1.2, 1.1, 1.1, 1.1, 1.1, 0.9, 0.8],
+  /* light */ [1.2, 0.9, 0.9, 0.9, 0.9, 1.5, 1.0],
+]
+
+/**
+ * Battle_GetDamage.cpp:1605–1632: damage × table[attack][defense] × (attack level / defense
+ * level), levels under 1 counted as 1; a level over 5 or an unknown element skips it. At least 1.
+ * Also against no element at all: a fire monster hits an unaligned hero 1.3 × harder.
+ */
+export function elementDamage(damage: number, attack = 0, defense = 0): number {
+  const attType = attack & 0xf,
+    defType = defense & 0xf
+  const attLevel = Math.max(1, (attack >> 4) & 0xf),
+    defLevel = Math.max(1, (defense >> 4) & 0xf)
+  if (attLevel > 5 || defLevel > 5 || attType > 6 || defType > 6) return Math.max(1, damage)
+  // the source multiplies in float (32-bit) before the int cast
+  const factor = Math.fround(Math.fround(ELEMENT_TABLE[attType]![defType]!) * (attLevel / defLevel))
+  return Math.max(1, Math.trunc(Math.fround(damage * factor)))
+}
+
 /** One attack; `multiplier` scales the damage (skills). */
 export function rollAttack(
   attacker: AttackRollInput,
@@ -259,7 +286,17 @@ export function rollAttack(
     return { kind: 'miss', damage: 0 }
   }
 
-  if (power) return { kind: 'hit', damage: sourceSkillDamage(attacker, defender, power) }
+  if (power) {
+    const damage = sourceSkillDamage(attacker, defender, power)
+    // MDT_ONLYPOWER returns before the elements (Battle_GetDamage.cpp:641–659)
+    return {
+      kind: 'hit',
+      damage:
+        power.type === 0
+          ? damage
+          : elementDamage(damage, attacker.stats.attackElement, defender.stats.defenseElement),
+    }
+  }
   const variance = attacker.stats.clientContext
     ? 1
     : 1 - DAMAGE_VARIANCE + rng() * DAMAGE_VARIANCE * 2
@@ -295,5 +332,6 @@ export function rollAttack(
   ) {
     damage = Math.max(1, Math.trunc(damage / 2))
   }
+  damage = elementDamage(damage, attacker.stats.attackElement, defender.stats.defenseElement)
   return { kind: sourceType === 'deadly' ? 'deadly' : crit ? 'crit' : 'hit', damage }
 }
