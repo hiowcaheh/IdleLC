@@ -1,9 +1,10 @@
-/** Runs and draws the client effects that skillFx.ts starts (one layer per scene). */
+/** Runs and draws the client effects that skillFx.ts starts (one layer per scene): particles and models. */
 import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef } from 'react'
 import { Group } from 'three'
 import { useGameStore } from '../../state/gameStore.ts'
 import { clientFx, loadClientFx } from './data.ts'
+import { ModelEffectMesh } from './ModelMeshes.ts'
 import { ParticleMesh } from './ParticleMeshes.ts'
 import { clearClientFx, fxState } from './skillFx.ts'
 
@@ -15,6 +16,7 @@ export function ClientFxLayer({ pace }: { pace?: () => number }) {
   const scene = useThree((s) => s.scene)
   const group = useRef<Group | null>(null)
   const meshes = useRef(new Map<object, ParticleMesh>())
+  const models = useRef(new Map<object, ModelEffectMesh>())
 
   useEffect(() => {
     void loadClientFx()
@@ -23,15 +25,18 @@ export function ClientFxLayer({ pace }: { pace?: () => number }) {
     group.current = root
     scene.add(root)
     const live = meshes.current
+    const liveModels = models.current
     return () => {
       scene.remove(root)
       for (const mesh of live.values()) mesh.dispose()
       live.clear()
+      for (const mesh of liveModels.values()) mesh.dispose()
+      liveModels.clear()
       clearClientFx()
     }
   }, [scene])
 
-  useFrame((_, delta) => {
+  useFrame(({ camera }, delta) => {
     const speed = pace ? pace() : useGameStore.getState().timeScale
     if (speed === 0) return
     const dt = Math.min(delta, 0.1) * speed
@@ -65,6 +70,26 @@ export function ClientFxLayer({ pace }: { pace?: () => number }) {
       root.remove(mesh.mesh)
       mesh.dispose()
       meshes.current.delete(system)
+    }
+    // model effects (EFMD): one group of meshes per running effect
+    const shown = new Set<object>()
+    for (const player of fxState.players) {
+      for (const live of player.models()) {
+        shown.add(live)
+        let mesh = models.current.get(live)
+        if (!mesh) {
+          mesh = new ModelEffectMesh(live)
+          models.current.set(live, mesh)
+          root.add(mesh.object)
+        }
+        mesh.update(camera)
+      }
+    }
+    for (const [live, mesh] of models.current) {
+      if (shown.has(live)) continue
+      root.remove(mesh.object)
+      mesh.dispose()
+      models.current.delete(live)
     }
   })
 

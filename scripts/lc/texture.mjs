@@ -45,7 +45,7 @@ function textureHeader(buffer) {
   validateDimensions(width, height)
   if (mips > 32 || frames < 1)
     throw new Error(`invalid texture counts ${mips} mips, ${frames} frames`)
-  return { r, data: { width, height, mips, flags, frames, version, frameSize } }
+  return { r, data: { width, height, mips, flags, frames, version, frameSize, mexW, mexH } }
 }
 
 /** TDAT metadata (v3/v4, plain Serious Engine or LC encoded). */
@@ -267,4 +267,10 @@ export function parseTexture(buffer) {
 function hasTransparency(rgba) {
   for (let i = 3; i < rgba.length; i += 4) if (rgba[i] < 250) return true
   return false
+}
+
+/** A texture's size in mex (its mip-0 pixels times 2^shift): model texture vertices are in mex. */
+export function textureMexSize(buffer) {
+  const { data } = textureHeader(buffer)
+  return { mexWidth: data.mexW, mexHeight: data.mexH }
 }

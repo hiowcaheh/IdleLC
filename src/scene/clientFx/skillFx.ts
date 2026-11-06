@@ -68,7 +68,11 @@ export function hasClientSkillFx(skillId: number): boolean {
   if (!skill || !data) return false
   return [skill.ready, ...skill.fire, skill.after].some((name) => {
     const group = name ? data.groups[name] : undefined
-    return group?.effects.some((e) => data.effects[e.name]?.kind === 'EFPT')
+    // the client draws it with particles or effect models (EFMD)
+    return group?.effects.some((e) => {
+      const kind = data.effects[e.name]?.kind
+      return kind === 'EFPT' || kind === 'EFMD'
+    })
   })
 }
 

@@ -170,12 +170,44 @@ export interface SkillFxDef {
   clips?: Record<'ready' | 'still' | 'fire', { group: string; delay: number }[]>
 }
 
+/** A texture of the effects; model texture vertices are divided by its size in mex. */
+export interface FxTextureDef {
+  url: string
+  width: number
+  height: number
+  mexWidth?: number
+  mexHeight?: number
+}
+
+/** One surface of an effect model: its triangles and how they are drawn (Model_internal.h). */
+export interface ModelSurfaceDef {
+  /** SurfaceTranslucencyType: 0 opaque, 1 translucent, 3 add, 4 transparent, 5 inverse multiply. */
+  translucency: number
+  doubleSided: boolean
+  /** 0xRRGGBBAA */
+  color: number
+  index: number[]
+}
+
+/** An effect model (.mdl, scripts/lc/mdl.mjs): the first mip, every frame, the first animation. */
+export interface ModelDef {
+  /** 0 a normal model, 1 faces the viewer (MF_FACE_FORWARD), 2 turns about its up axis (half). */
+  faceForward: number
+  /** Positions per frame, three numbers a vertex, in metres. */
+  frames: number[][]
+  /** Texture vertices in mex, two a vertex. */
+  uv: number[]
+  surfaces: ModelSurfaceDef[]
+  anim: { secsPerFrame: number; frames: number[] } | null
+}
+
 export interface ClientFxData {
   skills: Record<string, SkillFxDef>
   groups: Record<string, EffectGroupDef>
   effects: Record<string, EffectDef>
   particles: Record<string, ParticleGroupDef>
-  textures: Record<string, { url: string; width: number; height: number }>
+  textures: Record<string, FxTextureDef>
+  models?: Record<string, ModelDef>
 }
 
 let loading: Promise<ClientFxData | null> | null = null
@@ -188,7 +220,7 @@ export function clientFx(): ClientFxData | null {
 
 /** Fetches the effect data once; later calls share the same request. */
 export function loadClientFx(): Promise<ClientFxData | null> {
-  loading ??= fetch(`${import.meta.env.BASE_URL}fx/client/effects.json?v=1`)
+  loading ??= fetch(`${import.meta.env.BASE_URL}fx/client/effects.json?v=2`)
     .then((r) => (r.ok ? (r.json() as Promise<ClientFxData>) : null))
     .then((data) => (loaded = data))
     .catch(() => null)

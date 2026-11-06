@@ -22,7 +22,8 @@ import { parseAnimationEffects } from './anim-effects.mjs'
 import { parseSkillTable } from './skill-anims.mjs'
 import { readParticleGroup } from './title-particles.mjs'
 import { readEffectGroups, readUpgradeEffect } from './upgrade-effects.mjs'
-import { parseTexture } from './texture.mjs'
+import { parseTexture, textureMexSize } from './texture.mjs'
+import { mdlMesh, parseMdl } from './mdl.mjs'
 import sharp from 'sharp'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
@@ -230,6 +231,7 @@ async function main(argv) {
   if (report) return
   fs.mkdirSync(path.join(OUT, 'tex'), { recursive: true })
   const textureAssets = await exportTextures(files, [...textures])
+  const models = exportModels(files, [...mdl])
   fs.writeFileSync(
     path.join(OUT, 'effects.json'),
     JSON.stringify({
@@ -239,9 +241,36 @@ async function main(argv) {
       effects: collected.effects,
       particles: collected.particles,
       textures: textureAssets,
+      models,
     }),
   )
-  console.log(`wrote ${Object.keys(textureAssets).length} textures`)
+  console.log(
+    `wrote ${Object.keys(textureAssets).length} textures, ${Object.keys(models).length} models`,
+  )
+}
+
+/**
+ * The effect models (.mdl) of EFMD effects: path → the first mip as triangles per surface, every
+ * frame's positions (metres, 4 decimals) and texture vertices in mex, the face-forward kind
+ * (1 billboard, 2 turning about its own up axis) and the first animation (the effect loops anim 0).
+ */
+function exportModels(files, paths) {
+  const out = {}
+  const round = (n) => Math.round(n * 1e4) / 1e4
+  for (const clientPath of paths.sort()) {
+    if (!files.resolve(clientPath)) continue
+    const model = parseMdl(files.read(clientPath))
+    const mesh = mdlMesh(model)
+    const anim = model.anims[0]
+    out[clientPath] = {
+      faceForward: model.faceForward,
+      frames: mesh.frames.map((frame) => frame.map(round)),
+      uv: mesh.uv,
+      surfaces: mesh.surfaces,
+      anim: anim ? { secsPerFrame: anim.secsPerFrame, frames: anim.frames } : null,
+    }
+  }
+  return out
 }
 
 /** A texture's file name in public/fx/client/tex: its base name and a short hash of its path. */
@@ -273,6 +302,8 @@ async function exportTextures(files, paths) {
       url: `fx/client/tex/${id}.webp`,
       width: texture.width,
       height: texture.height,
+      // a model's texture vertices are in mex: u = mex / mexWidth (RenderModel_View.cpp)
+      ...textureMexSize(files.read(clientPath)),
       sha256: hash(data).slice(0, 16),
     }
   }
