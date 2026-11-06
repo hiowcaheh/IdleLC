@@ -5,6 +5,7 @@ import { AnimationMixer, Object3D, PropertyBinding, Vector3 } from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'meshoptimizer'
 import { placeSourceTag } from '../../src/scene/upgradeEffects.ts'
+import { ARTIFACT_WINGS, placeArtifactWing } from '../../src/scene/artifactEffects.ts'
 
 /** Keep shipped geometry/skin/animation bytes; remove image references for the Node-only loader. */
 async function loadRig(classId) {
@@ -50,6 +51,34 @@ async function loadRig(classId) {
 }
 
 describe('source tags on shipped GLTF rigs', () => {
+  it('attaches animated Seraphim wings above CENTER on every class and follows movement and facing', async () => {
+    for (const classId of ['titan', 'knight', 'healer', 'mage', 'rogue', 'sorcerer']) {
+      const target = await loadRig(classId)
+      const holder = new Object3D()
+      holder.add(target.object)
+      const anchor = new Object3D(),
+        center = new Object3D()
+      holder.add(anchor, center)
+      holder.updateMatrixWorld(true)
+      expect(placeSourceTag(target, 'CENTER', holder, center)).toBe(true)
+      for (const wing of ARTIFACT_WINGS) {
+        expect(placeArtifactWing(target, holder, anchor, wing, -0.1)).toBe(false)
+        expect(placeArtifactWing(target, holder, anchor, wing, 1)).toBe(true)
+        expect(anchor.position.y).toBeGreaterThan(center.position.y + 0.3)
+        const initial = anchor.position.clone(),
+          orientation = anchor.quaternion.clone()
+        holder.position.set(12, 0, -8)
+        holder.rotation.y = 1.2
+        holder.updateMatrixWorld(true)
+        expect(placeArtifactWing(target, holder, anchor, wing, 2)).toBe(true)
+        expect(anchor.position.distanceTo(initial)).toBeLessThan(0.00001)
+        expect(anchor.quaternion.angleTo(orientation)).toBeLessThan(0.00001)
+        holder.position.set(0, 0, 0)
+        holder.rotation.y = 0
+        holder.updateMatrixWorld(true)
+      }
+    }
+  })
   it('resolves real GLTF-loader joint names and keeps tags on posed hands and torso for all six classes', async () => {
     for (const classId of ['titan', 'knight', 'healer', 'mage', 'rogue', 'sorcerer']) {
       const target = await loadRig(classId)

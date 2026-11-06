@@ -25,6 +25,7 @@ import { useGameStore } from '../state/gameStore.ts'
 import type { ViewEvent } from '../state/combatEvents.ts'
 import { levelTone } from '../ui/hud/levelColor.ts'
 import { Character, type CharacterHandle } from './Character.tsx'
+import { activeArtifactVisual } from './artifactEffects.ts'
 import { HpBar3D } from './HpBar3D.tsx'
 import { SkillEffects } from './SkillEffects.tsx'
 import { armorUpgradePlus } from './upgradeEffects.ts'
@@ -244,6 +245,7 @@ export function DungeonScene({ id }: { id: DungeonId }) {
             weaponSubtype,
           }}
           titleEffect={titleEffect}
+          artifactEffect={activeArtifactVisual(run?.player.effects ?? [])}
         />
       </group>
       {run?.enemies.map((e) => (

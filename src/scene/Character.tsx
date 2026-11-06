@@ -41,6 +41,8 @@ import { TIMINGS } from '../game/logic/combat.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { UpgradeAura, type UpgradeLook } from './UpgradeAura.tsx'
 import { TitleAura } from './TitleAura.tsx'
+import { ArtifactWings } from './ArtifactWings.tsx'
+import type { ArtifactVisual } from './artifactEffects.ts'
 
 export type BaseAnimation = 'idle' | 'run'
 
@@ -115,6 +117,7 @@ interface Props {
   /** Upgrade effects follow this character's animated gear and hand bones. */
   upgrades?: UpgradeLook
   titleEffect?: string
+  artifactEffect?: ArtifactVisual
 }
 
 /** Share of a model's texture that shines on its own (see prepareModel). */
@@ -266,6 +269,7 @@ export function Character({
   gear,
   upgrades,
   titleEffect,
+  artifactEffect,
   scale = 1,
 }: Props) {
   const model = getModel(modelId)
@@ -518,6 +522,13 @@ export function Character({
         <ModelBoundary resetKey={`title-effect:${titleEffect}`} fallback={null}>
           <Suspense fallback={null}>
             <TitleAura effectName={titleEffect} target={upgradeTarget} />
+          </Suspense>
+        </ModelBoundary>
+      )}
+      {artifactEffect && timeScale && (
+        <ModelBoundary resetKey={`artifact-effect:${artifactEffect}`} fallback={null}>
+          <Suspense fallback={null}>
+            <ArtifactWings target={upgradeTarget} pace={timeScale} />
           </Suspense>
         </ModelBoundary>
       )}

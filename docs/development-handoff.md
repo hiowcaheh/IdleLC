@@ -1,5 +1,17 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Najnowszy etap: moc Seraphim i skrzydła, 2026-11-06
+
+Na życzenie właściciela Seraphim: +1200% EXP/SP, +800% złota, +300% drop,
+po +1200 STR/DEX/INT/CON. SP/drop to jawna zmiana względem oryginalnego serwera.
+Wizualizacja używa oryginalnych dwóch animowanych modeli Angel_wing03 i sześciu
+warstw z Effect.dat. Moc i `visual` są w regule importera, nie ręcznej łatce JSON.
+Konwersja `recover-artifact-fx`, oryginalny tag CENTER, alpha i opóźnienia;
+żywy efekt kontroluje widoczność, animacja respektuje pauzę. Szczegóły i granice
+adaptera w [Dungeons](dungeons.md). SaveVersion nadal 16.
+Weryfikacja: 533 testy / 61 plików, build, Chromium sześć klas 390/1280 px i pełna
+runda produkcyjna 320 px (600 s / 147 zabójstw). Brak błędów JS/konsoli/HTTP.
+
 ## Najnowszy etap: superbuffy i mikstury, 2026-11-06
 
 Szczegóły w [Dungeons](dungeons.md). Stałe superbuffy na 5/10/15/20, poza Bufferem,

@@ -77,14 +77,15 @@ export function buildDungeonSuperBuffs(tables) {
       },
     },
     // Artifact_Manager.h level 3 = item 10953, ApplyArtifact owner branch (not party).
-    // Flat attributes, +1200% EXP, +800% gold. No SP/drop bonus in the source.
+    // Source attributes/EXP/gold; owner 2026-11-06 adds +1200% SP and +300% drop.
     {
       ...item(10953),
       level: 1,
       sourceDuration: 0,
       effects: [],
       attributes: 1200,
-      rewards: { exp: 1200, sp: 0, gold: 800, drop: 0 },
+      rewards: { exp: 1200, sp: 1200, gold: 800, drop: 300 },
+      visual: 'Angel_wing03',
     },
   ]
 }

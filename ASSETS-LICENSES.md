@@ -36,3 +36,9 @@ z Quest.tex według questView.xml, UV 193,944,11,15 oraz 207,944,11,15. Katalog 
 rozszerzono o oryginalne komórki przedmiotów 1416/2453/10953 oraz skilla 1075;
 pochodzą z tych samych atlasów ItemBtn/SkillBtn klienta. Powyższa zgoda właściciela
 obejmuje także te konwersje.
+
+Skrzydła artefaktu (2026-11-06): `public/fx/artifact/angel_wing_03.glb` oraz
+`angel_wing_03_b.glb` pochodzą z `Data/Effect/Ska/angelwing` tego samego klienta
+2015, z oryginalnymi BM/BS/BA/TEX. `scripts/lc/artifact-effects.mjs` konwertuje je
+i zapisuje definicje grupy Angel_wing03 z Effect.dat do `lc-artifact-effects.json`.
+Powyższa decyzja właściciela obejmuje te zasoby LC; nie są CC0.

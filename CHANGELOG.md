@@ -1,5 +1,16 @@
 # Historia zmian
 
+## 2026-11-06 (Codex): bonusy i skrzydła Seraphim
+
+1. Na życzenie właściciela artefakt daje +1200% EXP/SP, +800% złota, +300% szansy
+   dropu oraz po +1200 STR/DEX/INT/CON. Bonusy są widoczne w wyborze superbuffa.
+2. Duże, oryginalne animowane skrzydła Angel_wing03, dwa modele i sześć warstw
+   podpiętych do postaci. Animacja zatrzymuje się w pauzie; efekt znika po rundzie.
+
+Szczegóły źródeł i zakresu konwersji: [docs/dungeons.md](docs/dungeons.md).
+Weryfikacja: 533 testy / 61 plików, build, sześć klas w Chromium i pełna runda
+produkcyjna na ekranie 320 px. Brak błędów JS/konsoli/HTTP.
+
 ## 2026-11-06 (Codex): superbuffy i oryginalny czas mikstur w Dungeons
 
 1. Mikstury z ekwipunku zachowują źródłowy czas i pozostały efekt po rundzie/reload.

@@ -190,6 +190,7 @@ export function dungeonSuperEffect(
     ...(buff.itemId === undefined ? {} : { itemId: buff.itemId }),
     name: buff.name,
     dungeon: true,
+    ...(buff.visual ? { visual: buff.visual } : {}),
     remaining,
     stats: [
       ...buff.effects.flatMap((raw) => {

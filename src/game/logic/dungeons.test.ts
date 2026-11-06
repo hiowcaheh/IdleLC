@@ -445,8 +445,8 @@ describe('per-character Buffer and lifetime dungeon points', () => {
   })
 })
 
-describe('fixed source super blessings and potion timers', () => {
-  it('uses the real source powers, keeps super blessings out of the Buffer, and never grants dummy attack magic', () => {
+describe('fixed dungeon super blessings and potion timers', () => {
+  it('uses source powers and the requested artifact override, keeps supers out of the Buffer, and ignores dummy attack magic', () => {
     expect(DUNGEON_SUPER_BUFFS.map((b) => b.id)).toEqual([-1416, -2453, -1075, -10953])
     const iris = dungeonSuperBuffDefinition(-1416)!
     const pill = dungeonSuperBuffDefinition(-2453)!
@@ -462,7 +462,8 @@ describe('fixed source super blessings and potion timers', () => {
     expect(artifact).toMatchObject({
       name: 'Artifact of Seraphim',
       attributes: 1200,
-      rewards: { exp: 1200, sp: 0, gold: 800, drop: 0 },
+      rewards: { exp: 1200, sp: 1200, gold: 800, drop: 300 },
+      visual: 'Angel_wing03',
     })
     for (const def of DUNGEON_SUPER_BUFFS) {
       expect(() =>
@@ -477,15 +478,34 @@ describe('fixed source super blessings and potion timers', () => {
   it('applies successive source reward multipliers to actual payouts and leaves ordinary rewards unchanged', () => {
     const state = run()
     state.player.effects = DUNGEON_SUPER_BUFFS.map((b) => dungeonSuperEffect(b, 600))
-    expect(dungeonRewardMultipliers(state)).toEqual({ exp: 39, sp: 3, gold: 9, drop: 1 })
+    expect(dungeonRewardMultipliers(state)).toEqual({ exp: 39, sp: 39, gold: 9, drop: 4 })
     const character = hero(10)
     const monster = getMonster('lc-35')
     const base = rewardKills(character, monster, 1, rng(), NOW)
+    const artifactOnly = {
+      ...state,
+      player: {
+        ...state.player,
+        effects: [dungeonSuperEffect(dungeonSuperBuffDefinition(-10953)!, 600)],
+      },
+    }
+    const artifactMultipliers = dungeonRewardMultipliers(artifactOnly)
+    expect(artifactMultipliers).toEqual({ exp: 13, sp: 13, gold: 9, drop: 4 })
+    const artifactPayout = rewardKills(character, monster, 1, rng(), NOW, artifactMultipliers)
+    expect([artifactPayout.exp, artifactPayout.sp, artifactPayout.gold]).toEqual([
+      base.exp * 13,
+      base.sp * 13,
+      base.gold * 9,
+    ])
     const boosted = rewardKills(character, monster, 1, rng(), NOW, dungeonRewardMultipliers(state))
     expect(boosted.exp).toBe(base.exp * 39)
-    expect(boosted.sp).toBe(base.sp * 3)
+    expect(boosted.sp).toBe(base.sp * 39)
     expect(boosted.gold).toBe(base.gold * 9)
-    expect(boosted.drops).toEqual(base.drops)
+    const defaultDrops = rewardKills(character, monster, 1, rng(), NOW, {
+      ...dungeonRewardMultipliers(state),
+      drop: 1,
+    })
+    expect(defaultDrops.drops).toEqual(base.drops)
     state.player.effects.forEach((e) => {
       e.remaining = 0
     })

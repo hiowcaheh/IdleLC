@@ -99,6 +99,7 @@ export interface LcDungeonSuperBuff {
   sourceEffects?: SkillEffectDef[]
   icon?: { atlas: number; row: number; col: number }
   attributes?: number
+  visual?: 'Angel_wing03'
   rewards?: { exp: number; sp: number; gold: number; drop: number }
 }
 

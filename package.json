@@ -24,6 +24,7 @@
     "recover-lc-props": "node scripts/lc/recover-props.mjs",
     "recover-upgrade-fx": "node scripts/lc/upgrade-effects.mjs",
     "recover-title-fx": "node scripts/lc/title-effects.mjs",
+    "recover-artifact-fx": "node scripts/lc/artifact-effects.mjs",
     "verify-lc-recovery": "node scripts/lc/verify-recovery.mjs"
   },
   "dependencies": {

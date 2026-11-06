@@ -1,5 +1,15 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-06 (Codex): Seraphim na życzenie właściciela daje +1200% EXP/SP,
++800% gold, +300% drop i po +1200 STR/DEX/INT/CON. SP/drop są świadomą zmianą
+wobec źródła. Sam artefakt to 13× EXP/SP, 9× gold, 4× szansa dropu; z Iris/pigułką
+39× EXP/SP. Oryginalne skrzydła Angel_wing03 (dwa SKA, sześć warstw) z Effect.dat,
+tag CENTER, źródłowe animacje/rozmiar/alpha/opóźnienia. `recover-artifact-fx`,
+`ArtifactWings.tsx`, `artifactEffects.ts`. `ActiveEffect.visual` działa tylko dla
+żywego efektu dungeon; pauza zamraża, koniec usuwa. Nadal SaveVersion **16**.
+[Dokumentacja i zakres adaptera](docs/dungeons.md).
+Weryfikacja: 533 testy / 61 plików, build, Chromium sześć klas i pełna runda 320 px.
+
 Aktualizacja 2026-11-06 (Codex): superbuffy i mikstury Dungeons, nadal SaveVersion **16**.
 Poziomy 5/10/15/20: osobna stała pula Iris 1416 (349/2, +200% EXP), pigułka 2453
 (468/1, +200% SP), Blue cube 1075 (+200% atk/matk/Deadly), Seraphim 10953

@@ -1,0 +1,808 @@
+{
+  "source": {
+    "path": "Data/Effect/Effect.dat",
+    "sha256": "24ccf0f7b0c076bfc67012f5dd90f80b01ae37f8523b1fdb452cac6a25577e1b"
+  },
+  "adapter": "seraphim-ska-wings-v1",
+  "groups": {
+    "Angel_wing03": {
+      "effects": [
+        {
+          "time": 0,
+          "name": "(MDL)angel_wing03"
+        },
+        {
+          "time": 0,
+          "name": "(MDL)angel_wing03_a"
+        },
+        {
+          "time": 0,
+          "name": "(MDL)angel_wing03_c"
+        },
+        {
+          "time": 0,
+          "name": "(PTC)angel_wing"
+        },
+        {
+          "time": 0,
+          "name": "(SKA)Angel_wing03"
+        },
+        {
+          "time": 0,
+          "name": "(SKA)Angel_wing03_b"
+        },
+        {
+          "time": 0.4000000059604645,
+          "name": "(SKA)Angel_wing03_01"
+        },
+        {
+          "time": 0.4000000059604645,
+          "name": "(SKA)Angel_wing03_b_01"
+        },
+        {
+          "time": 0.699999988079071,
+          "name": "(SKA)Angel_wing03_02"
+        },
+        {
+          "time": 0.699999988079071,
+          "name": "(SKA)Angel_wing03_b_02"
+        },
+        {
+          "time": 1.899999976158142,
+          "name": "(MDL)angel_wing03_b"
+        }
+      ],
+      "tags": [
+        {
+          "time": 0,
+          "effect": 0,
+          "name": "__ROOT"
+        },
+        {
+          "time": 0,
+          "effect": 1,
+          "name": "__ROOT"
+        },
+        {
+          "time": 0,
+          "effect": 2,
+          "name": "__ROOT"
+        },
+        {
+          "time": 0,
+          "effect": 3,
+          "name": "__ROOT"
+        },
+        {
+          "time": 0,
+          "effect": 4,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 5,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 6,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 7,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 8,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 9,
+          "name": "CENTER"
+        },
+        {
+          "time": 0,
+          "effect": 10,
+          "name": "__ROOT"
+        }
+      ]
+    }
+  },
+  "effects": {
+    "(MDL)angel_wing03": {
+      "name": "(MDL)angel_wing03",
+      "lifeTime": 3.6500000953674316,
+      "repeat": -1,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "boundingRadius": 1,
+      "kind": "EFMD",
+      "model": "Data\\Effect\\Mdl\\PlaneAddFlat.mdl",
+      "texture": "Data\\Effect\\Texture\\light_sh_c1.tex",
+      "color": 546308095,
+      "stretch": [
+        1,
+        1,
+        1
+      ],
+      "rotation": 1,
+      "position": 2,
+      "control": {
+        "twinkle": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "color": [],
+        "alpha": [
+          {
+            "time": 0,
+            "value": 240
+          },
+          {
+            "time": 1.649999976158142,
+            "value": 80
+          },
+          {
+            "time": 3.6500000953674316,
+            "value": 240
+          }
+        ],
+        "stretch": [
+          {
+            "time": 0,
+            "value": [
+              8,
+              8,
+              8
+            ]
+          }
+        ],
+        "position": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "angle": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "overDraw": false
+    },
+    "(MDL)angel_wing03_a": {
+      "name": "(MDL)angel_wing03_a",
+      "lifeTime": 3.6500000953674316,
+      "repeat": -1,
+      "fadeIn": 1,
+      "fadeOut": 1,
+      "boundingRadius": 4,
+      "kind": "EFMD",
+      "model": "Data\\Effect\\MDL\\PlaneAdd.mdl",
+      "texture": "Data\\Effect\\Texture\\LoginMark.tex",
+      "color": 1437007871,
+      "stretch": [
+        2.5,
+        2.5,
+        2.5
+      ],
+      "rotation": 0,
+      "position": 1,
+      "control": {
+        "twinkle": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "color": [],
+        "alpha": [
+          {
+            "time": 0,
+            "value": 150
+          }
+        ],
+        "stretch": [
+          {
+            "time": 0,
+            "value": [
+              2,
+              2,
+              2
+            ]
+          },
+          {
+            "time": 3.6500000953674316,
+            "value": [
+              1,
+              1,
+              1
+            ]
+          }
+        ],
+        "position": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "time": 3.6500000953674316,
+            "value": [
+              0,
+              2.299999952316284,
+              0
+            ]
+          }
+        ],
+        "angle": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "time": 3.6500000953674316,
+            "value": [
+              360,
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "overDraw": false
+    },
+    "(MDL)angel_wing03_c": {
+      "name": "(MDL)angel_wing03_c",
+      "lifeTime": 3.6500000953674316,
+      "repeat": -1,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "boundingRadius": 4,
+      "kind": "EFMD",
+      "model": "Data\\Effect\\MDL\\PlaneAdd.mdl",
+      "texture": "Data\\Effect\\Texture\\LoginMark.tex",
+      "color": 1437007871,
+      "stretch": [
+        2.5,
+        2.5,
+        2.5
+      ],
+      "rotation": 0,
+      "position": 1,
+      "control": {
+        "twinkle": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "color": [],
+        "alpha": [
+          {
+            "time": 0,
+            "value": 150
+          },
+          {
+            "time": 1.8200000524520874,
+            "value": 20
+          },
+          {
+            "time": 3.6500000953674316,
+            "value": 150
+          }
+        ],
+        "stretch": [
+          {
+            "time": 0,
+            "value": [
+              2,
+              2,
+              2
+            ]
+          },
+          {
+            "time": 1.8200000524520874,
+            "value": [
+              1.7000000476837158,
+              1.7000000476837158,
+              1.7000000476837158
+            ]
+          },
+          {
+            "time": 3.6500000953674316,
+            "value": [
+              2,
+              2,
+              2
+            ]
+          }
+        ],
+        "position": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "angle": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "time": 3.6500000953674316,
+            "value": [
+              360,
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "overDraw": false
+    },
+    "(PTC)angel_wing": {
+      "name": "(PTC)angel_wing",
+      "lifeTime": 0.9999999403953552,
+      "repeat": -1,
+      "fadeIn": 0.10000000149011612,
+      "fadeOut": 0.10000000149011612,
+      "boundingRadius": 1,
+      "kind": "EFPT",
+      "particleGroup": "angel_wing",
+      "rotation": 1
+    },
+    "(SKA)Angel_wing03": {
+      "name": "(SKA)Angel_wing03",
+      "lifeTime": 3.6500000953674316,
+      "repeat": -1,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "boundingRadius": 1,
+      "kind": "EFSK",
+      "model": "Data\\Effect\\Ska\\angelwing\\angel_wing_03.smc",
+      "color": 4294967295,
+      "stretch": [
+        1,
+        1,
+        1
+      ],
+      "position": 2,
+      "rotation": 2,
+      "control": {
+        "twinkle": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "color": [],
+        "alpha": [],
+        "stretch": [],
+        "position": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              0.41999998688697815,
+              -0.10000000149011612
+            ]
+          }
+        ],
+        "angle": [
+          {
+            "time": 0,
+            "value": [
+              180,
+              0,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    "(SKA)Angel_wing03_b": {
+      "name": "(SKA)Angel_wing03_b",
+      "lifeTime": 3.6500000953674316,
+      "repeat": -1,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "boundingRadius": 1,
+      "kind": "EFSK",
+      "model": "Data\\Effect\\Ska\\angelwing\\angel_wing_03_b.smc",
+      "color": 4294967295,
+      "stretch": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929
+      ],
+      "position": 2,
+      "rotation": 2,
+      "control": {
+        "twinkle": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "color": [],
+        "alpha": [],
+        "stretch": [],
+        "position": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              0.6000000238418579,
+              -0.20000000298023224
+            ]
+          }
+        ],
+        "angle": [
+          {
+            "time": 0,
+            "value": [
+              180,
+              0,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    "(SKA)Angel_wing03_01": {
+      "name": "(SKA)Angel_wing03_01",
+      "lifeTime": 3.6500000953674316,
+      "repeat": -1,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "boundingRadius": 1,
+      "kind": "EFSK",
+      "model": "Data\\Effect\\Ska\\angelwing\\angel_wing_03.smc",
+      "color": 4294967295,
+      "stretch": [
+        1,
+        1,
+        1
+      ],
+      "position": 2,
+      "rotation": 2,
+      "control": {
+        "twinkle": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "color": [],
+        "alpha": [
+          {
+            "time": 0,
+            "value": 50
+          }
+        ],
+        "stretch": [],
+        "position": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              0.41999998688697815,
+              -0.10000000149011612
+            ]
+          }
+        ],
+        "angle": [
+          {
+            "time": 0,
+            "value": [
+              180,
+              0,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    "(SKA)Angel_wing03_b_01": {
+      "name": "(SKA)Angel_wing03_b_01",
+      "lifeTime": 3.6500000953674316,
+      "repeat": -1,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "boundingRadius": 1,
+      "kind": "EFSK",
+      "model": "Data\\Effect\\Ska\\angelwing\\angel_wing_03_b.smc",
+      "color": 4294967295,
+      "stretch": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929
+      ],
+      "position": 2,
+      "rotation": 2,
+      "control": {
+        "twinkle": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "color": [],
+        "alpha": [
+          {
+            "time": 0,
+            "value": 50
+          }
+        ],
+        "stretch": [],
+        "position": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              0.6000000238418579,
+              -0.20000000298023224
+            ]
+          }
+        ],
+        "angle": [
+          {
+            "time": 0,
+            "value": [
+              180,
+              0,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    "(SKA)Angel_wing03_02": {
+      "name": "(SKA)Angel_wing03_02",
+      "lifeTime": 3.6500000953674316,
+      "repeat": -1,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "boundingRadius": 1,
+      "kind": "EFSK",
+      "model": "Data\\Effect\\Ska\\angelwing\\angel_wing_03.smc",
+      "color": 4294967295,
+      "stretch": [
+        1,
+        1,
+        1
+      ],
+      "position": 2,
+      "rotation": 2,
+      "control": {
+        "twinkle": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "color": [],
+        "alpha": [
+          {
+            "time": 0,
+            "value": 20
+          }
+        ],
+        "stretch": [],
+        "position": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              0.41999998688697815,
+              -0.10000000149011612
+            ]
+          }
+        ],
+        "angle": [
+          {
+            "time": 0,
+            "value": [
+              180,
+              0,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    "(SKA)Angel_wing03_b_02": {
+      "name": "(SKA)Angel_wing03_b_02",
+      "lifeTime": 3.6500000953674316,
+      "repeat": -1,
+      "fadeIn": 0,
+      "fadeOut": 0,
+      "boundingRadius": 1,
+      "kind": "EFSK",
+      "model": "Data\\Effect\\Ska\\angelwing\\angel_wing_03_b.smc",
+      "color": 4294967295,
+      "stretch": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929
+      ],
+      "position": 2,
+      "rotation": 2,
+      "control": {
+        "twinkle": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "color": [],
+        "alpha": [
+          {
+            "time": 0,
+            "value": 20
+          }
+        ],
+        "stretch": [],
+        "position": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              0.6000000238418579,
+              -0.20000000298023224
+            ]
+          }
+        ],
+        "angle": [
+          {
+            "time": 0,
+            "value": [
+              180,
+              0,
+              0
+            ]
+          }
+        ]
+      }
+    },
+    "(MDL)angel_wing03_b": {
+      "name": "(MDL)angel_wing03_b",
+      "lifeTime": 3.6500000953674316,
+      "repeat": -1,
+      "fadeIn": 0.5,
+      "fadeOut": 2,
+      "boundingRadius": 4,
+      "kind": "EFMD",
+      "model": "Data\\Effect\\MDL\\PlaneAdd.mdl",
+      "texture": "Data\\Effect\\Texture\\LoginMark.tex",
+      "color": 1437007871,
+      "stretch": [
+        2.5,
+        2.5,
+        2.5
+      ],
+      "rotation": 0,
+      "position": 1,
+      "control": {
+        "twinkle": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "color": [],
+        "alpha": [
+          {
+            "time": 0,
+            "value": 150
+          },
+          {
+            "time": 1,
+            "value": 150
+          },
+          {
+            "time": 2,
+            "value": 0
+          },
+          {
+            "time": 3.6500000953674316,
+            "value": 0
+          }
+        ],
+        "stretch": [
+          {
+            "time": 0,
+            "value": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "time": 2,
+            "value": [
+              6,
+              6,
+              6
+            ]
+          }
+        ],
+        "position": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              1.5,
+              0
+            ]
+          }
+        ],
+        "angle": [
+          {
+            "time": 0,
+            "value": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "time": 3.6500000953674316,
+            "value": [
+              360,
+              0,
+              0
+            ]
+          }
+        ]
+      },
+      "overDraw": false
+    }
+  },
+  "totalGroups": 3413,
+  "wings": [
+    {
+      "name": "(SKA)Angel_wing03",
+      "delay": 0,
+      "tag": "CENTER"
+    },
+    {
+      "name": "(SKA)Angel_wing03_b",
+      "delay": 0,
+      "tag": "CENTER"
+    },
+    {
+      "name": "(SKA)Angel_wing03_01",
+      "delay": 0.4000000059604645,
+      "tag": "CENTER"
+    },
+    {
+      "name": "(SKA)Angel_wing03_b_01",
+      "delay": 0.4000000059604645,
+      "tag": "CENTER"
+    },
+    {
+      "name": "(SKA)Angel_wing03_02",
+      "delay": 0.699999988079071,
+      "tag": "CENTER"
+    },
+    {
+      "name": "(SKA)Angel_wing03_b_02",
+      "delay": 0.699999988079071,
+      "tag": "CENTER"
+    }
+  ],
+  "models": {
+    "Data\\Effect\\Ska\\angelwing\\angel_wing_03.smc": {
+      "url": "fx/artifact/angel_wing_03.glb",
+      "sha256": "e4a9c5be0612deadafbd55082c1ccde52244c6b293ec4f51f1ccca77a7d333a5",
+      "sourceSha256": "a4305214e5f3180392b9495c2296c234fec0ecdae903f12e3cdc927a4813f822"
+    },
+    "Data\\Effect\\Ska\\angelwing\\angel_wing_03_b.smc": {
+      "url": "fx/artifact/angel_wing_03_b.glb",
+      "sha256": "95abf538da34295019d9c45ea4a90d053e491e313359cdc9c9835dd07615e971",
+      "sourceSha256": "8901f564cbde7d6679bb7274a7e7681485e3ddd1669ae35f4fc9fd265c2e9131"
+    }
+  }
+}

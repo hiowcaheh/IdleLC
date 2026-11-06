@@ -135,6 +135,7 @@ export interface ActiveEffect {
   keepOnDeath?: boolean
   /** Free dungeon selections expire with the run and never become owned potion boosts. */
   dungeon?: true
+  visual?: 'Angel_wing03'
   rewards?: { exp: number; sp: number; gold: number; drop: number }
 }
 

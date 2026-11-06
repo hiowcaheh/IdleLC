@@ -5,6 +5,7 @@ import {
   addToInventory,
   lootTable,
   rollDrops,
+  rollSourceDrops,
   stowDrops,
 } from './loot.ts'
 import { createRng } from './rng.ts'
@@ -29,6 +30,21 @@ describe('loot', () => {
   it('drops nothing without kills or a loot table', () => {
     expect(rollDrops([{ itemId: 1, chance: 1 }], 0, createRng(1))).toEqual([])
     expect(rollDrops(undefined, 10, createRng(1))).toEqual([])
+  })
+
+  it('raises source drop chance by 300% while retaining four attempts, empty slots and single items', () => {
+    const slots = Array.from({ length: 20 }, (_, i) =>
+      i === 0 ? { itemId: 7, chance: 0.1 } : null,
+    )
+    const rolls = () => {
+      // Two occupied slot draws, one above the boosted threshold, and one empty slot.
+      const values = [0, 0.39, 0, 0.4, 0.05, 0, 0, 0.05]
+      let index = 0
+      return () => values[index++]!
+    }
+    expect(rollSourceDrops(slots, 1, rolls())).toEqual([{ itemId: 7, count: 1 }])
+    expect(rollSourceDrops(slots, 1, rolls(), 4)).toEqual([{ itemId: 7, count: 2 }])
+    expect(rollSourceDrops(slots, 1, () => 0, 4)).toEqual([{ itemId: 7, count: 4 }])
   })
 
   it('stacks items per kind without changing the input', () => {

@@ -11,16 +11,17 @@ Pozostałe awanse nadal losują trzy klasyczne buffy. Poziom 20 oznacza maksymal
 15 zwykłych i 4 specjalne wybory. Również po podniesieniu kilku poziomów jednym zbiorem
 kryształów kolejka zachowuje właściwe progi. Wszystkie te wybory trwają do końca rundy.
 
-| Efekt                     | Źródło                                                           | Stała moc                                      |
-| ------------------------- | ---------------------------------------------------------------- | ---------------------------------------------- |
-| Platinum Blessed Iris     | item 1416, skill 349/2, magic 365/1                              | +200% EXP, 3× łącznie                          |
-| Platinum Super Skill Pill | item 2453, skill 468/1, magic 516/2                              | +200% SP, 3× łącznie                           |
-| Blue cube effect          | skill 1075/1, magic 949/1, 940/2, 991/2                          | +200% Deadly, ataku fizycznego i magicznego    |
-| Artifact of Seraphim      | item 10953, Artifact_Manager::ApplyArtifact, wariant właściciela | +1200 STR/DEX/INT/CON, +1200% EXP, +800% złota |
+| Efekt                     | Źródło                                                      | Stała moc                                                     |
+| ------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------- |
+| Platinum Blessed Iris     | item 1416, skill 349/2, magic 365/1                         | +200% EXP, 3× łącznie                                         |
+| Platinum Super Skill Pill | item 2453, skill 468/1, magic 516/2                         | +200% SP, 3× łącznie                                          |
+| Blue cube effect          | skill 1075/1, magic 949/1, 940/2, 991/2                     | +200% Deadly, ataku fizycznego i magicznego                   |
+| Artifact of Seraphim      | item 10953, ApplyArtifact owner + zmiana właściciela IdleLC | +1200 STR/DEX/INT/CON, +1200% EXP/SP, +800% złota, +300% drop |
 
 W dostarczonym serwerze Archangel (10952) jest środkowym artefaktem; najwyższy to
-Seraphim. Nie ma bonusu SP/drop. Nie zastąpiono wartości źródłowych przypuszczalnym
-+500% do wszystkiego. Zasoby artefaktu wynikają także z klasy: CON zwiększa HP,
+Seraphim. Oryginalny serwer nie daje SP/drop; na wyraźne życzenie właściciela IdleLC
+z 2026-11-06 dodano +1200% SP oraz +300% drop. Pozostałe wartości są źródłowe.
+Zasoby artefaktu wynikają także z klasy: CON zwiększa HP,
 INT i CON zwiększają MP według `levelup_hp` / `levelup_mp` z PC.cpp. Wykorzystano
 istniejące tabele współczynników z attributes.ts. Działanie uwzględnia kolejność:
 zasoby po pasywach i przed procentowymi buffami asyst.
@@ -28,8 +29,24 @@ zasoby po pasywach i przed procentowymi buffami asyst.
 W `Assist.cpp` Iris i pigułka SP mają specjalną interpretację; ich surowa magia
 wygląda jak zwiększenie ataku, ale nie jest używana jako atak. Import zachowuje surowe
 rekordy w sourceEffects i eksportuje właściwy bonus nagród. Kolejne bonusy nagród
-mnożą dotychczasową wypłatę IdleLC: Iris + Seraphim daje 3 × 13 EXP. Reguły różnicy
-poziomów i losowania dropu pozostają wspólne z pozostałą grą.
+mnożą dotychczasową wypłatę IdleLC: sam Seraphim daje 13× EXP/SP, 9× złota i 4×
+szansę dropu. Z Iris daje 39× EXP, z pigułką 39× SP. Drop zwiększa prawdopodobieństwo,
+nie liczbę sztuk; nadal są cztery próby z dwudziestu pozycji, w tym pustych.
+Reguły różnicy poziomów pozostają wspólne z pozostałą grą.
+
+Skrzydła Seraphim pochodzą z `Angel_wing03`, przypisanego itemowi 10953 w
+`CItemEffect::AddRelicEffect` / `g_strRelicEffectName`. `npm run recover-artifact-fx --
+--client <katalog>` odzyskuje sześć warstw EFSK z Effect.dat oraz konwertuje oryginalne
+modele `angel_wing_03.smc` i `angel_wing_03_b.smc`, teksturę, szkielety i animacje.
+Warstwy zachowują opóźnienia 0 / 0,4 / 0,7 s, alpha 255 / 50 / 20, źródłowy rozmiar,
+pozycję i heading. Są podpięte do żywego tagu CENTER każdej z sześciu klas, zgodnie
+z CSkaEffect, także w biegu i przy obrocie. DefaultShader przy alpha <255 przechodzi
+z alpha test na blend; pozostawienie progu MASK wycięłoby półprzezroczyste warstwy.
+Animacje zatrzymują się z pauzą. Wizualizacja wymaga aktywnego darmowego efektu
+artefaktu i znika przy jego usunięciu, wygaśnięciu albo zakończeniu rundy.
+To adapter oryginalnych animowanych skrzydeł, bez czterech dodatkowych legacy EFMD
+oraz emitera EFPT tej grupy. Pełna definicja jedenastu elementów pozostaje w manifeście;
+nie zastąpiono brakujących elementów przypadkowymi sprite’ami.
 
 Superbuffy są osobnym eksportem `dungeonSuperBuffs` i nie mają ulepszeń w Bufferze.
 ID wyborów są ujemne, aby nie kolidowały z listą klas. `ActiveEffect.dungeon` oznacza
@@ -254,7 +271,27 @@ na fizycznym telefonie.
   bez spadku punktów i bez zmiany sprzętu. Zweryfikowane wszystkie trzy grafiki
   karuzeli z klienta, w rozmiarach 320/1280 px, bez błędów strony i zasobów.
 
-## Weryfikacja superbuffów i mikstur
+## Weryfikacja mocy i skrzydeł Seraphim
+
+- `npm run check`: 533 testy / 61 plików, lint, format i TypeScript. Build poprawny.
+- Wypłaty testowane osobno dla artefaktu i łącznie z Iris/pigułką: 13× lub 39×
+  EXP/SP, 9× gold. Test dropu sprawdza próg 4×, puste pozycje, cztery próby i brak
+  mnożenia sztuk. Źródłowe współczynniki HP/MP oraz atrybuty pozostają sprawdzone.
+- Testy GLB sprawdzają hashe, animacje, szkielety, materiały i skończone wartości.
+  Testy tagów wykorzystują prawdziwe, animowane modele GLTF wszystkich sześciu klas.
+- Chromium 390/1280 px: wybór artefaktu przez GUI po kontrolowanym awansie serwisu,
+  sześć klas, tag CENTER, warstwy/alpha, bieg, obrót, pauza i usunięcie po wyjściu.
+  Te próby nie mierzą czasu zdobywania poziomów. Brak błędów JS/konsoli/HTTP/zasobów.
+- Build produkcyjny, 320×740, Belfist / Healer 80 ze źródłowym sprzętem +15:
+  pełne 600 s, 147 zabójstw, poziom podziemia 14. Sterowanie WASD według minimapy,
+  przyspieszenie deweloperskie ×20, bez dodawania EXP/kryształów w trakcie.
+  Seraphim wybrany na 5, Cube na 10; oba modele skrzydeł pobrane z HTTP 200.
+  HP 2085 → 10485, oryginalne mikstury po rundzie miały około 3002 s i przetrwały
+  reload. Artefakt usunięty, brak overflow i błędów JS/konsoli/HTTP.
+- W eksporcie bazy zmienia się wyłącznie Seraphim w `dungeonSuperBuffs`.
+  SaveVersion pozostaje 16; pozostałe rekordy i pola eksportu są identyczne.
+
+## Weryfikacja superbuffów i mikstur (przed zmianą mocy Seraphim)
 
 - `npm run check`: 528 testów / 59 plików, lint, format i TypeScript. Build poprawny.
 - Testy na źródłowym eksporcie: dokładne progi 5/10/15/20, brak powtórek,
