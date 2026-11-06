@@ -2125,18 +2125,17 @@ a.button {
   margin-bottom: calc(-1 * var(--gutter));
 }
 
-/* the potion slots on the left edge, halfway down the screen */
-.hud__side {
-  position: absolute;
-  top: 50%;
-  left: calc(var(--gutter) + var(--safe-left));
-  transform: translateY(-50%);
+/* the potion quick slots: a row on the right, just over the skill bar (owner's request) */
+.hud__potions {
+  display: flex;
+  justify-content: flex-end;
+  width: min(100%, 356px);
+  pointer-events: none;
 }
 
-.hud__side .potion-slots {
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+.hud__potions .potion-slots {
+  gap: 8px;
+  pointer-events: auto;
 }
 
 .skill-bar {
@@ -3286,11 +3285,11 @@ a.button {
   color: #8fe36a;
 }
 
-/* Rewards of a kill rising up the right side (ui/hud/RewardFeed.tsx) */
+/* Rewards of a kill rising up the left side (ui/hud/RewardFeed.tsx) */
 .reward-feed {
   --rise: 30vh;
   position: absolute;
-  right: 10px;
+  left: calc(10px + var(--safe-left));
   top: 34%;
   height: var(--rise);
   width: min(52vw, 220px);
@@ -3303,11 +3302,11 @@ a.button {
 
 .reward-feed__group {
   position: absolute;
-  right: 0;
+  left: 0;
   bottom: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 3px;
   max-width: 100%;
   opacity: 0;

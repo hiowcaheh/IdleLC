@@ -126,11 +126,6 @@ export function GameScreen() {
             )}
           </div>
         </div>
-        {!expedition && (
-          <div className="hud__side">
-            <PotionSlots />
-          </div>
-        )}
         <div className="hud__center">
           <LevelUpBanner />
         </div>
@@ -141,6 +136,10 @@ export function GameScreen() {
             <div className="hud__dock">
               {/* over the skill bar, clear of the names over the fighters */}
               {!dungeon && <StatusLine />}
+              {/* the potion quick slots on the right, just over the skill bar */}
+              <div className="hud__potions">
+                <PotionSlots />
+              </div>
               <SkillBar />
               {!dungeon && <HuntPanel />}
             </div>
