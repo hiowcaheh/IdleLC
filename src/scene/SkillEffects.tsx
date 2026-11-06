@@ -21,6 +21,7 @@ import type { SkillKind } from '../game/logic/skills.ts'
 import { combatEvents } from '../state/combatEvents.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { view } from './viewState.ts'
+import { hasClientSkillFx } from './clientFx/skillFx.ts'
 
 /**
  * The client's effect textures (`npm run convert-lc -- --only fx`). Which effect a skill plays is
@@ -493,6 +494,8 @@ export function SkillEffects({
       if (e.type === 'cast') {
         const windUp = e.castTime - TIMINGS.impactDelay
         if (e.kind === 'passive') return
+        // the client's own effects play this skill (clientFx/ClientFx.tsx)
+        if (hasClientSkillFx(e.skillId)) return
         if (windUp > MIN_WIND_UP || e.kind !== 'attack') {
           const { feet, scale } = bodyOf(e.source)
           const speed = Math.max(1, useGameStore.getState().timeScale)

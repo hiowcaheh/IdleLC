@@ -14,6 +14,8 @@ import { useFloatingTexts, type FloatingKind } from '../state/floatingTexts.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { Character, type CharacterHandle } from './Character.tsx'
 import { DamageNumbers } from './DamageNumbers.tsx'
+import { ClientFxLayer } from './clientFx/ClientFx.tsx'
+import { castClientSkill } from './clientFx/skillFx.ts'
 import { HpBar3D } from './HpBar3D.tsx'
 import { LevelUpEffect } from './LevelUpEffect.tsx'
 import { ModelBoundary } from './ModelBoundary.tsx'
@@ -237,6 +239,13 @@ export function Battle() {
           break
         case 'cast':
           textAt(e.source, e.name, 'skill')
+          // the skill's own effect groups from the client, on the fighters' tags
+          castClientSkill(
+            e.skillId,
+            () => (e.source === 'player' ? player : monster).current,
+            () => (e.source === 'player' ? monster : player).current,
+            { windUp: e.windUp, landsIn: e.castTime },
+          )
           // the skill's own clips from the client, else a swing timed to land with the skill
           if (
             e.source === 'player' &&
@@ -474,6 +483,7 @@ export function Battle() {
       <LevelUpEffect />
       <Suspense fallback={null}>
         <SkillEffects />
+        <ClientFxLayer />
       </Suspense>
       <Suspense fallback={null}>
         <RunSmoke />

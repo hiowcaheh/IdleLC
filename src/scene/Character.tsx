@@ -43,6 +43,7 @@ import { UpgradeAura, type UpgradeLook } from './UpgradeAura.tsx'
 import { TitleAura } from './TitleAura.tsx'
 import { ArtifactWings } from './ArtifactWings.tsx'
 import type { ArtifactVisual } from './artifactEffects.ts'
+import type { UpgradeTarget } from './upgradeEffects.ts'
 
 export type BaseAnimation = 'idle' | 'run'
 
@@ -65,6 +66,8 @@ export interface CharacterHandle {
   revive(): void
   /** Model height in world units (after scaling). */
   height(): number
+  /** The live model, bones and weapons the client's effects attach their tags to. */
+  effectTarget(): UpgradeTarget
 }
 
 /** When a cast's phases play, in game seconds from now (combat 'cast' event). */
@@ -457,8 +460,9 @@ export function Character({
         playBase(0.3)
       },
       height: () => state.height,
+      effectTarget: () => upgradeTarget,
     }
-  }, [actions, attacks, clipAction, model])
+  }, [actions, attacks, clipAction, model, upgradeTarget])
 
   useFrame((_, delta) => {
     const state = anim.current
