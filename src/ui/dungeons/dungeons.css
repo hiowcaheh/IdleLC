@@ -11,172 +11,274 @@
   max-width: 900px;
   border-image-source: url('/ui/lc/book-window.webp');
 }
-.dungeon-carousel {
+/*
+ * The Dungeons page (GUI pass, Claude Code): the dungeon's loading art is the picker, its name on
+ * the art in the dungeon's colour, arrows on the art's sides and one dot per dungeon under it; the
+ * facts in the Book's row style; the rules as a short list; Enter stays at the bottom of the window.
+ */
+.dungeon-page {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) 42px;
-  align-items: center;
-  gap: 8px;
-  border: solid transparent;
-  border-width: 8px;
-  border-image: url('/ui/lc/panel.webp') 10 8 10 8 / 8px stretch;
-  background: #252d35;
-  padding: 6px;
+  gap: 12px;
 }
-.dungeon-carousel__name {
+.dungeon-page__main,
+.dungeon-page__side {
+  display: grid;
+  align-content: start;
+  gap: 10px;
   min-width: 0;
-  display: grid;
-  place-items: center;
-  min-height: 46px;
-  text-align: center;
 }
-.dungeon-carousel__name h3 {
-  margin: 0;
-  color: #f0d59c;
-  font-family: var(--font-heading);
-  font-size: clamp(18px, 4vw, 28px);
-  line-height: 1.2;
-  overflow-wrap: anywhere;
+@media (min-width: 760px) {
+  .dungeon-page {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 16px;
+  }
 }
-.dungeon-arrow {
-  display: grid;
-  place-items: center;
-  min-width: 0;
-  width: 42px;
-  height: 38px;
-  padding: 0;
-  line-height: 1;
-}
-.dungeon-arrow__icon {
-  display: block;
-  width: 11px;
-  height: 15px;
-  background: center / 100% 100% no-repeat;
-}
-.dungeon-arrow__icon--left {
-  background-image: url('/ui/lc/page-left.webp');
-}
-.dungeon-arrow__icon--right {
-  background-image: url('/ui/lc/page-right.webp');
-}
-.dungeon-preview {
+.dungeon-hero {
+  --dungeon-color: #d8c08a;
   position: relative;
-  margin: 15px 0;
   border: solid transparent;
   border-width: 8px;
   border-image: url('/ui/lc/panel.webp') 10 8 10 8 / 8px stretch;
   background: #11161a;
+  overflow: hidden;
 }
-.dungeon-preview img {
+.dungeon-hero img {
   display: block;
   width: 100%;
-  aspect-ratio: 944 / 344;
-  object-fit: fill;
+  /* a little taller than the art, the bottom under the caption */
+  aspect-ratio: 944 / 400;
+  object-fit: cover;
+  object-position: 50% 30%;
 }
-.dungeon-preview__badge {
+.dungeon-hero__caption {
   position: absolute;
-  left: 12px;
-  bottom: 10px;
-  color: #cdbb95;
-  font-size: 12px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 26px 46px 8px;
+  text-align: center;
+  background: linear-gradient(to top, #0c1014f2 30%, #0c101400);
   pointer-events: none;
 }
+.dungeon-hero__caption h3 {
+  margin: 0;
+  color: #f4e2b4;
+  font-family: var(--font-heading);
+  font-size: clamp(20px, 5vw, 28px);
+  line-height: 1.15;
+  text-shadow: 0 2px 6px #000;
+}
+.dungeon-hero__caption span {
+  display: block;
+  margin-top: 2px;
+  color: var(--dungeon-color);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+/* the dungeon's colour as a thin line under the art */
+.dungeon-hero::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--dungeon-color), transparent);
+}
+.dungeon-hero__arrow {
+  position: absolute;
+  top: 50%;
+  width: 34px;
+  height: 46px;
+  margin-top: -23px;
+  padding: 0;
+  border: 1px solid #a88a5c;
+  border-radius: 3px;
+  background: #11161ad0 center / 11px 15px no-repeat;
+  box-shadow: 0 2px 6px #000a;
+  cursor: pointer;
+}
+.dungeon-hero__arrow--left {
+  left: 6px;
+  background-image: url('/ui/lc/page-left.webp');
+}
+.dungeon-hero__arrow--right {
+  right: 6px;
+  background-image: url('/ui/lc/page-right.webp');
+}
+.dungeon-hero__arrow:hover:not(:disabled),
+.dungeon-hero__arrow:focus-visible {
+  border-color: var(--gilt-bright);
+  background-color: #1d252cf0;
+}
+.dungeon-hero__lock {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  border: 1px solid #b5463c;
+  background: #2a0f0dd8;
+  color: #ff9b8a;
+  font-size: 12px;
+  font-weight: 800;
+}
+.dungeon-pager {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: -2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.dungeon-pager button {
+  display: block;
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 1px solid #8d7a59;
+  border-radius: 50%;
+  background: #1a2026;
+  cursor: pointer;
+}
+.dungeon-pager button.is-active {
+  border-color: var(--dungeon-color);
+  background: var(--dungeon-color);
+  box-shadow: 0 0 6px var(--dungeon-color);
+}
+/* label and value on one row, rows ruled like the Book's facts (also the results window) */
 .dungeon-facts {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px 24px;
-  margin: 14px 0;
+  margin: 0;
+  padding: 4px 10px;
+  border: 1px solid #79644970;
+  background: #22282e;
 }
 .dungeon-facts > div {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 8px;
+  align-items: baseline;
+  gap: 10px;
   min-width: 0;
-  padding: 7px 10px;
-  border: solid transparent;
-  border-width: 5px 8px;
-  border-image: url('/ui/lc/value-box.webp') 4 8 fill / 5px 8px stretch;
-  background: #252a31;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(150, 120, 80, 0.22);
+  font-size: 13px;
 }
-.dungeon-facts > div > span:not(.gold) {
+.dungeon-facts > div:last-child {
+  border-bottom: 0;
+}
+.dungeon-facts dt {
   color: #c6b999;
-  font-size: 13px;
 }
-.dungeon-facts strong {
-  font-size: 14px;
+.dungeon-facts dd {
+  margin: 0;
+  font-weight: 800;
+  color: #e6edf5;
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
-.dungeon-roster {
-  font-size: 12px;
-  line-height: 1.65;
-  color: #b9b4a6;
+.dungeon-facts dd.is-good {
+  color: #9fe08a;
 }
-.dungeon-rules {
-  padding: 3px 14px;
-  border: solid transparent;
-  border-width: 8px;
-  border-image: url('/ui/lc/panel.webp') 10 8 10 8 / 8px stretch;
-  background: #282c30 url('/ui/lc/skills-background.webp') center / cover;
+.dungeon-facts dd.is-bad {
+  color: #ff8f80;
 }
-.dungeon-rules p {
-  font-size: 13px;
-  line-height: 1.6;
-  color: #d3cabb;
-}
+.dungeon-rules,
 .dungeon-ranking {
-  margin: 18px 0;
-  padding: 14px;
-  border: 1px solid #71654e;
-  background: #23272c;
+  padding: 8px 12px 10px;
+  border: 1px solid #79644970;
+  background: #22282e;
 }
+.dungeon-rules h4,
 .dungeon-ranking h4 {
-  margin: 0 0 12px;
+  margin: 0 0 6px;
   color: #e9cb87;
   font-family: var(--font-heading);
-  padding: 7px 9px;
-  border: solid transparent;
-  border-width: 1px 3px;
-  border-image: url('/ui/lc/client-section.webp') 1 3 fill / 1px 3px stretch;
+  font-size: 15px;
 }
-.dungeon-ranking > div {
-  display: flex;
-  justify-content: space-between;
+.dungeon-rules ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dungeon-rules li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #d3cabb;
+}
+/* a small gilt diamond for each rule */
+.dungeon-rules li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.55em;
+  width: 5px;
+  height: 5px;
+  background: #c9a868;
+  transform: rotate(45deg);
+}
+.dungeon-ranking__list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: rank;
+}
+.dungeon-ranking__list li {
+  counter-increment: rank;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
-  padding: 10px;
-  background: #171d25;
+  gap: 8px;
+  padding: 5px 8px;
   border: 1px solid #494d4c;
+  background: #171d25;
+  font-size: 13px;
+}
+.dungeon-ranking__list li::before {
+  content: counter(rank);
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #8d7a59;
+  color: #f2d58e;
+  font-size: 11px;
+  font-weight: 800;
+}
+.dungeon-ranking__list li.is-you {
+  border-color: #a88a5c;
+  background: #2a2a24;
+}
+.dungeon-ranking__list span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .dungeon-ranking strong {
   font-size: 13px;
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 .dungeon-ranking p {
-  margin: 12px 0 0;
+  margin: 8px 0 0;
   color: #aea89b;
-  font-size: 12px;
+  font-size: 11.5px;
+  line-height: 1.4;
 }
-.dungeon-ranking .dungeon-ranking__lifetime {
-  margin-top: 18px;
-}
-.dungeon-ranking__list {
-  display: grid;
-  gap: 6px;
-  list-style: decimal inside;
-  margin: 0;
-  padding: 0;
-}
-.dungeon-ranking__list li {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 8px;
-  border: 1px solid #71654e;
-  background: #171d25;
-}
+/* the run's one action stays in sight at the bottom of the scrolling window */
 .dungeon-enter {
-  margin: 2px 0 8px;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: 12px 0 0;
   min-height: 42px;
+  box-shadow: 0 -10px 12px -4px #3c3f42;
 }
 .dungeon-overview {
   position: absolute;
@@ -418,50 +520,109 @@
   gap: 12px;
 }
 .sheet-backdrop--center .sheet.dungeon-results {
-  width: min(100%, 600px);
-  max-width: 600px;
+  width: min(100%, 520px);
+  max-width: 520px;
 }
-.dungeon-results h3,
-.dungeon-results__outcome {
+/* the score plate: the dungeon's art dimmed behind the name, how the run ended and the score */
+.dungeon-results__plate {
+  --outcome: #d9c48f;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 14px 12px 12px;
+  border: solid transparent;
+  border-width: 8px;
+  border-image: url('/ui/lc/panel.webp') 10 8 10 8 / 8px stretch;
+  background:
+    linear-gradient(#0d1216c4, #0d1216ee),
+    var(--dungeon-art) center 35% / cover no-repeat,
+    #11161a;
   text-align: center;
-  color: #e7ca8e;
+}
+.dungeon-results__plate--completed {
+  --outcome: #9fe08a;
+}
+.dungeon-results__plate--defeated {
+  --outcome: #ff8f80;
+}
+.dungeon-results__plate--left,
+.dungeon-results__plate--interrupted {
+  --outcome: #c9c2b2;
+}
+.dungeon-results__plate h3 {
+  margin: 0;
+  color: #f4e2b4;
+  font-family: var(--font-heading);
+  font-size: 22px;
+  text-shadow: 0 2px 6px #000;
+}
+.dungeon-results__outcome {
+  margin: 0;
+  color: var(--outcome);
+  font-family: var(--font-heading);
+  font-size: 16px;
+  text-shadow: 0 1px 4px #000;
 }
 .dungeon-results__score {
   display: grid;
-  gap: 4px;
-  text-align: center;
-  color: #f0dba4;
-  font-size: 46px;
-  margin: 20px 0;
+  gap: 0;
+  margin: 6px 0 0;
+  color: #f6e2a6;
+  font-family: var(--font-heading);
+  font-size: 48px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow:
+    0 2px 8px #000,
+    0 0 18px color-mix(in srgb, var(--dungeon-color) 45%, transparent);
 }
 .dungeon-results__score span {
+  margin-top: 2px;
   color: #c5b99e;
-  font-size: 14px;
+  font-family: inherit;
+  font-size: 13px;
+  text-shadow: none;
+}
+.dungeon-results__points {
+  margin: 10px 0;
+  text-align: center;
+  color: #b3d5b0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.dungeon-results__points.is-missed {
+  color: #c9bfa9;
 }
 .dungeon-results__loot {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 12px 0;
+  margin-top: 10px;
 }
-.dungeon-results__loot > span {
-  display: flex;
+.dungeon-results__loot h4 {
+  margin: 0 0 6px;
+  color: #e9cb87;
+  font-family: var(--font-heading);
+  font-size: 15px;
+}
+.dungeon-results__loot ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 46px);
   gap: 4px;
-  align-items: end;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.dungeon-results__loot small {
-  color: #dacbaa;
+.dungeon-results__loot .item-slot {
+  cursor: default;
+}
+.dungeon-results__penalty {
+  margin: 10px 0 0;
+  padding: 6px 10px;
+  border: 1px solid #b5463c80;
+  background: #2a0f0d99;
+  color: #ff9b8a;
+  font-size: 13px;
 }
 @media (max-width: 540px) {
-  .dungeon-facts {
-    gap: 7px;
-  }
-  .dungeon-facts > div {
-    padding: 7px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-  }
   .dungeon-status {
     padding: 5px 7px;
   }
@@ -504,28 +665,35 @@
   flex: 1;
   min-width: 0;
 }
+/* the points in one slim row of value boxes: label left, number right */
 .dungeon-wallet {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 .dungeon-wallet > div {
-  display: grid;
-  gap: 5px;
-  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  padding: 3px 4px;
   border: solid transparent;
   border-width: 5px 8px;
   border-image: url('/ui/lc/value-box.webp') 4 8 fill / 5px 8px stretch;
-  text-align: center;
 }
 .dungeon-wallet span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 12px;
   color: #c6b999;
 }
 .dungeon-wallet strong {
   color: #f2d58e;
-  font-size: 20px;
+  font-size: 15px;
   font-variant-numeric: tabular-nums;
 }
 .dungeon-buffer__list {
@@ -700,12 +868,6 @@
   min-width: 0;
   padding-inline: 3px;
 }
-.dungeon-results__points {
-  text-align: center;
-  color: #b3d5b0;
-  font-size: 13px;
-  line-height: 1.6;
-}
 .book__dungeon-note {
   color: #e1c383;
   font-size: 12px;
@@ -727,10 +889,10 @@
   .dungeon-buffer__row {
     padding: 9px;
   }
-  .dungeon-wallet > div {
-    padding: 7px 3px;
-  }
   .dungeon-loot__totals {
     gap: 6px;
   }
+}
+.dungeon-results .sheet__meta {
+  margin-top: 12px;
 }

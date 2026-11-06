@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from 'react'
 import {
   DUNGEONS,
   DUNGEON_MAX_LEVEL,
@@ -116,97 +116,127 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
         <DungeonBuffer />
       ) : (
         <>
-          <div className="dungeon-carousel" aria-label="Choose a dungeon">
-            <button
-              type="button"
-              className="button dungeon-arrow"
-              disabled={busy}
-              onClick={() => turn(-1)}
-              aria-label="Previous dungeon"
-            >
-              <span className="dungeon-arrow__icon dungeon-arrow__icon--left" aria-hidden="true" />
-            </button>
-            <div className="dungeon-carousel__name" aria-live="polite">
-              <h3>{def.name}</h3>
-            </div>
-            <button
-              type="button"
-              className="button dungeon-arrow"
-              disabled={busy}
-              onClick={() => turn(1)}
-              aria-label="Next dungeon"
-            >
-              <span className="dungeon-arrow__icon dungeon-arrow__icon--right" aria-hidden="true" />
-            </button>
-          </div>
-          <div className="dungeon-preview">
-            <img
-              src={`${import.meta.env.BASE_URL}dungeons/${def.id}/loading.webp`}
-              alt={`${def.name}, original client map artwork`}
-            />
-            <span className="dungeon-preview__badge">Horde expedition</span>
-          </div>
-          <div className="dungeon-facts">
-            <div>
-              <span>Entry level</span>
-              <strong className={locked ? 'is-bad' : 'is-good'}>Lv {def.minLevel}</strong>
-            </div>
-            <div>
-              <span>Duration</span>
-              <strong>10 minutes</strong>
-            </div>
-            <div>
-              <span>Entries today</span>
-              <strong>{left} / 2 left</strong>
-            </div>
-            <div>
-              <span>Original monsters</span>
-              <strong>
-                Lv {monsters[0]!.level}–{monsters.at(-1)!.level}
-              </strong>
-            </div>
-          </div>
-          <div className="dungeon-rules">
-            <p>
-              Survive 20 waves. Each kill scores 1 point. Collect the crystals to reach dungeon
-              level 20 and choose class blessings. A completed run adds its score to your Buffer
-              wallet and lifetime ranking.
-            </p>
-            <p>
-              Potions and your skills remain usable. Your equipped gear is locked. Blessings last
-              until this run ends.
-            </p>
-            <p>
-              Levels 5, 10, 15 and 20 offer fixed super blessings. These cannot be upgraded in the
-              Buffer. Your own potions keep their original duration.
-            </p>
-            <p>
-              Death ends the run. Earned EXP, SP, gold and loot are kept. Leaving or reloading uses
-              the entry. Daily entries reset at 00:00 UTC.
-            </p>
-          </div>
-          <section className="dungeon-ranking" aria-label="Dungeon ranking">
-            <h4>Best score in one run</h4>
-            <div>
-              <span>{character.name}</span>
-              <strong>{best ? `${best.score} points` : 'No runs recorded yet'}</strong>
-            </div>
-            <h4 className="dungeon-ranking__lifetime">Lifetime ranking</h4>
-            <ol className="dungeon-ranking__list">
-              {[...characters]
-                .sort((a, b) => (b.dungeons?.totalPoints ?? 0) - (a.dungeons?.totalPoints ?? 0))
-                .map((c) => (
-                  <li key={c.id}>
-                    <span>{c.name}</span>
-                    <strong>{(c.dungeons?.totalPoints ?? 0).toLocaleString('en-US')} points</strong>
+          <div className="dungeon-page">
+            <div className="dungeon-page__main">
+              {/* the dungeon's original loading art with its name on it, arrows on its sides */}
+              <div
+                className="dungeon-hero"
+                style={{ '--dungeon-color': def.color } as CSSProperties}
+                aria-label="Choose a dungeon"
+              >
+                <img
+                  src={`${import.meta.env.BASE_URL}dungeons/${def.id}/loading.webp`}
+                  alt={`${def.name}, original client map artwork`}
+                />
+                <button
+                  type="button"
+                  className="dungeon-hero__arrow dungeon-hero__arrow--left"
+                  disabled={busy}
+                  onClick={() => turn(-1)}
+                  aria-label="Previous dungeon"
+                />
+                <button
+                  type="button"
+                  className="dungeon-hero__arrow dungeon-hero__arrow--right"
+                  disabled={busy}
+                  onClick={() => turn(1)}
+                  aria-label="Next dungeon"
+                />
+                <div className="dungeon-hero__caption" aria-live="polite">
+                  <h3>{def.name}</h3>
+                  <span>Horde expedition</span>
+                </div>
+                {locked && <span className="dungeon-hero__lock">Lv {def.minLevel}</span>}
+              </div>
+              <ol className="dungeon-pager" aria-label="Dungeons">
+                {DUNGEONS.map((d, i) => (
+                  <li key={d.id}>
+                    <button
+                      type="button"
+                      className={i === index ? 'is-active' : ''}
+                      style={{ '--dungeon-color': d.color } as CSSProperties}
+                      aria-label={d.name}
+                      aria-current={i === index}
+                      disabled={busy}
+                      onClick={() => {
+                        setIndex(i)
+                        setError('')
+                      }}
+                    />
                   </li>
                 ))}
-            </ol>
-            <p>
-              Local characters. Spending points in the Buffer does not change this ranking. Global
-              ranking will be added later.
-            </p>
-          </section>
+              </ol>
+              <dl className="dungeon-facts">
+                <div>
+                  <dt>Entry level</dt>
+                  <dd className={locked ? 'is-bad' : 'is-good'}>Lv {def.minLevel}</dd>
+                </div>
+                <div>
+                  <dt>Original monsters</dt>
+                  <dd>
+                    Lv {monsters[0]!.level}–{monsters.at(-1)!.level}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Duration</dt>
+                  <dd>10 minutes</dd>
+                </div>
+                <div>
+                  <dt>Entries today</dt>
+                  <dd className={left === 0 ? 'is-bad' : undefined}>{left} / 2 left</dd>
+                </div>
+                <div>
+                  <dt>Best score in one run</dt>
+                  <dd>{best ? `${best.score} points` : 'No runs yet'}</dd>
+                </div>
+              </dl>
+            </div>
+            <div className="dungeon-page__side">
+              <section className="dungeon-rules" aria-label="How a run works">
+                <h4>How a run works</h4>
+                <ul>
+                  <li>Survive 20 waves. Each kill scores 1 point.</li>
+                  <li>
+                    Collect the crystals to reach dungeon level 20 and choose class blessings.
+                  </li>
+                  <li>
+                    A completed run adds its score to your Buffer wallet and lifetime ranking.
+                  </li>
+                  <li>
+                    Potions and your skills remain usable. Your equipped gear is locked. Blessings
+                    last until this run ends.
+                  </li>
+                  <li>
+                    Levels 5, 10, 15 and 20 offer fixed super blessings. These cannot be upgraded in
+                    the Buffer. Your own potions keep their original duration.
+                  </li>
+                  <li>
+                    Death ends the run. Earned EXP, SP, gold and loot are kept. Leaving or reloading
+                    uses the entry. Daily entries reset at 00:00 UTC.
+                  </li>
+                </ul>
+              </section>
+              <section className="dungeon-ranking" aria-label="Dungeon ranking">
+                <h4>Lifetime ranking</h4>
+                <ol className="dungeon-ranking__list">
+                  {[...characters]
+                    .sort((a, b) => (b.dungeons?.totalPoints ?? 0) - (a.dungeons?.totalPoints ?? 0))
+                    .map((c) => (
+                      <li key={c.id} className={c.id === character.id ? 'is-you' : undefined}>
+                        <span>{c.name}</span>
+                        <strong>
+                          {(c.dungeons?.totalPoints ?? 0).toLocaleString('en-US')} points
+                        </strong>
+                      </li>
+                    ))}
+                </ol>
+                <p>
+                  Local characters. Spending points in the Buffer does not change this ranking.
+                  Global ranking will be added later.
+                </p>
+              </section>
+            </div>
+          </div>
           {error && (
             <p className="form-error" role="alert">
               {error}
@@ -618,6 +648,7 @@ export function DungeonResult() {
   const result = useGameStore((s) => s.dungeonResult)
   const dismiss = useGameStore((s) => s.dismissDungeonResult)
   if (!result) return null
+  const dungeon = getDungeon(result.dungeonId)!
   return (
     <Sheet
       centered
@@ -626,60 +657,76 @@ export function DungeonResult() {
       className="sheet--client dungeon-results"
       onClose={dismiss}
     >
-      <h3>{getDungeon(result.dungeonId)!.name}</h3>
-      <p className="dungeon-results__outcome">
-        {
+      {/* the score on the dungeon's own art, tinted by how the run ended */}
+      <div
+        className={`dungeon-results__plate dungeon-results__plate--${result.outcome}`}
+        style={
           {
-            completed: 'Survived!',
-            defeated: 'Defeated',
-            left: 'Run ended',
-            interrupted: 'Run interrupted',
-          }[result.outcome]
+            '--dungeon-color': dungeon.color,
+            '--dungeon-art': `url(${import.meta.env.BASE_URL}dungeons/${dungeon.id}/loading.webp)`,
+          } as CSSProperties
         }
-      </p>
-      <div className="dungeon-results__score">
-        {result.score}
-        <span>points</span>
+      >
+        <h3>{dungeon.name}</h3>
+        <p className="dungeon-results__outcome">
+          {
+            {
+              completed: 'Survived!',
+              defeated: 'Defeated',
+              left: 'Run ended',
+              interrupted: 'Run interrupted',
+            }[result.outcome]
+          }
+        </p>
+        <div className="dungeon-results__score">
+          {result.score.toLocaleString('en-US')}
+          <span>points</span>
+        </div>
       </div>
-      <p className="dungeon-results__points">
+      <p className={`dungeon-results__points${result.outcome === 'completed' ? '' : ' is-missed'}`}>
         {result.outcome === 'completed'
           ? `+${result.score} Buffer points and lifetime ranking points`
           : 'Complete the full 10 minutes to earn Buffer and lifetime ranking points.'}
       </p>
-      <div className="dungeon-facts">
+      <dl className="dungeon-facts">
         <div>
-          <span>Time survived</span>
-          <strong>{minutes(result.seconds)}</strong>
+          <dt>Time survived</dt>
+          <dd>{minutes(result.seconds)}</dd>
         </div>
         <div>
-          <span>Dungeon level</span>
-          <strong>{result.level} / 20</strong>
+          <dt>Dungeon level</dt>
+          <dd>{result.level} / 20</dd>
         </div>
         <div>
-          <span>EXP earned</span>
-          <strong>{result.exp.toLocaleString('en-US')}</strong>
+          <dt>EXP earned</dt>
+          <dd>{result.exp.toLocaleString('en-US')}</dd>
         </div>
         <div>
-          <span>Gold earned</span>
-          <Gold amount={result.gold} />
+          <dt>SP earned</dt>
+          <dd>{formatSp(result.sp)}</dd>
         </div>
         <div>
-          <span>SP earned</span>
-          <strong>{formatSp(result.sp)}</strong>
+          <dt>Gold earned</dt>
+          <dd>
+            <Gold amount={result.gold} />
+          </dd>
         </div>
-      </div>
+      </dl>
       {result.drops.length > 0 && (
-        <div className="dungeon-results__loot">
-          {result.drops.map((d) => (
-            <span key={d.itemId} title={getItem(d.itemId).name}>
-              <ItemIcon item={getItem(d.itemId)} size={32} />
-              <small>×{d.count}</small>
-            </span>
-          ))}
-        </div>
+        <section className="dungeon-results__loot" aria-label="Loot">
+          <h4>Loot</h4>
+          <ul>
+            {result.drops.map((d) => (
+              <li key={d.itemId} className="item-slot" title={getItem(d.itemId).name}>
+                <ItemIcon item={getItem(d.itemId)} size={32} />
+                <span className="item-slot__count">{d.count}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
       {(result.lost.exp > 0 || result.lost.sp > 0) && (
-        <p className="is-bad">
+        <p className="dungeon-results__penalty">
           Death penalty: {result.lost.exp.toLocaleString('en-US')} EXP, {formatSp(result.lost.sp)}{' '}
           SP.
         </p>
