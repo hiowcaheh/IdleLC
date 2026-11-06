@@ -348,6 +348,40 @@
 .dungeon-status__counts strong {
   color: #b2d7dd;
 }
+.dungeon-wave-clear {
+  position: absolute;
+  top: calc(244px + var(--safe-top));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  width: max-content;
+  max-width: calc(100% - 2 * var(--gutter));
+  padding: 8px 20px;
+  border: solid transparent;
+  border-width: 8px;
+  border-image: url('/ui/lc/panel.webp') 10 8 10 8 / 8px stretch;
+  background: #252c34ed;
+  color: #edcf92;
+  text-align: center;
+  text-shadow: 0 1px 2px #000;
+  pointer-events: none;
+}
+.dungeon-wave-clear strong {
+  font-family: var(--font-heading);
+  font-size: 20px;
+}
+.dungeon-wave-clear small {
+  color: #d5cdb9;
+  font-size: 12px;
+}
+.dungeon-wave-clear small span {
+  color: #f7df96;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
 .dungeon-xp {
   position: relative;
   height: 27px;

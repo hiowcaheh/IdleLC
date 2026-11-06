@@ -1,5 +1,12 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-06 (Codex), po przeglądzie Claude’a do `d688757`: tylko brakujący
+komunikat „Wave cleaned” + „Next wave in N s” (maks. 5 s). `waveStatus.ts` czyta
+`nextWaveIn` i harmonogram, bez zmiany logiki fal. Zegar pauzuje z grą. Status obok
+minimapy jest gotowym układem Claude’a, nie został przebudowany. Nadal v16;
+Seraphim i skrzydła są zachowane. [Dungeons](docs/dungeons.md).
+Weryfikacja: 549 testów / 62 pliki, build i próby Chromium z rzeczywistym końcem fali.
+
 Aktualizacja 2026-11-06, druga partia (Claude Code): [15 zgłoszeń](docs/owner-batch-2026-11-06.md).
 
 - **Fale Dungeons (reguła właściciela):** `2 × (4 + fala)`, następna 5 s po wyczyszczeniu

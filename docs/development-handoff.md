@@ -1,5 +1,15 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Najnowszy etap: komunikat końca fali (Codex), 2026-11-06
+
+Przeczytano obie partie notatek Claude’a i pobrano `main` do `d688757`. Układ statusu
+obok minimapy i następna fala po 5 s były już zrobione. Dodano tylko „Wave cleaned”
+z odliczaniem w ramce klienta: `waveStatus.ts`, użycie w DungeonHud i osobne klasy CSS.
+Nie zmieniać istniejących reguł fal ani dublować układu. Seraphim i oryginalne skrzydła
+pozostały nietknięte. Nadal SaveVersion 16. [Szczegóły](dungeons.md).
+Weryfikacja: 549 testów / 62 pliki, build, Chromium 320/390/1280 px oraz normalna
+pierwsza fala Belfist w buildzie produkcyjnym (10 zabójstw, odliczanie 5 → 1, fala 2).
+
 ## Najnowszy etap: druga partia Dungeons/HUD (Claude Code), 2026-11-06
 
 [Szczegóły](owner-batch-2026-11-06.md#druga-partia-tego-dnia-15-zgłoszeń).

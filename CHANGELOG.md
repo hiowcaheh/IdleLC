@@ -1,5 +1,15 @@
 # Historia zmian
 
+## 2026-11-06 (Codex): komunikat po wyczyszczeniu fali
+
+Po przeglądzie notatek i zmian Claude’a do `d688757` uzupełniono brakujący napis
+„Wave cleaned” i małe odliczanie do następnej fali, maks. 5 s, w ramce klienta.
+Licznik korzysta z istniejącego czasu rundy i respektuje pauzę. Zachowano gotowy
+układ statusu obok minimapy oraz logikę fal Claude’a. Seraphim i skrzydła pozostają.
+Szczegóły: [docs/dungeons.md](docs/dungeons.md).
+Weryfikacja: 549 testów / 62 pliki, build, Chromium 320/390/1280 px i rzeczywiste
+wyczyszczenie pierwszej fali w buildzie produkcyjnym. Brak błędów JS/konsoli/HTTP.
+
 ## 2026-11-06 (Claude Code): druga partia, 15 zgłoszeń (Dungeons i HUD)
 
 Szczegóły i lista zmian w plikach Codexa: [docs/owner-batch-2026-11-06.md](docs/owner-batch-2026-11-06.md),

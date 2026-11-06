@@ -28,6 +28,7 @@ import { getItem } from '../../game/data/items.ts'
 import { Gold } from '../Gold.tsx'
 import { BlessingEffects, DungeonBuffer } from './DungeonBuffer.tsx'
 import { DungeonMinimap } from './DungeonMinimap.tsx'
+import { nextDungeonWaveIn } from './waveStatus.ts'
 import './dungeons.css'
 
 /** Bumped when the dungeon art is cut again (dungeon-art.mjs), past the PWA's cached copy. */
@@ -483,6 +484,7 @@ export function DungeonHud() {
   if (!run) return null
   const ratio = run.level === DUNGEON_MAX_LEVEL ? 1 : run.xp / dungeonXpNeeded(run.level)
   const superChoice = run.choices.some((id) => !!dungeonSuperBuffDefinition(id))
+  const nextWave = nextDungeonWaveIn(run)
   return (
     <>
       <div className="dungeon-overview">
@@ -515,6 +517,14 @@ export function DungeonHud() {
           </div>
         </section>
       </div>
+      {nextWave !== null && (
+        <div className="dungeon-wave-clear" role="status">
+          <strong>Wave cleaned</strong>
+          <small>
+            Next wave in <span>{nextWave}</span> s
+          </small>
+        </div>
+      )}
       <DungeonJoystick />
       <div className="dungeon-actions">
         <button type="button" className="button" onClick={() => setPaused(true)}>

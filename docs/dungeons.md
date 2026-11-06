@@ -3,6 +3,29 @@
 Wdrożenie z 2026-11-06, po przeglądzie zmian Claude’a do `9ad20b8`. Aktualny SaveVersion **16**.
 To nowy, aktywny tryb hordowy IdleLC. Nie zastępuje polowania na spotach ani wypraw AFK.
 
+## Uzupełnienie po zmianach Claude’a: komunikat końca fali (2026-11-06)
+
+Przejrzano obie partie opisane w [notatkach Claude’a](owner-batch-2026-11-06.md),
+do `d688757`. Węższy status obok minimapy oraz pięciosekundowe oczekiwanie były
+już gotowe. Zachowano ich układ i reguły, podobnie jak pozostałe zmiany Claude’a.
+
+Uzupełniono jedynie brakujący komunikat „Wave cleaned” z małym „Next wave in N s”,
+w ramce klienta pod górnym HUD-em. `waveStatus.ts` odczytuje istniejący stan rundy,
+bez drugiego zegara lub zmiany sposobu wysyłania fal. Odliczanie ma maksymalnie 5 s,
+uwzględnia wcześniejszą falę z harmonogramu 30 s i zatrzymuje się wraz z pauzą,
+oknem buffa lub menu. Komunikat wymaga wyczerpanej kolejki i braku żywych NPC;
+znika po nadejściu następnej fali. Nie obiecuje nowej fali po zakończeniu rundy.
+Artefakt Seraphim i oryginalne skrzydła z wcześniejszego etapu pozostają zachowane.
+
+Weryfikacja uzupełnienia: `npm run check` **549 testów / 62 pliki**, build poprawny.
+Chromium 320/390/1280 px: status i minimapa w jednym rzędzie bez overflow, komunikat
+pod nimi, odliczanie, pauza, wcześniejsza fala według harmonogramu i zniknięcie po
+wyjściu. Przypadki brzegowe korzystały z kontrolowanego wyczyszczenia fali w serwisie.
+W bieżącej wersji sprawdzono również wybór Seraphim i sześć widocznych warstw skrzydeł.
+Osobno build produkcyjny 320×740, Belfist / Healer 80: normalne autoataki wyczyściły
+pierwszych 10 NPC bez podmieniania stanu ani EXP; licznik pokazał 5/4/3/2/1,
+przetrwał pauzę i zniknął wraz ze startem fali 2. Brak błędów JS/konsoli/HTTP.
+
 ## Superbuffy i oryginalne czasy mikstur (2026-11-06)
 
 Poziomy 5 / 10 / 15 / 20 zastępują zwykły wybór wyborem superbuffa. Wybrane
@@ -135,9 +158,11 @@ podziemiem działa nadal według istniejących reguł serwera.
   są raz przy FIRE, nie osobno za każdego przeciwnika. Każdy cel ma osobne losowanie.
 - Żywiołaki Sorcerera działają także tutaj. Lista nienawiści do gracza i żywiołaków
   należy do konkretnego NPC, nie do całej hordy.
-- 20 fal co 30 sekund. Budżet fali to `4 + numer fali` (łącznie do 290 potworów),
-  odstęp spawnu 0,65 s; jednocześnie do 16 żywych NPC. Kolejka jest zachowana, gdy
-  pole jest pełne. Kolejne fale używają wyższych pozycji oryginalnego zestawu NPC.
+- Po aktualizacji Claude’a z 2026-11-06 budżet fali to `2 × (4 + numer fali)`.
+  Następna przychodzi 5 s po wyczyszczeniu poprzedniej, najpóźniej na istniejącym
+  harmonogramie co 30 s. Fala 20 powtarza się do końca rundy. Odstęp spawnu 0,65 s,
+  jednocześnie do 16 żywych NPC; kolejka zostaje zachowana, gdy pole jest pełne.
+  Kolejne fale używają wyższych pozycji oryginalnego zestawu NPC.
 - Z zabitego potwora zostaje kryształ o wartości 1. Dopiero podniesienie daje EXP
   podziemia. Kryształy w promieniu 4,5 m lecą do postaci, zbierane są w promieniu 1,4 m.
   Podziemie zaczyna od poziomu 1 i EXP 0; limit to 20. Próg następnego poziomu:
