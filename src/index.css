@@ -5756,3 +5756,23 @@ a.button {
   color: var(--gilt-bright);
   white-space: normal;
 }
+
+/* Settings → Performance info: two quiet lines under the top bar, left of the menu buttons */
+.perf-overlay {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 88px);
+  right: 52px;
+  z-index: 40;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 55%);
+  color: #cfe8a0;
+  font:
+    9px/1.35 ui-monospace,
+    Menlo,
+    Consolas,
+    monospace;
+  text-align: right;
+  white-space: pre;
+  pointer-events: none;
+}

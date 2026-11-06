@@ -9,6 +9,7 @@ import {
 } from 'three'
 import { loadMap, mapFile, type TerrainMeta } from './lcMap.ts'
 import { terrainGeometries } from './lcTerrainGeometry.ts'
+import { splatFragment } from './terrainShader.ts'
 
 // Dratan has 11 layers + 3 mask sheets; one shadow map still fits a 16-sampler mobile GPU.
 const LAYERS = 11
@@ -67,22 +68,7 @@ function useSplatMaterial(map: string, meta: TerrainMeta) {
             ...masks.map((_, i) => `uniform sampler2D uMask${i};`),
           ].join('\n'),
         )
-        .replace(
-          '#include <map_fragment>',
-          [
-            'vec2 maskUv = vMapPos / uMapSize;',
-            ...masks.map((_, i) => `vec4 mask${i} = texture2D(uMask${i}, maskUv);`),
-            'vec3 ground = texture2D(uLayer0, vMapPos / uTile0).rgb;',
-            ...layers
-              .map((_, k) => k)
-              .slice(1)
-              .map(
-                (k) =>
-                  `ground = mix(ground, texture2D(uLayer${k}, vMapPos / uTile${k}).rgb, ${maskOf(k)});`,
-              ),
-            'diffuseColor.rgb *= ground;',
-          ].join('\n'),
-        )
+        .replace('#include <map_fragment>', splatFragment(layers.length, masks.length, maskOf))
     }
     // one shader per layer count
     material.customProgramCacheKey = () => `lc-terrain-${layers.length}-${masks.length}`

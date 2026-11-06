@@ -9,6 +9,7 @@ import type { GraphicsQuality } from '../game/logic/save.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { Battle } from './Battle.tsx'
 import { CameraRig } from './CameraRig.tsx'
+import { PerfProbe } from './PerfProbe.tsx'
 import { World } from './World.tsx'
 
 function preloadModel(modelId: string): void {
@@ -74,6 +75,7 @@ function QualityCanvas({
         <Battle />
       </Suspense>
       <CameraRig />
+      <PerfProbe />
     </Canvas>
   )
 }

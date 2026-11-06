@@ -22,6 +22,7 @@ import { SkillBar } from './skills/SkillBar.tsx'
 import { SkillsPanel } from './skills/SkillsPanel.tsx'
 import { TitlesPanel } from './titles/TitlesPanel.tsx'
 import { Toasts } from './Toasts.tsx'
+import { PerfOverlay } from './perf/PerfOverlay.tsx'
 import { ZoneLoading } from './ZoneLoading.tsx'
 
 export function GameScreen() {
@@ -45,6 +46,7 @@ export function GameScreen() {
   return (
     <div className="game">
       <GameCanvas />
+      <PerfOverlay />
       {character && !character.expedition && <SceneLabels />}
       {character && !character.expedition && <RewardFeed />}
 

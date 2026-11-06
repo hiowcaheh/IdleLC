@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import type { GraphicsQuality } from '../game/logic/save.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { useDevTools } from './dev/devMode.ts'
+import { usePerfOverlay } from './perf/perfOverlay.ts'
 import { Sheet } from './Sheet.tsx'
 
 const QUALITY_OPTIONS: { value: GraphicsQuality; label: string; hint: string }[] = [
@@ -23,6 +24,8 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
   const leaveGame = useGameStore((s) => s.leaveGame)
   const navigate = useNavigate()
   const devTools = useDevTools((s) => s.enabled)
+  const perfInfo = usePerfOverlay((s) => s.enabled)
+  const setPerfInfo = usePerfOverlay((s) => s.setEnabled)
   const setDevTools = useDevTools((s) => s.setEnabled)
   const [confirmReset, setConfirmReset] = useState(false)
   const [resetDone, setResetDone] = useState(false)
@@ -82,6 +85,19 @@ export function SettingsPanel({ onClose }: { onClose(): void }) {
           className="switch"
           checked={settings.showDamageNumbers}
           onChange={(e) => updateSettings({ showDamageNumbers: e.target.checked })}
+        />
+      </label>
+
+      <label className="setting setting--row">
+        <span>
+          <span className="setting__label">Performance info</span>
+          <span className="setting__hint">FPS and how much the scene draws, at the top</span>
+        </span>
+        <input
+          type="checkbox"
+          className="switch"
+          checked={perfInfo}
+          onChange={(e) => setPerfInfo(e.target.checked)}
         />
       </label>
 
