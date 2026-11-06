@@ -36,8 +36,11 @@ export const UI_PARTS = {
   // the book with a quill (the owner's pick for the Skills window)
   'menu-skills': [atlas('TopUI'), 0, 170, 22, 22, { scale: 4 }],
   'menu-system': [atlas('TopUI'), 156, 222, 22, 22, { scale: 4 }],
-  // UIRadar.cpp RADER_QUESTNPC: the original cyan Q, framed by the TopUI badge in CSS.
-  'menu-dungeons': [atlas('TopUI'), 649, 448, 14, 15, { scale: 4 }],
+  // UIMap.cpp m_rtSubZone[DUNGEON]: the world map's dungeon mark (crossed swords over a stairway),
+  // put in a quick-menu button frame by dungeon-art.mjs so it matches the other menu buttons.
+  'menu-dungeons': [atlas('Map'), 67, 91, 32, 36, { scale: 2 }],
+  // UIPlayerInfo.cpp m_btnQuickMenu: a 22 × 22 TopUI quick-menu button (System), for its frame.
+  'menu-frame': [atlas('TopUI'), 156, 222, 22, 22],
   // questView.xml btn_left / btn_right, normal UV state.
   'page-left': [atlas('Quest'), 193, 944, 11, 15, { scale: 4 }],
   'page-right': [atlas('Quest'), 207, 944, 11, 15, { scale: 4 }],

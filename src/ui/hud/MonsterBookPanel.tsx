@@ -151,14 +151,6 @@ function BookRewards({ monsterId, kills }: { monsterId: string; kills: number })
  * The monster book: pick a zone, then one of its monsters (hunting order) to see how many the hero
  * has defeated. Rewards for milestones come later.
  */
-const ELEMENTS = ['None', 'Fire', 'Water', 'Earth', 'Wind', 'Dark', 'Light']
-
-/** An element as the server packs it, (level << 4) | element: "Fire 2", "None". */
-function elementName(packed = 0): string {
-  const name = ELEMENTS[packed & 0xf] ?? 'None'
-  return name === 'None' ? name : `${name} ${Math.max(1, (packed >> 4) & 0xf)}`
-}
-
 export function MonsterBookPanel({ onClose }: { onClose(): void }) {
   const character = useGameStore((s) => s.character)
   const [category, setCategory] = useState<'worlds' | 'dungeons'>('worlds')
@@ -186,8 +178,6 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
     // a_skill_point is in 1/10 000 SP
     ['Base SP', ((monster.sp ?? 0) / 10_000).toLocaleString('en-US', { maximumFractionDigits: 4 })],
     ['Base gold', <Gold amount={monster.gold} />],
-    ['Attack element', elementName(monster.stats.attackElement)],
-    ['Defense element', elementName(monster.stats.defenseElement)],
     [
       dungeon ? 'Dungeon' : 'Spot',
       dungeon ? dungeon.name : `${index + 1}${index >= open ? ' · locked' : ''}`,

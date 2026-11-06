@@ -3,12 +3,8 @@
   width: 32px;
   height: 32px;
   pointer-events: auto;
-  background-image: url('/ui/lc/menu-dungeons.webp?v=dungeons2'), url('/ui/lc/badge.webp');
-  background-size:
-    17px 18px,
-    100% 100%;
-  background-repeat: no-repeat;
-  background-position: center;
+  /* the world map's dungeon mark in a quick-menu frame, like the other menu buttons (dungeon-art.mjs) */
+  background: url('/ui/lc/menu-dungeons.webp?v=244d782e') center / 100% 100% no-repeat;
 }
 .sheet.dungeons-window {
   width: min(100%, 900px);
