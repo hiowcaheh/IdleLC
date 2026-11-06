@@ -3859,6 +3859,62 @@ a.button {
   background-image: url('/ui/lc/page-left.webp');
 }
 
+/* ScrollStrip (ui/ScrollStrip.tsx): a sideways row, the client's page arrow on the side with more */
+.scroll-strip {
+  --fade-left: 0px;
+  --fade-right: 0px;
+  position: relative;
+  min-width: 0;
+}
+
+.scroll-strip__track {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--fade-left),
+    #000 calc(100% - var(--fade-right)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--fade-left),
+    #000 calc(100% - var(--fade-right)),
+    transparent
+  );
+}
+
+.scroll-strip.has-more-left {
+  --fade-left: 28px;
+}
+
+.scroll-strip.has-more-right {
+  --fade-right: 28px;
+}
+
+.scroll-strip__more {
+  position: absolute;
+  top: 50%;
+  width: 30px;
+  height: 42px;
+  margin-top: -21px;
+  padding: 0;
+  border: 1px solid #a88a5c;
+  border-radius: 3px;
+  background: #11161ad8 url('/ui/lc/page-right.webp') center / 11px 15px no-repeat;
+  box-shadow: 0 2px 6px #000a;
+  cursor: pointer;
+}
+
+.scroll-strip__more--right {
+  right: 0;
+}
+
+.scroll-strip__more--left {
+  left: 0;
+  background-image: url('/ui/lc/page-left.webp');
+}
+
 /* ---------- Bag and equipment slots (the client's slot frames) ---------- */
 
 .item-slot {

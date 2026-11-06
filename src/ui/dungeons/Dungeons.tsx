@@ -19,6 +19,7 @@ import { dungeonSession } from '../../game/session/dungeonSession.ts'
 import { VisibleClock } from '../../game/session/visibleClock.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { toast } from '../../state/toasts.ts'
+import { ScrollStrip } from '../ScrollStrip.tsx'
 import { Sheet } from '../Sheet.tsx'
 import { SkillIcon } from '../skills/SkillIcon.tsx'
 import { formatSp } from '../skills/format.ts'
@@ -504,9 +505,12 @@ export function DungeonHud() {
             aria-valuemax={100}
           >
             <span className="dungeon-xp__fill" style={{ width: `${ratio * 100}%` }} />
+            {/* the level on the left, the crystals collected and needed on the right */}
             <span className="dungeon-xp__text">
-              Dungeon Lv {run.level} / 20{' '}
-              {run.level < 20 ? `(${run.xp}/${dungeonXpNeeded(run.level)})` : 'MAX'}
+              <span>Dungeon Lv {run.level} / 20</span>
+              <span className="dungeon-xp__count">
+                {run.level < 20 ? `${run.xp} / ${dungeonXpNeeded(run.level)}` : 'MAX'}
+              </span>
             </span>
           </div>
         </section>
@@ -529,7 +533,11 @@ export function DungeonHud() {
           <p className="sheet__meta">
             Time is paused. Choose one blessing for the rest of this run.
           </p>
-          <div className={`dungeon-blessings dungeon-blessings--count-${run.choices.length}`}>
+          {/* the choices side by side, scrolled with the client's arrows on a narrow screen */}
+          <ScrollStrip
+            className={`dungeon-blessings dungeon-blessings--count-${run.choices.length}`}
+            label="Blessings to choose"
+          >
             {run.choices.map((id) => {
               const special = dungeonSuperBuffDefinition(id)
               const rank = special
@@ -594,7 +602,7 @@ export function DungeonHud() {
                 </button>
               )
             })}
-          </div>
+          </ScrollStrip>
           {error && (
             <p role="alert" className="form-error">
               {error}

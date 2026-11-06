@@ -62,7 +62,7 @@ export function DungeonLootButton() {
     <>
       <button
         type="button"
-        className="icon-button hud__menu hud__menu--inventory dungeon-loot-button"
+        className="icon-button hud__menu dungeon-loot-button"
         aria-label="Dungeon loot"
         title="Dungeon loot"
         onClick={() => {

@@ -61,7 +61,7 @@ const root = process.argv[2]
 if (!root) throw new Error('Usage: node scripts/lc/dungeon-art.mjs <client-folder>')
 const files = new ClientFiles([root])
 const ui = await buildUiParts(files)
-for (const name of ['page-left', 'page-right', 'trophy'])
+for (const name of ['page-left', 'page-right', 'trophy', 'menu-dungeon-loot'])
   fs.writeFileSync(`public/ui/lc/${name}.webp`, ui[name])
 await sharp(await dungeonButton(ui['menu-frame'], ui['menu-dungeons']))
   .webp({ lossless: true })

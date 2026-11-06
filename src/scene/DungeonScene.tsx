@@ -289,6 +289,8 @@ export function DungeonScene({ id }: { id: DungeonId }) {
             <Html
               center
               position-y={2.5}
+              // under the HUD and its windows (drei's default range sits above everything)
+              zIndexRange={[9, 0]}
               className={`dungeon-target level-tone--${levelTone(character.level, getMonster(e.monsterId).level)}`}
             >
               {getMonster(e.monsterId).name} <small>Lv {getMonster(e.monsterId).level}</small>
