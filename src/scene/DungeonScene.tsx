@@ -26,6 +26,7 @@ import type { ViewEvent } from '../state/combatEvents.ts'
 import { useFloatingTexts } from '../state/floatingTexts.ts'
 import { Character, type CharacterHandle } from './Character.tsx'
 import { DamageNumbers } from './DamageNumbers.tsx'
+import { DungeonBoxes } from './DungeonBoxes.tsx'
 import { ClientFxLayer } from './clientFx/ClientFx.tsx'
 import { castClientSkill } from './clientFx/skillFx.ts'
 import { activeArtifactVisual } from './artifactEffects.ts'
@@ -343,6 +344,9 @@ export function DungeonScene({ id }: { id: DungeonId }) {
           </Suspense>
         </group>
       ))}
+      <Suspense fallback={null}>
+        <DungeonBoxes boxes={run?.boxes ?? []} />
+      </Suspense>
       <instancedMesh ref={crystals} args={[undefined, undefined, 512]} frustumCulled={false}>
         <octahedronGeometry args={[1]} />
         <meshStandardMaterial

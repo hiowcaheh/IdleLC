@@ -39,6 +39,10 @@ import type { ElementalType } from './summons.ts'
 import { rollInt, type Rng } from './rng.ts'
 import type { LcDungeonSuperBuff } from '../data/lcTypes.ts'
 import { HP_COEFFICIENT, MP_COEFFICIENT } from './attributes.ts'
+import { DUNGEON_BOX_CHANCE, DUNGEON_BOXES } from '../data/boxes.ts'
+
+/** Metres from a box's centre at which the hero picks it up. */
+export const DUNGEON_BOX_REACH = 1.2
 
 export interface DungeonPoint {
   x: number
@@ -55,6 +59,11 @@ export interface DungeonEnemy extends DungeonPoint {
 export interface DungeonCrystal extends DungeonPoint {
   uid: number
   value: number
+}
+/** A dungeon box on the ground (data/boxes.ts), picked up by walking into it. */
+export interface DungeonBox extends DungeonPoint {
+  uid: number
+  itemId: number
 }
 export type DungeonEnd = 'completed' | 'defeated' | 'left' | 'interrupted'
 export interface DungeonRecord {
@@ -110,6 +119,8 @@ export interface DungeonRun {
   facing: number
   enemies: DungeonEnemy[]
   crystals: DungeonCrystal[]
+  /** Boxes on the ground (absent in runs started before boxes existed). */
+  boxes?: DungeonBox[]
   ended: DungeonEnd | null
   rewards: {
     exp: number
@@ -378,6 +389,7 @@ export function createDungeonRun(
     facing: Math.PI,
     enemies: [],
     crystals: [],
+    boxes: [],
     ended: null,
     rewards: { exp: 0, gold: 0, sp: 0, drops: [], lost: { exp: 0, sp: 0 } },
   }
@@ -479,12 +491,20 @@ export function dungeonStep(
   seconds: number,
   input: DungeonPoint,
   rng: Rng,
-): { run: DungeonRun; events: DungeonEvent[]; kills: string[]; potions: ItemStack[] } {
+): {
+  run: DungeonRun
+  events: DungeonEvent[]
+  kills: string[]
+  potions: ItemStack[]
+  /** Boxes the hero walked into this step (item ids). */
+  boxes: number[]
+} {
   const result = {
     run,
     events: [] as DungeonEvent[],
     kills: [] as string[],
     potions: [] as ItemStack[],
+    boxes: [] as number[],
   }
   if (run.ended || run.choices.length || seconds <= 0) return result
   const dt = Math.min(0.05, seconds, DUNGEON_SECONDS - run.elapsed)
@@ -495,6 +515,7 @@ export function dungeonStep(
     player: copyFighter(run.player),
     enemies: run.enemies.map((e) => ({ ...e, fighter: copyFighter(e.fighter) })),
     crystals: run.crystals.map((c) => ({ ...c })),
+    boxes: (run.boxes ?? []).map((b) => ({ ...b })),
     choices: [...run.choices],
   }
   result.run = next
@@ -632,6 +653,14 @@ export function dungeonStep(
     const nearby = next.crystals.find((c) => distance(c, enemy) < 1)
     if (nearby) nearby.value++
     else next.crystals.push({ uid: next.nextUid++, x: enemy.x, z: enemy.z, value: 1 })
+    // the dungeon's box (owner's rule, 2026-11-07), beside the crystal so both stay visible
+    if (rng() < DUNGEON_BOX_CHANCE)
+      next.boxes!.push({
+        uid: next.nextUid++,
+        x: enemy.x + 0.6,
+        z: enemy.z,
+        itemId: DUNGEON_BOXES[next.dungeonId],
+      })
   }
   next.enemies = next.enemies.filter((e) => e.deadFor < 0.8)
   for (const crystal of next.crystals) {
@@ -642,6 +671,12 @@ export function dungeonStep(
     }
   }
   next.crystals = next.crystals.filter((c) => c.value > 0)
+  // boxes do not fly to the hero like crystals: the hero walks into them
+  next.boxes = next.boxes!.filter((box) => {
+    if (distance(box, next.position) > DUNGEON_BOX_REACH) return true
+    result.boxes.push(box.itemId)
+    return false
+  })
   while (next.level < DUNGEON_MAX_LEVEL && next.xp >= dungeonXpNeeded(next.level)) {
     next.xp -= dungeonXpNeeded(next.level)
     next.level++

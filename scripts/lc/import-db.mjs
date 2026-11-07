@@ -77,6 +77,28 @@ const SF_ABSTIME = 1 << 3
 const SF_NOTDUPLICATE = 1 << 4
 const SF_NOCANCEL = 1 << 5
 /**
+ * IdleLC's own items (not in the database), with client icons (owner's request, 2026-11-07): the
+ * chests a dungeon's monsters drop. Their contents are game rules (src/game/data/boxes.ts). Ids
+ * from 95001 stay clear of every t_item index.
+ */
+export const OWN_ITEMS = [
+  { id: 95001, name: 'Belfist Box', icon: { atlas: 7, row: 3, col: 6 } },
+  { id: 95002, name: 'Procyon Box', icon: { atlas: 7, row: 3, col: 3 } },
+  { id: 95003, name: 'Maargadum Box', icon: { atlas: 7, row: 3, col: 7 } },
+].map((item) => ({
+  ...item,
+  // t_item a_type_idx 2 / a_subtype_idx 9: the client's boxes opened for a random reward
+  type: 2,
+  subtype: 9,
+  slot: -1,
+  level: 0,
+  jobFlag: 0,
+  flag: 0,
+  price: 0,
+  stats: [0, 0, 0, 0, 0],
+  own: true,
+}))
+/**
  * t_item 1838 "Magnifying glass" (may fail) and 1839 "Golden magnifying glass" (always works) identify
  * rare items. LC sells them in town shops; IdleLC's shop offers them in every zone (own decision).
  */
@@ -350,6 +372,7 @@ function buildData(tables) {
       ...(rareOf(r).length > 0 ? { rare: rareOf(r) } : {}),
       ...(titleOfItem.has(int(r.a_index)) ? { title: titleOfItem.get(int(r.a_index)) } : {}),
     }))
+  items.push(...OWN_ITEMS)
   const rareSets = buildRareSets(
     tables.t_rareoption,
     new Set(items.flatMap((i) => (i.rare ?? []).map(([set]) => set))),

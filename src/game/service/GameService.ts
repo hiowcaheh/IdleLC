@@ -14,6 +14,12 @@ import type { TitleUse } from '../logic/titles.ts'
 import type { DungeonId } from '../data/dungeons.ts'
 import type { DungeonPoint, DungeonUpdate } from '../logic/dungeons.ts'
 
+/** Boxes opened: the character after, and the prizes summed by item. */
+export interface BoxOpening {
+  character: CharacterData
+  prizes: ItemStack[]
+}
+
 /**
  * Everything that changes the saved game goes through this contract, and every call is
  * asynchronous — like a request to a server. Stage 1: LocalGameService (browser storage).
@@ -91,6 +97,8 @@ export interface GameService {
     targets: IdentifyTarget[],
   ): Promise<IdentifyResult>
   /** Uses a title item from the bag: its title is added for its days (worn if none is). */
+  /** Opens `count` dungeon boxes of the kind from the bag (data/boxes.ts). */
+  openBoxes(characterId: string, itemId: number, count: number): Promise<BoxOpening>
   redeemTitleItem(characterId: string, itemId: number): Promise<TitleUse>
   /** Wears an owned title, or takes the worn one off (null). */
   setTitle(characterId: string, titleId: number | null): Promise<CharacterData>

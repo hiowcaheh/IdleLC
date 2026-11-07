@@ -59,6 +59,7 @@ import {
 import { SP_UNIT, applyAuto, applyBar, applyLearn } from '../logic/skills.ts'
 import { isZoneOpen, isSpotOpen, zoneSpots } from '../logic/spots.ts'
 import { applyClaimBookReward, type BookClaim } from '../logic/book.ts'
+import { applyOpenBoxes } from '../logic/boxes.ts'
 import {
   applyLevelTitles,
   applyUseTitleItem,
@@ -83,7 +84,7 @@ import {
   type SaveData,
   type Settings,
 } from '../logic/save.ts'
-import type { DevCommands, GameService, KeyValueStorage } from './GameService.ts'
+import type { BoxOpening, DevCommands, GameService, KeyValueStorage } from './GameService.ts'
 
 export const SAVE_KEY = 'idlelc.save'
 
@@ -320,6 +321,18 @@ export class LocalGameService implements GameService {
           sp: run.rewards.sp + reward.sp,
           drops: [...drops].map(([itemId, count]) => ({ itemId, count })),
         }
+      }
+      if (tick.boxes.length) {
+        // boxes the hero walked into go to the bag, and into the run's loot list
+        const boxes = tick.boxes.map((itemId) => ({ itemId, count: 1 }))
+        character = { ...character, ...stowDrops(character, boxes, this.rng) }
+        const drops = new Map(run.rewards.drops.map((d) => [d.itemId, d.count]))
+        for (const box of boxes) drops.set(box.itemId, (drops.get(box.itemId) ?? 0) + 1)
+        run.rewards = {
+          ...run.rewards,
+          drops: [...drops].map(([itemId, count]) => ({ itemId, count })),
+        }
+        important = true
       }
       const enemy = run.enemies.find((e) => e.fighter.hp > 0)
       // Keep resources, casts and effects; update real character levels and remaining potion supply.
@@ -562,6 +575,12 @@ export class LocalGameService implements GameService {
     const purchase = applyBuy(this.notOnExpedition(characterId), itemId, count)
     const updated = this.update(characterId, () => purchase.character)
     return copy({ ...purchase, character: updated })
+  }
+
+  async openBoxes(characterId: string, itemId: number, count: number): Promise<BoxOpening> {
+    const opening = applyOpenBoxes(this.notOnExpedition(characterId), itemId, count, this.rng)
+    const updated = this.update(characterId, () => opening.character)
+    return copy({ ...opening, character: updated })
   }
 
   async redeemTitleItem(characterId: string, itemId: number): Promise<TitleUse> {

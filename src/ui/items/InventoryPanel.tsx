@@ -24,6 +24,8 @@ import { useGameStore } from '../../state/gameStore.ts'
 import { STAT_TOAST_MS, toast } from '../../state/toasts.ts'
 import { heroStats, nameTone, pieceName, rareLabel, wearProblem } from '../gear/format.ts'
 import { PotionNotes } from './PotionNotes.tsx'
+import { isBox } from '../../game/data/boxes.ts'
+import { MAX_BOXES_AT_ONCE } from '../../game/logic/boxes.ts'
 import { drinkWithToast } from './drinkWithToast.ts'
 import { comparePotions } from './potionText.ts'
 import { Sheet } from '../Sheet.tsx'
@@ -87,6 +89,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   const equipItem = useGameStore((s) => s.equipItem)
   const exchangeStones = useGameStore((s) => s.exchangeStones)
   const redeemTitleItem = useGameStore((s) => s.redeemTitleItem)
+  const openBoxes = useGameStore((s) => s.openBoxes)
   const identifyItems = useGameStore((s) => s.identifyItems)
   const [selected, setSelected] = useState<string | null>(null)
   const [category, setCategory] = useState<Category>('all')
@@ -350,6 +353,28 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
               Use
             </button>
           )}
+          {isBox(stack.itemId) &&
+            [1, Math.min(stack.count, MAX_BOXES_AT_ONCE)]
+              .filter((n, i) => i === 0 || n > 1)
+              .map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  className="button button--gold"
+                  disabled={busy || away}
+                  onClick={() =>
+                    run(async () => {
+                      const prizes = await openBoxes(stack.itemId, n)
+                      const got = prizes
+                        .map((p) => `${getItem(p.itemId).name} ×${fmt(p.count)}`)
+                        .join(', ')
+                      return `Opened ${n === 1 ? 'the box' : `${fmt(n)} boxes`}: ${got}.`
+                    })
+                  }
+                >
+                  {n === 1 ? 'Open' : `Open all ×${fmt(n)}`}
+                </button>
+              ))}
           {stack.itemId === SMELTING_STONE_ID && (
             <>
               <p className="item-row__note">

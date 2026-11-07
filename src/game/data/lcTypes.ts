@@ -85,6 +85,8 @@ export interface LcItem {
   rare?: [number, number][]
   /** Title items: the t_title index the item gives. */
   title?: number
+  /** IdleLC's own item, not in the database (import-db OWN_ITEMS). */
+  own?: true
 }
 
 export interface LcDungeonSuperBuff {
