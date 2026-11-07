@@ -1,5 +1,13 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Najnowszy etap: czwarta partia właściciela (Claude Code), 2026-11-07
+
+[Szczegóły i notatka dla Codexa](owner-batch-2026-11-07.md). Nowe moduły: `data/boxes.ts` +
+`logic/boxes.ts` (skrzynki), `data/cashShop.ts` + `logic/cashShop.ts` + `ui/cashShop/` (sklep
+Cash, `SaveData.cash`), `scene/DungeonBoxes.tsx` (model `public/models/lc/drop/`). Mikstury
+z `HARDCODED_BOOSTS` działają przez pola `steal`, `berserker` i `rewards` efektu
+(`combat.ts`, `effectRewardMultipliers`). SaveVersion 16.
+
 ## Najnowszy etap: efekty skilli z klienta, etapy 1 i 2 (Claude Code), 2026-11-07
 
 - **Eksport:** `scripts/lc/client-effects.mjs --client <klient 2015>` (`--report` daje samo

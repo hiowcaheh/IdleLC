@@ -262,6 +262,14 @@ Poniższa tabela zachowuje historyczny punkt odniesienia tych decyzji.
 | D24 | Spoty odblokowywane zabójstwami, swobodne przejście stref, własne areny Juno                           | Oryginalny otwarty świat i źródłowe spawny; DB Juno nie pasuje do tego terenu           | Zachować przebieg idle; czy i kiedy zmieniać pozycje walk i tereny innych stref?                               |
 | D25 | Własne efekty, częściowo odzyskane ramki i czytelny font webowy                                        | Dostępne atlasy/bitmapy i częściowo zbadane Effect.dat                                  | Które elementy wymagają wiernego wyglądu LC, a które mają zachować czytelność telefonu?                        |
 
+Dopisane 2026-11-07 (Claude Code, czwarta partia):
+
+| ID  | Obecnie w IdleLC                                                                                 | Źródło / oryginał                                            | Do decyzji właściciela                            |
+| --- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------- |
+| D26 | Skrzynki podziemi (własne 95001–95003): 5% z potwora, 80% Smelting / 20% Heaven Stone            | Własny system na prośbę właściciela; model i ikony z klienta | Szanse i zawartość („będziemy podkręcać”).        |
+| D27 | Sklep Cash: część cen z `t_catalog`, reszta i paczki własne; Cash tylko z dev                    | Katalog bazy nie ma części przedmiotów                       | Skąd gracz bierze Cash i czy zmienić ceny własne. |
+| D28 | Pięć buffów podziemi spoza klas o stałym poziomie (Ignition 2, Horse 30 ×2, Mount 10, Dragon 30) | Dane 1:1, wybór i stały poziom własne                        | Czy Ignition +200% nie jest za mocny.             |
+
 ## Jak zapisywać rozstrzygnięcie
 
 Przy decyzji dopisz datę, odpowiedź właściciela, zakres plików i status wdrożenia przy konkretnym ID. Jeżeli zmienia zapis lub istniejące przedmioty, opisz migrację oraz wpływ na aktywną walkę/AFK. Po wdrożeniu podaj commit i weryfikację. Nie usuwaj historii decyzji; nowa decyzja zastępuje wcześniejszą jawnie.

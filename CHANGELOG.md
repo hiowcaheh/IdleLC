@@ -1,5 +1,24 @@
 # Historia zmian
 
+## 2026-11-07 (Claude Code): czwarta partia (skrzynki, sklep Cash, mikstury, buffy)
+
+Szczegóły, ceny, pytania i lista zmian w plikach Codexa:
+[docs/owner-batch-2026-11-07.md](docs/owner-batch-2026-11-07.md). SaveVersion nadal 16.
+580 testów / 70 plików.
+
+1. **Przycisk Dungeons** jako kwadrat zdarzeń klienta, bez podpisu i poświaty.
+2. **Mikstury w drodze:** auto-picie HP/MP także w biegu między spotami.
+3. **Suwaki z GUI klienta** (`NewOption.tex`).
+4. **Mikstury w torbie posortowane:** boosty, HP, MP.
+5. **Bez skracania drogi:** zamknięcie gry w biegu przywraca spot startowy (`runFrom`).
+6. **Pięć buffów podziemi:** Ignition 2, koń atak 30, koń obrona 30, Mount HP/MP 10,
+   Dragon magia 30.
+7. **Animacja biegu w rundzie** przy strzelaniu.
+8. **Skrzynki podziemi:** 5% z potwora, model 3D z klienta na podłodze, otwieranie w torbie.
+9. **Nowe mikstury z bazy** z regułami serwera (steal, berserker, atrybuty, tarcze, krytyk,
+   EXP/SP).
+10. **Sklep za Cash:** zakładki HOT, Items, Potions, Packages, grafiki z `Cashshop.tex`.
+
 ## 2026-11-07 (Claude Code): efekty skilli z klienta, etap 2 (modele, pociski, smugi, orbity)
 
 Commity `3eac61a`, `b71a8f8`, `7d8998d`. 565 testów / 66 plików.

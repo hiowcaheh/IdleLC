@@ -1,5 +1,12 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-07, później (Claude Code): [czwarta partia](docs/owner-batch-2026-11-07.md).
+Skrzynki podziemi 95001–95003 (5%, model `ITEM_treasure02` na podłodze, `data/boxes.ts`), sklep
+za **Cash** (konto: `SaveData.cash`, `data/cashShop.ts`, ceny z `t_catalog` albo własne),
+nowe mikstury-boosty z regułami serwera (steal, berserker, EXP/SP także poza podziemiami),
+5 buffów podziemi o stałym poziomie (`EXTRA_DUNGEON_BUFFS`), suwaki z klienta, `runFrom`.
+Nadal SaveVersion **16**. Otwarte: źródło Cash, „Kar/Neon 12 lv”.
+
 Aktualizacja 2026-11-07 (Claude Code): **efekty z klienta, etap 2** i **trzecia partia Dungeons**.
 Działają modele MDL (EFMD, czytnik `scripts/lc/mdl.mjs`), modele SKA (EFSK, GLB w
 `public/fx/client/ska`), pociski FireEffect2 z trafieniem FireEffect3, smugi (EFSB, EFTC) i orbity
