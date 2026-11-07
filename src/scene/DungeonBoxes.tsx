@@ -1,50 +1,43 @@
 /**
- * Dungeon boxes on the ground (data/boxes.ts): the box's client icon floating above a golden
- * ring, so it reads at a glance on a phone. The hero picks one up by walking into it.
+ * Dungeon boxes on the ground (data/boxes.ts) as the client shows a dropped box: its 3D chest,
+ * Data\Item\Common\ITEM_treasure02.smc (the drop model of the client's boxes, t_item a_file_smc),
+ * lying on the floor, with a faint golden ring so it reads on a phone. The hero picks one up by
+ * walking into it. Converted with:
+ *   npm run convert-lc -- --client <2015 client> --smc 'Data\Item\Common\ITEM_treasure02.smc'
+ *     --out <folder>   (then copied to public/models/lc/drop/)
  */
-import { useTexture } from '@react-three/drei'
+import { useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { useMemo, useRef } from 'react'
-import { AdditiveBlending, DoubleSide, SRGBColorSpace, type Group, type Sprite } from 'three'
-import { itemIcon } from '../game/data/items.ts'
+import { AdditiveBlending, DoubleSide, type Group } from 'three'
 import type { DungeonBox } from '../game/logic/dungeons.ts'
 
-function BoxIcon({ itemId }: { itemId: number }) {
-  const icon = itemIcon(itemId)!
-  const sheet = useTexture(icon.url)
-  const map = useMemo(() => {
-    const t = sheet.clone()
-    t.colorSpace = SRGBColorSpace
-    t.repeat.set(icon.size / icon.sheetWidth, icon.size / icon.sheetHeight)
-    t.offset.set(icon.x / icon.sheetWidth, 1 - (icon.y + icon.size) / icon.sheetHeight)
-    t.needsUpdate = true
-    return t
-  }, [sheet, icon.size, icon.sheetWidth, icon.sheetHeight, icon.x, icon.y])
-  const sprite = useRef<Sprite>(null)
-  useFrame(({ clock }) => {
-    if (sprite.current) sprite.current.position.y = 0.75 + Math.sin(clock.elapsedTime * 2.4) * 0.08
-  })
-  return (
-    <sprite ref={sprite} scale={[0.85, 0.85, 1]} position={[0, 0.75, 0]}>
-      <spriteMaterial map={map} transparent depthWrite={false} toneMapped={false} />
-    </sprite>
-  )
+const CHEST_URL = `${import.meta.env.BASE_URL}models/lc/drop/item_treasure02.glb?v=dfa1c9bf7c8d`
+/** The chest is 0.45 m wide in the client; a little larger here for phone screens. */
+const CHEST_SCALE = 1.6
+
+function Chest({ box }: { box: DungeonBox }) {
+  const gltf = useGLTF(CHEST_URL)
+  const model = useMemo(() => gltf.scene.clone(true), [gltf.scene])
+  // each box turned its own way, as boxes fall in the client
+  const yaw = useMemo(() => ((box.uid * 2.399) % (Math.PI * 2)) - Math.PI, [box.uid])
+  return <primitive object={model} rotation-y={yaw} scale={CHEST_SCALE} />
 }
 
 function BoxMark({ box }: { box: DungeonBox }) {
   const ring = useRef<Group>(null)
   useFrame((_, dt) => {
-    if (ring.current) ring.current.rotation.y += dt * 1.5
+    if (ring.current) ring.current.rotation.y += dt * 1.2
   })
   return (
     <group position={[box.x, 0, box.z]}>
       <group ref={ring}>
-        <mesh rotation-x={-Math.PI / 2} position-y={0.04}>
-          <ringGeometry args={[0.42, 0.62, 24, 1, 0, Math.PI * 1.6]} />
+        <mesh rotation-x={-Math.PI / 2} position-y={0.03}>
+          <ringGeometry args={[0.5, 0.62, 24, 1, 0, Math.PI * 1.6]} />
           <meshBasicMaterial
             color="#f4c35a"
             transparent
-            opacity={0.75}
+            opacity={0.45}
             blending={AdditiveBlending}
             depthWrite={false}
             side={DoubleSide}
@@ -52,7 +45,7 @@ function BoxMark({ box }: { box: DungeonBox }) {
           />
         </mesh>
       </group>
-      {itemIcon(box.itemId) && <BoxIcon itemId={box.itemId} />}
+      <Chest box={box} />
     </group>
   )
 }
