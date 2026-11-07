@@ -305,6 +305,8 @@ export interface ItemDef {
   magnifier?: { chance: number }
   /** Title items (type Other): the title using it adds (data/titles.ts). */
   title?: number
+  /** Boost potions: what the item does, in the database's words. */
+  description?: string
 }
 
 /** A title 1:1 from t_title, shown under the hero's name while worn. */

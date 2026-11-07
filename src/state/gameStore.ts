@@ -1,3 +1,4 @@
+import { purchaseFeed } from './purchases.ts'
 import type { AttributeKey } from '../game/logic/attributes.ts'
 import type { DungeonId } from '../game/data/dungeons.ts'
 import type {
@@ -572,6 +573,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const purchase = await enqueue(() => gameService.buyCashOffer(id, offerId, count))
       applyCharacter(purchase.character)
       set({ save: { ...get().save, cash: purchase.cash } })
+      purchaseFeed.emit(purchase.items)
       return purchase.items
     },
 

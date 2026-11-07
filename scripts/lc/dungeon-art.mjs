@@ -92,6 +92,13 @@ for (const name of [
   'cash-tag-new',
   'cash-tag-hot',
   'cash-slot',
+  'cash-card',
+  'cash-bar',
+  'cash-button',
+  'cash-button-down',
+  'cash-icon-slot',
+  'cash-tag-dc',
+  'cash-sale',
 ])
   fs.writeFileSync(`public/ui/lc/${name}.webp`, ui[name])
 // the client's event / notice square on the right of the screen (owner's choice, 2026-11-07)

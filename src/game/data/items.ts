@@ -397,6 +397,7 @@ export const ITEMS: Record<number, ItemDef> = lcData
               ? { magnifier: { chance: MAGNIFIER_CHANCE[i.id]! } }
               : {}),
             ...(i.title !== undefined ? { title: i.title } : {}),
+            ...(i.description ? { description: i.description } : {}),
           },
         ]
       }),

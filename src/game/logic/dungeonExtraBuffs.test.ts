@@ -22,23 +22,35 @@ const stat = (id: number) =>
 
 describe('extra dungeon blessings (owner, 2026-11-07)', () => {
   it('join the pool at their fixed level, as the database gives it', () => {
-    for (const id of [1062, 257, 259, 270, 276]) {
+    for (const id of [1062, 268, 269, 388, 437]) {
       expect(DUNGEON_BUFFS).toContain(id)
       expect(dungeonBuffRank(id, 1).kind).toBe('buff')
+      expect(dungeonBuffRank(id, 1).mpCost).toBe(0)
     }
     expect(dungeonBuffDefinition(1062)!.sourceLevel).toBe(2)
     expect(stat(1062)).toEqual([
       ['attack', 200, true],
       ['magicAttack', 200, true],
     ])
-    expect(dungeonBuffDefinition(257)!.sourceLevel).toBe(30)
-    expect(stat(257)).toEqual([['attack', 60, false]])
-    expect(stat(259)).toEqual([['defense', 250, false]])
-    expect(stat(270)).toEqual([
-      ['maxHp', 500, false],
-      ['maxMp', 500, false],
+    // the horse mount's howlings at their top level (owner, 2026-11-07)
+    expect(dungeonBuffDefinition(268)!.sourceLevel).toBe(12)
+    expect(stat(268)).toEqual([
+      ['attack', 100, false],
+      ['magicAttack', 70, false],
     ])
-    expect(stat(276)).toEqual([['magicAttack', 30, false]])
+    expect(stat(269)).toEqual([
+      ['defense', 480, false],
+      ['magicDefense', 20, false],
+    ])
+    expect(stat(388)).toEqual([
+      ['attackSpeed', 15, true],
+      ['runSpeed', 15, false],
+    ])
+    expect(stat(437)).toEqual([
+      ['attack', 50, false],
+      ['magicAttack', 50, false],
+      ['defense', 50, false],
+    ])
   })
 
   it('cannot be upgraded', () => {
@@ -46,6 +58,6 @@ describe('extra dungeon blessings (owner, 2026-11-07)', () => {
       ...createCharacterData({ name: 'Rider', classId: 'titan' }, 'r', 0),
       dungeons: { ...emptyDungeonProgress(), points: 100000, totalPoints: 100000 },
     }
-    expect(() => upgradeDungeonBuff(hero, 257)).toThrow(/maximum/)
+    expect(() => upgradeDungeonBuff(hero, 268)).toThrow(/maximum/)
   })
 })

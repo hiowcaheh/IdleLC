@@ -18,6 +18,7 @@ import { buildModelManifest, modelIdFromSmc } from './manifest.mjs'
 import { int, num, readTables } from './sql.mjs'
 import { sourceFields, sourceMagic, sourceNpc } from './source-records.mjs'
 import { buildDungeonSuperBuffs, DUNGEON_SUPER_ITEMS } from './dungeon-super.mjs'
+import { ITEM_ATLAS } from './icons.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const MAX_LEVEL = 100
@@ -391,6 +392,15 @@ function buildData(tables) {
       stats: [0, 1, 2, 3, 4].map((k) => int(r[`a_num_${k}`])),
       icon: { atlas: int(r.a_texture_id), row: int(r.a_texture_row), col: int(r.a_texture_col) },
       ...(potions.has(int(r.a_index)) ? { potion: potions.get(int(r.a_index)) } : {}),
+      // what a boost potion does, in the database's words (without its "[Cash Item]" tag)
+      ...(BOOST_POTIONS.has(int(r.a_index)) && String(r.a_descr_usa ?? '').trim()
+        ? {
+            description: String(r.a_descr_usa)
+              .replace(/^\s*\[[^\]]*\]\s*/, '')
+              .replace(/\s*\?\s+/g, '. ')
+              .trim(),
+          }
+        : {}),
       ...(rareOf(r).length > 0 ? { rare: rareOf(r) } : {}),
       ...(titleOfItem.has(int(r.a_index)) ? { title: titleOfItem.get(int(r.a_index)) } : {}),
     }))
@@ -422,12 +432,29 @@ function buildData(tables) {
     const extra = EXTRA_DUNGEON_BUFFS.find((b) => b.id === skill.id)
     const row = skill.levels.find((l) => l.level === extra.level)
     if (!row) throw new Error(`No level ${extra.level} of skill ${skill.id}`)
+    // an item's skill without an icon of its own shows the item's icon (icons.mjs ITEM_ATLAS)
+    const noIcon = !skill.icon.atlas && !skill.icon.row && !skill.icon.col
+    const item = noIcon
+      ? tables.t_item.find(
+          (r) => int(r.a_type_idx) === 6 && int(r.a_num_0) === skill.id && usable(r),
+        )
+      : null
     dungeonBuffs.push({
       ...skill,
+      ...(item
+        ? {
+            icon: {
+              atlas: ITEM_ATLAS + int(item.a_texture_id),
+              row: int(item.a_texture_row),
+              col: int(item.a_texture_col),
+            },
+          }
+        : {}),
       classId: extra.origin,
       sourceLevel: extra.level,
       // a pet's strengthening has no duration of its own; a blessing lasts to the end of the run
-      levels: [{ ...row, level: 1, duration: Math.max(row.duration, 6000) }],
+      // a blessing is free: the howlings' MP cost (500 at level 12) does not apply
+      levels: [{ ...row, level: 1, mp: 0, hp: 0, duration: Math.max(row.duration, 6000) }],
     })
   }
   const npcSkillIds = new Set(monsters.flatMap((m) => (m.skills ?? []).map((s) => s.id)))
@@ -874,17 +901,17 @@ const SKILL_CLASSES = ['titan', 'knight', 'healer', 'mage', 'rogue', 'sorcerer']
 
 /**
  * Dungeon blessings beyond the class buffs (owner's request, 2026-11-07), each at one fixed level:
- * Basic Ignition 2 (an item skill: +200% attack and magic attack), the horse's Attack Power
- * Increase and Armor Increase at 30 (their top level), and two picked by Claude: the mount's HP/MP
- * up at 10 (its top level) and the dragon's Magical Power at 30, the casters' counterpart of the
- * horse's attack. `origin` is shown where class buffs show their class.
+ * Basic Ignition 2 (an item skill: +200% attack and magic attack), the horse mount's Offensive and
+ * Defensive Howling at 12 (their top level; pet level 31–50 learns them), and two picked by Claude:
+ * Moon Cake (+15% attack speed, faster running away from the horde) and Stars (+50 attack, magic
+ * attack and defense, for every class). `origin` is shown where class buffs show their class.
  */
 export const EXTRA_DUNGEON_BUFFS = [
   { id: 1062, level: 2, origin: 'item' },
-  { id: 257, level: 30, origin: 'horse' },
-  { id: 259, level: 30, origin: 'horse' },
-  { id: 270, level: 10, origin: 'mount' },
-  { id: 276, level: 30, origin: 'dragon' },
+  { id: 268, level: 12, origin: 'horse' },
+  { id: 269, level: 12, origin: 'horse' },
+  { id: 388, level: 1, origin: 'event' },
+  { id: 437, level: 1, origin: 'event' },
 ]
 
 /**

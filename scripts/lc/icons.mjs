@@ -134,9 +134,16 @@ export const ICON_KINDS = [
         ].map((s) => [s.id, s]),
       ).values(),
     ],
-    atlasPath: (id) => `Data\\Interface\\SkillBtn${id}.tex`,
+    // atlas ITEM_ATLAS + n: an item skill's own item icon (ItemBtn n), e.g. Moon Cake
+    atlasPath: (id) =>
+      id >= ITEM_ATLAS
+        ? `Data\\Interface\\ItemBtn${id - ITEM_ATLAS}.tex`
+        : `Data\\Interface\\SkillBtn${id}.tex`,
   },
 ]
+
+/** Skill icons at atlas ITEM_ATLAS + n come from ItemBtn n (skills that only items cast). */
+export const ITEM_ATLAS = 100
 
 /** Class portraits: the round faces in Data\Interface\TopUI.tex (78 px circles on an 86 px grid). */
 export const PORTRAIT_ATLAS = 'Data\\Interface\\TopUI.tex'

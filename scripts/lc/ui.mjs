@@ -54,6 +54,15 @@ export const UI_PARTS = {
   'cash-tag-new': [atlas('Cashshop'), 183, 501, 22, 11, { scale: 3 }],
   'cash-tag-hot': [atlas('Cashshop'), 208, 501, 22, 11, { scale: 3 }],
   'cash-slot': [atlas('Cashshop'), 217, 153, 72, 69, { scale: 2 }],
+  // the shop list's item panel (gold-trimmed head strip), the gold-ended Cash bar, its blue
+  // button (normal / pressed), an icon slot, the D.C. tag and the cards picture (SALE)
+  'cash-card': [atlas('Cashshop'), 0, 152, 213, 76, { scale: 2 }],
+  'cash-bar': [atlas('Cashshop'), 48, 490, 131, 22, { scale: 2 }],
+  'cash-button': [atlas('Cashshop'), 249, 235, 65, 21, { scale: 2 }],
+  'cash-button-down': [atlas('Cashshop'), 249, 258, 65, 21, { scale: 2 }],
+  'cash-icon-slot': [atlas('Cashshop'), 0, 236, 34, 34, { scale: 2 }],
+  'cash-tag-dc': [atlas('Cashshop'), 233, 501, 22, 11, { scale: 3 }],
+  'cash-sale': [atlas('Cashshop'), 126, 357, 60, 60],
   // the dungeon's loot: the icon of t_item 298 Old Pouch (ItemBtn1, row 7, column 13), a pouch the
   // Harpy Queen of Dratan drops, so it is not the field's Inventory button (owner's choice)
   'menu-dungeon-loot': [atlas('ItemBtn1'), 416, 224, 32, 32, { scale: 4 }],

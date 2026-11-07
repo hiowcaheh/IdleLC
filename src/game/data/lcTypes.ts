@@ -85,6 +85,8 @@ export interface LcItem {
   rare?: [number, number][]
   /** Title items: the t_title index the item gives. */
   title?: number
+  /** Boost potions: what the item does, t_item.a_descr_usa. */
+  description?: string
   /** IdleLC's own item, not in the database (import-db OWN_ITEMS). */
   own?: true
 }

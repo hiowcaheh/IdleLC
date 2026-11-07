@@ -172,6 +172,12 @@ export function activeEffectRows(
       ['drop', 'Drop chance'],
     ] as const)
       if (effect.rewards[key]) rows.push({ label, value: `+${effect.rewards[key]}%`, bad: false })
+  if (effect.steal === 'hp')
+    rows.push({ label: 'HP steal', value: '5% of damage, 30% of hits', bad: false })
+  if (effect.steal === 'mp')
+    rows.push({ label: 'MP steal', value: '10% of max MP, 30% of hits', bad: false })
+  if (effect.berserker)
+    rows.push({ label: 'Double damage', value: '10% of hits on monsters', bad: false })
   if (effect.poison > 0)
     rows.push({ label: 'Poison damage', value: `−${effect.poison}`, bad: true })
   if (effect.stun) rows.push({ label: 'Stunned', value: 'No attacks', bad: true })

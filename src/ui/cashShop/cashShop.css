@@ -37,30 +37,78 @@
   color: #c9b98f;
   font-size: 0.85em;
 }
+
+/* the account's Cash on the client's gold-ended bar, the Top up button beside it */
 .cash-wallet {
-  padding: 3px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.cash-wallet__bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 132px;
+  height: 24px;
+  padding: 0 14px;
+  font-size: 0.9em;
   border: solid transparent;
-  border-width: 5px 8px;
-  border-image: url('/ui/lc/value-box.webp') 4 8 fill / 5px 8px stretch;
+  border-width: 0 10px;
+  border-image: url('/ui/lc/cash-bar.webp?v=5985d449') 0 20 fill / 0 10px stretch;
+}
+/* the client's blue shop button (normal / pressed) */
+.cash-button {
+  min-width: 76px;
+  height: 26px;
+  padding: 0 10px;
+  color: #eef6ff;
+  font: inherit;
+  font-size: 0.86em;
+  font-weight: 700;
+  text-shadow: 0 1px 2px #000;
+  border: solid transparent;
+  border-width: 4px 8px;
+  border-image: url('/ui/lc/cash-button.webp?v=81b99c30') 8 16 fill / 4px 8px stretch;
+  background: none;
+  cursor: pointer;
+}
+.cash-button:hover,
+.cash-button:focus-visible {
+  filter: brightness(1.15);
+}
+.cash-button:active {
+  border-image-source: url('/ui/lc/cash-button-down.webp?v=cef6b572');
+}
+.cash-button:disabled {
+  filter: grayscale(0.8) brightness(0.7);
+  cursor: default;
+}
+.cash-button--wide {
+  width: 100%;
+  height: 38px;
+  margin-top: 10px;
+  font-size: 1em;
 }
 
 .cash-tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   margin-bottom: 10px;
 }
 .cash-tabs__tab {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   min-width: 0;
-  padding-top: 6px;
-  padding-bottom: 6px;
+  padding: 5px 2px;
+  font-size: 0.82em;
 }
 .cash-tabs__picture {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border: 1px solid #0008;
   border-radius: 3px;
   background: center / cover no-repeat;
@@ -68,6 +116,9 @@
 }
 .cash-tabs__tab--hot .cash-tabs__picture {
   background-image: url('/ui/lc/cash-hot.webp?v=a1a8d426');
+}
+.cash-tabs__tab--sale .cash-tabs__picture {
+  background-image: url('/ui/lc/cash-sale.webp?v=c4c10e6a');
 }
 .cash-tabs__tab--items .cash-tabs__picture {
   background-image: url('/ui/lc/cash-items.webp?v=441cda34');
@@ -82,42 +133,86 @@
   filter: saturate(0.6) brightness(0.8);
 }
 
+/* every offer on the client's item panel, all the same size: the name in its head strip */
 .cash-offers {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+  grid-auto-rows: 104px;
   gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
+.cash-offers > li {
+  min-width: 0;
+}
 .cash-offer {
   position: relative;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
   width: 100%;
-  min-height: 64px;
-  padding: 6px;
+  height: 100%;
+  padding: 0;
   color: inherit;
   font: inherit;
   text-align: left;
-  border: 1px solid #5d4a2e;
-  border-radius: 4px;
-  background: linear-gradient(#2c3238, #1d2227);
-  box-shadow: inset 0 1px 0 #ffffff12;
+  border: solid transparent;
+  border-width: 28px 6px 4px;
+  border-image: url('/ui/lc/cash-card.webp?v=0ecdd927') 56 24 12 fill / 28px 6px 4px stretch;
+  background: none;
   cursor: pointer;
 }
 .cash-offer:hover,
 .cash-offer:focus-visible {
-  border-color: #c9a75a;
+  filter: brightness(1.18);
 }
-.cash-offer__slot {
+.cash-offer__name {
+  position: absolute;
+  top: -25px;
+  left: 4px;
+  right: 4px;
+  height: 22px;
+  overflow: hidden;
+  color: #f1e3bf;
+  font-size: 0.82em;
+  font-weight: 700;
+  line-height: 22px;
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px #000;
+}
+.cash-offer__tags {
+  position: absolute;
+  top: -36px;
+  left: -8px;
+  display: flex;
+  gap: 2px;
+}
+.cash-offer__body {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-height: 0;
+  padding: 4px 6px;
+}
+.cash-offer__slot,
+.cash-contents__slot {
   display: grid;
   flex: none;
   place-items: center;
-  width: 52px;
+  width: 44px;
+  height: 44px;
+  background: url('/ui/lc/cash-icon-slot.webp?v=78a37024') center / 100% 100% no-repeat;
+}
+.cash-contents__slot {
+  width: 36px;
+  height: 36px;
+}
+.cash-contents__slot--big {
+  width: 50px;
   height: 50px;
-  background: url('/ui/lc/cash-slot.webp?v=e4399655') center / 100% 100% no-repeat;
 }
 .cash-offer__package {
   display: block;
@@ -126,26 +221,44 @@
 }
 .cash-offer__text {
   display: grid;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
 }
-.cash-offer__name {
-  overflow: hidden;
-  color: #f1e3bf;
-  font-weight: 600;
-  line-height: 1.15;
-}
-.cash-offer__contents {
+.cash-offer__line {
+  min-height: 1.1em;
   overflow: hidden;
   color: #a9a08a;
-  font-size: 0.78em;
-  line-height: 1.2;
+  font-size: 0.76em;
+  line-height: 1.15;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
-/* the client's HOT / NEW tags (Cashshop.tex), on the offer's corner */
-.cash-offer__tag {
-  position: absolute;
-  top: -4px;
-  left: -3px;
+.cash-offer__saving {
+  justify-self: start;
+  padding: 0 4px;
+  color: #fff;
+  font-size: 0.74em;
+  font-weight: 800;
+  border-radius: 2px;
+  background: #8c2a1c;
+  box-shadow: inset 0 0 0 1px #e0683f80;
+}
+.cash-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 6px;
+  font-size: 0.9em;
+}
+.cash-price__was {
+  color: #8f8775;
+  font-size: 0.85em;
+  text-decoration-color: #d0533a;
+  text-decoration-thickness: 2px;
+}
+
+/* the client's HOT / NEW / D.C. tags (Cashshop.tex) */
+.cash-tag {
   width: 30px;
   height: 15px;
   overflow: hidden;
@@ -153,20 +266,123 @@
   font-size: 1px;
   background: center / 100% 100% no-repeat;
 }
-.cash-offer__tag--hot {
+.cash-tag--hot {
   background-image: url('/ui/lc/cash-tag-hot.webp?v=72375796');
 }
-.cash-offer__tag--new {
+.cash-tag--new {
   background-image: url('/ui/lc/cash-tag-new.webp?v=70ab7b12');
 }
-.cash-shop__hint {
-  margin-top: 12px;
+.cash-tag--dc {
+  background-image: url('/ui/lc/cash-tag-dc.webp?v=0c1672d9');
 }
-.cash-buy__contents {
-  margin: 0;
-  color: #c9bd9c;
+
+/* a package's contents and the top-up packs: rows of the client's slots */
+.cash-contents {
+  width: 100%;
+  margin: 8px 0 4px;
+  border-collapse: collapse;
+  font-size: 0.88em;
+}
+.cash-contents th {
+  padding: 3px 6px;
+  color: #c9b98f;
+  font-size: 0.85em;
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 1px solid #5d4a2e;
+}
+.cash-contents td {
+  padding: 3px 6px;
+  border-bottom: 1px solid #ffffff10;
+}
+.cash-contents tbody tr:nth-child(odd) td {
+  background: #ffffff06;
+}
+.cash-contents__icon {
+  width: 40px;
+}
+.cash-contents__name {
+  color: #f1e3bf;
+}
+.cash-contents__count {
+  color: #ffd75e;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.cash-contents__worth {
+  color: #a9a08a;
+  text-align: right;
+  white-space: nowrap;
+}
+.cash-contents tfoot td {
+  color: #c9b98f;
+  border-bottom: 0;
+}
+.cash-buy__text {
+  margin: 6px 0 0;
+  color: #d9ccaa;
 }
 .cash-buy__count {
   display: grid;
   place-items: center;
+}
+
+.cash-topup {
+  display: grid;
+  gap: 6px;
+}
+.cash-topup__rate {
+  margin: 0;
+  padding: 6px;
+  font-size: 1.25em;
+  text-align: center;
+  border: solid transparent;
+  border-width: 0 10px;
+  border-image: url('/ui/lc/cash-bar.webp?v=5985d449') 0 20 fill / 0 10px stretch;
+}
+.cash-topup__table td:first-child {
+  color: #f1e3bf;
+  font-weight: 700;
+}
+.cash-topup__bonus {
+  color: #8fe36a;
+  font-weight: 700;
+  text-align: right;
+}
+.cash-topup__head {
+  margin: 8px 0 0;
+  color: #e8c66d;
+  font-size: 0.95em;
+}
+.cash-topup__steps {
+  margin: 0;
+  padding-left: 20px;
+  color: #d9ccaa;
+}
+.cash-topup__steps li + li {
+  margin-top: 2px;
+}
+.cash-topup__text {
+  margin: 0;
+  color: #d9ccaa;
+}
+.cash-topup__note {
+  margin: 6px 0 0;
+  color: #9a917c;
+  font-size: 0.82em;
+}
+
+/* the bought items rise on the left, above the shop window (PurchaseFeed) */
+.reward-feed.purchase-feed {
+  position: fixed;
+  z-index: 70;
+  pointer-events: none;
+}
+.purchase-feed__entry {
+  padding: 2px 10px 2px 2px;
+  color: #ffe08a;
+  border: 1px solid #a8843c;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #1b1610f2, #241c12e6);
+  box-shadow: 0 2px 6px #000c;
 }

@@ -46,6 +46,10 @@ export function EffectWindow({ side, id, onClose }: { side: Side; id: string; on
         ? 'Stun'
         : KIND_LABELS[kind]
   const rows = activeEffectRows(effect)
+  const description =
+    skill?.description ||
+    special?.description ||
+    (effect.itemId !== undefined ? getItem(effect.itemId).description : undefined)
 
   return (
     <Sheet centered title={effect.name} titleId="effect-title" onClose={onClose}>
@@ -76,9 +80,7 @@ export function EffectWindow({ side, id, onClose }: { side: Side; id: string; on
             ))}
           </dl>
         )}
-        {(skill?.description || special?.description) && (
-          <p className="effect-window__text">{skill?.description || special?.description}</p>
-        )}
+        {description && <p className="effect-window__text">{description}</p>}
       </div>
       {inDungeon && effect.dungeon && (
         <p className="sheet__meta">This dungeon blessing ends when the run ends.</p>
