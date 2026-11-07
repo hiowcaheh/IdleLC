@@ -6010,3 +6010,10 @@ input[type='range']:focus-visible {
   white-space: pre;
   pointer-events: none;
 }
+
+/* items that reach the bag outside a fight (Cash shop, boxes): the drop feed's look, above windows */
+.reward-feed.bag-feed {
+  position: fixed;
+  z-index: 70;
+  pointer-events: none;
+}

@@ -33,14 +33,14 @@ describe('Cash item shop (owner, 2026-11-07)', () => {
 
   it('takes the Cash and puts the offer in the bag, times the count', () => {
     const bought = applyCashBuy(hero(), 20000, 'proficiency-package', 2)
-    expect(bought.cash).toBe(20000 - 2 * 1900)
+    expect(bought.cash).toBe(20000 - 2 * 380)
     expect(bought.items).toEqual([
       { itemId: 1288, count: 4 },
       { itemId: 2453, count: 10 },
       { itemId: 2138, count: 2 },
     ])
     expect(bought.character.inventory.find((s) => s.itemId === 2453)?.count).toBe(10)
-    expect(() => applyCashBuy(hero(), 1899, 'proficiency-package', 1)).toThrow(/cash/)
+    expect(() => applyCashBuy(hero(), 379, 'proficiency-package', 1)).toThrow(/cash/)
     expect(() => applyCashBuy(hero(), 1e9, 'nothing', 1)).toThrow()
   })
 
@@ -54,7 +54,7 @@ describe('Cash item shop (owner, 2026-11-07)', () => {
       if (offer.was !== undefined) expect(offer.price).toBeLessThan(offer.was)
       if (offer.tabs.includes('sale')) expect(cashSaving(offer)).toBeGreaterThan(0)
     }
-    expect(cashOfferWorth(getCashOffer('proficiency-package')!)).toBe(2 * 400 + 5 * 400 + 300)
+    expect(cashOfferWorth(getCashOffer('proficiency-package')!)).toBe(2 * 80 + 5 * 80 + 60)
   })
 
   it('keeps the account Cash in the save; older v16 saves start with none', () => {

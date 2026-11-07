@@ -5,7 +5,7 @@
  *
  * Prices are own, set to the owner's rules: Cash is cheap and the shop is not pay-to-win. It sells
  * time-limited boosts and conveniences only, no upgrade stones and no gear; a one-hour potion costs
- * a few hundred Cash. Packages save about a third against buying their contents one by one; SALE
+ * 30 to 80 Cash (owner, 2026-11-07: all prices a fifth of the first ones). Packages save about a third against buying their contents one by one; SALE
  * offers keep their regular price in `was`.
  */
 import { GOLDEN_MAGNIFIER_ID, MAGNIFIER_ID } from './items.ts'
@@ -61,65 +61,65 @@ const pack = (
 
 export const CASH_OFFERS: readonly CashOffer[] = [
   // one-hour (Iris: three-hour) boosts
-  potion('adrenaline', 2138, 300, { tabs: ['hot', 'potions'], tag: 'hot' }),
-  potion('super-haste', 2845, 200, { tabs: ['hot', 'potions'], tag: 'hot' }),
-  potion('cooldown', 6916, 400, { tabs: ['hot', 'potions'] }),
-  potion('blessed-iris', 1288, 280, { was: 400, tabs: ['hot', 'sale', 'potions'] }),
-  potion('skill-pill', 2453, 400, { tabs: ['hot', 'potions'] }),
-  potion('berserker', 2853, 300, { was: 400, tabs: ['sale', 'potions'], tag: 'new' }),
-  potion('power', 2846, 300),
+  potion('adrenaline', 2138, 60, { tabs: ['hot', 'potions'], tag: 'hot' }),
+  potion('super-haste', 2845, 40, { tabs: ['hot', 'potions'], tag: 'hot' }),
+  potion('cooldown', 6916, 80, { tabs: ['hot', 'potions'] }),
+  potion('blessed-iris', 1288, 56, { was: 80, tabs: ['hot', 'sale', 'potions'] }),
+  potion('skill-pill', 2453, 80, { tabs: ['hot', 'potions'] }),
+  potion('berserker', 2853, 60, { was: 80, tabs: ['sale', 'potions'], tag: 'new' }),
+  potion('power', 2846, 60),
   {
     id: 'hp-steal',
     items: [{ itemId: 2357, count: 10 }],
-    price: 350,
-    was: 500,
+    price: 70,
+    was: 100,
     tabs: ['sale', 'potions'],
   },
-  { id: 'mp-steal', items: [{ itemId: 2356, count: 10 }], price: 500, tabs: ['potions'] },
-  potion('strength', 2849, 150),
-  potion('dexterity', 2850, 150),
-  potion('constitution', 2851, 150),
-  potion('intelligence', 2852, 150),
-  potion('shield', 2872, 200, { was: 300, tabs: ['sale', 'potions'] }),
-  potion('magic-shield', 2871, 300),
-  potion('critical-small', 2988, 150),
-  potion('critical-medium', 2989, 250),
-  potion('critical-big', 2990, 400),
+  { id: 'mp-steal', items: [{ itemId: 2356, count: 10 }], price: 100, tabs: ['potions'] },
+  potion('strength', 2849, 30),
+  potion('dexterity', 2850, 30),
+  potion('constitution', 2851, 30),
+  potion('intelligence', 2852, 30),
+  potion('shield', 2872, 40, { was: 60, tabs: ['sale', 'potions'] }),
+  potion('magic-shield', 2871, 60),
+  potion('critical-small', 2988, 30),
+  potion('critical-medium', 2989, 50),
+  potion('critical-big', 2990, 80),
   // five-minute event potions
-  potion('attack-large', 1315, 50),
-  potion('defense-large', 1314, 50),
-  potion('chocolate-small', 2043, 30),
-  potion('chocolate-medium', 2044, 50),
-  potion('chocolate-large', 2045, 80),
-  potion('chocolate-red', 1226, 100),
-  potion('chocolate-white', 1227, 100),
-  potion('candle', 1575, 60),
-  potion('red-pouch', 2631, 100),
+  potion('attack-large', 1315, 10),
+  potion('defense-large', 1314, 10),
+  potion('chocolate-small', 2043, 6),
+  potion('chocolate-medium', 2044, 10),
+  potion('chocolate-large', 2045, 16),
+  potion('chocolate-red', 1226, 20),
+  potion('chocolate-white', 1227, 20),
+  potion('candle', 1575, 12),
+  potion('red-pouch', 2631, 20),
   // conveniences
   {
     id: 'golden-magnifier',
     items: [{ itemId: GOLDEN_MAGNIFIER_ID, count: 1 }],
-    price: 200,
+    price: 40,
     tabs: ['items'],
   },
   {
     id: 'magnifier-10',
     items: [{ itemId: MAGNIFIER_ID, count: 10 }],
-    price: 300,
+    price: 60,
     tabs: ['items'],
   },
   {
     id: 'golden-magnifier-10',
     items: [{ itemId: GOLDEN_MAGNIFIER_ID, count: 10 }],
-    price: 1500,
+    price: 300,
     tabs: ['items', 'sale'],
-    was: 2000,
+    was: 400,
   },
   // packages: about a third off their contents
   pack(
     'starter-package',
     'Starter Package',
-    900,
+    180,
     [
       [2138, 1],
       [2845, 1],
@@ -132,7 +132,7 @@ export const CASH_OFFERS: readonly CashOffer[] = [
   pack(
     'proficiency-package',
     'Proficiency Package',
-    1900,
+    380,
     [
       [1288, 2],
       [2453, 5],
@@ -140,27 +140,27 @@ export const CASH_OFFERS: readonly CashOffer[] = [
     ],
     { tabs: ['hot', 'packages'], tag: 'hot' },
   ),
-  pack('hunter-package', 'Hunter Package', 2100, [
+  pack('hunter-package', 'Hunter Package', 420, [
     [2853, 3],
     [2846, 3],
     [2990, 3],
   ]),
-  pack('guardian-package', 'Guardian Package', 1600, [
+  pack('guardian-package', 'Guardian Package', 320, [
     [2872, 3],
     [2871, 3],
     [2851, 5],
   ]),
-  pack('attribute-package', 'Attribute Package', 1100, [
+  pack('attribute-package', 'Attribute Package', 220, [
     [2849, 3],
     [2850, 3],
     [2851, 3],
     [2852, 3],
   ]),
-  pack('steal-package', 'Steal Package', 700, [
+  pack('steal-package', 'Steal Package', 140, [
     [2357, 10],
     [2356, 10],
   ]),
-  pack('sweets-package', 'Sweets Package', 950, [
+  pack('sweets-package', 'Sweets Package', 190, [
     [2045, 10],
     [2631, 5],
     [1575, 5],

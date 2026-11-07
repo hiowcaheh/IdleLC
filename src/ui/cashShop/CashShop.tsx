@@ -1,8 +1,8 @@
 /**
  * The item shop paid in Cash (owner's requests, 2026-11-07), built on the client's Cashshop.tex:
  * its category pictures on the tabs, its item panel for every offer (all the same size), its HOT /
- * NEW / D.C. tags, its gold-ended Cash bar and blue button (Top up), its icon slots in a package's
- * contents. Bought items also rise on the left of the screen (PurchaseFeed).
+ * NEW / D.C. tags, its gold-ended Cash bar and blue button (Donate), its icon slots in a package's
+ * contents. Bought items also rise on the left of the screen (BagFeed).
  */
 import { useState } from 'react'
 import {
@@ -97,15 +97,18 @@ export function CashShopPanel({ onClose }: { onClose(): void }) {
       titleId="cash-shop-title"
       className="sheet--fixed cash-shop"
       onClose={onClose}
+      extra={
+        <div className="cash-wallet">
+          <button type="button" className="cash-button" onClick={() => setTopUp(true)}>
+            Donate
+          </button>
+          <p className="shop__gold cash-wallet__box" aria-label={`${fmt(cash)} Cash`}>
+            <span className="coin coin--small coin--cash" aria-hidden="true" />
+            <span>{fmt(cash)}</span>
+          </p>
+        </div>
+      }
     >
-      <div className="cash-wallet">
-        <span className="cash-wallet__bar" aria-label="Your Cash">
-          <Cash amount={cash} />
-        </span>
-        <button type="button" className="cash-button" onClick={() => setTopUp(true)}>
-          Top up
-        </button>
-      </div>
       <div className="tabs cash-tabs" role="tablist" aria-label="Shop pages">
         {CASH_TABS.map((t) => (
           <button
@@ -198,7 +201,25 @@ function PackageContents({ offer }: { offer: CashOffer }) {
   )
 }
 
-/** How many to buy, like the gold shop's window; a package lists what it holds. */
+/** What an offer is, in its detail window's head: a potion's duration, a package's size. */
+function offerKind(offer: CashOffer): string {
+  if (offer.items.length > 1) return `Package · ${fmt(pieces(offer))} items`
+  const item = getItem(offer.items[0]!.itemId)
+  const count = offer.items[0]!.count
+  const what = item.potion ? 'Potion' : item.type === 'scroll' ? 'Scroll' : 'Item'
+  const lasts = item.potion?.duration
+  const time = !lasts
+    ? ''
+    : lasts >= 3600 && lasts % 3600 === 0
+      ? ` · ${lasts / 3600} h`
+      : ` · ${Math.round(lasts / 60)} min`
+  return `${what}${time}${count > 1 ? ` · ×${fmt(count)}` : ''}`
+}
+
+/**
+ * An offer's window: the item (or package) with its price on top, what it does (or holds) in the
+ * middle, the purchase at the bottom on its own panel: amount, total and Cash left, Buy.
+ */
 function CashBuyDialog({ offer, onClose }: { offer: CashOffer; onClose(): void }) {
   const cash = useGameStore((s) => s.save.cash)
   const buy = useGameStore((s) => s.buyCashOffer)
@@ -208,6 +229,7 @@ function CashBuyDialog({ offer, onClose }: { offer: CashOffer; onClose(): void }
   const amount = Math.max(1, Math.min(count, Math.max(1, max)))
   const single = offer.items.length === 1 ? getItem(offer.items[0]!.itemId) : null
   const saving = cashSaving(offer)
+  const worth = cashOfferWorth(offer)
   const set = (n: number) => setCount(Math.max(1, Math.min(Math.max(1, max), Math.round(n) || 1)))
 
   const confirm = async () => {
@@ -229,33 +251,42 @@ function CashBuyDialog({ offer, onClose }: { offer: CashOffer; onClose(): void }
   }
 
   return (
-    <Sheet centered title="Buy" titleId="cash-buy-title" className="sheet--buy" onClose={onClose}>
-      <div className="item-info buy-dialog cash-buy">
-        <div className="item-info__head">
-          <span className="cash-contents__slot cash-contents__slot--big">
-            <OfferIcon offer={offer} size={40} />
-          </span>
-          <span className="item-info__title">
-            <span className="item-info__name">{offerName(offer)}</span>
-            <span className="item-info__kind">
-              <Price offer={offer} />
-              {saving > 0 && <span className="cash-offer__saving">−{saving}%</span>}
-            </span>
-          </span>
+    <Sheet
+      centered
+      title={offerName(offer)}
+      titleId="cash-buy-title"
+      className="sheet--buy cash-detail"
+      onClose={onClose}
+    >
+      <div className="cash-detail__head">
+        <span className="cash-contents__slot cash-contents__slot--big">
+          <OfferIcon offer={offer} size={40} />
+        </span>
+        <span className="cash-detail__title">
+          <span className="cash-detail__name">{offerName(offer)}</span>
+          <span className="cash-detail__kind">{offerKind(offer)}</span>
+        </span>
+        <span className="cash-detail__price">
+          {worth > offer.price && <s className="cash-price__was">{fmt(worth)}</s>}
+          <Cash amount={offer.price} />
+          {saving > 0 && <span className="cash-offer__saving">−{saving}%</span>}
+        </span>
+      </div>
+      {single ? (
+        <div className="cash-detail__body">
+          {single.description && <p className="cash-detail__desc">{single.description}</p>}
+          {single.potion && <PotionInfo potion={single.potion} />}
         </div>
-        {single ? (
-          <>
-            {single.description && <p className="cash-buy__text">{single.description}</p>}
-            {single.potion && <PotionInfo potion={single.potion} />}
-          </>
-        ) : (
-          <PackageContents offer={offer} />
-        )}
+      ) : (
+        <PackageContents offer={offer} />
+      )}
+      <div className="cash-detail__buy">
         {max < 1 ? (
           <p className="sheet__empty">Not enough Cash.</p>
         ) : (
           <>
-            <div className="buy-dialog__amount">
+            <div className="cash-detail__amount">
+              <span className="cash-detail__label">Amount</span>
               <button
                 type="button"
                 className="button buy-dialog__step"
@@ -278,29 +309,26 @@ function CashBuyDialog({ offer, onClose }: { offer: CashOffer; onClose(): void }
                 +
               </button>
             </div>
-            <input
-              type="range"
-              aria-label="Amount"
-              min={1}
-              max={max}
-              value={amount}
-              disabled={max <= 1}
-              onChange={(e) => set(Number(e.target.value))}
-            />
-            <dl className="hero-stats hero-stats--single item-info__stats">
-              <div>
-                <dt>Total</dt>
-                <dd>
-                  <Cash amount={offer.price * amount} />
-                </dd>
-              </div>
-              <div>
-                <dt>Cash left</dt>
-                <dd>
-                  <Cash amount={cash - offer.price * amount} />
-                </dd>
-              </div>
-            </dl>
+            {max > 1 && (
+              <input
+                type="range"
+                aria-label="Amount"
+                min={1}
+                max={max}
+                value={amount}
+                onChange={(e) => set(Number(e.target.value))}
+              />
+            )}
+            <div className="cash-detail__sums">
+              <span>
+                <span className="cash-detail__label">Total</span>
+                <Cash amount={offer.price * amount} />
+              </span>
+              <span>
+                <span className="cash-detail__label">Cash left</span>
+                <Cash amount={cash - offer.price * amount} />
+              </span>
+            </div>
             <button
               type="button"
               className="cash-button cash-button--wide"
@@ -327,7 +355,7 @@ const TOP_UPS: [euro: number, bonus: number][] = [
 /** How to top up Cash: the rate, the packs, PayPal and Discord. */
 function TopUpInfo({ onClose }: { onClose(): void }) {
   return (
-    <Sheet centered title="Top up Cash" titleId="cash-topup-title" onClose={onClose}>
+    <Sheet centered title="Donate" titleId="cash-topup-title" onClose={onClose}>
       <div className="cash-topup">
         <p className="cash-topup__rate">
           <strong>1 €</strong> = <Cash amount={CASH_PER_EURO} />
@@ -352,7 +380,7 @@ function TopUpInfo({ onClose }: { onClose(): void }) {
             ))}
           </tbody>
         </table>
-        <h3 className="cash-topup__head">How to top up</h3>
+        <h3 className="cash-topup__head">How to donate</h3>
         <ol className="cash-topup__steps">
           <li>
             Pay with <strong>PayPal</strong> the amount of the pack you want.
@@ -365,7 +393,7 @@ function TopUpInfo({ onClose }: { onClose(): void }) {
           Contact us on our <strong>Discord</strong> server: the team answers every day.
         </p>
         <p className="cash-topup__note">
-          Top-ups open soon. The shop sells no upgrade stones and no gear.
+          Donations open soon. The shop sells no upgrade stones and no gear.
         </p>
         <button type="button" className="cash-button cash-button--wide" onClick={onClose}>
           OK

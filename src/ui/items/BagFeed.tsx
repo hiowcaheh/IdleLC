@@ -1,13 +1,13 @@
 /**
- * What was just bought in the Cash shop, on the left of the screen like the drops of a kill: one
- * line per item, appearing one after another, above the shop window.
+ * What just reached the bag (Cash shop purchases, opened boxes), on the left of the screen in the
+ * look of a kill's drops: one line per item, one after another, above the open windows.
  */
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { getItem } from '../../game/data/items.ts'
-import { purchaseFeed } from '../../state/purchases.ts'
-import { fmt } from '../gear/format.ts'
-import { ItemIcon } from '../items/ItemIcon.tsx'
+import { bagFeed } from '../../state/bagFeed.ts'
+import { fmt, nameTone } from '../gear/format.ts'
+import { ItemIcon } from './ItemIcon.tsx'
 
 /** Keep in step with the reward feed's rise animation. */
 const RISE_MS = 3600
@@ -21,7 +21,7 @@ interface Line {
 }
 let nextId = 1
 
-export function PurchaseFeed() {
+export function BagFeed() {
   const [lines, setLines] = useState<Line[]>([])
   useEffect(() => {
     const timers = new Set<ReturnType<typeof setTimeout>>()
@@ -32,7 +32,7 @@ export function PurchaseFeed() {
       }, ms)
       timers.add(timer)
     }
-    const unsubscribe = purchaseFeed.subscribe((items) => {
+    const unsubscribe = bagFeed.subscribe((items) => {
       items.forEach((item, i) => {
         const id = nextId++
         later(i * STEP_MS, () => {
@@ -48,14 +48,14 @@ export function PurchaseFeed() {
   }, [])
   if (lines.length === 0) return null
   return createPortal(
-    <ul className="reward-feed purchase-feed" aria-label="Bought">
+    <ul className="reward-feed bag-feed" aria-label="Added to the bag">
       {lines.map((line) => {
         const item = getItem(line.itemId)
         return (
           <li key={line.id} className="reward-feed__group">
-            <span className="reward-feed__entry purchase-feed__entry">
+            <span className="reward-feed__entry reward-feed__entry--item">
               <ItemIcon item={item} size={22} />
-              <span className="reward-feed__name">
+              <span className={`reward-feed__name${nameTone({ itemId: line.itemId })}`}>
                 {item.name}
                 {line.count > 1 ? ` ×${fmt(line.count)}` : ''}
               </span>

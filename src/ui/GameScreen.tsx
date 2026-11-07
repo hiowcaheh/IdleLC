@@ -1,5 +1,5 @@
 import { CashShopButton, CashShopPanel } from './cashShop/CashShop.tsx'
-import { PurchaseFeed } from './cashShop/PurchaseFeed.tsx'
+import { BagFeed } from './items/BagFeed.tsx'
 import { useMemo, useState } from 'react'
 import { skillsForClass } from '../game/data/skills.ts'
 import { checkLearn } from '../game/logic/skills.ts'
@@ -162,7 +162,7 @@ export function GameScreen() {
       {titlesOpen && <TitlesPanel onClose={() => setTitlesOpen(false)} />}
       {dungeonsOpen && <DungeonsPanel onClose={() => setDungeonsOpen(false)} />}
       {shopOpen && <CashShopPanel onClose={() => setShopOpen(false)} />}
-      <PurchaseFeed />
+      <BagFeed />
       <DungeonResult />
       <AfkSummary />
       <Toasts />

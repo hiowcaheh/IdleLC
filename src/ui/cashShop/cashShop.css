@@ -38,25 +38,20 @@
   font-size: 0.85em;
 }
 
-/* the account's Cash on the client's gold-ended bar, the Top up button beside it */
+/* the account's Cash in the same value box as the gold of the other windows, Donate beside it */
 .cash-wallet {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  margin-bottom: 8px;
 }
-.cash-wallet__bar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  min-width: 132px;
-  height: 24px;
-  padding: 0 14px;
-  font-size: 0.9em;
-  border: solid transparent;
-  border-width: 0 10px;
-  border-image: url('/ui/lc/cash-bar.webp?v=5985d449') 0 20 fill / 0 10px stretch;
+.cash-wallet__box {
+  margin: 0;
+  color: #9fdcff;
+}
+/* the client's gold coin turned blue: Cash is not gold */
+.coin--cash {
+  filter: hue-rotate(185deg) saturate(1.4) brightness(1.15);
 }
 /* the client's blue shop button (normal / pressed) */
 .cash-button {
@@ -372,17 +367,102 @@
   font-size: 0.82em;
 }
 
-/* the bought items rise on the left, above the shop window (PurchaseFeed) */
-.reward-feed.purchase-feed {
-  position: fixed;
-  z-index: 70;
-  pointer-events: none;
+/* an offer's window: head with the price, body, purchase panel */
+.sheet.cash-detail {
+  max-width: 420px;
 }
-.purchase-feed__entry {
-  padding: 2px 10px 2px 2px;
-  color: #ffe08a;
-  border: 1px solid #a8843c;
+.cash-detail__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'icon title'
+    'icon price';
+  gap: 2px 10px;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #5d4a2e;
+}
+.cash-detail__head > .cash-contents__slot {
+  grid-area: icon;
+}
+.cash-detail__title {
+  display: grid;
+  grid-area: title;
+  min-width: 0;
+}
+.cash-detail__name {
+  overflow: hidden;
+  color: #f1e3bf;
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.cash-detail__kind {
+  color: #a9a08a;
+  font-size: 0.8em;
+}
+.cash-detail__price {
+  display: flex;
+  grid-area: price;
+  align-items: center;
+  justify-self: start;
+  gap: 6px;
+  padding: 1px 8px;
+  border: solid transparent;
+  border-width: 3px 5px;
+  border-image: url('/ui/lc/value-box.webp') 3 5 fill / 3px 5px stretch;
+}
+.cash-detail__body {
+  display: grid;
+  gap: 6px;
+  padding: 8px 0 4px;
+}
+.cash-detail__desc {
+  margin: 0;
+  color: #d9ccaa;
+  font-size: 0.88em;
+  font-style: italic;
+}
+.cash-detail .potion-info .potion-notes {
+  font-size: 0.82em;
+}
+.cash-detail__buy {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 10px 10px;
+  border: 1px solid #00000080;
   border-radius: 3px;
-  background: linear-gradient(90deg, #1b1610f2, #241c12e6);
-  box-shadow: 0 2px 6px #000c;
+  background: #0000002e;
+  box-shadow: inset 0 1px 0 #ffffff0d;
+}
+.cash-detail__label {
+  color: #a9a08a;
+  font-size: 0.8em;
+}
+.cash-detail__amount {
+  display: grid;
+  grid-template-columns: 1fr auto 64px auto;
+  align-items: center;
+  gap: 6px;
+}
+.cash-detail__amount .buy-dialog__input {
+  width: 100%;
+}
+.cash-detail__sums {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.cash-detail__sums > span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px 6px;
+  border: solid transparent;
+  border-width: 3px 5px;
+  border-image: url('/ui/lc/value-box.webp') 3 5 fill / 3px 5px stretch;
+}
+.cash-detail .cash-button--wide {
+  margin-top: 0;
 }
