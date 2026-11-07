@@ -30,7 +30,13 @@ const EVENT_BUTTON = 128
  * The quick-menu frame with a dark well inside (top and bottom shade of the client's empty slots)
  * and the world map's dungeon mark in it: a button of the same look as Character, Inventory, ….
  */
-async function dungeonButton(frameWebp, markWebp, well = WELL_TOPUI, side = BUTTON) {
+async function dungeonButton(
+  frameWebp,
+  markWebp,
+  well = WELL_TOPUI,
+  side = BUTTON,
+  brightness = well === WELL_EVENT ? 1.5 : 1.15,
+) {
   const { data, info } = await sharp(frameWebp).raw().toBuffer({ resolveWithObject: true })
   const size = info.width
   for (let y = BORDER; y < size - BORDER; y++) {
@@ -52,7 +58,7 @@ async function dungeonButton(frameWebp, markWebp, well = WELL_TOPUI, side = BUTT
   const mark = await sharp(markWebp)
     .resize({ height: Math.round(inner), fit: 'inside' })
     // a touch brighter: on the map it lies on a light parchment, here in a dark well
-    .modulate({ brightness: well === WELL_EVENT ? 1.5 : 1.15 })
+    .modulate({ brightness })
     .png()
     .toBuffer()
   const { width = 0, height = 0 } = await sharp(mark).metadata()
@@ -79,12 +85,25 @@ for (const name of [
   'menu-dungeon-loot',
   'slider-track',
   'slider-thumb',
+  'cash-hot',
+  'cash-items',
+  'cash-packages',
+  'cash-potions',
+  'cash-tag-new',
+  'cash-tag-hot',
+  'cash-slot',
 ])
   fs.writeFileSync(`public/ui/lc/${name}.webp`, ui[name])
 // the client's event / notice square on the right of the screen (owner's choice, 2026-11-07)
 await sharp(await dungeonButton(ui['event-frame'], ui['menu-dungeons'], WELL_EVENT, EVENT_BUTTON))
   .webp({ lossless: true })
   .toFile('public/ui/lc/menu-dungeons.webp')
+// the item shop button below it (owner's request, 2026-11-07): the shop's gift-box picture
+await sharp(
+  await dungeonButton(ui['event-frame'], ui['cash-packages'], WELL_EVENT, EVENT_BUTTON, 1),
+)
+  .webp({ lossless: true })
+  .toFile('public/ui/lc/menu-shop.webp')
 /**
  * The part of each D_0n loading picture shown in the Dungeons window, inside its ragged black
  * border and above the publisher's emblem (y 378–405). Belfist and Procyon keep the statues at

@@ -84,7 +84,14 @@ import {
   type SaveData,
   type Settings,
 } from '../logic/save.ts'
-import type { BoxOpening, DevCommands, GameService, KeyValueStorage } from './GameService.ts'
+import type {
+  BoxOpening,
+  CashPurchase,
+  DevCommands,
+  GameService,
+  KeyValueStorage,
+} from './GameService.ts'
+import { applyCashBuy } from '../logic/cashShop.ts'
 
 export const SAVE_KEY = 'idlelc.save'
 
@@ -577,6 +584,13 @@ export class LocalGameService implements GameService {
     return copy({ ...purchase, character: updated })
   }
 
+  async buyCashOffer(characterId: string, offerId: string, count: number): Promise<CashPurchase> {
+    const purchase = applyCashBuy(this.notOnExpedition(characterId), this.save.cash, offerId, count)
+    this.save = { ...this.save, cash: purchase.cash }
+    const updated = this.update(characterId, () => purchase.character)
+    return copy({ ...purchase, character: updated })
+  }
+
   async openBoxes(characterId: string, itemId: number, count: number): Promise<BoxOpening> {
     const opening = applyOpenBoxes(this.notOnExpedition(characterId), itemId, count, this.rng)
     const updated = this.update(characterId, () => opening.character)
@@ -665,6 +679,11 @@ export class LocalGameService implements GameService {
           return { ...c, level: progress.level, exp: progress.exp }
         }),
       ),
+    addCash: async (amount) => {
+      this.save = { ...this.save, cash: Math.max(0, this.save.cash + Math.floor(amount)) }
+      this.persist()
+      return this.save.cash
+    },
     addGold: async (characterId, amount) =>
       copy(
         this.update(characterId, (c) => ({

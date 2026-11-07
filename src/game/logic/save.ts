@@ -3,6 +3,7 @@
  * The save is one account: settings + up to MAX_CHARACTERS characters (future database rows).
  * When the shape changes: bump SAVE_VERSION and add a migration from the previous version.
  */
+import { sanitizeCash } from './cashShop.ts'
 import { sanitizeAllocatedStats } from './statPoints.ts'
 import { dungeonRefundDue, sanitizeDungeonProgress } from './dungeons.ts'
 import { BOOK_MILESTONES } from '../data/bookRewards.ts'
@@ -68,6 +69,8 @@ export interface SaveData {
   characters: CharacterData[]
   /** Character that was in play when the game was closed (reopens straight into the game). */
   activeCharacterId: string | null
+  /** The account's item-shop currency (data/cashShop.ts); absent in older v16 saves = 0. */
+  cash: number
 }
 
 /** Upgrades a save from version N to N + 1. */
@@ -206,6 +209,7 @@ export function createDefaultSave(now = Date.now()): SaveData {
     settings: { ...DEFAULT_SETTINGS },
     characters: [],
     activeCharacterId: null,
+    cash: 0,
   }
 }
 
@@ -540,6 +544,7 @@ function sanitize(raw: Record<string, unknown>, now: number): SaveData {
     settings: sanitizeSettings(raw.settings),
     characters,
     activeCharacterId: active ? active.id : null,
+    cash: sanitizeCash(raw.cash),
   }
 }
 

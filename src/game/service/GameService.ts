@@ -14,6 +14,13 @@ import type { TitleUse } from '../logic/titles.ts'
 import type { DungeonId } from '../data/dungeons.ts'
 import type { DungeonPoint, DungeonUpdate } from '../logic/dungeons.ts'
 
+/** A Cash shop purchase: the character with the items, and the account's Cash left. */
+export interface CashPurchase {
+  character: CharacterData
+  cash: number
+  items: ItemStack[]
+}
+
 /** Boxes opened: the character after, and the prizes summed by item. */
 export interface BoxOpening {
   character: CharacterData
@@ -97,6 +104,8 @@ export interface GameService {
     targets: IdentifyTarget[],
   ): Promise<IdentifyResult>
   /** Uses a title item from the bag: its title is added for its days (worn if none is). */
+  /** Buys `count` of a Cash shop offer for the character with the account's Cash. */
+  buyCashOffer(characterId: string, offerId: string, count: number): Promise<CashPurchase>
   /** Opens `count` dungeon boxes of the kind from the bag (data/boxes.ts). */
   openBoxes(characterId: string, itemId: number, count: number): Promise<BoxOpening>
   redeemTitleItem(characterId: string, itemId: number): Promise<TitleUse>
@@ -130,6 +139,8 @@ export interface DevCommands {
   addTitleItem(characterId: string, titleId: number): Promise<CharacterData>
   /** Gives back today's dungeon entries (the runs already made are not undone). */
   resetDungeonEntries(characterId: string): Promise<CharacterData>
+  /** Adds Cash to the account; resolves with the new amount. */
+  addCash(amount: number): Promise<number>
 }
 
 /** Subset of the Web Storage API — lets tests use an in-memory store. */

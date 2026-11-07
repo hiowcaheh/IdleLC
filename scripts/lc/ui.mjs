@@ -46,6 +46,14 @@ export const UI_PARTS = {
   'slider-thumb': [atlas('NewOption'), 283, 5, 17, 10, { scale: 4 }],
   // EventBtn0's first square: the frame of the client's event / notice buttons on the right
   'event-frame': [atlas('EventBtn0'), 0, 0, 32, 32],
+  // the item shop (Cashshop.tex): category pictures, NEW / HOT tags and the item frame
+  'cash-hot': [atlas('Cashshop'), 0, 357, 60, 60],
+  'cash-items': [atlas('Cashshop'), 63, 357, 60, 60],
+  'cash-packages': [atlas('Cashshop'), 252, 357, 60, 60],
+  'cash-potions': [atlas('Cashshop'), 0, 420, 60, 60],
+  'cash-tag-new': [atlas('Cashshop'), 183, 501, 22, 11, { scale: 3 }],
+  'cash-tag-hot': [atlas('Cashshop'), 208, 501, 22, 11, { scale: 3 }],
+  'cash-slot': [atlas('Cashshop'), 217, 153, 72, 69, { scale: 2 }],
   // the dungeon's loot: the icon of t_item 298 Old Pouch (ItemBtn1, row 7, column 13), a pouch the
   // Harpy Queen of Dratan drops, so it is not the field's Inventory button (owner's choice)
   'menu-dungeon-loot': [atlas('ItemBtn1'), 416, 224, 32, 32, { scale: 4 }],

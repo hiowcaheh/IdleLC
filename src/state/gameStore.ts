@@ -96,6 +96,9 @@ interface GameStore {
   unequipItem(slot: EquipSlot): Promise<void>
   upgradeItem(slot: EquipSlot): Promise<UpgradeResult>
   exchangeStones(count: number): Promise<void>
+  /** Buys from the Cash shop; resolves with what went into the bag. */
+  buyCashOffer(offerId: string, count: number): Promise<ItemStack[]>
+  devAddCash(amount: number): void
   /** Opens dungeon boxes from the bag; resolves with the prizes. */
   openBoxes(itemId: number, count: number): Promise<ItemStack[]>
   buyItem(itemId: number, count: number): Promise<PurchaseResult>
@@ -562,6 +565,20 @@ export const useGameStore = create<GameStore>((set, get) => {
     async exchangeStones(count) {
       const id = playedId()
       applyCharacter(await enqueue(() => gameService.exchangeStones(id, count)))
+    },
+
+    async buyCashOffer(offerId, count) {
+      const id = playedId()
+      const purchase = await enqueue(() => gameService.buyCashOffer(id, offerId, count))
+      applyCharacter(purchase.character)
+      set({ save: { ...get().save, cash: purchase.cash } })
+      return purchase.items
+    },
+
+    devAddCash(amount) {
+      enqueue(async () => (await gameService.dev?.addCash(amount)) ?? get().save.cash)
+        .then((cash) => set({ save: { ...get().save, cash } }))
+        .catch(logError)
     },
 
     async openBoxes(itemId, count) {

@@ -26,6 +26,7 @@ export function DevPanel() {
   const devAddExp = useGameStore((s) => s.devAddExp)
   const devAddGold = useGameStore((s) => s.devAddGold)
   const devAddSp = useGameStore((s) => s.devAddSp)
+  const devAddCash = useGameStore((s) => s.devAddCash)
   const devKillTarget = useGameStore((s) => s.devKillTarget)
   const devHeal = useGameStore((s) => s.devHeal)
   const devSimulateAfk = useGameStore((s) => s.devSimulateAfk)
@@ -139,6 +140,9 @@ export function DevPanel() {
         </button>
         <button type="button" className="dev-chip" onClick={() => devAddSp(10)}>
           +10 SP
+        </button>
+        <button type="button" className="dev-chip" onClick={() => devAddCash(10000)}>
+          +10,000 Cash
         </button>
       </div>
 

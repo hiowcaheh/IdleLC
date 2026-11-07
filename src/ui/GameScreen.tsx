@@ -1,3 +1,4 @@
+import { CashShopButton, CashShopPanel } from './cashShop/CashShop.tsx'
 import { useMemo, useState } from 'react'
 import { skillsForClass } from '../game/data/skills.ts'
 import { checkLearn } from '../game/logic/skills.ts'
@@ -40,6 +41,7 @@ export function GameScreen() {
   const [characterOpen, setCharacterOpen] = useState(false)
   const [titlesOpen, setTitlesOpen] = useState(false)
   const [dungeonsOpen, setDungeonsOpen] = useState(false)
+  const [shopOpen, setShopOpen] = useState(false)
   const dungeon = useGameStore((s) => s.dungeon)
   const devTools = useDevTools((s) => s.enabled)
   const character = useGameStore((s) => s.character)
@@ -123,6 +125,7 @@ export function GameScreen() {
                   </svg>
                 </button>
                 <DungeonsButton onClick={() => setDungeonsOpen(true)} />
+                <CashShopButton onClick={() => setShopOpen(true)} />
               </>
             )}
           </div>
@@ -157,6 +160,7 @@ export function GameScreen() {
       {characterOpen && <CharacterPanel onClose={() => setCharacterOpen(false)} />}
       {titlesOpen && <TitlesPanel onClose={() => setTitlesOpen(false)} />}
       {dungeonsOpen && <DungeonsPanel onClose={() => setDungeonsOpen(false)} />}
+      {shopOpen && <CashShopPanel onClose={() => setShopOpen(false)} />}
       <DungeonResult />
       <AfkSummary />
       <Toasts />
