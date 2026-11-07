@@ -159,7 +159,9 @@ describe('dungeons on the original database', () => {
 
   it('offers distinct cross-class buffs at rank one, including advanced class definitions', () => {
     expect(DUNGEON_BUFFS.length).toBeGreaterThanOrEqual(19)
-    expect(new Set(DUNGEON_BUFFS.map((id) => dungeonBuffDefinition(id)!.classId)).size).toBe(6)
+    // the six classes; the extra blessings (sourceLevel, 2026-11-07) come from items and mounts
+    const classBuffs = DUNGEON_BUFFS.filter((id) => !dungeonBuffDefinition(id)!.sourceLevel)
+    expect(new Set(classBuffs.map((id) => dungeonBuffDefinition(id)!.classId)).size).toBe(6)
     expect(
       DUNGEON_BUFFS.some((id) => dungeonBuffDefinition(id)!.levels.at(-1)!.learnLevel > 30),
     ).toBe(true)

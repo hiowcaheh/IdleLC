@@ -417,6 +417,19 @@ function buildData(tables) {
       last.effects.every((e) => e.type === 0 || e.type === 1)
     )
   })
+  // the extra blessings at the one level they are offered (renumbered 1, the source level kept)
+  for (const skill of buildSkills(tables, new Set(EXTRA_DUNGEON_BUFFS.map((b) => b.id)))) {
+    const extra = EXTRA_DUNGEON_BUFFS.find((b) => b.id === skill.id)
+    const row = skill.levels.find((l) => l.level === extra.level)
+    if (!row) throw new Error(`No level ${extra.level} of skill ${skill.id}`)
+    dungeonBuffs.push({
+      ...skill,
+      classId: extra.origin,
+      sourceLevel: extra.level,
+      // a pet's strengthening has no duration of its own; a blessing lasts to the end of the run
+      levels: [{ ...row, level: 1, duration: Math.max(row.duration, 6000) }],
+    })
+  }
   const npcSkillIds = new Set(monsters.flatMap((m) => (m.skills ?? []).map((s) => s.id)))
   const npcSkills = buildSkills(tables, npcSkillIds).map((definition) => {
     const skill = { ...definition }
@@ -858,6 +871,21 @@ function buildGearReference(pool) {
 
 /** t_skill.a_job → IdleLC class (base classes only; a_job2 = 0 are the skills before a subclass). */
 const SKILL_CLASSES = ['titan', 'knight', 'healer', 'mage', 'rogue', 'sorcerer']
+
+/**
+ * Dungeon blessings beyond the class buffs (owner's request, 2026-11-07), each at one fixed level:
+ * Basic Ignition 2 (an item skill: +200% attack and magic attack), the horse's Attack Power
+ * Increase and Armor Increase at 30 (their top level), and two picked by Claude: the mount's HP/MP
+ * up at 10 (its top level) and the dragon's Magical Power at 30, the casters' counterpart of the
+ * horse's attack. `origin` is shown where class buffs show their class.
+ */
+export const EXTRA_DUNGEON_BUFFS = [
+  { id: 1062, level: 2, origin: 'item' },
+  { id: 257, level: 30, origin: 'horse' },
+  { id: 259, level: 30, origin: 'horse' },
+  { id: 270, level: 10, origin: 'mount' },
+  { id: 276, level: 30, origin: 'dragon' },
+]
 
 /**
  * Class skills 1:1: t_skill (name, description, type, timings in 1/10 s, icon) with every level from

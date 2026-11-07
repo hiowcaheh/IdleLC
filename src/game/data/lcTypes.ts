@@ -160,6 +160,8 @@ export interface LcSkill {
   fireRange?: number
   fireRange2?: number
   icon: { atlas: number; row: number; col: number }
+  /** Extra dungeon blessings: the source level of their single (renumbered) level. */
+  sourceLevel?: number
   levels: {
     level: number
     mp: number

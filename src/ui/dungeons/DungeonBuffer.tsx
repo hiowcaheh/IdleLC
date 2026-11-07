@@ -97,7 +97,7 @@ export function DungeonBuffer() {
                       <i key={i} className={i < level ? 'is-on' : undefined} />
                     ))}
                   </span>
-                  Lv {level} / {max}
+                  {skill.sourceLevel ? `Lv ${skill.sourceLevel}, fixed` : `Lv ${level} / ${max}`}
                 </span>
               </div>
               {/* each effect now, and what the next level makes of it */}

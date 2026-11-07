@@ -643,7 +643,7 @@ export function DungeonHud() {
                       <small>
                         {special
                           ? 'Super blessing, fixed power'
-                          : `${skill!.classId}, rank ${rank.level}`}
+                          : `${skill!.classId}, rank ${skill!.sourceLevel ?? rank.level}`}
                       </small>
                     </span>
                   </span>

@@ -362,6 +362,8 @@ export interface SkillLevelDef {
 export interface SkillDef {
   id: number
   classId: ClassId
+  /** Extra dungeon blessings at a fixed level: the source level of their single level. */
+  sourceLevel?: number
   name: string
   description: string
   /** t_skill.a_type: 0 melee, 1 ranged, 2 magic, 3 passive. */
