@@ -4,7 +4,9 @@ Aktualizacja 2026-11-07, później (Claude Code): [czwarta partia](docs/owner-ba
 Skrzynki podziemi 95001–95003 (5%, model `ITEM_treasure02` na podłodze, `data/boxes.ts`), sklep
 za **Cash** (konto: `SaveData.cash`, `data/cashShop.ts`, ceny z `t_catalog` albo własne),
 nowe mikstury-boosty z regułami serwera (steal, berserker, EXP/SP także poza podziemiami),
-5 buffów podziemi o stałym poziomie (`EXTRA_DUNGEON_BUFFS`), suwaki z klienta, `runFrom`.
+5 buffów podziemi o stałym poziomie (`EXTRA_DUNGEON_BUFFS`: Ignition 2, Offensive / Defensive
+Howling konia 12, Moon Cake, Stars), suwaki z klienta, `runFrom`. Sklep: ceny własne i tanie
+(1000 Cash = 1 €), bez kamieni i sprzętu (nie pay2win), zakładka SALE, paczki ~1/3 taniej.
 Nadal SaveVersion **16**. Otwarte: źródło Cash, „Kar/Neon 12 lv”.
 
 Aktualizacja 2026-11-07 (Claude Code): **efekty z klienta, etap 2** i **trzecia partia Dungeons**.

@@ -116,3 +116,47 @@ Super Haste 1 500, 100 Cooldown 2 100, Berserker 2 900, potki statystyk 1 000, H
 - **Do decyzji:** `combat.ts` czyta STR/DEX/INT/CON (`MST_STAT` 29–32) **tylko dla mikstur**.
   Twoje buffy 161 Fire Command, 1620 Ultimate Strength i 1806 Mark of Thunder też je mają, ale
   dziś są pomijane przez `interpretEffect`. Nie zmieniałem ich działania.
+
+## Piąta partia (Claude Code, 2026-11-07)
+
+1. **Buffy konia poprawione.** Zamiast pasywnych umiejętności zwierzaka (257, 259) są
+   umiejętności konia-wierzchowca, poziom 12 (najwyższy; koń uczy się ich od 31 do 50 poziomu):
+   - **Offensive Howling:** +100 ataku, +70 ataku magicznego;
+   - **Defensive Howling:** +480 obrony, +20 obrony magicznej.
+
+   Na poziomie zwierzaka 38 dostępny jest poziom 10 (+90 / +60 i +450 / +10). Jeśli tak ma być,
+   wystarczy zmienić `level` w `EXTRA_DUNGEON_BUFFS`.
+
+2. **Nowe propozycje zamiast moich dwóch:**
+   - **Moon Cake:** +15% szybkości ataku i +1,5 biegu, czyli ucieczka przed hordą;
+   - **Stars:** +50 ataku, ataku magicznego i obrony, dla każdej klasy.
+
+   Oba mają ikony swoich przedmiotów (`icons.mjs` `ITEM_ATLAS`). Wszystkie dodatkowe buffy są
+   darmowe (bez kosztu MP wycia konia).
+
+3. **Sklep (Item Shop) przebudowany na częściach `Cashshop.tex`:**
+   - każda oferta leży na panelu przedmiotu z klienta: nazwa w złotej listwie, ikona w slocie;
+     wszystkie karty mają ten sam rozmiar;
+   - Cash na cienkim pasku ze złotymi końcami, obok niebieski przycisk klienta **Top up**;
+   - okno doładowania: 1 € = 1 000 Cash, paczki 5/10/20/50 € z bonusami, kroki przez PayPal,
+     kontakt na Discordzie i dopisek „Top-ups open soon”;
+   - zakładka **SALE**: przekreślona cena regularna, procent zniżki i znacznik D.C.;
+   - kliknięcie paczki pokazuje tabelę zawartości: ikona, nazwa, ilość, cena osobno i suma.
+4. **Nowe ceny (własne):** Cash jest tani i sklep nie jest pay2win.
+   - Tylko boosty czasowe i wygoda: bez kamieni ulepszeń i bez sprzętu. Heaven Stone wypadł ze
+     sklepu, a zakładka Items ma lupy.
+   - Mikstura godzinna kosztuje 150–400 Cash, czyli 0,15–0,40 €.
+   - Siedem paczek (Starter, Proficiency, Hunter, Guardian, Attribute, Steal, Sweets) jest
+     30–41% taniej niż ich zawartość kupiona osobno.
+5. **Zakupione przedmioty** pojawiają się po lewej stronie ekranu jeden po drugim, jak drop, nad
+   oknem sklepu (`PurchaseFeed`).
+6. **Okno buffa mikstury** (np. Berserker) pokazuje działanie (podwójne obrażenia, kradzież HP/MP,
+   EXP/SP) i opis przedmiotu z bazy (`t_item.a_descr_usa`).
+7. **Poświata pod skrzynką (jak w Diablo):** złota plama światła na podłodze, miękki słup światła
+   i unoszące się iskry, pulsujące.
+
+### Dla Codexa (piąta partia)
+
+- `EXTRA_DUNGEON_BUFFS` to teraz 1062, 268, 269, 388, 437. Każdy ma jeden poziom z `mp: 0`.
+  Poziomów 257/259/270/276 nikt nie kupował (stały poziom), więc nie ma zwrotu ani migracji.
+- `icons.mjs`: atlas ikon skilli od 100 wzwyż czyta `ItemBtn(n - 100)`.

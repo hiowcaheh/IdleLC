@@ -1,5 +1,22 @@
 # Historia zmian
 
+## 2026-11-07 (Claude Code): piąta partia (buffy konia, sklep, poświata skrzynki)
+
+Szczegóły: [docs/owner-batch-2026-11-07.md](docs/owner-batch-2026-11-07.md), sekcja „Piąta
+partia”. 581 testów / 70 plików. SaveVersion nadal 16.
+
+1. Offensive i Defensive Howling konia (poziom 12) zamiast pasywnych umiejętności zwierzaka; Moon
+   Cake i Stars zamiast moich dwóch propozycji.
+2. Sklep na częściach `Cashshop.tex`:
+   - karty równej wielkości;
+   - pasek Cash z przyciskiem Top up (okno z informacjami: 1 € = 1 000 Cash, PayPal, Discord);
+   - zakładka SALE;
+   - tabela zawartości paczek.
+3. Nowe, tanie ceny bez pay2win (bez kamieni i sprzętu), paczki 30–41% taniej.
+4. Zakupy pokazują się po lewej jak drop.
+5. Okno buffa mikstury pokazuje działanie i opis (Berserker, kradzież HP/MP).
+6. Złota poświata, słup światła i iskry pod skrzynką.
+
 ## 2026-11-07 (Claude Code): czwarta partia (skrzynki, sklep Cash, mikstury, buffy)
 
 Szczegóły, ceny, pytania i lista zmian w plikach Codexa:

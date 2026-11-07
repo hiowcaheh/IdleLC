@@ -264,11 +264,11 @@ Poniższa tabela zachowuje historyczny punkt odniesienia tych decyzji.
 
 Dopisane 2026-11-07 (Claude Code, czwarta partia):
 
-| ID  | Obecnie w IdleLC                                                                                 | Źródło / oryginał                                            | Do decyzji właściciela                            |
-| --- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------- |
-| D26 | Skrzynki podziemi (własne 95001–95003): 5% z potwora, 80% Smelting / 20% Heaven Stone            | Własny system na prośbę właściciela; model i ikony z klienta | Szanse i zawartość („będziemy podkręcać”).        |
-| D27 | Sklep Cash: część cen z `t_catalog`, reszta i paczki własne; Cash tylko z dev                    | Katalog bazy nie ma części przedmiotów                       | Skąd gracz bierze Cash i czy zmienić ceny własne. |
-| D28 | Pięć buffów podziemi spoza klas o stałym poziomie (Ignition 2, Horse 30 ×2, Mount 10, Dragon 30) | Dane 1:1, wybór i stały poziom własne                        | Czy Ignition +200% nie jest za mocny.             |
+| ID  | Obecnie w IdleLC                                                                                                 | Źródło / oryginał                                            | Do decyzji właściciela                                   |
+| --- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------- |
+| D26 | Skrzynki podziemi (własne 95001–95003): 5% z potwora, 80% Smelting / 20% Heaven Stone                            | Własny system na prośbę właściciela; model i ikony z klienta | Szanse i zawartość („będziemy podkręcać”).               |
+| D27 | Sklep Cash: ceny własne i tanie (1000 Cash = 1 €), bez kamieni i sprzętu, paczki ~1/3 taniej; Cash tylko z dev   | Katalog bazy ma droższe ceny i inne paczki                   | Skąd gracz bierze Cash; czy ceny zostają.                |
+| D28 | Pięć buffów podziemi spoza klas o stałym poziomie (Ignition 2, Offensive/Defensive Howling 12, Moon Cake, Stars) | Dane 1:1, wybór i stały poziom własne                        | Czy Ignition +200% nie jest za mocny; Howling 12 czy 10. |
 
 ## Jak zapisywać rozstrzygnięcie
 
