@@ -153,6 +153,34 @@ export interface EffectDef {
   position?: number
   control?: EffectControlDef | null
   overDraw?: boolean
+  /** EFSB / EFTC: a trail's colours (newest, oldest), length in seconds, step and blend. */
+  width?: number
+  colorBegin?: number
+  colorEnd?: number
+  traceTime?: number
+  interval?: number
+  twinkle?: number
+  velocity?: number
+  blend?: number | null
+  /** EFOB: effects circling the tag (COrbitEffect). */
+  orbits?: OrbitDef[]
+  fadeFlags?: number
+  fadeInRadiusMul?: number
+  fadeInPhaseMul?: number
+  fadeOutRadiusMul?: number
+  fadeOutPhaseMul?: number
+  goalTag?: string
+}
+
+/** One orbit of an EFOB: per axis radius · sin(phaseMul · t + 2π · phaseOffset) + offset. */
+export interface OrbitDef {
+  radius: [number, number, number]
+  phaseMul: [number, number, number]
+  phaseOffset: [number, number, number]
+  offset: [number, number, number]
+  /** Seconds before its effect starts. */
+  delay: number
+  effect: string
 }
 
 /** EEGM: an effect group, its effects started at times on the tags of the same index. */
@@ -227,7 +255,7 @@ export function clientFx(): ClientFxData | null {
 
 /** Fetches the effect data once; later calls share the same request. */
 export function loadClientFx(): Promise<ClientFxData | null> {
-  loading ??= fetch(`${import.meta.env.BASE_URL}fx/client/effects.json?v=3`)
+  loading ??= fetch(`${import.meta.env.BASE_URL}fx/client/effects.json?v=4`)
     .then((r) => (r.ok ? (r.json() as Promise<ClientFxData>) : null))
     .then((data) => (loaded = data))
     .catch(() => null)

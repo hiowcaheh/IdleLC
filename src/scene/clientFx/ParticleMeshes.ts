@@ -89,7 +89,7 @@ void main() {
 `
 
 /** GL factors of the client's blend types (Gfx_wrapper.cpp gfxSetBlendType). */
-function blendFactors(blend: number): [BlendingSrcFactor, BlendingDstFactor] {
+export function blendFactors(blend: number): [BlendingSrcFactor, BlendingDstFactor] {
   switch (blend) {
     case 205: // PBT_ADD: S + D
       return [OneFactor, OneFactor]

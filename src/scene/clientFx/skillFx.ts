@@ -2,11 +2,23 @@
  * Plays the client's own effect groups for skills (skills.lod ready / fire / after effects and the
  * effects the class clips key in their .bae) on the fighters' tags. ClientFxLayer draws them.
  */
-import { Object3D, Quaternion, Vector3 } from 'three'
+import { Object3D, Quaternion, Vector3, type Mesh } from 'three'
 import type { CharacterHandle } from '../Character.tsx'
-import { placeSourceTag } from '../upgradeEffects.ts'
+import {
+  placeSourceTag,
+  weaponAnchorPosition,
+  weaponAnchors,
+  type WeaponAnchor,
+} from '../upgradeEffects.ts'
 import { clientFx, type ClientFxData } from './data.ts'
-import { IDENTITY, type Placement, type Quat, type TagLookup, type Vec3 } from './particles.ts'
+import {
+  IDENTITY,
+  rotate,
+  type Placement,
+  type Quat,
+  type TagLookup,
+  type Vec3,
+} from './particles.ts'
 import { EffectGroupPlayer } from './player.ts'
 
 /** Something that hands out the live character (its ref changes as models load). */
@@ -38,15 +50,66 @@ export function fighterTag(
 ): Placement | null {
   if (!fighter) return null
   const target = fighter.effectTarget()
-  // a group tag's points (__0_SWORD, __1_SWORD) are taken at the tag itself
+  // a group tag's own points (__0_SWORD) when the model has them, else the tag itself
+  if (/^__\d+_/.test(name) && placeSourceTag(target, name, holder, scratch))
+    return { position: toVec(scratch.position), rotation: toQuat(scratch.quaternion) }
   const plain = name.replace(/^__\d+_/, '')
   if (plain !== '__TOP' && placeSourceTag(target, plain, holder, scratch)) {
     return { position: toVec(scratch.position), rotation: toQuat(scratch.quaternion) }
   }
+  // a weapon's group tag the item models lack: the ends of the held weapon (own approximation)
+  const blade = weaponEnd(fighter, name)
+  if (blade) return blade
   target.object.getWorldPosition(point)
   target.object.getWorldQuaternion(turn)
   point.y += fighter.height() * fallbackHeight(plain)
   return { position: toVec(point), rotation: toQuat(turn) }
+}
+
+const WEAPON_TAG = /^(?:__(\d)_)?(SWORD|RDAGGER|LDAGGER|AXE|LDSWORD|RDSWORD|DAGGER|WEAPON)$/
+const anchorsOf = new WeakMap<Mesh, WeaponAnchor[]>()
+const endPoint = new Vector3()
+const handPoint = new Vector3()
+
+/**
+ * The weapon's tags the client's item models carry as a group (SWORD: two points along the blade)
+ * but the converted ones do not: the ends of the weapon in that hand along its longest axis.
+ * __1_ is the end at the hand, __0_ (and the plain name) the far one.
+ */
+function weaponEnd(fighter: CharacterHandle, name: string): Placement | null {
+  const match = WEAPON_TAG.exec(name)
+  const target = fighter.effectTarget()
+  if (!match || !target.weapons.size) return null
+  const left = /^L/.test(match[2]!)
+  const hand = fighterHand(fighter, left ? 'LHAND' : 'RHAND')
+  let best: { mesh: Mesh; ends: Vector3[]; distance: number } | null = null
+  for (const mesh of target.weapons) {
+    let anchors = anchorsOf.get(mesh)
+    if (!anchors) {
+      anchors = weaponAnchors(mesh, 12)
+      anchorsOf.set(mesh, anchors)
+    }
+    if (anchors.length < 2) continue
+    const ends = [anchors[0]!, anchors[anchors.length - 1]!].map((a) =>
+      weaponAnchorPosition(a, holder, new Vector3()),
+    )
+    const distance = hand ? Math.min(...ends.map((e) => e.distanceTo(hand))) : 0
+    if (!best || distance < best.distance) best = { mesh, ends, distance }
+  }
+  if (!best) return null
+  const [a, b] = best.ends as [Vector3, Vector3]
+  const nearHand = hand && a.distanceTo(hand) < b.distanceTo(hand) ? a : b
+  const far = nearHand === a ? b : a
+  endPoint.copy(match[1] === '1' ? nearHand : far)
+  best.mesh.getWorldQuaternion(turn)
+  return { position: toVec(endPoint), rotation: toQuat(turn) }
+}
+
+/** A hand's source tag position (null when the model has none). */
+function fighterHand(fighter: CharacterHandle, name: 'LHAND' | 'RHAND'): Vector3 | null {
+  return placeSourceTag(fighter.effectTarget(), name, holder, scratch)
+    ? handPoint.copy(scratch.position)
+    : null
 }
 
 interface Pending {
@@ -75,6 +138,8 @@ export const fxState = {
 /** CSkill missile types that send a missile (MT_ARROW, CONTINUE, INVISIBLE, MAGIC, MAGECUTTER, GOWAITBACK). */
 const FLYING = new Set([1, 3, 4, 5, 7, 10])
 const FORWARD = new Vector3(0, 0, -1)
+/** Metres between a missile's two group points (an arrow's head and nock; own measure). */
+const MISSILE_LENGTH = 0.8
 const heading = new Vector3()
 
 /**
@@ -109,6 +174,9 @@ export function advanceMissiles(dt: number): void {
   })
 }
 
+/** Effect kinds this player draws. */
+const DRAWN = new Set(['EFPT', 'EFMD', 'EFSK', 'EFSB', 'EFTC', 'EFOB'])
+
 /** Whether a skill has effects of its own in the client data (loaded or not yet). */
 export function hasClientSkillFx(skillId: number): boolean {
   const data = clientFx()
@@ -116,10 +184,10 @@ export function hasClientSkillFx(skillId: number): boolean {
   if (!skill || !data) return false
   return [skill.ready, ...skill.fire, skill.missile, skill.hit, skill.after].some((name) => {
     const group = name ? data.groups[name] : undefined
-    // the client draws it with particles or effect models (EFMD, EFSK)
+    // the client draws it with particles, effect models, trails or orbits
     return group?.effects.some((e) => {
       const kind = data.effects[e.name]?.kind
-      return kind === 'EFPT' || kind === 'EFMD' || kind === 'EFSK'
+      return !!kind && DRAWN.has(kind)
     })
   })
 }
@@ -203,8 +271,13 @@ export function castClientSkill(
           hit: () => play(data, skill.hit, targetTags),
         }
         // every tag of the missile's group is the missile itself
-        missile.player = play(data, skill.missile, () => ({
-          position: missile.position,
+        // the missile's tags are on it; a group's second point (__1_ARROW) trails behind it
+        missile.player = play(data, skill.missile, (name) => ({
+          position: name.startsWith('__1_')
+            ? (missile.position.map(
+                (v, i) => v - rotate([0, 0, -MISSILE_LENGTH], missile.rotation)[i]!,
+              ) as Vec3)
+            : missile.position,
           rotation: missile.rotation,
         }))
         fxState.missiles.push(missile)

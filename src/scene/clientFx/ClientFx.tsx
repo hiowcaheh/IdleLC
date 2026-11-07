@@ -7,6 +7,7 @@ import { clientFx, loadClientFx } from './data.ts'
 import { ModelEffectMesh } from './ModelMeshes.ts'
 import { ParticleMesh } from './ParticleMeshes.ts'
 import { SkaEffectMesh } from './SkaMeshes.ts'
+import { TrailMesh } from './TrailMeshes.ts'
 import { advanceMissiles, clearClientFx, fxState } from './skillFx.ts'
 
 /**
@@ -19,6 +20,7 @@ export function ClientFxLayer({ pace }: { pace?: () => number }) {
   const meshes = useRef(new Map<object, ParticleMesh>())
   const models = useRef(new Map<object, ModelEffectMesh>())
   const skas = useRef(new Map<object, SkaEffectMesh>())
+  const trails = useRef(new Map<object, TrailMesh>())
 
   useEffect(() => {
     void loadClientFx()
@@ -29,7 +31,10 @@ export function ClientFxLayer({ pace }: { pace?: () => number }) {
     const live = meshes.current
     const liveModels = models.current
     const liveSkas = skas.current
+    const liveTrails = trails.current
     return () => {
+      for (const mesh of liveTrails.values()) mesh.dispose()
+      liveTrails.clear()
       for (const mesh of liveSkas.values()) mesh.dispose()
       liveSkas.clear()
       scene.remove(root)
@@ -116,6 +121,26 @@ export function ClientFxLayer({ pace }: { pace?: () => number }) {
       if (animated.has(live)) continue
       mesh.dispose()
       skas.current.delete(live)
+    }
+    // trails (EFSB, EFTC): a strip rebuilt from each trail's samples
+    const drawn = new Set<object>()
+    for (const player of fxState.players) {
+      for (const live of player.trails()) {
+        drawn.add(live)
+        let mesh = trails.current.get(live)
+        if (!mesh) {
+          mesh = new TrailMesh(live)
+          trails.current.set(live, mesh)
+          root.add(mesh.mesh)
+        }
+        mesh.update(camera)
+      }
+    }
+    for (const [live, mesh] of trails.current) {
+      if (drawn.has(live)) continue
+      root.remove(mesh.mesh)
+      mesh.dispose()
+      trails.current.delete(live)
     }
   })
 

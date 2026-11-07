@@ -6,7 +6,9 @@
  * take their time.
  */
 import type { ClientFxData, EffectDef, FxTextureDef, ModelDef } from './data.ts'
+import { TrailState } from './trail.ts'
 import { modelLook, modelPlacement } from './modelEffect.ts'
+import { orbitPoints, type OrbitFrame } from './orbit.ts'
 import {
   IDENTITY,
   ParticleSystem,
@@ -50,6 +52,19 @@ export interface LiveSka {
   rotation: Quat
 }
 
+/** A running trail (EFSB, EFTC), for the renderer. */
+export interface LiveTrail {
+  state: TrailState
+  texture: FxTextureDef | null
+  /** PredefinedBlendType (PBT_ADDALPHA when the file has none). */
+  blend: number
+  /** The group tag a two-point trail spans (its __0_ and __1_ points). */
+  span?: string
+}
+
+/** Group tags of the weapons: a trail on one spans its two points (CGroupTag of two tags). */
+const SPANNED = /^(SWORD|RDAGGER|LDAGGER|AXE|LDSWORD|RDSWORD|CUTTER|ARROW)$/
+
 interface Running {
   def: EffectDef
   tag: string
@@ -61,6 +76,14 @@ interface Running {
   particles?: LiveParticles
   model?: LiveModel
   ska?: LiveSka
+  trail?: LiveTrail
+  /** EFOB: where its orbits are, which of their effects have started. */
+  orbit?: { frame: OrbitFrame; points: Vec3[]; started: boolean[] }
+  /** The tags it stands on: the character's, or an orbit's moving point. */
+  lookup?: TagLookup
+  /** An orbit's effect ends with its orbit (COrbitEffect::ClearInstance). */
+  parent?: Running
+  ended?: boolean
   /** Where the tag was and how it was turned at the first process (m_bOnlyStart). */
   start?: Placement
   /** EOTT_START: the tag's turn when it started. */
@@ -92,6 +115,7 @@ export class EffectGroupPlayer {
     this.data = data
   }
   private readonly data: ClientFxData
+  private readonly spawned: Running[] = []
 
   /** The particle effects alive now. */
   particles(): LiveParticles[] {
@@ -101,6 +125,11 @@ export class EffectGroupPlayer {
   /** The model effects alive now. */
   models(): LiveModel[] {
     return this.running.flatMap((r) => (r.model ? [r.model] : []))
+  }
+
+  /** The trails alive now. */
+  trails(): LiveTrail[] {
+    return this.running.flatMap((r) => (r.trail ? [r.trail] : []))
   }
 
   /** The SKA model effects alive now. */
@@ -128,6 +157,8 @@ export class EffectGroupPlayer {
   update(dt: number): boolean {
     this.elapsed += dt
     this.running = this.running.filter((r) => this.process(r, dt))
+    // effects an orbit started during this step
+    this.running.push(...this.spawned.splice(0))
     // effects due now start with the part of this step they are late by
     while (this.next < this.keys.length && this.keys[this.next]!.time <= this.elapsed) {
       const key = this.keys[this.next++]!
@@ -136,11 +167,17 @@ export class EffectGroupPlayer {
     return this.next < this.keys.length || this.running.length > 0
   }
 
-  private start(def: EffectDef, tags: string[], late: number) {
+  private start(
+    def: EffectDef,
+    tags: string[],
+    late: number,
+    lookup: TagLookup = this.tags,
+    parent?: Running,
+  ) {
     // a group tag (__0_X / __1_X) stands at its first point
     const tag = tags.find((t) => t.startsWith('__0_')) ?? tags[0]
     if (!tag) return
-    const at = this.tags(tag)
+    const at = lookup(tag)
     if (!at) return // the client skips an effect whose tag the character lacks
     const running: Running = {
       def,
@@ -148,12 +185,31 @@ export class EffectGroupPlayer {
       left: def.lifeTime,
       age: 0,
       repeat: def.repeat,
+      ...(lookup !== this.tags ? { lookup } : {}),
+      ...(parent ? { parent } : {}),
     }
+    if ((def.kind === 'EFSB' || def.kind === 'EFTC') && !def.unsupported) {
+      // CTraceEffect needs a group tag of two points; a spline billboard spans one when it has it
+      const span = SPANNED.test(tag) ? tag : undefined
+      if (def.kind === 'EFSB' || span)
+        running.trail = {
+          state: new TrailState(def, !!span),
+          texture: def.texture ? (this.data.textures[def.texture] ?? null) : null,
+          blend: def.blend ?? 206,
+          ...(span ? { span } : {}),
+        }
+    }
+    if (def.kind === 'EFOB' && def.orbits?.length)
+      running.orbit = {
+        frame: { position: at.position, rotation: IDENTITY, first: true },
+        points: def.orbits.map(() => [...at.position] as Vec3),
+        started: def.orbits.map(() => false),
+      }
     if (def.kind === 'EFPT' && def.particleGroup && !def.unsupported) {
       const group = this.data.particles[def.particleGroup]
       if (group && group.emitter && this.data.textures[group.texture]) {
         running.particles = {
-          system: new ParticleSystem(group, randomTable(), this.tags),
+          system: new ParticleSystem(group, randomTable(), lookup),
           texture: group.texture,
         }
         running.startRotation = at.rotation
@@ -192,7 +248,8 @@ export class EffectGroupPlayer {
       // CSkaEffect::Start takes the tag's place at once
       running.start = at
     }
-    if (late <= 0 || this.process(running, late)) this.running.push(running)
+    if (late > 0 && !this.process(running, late)) return
+    ;(parent ? this.spawned : this.running).push(running)
   }
 
   private place(r: Running, at: Placement) {
@@ -204,6 +261,13 @@ export class EffectGroupPlayer {
 
   /** CEffect::PreProcess and the effect's own Process; false when it has ended. */
   private process(r: Running, dt: number): boolean {
+    const alive = !r.parent?.ended && this.step(r, dt)
+    if (!alive) r.ended = true
+    return alive
+  }
+
+  private step(r: Running, dt: number): boolean {
+    const lookup = r.lookup ?? this.tags
     r.left -= dt
     r.age += dt
     if (r.left <= 0) {
@@ -217,14 +281,21 @@ export class EffectGroupPlayer {
       } else return false
     }
     if (r.particles) {
-      const at = this.tags(r.tag)
+      const at = lookup(r.tag)
       if (at) this.place(r, at)
       r.particles.system.process(dt)
     }
+    if (r.trail) {
+      const span = r.trail.span
+      const a = lookup(span ? `__0_${span}` : r.tag)
+      const b = span ? lookup(`__1_${span}`) : null
+      if (a) r.trail.state.process(r.age, r.left, a.position, b?.position ?? null)
+    }
+    if (r.orbit) this.orbit(r, lookup)
     // model effects (EFMD, EFSK) share CMdlEffect's look and placement rules
     const shown = r.model ?? r.ska
     if (shown) {
-      const at = this.tags(r.tag)
+      const at = lookup(r.tag)
       r.start ??= at ?? { position: shown.position, rotation: shown.rotation }
       const age = Math.max(0, r.age)
       const look = modelLook(r.def, age, r.left)
@@ -238,5 +309,23 @@ export class EffectGroupPlayer {
       })
     }
     return true
+  }
+
+  /** COrbitEffect::Process: move the orbits' points, start their effects when they are due. */
+  private orbit(r: Running, lookup: TagLookup) {
+    const o = r.orbit!
+    const def = r.def
+    const attach = lookup(r.tag)
+    if (!attach) return
+    const goal = def.goalTag ? lookup(def.goalTag) : null
+    o.points = orbitPoints(def, Math.max(0, r.age), r.left, attach, goal, o.frame)
+    def.orbits!.forEach((orbit, i) => {
+      if (o.started[i] || r.age < orbit.delay || orbit.effect === def.name) return
+      o.started[i] = true
+      const child = this.data.effects[orbit.effect]
+      if (!child) return
+      const at = (): Placement => ({ position: o.points[i]!, rotation: o.frame.rotation })
+      this.start(child, ['__ROOT'], r.age - orbit.delay, at, r)
+    })
   }
 }

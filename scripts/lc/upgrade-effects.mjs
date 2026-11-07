@@ -130,6 +130,45 @@ export function readUpgradeEffect(buffer, offset = 0) {
     out.twinkle = finite(r)
     out.capEnd = Boolean(r.i32())
     out.blend = v >= 4 ? r.i32() : null
+  } else if (out.kind === 'EFSB') {
+    // CSplineBillboardEffect::Read, versions 1–3
+    const v = version(r, [1, 2, 3])
+    out.width = finite(r)
+    out.texture = fileName(r)
+    out.colorBegin = r.u32()
+    out.colorEnd = r.u32()
+    out.traceTime = finite(r)
+    out.interval = finite(r)
+    out.twinkle = finite(r)
+    out.velocity = v >= 2 ? finite(r) : 0
+    out.blend = v >= 3 ? r.i32() : null
+  } else if (out.kind === 'EFOB') {
+    // COrbitEffect::Read, versions 5 and 6 (older ones are commented out in the client)
+    const v = version(r, [5, 6])
+    out.orbits = Array.from({ length: count(r, 52) }, () => ({
+      radius: [0, 0, 0],
+      phaseMul: [0, 0, 0],
+      phaseOffset: [0, 0, 0],
+      offset: [0, 0, 0],
+    })).map((orbit) => {
+      for (let axis = 0; axis < 3; axis++) {
+        orbit.radius[axis] = finite(r)
+        orbit.phaseMul[axis] = finite(r)
+        orbit.phaseOffset[axis] = finite(r)
+        orbit.offset[axis] = finite(r)
+      }
+      orbit.delay = finite(r)
+      orbit.effect = line(r)
+      return orbit
+    })
+    out.fadeFlags = v >= 6 ? r.u32() : (r.u32() & 0x7f) | (r.u32() & 0x7f0000)
+    out.fadeInRadiusMul = finite(r)
+    out.fadeInPhaseMul = finite(r)
+    out.fadeOutRadiusMul = finite(r)
+    out.fadeOutPhaseMul = finite(r)
+    out.goalTag = r.string()
+    out.rotation = r.i32()
+    out.position = r.i32()
   } else throw new Error(`unsupported upgrade effect ${out.name}: ${out.kind}`)
   return { effect: out, bytesRead: r.o - offset }
 }

@@ -132,6 +132,7 @@ export function collectEffects(buffer, groupNames) {
     effects[name] = effect
     if (effect.kind === 'EFPT') visitParticles(effect.particleGroup)
     for (const p of effect.paths ?? []) visitEffect(p.effect)
+    for (const o of effect.orbits ?? []) visitEffect(o.effect)
   }
   for (const name of groupNames) {
     const group = allGroups[name]
