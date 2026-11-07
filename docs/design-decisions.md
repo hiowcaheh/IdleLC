@@ -70,6 +70,27 @@ wydajność) oraz szybkie poprawki ([combat-skills-summons.md](combat-skills-sum
   2016 nie ma tej kolumny (`SORCERER_APPLY` w `summons.ts`).
 - Resurrection i Invisibility pozostają niedostępne: bez drużyny i bez sensu w walce jeden na jeden.
 
+## Rozstrzygnięcia właściciela — 2026-11-06/07 (Dungeons, trzecia partia)
+
+Reguły właściciela, bez odpowiednika w źródle (szczegóły w
+[owner-batch-2026-11-06.md](owner-batch-2026-11-06.md)):
+
+- **Buffs:**
+  - koszt ulepszenia to `100 × obecny poziom`;
+  - z puli wypadają pierwsze stopnie Haste i Battle Roar, wchodzą Mana Recovery i Tyrant.
+    Zamienniki wybrałem sam: to klasowe buffy z pełnymi danymi, których pula nie miała;
+  - kupione poziomy usuniętych buffów wracają jednorazowo jako punkty, po 100 za poziom.
+- **Ranking:** osobny dla każdego podziemia oraz łączny, po trzy miejsca.
+- **Fale:** po wyczyszczeniu zawsze pełne 5 s; harmonogram 30 s działa tylko na falę, która walczy.
+- **Ikona torby w rundzie:** Old Pouch (`t_item` 298).
+
+Przybliżenia własne w efektach z klienta (brak danych w konwertowanych modelach):
+
+- punkty grup broni (SWORD, sztylety, AXE) to końce trzymanej broni wzdłuż najdłuższej osi:
+  `__1_` przy dłoni, `__0_` dalej;
+- drugi punkt grupy pocisku leży 0,8 m za nim;
+- pocisk leci po prostej do środka celu, z prędkością skilla ze `skills.lod`.
+
 ## Rozstrzygnięcia właściciela — 2026-11-05, wieczór
 
 Właściciel: tytuły i mikstury mają działać „1:1 tak jak w plikach serwerowych”. Wdrożone

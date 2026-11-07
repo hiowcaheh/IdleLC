@@ -1,5 +1,63 @@
 # Historia zmian
 
+## 2026-11-07 (Claude Code): efekty skilli z klienta, etap 2 (modele, pociski, smugi, orbity)
+
+Commity `3eac61a`, `b71a8f8`, `7d8998d`. 565 testów / 66 plików.
+
+1. **Modele MDL w efektach (EFMD, 220 użyć).** Nowy czytnik `scripts/lc/mdl.mjs` (MDAT
+   V002–V010, według `CModelData::Read_t`) czyta wszystkie 15 modeli efektów: płaszczyzny,
+   billboardy, cylindry, krąg magii i lejki huraganu. Runtime w `modelEffect.ts` przenosi
+   `CMdlEffect` i `CEffectControl`: kolor, alfę, mruganie, wygaszanie, skalę, pozycję po
+   splajnie i kąt. `ModelMeshes.ts` rysuje je z mieszaniem add / alpha, billboardami
+   i overdraw.
+2. **Modele SKA w efektach (EFSK, 79 użyć).** 31 modeli `.smc` jako GLB (`public/fx/client/ska`,
+   1,5 MB), tym samym konwerterem co postacie i skrzydła. Pierwsza animacja gra w pętli,
+   z kolorem i skalą efektu.
+3. **Pociski.** Trzy efekty wystrzału ze `skills.lod` mają swoje role:
+   - FireEffect1 gra przy rzucającym;
+   - FireEffect2 to pocisk, który leci z dłoni do celu z prędkością skilla, przy każdym opóźnieniu;
+   - FireEffect3 to trafienie, gdy pocisk doleci.
+
+   Grupa przygotowania kończy się przy wystrzale, a kula Energy Bolt rusza z miejsca, w którym
+   się uformowała (MT_CONTINUE). Pociski i grupy przygotowania nie wiszą już 10–20 s.
+
+4. **Smugi (EFSB 33, EFTC 7) i orbity (EFOB 23).** `trail.ts` to wstęga przez próbki z ostatnich
+   `traceTime` sekund. Przy jednym punkcie jest zwrócona do kamery, przy grupie (miecz, sztylety)
+   rozpina się między dwoma punktami. `orbit.ts` przenosi ruch `COrbitEffect`: efekty-dzieci
+   krążą po sinusach, z wygaszaniem promienia i fazy oraz drogą do tagu celu.
+5. **Przybliżenia własne** (brak danych w konwertowanych modelach):
+   - punkty grup broni (SWORD, sztylety, AXE) to końce trzymanej broni wzdłuż najdłuższej osi;
+   - drugi punkt pocisku jest 0,8 m za nim.
+
+**Jeszcze nie:** dźwięki (EFSN 123), światło (EFLT), teren (EFTR), fala uderzeniowa (SWVE),
+efekty encji (EENT), trzypunktowe smugi EFTC. Efekty tytułów i ulepszeń mają nadal własne
+adaptery Codexa.
+
+## 2026-11-07 (Claude Code): trzecia partia, 16 zgłoszeń (Buffs, rankingi, runda)
+
+Szczegóły i lista zmian w plikach Codexa: [docs/owner-batch-2026-11-06.md](docs/owner-batch-2026-11-06.md),
+sekcja „Trzecia partia”. Commity `cf933d4`, `8c7a334`. SaveVersion nadal 16.
+
+1. **Buffs** (dawniej Buffer):
+   - nowe karty z efektami „teraz → po ulepszeniu”;
+   - koszt 100 / 200 / 300 … za poziom;
+   - Haste i Battle Roar zastąpione przez Mana Recovery i Tyrant (Haste 2 i Battle Roar 2 zostają);
+   - kupione poziomy usuniętych buffów wracają jednorazowo jako punkty.
+2. **Rankingi:** zakładka pokazanego podziemia i zakładka wszystkich podziemi, po trzy miejsca.
+3. **Runda:**
+   - nick i tytuł nad bohaterem jak na polu;
+   - napisy paska poziomu mieszczą się w ramce;
+   - po wyczyszczeniu fali zawsze mija pełne 5 s;
+   - okno wyboru błogosławieństwa mówi „Game paused” i podaje czas do następnej fali.
+4. **Mikstury w rundzie:**
+   - torba zostaje otwarta po wypiciu;
+   - toast zmian statystyk jak na polu;
+   - slot pokazuje czas działania i odnowienie;
+   - nazwa mikstury nad bohaterem zawsze widoczna.
+5. **Ikona torby:** Old Pouch, przedmiot z gry (wypada z Harpy Queen w Dratan).
+6. **Przycisk Dungeons:** większy, ze złotą poświatą i podpisem.
+7. **Limit biegu 20 m/s:** „Movement bonus” w Character pokazuje premię po limicie.
+
 ## 2026-11-06 (Claude Code): efekty skilli prosto z klienta (etap 1: cząsteczki)
 
 1. **Eksport z klienta.** `scripts/lc/client-effects.mjs --client <klient 2015>` zapisuje

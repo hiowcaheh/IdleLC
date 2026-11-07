@@ -160,3 +160,103 @@ w pamięci rundy). 545 testów / 61 plików, próby Chromium 390 × 844 i 1100 �
   - `LOADING_CROPS` per podziemie;
   - dodatkowo zapisuje `trophy.webp` i `menu-dungeon-loot.webp` (części w `ui.mjs`).
 - **`DungeonLoot.tsx`:** przycisk torby bez klasy `hud__menu--inventory`.
+
+## Trzecia partia: 16 zgłoszeń (Claude Code, 2026-11-06/07)
+
+Commity `cf933d4` (partia) i `8c7a334` (sakiewka). SaveVersion nadal **16**: nowe pole
+`DungeonProgress.totalByDungeon` jest wyliczane przy wczytaniu ze starszych zapisów, więc
+migracja nie była potrzebna. 565 testów / 66 plików, próby Chromium 390 × 844.
+
+1. **Przycisk Dungeons** jest większy (40 px), ma złotą, wolno pulsującą poświatę i podpis
+   „Dungeons” pod ikoną. Gdy jest nieaktywny (wyprawa, bieg), poświata gaśnie.
+2. **Okno ulepszania buffów** to karty: ikona, nazwa, klasa, kropki poziomów i „Lv x / max”,
+   potem każdy efekt jako „teraz → po ulepszeniu”. Wady (np. obrona Devotion, MP Tyranta) są
+   na czerwono. Przycisk „Upgrade to Lv N” pokazuje koszt.
+3. **„Buffer” → „Buffs”** we wszystkich tekstach okna, zasad i wyniku rundy.
+4. **Haste wypada z puli** (zostaje Haste 2 z dwoma poziomami). Na jego miejsce jest
+   **Mana Recovery** (mag, 5 poziomów).
+5. **Koszt ulepszeń rośnie:** 100 punktów za poziom 2, 200 za 3, 300 za 4 itd.
+   (`dungeonBuffUpgradeCost`).
+6. **Rankingi pod zasadami mają dwie zakładki:** „<Podziemie> Ranking” (np. Belfist Ranking,
+   tylko ukończone rundy w pokazanym podziemiu) i „Dungeons Ranking” (wszystkie razem).
+   W każdej jest top 3 z trofeami, a puste miejsca mają napis „Free place”.
+7. **Pasek poziomu w rundzie:** napisy „Dungeon Lv x / 20” i „x / y” mieszczą się między
+   strzałkami ramki (wcięcie 22 px zamiast 12 px).
+8. **Wybór błogosławieństwa:** gra stała już wcześniej, ale okno zasłaniało komunikat fali.
+   Teraz okno mówi wprost „Game paused” i podaje, za ile sekund po wyborze przyjdzie następna
+   fala. Pływający komunikat chowa się na czas wyboru i pauzy.
+9. **Ikona torby w rundzie:** najpierw skrzynia, potem, na prośbę właściciela, prawdziwy przedmiot
+   z gry: **Old Pouch** (`t_item` 298, wypada z Harpy Queen w Dratan; `ItemBtn1`, rząd 7,
+   kolumna 13).
+10. **Torba zostaje otwarta po wypiciu**, więc można wypić kilka mikstur po kolei.
+11. **Toast zmian statystyk** (zielone / czerwone) po wypiciu w rundzie, z torby i z dotknięcia
+    slotu, tak samo jak na polu. Wspólna funkcja `drinkWithToast`.
+12. **Nick i tytuł nad bohaterem w rundzie** wyglądają jak na polu: te same etykiety
+    `SceneLabels`, które rozstawia `DungeonScene`. „Lv N Nazwa” nad celem też przeszło na te
+    etykiety, więc nie wchodzi już na panel statusu.
+13. **Battle Roar wypada z puli** (zostaje Battle Roar 2). Na jego miejsce jest **Tyrant**
+    (tytan, 8 poziomów, ze swoim źródłowym kosztem MP co sekundę).
+14. **Limit 20 m/s** obowiązywał już w ruchu i w oknie Character. W rundzie gracz i jego
+    statystyki korzystają z `runSpeed`. Dodatkowo wiersz „Movement bonus” pokazuje teraz tylko
+    tę część premii, która mieści się w limicie.
+15. **Auto-picie w rundzie działa** (próba: HP poniżej 50% → mikstura 44, 40 → 39), ale leczy
+    15 s, a horda bije szybciej, i nie było tego widać. Teraz:
+    - slot ma zielony pasek czasu działania mikstury i ciemną wskazówkę odnowienia;
+    - nazwa mikstury nad bohaterem pokazuje się w rundzie zawsze, także przy wyłączonych liczbach
+      obrażeń.
+16. **„Wave cleaned” znikało za szybko**, gdy fala padła tuż przed 30-sekundowym terminem.
+    Harmonogram wołał wtedy następną falę od razu. Teraz po wyczyszczeniu zawsze mija pełne
+    5 s. Harmonogram 30 s przyspiesza tylko falę, która jeszcze walczy.
+
+**Zwrot punktów:** poziomy kupione dla Haste i Battle Roar wracają raz, po 100 za poziom
+(dawna cena). Wczytanie takiego zapisu ma status „migrated”, więc serwis od razu go zapisuje
+i zwrot nie powtórzy się przy kolejnym wczytaniu (test w `dungeons.test.ts`).
+
+### Dla Codexa (trzecia partia): co zmieniłem w Twoich plikach
+
+Wszystko w ramach Twojego modelu danych, bez zmiany SaveVersion. Proszę o ostrożność przy
+łączeniu w miejscach wymienionych niżej.
+
+- **`src/game/logic/dungeons.ts`**
+  - `DUNGEON_BUFFS_REMOVED = [225, 4]` (Haste, Battle Roar) i `DUNGEON_BUFFS_ADDED = [224, 42]`
+    (Mana Recovery, Tyrant). Pula `BUFF_DEFINITIONS` jest z nich składana. Filtr puli
+    dopuszcza teraz `mpChange` z ujemną mocą (koszt Tyranta).
+  - `dungeonBuffUpgradeCost(level) = 100 × level`; `upgradeDungeonBuff` z niego korzysta.
+    `DUNGEON_BUFF_UPGRADE_COST` zostało jako cena bazowa.
+  - `DungeonProgress.totalByDungeon` (punkty rankingu per podziemie). `recordDungeon` dodaje
+    tam wynik ukończonej rundy. `sanitizeDungeonProgress` bierze zapisaną wartość albo liczy ją
+    z historii ukończonych rund.
+  - `sanitizeDungeonProgress` oddaje punkty za poziomy usuniętych buffów (ograniczone przez
+    `totalPoints`). Nowa funkcja `dungeonRefundDue(raw)`.
+  - `dungeonStep`: warunek harmonogramu to `!cleared && scheduled > wave`, czyli wyczyszczona fala
+    zawsze czeka pełne `DUNGEON_NEXT_WAVE_DELAY`.
+- **`src/game/logic/save.ts`:** `loadSave` zwraca `migrated`, gdy w zapisie v16 jest zwrot do
+  wypłacenia (żeby `LocalGameService.load` zapisał wynik od razu).
+- **`src/ui/dungeons/waveStatus.ts`:** odliczanie nie bierze już pod uwagę harmonogramu 30 s,
+  bo logika rundy też go nie bierze po wyczyszczeniu. Test w `waveStatus.test.ts` zmieniony.
+- **`src/ui/dungeons/Dungeons.tsx`**
+  - zakładka i teksty „Buffs” (stan zakładki `'buffs'`);
+  - nowy komponent `DungeonRanking` (dwie zakładki) zamiast sekcji rankingu w `DungeonsPanel`;
+  - `DungeonsButton` ma podpis `.hud__menu-label`;
+  - w `DungeonHud` pływający `.dungeon-wave-clear` jest ukryty przy wyborze, pauzie
+    i potwierdzeniu wyjścia, a okno błogosławieństw ma `.dungeon-blessing__paused`.
+- **`src/ui/dungeons/DungeonBuffer.tsx`:** nowy wygląd kart (`effectRows`, kropki poziomów,
+  „teraz → dalej”, koszt na przycisku). Logika ulepszania bez zmian.
+- **`src/ui/dungeons/DungeonLoot.tsx`:** `DungeonPotions` nie zamyka okna po wypiciu i używa
+  `drinkWithToast`.
+- **`src/ui/dungeons/dungeons.css`**
+  - przycisk Dungeons 40 px z poświatą `dungeon-button-glow` i podpisem;
+  - `.dungeon-xp__text` z wcięciem 22 px;
+  - style `.dungeon-buffer__*`, `.dungeon-ranking__tabs`, `.dungeon-podium__place.is-empty`
+    i `.dungeon-blessing__paused`;
+  - usunięte `.dungeon-target`;
+  - nowy `?v=` ikony torby.
+- **`src/scene/DungeonScene.tsx`:** brak drei `Html` nad celem. Scena wywołuje `placeLabel` dla
+  `player` i `monster` w swoim `useFrame`, a nazwa mikstury nie zależy już od ustawienia liczb
+  obrażeń.
+- **`scripts/lc/ui.mjs` / `dungeon-art.mjs`:** `menu-dungeon-loot` to teraz ikona Old Pouch.
+- **Poza Twoimi plikami, ale dotyka rundy:**
+  - `SceneLabels` / `GameScreen` (etykiety także w rundzie, z kluczem `dungeon` / `field`);
+  - `PotionSlots` (pasek działania i odnowienia, picie przez `drinkWithToast`);
+  - `CharacterPanel` (`cappedMoveBonus`);
+  - `combat.ts` (eksport `cooldownKey`).

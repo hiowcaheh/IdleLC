@@ -1,28 +1,53 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
-## Najnowszy etap: efekty skilli z klienta, etap 1 (Claude Code), 2026-11-06
+## Najnowszy etap: efekty skilli z klienta, etapy 1 i 2 (Claude Code), 2026-11-07
 
-- **Eksport:** `scripts/lc/client-effects.mjs` (`--report` daje samo podsumowanie) zapisuje
-  `public/fx/client/effects.json` i `tex/*.webp`.
-  - Grupy skilli bierze ze skills.lod (ready / fire / after) i z kluczy klipów `.bae`.
-  - Efekty i systemy cząsteczek czyta z Effect.dat (czytniki `upgrade-effects.mjs` /
-    `title-particles.mjs`).
-  - Plik jest w `.prettierignore`.
+- **Eksport:** `scripts/lc/client-effects.mjs --client <klient 2015>` (`--report` daje samo
+  podsumowanie) zapisuje do `public/fx/client/`:
+  - `effects.json`: grupy, efekty, systemy cząsteczek, tekstury z rozmiarem w mex, modele MDL
+    i listę modeli SKA;
+  - `tex/*.webp`;
+  - `ska/*.glb`.
+
+  Plik JSON jest w `.prettierignore`. Pokrycie: 287 grup, 980 efektów, 474 systemy cząsteczek,
+  175 tekstur, 15 modeli MDL, 31 modeli SKA.
+
+- **Czytniki:**
+  - `mdl.mjs` (MDAT V002–V010);
+  - `upgrade-effects.mjs` czyta EFMD, EFSK, EFPT, EFTC, EFSP, EFSB i EFOB;
+  - `title-particles.mjs` czyta PTGR.
 - **Runtime w `src/scene/clientFx/`:**
-  - `particles.ts`: czysty port CParticleGroup, testy w `particles.test.ts`.
-  - `player.ts`: CEffectGroup, czasy i tagi, cykl życia CEffect.
-  - `ParticleMeshes.ts`: rysowanie jak DrawPort_Particles.
-  - `skillFx.ts`: kolejność ready → clip keys → fire → after; tagi przez `placeSourceTag`, a gdy
-    tagu brak, punkt na wysokości modelu.
-  - `ClientFx.tsx`: warstwa w scenie.
-- **Uchwyt postaci:** `CharacterHandle.effectTarget()` zwraca kości i broń dla tagów.
-- **Do zrobienia, kolejno:**
-  1. czytnik MDL (MDATV010) i efekty EFMD (głównie PlaneAdd / PlaneAddFlat, flagi face-forward);
-  2. EFSK (modele SKA efektów przez istniejący tor SMC→GLB);
-  3. EFTR (trace broni), EFOB (orbity), EFSB (shock wave), EFLT (światło);
-  4. efekty tytułów i ulepszeń przez ten sam odtwarzacz (dziś mają własne adaptery Codexa).
+  - `particles.ts`: CParticleGroup;
+  - `modelEffect.ts`: CMdlEffect / CEffectControl, wspólne dla EFMD i EFSK;
+  - `trail.ts`: CSplineBillboardEffect / CTraceEffect;
+  - `orbit.ts`: COrbitEffect;
+  - `player.ts`: CEffectGroup, czyli czasy, tagi, wiek efektu, `stop(leftTime)` jak
+    `CEffectGroup::Stop` i efekty-dzieci orbit;
+  - rysowanie: `ParticleMeshes.ts`, `ModelMeshes.ts`, `SkaMeshes.ts`, `TrailMeshes.ts`
+    i `ClientFx.tsx` (jedna warstwa na scenę).
+- **`skillFx.ts`:**
+  - kolejność: ready → klucze klipów → FireEffect1 → pociski / trafienia przy opóźnieniach
+    → after;
+  - typy pocisków z `CSkill` (1, 3, 4, 5, 7, 10 lecą; 0, 2, 8 trafiają od razu; 9 nic);
+  - ready kończy się przy wystrzale (`Stop(0.04)`).
+- **Tagi:**
+  - `placeSourceTag` Codexa, także punkty grup `__0_X`, gdy model je ma;
+  - SWORD, sztylety i AXE bez danych biorą końce trzymanej broni (`weaponAnchors`);
+  - czego brak, stoi na wysokości modelu.
+- **Do zrobienia:**
+  1. EFLT (światło), SWVE (fala uderzeniowa), EFTR (teren), EENT (encje), trzypunktowe EFTC;
+  2. efekty tytułów i ulepszeń przez ten sam odtwarzacz (dziś mają własne adaptery Codexa,
+     nie ruszać bez potrzeby);
+  3. potwierdzić kolejność punktów grup broni, gdy pojawią się tagi `_TAG_G` mieczy.
 
   Dźwięki (EFSN) są pomijane.
+
+## Najnowszy etap: trzecia partia właściciela, Dungeons (Claude Code), 2026-11-07
+
+Buffs (koszt 100 × poziom, nowa pula, zwrot za usunięte), rankingi per podziemie
+(`totalByDungeon`), pełne 5 s po wyczyszczeniu fali, etykiety pola w rundzie, mikstury
+(toast, otwarta torba, pasek działania), ikona Old Pouch. SaveVersion 16.
+[Lista i zmiany w plikach Codexa](owner-batch-2026-11-06.md).
 
 ## Najnowszy etap: dolna minimapa i niższy panel Dungeons (Codex), 2026-11-06
 

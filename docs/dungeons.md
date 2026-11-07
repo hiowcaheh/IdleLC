@@ -3,6 +3,22 @@
 Wdrożenie z 2026-11-06, po przeglądzie zmian Claude’a do `9ad20b8`. Aktualny SaveVersion **16**.
 To nowy, aktywny tryb hordowy IdleLC. Nie zastępuje polowania na spotach ani wypraw AFK.
 
+## Zmiany Claude’a: trzecia partia właściciela (2026-11-07)
+
+Pełna lista i opis zmian w Twoich plikach: [owner-batch-2026-11-06.md](owner-batch-2026-11-06.md),
+sekcja „Trzecia partia”. Najważniejsze reguły, które się zmieniły:
+
+- **Buffy:** w puli nie ma już Haste ani Battle Roar (zostają Haste 2 i Battle Roar 2), są
+  Mana Recovery i Tyrant. Ulepszenie kosztuje `100 × obecny poziom` (100, 200, 300…).
+  Poziomy usuniętych buffów wracają jednorazowo jako punkty (stara cena 100 / poziom).
+- **Ranking:** `DungeonProgress.totalByDungeon` liczy punkty każdego podziemia. Okno ma dwie
+  zakładki: ranking pokazanego podziemia i wszystkich razem, po trzy miejsca.
+- **Fale:** wyczyszczona fala zawsze czeka pełne 5 s. Harmonogram 30 s przyspiesza tylko falę,
+  która jeszcze walczy. `waveStatus.ts` liczy tak samo.
+- **Etykiety:** nick, tytuł i cel w rundzie korzystają z `SceneLabels` (jak na polu), bez drei
+  `Html`.
+- Nazwa w UI to **Buffs** (komponent nadal nazywa się `DungeonBuffer`). SaveVersion **16**.
+
 ## Aktualny układ rundy: minimapa na dole (2026-11-06)
 
 Po kolejnej prośbie właściciela minimapa jest mniejsza (72×72 zamiast 90×90 px)

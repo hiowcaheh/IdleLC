@@ -1,10 +1,12 @@
 # IdleLC — wytyczne projektu
 
-Aktualizacja 2026-11-06, wieczór (Claude Code): **efekty skilli z klienta, etap 1**.
-`scripts/lc/client-effects.mjs` → `public/fx/client/`, a port silnika cząsteczek jest
-w `src/scene/clientFx/`. Działa na polu i w Dungeons. Skille z danymi klienta pomijają własne
-`SkillEffects`. Następne: MDL (EFMD), SKA (EFSK), trace i orbity. Szczegóły w
-[przekazaniu](docs/development-handoff.md).
+Aktualizacja 2026-11-07 (Claude Code): **efekty z klienta, etap 2** i **trzecia partia Dungeons**.
+Działają modele MDL (EFMD, czytnik `scripts/lc/mdl.mjs`), modele SKA (EFSK, GLB w
+`public/fx/client/ska`), pociski FireEffect2 z trafieniem FireEffect3, smugi (EFSB, EFTC) i orbity
+(EFOB) w `src/scene/clientFx/`. Brakuje światła, terenu, shockwave i dźwięków.
+Dungeons: Buffs (koszt `100 × poziom`, Mana Recovery i Tyrant zamiast Haste i Battle Roar, zwrot),
+ranking per podziemie (`totalByDungeon`), pełne 5 s po fali, etykiety pola w rundzie, ikona
+Old Pouch. Nadal SaveVersion **16**. Notatka dla Codexa: [trzecia partia](docs/owner-batch-2026-11-06.md).
 
 Aktualizacja 2026-11-06 (Codex): minimapa Dungeons ma 72 px i jest na dole po lewej,
 nad paskiem skilli, obok joysticka. Panel statusu jest na pełną szerokość dawnego
