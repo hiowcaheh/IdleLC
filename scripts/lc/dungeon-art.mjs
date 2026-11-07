@@ -72,7 +72,14 @@ const root = process.argv[2]
 if (!root) throw new Error('Usage: node scripts/lc/dungeon-art.mjs <client-folder>')
 const files = new ClientFiles([root])
 const ui = await buildUiParts(files)
-for (const name of ['page-left', 'page-right', 'trophy', 'menu-dungeon-loot'])
+for (const name of [
+  'page-left',
+  'page-right',
+  'trophy',
+  'menu-dungeon-loot',
+  'slider-track',
+  'slider-thumb',
+])
   fs.writeFileSync(`public/ui/lc/${name}.webp`, ui[name])
 // the client's event / notice square on the right of the screen (owner's choice, 2026-11-07)
 await sharp(await dungeonButton(ui['event-frame'], ui['menu-dungeons'], WELL_EVENT, EVENT_BUTTON))

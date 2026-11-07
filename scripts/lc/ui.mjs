@@ -41,6 +41,9 @@ export const UI_PARTS = {
   'menu-dungeons': [atlas('Map'), 67, 91, 32, 36, { scale: 2 }],
   // UIPlayerInfo.cpp m_btnQuickMenu: a 22 × 22 TopUI quick-menu button (System), for its frame.
   'menu-frame': [atlas('TopUI'), 156, 222, 22, 22],
+  // the client's option sliders (NewOption.tex): the metal track and the gold thumb above it
+  'slider-track': [atlas('NewOption'), 11, 447, 192, 6, { scale: 2 }],
+  'slider-thumb': [atlas('NewOption'), 283, 5, 17, 10, { scale: 4 }],
   // EventBtn0's first square: the frame of the client's event / notice buttons on the right
   'event-frame': [atlas('EventBtn0'), 0, 0, 32, 32],
   // the dungeon's loot: the icon of t_item 298 Old Pouch (ItemBtn1, row 7, column 13), a pouch the
