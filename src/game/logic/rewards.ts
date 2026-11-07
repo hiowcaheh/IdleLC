@@ -2,13 +2,13 @@
  * Combat rewards. The browser only animates the fight and reports its outcome; the service
  * (later: a Supabase function) checks the report against the clock and pays out. Pure.
  */
-import { reportedBoosts, type OwnedBoost } from './boosts.ts'
+import { boostEffects, reportedBoosts, type OwnedBoost } from './boosts.ts'
 import { deathLoss } from './death.ts'
 import { getItem } from '../data/items.ts'
 import type { MonsterDef } from '../data/types.ts'
 import { clamp } from './balance.ts'
 import type { CharacterData } from './character.ts'
-import { TIMINGS } from './combat.ts'
+import { TIMINGS, effectRewardMultipliers } from './combat.ts'
 import { monsterDrops, stowDrops, takeFromInventory, type ItemStack } from './loot.ts'
 import { applyPlayTime, optionValue, type OptionGain } from './options.ts'
 import type { Hero } from './fighters.ts'
@@ -208,10 +208,21 @@ export function applyCombatReport(
   character = pruneTitles(character, now)
   const kills = clamp(Math.floor(report.kills), 0, Math.max(0, allowedKills))
   const deaths = Math.max(0, Math.floor(report.deaths))
-  const reward = rewardKills(character, monster, kills, rng, now)
-  const { exp, gold, sp, drops } = reward
   const potions = (report.potions ?? []).filter((p) => getItem(p.itemId).potion)
   const { inventory, taken } = takeFromInventory(character.inventory, potions)
+  const working =
+    report.boosts === undefined
+      ? character.boosts
+      : reportedBoosts(
+          character.boosts,
+          taken.map((p) => p.itemId),
+          report.boosts,
+          now,
+        )
+  // EXP / SP potions working in the fight (Blessed Iris, skill pills)
+  const multipliers = effectRewardMultipliers(boostEffects(working, now))
+  const reward = rewardKills(character, monster, kills, rng, now, multipliers)
+  const { exp, gold, sp, drops } = reward
   const played = applyPlayTime(character, playSeconds, rng)
   const bag = stowDrops({ inventory, gear: played.character.gear }, drops, rng)
   // each death of the report after its kills (Battle_ProcDead_PC.cpp)
@@ -224,17 +235,7 @@ export function applyCombatReport(
     lost.exp += loss.exp
     lost.sp += loss.sp
   }
-  const boosts =
-    report.boosts === undefined
-      ? {}
-      : {
-          boosts: reportedBoosts(
-            character.boosts,
-            taken.map((p) => p.itemId),
-            report.boosts,
-            now,
-          ),
-        }
+  const boosts = report.boosts === undefined ? {} : { boosts: working ?? [] }
   return {
     character: {
       ...played.character,

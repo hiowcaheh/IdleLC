@@ -10,6 +10,7 @@ import type { CharacterData } from './character.ts'
 import {
   combatTick,
   createCombat,
+  effectRewardMultipliers,
   takePotionsUsed,
   updatePlayer,
   type ActiveEffect,
@@ -221,7 +222,14 @@ export function simulateAfk(
     if (killCount === 0) continue
     collectPotions()
     const at = startedAt + done * 1000
-    const reward = rewardKills(current, monster, killCount, rng, at)
+    const reward = rewardKills(
+      current,
+      monster,
+      killCount,
+      rng,
+      at,
+      effectRewardMultipliers(state.player.effects),
+    )
     totalExp += reward.exp
     gold += reward.gold
     sp += reward.sp

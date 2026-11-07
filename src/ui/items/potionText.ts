@@ -25,9 +25,25 @@ const time = (seconds: number) =>
       ? `${Math.floor(seconds / 60)} min ${seconds % 60} s`
       : `${seconds} s`
 
-/** A boost potion's stat changes ("Attack speed +15%, Run speed +1.5 m/s"). */
+/** What a boost does beyond stats (steal, Berserker, EXP / SP), as [label, value] rows. */
+function specialParts(potion: PotionDef): [string, string][] {
+  const rows: [string, string][] = []
+  if (potion.steal === 'hp') rows.push(['HP steal', '5% of damage, 30% of hits'])
+  if (potion.steal === 'mp') rows.push(['MP steal', '10% of max MP, 30% of hits'])
+  if (potion.berserker) rows.push(['Double damage', '10% of hits on monsters'])
+  if (potion.rewards?.exp) rows.push(['EXP', `+${potion.rewards.exp}%`])
+  if (potion.rewards?.sp) rows.push(['SP', `+${potion.rewards.sp}%`])
+  return rows
+}
+
+/** A boost potion's changes ("Attack speed +15%, Run speed +1.5 m/s"). */
 function boostStats(potion: PotionDef): string {
-  return boostEffect(0, '', potion, potion.duration).stats.map(statLine).join(', ')
+  return [
+    ...boostEffect(0, '', potion, potion.duration).stats.map(statLine),
+    ...specialParts(potion).map(([label, value]) =>
+      value.startsWith('+') ? `${label} ${value}` : label,
+    ),
+  ].join(', ')
 }
 const resource = (potion: PotionDef) =>
   potion.kind === 'hp' || potion.kind === 'hpRegen' ? 'HP' : 'MP'
@@ -46,7 +62,10 @@ export function potionRows(potion: PotionDef): [string, string][] {
   const what = resource(potion)
   const rows: [string, string][] =
     potion.kind === 'boost'
-      ? boostEffect(0, '', potion, potion.duration).stats.map(statParts)
+      ? [
+          ...boostEffect(0, '', potion, potion.duration).stats.map(statParts),
+          ...specialParts(potion),
+        ]
       : potion.kind === 'hp' || potion.kind === 'mp'
         ? [
             [`${what} per second`, `+${potion.power}`],

@@ -246,6 +246,12 @@ export interface PotionDef {
   exclusive?: boolean
   /** Boosts: skills have no cooldown while it works (own rule, owner's request 2026-11-05). */
   noCooldown?: boolean
+  /** Boosts: HP / MP steal potions (Battle.cpp hcHPSteelPotion / hcMPSteelPotion). */
+  steal?: 'hp' | 'mp'
+  /** Boosts: Berserker Potion, 10% of hits on monsters deal double (hcAttackBerserker). */
+  berserker?: boolean
+  /** Boosts: EXP / SP / gold / drop bonus in per cent (Blessed Iris, skill pills). */
+  rewards?: { exp: number; sp: number; gold: number; drop: number }
 }
 
 /** An item option 1:1 from t_option. */

@@ -144,6 +144,10 @@ export interface ActiveEffect {
   dungeon?: true
   visual?: 'Angel_wing03'
   rewards?: { exp: number; sp: number; gold: number; drop: number }
+  /** HP / MP steal potions (Battle.cpp hcHPSteelPotion / hcMPSteelPotion). */
+  steal?: 'hp' | 'mp'
+  /** Berserker Potion: 10% of the hero's hits on a monster deal double (hcAttackBerserker). */
+  berserker?: true
 }
 
 export interface Fighter extends FighterInit {
@@ -1084,9 +1088,12 @@ function strike(
     return null
   }
   if (multiplier <= 0) return false
+  // Berserker Potion: 10% of the hero's hits on a monster deal double (Battle_GetDamage.cpp)
+  if (side === 'player' && self.effects.some((e) => e.berserker && e.remaining > 0))
+    if (rng() < 0.1) result.damage *= 2
   target.hp = Math.max(0, target.hp - result.damage)
   if (side === 'player') addHate(s, s.player, result.damage)
-  steal(self, result.damage)
+  steal(self, result.damage, rng)
   events.push({
     type: 'hit',
     target: targetSide,
@@ -1322,11 +1329,20 @@ function reflect(
   return true
 }
 
-/** Rare options "HP / MP Steal": a share of the damage dealt comes back as HP / MP. */
-function steal(f: Fighter, damage: number): void {
+/**
+ * HP / MP steal (Battle.cpp): a steal potion replaces the rare option of its kind — 30% of the
+ * hits give back 5% of the damage as HP, or 10% of max MP; else the option's share of the damage.
+ */
+function steal(f: Fighter, damage: number, rng: Rng): void {
   const stats = effectiveStats(f)
-  if (stats.hpSteal) f.hp = Math.min(stats.maxHp, f.hp + (damage * stats.hpSteal) / 100)
-  if (stats.mpSteal) f.mp = Math.min(stats.maxMp ?? 0, f.mp + (damage * stats.mpSteal) / 100)
+  const potion = (kind: 'hp' | 'mp') => f.effects.some((e) => e.steal === kind && e.remaining > 0)
+  if (damage > 0 && potion('hp')) {
+    if (rng() >= 0.7) f.hp = Math.min(stats.maxHp, f.hp + Math.trunc((damage * 5) / 100))
+  } else if (stats.hpSteal) f.hp = Math.min(stats.maxHp, f.hp + (damage * stats.hpSteal) / 100)
+  if (damage > 0 && potion('mp')) {
+    if (rng() >= 0.7)
+      f.mp = Math.min(stats.maxMp ?? 0, f.mp + Math.trunc(((stats.maxMp ?? 0) * 10) / 100))
+  } else if (stats.mpSteal) f.mp = Math.min(stats.maxMp ?? 0, f.mp + (damage * stats.mpSteal) / 100)
 }
 
 function landSwing(s: CombatState, side: Side, rng: Rng, events: CombatEvent[]): boolean {
@@ -1642,6 +1658,10 @@ export function boostEffect(
     remaining,
     stats: [
       ...(potion.effects ?? []).flatMap((e) => {
+        // MST_STAT_STR / DEX / INT / CON: COption::ApplyOptionValue like a worn option
+        const attribute = e.type === 0 ? POTION_ATTRIBUTES[e.subtype] : undefined
+        if (attribute)
+          return [{ kind: 'stat' as const, stat: attribute, value: e.power, percent: false }]
         const effect = interpretEffect(e)
         // no cooldown at all supersedes the potion's own cooldown reduction
         if (potion.noCooldown && effect?.kind === 'stat' && effect.stat === 'cooldownReduction')
@@ -1656,8 +1676,29 @@ export function boostEffect(
     poison: 0,
     nextTick: POISON_TICK,
     ...(potion.keepOnDeath ? { keepOnDeath: true } : {}),
+    ...(potion.rewards ? { rewards: { ...potion.rewards } } : {}),
+    ...(potion.steal ? { steal: potion.steal } : {}),
+    ...(potion.berserker ? { berserker: true as const } : {}),
     ...magicsOf(potion.effects),
   }
+}
+
+/**
+ * Skill.h MST_STAT_STR / DEX / INT / CON (29–32). Read for potions only: the dungeon blessings
+ * carrying them (161, 1620, 1806) keep their current behaviour until Codex decides.
+ */
+const POTION_ATTRIBUTES: Partial<
+  Record<number, 'strength' | 'dexterity' | 'intelligence' | 'constitution'>
+> = { 29: 'strength', 30: 'dexterity', 31: 'intelligence', 32: 'constitution' }
+
+/** EXP / SP / gold / drop multipliers of the working effects (successive, as in the source). */
+export function effectRewardMultipliers(effects: readonly ActiveEffect[]) {
+  const rates = { exp: 1, sp: 1, gold: 1, drop: 1 }
+  for (const e of effects)
+    if (e.remaining > 0 && e.rewards)
+      for (const key of ['exp', 'sp', 'gold', 'drop'] as const)
+        rates[key] *= 1 + e.rewards[key] / 100
+  return rates
 }
 
 function magicsOf(effects: readonly { magic?: number; magicLevel?: number }[] | undefined) {

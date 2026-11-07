@@ -57,7 +57,29 @@ const UPGRADE_STONES = new Set([84, 85])
  * the database has no skill cast speed potion). Their effects, durations and flags come from
  * t_skill / t_skillLevel / t_magic.
  */
-const BOOST_POTIONS = new Set([391, 2138, 2845, 6916])
+const BOOST_POTIONS = new Set([
+  391, 2138, 2845, 6916,
+  // the owner's list of 2026-11-07 (cash shop and event potions), as t_item / t_skill run them:
+  // HP / MP steal, Berserker, Power, Strength, Dex, Constitution, Intelligence, Shield, Magic
+  // Shield, three critical potions, Large Attack / Defense, chocolates, Candle, Red Lucky Pouch,
+  // Blessed Iris and the Platinum Super Skill Pill
+  2357, 2356, 2853, 2846, 2849, 2850, 2851, 2852, 2872, 2871, 2988, 2989, 2990, 1315, 1314, 2043,
+  2044, 2045, 1226, 1227, 1575, 2631, 1288, 2453,
+])
+/**
+ * Boosts the server runs by their item or skill index instead of their t_magic (CAssistList::Apply,
+ * Assist.cpp: `bSkip`, the magic is not applied). steal: Battle.cpp hcHPSteelPotion (30% of the
+ * hits that hurt give back 5% of the damage) / hcMPSteelPotion (30%: 10% of max MP). berserker:
+ * Battle_GetDamage.cpp hcAttackBerserker (10% of the hero's hits on a monster deal double). exp:
+ * skill 349 rate hcCashExpUp = its magic power; sp: item 2453 hcSPPlusPer100 += 200.
+ */
+const HARDCODED_BOOSTS = new Map([
+  [2357, { steal: 'hp' }],
+  [2356, { steal: 'mp' }],
+  [2853, { berserker: true }],
+  [1288, { rewards: 'exp' }],
+  [2453, { rewards: 'sp' }],
+])
 /**
  * IdleLC prices of items the database gives no gold price (own, owner's request 2026-11-05): the
  * cooldown potion is a cash shop item there.
@@ -630,13 +652,26 @@ function buildPotions(tables, itemRows, usable) {
         ]
       })
       const flag = int(skill.a_flag)
+      const hard = HARDCODED_BOOSTS.get(int(r.a_index))
       potions.set(int(r.a_index), {
         kind: 'boost',
         power: 0,
         duration: int(level.a_durtime) / 10,
         cooldown: int(skill.a_reuseTime) / 10,
         skill: int(skill.a_index),
-        effects,
+        effects: hard ? [] : effects,
+        ...(hard?.steal ? { steal: hard.steal } : {}),
+        ...(hard?.berserker ? { berserker: true } : {}),
+        ...(hard?.rewards
+          ? {
+              rewards: {
+                exp: hard.rewards === 'exp' ? (effects[0]?.power ?? 0) : 0,
+                sp: hard.rewards === 'sp' ? (effects[0]?.power ?? 0) : 0,
+                gold: 0,
+                drop: 0,
+              },
+            }
+          : {}),
         ...(flag & SF_NOCANCEL ? { keepOnDeath: true } : {}),
         ...(flag & SF_ABSTIME ? { realTime: true } : {}),
         ...(flag & SF_NOTDUPLICATE ? { exclusive: true } : {}),
