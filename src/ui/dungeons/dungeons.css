@@ -4,7 +4,7 @@
 }
 /* the run's loot bag: a pouch from the client's items, not the field's Inventory bag */
 .game .icon-button.dungeon-loot-button {
-  background-image: url('/ui/lc/menu-dungeon-loot.webp?v=152ef04c');
+  background-image: url('/ui/lc/menu-dungeon-loot.webp?v=ef2d96e6');
 }
 .game .icon-button.hud__menu--dungeons {
   position: absolute;

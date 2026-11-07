@@ -41,9 +41,9 @@ export const UI_PARTS = {
   'menu-dungeons': [atlas('Map'), 67, 91, 32, 36, { scale: 2 }],
   // UIPlayerInfo.cpp m_btnQuickMenu: a 22 × 22 TopUI quick-menu button (System), for its frame.
   'menu-frame': [atlas('TopUI'), 156, 222, 22, 22],
-  // the dungeon's loot: a treasure chest of the item icons (ItemBtn7, row 3, column 5), so it is
-  // not the field's Inventory button (owner's choice of 2026-11-06 over the earlier pouch)
-  'menu-dungeon-loot': [atlas('ItemBtn7'), 160, 96, 32, 32, { scale: 4 }],
+  // the dungeon's loot: the icon of t_item 298 Old Pouch (ItemBtn1, row 7, column 13), a pouch the
+  // Harpy Queen of Dratan drops, so it is not the field's Inventory button (owner's choice)
+  'menu-dungeon-loot': [atlas('ItemBtn1'), 416, 224, 32, 32, { scale: 4 }],
   // UIRadar.cpp _createTrophyData: the Royal Rumble winner's trophy (trophy.tex), for the ranking.
   trophy: [atlas('trophy'), 21, 19, 330, 307, { quality: 90 }],
   // questView.xml btn_left / btn_right, normal UV state.
