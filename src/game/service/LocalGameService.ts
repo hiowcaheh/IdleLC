@@ -130,13 +130,17 @@ export class LocalGameService implements GameService {
                 }),
               }
             : c
+        // the game was closed on the way between spots: the hero is back where it left from
+        const { runFrom, ...still } = recovered
+        const placed = runFrom && !still.expedition ? { ...still, location: runFrom } : still
         return applyLevelTitles(
-          recovered.expedition ? recovered : pruneTitles(recovered, this.now()),
+          placed.expedition ? placed : pruneTitles(placed, this.now()),
           this.now(),
         )
       }),
     }
-    if (status !== 'loaded' || save.characters.some((c) => c.dungeons?.active)) this.persist()
+    if (status !== 'loaded' || save.characters.some((c) => c.dungeons?.active || c.runFrom))
+      this.persist()
     return { save: copy(this.save), status }
   }
 
@@ -169,7 +173,11 @@ export class LocalGameService implements GameService {
     this.persist()
   }
 
-  async travel(characterId: string, location: CharacterLocation): Promise<CharacterData> {
+  async travel(
+    characterId: string,
+    location: CharacterLocation,
+    from?: CharacterLocation,
+  ): Promise<CharacterData> {
     this.notOnExpedition(characterId)
     const zone = ZONES[location.zoneId]
     if (!zone) throw new GameError('unknown-zone', `Unknown zone: ${location.zoneId}`)
@@ -182,7 +190,31 @@ export class LocalGameService implements GameService {
     if (!isSpotOpen(character, location)) {
       throw new GameError('spot-locked', `${location.monsterId} is not open yet`)
     }
-    return copy(this.update(characterId, (c) => ({ ...c, location: { ...location } })))
+    // a run on the same map remembers where it started until the hero arrives
+    const runFrom =
+      from && from.zoneId === location.zoneId && from.monsterId !== location.monsterId
+        ? { ...from }
+        : undefined
+    return copy(
+      this.update(characterId, (c) => {
+        const next: CharacterData = { ...c, location: { ...location } }
+        if (runFrom) next.runFrom = runFrom
+        else delete next.runFrom
+        return next
+      }),
+    )
+  }
+
+  async arrive(characterId: string): Promise<CharacterData> {
+    const character = this.character(characterId)
+    if (!character.runFrom) return copy(character)
+    return copy(
+      this.update(characterId, (c) => {
+        const next: CharacterData = { ...c }
+        delete next.runFrom
+        return next
+      }),
+    )
   }
 
   async reportCombat(characterId: string, report: CombatReport): Promise<CombatResult> {

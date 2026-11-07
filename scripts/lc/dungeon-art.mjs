@@ -12,26 +12,37 @@ import { buildUiParts } from './ui.mjs'
 
 /** Side of a menu button image: the 22 px quick-menu cell, upscaled 4× like the other menu icons. */
 const BUTTON = 88
-/** The quick-menu frame's border in the 22 px cell. */
+/** The quick-menu frame's border in the 22 px cell (and the event button's in its 32 px one). */
 const BORDER = 2
+/** Top and bottom shade of the well: the quick menu's slate, the event buttons' brown. */
+const WELL_TOPUI = [
+  [52, 62, 72],
+  [18, 24, 29],
+]
+const WELL_EVENT = [
+  [34, 17, 6],
+  [87, 73, 53],
+]
+/** The event button: the client's 32 px notice square (EventBtn0), upscaled 4×. */
+const EVENT_BUTTON = 128
 
 /**
  * The quick-menu frame with a dark well inside (top and bottom shade of the client's empty slots)
  * and the world map's dungeon mark in it: a button of the same look as Character, Inventory, ….
  */
-async function dungeonButton(frameWebp, markWebp) {
+async function dungeonButton(frameWebp, markWebp, well = WELL_TOPUI, side = BUTTON) {
   const { data, info } = await sharp(frameWebp).raw().toBuffer({ resolveWithObject: true })
   const size = info.width
   for (let y = BORDER; y < size - BORDER; y++) {
     const t = (y - BORDER) / (size - 2 * BORDER - 1)
     for (let x = BORDER; x < size - BORDER; x++) {
       const i = (y * size + x) * info.channels
-      data[i] = Math.round(52 + (18 - 52) * t)
-      data[i + 1] = Math.round(62 + (24 - 62) * t)
-      data[i + 2] = Math.round(72 + (29 - 72) * t)
+      for (let c = 0; c < 3; c++)
+        data[i + c] = Math.round(well[0][c] + (well[1][c] - well[0][c]) * t)
       if (info.channels === 4) data[i + 3] = 255
     }
   }
+  const BUTTON = side
   const frame = await sharp(data, { raw: info })
     .resize(BUTTON, BUTTON, { kernel: 'mitchell' })
     .sharpen({ sigma: 1.2, m1: 1, m2: 3 })
@@ -41,7 +52,7 @@ async function dungeonButton(frameWebp, markWebp) {
   const mark = await sharp(markWebp)
     .resize({ height: Math.round(inner), fit: 'inside' })
     // a touch brighter: on the map it lies on a light parchment, here in a dark well
-    .modulate({ brightness: 1.15 })
+    .modulate({ brightness: well === WELL_EVENT ? 1.5 : 1.15 })
     .png()
     .toBuffer()
   const { width = 0, height = 0 } = await sharp(mark).metadata()
@@ -63,7 +74,8 @@ const files = new ClientFiles([root])
 const ui = await buildUiParts(files)
 for (const name of ['page-left', 'page-right', 'trophy', 'menu-dungeon-loot'])
   fs.writeFileSync(`public/ui/lc/${name}.webp`, ui[name])
-await sharp(await dungeonButton(ui['menu-frame'], ui['menu-dungeons']))
+// the client's event / notice square on the right of the screen (owner's choice, 2026-11-07)
+await sharp(await dungeonButton(ui['event-frame'], ui['menu-dungeons'], WELL_EVENT, EVENT_BUTTON))
   .webp({ lossless: true })
   .toFile('public/ui/lc/menu-dungeons.webp')
 /**

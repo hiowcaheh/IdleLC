@@ -25,6 +25,7 @@ import { STAT_TOAST_MS, toast } from '../../state/toasts.ts'
 import { heroStats, nameTone, pieceName, rareLabel, wearProblem } from '../gear/format.ts'
 import { PotionNotes } from './PotionNotes.tsx'
 import { drinkWithToast } from './drinkWithToast.ts'
+import { comparePotions } from './potionText.ts'
 import { Sheet } from '../Sheet.tsx'
 import { ItemIcon } from './ItemIcon.tsx'
 import { WearCompare } from '../gear/WearCompare.tsx'
@@ -68,10 +69,11 @@ const categoryOf = (item: ItemDef): Category =>
     ? item.type
     : 'other'
 
-/** By type; weapons and armor from the highest required level down. */
+/** By type; weapons and armor from the highest required level down; potions by group and level. */
 const byType = (a: ItemDef, b: ItemDef) =>
   TYPE_ORDER.indexOf(a.type) - TYPE_ORDER.indexOf(b.type) ||
   (a.gear && b.gear ? b.level - a.level : 0) ||
+  comparePotions(a, b) ||
   a.name.localeCompare(b.name)
 
 /**

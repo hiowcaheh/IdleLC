@@ -865,6 +865,8 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
   switch (s.phase) {
     case 'traveling': {
       regen(s.player, dt, true)
+      // the hero drinks on the way too, to arrive healed (owner's rule, 2026-11-07)
+      drinkPotions(s.player, events)
       // metres at the speed of the moment: a speed potion drunk on the way shortens what is left
       const run = s.travel ?? { distance: TRAVEL_METRES, done: 0 }
       const done = movementBlocked ? run.done : run.done + dt * runSpeed(effectiveStats(s.player))
@@ -879,6 +881,7 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
 
     case 'spawning':
       regen(s.player, dt, false)
+      drinkPotions(s.player, events)
       if (reached(s.phaseTime, TIMINGS.spawning)) {
         s.monster = freshFighter(s.monster)
         // a new monster: an empty attack list
@@ -894,6 +897,7 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
 
     case 'approach':
       regen(s.player, dt, true)
+      drinkPotions(s.player, events)
       if (reached(s.phaseTime, approachTime(s))) engage(s, events, 0)
       return
 
@@ -911,6 +915,7 @@ function advance(s: CombatState, dt: number, rng: Rng, events: CombatEvent[]): v
 
     case 'victory':
       regen(s.player, dt, false)
+      drinkPotions(s.player, events)
       if (reached(s.phaseTime, TIMINGS.victory)) {
         enter(s, 'spawning')
         events.push({ type: 'despawn' })

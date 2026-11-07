@@ -12,49 +12,19 @@
   right: calc(100% + 10px);
   width: 40px;
   height: 40px;
-  overflow: visible;
   pointer-events: auto;
-  /* the world map's dungeon mark in a quick-menu frame, like the other menu buttons (dungeon-art.mjs) */
-  background: url('/ui/lc/menu-dungeons.webp?v=244d782e') center / 100% 100% no-repeat;
-  /* a slow gilt glow, so the way into the dungeons is seen at a glance */
-  animation: dungeon-button-glow 2.4s ease-in-out infinite;
+  /* the client's event / notice square (EventBtn0) with the world map's dungeon mark
+     (dungeon-art.mjs); a square of its own beside the round menu buttons, quiet like the client's */
+  background: url('/ui/lc/menu-dungeons.webp?v=79bf83bb') center / 100% 100% no-repeat;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px #000a;
+}
+.game .icon-button.hud__menu--dungeons:hover,
+.game .icon-button.hud__menu--dungeons:focus-visible {
+  filter: brightness(1.2);
 }
 .game .icon-button.hud__menu--dungeons:disabled {
-  animation: none;
   filter: grayscale(0.8) brightness(0.7);
-}
-.hud__menu--dungeons .hud__menu-label {
-  position: absolute;
-  top: calc(100% + 2px);
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 1px 5px 2px;
-  border: 1px solid #b38b4a;
-  border-radius: 3px;
-  background: linear-gradient(#3a2a14f0, #1d140af0);
-  color: #ffdf8a;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  line-height: 1.2;
-  white-space: nowrap;
-  text-shadow: 0 1px 1px #000;
-  pointer-events: none;
-}
-@keyframes dungeon-button-glow {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 2px #ffcf6a) drop-shadow(0 0 1px #000);
-  }
-  50% {
-    filter: drop-shadow(0 0 7px #ffc04a) drop-shadow(0 0 3px #ff9a2a) brightness(1.15);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .game .icon-button.hud__menu--dungeons {
-    animation: none;
-    filter: drop-shadow(0 0 5px #ffc04a);
-  }
 }
 .sheet.dungeons-window {
   width: min(100%, 900px);

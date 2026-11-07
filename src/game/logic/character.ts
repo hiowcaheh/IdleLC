@@ -60,6 +60,11 @@ export interface CharacterData {
   /** Last time the game heard from this character; time away since then counts as AFK. */
   lastPlayedAt: number
   location: CharacterLocation
+  /**
+   * The spot the hero left while it runs to `location` on the same map. A reload during the run
+   * puts it back there, so closing the game can't skip the way (owner's rule, 2026-11-07).
+   */
+  runFrom?: CharacterLocation
   /** The farthest open hunting spot per zone id (logic/spots.ts); a zone not here: its first spot. */
   reachedSpots: Record<string, string>
   stats: CharacterStats

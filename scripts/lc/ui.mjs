@@ -41,6 +41,8 @@ export const UI_PARTS = {
   'menu-dungeons': [atlas('Map'), 67, 91, 32, 36, { scale: 2 }],
   // UIPlayerInfo.cpp m_btnQuickMenu: a 22 × 22 TopUI quick-menu button (System), for its frame.
   'menu-frame': [atlas('TopUI'), 156, 222, 22, 22],
+  // EventBtn0's first square: the frame of the client's event / notice buttons on the right
+  'event-frame': [atlas('EventBtn0'), 0, 0, 32, 32],
   // the dungeon's loot: the icon of t_item 298 Old Pouch (ItemBtn1, row 7, column 13), a pouch the
   // Harpy Queen of Dratan drops, so it is not the field's Inventory button (owner's choice)
   'menu-dungeon-loot': [atlas('ItemBtn1'), 416, 224, 32, 32, { scale: 4 }],

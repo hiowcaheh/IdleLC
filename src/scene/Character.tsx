@@ -48,8 +48,11 @@ import type { UpgradeTarget } from './upgradeEffects.ts'
 export type BaseAnimation = 'idle' | 'run'
 
 export interface CharacterHandle {
-  /** Looping animation to return to after one-shots. */
-  setBase(anim: BaseAnimation): void
+  /**
+   * Looping animation to return to after one-shots; `interrupt` cuts a swing or spell short and
+   * plays it now (a hero that starts running in a dungeon run).
+   */
+  setBase(anim: BaseAnimation, interrupt?: boolean): void
   /** Swing timed so the blow lands exactly TIMINGS.impactDelay after this call. */
   attack(): void
   /**
@@ -381,8 +384,13 @@ export function Character({
     }
 
     return {
-      setBase(name) {
+      setBase(name, interrupt = false) {
+        const changed = state.base !== name
         state.base = name
+        if (interrupt && changed && state.oneShot && !state.dead) {
+          state.oneShot = false
+          state.pending = null
+        }
         if (!state.oneShot && !state.dead) playBase(0.2)
       },
       attack() {

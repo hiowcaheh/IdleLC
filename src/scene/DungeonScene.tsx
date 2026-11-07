@@ -105,14 +105,20 @@ export function DungeonScene({ id }: { id: DungeonId }) {
   const summonGroups = useRef(new Map<ElementalType, Group>())
   const crystals = useRef<InstancedMesh>(null)
   const cameraPlaced = useRef(false)
+  const heroMoving = useRef(false)
 
   useEffect(
     () =>
       dungeonSession.subscribe((events) => {
         for (const { enemyUid, event: e } of events) {
           const monster = enemyUid === null ? undefined : enemyHandles.current.get(enemyUid)
-          if (e.type === 'attack') (e.source === 'player' ? hero.current : monster)?.attack()
-          else if (e.type === 'cast') {
+          // a hero who runs with the stick keeps running: it shoots without its swing clip
+          // (owner's report: the Healer floated across the floor in her bow pose)
+          const runningHero =
+            e.type !== 'death' && 'source' in e && e.source === 'player' && heroMoving.current
+          if (e.type === 'attack') {
+            if (!runningHero) (e.source === 'player' ? hero.current : monster)?.attack()
+          } else if (e.type === 'cast') {
             // the client's effect groups of the skill, between the caster and its target
             const targetUid = dungeonSession.state?.targetUid
             const enemy = () =>
@@ -127,7 +133,7 @@ export function DungeonScene({ id }: { id: DungeonId }) {
               () => (e.source === 'player' ? enemy() : hero.current),
               { windUp: e.windUp, landsIn: e.castTime },
             )
-            const actor = e.source === 'player' ? hero.current : monster
+            const actor = e.source === 'player' ? (runningHero ? null : hero.current) : monster
             if (
               actor &&
               !actor.skill(e.skillId, {
@@ -185,7 +191,8 @@ export function DungeonScene({ id }: { id: DungeonId }) {
     if (!moving && target) yaw = Math.atan2(target.x - x, target.z - z)
     const turn = Math.atan2(Math.sin(yaw - group.rotation.y), Math.cos(yaw - group.rotation.y))
     group.rotation.y += turn * Math.min(1, delta * 12)
-    hero.current?.setBase(moving ? 'run' : 'idle')
+    heroMoving.current = moving
+    hero.current?.setBase(moving ? 'run' : 'idle', moving)
     view.player.copy(group.position)
     view.playerHeight = hero.current?.height() ?? 2
     if (target) view.monster.set(target.x, 0, target.z)

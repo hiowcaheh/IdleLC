@@ -6,7 +6,7 @@ import { Gold } from '../Gold.tsx'
 import { Sheet } from '../Sheet.tsx'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { drinkWithToast } from '../items/drinkWithToast.ts'
-import { potionLine } from '../items/potionText.ts'
+import { comparePotions, potionLine } from '../items/potionText.ts'
 import { formatSp } from '../skills/format.ts'
 
 export function DungeonLootSummary({ rewards }: { rewards: DungeonRun['rewards'] }) {
@@ -116,6 +116,7 @@ function DungeonPotions() {
   const potions = character.inventory
     .map((s) => ({ ...s, item: getItem(s.itemId) }))
     .filter((s) => s.count > 0 && s.item.potion)
+    .sort((a, b) => comparePotions(a.item, b.item) || a.item.name.localeCompare(b.item.name))
   return potions.length ? (
     <ul className="dungeon-potions">
       {potions.map(({ itemId, count, item }) => (

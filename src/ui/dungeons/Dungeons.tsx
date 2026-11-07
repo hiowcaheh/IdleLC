@@ -52,11 +52,7 @@ export function DungeonsButton({ onClick }: { onClick(): void }) {
       title="Dungeons"
       disabled={away || traveling}
       onClick={onClick}
-    >
-      <span className="hud__menu-label" aria-hidden="true">
-        Dungeons
-      </span>
-    </button>
+    />
   )
 }
 

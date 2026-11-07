@@ -32,7 +32,14 @@ export interface GameService {
   /** Marks the character as being played (null = back to character selection). */
   setActiveCharacter(characterId: string | null): Promise<void>
   /** Moves the character to another hunting spot. */
-  travel(characterId: string, location: CharacterLocation): Promise<CharacterData>
+  /** Goes to a spot; `from` is the spot the hero runs from on the same map (kept until it arrives). */
+  travel(
+    characterId: string,
+    location: CharacterLocation,
+    from?: CharacterLocation,
+  ): Promise<CharacterData>
+  /** The hero has reached the spot it ran to. */
+  arrive(characterId: string): Promise<CharacterData>
   /**
    * Outcome of the fights since the last report; the service checks it, pays out and takes the
    * potions drunk out of the bag.

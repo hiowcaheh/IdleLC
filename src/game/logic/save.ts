@@ -274,6 +274,11 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
   const stats = isRecord(raw.stats) ? raw.stats : {}
   const createdAt = num(raw.createdAt, now)
   const location = sanitizeLocation(raw.location)
+  // a run between spots of one map that the game was closed during
+  const runFrom =
+    isRecord(raw.runFrom) && raw.runFrom.zoneId === location.zoneId
+      ? sanitizeLocation(raw.runFrom)
+      : undefined
   // dual swords and a shield together (saves from before that rule): the shield goes to the bag
   return freeHands({
     id: raw.id,
@@ -289,6 +294,7 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     createdAt,
     lastPlayedAt: num(raw.lastPlayedAt, createdAt),
     location,
+    ...(runFrom ? { runFrom } : {}),
     reachedSpots: sanitizeReached(raw.reachedSpots, location),
     stats: {
       kills: int(stats.kills, 0),

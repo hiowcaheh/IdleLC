@@ -665,6 +665,15 @@ describe('potions in combat', () => {
     expect(later.player.hp).toBeCloseTo(r.state.player.hp + 32, 0)
   })
 
+  it('drinks on the way to the next spot too (owner, 2026-11-07)', () => {
+    const small = potion(43, 'hp', 16)
+    const low = 1000 * HP_POTION_BELOW - 100
+    const walking = { ...drinker([small], low), phase: 'traveling' as const, phaseTime: 0 }
+    const r = combatTick(walking, 0.01, createRng(1))
+    expect(r.state.phase).toBe('traveling')
+    expect(r.events).toContainEqual({ type: 'potion', itemId: 43, name: 'Potion 43', kind: 'hp' })
+  })
+
   it('does not drink another of the kind while one works or during its cooldown', () => {
     const small = potion(43, 'hp', 16, 5, 1)
     const r = combatTick(drinker([small], 100), 0.01, createRng(1))

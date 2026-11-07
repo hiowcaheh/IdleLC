@@ -265,6 +265,28 @@ describe('LocalGameService', () => {
     expect((await reloaded.claimAfk(hero.id)).seconds).toBe(3600)
   })
 
+  it('puts a hero closed on the way between spots back where it left (owner, 2026-11-07)', async () => {
+    const { game, clock, hero, storage } = await withKnight()
+    await game.dev!.openAllSpots(hero.id)
+    const zone = ZONES[hero.location.zoneId]!
+    const other = zone.monsterIds.find((id) => id !== hero.location.monsterId)!
+    const start = { ...hero.location }
+    const running = await game.travel(hero.id, { zoneId: zone.id, monsterId: other }, start)
+    expect(running.runFrom).toEqual(start)
+    // the game is closed during the run and opened again much later
+    clock.now += 600 * 1000
+    const reloaded = new LocalGameService(storage, { now: () => clock.now, rng: createRng(3) })
+    const back = (await reloaded.load()).save.characters.find((c) => c.id === hero.id)!
+    expect(back.location).toEqual(start)
+    expect(back.runFrom).toBeUndefined()
+    // a run that arrives keeps its spot
+    await reloaded.travel(hero.id, { zoneId: zone.id, monsterId: other }, start)
+    expect((await reloaded.arrive(hero.id)).runFrom).toBeUndefined()
+    const again = new LocalGameService(storage, { now: () => clock.now, rng: createRng(4) })
+    const arrived = (await again.load()).save.characters.find((c) => c.id === hero.id)!
+    expect(arrived.location.monsterId).toBe(other)
+  })
+
   it('simulates a long expedition with a dev command', async () => {
     const { game, hero } = await withKnight()
     const away = await game.dev.simulateAfk(hero.id, 3600)

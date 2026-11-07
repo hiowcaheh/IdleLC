@@ -288,6 +288,12 @@ export const useGameStore = create<GameStore>((set, get) => {
   }
 
   combatEvents.subscribe((event) => {
+    // arrived: the save no longer needs the spot the run started from
+    if (event.type === 'arrive') {
+      runFrom = null
+      const id = get().character?.id
+      if (id) enqueue(() => gameService.arrive(id)).catch(logError)
+    }
     if (event.type === 'death') {
       reportCombat(event.who === 'monster' ? 1 : 0, event.who === 'player' ? 1 : 0)
     }
@@ -316,10 +322,11 @@ export const useGameStore = create<GameStore>((set, get) => {
         ? undefined
         : planTravel(zoneId, monsterId)
     runFrom = newZone ? null : running() && runFrom ? runFrom : character.location
+    const from = runFrom ?? undefined
     combatEvents.emit(combatSession.setMonster(monsterId, distance))
     applyCharacter({ ...character, location })
     set({ hud: toHud(combatSession.state) })
-    enqueue(() => gameService.travel(character.id, location))
+    enqueue(() => gameService.travel(character.id, location, from))
       .then(applyCharacter)
       .catch(logError)
   }

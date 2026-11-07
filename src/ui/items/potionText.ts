@@ -1,4 +1,4 @@
-import type { PotionDef } from '../../game/data/types.ts'
+import type { ItemDef, PotionDef } from '../../game/data/types.ts'
 import {
   HP_POTION_BELOW,
   MP_POTION_BELOW,
@@ -84,4 +84,15 @@ export function potionNotes(potion: PotionDef): string[] {
         ...(potion.exclusive ? ['Only one at a time.'] : []),
       ]
   }
+}
+
+/** Potions in groups (owner's order): boosts first (Haste, Adrenaline, cast…), then HP, then MP. */
+const POTION_ORDER = ['boost', 'hp', 'hpRegen', 'mp', 'mpRegen'] as const
+const potionRank = (item: ItemDef) =>
+  item.potion ? POTION_ORDER.indexOf(item.potion.kind) : POTION_ORDER.length
+
+/** Orders potions by group, then level and strength; other items compare equal. */
+export function comparePotions(a: ItemDef, b: ItemDef): number {
+  if (!a.potion || !b.potion) return potionRank(a) - potionRank(b)
+  return potionRank(a) - potionRank(b) || a.level - b.level || a.potion.power - b.potion.power
 }
