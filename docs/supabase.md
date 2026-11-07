@@ -144,6 +144,28 @@ porównywać zgłoszone tempo z `measureHuntRate` (czy postać w ogóle może ta
   ale jej wynik i tempo są ograniczone przez serwer.
 - Klucz `anon` w przeglądarce jest publiczny z założenia — bezpieczeństwo daje RLS i funkcje serwera.
 
+### Skrzynki, Multi-open, sklep Cash i zwoje (wymóg właściciela, 2026-11-07)
+
+Gracze nie mogą oszukiwać ani duplikować skrzynek. Dlatego `openBoxes`, `buyCashOffer`
+i `useDungeonScroll` to funkcje serwera (RPC), nigdy zapis z przeglądarki.
+
+1. **Jedna transakcja.** Funkcja sprawdza właściciela postaci (`auth.uid()`) i blokuje wiersz torby
+   (`SELECT … FOR UPDATE`). Potem sprawdza liczbę skrzynek / saldo Cash, odejmuje je, losuje nagrody
+   i dopisuje je w tej samej transakcji. Błąd w środku = nic się nie zmienia.
+2. **Losowanie tylko na serwerze.** Funkcja używa `gen_random_bytes` (pgcrypto). Tabelę szans
+   (`BOX_PRIZES`) trzyma w bazie, nie w kliencie, a ilość z klienta jest tylko prośbą: serwer bierze
+   `min(prośba, posiadane, MAX_BOXES_AT_ONCE)`.
+3. **Klucz idempotencji.** Każde żądanie ma `request_id` (UUID z klienta). Powtórka tego samego
+   klucza zwraca zapisany wynik, nie losuje drugi raz (podwójne kliknięcie, ponowienie po zerwaniu
+   sieci).
+4. **Dziennik.** Tabela `item_ledger` zapisuje postać, przedmiot, zmianę ilości, powód
+   (`box_open`, `cash_buy`, `scroll_use`), `request_id` i czas. Suma wpisów musi się zgadzać
+   z torbą; nocny job sprawdza rozbieżności.
+5. **Limity.** Ograniczenie liczby żądań na minutę na konto. Cash zmienia tylko serwer: płatność
+   PayPal przez webhook, z weryfikacją podpisu i tylko wtedy dopisanie Cash.
+6. **Ograniczenia w bazie.** `CHECK (count >= 0)` na stosach i saldzie Cash, unikalny
+   `(character_id, item_id)` dla stosów.
+
 ## Do decyzji właściciela przed etapem 2
 
 1. Logowanie: e-mail (magic link), Google, czy oba?

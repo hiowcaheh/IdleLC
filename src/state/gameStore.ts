@@ -587,6 +587,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const id = playedId()
       const opening = await enqueue(() => gameService.openBoxes(id, itemId, count))
       applyCharacter(opening.character)
+      bagFeed.emit(opening.prizes)
       return opening.prizes
     },
 

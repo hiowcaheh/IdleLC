@@ -466,3 +466,35 @@
 .cash-detail .cash-button--wide {
   margin-top: 0;
 }
+
+/* dungeon boxes in the bag (ui/items/BoxActions): "?", Multi-open, the prizes */
+.item-row__actions .button.box-help {
+  flex: 0 0 44px;
+  min-width: 44px;
+  padding: 0;
+  font-weight: 800;
+}
+.item-row__actions:has(.box-help) .button:not(.box-help) {
+  flex-basis: 100px;
+}
+.box-dialog {
+  display: grid;
+  gap: 8px;
+}
+.box-dialog__text {
+  margin: 0;
+  color: #d9ccaa;
+}
+.box-dialog__note {
+  margin: 0;
+  color: #9a917c;
+  font-size: 0.82em;
+}
+.box-dialog__chance {
+  color: #8fe36a;
+  font-weight: 700;
+}
+.box-dialog__count {
+  display: grid;
+  place-items: center;
+}
