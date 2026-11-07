@@ -37,14 +37,30 @@ export interface LiveModel {
   rotation: Quat
 }
 
+/** A running SKA model effect (EFSK), for the renderer. */
+export interface LiveSka {
+  def: EffectDef
+  url: string
+  /** Seconds since it (re)started: the time of its looping first animation. */
+  age: number
+  /** 0xRRGGBBAA */
+  color: number
+  stretch: Vec3
+  position: Vec3
+  rotation: Quat
+}
+
 interface Running {
   def: EffectDef
   tag: string
   /** Seconds of its life left (m_fLeftTime). */
   left: number
+  /** Seconds since it (re)started (the processed time its tracks are read at). */
+  age: number
   repeat: number
   particles?: LiveParticles
   model?: LiveModel
+  ska?: LiveSka
   /** Where the tag was and how it was turned at the first process (m_bOnlyStart). */
   start?: Placement
   /** EOTT_START: the tag's turn when it started. */
@@ -87,12 +103,24 @@ export class EffectGroupPlayer {
     return this.running.flatMap((r) => (r.model ? [r.model] : []))
   }
 
-  stop(): void {
+  /** The SKA model effects alive now. */
+  skaModels(): LiveSka[] {
+    return this.running.flatMap((r) => (r.ska ? [r.ska] : []))
+  }
+
+  /**
+   * CEffectGroup::Stop: effects not started yet never start; running ones repeat no more and end
+   * within `leftTime` seconds, or over their own fade-out time when it is negative (CEffect::Stop);
+   * particle emitters stop at once.
+   */
+  stop(leftTime = -1): void {
     this.stopped = true
     this.next = this.keys.length
     for (const r of this.running) {
       r.repeat = 0
       r.particles?.system.stop()
+      const cut = leftTime < 0 ? r.def.fadeOut : leftTime
+      if (r.left > cut) r.left = cut
     }
   }
 
@@ -114,7 +142,13 @@ export class EffectGroupPlayer {
     if (!tag) return
     const at = this.tags(tag)
     if (!at) return // the client skips an effect whose tag the character lacks
-    const running: Running = { def, tag, left: def.lifeTime, repeat: def.repeat }
+    const running: Running = {
+      def,
+      tag,
+      left: def.lifeTime,
+      age: 0,
+      repeat: def.repeat,
+    }
     if (def.kind === 'EFPT' && def.particleGroup && !def.unsupported) {
       const group = this.data.particles[def.particleGroup]
       if (group && group.emitter && this.data.textures[group.texture]) {
@@ -142,6 +176,22 @@ export class EffectGroupPlayer {
           rotation: at.rotation,
         }
     }
+    if (def.kind === 'EFSK' && def.model) {
+      // CSkaEffect: a model the client has no mesh for draws nothing (Invisible.smc)
+      const asset = this.data.skaModels?.[def.model]
+      if (asset)
+        running.ska = {
+          def,
+          url: `${asset.url}?v=${asset.sha256.slice(0, 12)}`,
+          age: 0,
+          color: (def.color ?? 0xffffffff) >>> 0,
+          stretch: [1, 1, 1],
+          position: at.position,
+          rotation: at.rotation,
+        }
+      // CSkaEffect::Start takes the tag's place at once
+      running.start = at
+    }
     if (late <= 0 || this.process(running, late)) this.running.push(running)
   }
 
@@ -155,10 +205,12 @@ export class EffectGroupPlayer {
   /** CEffect::PreProcess and the effect's own Process; false when it has ended. */
   private process(r: Running, dt: number): boolean {
     r.left -= dt
+    r.age += dt
     if (r.left <= 0) {
       if (r.repeat !== 0 && !this.stopped) {
         if (r.repeat > 0) r.repeat--
         r.left += r.def.lifeTime
+        r.age -= r.def.lifeTime
         r.particles?.system.restart()
         // a restarted model effect takes the tag's place again (CMdlEffect::Start m_bOnlyStart)
         r.start = undefined
@@ -169,13 +221,15 @@ export class EffectGroupPlayer {
       if (at) this.place(r, at)
       r.particles.system.process(dt)
     }
-    if (r.model) {
+    // model effects (EFMD, EFSK) share CMdlEffect's look and placement rules
+    const shown = r.model ?? r.ska
+    if (shown) {
       const at = this.tags(r.tag)
-      r.start ??= at ?? { position: r.model.position, rotation: r.model.rotation }
-      const age = Math.max(0, r.def.lifeTime - r.left)
+      r.start ??= at ?? { position: shown.position, rotation: shown.rotation }
+      const age = Math.max(0, r.age)
       const look = modelLook(r.def, age, r.left)
       const placed = modelPlacement(r.def, look, r.start, at)
-      Object.assign(r.model, {
+      Object.assign(shown, {
         age,
         color: look.color,
         stretch: look.stretch,

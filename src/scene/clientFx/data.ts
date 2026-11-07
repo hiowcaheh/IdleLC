@@ -164,7 +164,12 @@ export interface EffectGroupDef {
 /** What a skill plays (skills.lod and the class .bae of its clips). */
 export interface SkillFxDef {
   ready?: string
+  /** FireEffect1, on the caster when the release starts. */
   fire: string[]
+  /** FireEffect2: the missile's group, flying to the target (CSkill missile types). */
+  missile?: string
+  /** FireEffect3: on the target at each hit. */
+  hit?: string
   after?: string
   projectile?: { type: number; speed: number; delays: number[] }
   clips?: Record<'ready' | 'still' | 'fire', { group: string; delay: number }[]>
@@ -208,6 +213,8 @@ export interface ClientFxData {
   particles: Record<string, ParticleGroupDef>
   textures: Record<string, FxTextureDef>
   models?: Record<string, ModelDef>
+  /** EFSK: the .smc models as GLB (public/fx/client/ska). */
+  skaModels?: Record<string, { url: string; sha256: string }>
 }
 
 let loading: Promise<ClientFxData | null> | null = null
@@ -220,7 +227,7 @@ export function clientFx(): ClientFxData | null {
 
 /** Fetches the effect data once; later calls share the same request. */
 export function loadClientFx(): Promise<ClientFxData | null> {
-  loading ??= fetch(`${import.meta.env.BASE_URL}fx/client/effects.json?v=2`)
+  loading ??= fetch(`${import.meta.env.BASE_URL}fx/client/effects.json?v=3`)
     .then((r) => (r.ok ? (r.json() as Promise<ClientFxData>) : null))
     .then((data) => (loaded = data))
     .catch(() => null)

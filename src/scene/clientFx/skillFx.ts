@@ -6,7 +6,7 @@ import { Object3D, Quaternion, Vector3 } from 'three'
 import type { CharacterHandle } from '../Character.tsx'
 import { placeSourceTag } from '../upgradeEffects.ts'
 import { clientFx, type ClientFxData } from './data.ts'
-import type { Placement, Quat, TagLookup, Vec3 } from './particles.ts'
+import { IDENTITY, type Placement, type Quat, type TagLookup, type Vec3 } from './particles.ts'
 import { EffectGroupPlayer } from './player.ts'
 
 /** Something that hands out the live character (its ref changes as models load). */
@@ -54,11 +54,59 @@ interface Pending {
   start(): void
 }
 
-/** The groups playing now and the ones waiting for their time (game seconds). */
+/** A missile in flight: its effect group rides on it, its hit group plays where it arrives. */
+interface Missile {
+  position: Vec3
+  rotation: Quat
+  speed: number
+  target: FighterSource
+  player: EffectGroupPlayer | null
+  hit(): void
+}
+
+/** The groups playing now, the ones waiting for their time (game seconds), the missiles flying. */
 export const fxState = {
   clock: 0,
   pending: [] as Pending[],
   players: [] as EffectGroupPlayer[],
+  missiles: [] as Missile[],
+}
+
+/** CSkill missile types that send a missile (MT_ARROW, CONTINUE, INVISIBLE, MAGIC, MAGECUTTER, GOWAITBACK). */
+const FLYING = new Set([1, 3, 4, 5, 7, 10])
+const FORWARD = new Vector3(0, 0, -1)
+const heading = new Vector3()
+
+/**
+ * Moves the missiles toward their targets' middles at their speed (the target may move); on
+ * arrival the missile's group stops with its fade-outs (CEffectGroup::Stop) and the hit plays.
+ */
+export function advanceMissiles(dt: number): void {
+  fxState.missiles = fxState.missiles.filter((m) => {
+    const end = fighterTag(m.target(), 'CENTER')
+    if (!end) {
+      m.player?.stop()
+      return false
+    }
+    heading.set(
+      end.position[0] - m.position[0],
+      end.position[1] - m.position[1],
+      end.position[2] - m.position[2],
+    )
+    const distance = heading.length()
+    const step = m.speed * dt
+    if (distance <= Math.max(step, 0.05)) {
+      m.position = end.position
+      m.player?.stop()
+      m.hit()
+      return false
+    }
+    heading.divideScalar(distance)
+    m.position = m.position.map((v, i) => v + heading.getComponent(i) * step) as Vec3
+    // the missile entity faces where it flies (its forward is −z)
+    m.rotation = toQuat(turn.setFromUnitVectors(FORWARD, heading))
+    return true
+  })
 }
 
 /** Whether a skill has effects of its own in the client data (loaded or not yet). */
@@ -66,24 +114,28 @@ export function hasClientSkillFx(skillId: number): boolean {
   const data = clientFx()
   const skill = data?.skills[skillId]
   if (!skill || !data) return false
-  return [skill.ready, ...skill.fire, skill.after].some((name) => {
+  return [skill.ready, ...skill.fire, skill.missile, skill.hit, skill.after].some((name) => {
     const group = name ? data.groups[name] : undefined
-    // the client draws it with particles or effect models (EFMD)
+    // the client draws it with particles or effect models (EFMD, EFSK)
     return group?.effects.some((e) => {
       const kind = data.effects[e.name]?.kind
-      return kind === 'EFPT' || kind === 'EFMD'
+      return kind === 'EFPT' || kind === 'EFMD' || kind === 'EFSK'
     })
   })
 }
 
 function play(data: ClientFxData, name: string | undefined, tags: TagLookup) {
-  if (name && data.groups[name]) fxState.players.push(new EffectGroupPlayer(name, data, tags))
+  if (!name || !data.groups[name]) return null
+  const player = new EffectGroupPlayer(name, data, tags)
+  fxState.players.push(player)
+  return player
 }
 
 /**
- * A cast: the ready group at once, the fire groups when the release starts, the after group on the
- * target when it lands, and the effects the clips key at their delays. TEST-HIT is the target's
- * middle; ARROWHEAD flies from the caster's hand to it over the release.
+ * A cast: the ready group at once, the fire group when the release starts, at each of the skill's
+ * delays a missile with its group (or the hit at once), the after group on the target when the
+ * hit lands, and the effects the clips key at their delays. TEST-HIT is the target's middle;
+ * ARROWHEAD on the caster flies from the hand to it over the release.
  */
 export function castClientSkill(
   skillId: number,
@@ -115,18 +167,57 @@ export function castClientSkill(
   const targetTags: TagLookup = (name) =>
     fighterTag(target(), name === 'TEST-HIT' ? 'CENTER' : name)
   const at = (time: number, run: () => void) => fxState.pending.push({ at: time, start: run })
-  at(now, () => play(data, skill.ready, casterTags))
+  // the ready group ends when the release starts; its SKA models are where a continued missile
+  // (MT_CONTINUE) sets off from (Character.es m_saLastEffectInfo, Stop(0.04))
+  let ready: EffectGroupPlayer | null = null
+  const formed: Vec3[] = []
+  at(now, () => (ready = play(data, skill.ready, casterTags)))
+  at(fireAt, () => {
+    if (!ready) return
+    for (const model of ready.skaModels()) formed.push(model.position)
+    ready.stop(0.04)
+  })
   for (const key of skill.clips?.ready ?? [])
     at(now + key.delay, () => play(data, key.group, casterTags))
   for (const key of skill.clips?.fire ?? [])
     at(fireAt + key.delay, () => play(data, key.group, casterTags))
   for (const name of skill.fire) at(fireAt, () => play(data, name, casterTags))
+  // FireEffect2 / FireEffect3 at each of the skill's delays (Character.es SkillFire): a missile
+  // from the hand that plays the hit where it arrives, or the hit on the target at once
+  const type = skill.projectile?.type ?? 0
+  const delays = skill.projectile?.delays.length ? skill.projectile.delays : [0]
+  delays.forEach((delay, shot) => {
+    if (type === 9) return // MT_NOTHING
+    if (FLYING.has(type)) {
+      at(fireAt + delay, () => {
+        const hand = fighterTag(caster(), 'RHAND') ?? fighterTag(caster(), 'CENTER')
+        const continued = type === 3 ? formed[shot] : undefined
+        const from = continued ? { position: continued, rotation: IDENTITY } : hand
+        if (!from) return
+        const missile: Missile = {
+          position: from.position,
+          rotation: from.rotation,
+          speed: Math.max(1, skill.projectile?.speed ?? 30),
+          target,
+          player: null,
+          hit: () => play(data, skill.hit, targetTags),
+        }
+        // every tag of the missile's group is the missile itself
+        missile.player = play(data, skill.missile, () => ({
+          position: missile.position,
+          rotation: missile.rotation,
+        }))
+        fxState.missiles.push(missile)
+      })
+    } else at(fireAt + delay, () => play(data, skill.hit, targetTags))
+  })
   at(landAt, () => play(data, skill.after, targetTags))
 }
 
 /** Ends everything (a new fight, a reload of the scene). */
 export function clearClientFx(): void {
   fxState.pending = []
+  fxState.missiles = []
   for (const p of fxState.players) p.stop()
   fxState.players = []
 }

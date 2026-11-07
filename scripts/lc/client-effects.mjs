@@ -24,6 +24,10 @@ import { readParticleGroup } from './title-particles.mjs'
 import { readEffectGroups, readUpgradeEffect } from './upgrade-effects.mjs'
 import { parseTexture, textureMexSize } from './texture.mjs'
 import { mdlMesh, parseMdl } from './mdl.mjs'
+import { buildModel } from './model.mjs'
+import { parseSmc } from './smc.mjs'
+import { NodeIO } from '@gltf-transform/core'
+import { ALL_EXTENSIONS } from '@gltf-transform/extensions'
 import sharp from 'sharp'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
@@ -186,7 +190,10 @@ async function main(argv) {
       }))
     const entry = {
       ready: weapon.readyEffect || undefined,
-      fire: weapon.fireEffects.filter(Boolean),
+      // FireEffect1 on the caster, FireEffect2 the missile, FireEffect3 the hit (Character.es)
+      fire: weapon.fireEffects.slice(0, 1).filter(Boolean),
+      missile: weapon.fireEffects[1] || undefined,
+      hit: weapon.fireEffects[2] || undefined,
       after: record.afterEffect || undefined,
       projectile: weapon.projectile.type
         ? {
@@ -232,6 +239,7 @@ async function main(argv) {
   fs.mkdirSync(path.join(OUT, 'tex'), { recursive: true })
   const textureAssets = await exportTextures(files, [...textures])
   const models = exportModels(files, [...mdl])
+  const skaModels = await exportSkaModels(files, [...smc])
   fs.writeFileSync(
     path.join(OUT, 'effects.json'),
     JSON.stringify({
@@ -242,10 +250,12 @@ async function main(argv) {
       particles: collected.particles,
       textures: textureAssets,
       models,
+      skaModels,
     }),
   )
   console.log(
-    `wrote ${Object.keys(textureAssets).length} textures, ${Object.keys(models).length} models`,
+    `wrote ${Object.keys(textureAssets).length} textures, ${Object.keys(models).length} models, ` +
+      `${Object.keys(skaModels).length} SKA models`,
   )
 }
 
@@ -269,6 +279,31 @@ function exportModels(files, paths) {
       surfaces: mesh.surfaces,
       anim: anim ? { secsPerFrame: anim.secsPerFrame, frames: anim.frames } : null,
     }
+  }
+  return out
+}
+
+/**
+ * The SKA models of EFSK effects as GLB (the same builder as the characters and the artifact
+ * wings: unlit, WebP textures, the add / alpha blend of each surface's shader in its extras, the
+ * animations of the .smc). Models whose meshes the client lacks are left out, as it draws nothing.
+ */
+async function exportSkaModels(files, paths) {
+  const out = {}
+  const io = new NodeIO().registerExtensions(ALL_EXTENSIONS)
+  fs.mkdirSync(path.join(OUT, 'ska'), { recursive: true })
+  for (const clientPath of paths.sort()) {
+    if (!files.resolve(clientPath)) continue
+    const smc = parseSmc(files.read(clientPath).toString('latin1'))
+    const { document, stats } = await buildModel(files, smc, { webp: true, unlit: true })
+    if (!stats.meshes) {
+      console.warn(`no meshes: ${clientPath} ${JSON.stringify(stats.missing)}`)
+      continue
+    }
+    const glb = await io.writeBinary(document)
+    const id = textureId(clientPath)
+    fs.writeFileSync(path.join(OUT, 'ska', `${id}.glb`), glb)
+    out[clientPath] = { url: `fx/client/ska/${id}.glb`, sha256: hash(glb).slice(0, 16) }
   }
   return out
 }

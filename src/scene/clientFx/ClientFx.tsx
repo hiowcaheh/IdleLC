@@ -6,7 +6,8 @@ import { useGameStore } from '../../state/gameStore.ts'
 import { clientFx, loadClientFx } from './data.ts'
 import { ModelEffectMesh } from './ModelMeshes.ts'
 import { ParticleMesh } from './ParticleMeshes.ts'
-import { clearClientFx, fxState } from './skillFx.ts'
+import { SkaEffectMesh } from './SkaMeshes.ts'
+import { advanceMissiles, clearClientFx, fxState } from './skillFx.ts'
 
 /**
  * The layer that runs and draws the client effects; one per scene. `pace` is the game's speed
@@ -17,6 +18,7 @@ export function ClientFxLayer({ pace }: { pace?: () => number }) {
   const group = useRef<Group | null>(null)
   const meshes = useRef(new Map<object, ParticleMesh>())
   const models = useRef(new Map<object, ModelEffectMesh>())
+  const skas = useRef(new Map<object, SkaEffectMesh>())
 
   useEffect(() => {
     void loadClientFx()
@@ -26,7 +28,10 @@ export function ClientFxLayer({ pace }: { pace?: () => number }) {
     scene.add(root)
     const live = meshes.current
     const liveModels = models.current
+    const liveSkas = skas.current
     return () => {
+      for (const mesh of liveSkas.values()) mesh.dispose()
+      liveSkas.clear()
       scene.remove(root)
       for (const mesh of live.values()) mesh.dispose()
       live.clear()
@@ -46,6 +51,7 @@ export function ClientFxLayer({ pace }: { pace?: () => number }) {
       fxState.pending = fxState.pending.filter((p) => p.at > fxState.clock)
       for (const p of due) p.start()
     }
+    advanceMissiles(dt)
     fxState.players = fxState.players.filter((p) => p.update(dt))
     const data = clientFx()
     const root = group.current
@@ -90,6 +96,26 @@ export function ClientFxLayer({ pace }: { pace?: () => number }) {
       root.remove(mesh.object)
       mesh.dispose()
       models.current.delete(live)
+    }
+    // SKA model effects (EFSK): each its own copy of the model, shown once loaded
+    const animated = new Set<object>()
+    for (const player of fxState.players) {
+      for (const live of player.skaModels()) {
+        animated.add(live)
+        let mesh = skas.current.get(live)
+        if (!mesh) {
+          const holder = new Group()
+          root.add(holder)
+          mesh = new SkaEffectMesh(live, holder)
+          skas.current.set(live, mesh)
+        }
+        mesh.update()
+      }
+    }
+    for (const [live, mesh] of skas.current) {
+      if (animated.has(live)) continue
+      mesh.dispose()
+      skas.current.delete(live)
     }
   })
 
