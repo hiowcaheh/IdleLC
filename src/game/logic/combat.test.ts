@@ -63,6 +63,30 @@ const strongPlayer = { level: 10, stats: stats({ attack: 50 }) }
 const weakMonster = { level: 1, stats: stats({ maxHp: 30, attack: 2 }) }
 
 describe('combatTick', () => {
+  it('stops a single encounter on the first death, including a long frame, until a return run', () => {
+    const rng = createRng(7)
+    const start = createCombat(strongPlayer, 'boss', weakMonster)
+    const one = combatTick(start, 120, rng, true)
+    expect(one.state.phase).toBe('victory')
+    expect(one.events.filter((e) => e.type === 'death' && e.who === 'monster')).toHaveLength(1)
+    expect(combatTick(one.state, 120, rng, true).events).toEqual([])
+    expect(
+      combatTick(start, 120, createRng(7)).events.filter(
+        (e) => e.type === 'death' && e.who === 'monster',
+      ).length,
+    ).toBeGreaterThan(1)
+    const loss = combatTick(
+      createCombat(weakMonster, 'boss', strongPlayer),
+      120,
+      createRng(7),
+      true,
+    )
+    expect(loss.state.phase).toBe('defeat')
+    expect(loss.events.filter((e) => e.type === 'death' && e.who === 'player')).toHaveLength(1)
+    const returning = changeMonster(loss.state, 'ordinary', weakMonster, 50)
+    expect(returning.state.phase).toBe('traveling')
+    expect(returning.state.player.hp).toBeGreaterThan(0)
+  })
   it('distinguishes cast speed, flat preparation adjustment and the two cooldown modifiers', () => {
     const skill = { castTime: 2, cooldown: 8 } as SkillRank
     const boosted = stats({ castSpeed: 20, castTime: -0.2, reuseTime: -2, cooldownReduction: 50 })

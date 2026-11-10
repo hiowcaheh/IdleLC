@@ -5,6 +5,7 @@ import { getModel, modelUrl, playerModelId } from '../game/assets/manifest.ts'
 import { getMonster } from '../game/data/monsters.ts'
 import type { ClassId } from '../game/data/types.ts'
 import { ZONES } from '../game/data/zones.ts'
+import { worldBossFor } from '../game/data/worldBosses.ts'
 import type { GraphicsQuality } from '../game/logic/save.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { Battle } from './Battle.tsx'
@@ -45,13 +46,17 @@ function QualityCanvas({
   classId: ClassId
 }) {
   const [dpr, setDpr] = useState(() => maxDpr(quality))
-  const monsterId = useGameStore((s) => s.character?.location.monsterId ?? '')
+  const monsterId = useGameStore(
+    (s) => s.character?.worldBoss?.active?.arenaMonsterId ?? s.character?.location.monsterId ?? '',
+  )
   const dungeonId = useGameStore((s) => s.dungeon?.dungeonId)
   const shadows = quality !== 'low'
 
   useEffect(() => {
     preloadModel(playerModelId(classId))
     for (const id of zone.monsterIds) preloadModel(getMonster(id).modelId)
+    const boss = worldBossFor(zone.id)
+    if (boss) preloadModel(getMonster(boss.monsterId).modelId)
   }, [zone, classId])
 
   return (

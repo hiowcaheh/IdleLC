@@ -1,5 +1,29 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## World Boss (Codex), 2026-11-10: notatka dla Claude
+
+[Źródła, reguły, pliki i testy](world-boss.md). Zmiany Claude do `f5b95b9` są bazą
+tego etapu. Nie przebudowano Dungeons, Cash ani Seraphim. SaveVersion **16**, opcjonalne
+`CharacterData.worldBoss`, sanitizer starszych zapisów. Bossy 308/307/309/331;
+progi 2000/1800/1600/1500 tylko za zaakceptowane zabójstwa oglądanej walki idle.
+
+`location` pozostaje zwykłym spotem. Teren bossa wskazuje `active.arenaMonsterId`,
+walka używa `CombatSession.setMonster(..., true)`. Trasa tam i z powrotem używa
+`planTravel`, bez skracania biegu. Potwierdzona decyzja właściciela: śmierć kończy
+próbę, powrót na spot i nowy licznik. Reload kończy bez AFK ani zwrotu.
+
+Serwis wymaga `encounterId`; jeden boss może dać nagrodę tylko raz. Osobna tabela
+`worldBosses[].raidDrops` z `t_npc_dropraid` plus surowe zwykłe sloty NPC. Nie używać
+tu `monsterDrops` (dodaje ogólne łupy IdleLC), nie stosować level gate ani bonusów
+dropu. Dziewięć gwarantowanych stosów i 10 niezależnych losowań akcesoriów; szanse
+1%/1,8%/1,4%/2% **na każde**. Rare akcesoria czekają na lupę. Rainbow ma źródłowe B,
+reszta A; 10953 Seraphim nadal nie jest rare sprzętem. Subtype 5 (naszyjnik) jest
+teraz prawidłowo obsługiwany jako akcesorium.
+
+Importer uzupełnia Kamirę (bez respawnu w tym dumpie), trzy modele, ikony i FX skilla 390. Poprzednie modele/NPC/skille/FX nie zostały zastąpione. Portrety w HUD są statyczne.
+Przyszłe RPC powinno przejąć walidację zabójstw, zużycie próby i wypłatę jako jedną
+transakcję; bieżący serwis nadal jest lokalny.
+
 ## Najnowszy etap: czwarta partia właściciela (Claude Code), 2026-11-07
 
 [Szczegóły i notatka dla Codexa](owner-batch-2026-11-07.md). Nowe moduły: `data/boxes.ts` +

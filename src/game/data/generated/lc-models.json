@@ -1493,6 +1493,26 @@
       "tint": {}
     },
     {
+      "id": "red_dragon",
+      "file": "red_dragon.glb?v=7a4454bee8",
+      "scale": 1,
+      "animations": {
+        "idle": "dragon_idle_01",
+        "idle2": "dragon_idle_02",
+        "walk": "dragon_walk",
+        "run": "dragon_run",
+        "attack": [
+          "dragon_att_01"
+        ],
+        "hit": "dragon_dam",
+        "die": "dragon_die"
+      },
+      "attackImpact": 0.6,
+      "height": 0.7227393414105655,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "kel",
       "file": "kel.glb?v=a6f4d193e3",
       "scale": 1,
@@ -1843,6 +1863,26 @@
       "tint": {}
     },
     {
+      "id": "kamira",
+      "file": "kamira.glb?v=4810e05942",
+      "scale": 1,
+      "animations": {
+        "idle": "kamira_idle01",
+        "idle2": "kamira_idle02",
+        "walk": "kamira_walk",
+        "run": "kamira_run",
+        "attack": [
+          "kamira_att01"
+        ],
+        "hit": "kamira_dam",
+        "die": "kamira_die"
+      },
+      "attackImpact": 0.6,
+      "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
       "id": "assassinbug_q",
       "file": "assassinbug_q.glb?v=51e2080a5a",
       "scale": 1,
@@ -2027,6 +2067,26 @@
       },
       "attackImpact": 0.6,
       "height": 2,
+      "radius": 1,
+      "tint": {}
+    },
+    {
+      "id": "gold_dragon",
+      "file": "gold_dragon.glb?v=d684268305",
+      "scale": 1,
+      "animations": {
+        "idle": "dragon_idle_01",
+        "idle2": "dragon_idle_02",
+        "walk": "dragon_walk",
+        "run": "dragon_run",
+        "attack": [
+          "dragon_att_01"
+        ],
+        "hit": "dragon_dam",
+        "die": "dragon_die"
+      },
+      "attackImpact": 0.6,
+      "height": 0.7227393414105655,
       "radius": 1,
       "tint": {}
     },

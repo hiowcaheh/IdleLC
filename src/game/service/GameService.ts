@@ -53,6 +53,8 @@ export interface GameService {
   ): Promise<CharacterData>
   /** The hero has reached the spot it ran to. */
   arrive(characterId: string): Promise<CharacterData>
+  summonWorldBoss(characterId: string): Promise<CharacterData>
+  cancelWorldBoss(characterId: string): Promise<CharacterData>
   /**
    * Outcome of the fights since the last report; the service checks it, pays out and takes the
    * potions drunk out of the bag.

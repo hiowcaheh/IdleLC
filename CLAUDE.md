@@ -1,5 +1,19 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-10 (Codex): **World Boss**, po zachowaniu zmian Claude do `f5b95b9`.
+[Pełne przekazanie i źródła](docs/world-boss.md). Liczniki per postać/mapa tylko za
+oglądane idle: Juno 2000 / Dratan 1800 / Merac 1600 / Egeha 1500. NPC 308/307/309/331;
+Kamira to 307, nie Baal. `worldBoss` jest opcjonalnym polem **v16**. `location` pozostaje
+zwykłym spotem, `active.arenaMonsterId` wskazuje plac przywołania. Nie podstawiać
+bossa do trwałej `location`, nie liczyć AFK ani Dungeons. `singleEncounter` zatrzymuje
+odradzanie po śmierci do rozliczenia. Drop ma osobny callback `worldBossDrops`, surowe
+zwykłe sloty i `t_npc_dropraid`; **żadnych** mnożników dropu ani blokady za poziom.
+Dziewięć gwarantowanych pozycji i 10 niezależnych szans raid ACC. Akcesoria są
+nieodkryte; Crest of Rainbow źródłowo B, pozostałe A. Subtype 5 to naszyjnik, 6/7 pet,
+8 artefakt. Śmierć według odpowiedzi właściciela kończy próbę, powrót i licznik od nowa;
+wyjście/reload też kończą bez zwrotu. Seraphim, Dungeons, Cash i poprzednie FX bez zmian.
+FX Kamiry 390 dodaje dwie grupy; `effects.json?v=5`. Nadal LocalGameService.
+
 Aktualizacja 2026-11-07, później (Claude Code): [czwarta partia](docs/owner-batch-2026-11-07.md).
 Skrzynki podziemi 95001–95003 (5%, model `ITEM_treasure02` na podłodze, `data/boxes.ts`), sklep
 za **Cash** (konto: `SaveData.cash`, `data/cashShop.ts`, ceny z `t_catalog` albo własne),

@@ -91,8 +91,8 @@ const MAGNIFIER_CHANCE: Record<number, number> = { [MAGNIFIER_ID]: 0.6, [GOLDEN_
 const JOB_ORDER: ClassId[] = ['titan', 'knight', 'healer', 'mage', 'rogue', 'sorcerer']
 /** t_item.a_flag bit 2: the item can be upgraded. */
 const FLAG_UPGRADE = 1 << 2
-/** Accessory subtypes IdleLC wears: cords, stones, eyes, earrings, rings (pets and others not). */
-const MAX_ACCESSORY_SUBTYPE = 4
+/** Config.h IACCESSORY_CHARM..IACCESSORY_NECKLACE (0..5); pets/artifacts are not worn here. */
+const MAX_ACCESSORY_SUBTYPE = 5
 
 function lcGear(item: LcItem): GearDef | undefined {
   const slot = SLOTS_BY_WEARING[item.slot]

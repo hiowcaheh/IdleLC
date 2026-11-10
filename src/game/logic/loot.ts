@@ -5,6 +5,7 @@ import type { CharacterData } from './character.ts'
 import type { GearPiece } from './equipment.ts'
 import { newId } from './id.ts'
 import { rollOptions } from './options.ts'
+import { isRare } from './rare.ts'
 import { chance, rollInt, type Rng } from './rng.ts'
 
 /**
@@ -95,7 +96,7 @@ export function stowDrops(
         uid: makeId(),
         itemId: drop.itemId,
         plus: 0,
-        options: rollOptions(drop.itemId, rng),
+        ...(isRare(drop.itemId) ? {} : { options: rollOptions(drop.itemId, rng) }),
       })
     }
   }

@@ -19,6 +19,7 @@ import { int, num, readTables } from './sql.mjs'
 import { sourceFields, sourceMagic, sourceNpc } from './source-records.mjs'
 import { buildDungeonSuperBuffs, DUNGEON_SUPER_ITEMS } from './dungeon-super.mjs'
 import { ITEM_ATLAS } from './icons.mjs'
+import { buildWorldBosses, WORLD_BOSS_NPCS } from './world-boss.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const MAX_LEVEL = 100
@@ -208,7 +209,7 @@ export function huntingPoint(points) {
   return [Math.round(best[0] * 10) / 10, Math.round(best[1] * 10) / 10]
 }
 
-function buildData(tables) {
+export function buildData(tables) {
   const npcs = new Map(tables.t_npc.map((r) => [int(r.a_index), r]))
   const zoneOfNpc = new Map()
   /** npc index → zone → spawn points [x, z, how many] on the ground layer */
@@ -228,6 +229,12 @@ function buildData(tables) {
   }
 
   const fieldIndexes = new Set([...FIELD_ZONES, ...DUNGEON_ZONES].map((z) => z.index))
+  // Kamira has no static regen in this dump; the owner summons her in Dratan.
+  for (const { npc, zone } of WORLD_BOSS_NPCS) {
+    const zones = zoneOfNpc.get(npc) ?? new Set()
+    zones.add(zone)
+    zoneOfNpc.set(npc, zones)
+  }
   const monsters = []
   const usedItems = new Set()
   for (const [index, r] of npcs) {
@@ -304,6 +311,8 @@ function buildData(tables) {
     .filter((z) => z.monsterIds.length > 0)
 
   const itemRows = new Map(tables.t_item.map((r) => [int(r.a_index), r]))
+  const worldBosses = buildWorldBosses(tables)
+  for (const boss of worldBosses) for (const drop of boss.raidDrops) usedItems.add(drop.item)
   const isGear = (r) =>
     ((int(r.a_type_idx) === 0 && CLASS_WEAPONS.has(int(r.a_subtype_idx))) ||
       int(r.a_type_idx) === 1) &&
@@ -360,7 +369,8 @@ function buildData(tables) {
   // rare items: the t_rareoption sets each piece can get when it is identified, with their weights;
   // from level 77 every rare piece of a slot can also get that slot's special sets (owner's rule)
   const rareOf = (r) => {
-    if (!isGear(r) || (int(r.a_job_flag) & BASE_CLASS_BITS) === 0) return []
+    const rareAccessory = int(r.a_type_idx) === 5 && (int(r.a_flag) & (1 << 15)) !== 0
+    if ((!isGear(r) && !rareAccessory) || (int(r.a_job_flag) & BASE_CLASS_BITS) === 0) return []
     const sets = []
     for (let i = 0; i < 10; i++) {
       const set = int(r[`a_rare_index_${i}`])
@@ -493,6 +503,7 @@ function buildData(tables) {
     skills,
     dungeonBuffs,
     dungeonSuperBuffs: buildDungeonSuperBuffs(tables),
+    worldBosses,
     npcSkills,
   }
 }
@@ -1061,6 +1072,7 @@ async function main() {
   const text = fs.readFileSync(args.dump, 'utf8')
   const tables = readTables(text, [
     't_npc',
+    't_npc_dropraid',
     't_item',
     't_exp',
     't_npc_regen',

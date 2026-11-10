@@ -65,6 +65,7 @@ const isAway = () => {
     s.character?.expedition != null ||
     s.dungeon != null ||
     s.dungeonEntering ||
+    s.worldBossEntering ||
     s.dungeonResult != null
   )
 }

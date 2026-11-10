@@ -92,6 +92,12 @@ import type {
   KeyValueStorage,
 } from './GameService.ts'
 import { applyCashBuy } from '../logic/cashShop.ts'
+import {
+  chargeWorldBoss,
+  endWorldBoss,
+  summonWorldBoss as beginWorldBoss,
+  worldBossDrops,
+} from '../logic/worldBoss.ts'
 
 export const SAVE_KEY = 'idlelc.save'
 
@@ -139,7 +145,10 @@ export class LocalGameService implements GameService {
               }
             : c
         // the game was closed on the way between spots: the hero is back where it left from
-        const { runFrom, ...still } = recovered
+        const bossRecovered = recovered.worldBoss?.active
+          ? { ...endWorldBoss(recovered), lastPlayedAt: this.now() }
+          : recovered
+        const { runFrom, ...still } = bossRecovered
         const placed = runFrom && !still.expedition ? { ...still, location: runFrom } : still
         return applyLevelTitles(
           placed.expedition ? placed : pruneTitles(placed, this.now()),
@@ -147,7 +156,10 @@ export class LocalGameService implements GameService {
         )
       }),
     }
-    if (status !== 'loaded' || save.characters.some((c) => c.dungeons?.active || c.runFrom))
+    if (
+      status !== 'loaded' ||
+      save.characters.some((c) => c.dungeons?.active || c.runFrom || c.worldBoss?.active)
+    )
       this.persist()
     return { save: copy(this.save), status }
   }
@@ -162,6 +174,7 @@ export class LocalGameService implements GameService {
   }
 
   async deleteCharacter(characterId: string): Promise<void> {
+    this.notOnWorldBoss(characterId)
     if (this.character(characterId).dungeons?.active) throw new GameError('in-dungeon')
     this.save = {
       ...this.save,
@@ -176,6 +189,7 @@ export class LocalGameService implements GameService {
     const current = this.save.activeCharacterId
     if (current && current !== characterId && this.character(current).dungeons?.active)
       throw new GameError('in-dungeon', 'Leave the dungeon before switching characters.')
+    if (current && current !== characterId) this.notOnWorldBoss(current)
     if (characterId !== null) this.character(characterId)
     this.save = { ...this.save, activeCharacterId: characterId }
     this.persist()
@@ -186,6 +200,7 @@ export class LocalGameService implements GameService {
     location: CharacterLocation,
     from?: CharacterLocation,
   ): Promise<CharacterData> {
+    this.notOnWorldBoss(characterId)
     this.notOnExpedition(characterId)
     const zone = ZONES[location.zoneId]
     if (!zone) throw new GameError('unknown-zone', `Unknown zone: ${location.zoneId}`)
@@ -227,7 +242,18 @@ export class LocalGameService implements GameService {
 
   async reportCombat(characterId: string, report: CombatReport): Promise<CombatResult> {
     const character = this.notOnExpedition(characterId)
-    if (report.monsterId !== character.location.monsterId) {
+    const boss = character.worldBoss?.active
+    if (boss) {
+      if (report.encounterId !== boss.id || report.monsterId !== boss.monsterId)
+        throw new GameError('wrong-world-boss')
+      if (
+        ![0, 1].includes(report.kills) ||
+        ![0, 1].includes(report.deaths) ||
+        report.kills + report.deaths > 1
+      )
+        throw new GameError('invalid-world-boss-result')
+    } else if (report.encounterId) throw new GameError('world-boss-expired')
+    if (report.monsterId !== (boss?.monsterId ?? character.location.monsterId)) {
       throw new GameError('wrong-monster', `${characterId} is not hunting ${report.monsterId}`)
     }
     const monster = MONSTERS[report.monsterId]!
@@ -235,7 +261,25 @@ export class LocalGameService implements GameService {
     const elapsed = Math.max(0, (now - character.lastPlayedAt) / 1000)
     const allowed = maxKills(elapsed, this.timeScale)
     const played = Math.min(elapsed, MAX_PLAY_GAP) * this.timeScale
-    const result = applyCombatReport(character, monster, report, allowed, this.rng, played, now)
+    const fighter = boss
+      ? { ...character, location: { ...character.location, monsterId: boss.monsterId } }
+      : character
+    const result = applyCombatReport(
+      fighter,
+      monster,
+      report,
+      allowed,
+      this.rng,
+      played,
+      now,
+      boss ? worldBossDrops : undefined,
+    )
+    result.character = { ...result.character, location: character.location }
+    result.character = boss
+      ? result.kills > 0 || report.deaths > 0
+        ? endWorldBoss(result.character, result.kills > 0)
+        : result.character
+      : chargeWorldBoss(result.character, result.kills)
     // active play in real seconds (dev speed-up aside)
     const playSeconds = character.stats.playSeconds + Math.min(elapsed, MAX_PLAY_GAP)
     const updated = this.update(characterId, () => ({
@@ -246,7 +290,21 @@ export class LocalGameService implements GameService {
     return copy({ ...result, character: updated })
   }
 
+  async summonWorldBoss(characterId: string): Promise<CharacterData> {
+    const character = this.notOnExpedition(characterId)
+    const changed = beginWorldBoss(character, newId(), this.now())
+    return copy(this.update(characterId, () => changed))
+  }
+
+  async cancelWorldBoss(characterId: string): Promise<CharacterData> {
+    const character = this.character(characterId)
+    return copy(
+      this.update(characterId, () => ({ ...endWorldBoss(character), lastPlayedAt: this.now() })),
+    )
+  }
+
   async startDungeon(characterId: string, dungeonId: DungeonId): Promise<DungeonUpdate> {
+    this.notOnWorldBoss(characterId)
     const character = this.notOnExpedition(characterId)
     const run = createDungeonRun(character, dungeonId, newId(), this.now())
     const p = dailyProgress(character.dungeons, this.now())
@@ -489,6 +547,7 @@ export class LocalGameService implements GameService {
   }
 
   async startAfk(characterId: string): Promise<CharacterData> {
+    this.notOnWorldBoss(characterId)
     const character = this.notOnExpedition(characterId)
     const now = this.now()
     return copy(
@@ -744,6 +803,11 @@ export class LocalGameService implements GameService {
     if (!character) throw new GameError('unknown-character', `No character ${characterId}`)
     // An expedition needs the title history up to its claim, including already expired titles.
     return character.expedition ? character : pruneTitles(character, this.now())
+  }
+
+  private notOnWorldBoss(characterId: string): void {
+    if (this.character(characterId).worldBoss?.active)
+      throw new GameError('world-boss-active', 'Finish or leave the World Boss encounter first.')
   }
 
   private notOnExpedition(characterId: string, allowDungeon = false): CharacterData {

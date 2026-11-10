@@ -37,6 +37,7 @@ export class CombatSession {
   private readonly rng: Rng
   private hero: Hero | null = null
   private titleId: number | null = null
+  private singleEncounter = false
   /** Potions reported to the service and not yet settled (not off the character's inventory yet). */
   private readonly reported = new Map<number, number>()
 
@@ -51,6 +52,7 @@ export class CombatSession {
 
   /** Starts a fresh fight for a character against a monster (entering the game). */
   start(hero: Hero, monsterId: string): void {
+    this.singleEncounter = false
     this.trackTitle(hero)
     this.combat = withBoosts(
       createCombat(this.fighter(hero), monsterId, monsterFighter(monsterId)),
@@ -60,6 +62,7 @@ export class CombatSession {
 
   /** A fresh fight after `awaySeconds` away (expedition), keeping the hero's HP and MP. */
   resume(hero: Hero, monsterId: string, awaySeconds: number): void {
+    this.singleEncounter = false
     this.trackTitle(hero)
     const next = createCombat(this.fighter(hero), monsterId, monsterFighter(monsterId))
     this.combat = withBoosts(carryVitals(this.combat, next, awaySeconds), hero)
@@ -73,13 +76,14 @@ export class CombatSession {
   tick(dt: number): CombatEvent[] {
     if (this.hero && activeTitleId(this.hero, Date.now()) !== this.titleId)
       this.setPlayer(this.hero)
-    const { state, events } = combatTick(this.combat, dt, this.rng)
+    const { state, events } = combatTick(this.combat, dt, this.rng, this.singleEncounter)
     this.combat = state
     return events
   }
 
   /** Sets off for another monster, `distance` metres away (its route over the map) when known. */
-  setMonster(monsterId: string, distance?: number): CombatEvent[] {
+  setMonster(monsterId: string, distance?: number, singleEncounter = false): CombatEvent[] {
+    this.singleEncounter = singleEncounter
     if (monsterId === this.combat.monsterId) return []
     const { state, events } = changeMonster(
       this.combat,

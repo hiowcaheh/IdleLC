@@ -34,11 +34,12 @@ export const EVENT_MONSTERS: ReadonlySet<string> = new Set(['lc-1105', 'lc-454',
 
 /**
  * Raid bosses (owner's decision 2026-10-30): no hunting spot; they wait for a boss system. Grand
- * Balrog (Juno), Baal (Dratan), Grand Red Dragon and Gatekeeper Abaddon (Merac), Grand Golden
+ * Balrog (Juno), Kamira and Baal (Dratan), Grand Red Dragon and Gatekeeper Abaddon (Merac), Grand Golden
  * Dragon (Egeha), the Shadow Dragons (Streiana), Brainwashed Balrog (Alber).
  */
 export const RAID_BOSSES: ReadonlySet<string> = new Set([
   'lc-308',
+  'lc-307',
   'lc-152',
   'lc-309',
   'lc-1339',

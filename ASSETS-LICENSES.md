@@ -20,6 +20,17 @@ Na decyzję właściciela (2026-10-29) w repo są też zasoby wygenerowane z kli
 
 Surowe pliki klienta i zrzut bazy nie są w repo.
 
+World Boss (2026-11-10): `public/models/lc/kamira.glb`, `red_dragon.glb` i
+`gold_dragon.glb` to konwersje oryginalnych `Kamira/kamira.smc`,
+`Dragon/red_dragon.smc` i `Dragon/gold_dragon.smc` klienta 2015. Balrog był już
+w projekcie. `public/ui/world-boss/*.webp` to statyczne portrety tych czterech
+modeli z ich oryginalnymi teksturami, renderowane do 256 × 256, bez generowania AI.
+Ramka HUD używa pierścienia istniejącego `player-frame.webp` z TopUI klienta.
+Atlas przedmiotów rozszerzono o 12 źródłowych ikon. `public/fx/client/effects.json`
+uzupełniono o dwie grupy skilla Kamiry 390 i teksturę
+`deathknight_black02-810ab8a2.webp` z Effect.dat / Texture/deathknight_black02.tex.
+Powyższa decyzja właściciela obejmuje te konwersje; nie są objęte CC0.
+
 Dungeons (2026-11-06): `public/dungeons/` zawiera sześć tekstur posadzek/ścian z
 `Data/World/Dungeon1`, `Dungeon2`, `Dungeon3`, wyeksportowanych przez
 `scripts/lc/dungeon-art.mjs`. `public/ui/lc/menu-dungeons.webp` to oryginalne Q

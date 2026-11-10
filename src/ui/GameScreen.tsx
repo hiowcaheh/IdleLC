@@ -27,6 +27,7 @@ import { Toasts } from './Toasts.tsx'
 import { PerfOverlay } from './perf/PerfOverlay.tsx'
 import { ZoneLoading } from './ZoneLoading.tsx'
 import { DungeonLootButton } from './dungeons/DungeonLoot.tsx'
+import { WorldBossButton } from './worldBoss/WorldBossButton.tsx'
 import {
   DungeonsButton,
   DungeonsPanel,
@@ -66,6 +67,7 @@ export function GameScreen() {
       {character && !character.expedition && <RewardFeed />}
 
       <div className="hud">
+        <WorldBossButton />
         {dungeon && <DungeonHud />}
         <div className="hud__top">
           <PlayerFrame />

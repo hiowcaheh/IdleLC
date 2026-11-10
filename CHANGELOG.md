@@ -1,5 +1,30 @@
 # Historia zmian
 
+## 2026-11-10 (Codex): World Boss
+
+Szczegóły źródeł i notatka dla Claude: [docs/world-boss.md](docs/world-boss.md).
+SaveVersion nadal **16**, istniejące zmiany Claude do `f5b95b9` zachowane.
+
+1. Ikona bossa po lewej w idle, półokrąg postępu od lewej do prawej, poświata przy
+   gotowości. Osobny licznik dla postaci i mapy: Juno 2000, Dratan 1800, Merac 1600,
+   Egeha 1500. AFK, wyprawy i Dungeons nie naliczają zabójstw.
+2. Grand Balrog 308, Grand Devilroad Kamira 307, Grand Red Dragon 309 i Grand Golden
+   Dragon 331. Przywołanie usuwa zwykły cel, postać biegnie trasą mapy do bossa.
+3. Osobna źródłowa tabela `t_npc_dropraid`: dziewięć gwarantowanych pozycji oraz
+   dziesięć niezależnych losowań raid ACC (1% / 1,8% / 1,4% / 2% na każde).
+   Drop przedmiotów nie zależy od poziomu postaci ani buffów do dropu.
+4. Raid ACC są nieodkryte, używają lup, źródłowych opcji i kolorów. Crest of Rainbow
+   ma źródłowe grade B, pozostałe grade A. Naszyjniki poprawnie zajmują slot akcesorium.
+5. Jedna próba i jedna wypłata. Po śmierci, wyjściu lub reloadzie próba kończy się
+   bez zwrotu licznika; postać wraca na poprzedni spot. Po wygranej otrzymuje drop
+   i też wraca. Zwykła walka nie odradza kolejnego bossa.
+6. Oryginalne modele Kamiry i obu smoków, portrety z modeli klienta, ikony nowych
+   przedmiotów oraz źródłowy efekt umiejętności Kamiry. Bez dodatkowej sceny 3D w HUD.
+
+Weryfikacja: 596 testów / 72 pliki, build, Chromium 320/390/1280 px, przywołania i
+powroty na czterech mapach, śmierć, odkrywanie raid ACC. Próby walk na przygotowanych
+zapisach z narzędziami dev; szczegóły i granice testów w dokumentacji powyżej.
+
 ## 2026-11-07 (Claude Code): piąta partia (buffy konia, sklep, poświata skrzynki)
 
 Szczegóły: [docs/owner-batch-2026-11-07.md](docs/owner-batch-2026-11-07.md), sekcja „Piąta

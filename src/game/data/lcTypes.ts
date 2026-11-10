@@ -8,6 +8,14 @@ export interface LcDrop {
   chance: number
 }
 
+export interface LcWorldBoss {
+  zoneId: string
+  monsterId: string
+  killsRequired: number
+  /** Independent server rolls, in 1/10000, with original stack sizes. */
+  raidDrops: { item: number; count: number; probability: number; flag: number }[]
+}
+
 export interface LcMonster {
   id: string
   npcIndex: number
@@ -122,6 +130,7 @@ export interface LcData {
   /** Active class buffs, including advanced classes; used only for dungeon blessings. */
   dungeonBuffs?: LcSkill[]
   dungeonSuperBuffs?: LcDungeonSuperBuff[]
+  worldBosses?: LcWorldBoss[]
   npcSkills?: Omit<LcSkill, 'classId' | 'icon'>[]
   /** Item ids the NPC shops of each field zone sell (gear and the upgrade stone), by zone id. */
   shops?: Record<string, number[]>

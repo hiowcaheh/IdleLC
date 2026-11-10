@@ -199,8 +199,8 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
       {tab === 'unidentified' && (
         <>
           <p className="sheet__meta">
-            Rare weapons and armor come unidentified. Pick the items, then use a magnifying glass on
-            each. It reveals the piece's grade and rare options.
+            Rare weapons, armor and raid accessories come unidentified. Pick the items, then use a
+            magnifying glass on each. It reveals the piece's grade and rare options.
           </p>
           <ul className="appraiser__glasses">
             {GLASSES.map((id) => {
@@ -243,9 +243,7 @@ export function AppraiserPanel({ onClose }: { onClose(): void }) {
             })}
           </ul>
           {pending.length === 0 ? (
-            <p className="sheet__empty">
-              Nothing to identify. Rare items drop from monsters from about level 70.
-            </p>
+            <p className="sheet__empty">No unidentified rare items in your bag or equipment.</p>
           ) : (
             <>
               <div className="appraiser__bar">

@@ -681,11 +681,17 @@ export function healPlayer(state: CombatState): CombatState {
   return { ...state, player: { ...player, hp: stats.maxHp, mp: stats.maxMp ?? 0 } }
 }
 
-export function combatTick(state: CombatState, dt: number, rng: Rng): TickResult {
+export function combatTick(
+  state: CombatState,
+  dt: number,
+  rng: Rng,
+  singleEncounter = false,
+): TickResult {
   const s = copyState(state)
   const events: CombatEvent[] = []
   let remaining = Math.max(0, dt)
   while (remaining > 0) {
+    if (singleEncounter && (s.phase === 'victory' || s.phase === 'defeat')) break
     const step = Math.min(remaining, MAX_STEP)
     remaining -= step
     advance(s, step, rng, events)

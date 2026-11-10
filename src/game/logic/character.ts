@@ -4,6 +4,7 @@
  */
 import type { OwnedBoost } from './boosts.ts'
 import { emptyDungeonProgress, type DungeonProgress } from './dungeons.ts'
+import { emptyWorldBossProgress, type WorldBossProgress } from './worldBoss.ts'
 import type { Attributes } from './attributes.ts'
 import { EMPTY_ALLOCATED_STATS } from './statPoints.ts'
 import { CLASSES } from '../data/classes.ts'
@@ -89,6 +90,8 @@ export interface CharacterData {
   boosts?: OwnedBoost[]
   /** Daily entries and local records. Active runs are closed on reload, never simulated offline. */
   dungeons?: DungeonProgress
+  /** Charge per map and one non-AFK encounter; absent in older v16 saves. */
+  worldBoss?: WorldBossProgress
   /** Titles the character has (logic/titles.ts), and the worn one (shown under the name). */
   titles: OwnedTitle[]
   activeTitle: number | null
@@ -168,6 +171,7 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
     titlesEarned: [],
     optionProgress: 0,
     dungeons: emptyDungeonProgress(),
+    worldBoss: emptyWorldBossProgress(),
   }
   // a new character wears "Newbie" for its first days (when the data has it)
   const welcomed = grantTitle(character, NEWBIE_TITLE, now)

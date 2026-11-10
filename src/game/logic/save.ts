@@ -4,6 +4,7 @@
  * When the shape changes: bump SAVE_VERSION and add a migration from the previous version.
  */
 import { sanitizeCash } from './cashShop.ts'
+import { sanitizeWorldBossProgress } from './worldBoss.ts'
 import { sanitizeAllocatedStats } from './statPoints.ts'
 import { dungeonRefundDue, sanitizeDungeonProgress } from './dungeons.ts'
 import { BOOK_MILESTONES } from '../data/bookRewards.ts'
@@ -299,6 +300,7 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     lastPlayedAt: num(raw.lastPlayedAt, createdAt),
     location,
     ...(runFrom ? { runFrom } : {}),
+    worldBoss: sanitizeWorldBossProgress(raw.worldBoss),
     reachedSpots: sanitizeReached(raw.reachedSpots, location),
     stats: {
       kills: int(stats.kills, 0),

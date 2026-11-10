@@ -4,6 +4,7 @@ import { ZONES } from '../../game/data/zones.ts'
 import { claimableRewards } from '../../game/logic/book.ts'
 import { openSpotCount, zoneSpots } from '../../game/logic/spots.ts'
 import { useGameStore } from '../../state/gameStore.ts'
+import { toast } from '../../state/toasts.ts'
 import { ExpeditionDialog } from '../expedition/ExpeditionDialog.tsx'
 import { AppraiserPanel } from '../gear/AppraiserPanel.tsx'
 import { fmt } from '../gear/format.ts'
@@ -19,6 +20,8 @@ import { WorldMapPanel } from './WorldMapPanel.tsx'
 export function HuntPanel() {
   const character = useGameStore((s) => s.character)
   const selectMonster = useGameStore((s) => s.selectMonster)
+  const cancelWorldBoss = useGameStore((s) => s.cancelWorldBoss)
+  const enteringBoss = useGameStore((s) => s.worldBossEntering)
   // no expedition on the way to another spot (it would skip the run)
   const running = useGameStore((s) => s.hud.phase === 'traveling')
   const [expeditionOpen, setExpeditionOpen] = useState(false)
@@ -27,7 +30,9 @@ export function HuntPanel() {
   const [bookOpen, setBookOpen] = useState(false)
   const [mapOpen, setMapOpen] = useState(false)
   if (!character) return null
-  const { zoneId, monsterId } = character.location
+  const { zoneId } = character.location
+  const boss = character.worldBoss?.active
+  const monsterId = boss?.monsterId ?? character.location.monsterId
   const zone = ZONES[zoneId]
   if (!zone) return null
 
@@ -38,18 +43,19 @@ export function HuntPanel() {
   const previous = index > 0 ? spots[index - 1] : undefined
   const next = index + 1 < spots.length ? spots[index + 1] : undefined
   const nextOpen = next !== undefined && index + 1 < open
-  const away = character.expedition !== null
+  const away = character.expedition !== null || !!boss || enteringBoss
   const kills = character.stats.monsterKills[monsterId] ?? 0
   const claimable = claimableRewards(character)
 
   return (
-    <section className="hunt" aria-label="Hunting">
+    <section className={`hunt${boss ? ' hunt--world-boss' : ''}`} aria-label="Hunting">
       <header className="hunt__header">
         <h2 className="hunt__zone">
           <button
             type="button"
             className="hunt__zone-button"
             aria-label={`${zone.name}: open the world map`}
+            disabled={!!boss || enteringBoss}
             onClick={() => setMapOpen(true)}
           >
             {zone.name}
@@ -59,10 +65,16 @@ export function HuntPanel() {
           </button>
         </h2>
         <p className="hunt__kills">
-          Spot{' '}
-          <strong>
-            {index + 1} / {spots.length}
-          </strong>
+          {boss ? (
+            'World Boss'
+          ) : (
+            <>
+              Spot{' '}
+              <strong>
+                {index + 1} / {spots.length}
+              </strong>
+            </>
+          )}
         </p>
       </header>
 
@@ -86,9 +98,11 @@ export function HuntPanel() {
             {monster.name}
           </span>
           <span className="hunt__spot-meta">
-            <span>Monsters killed: {fmt(kills)}</span>
+            {!boss && <span>Monsters killed: {fmt(kills)}</span>}
             <span className={`hunt__next${next && !nextOpen ? ' is-locked' : ''}`}>
-              {next ? (
+              {boss ? (
+                'Return after the fight'
+              ) : next ? (
                 <>
                   Next: {getMonster(next).name}
                   {!nextOpen && <LockIcon />}
@@ -132,15 +146,36 @@ export function HuntPanel() {
           Book
           {claimable > 0 && <span className="icon-button__badge">{claimable}</span>}
         </button>
-        <button
-          type="button"
-          className="hunt__expedition"
-          disabled={running}
-          title={running ? 'Reach the spot first' : undefined}
-          onClick={() => setExpeditionOpen(true)}
-        >
-          Expedition
-        </button>
+        {boss ? (
+          <button
+            type="button"
+            className="hunt__shop"
+            aria-label="Leave boss"
+            onClick={() =>
+              void cancelWorldBoss().catch((e: unknown) =>
+                toast(e instanceof Error ? e.message : 'Could not leave the boss.', 'error'),
+              )
+            }
+          >
+            Leave
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="hunt__expedition"
+            disabled={running || !!boss || enteringBoss}
+            title={
+              boss
+                ? 'Finish the World Boss encounter first'
+                : running
+                  ? 'Reach the spot first'
+                  : undefined
+            }
+            onClick={() => setExpeditionOpen(true)}
+          >
+            Expedition
+          </button>
+        )}
       </div>
       {shopOpen && <ShopPanel onClose={() => setShopOpen(false)} />}
       {appraiserOpen && <AppraiserPanel onClose={() => setAppraiserOpen(false)} />}

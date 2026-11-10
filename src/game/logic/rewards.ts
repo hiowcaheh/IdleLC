@@ -44,6 +44,8 @@ export interface CombatReport {
   potions?: ItemStack[]
   /** Boost potions working on the hero now, to keep (logic/boosts.ts). */
   boosts?: OwnedBoost[]
+  /** A World Boss report belongs to exactly one consumed summon. */
+  encounterId?: string
 }
 
 export interface CombatResult {
@@ -152,6 +154,7 @@ export function rewardKills(
   rng: Rng,
   now = Date.now(),
   multipliers = { exp: 1, sp: 1, gold: 1, drop: 1 },
+  encounterDrops?: (monster: MonsterDef, rng: Rng) => ItemStack[],
 ) {
   const bonuses = rewardBonuses(hero, now)
   const items = new Map<number, number>()
@@ -161,6 +164,8 @@ export function rewardKills(
     gold = 0,
     sp = 0
   for (let k = 0; k < kills; k++) {
+    // Neither level penalties nor reward buffs can affect an encounter's item rolls.
+    const fixedDrops = encounterDrops?.(monster, rng)
     const base = rolledReward(monster, level, bonuses, rng)
     const reward = {
       exp: Math.trunc(base.exp * multipliers.exp),
@@ -170,8 +175,8 @@ export function rewardKills(
     exp += reward.exp
     gold += reward.gold
     sp += reward.sp
-    if (levelRewardRates(level, monster.level).drops) {
-      for (const item of monsterDrops(monster, 1, rng, multipliers.drop))
+    if (fixedDrops || levelRewardRates(level, monster.level).drops) {
+      for (const item of fixedDrops ?? monsterDrops(monster, 1, rng, multipliers.drop))
         items.set(item.itemId, (items.get(item.itemId) ?? 0) + item.count)
     }
     // A level gained by this kill changes the penalties of the next kill, even in one report.
@@ -204,6 +209,7 @@ export function applyCombatReport(
   rng: Rng,
   playSeconds = 0,
   now = Date.now(),
+  encounterDrops?: (monster: MonsterDef, rng: Rng) => ItemStack[],
 ): CombatResult {
   character = pruneTitles(character, now)
   const kills = clamp(Math.floor(report.kills), 0, Math.max(0, allowedKills))
@@ -221,7 +227,7 @@ export function applyCombatReport(
         )
   // EXP / SP potions working in the fight (Blessed Iris, skill pills)
   const multipliers = effectRewardMultipliers(boostEffects(working, now))
-  const reward = rewardKills(character, monster, kills, rng, now, multipliers)
+  const reward = rewardKills(character, monster, kills, rng, now, multipliers, encounterDrops)
   const { exp, gold, sp, drops } = reward
   const played = applyPlayTime(character, playSeconds, rng)
   const bag = stowDrops({ inventory, gear: played.character.gear }, drops, rng)

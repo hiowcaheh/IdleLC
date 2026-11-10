@@ -42,7 +42,9 @@ const errorText = (error: unknown) =>
   error instanceof Error ? error.message : 'The command could not be completed.'
 
 export function DungeonsButton({ onClick }: { onClick(): void }) {
-  const away = useGameStore((s) => !!s.character?.expedition)
+  const away = useGameStore(
+    (s) => !!s.character?.expedition || !!s.character?.worldBoss?.active || s.worldBossEntering,
+  )
   const traveling = useGameStore((s) => s.hud.phase === 'traveling')
   return (
     <button
