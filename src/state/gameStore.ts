@@ -106,8 +106,12 @@ interface GameStore {
   exchangeStones(count: number): Promise<void>
   /** Buys from the Cash shop; resolves with what went into the bag. */
   buyCashOffer(offerId: string, count: number): Promise<ItemStack[]>
+  /** Uses one ticket; resolves with the Cash credited to the account. */
+  redeemCashTicket(itemId: number): Promise<number>
+  /** Plays one Moonstone at the statue; resolves with its source prize. */
+  playMoonstone(stoneId: number): Promise<ItemStack>
   devAddCash(amount: number): void
-  /** Opens dungeon boxes from the bag; resolves with the prizes. */
+  /** Opens boxes from the bag; resolves with the prizes. */
   openBoxes(itemId: number, count: number): Promise<ItemStack[]>
   buyItem(itemId: number, count: number): Promise<PurchaseResult>
   sellGear(uids: string[]): Promise<PieceSale>
@@ -643,6 +647,22 @@ export const useGameStore = create<GameStore>((set, get) => {
       set({ save: { ...get().save, cash: purchase.cash } })
       bagFeed.emit(purchase.items)
       return purchase.items
+    },
+
+    async redeemCashTicket(itemId) {
+      const id = playedId()
+      const use = await enqueue(() => gameService.redeemCashTicket(id, itemId))
+      applyCharacter(use.character)
+      set({ save: { ...get().save, cash: use.cash } })
+      return use.credited
+    },
+
+    async playMoonstone(stoneId) {
+      const id = playedId()
+      const played = await enqueue(() => gameService.playMoonstone(id, stoneId))
+      applyCharacter(played.character)
+      bagFeed.emit([played.prize])
+      return played.prize
     },
 
     devAddCash(amount) {

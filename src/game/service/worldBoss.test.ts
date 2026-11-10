@@ -203,8 +203,11 @@ describe('World Boss service lifecycle', () => {
     const result = await f.game.reportCombat('boss', report)
     expect(result.drops).toEqual(
       expect.arrayContaining([
-        { itemId: 786, count: 5 },
-        { itemId: 45, count: 10 },
+        { itemId: 4917, count: 50 },
+        { itemId: 4920, count: 50 },
+        { itemId: 972, count: 10 },
+        { itemId: 2544, count: 25 },
+        { itemId: 95014, count: 1 },
       ]),
     )
     expect(result.character.worldBoss).toMatchObject({

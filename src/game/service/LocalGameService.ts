@@ -92,6 +92,8 @@ import type {
   KeyValueStorage,
 } from './GameService.ts'
 import { applyCashBuy } from '../logic/cashShop.ts'
+import { applyCashTicket, type CashTicketUse } from '../logic/cashTickets.ts'
+import { applyMoonstonePlay, type MoonstonePlay } from '../logic/moonstones.ts'
 import {
   chargeWorldBoss,
   endWorldBoss,
@@ -684,6 +686,32 @@ export class LocalGameService implements GameService {
     this.save = { ...this.save, cash: purchase.cash }
     const updated = this.update(characterId, () => purchase.character)
     return copy({ ...purchase, character: updated })
+  }
+
+  async redeemCashTicket(characterId: string, itemId: number): Promise<CashTicketUse> {
+    const use = applyCashTicket(this.character(characterId), this.save.cash, itemId)
+    const before = this.save
+    try {
+      this.save = { ...this.save, cash: use.cash }
+      const updated = this.update(characterId, () => use.character)
+      return copy({ ...use, character: updated })
+    } catch (error) {
+      this.save = before
+      throw error
+    }
+  }
+
+  async playMoonstone(characterId: string, stoneId: number): Promise<MoonstonePlay> {
+    this.notOnWorldBoss(characterId)
+    const played = applyMoonstonePlay(this.notOnExpedition(characterId), stoneId, this.rng)
+    const before = this.save
+    try {
+      const updated = this.update(characterId, () => played.character)
+      return copy({ ...played, character: updated })
+    } catch (error) {
+      this.save = before
+      throw error
+    }
   }
 
   async openBoxes(characterId: string, itemId: number, count: number): Promise<BoxOpening> {

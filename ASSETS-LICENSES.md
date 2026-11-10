@@ -20,6 +20,13 @@ Na decyzję właściciela (2026-10-29) w repo są też zasoby wygenerowane z kli
 
 Surowe pliki klienta i zrzut bazy nie są w repo.
 
+Statua Księżycowa i bilety Cash (2026-11-10): `public/ui/lc/moonstone-*.webp`
+pochodzą z `Data/Interface/MoonStone.tex` klienta 2015, według UV w CUIGamble.
+`event-frame.webp` pochodzi z EventBtn0.tex. Eksport: `scripts/lc/moonstone-art.mjs`.
+Atlas przedmiotów rozszerzono o źródłowe ikony nagród i kamieni. Sześć własnych
+biletów Cash używa ikony Phoenix Ticket 3217 (ItemBtn6, wiersz 0, kolumna 4).
+Są objęte powyższą decyzją właściciela dotyczącą zasobów LC.
+
 World Boss (2026-11-10): `public/models/lc/kamira.glb`, `red_dragon.glb` i
 `gold_dragon.glb` to konwersje oryginalnych `Kamira/kamira.smc`,
 `Dragon/red_dragon.smc` i `Dragon/gold_dragon.smc` klienta 2015. Balrog był już

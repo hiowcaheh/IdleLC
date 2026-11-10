@@ -18,7 +18,7 @@ import {
 import type { ClassId, GearSlot } from '../data/types.ts'
 import type { CharacterData } from './character.ts'
 import { GameError } from './errors.ts'
-import { addToInventory, type ItemStack } from './loot.ts'
+import { addToInventory, stackKey, type ItemStack } from './loot.ts'
 
 export interface SaleResult {
   character: CharacterData
@@ -44,22 +44,25 @@ export function stacksValue(stacks: readonly ItemStack[]): number {
 
 /** Sells the given pieces from the character's inventory. Throws a GameError when it can't. */
 export function applySale(character: CharacterData, items: readonly ItemStack[]): SaleResult {
-  const wanted = new Map<number, number>()
-  for (const { itemId, count } of items) {
+  const wanted = new Map<string, ItemStack>()
+  for (const item of items) {
+    const { count } = item
     if (!Number.isInteger(count) || count <= 0) throw new GameError('bad-count', `${count}`)
-    wanted.set(itemId, (wanted.get(itemId) ?? 0) + count)
+    const key = stackKey(item)
+    wanted.set(key, { ...item, count: (wanted.get(key)?.count ?? 0) + count })
   }
   if (wanted.size === 0) throw new GameError('nothing-to-sell')
 
   const inventory = character.inventory.map((s) => ({ ...s }))
   const sold: ItemStack[] = []
-  for (const [itemId, count] of wanted) {
-    const stack = inventory.find((s) => s.itemId === itemId)
+  for (const [key, item] of wanted) {
+    const { itemId, count } = item
+    const stack = inventory.find((s) => stackKey(s) === key)
     if (!stack || stack.count < count) {
       throw new GameError('not-enough-items', `${count}× item ${itemId}`)
     }
     stack.count -= count
-    sold.push({ itemId, count })
+    sold.push(item)
   }
   const gold = stacksValue(sold)
   return {

@@ -1,4 +1,5 @@
 import { CashShopButton, CashShopPanel } from './cashShop/CashShop.tsx'
+import { MoonstoneButton, MoonstoneStatue } from './moonstone/MoonstoneStatue.tsx'
 import { BagFeed } from './items/BagFeed.tsx'
 import { useMemo, useState } from 'react'
 import { skillsForClass } from '../game/data/skills.ts'
@@ -45,6 +46,7 @@ export function GameScreen() {
   const [titlesOpen, setTitlesOpen] = useState(false)
   const [dungeonsOpen, setDungeonsOpen] = useState(false)
   const [shopOpen, setShopOpen] = useState(false)
+  const [moonstoneOpen, setMoonstoneOpen] = useState(false)
   const dungeon = useGameStore((s) => s.dungeon)
   const devTools = useDevTools((s) => s.enabled)
   const character = useGameStore((s) => s.character)
@@ -131,6 +133,7 @@ export function GameScreen() {
                 </button>
                 <DungeonsButton onClick={() => setDungeonsOpen(true)} />
                 <CashShopButton onClick={() => setShopOpen(true)} />
+                <MoonstoneButton onClick={() => setMoonstoneOpen(true)} />
               </>
             )}
           </div>
@@ -166,6 +169,7 @@ export function GameScreen() {
       {titlesOpen && <TitlesPanel onClose={() => setTitlesOpen(false)} />}
       {dungeonsOpen && <DungeonsPanel onClose={() => setDungeonsOpen(false)} />}
       {shopOpen && <CashShopPanel onClose={() => setShopOpen(false)} />}
+      {moonstoneOpen && <MoonstoneStatue onClose={() => setMoonstoneOpen(false)} />}
       <BagFeed />
       <DungeonResult />
       <WorldBossResult />

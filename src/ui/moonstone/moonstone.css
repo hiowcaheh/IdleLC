@@ -1,0 +1,212 @@
+.game .icon-button.hud__menu--moonstone {
+  position: absolute;
+  top: 94px;
+  right: calc(100% + 10px);
+  width: 40px;
+  height: 40px;
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  background: url('/ui/lc/event-frame.webp') center / 100% 100% no-repeat;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px #000a;
+}
+.game .icon-button.hud__menu--moonstone:hover,
+.game .icon-button.hud__menu--moonstone:focus-visible {
+  filter: brightness(1.2);
+}
+.game .icon-button.hud__menu--moonstone:disabled {
+  filter: grayscale(0.8) brightness(0.7);
+}
+.sheet.moonstone {
+  width: min(100%, 500px);
+}
+.moonstone .sheet__body {
+  padding: 10px 12px 14px;
+}
+.moonstone-machine {
+  position: relative;
+  aspect-ratio: 255 / 148;
+  background: url('/ui/lc/moonstone-top.webp?v=1') center / 100% 100% no-repeat;
+}
+.moonstone-machine__title {
+  position: absolute;
+  top: 52%;
+  left: 8%;
+  right: 8%;
+  color: #d8d1bb;
+  text-align: center;
+  font: 700 clamp(12px, 3vw, 18px) var(--font-display);
+  text-shadow: 0 1px 3px #000;
+}
+.moonstone-reels {
+  position: absolute;
+  left: 2.8%;
+  right: 2.4%;
+  bottom: 1%;
+  height: 29%;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 2%;
+}
+.moonstone-reel {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.moonstone-reel > .item-icon {
+  width: 70% !important;
+  height: auto !important;
+  aspect-ratio: 1;
+}
+.moonstone-reel__strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: moonstone-roll 0.38s linear infinite;
+}
+@keyframes moonstone-roll {
+  from {
+    transform: translateY(-40%);
+  }
+  to {
+    transform: translateY(40%);
+  }
+}
+.moonstone-stones {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 4px 5px;
+  aspect-ratio: 255 / 45;
+  background: url('/ui/lc/moonstone-middle.webp?v=1') center / 100% 100% no-repeat;
+}
+.moonstone-stone {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.moonstone-stone.is-selected {
+  background: url('/ui/lc/moonstone-select.webp?v=1') center / contain no-repeat;
+}
+.moonstone-stone__icon {
+  display: block;
+  width: 60%;
+  max-width: 42px;
+  aspect-ratio: 1;
+}
+.moonstone-stone__count {
+  position: absolute;
+  bottom: 0;
+  right: 7%;
+  color: #fff2bc;
+  font: 700 12px var(--font-body);
+  text-shadow:
+    0 1px 3px #000,
+    1px 0 #000;
+}
+.moonstone-controls {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 3% 4%;
+  background: url('/ui/lc/moonstone-bottom.webp?v=1') center / 100% 100% no-repeat;
+}
+.moonstone-control {
+  flex: 1;
+  min-width: 0;
+  aspect-ratio: 113 / 29;
+  border: 0;
+  cursor: pointer;
+  background: center / 100% 100% no-repeat;
+}
+.moonstone-control--start {
+  background-image: url('/ui/lc/moonstone-start.webp?v=1');
+}
+.moonstone-control--start:active {
+  background-image: url('/ui/lc/moonstone-start-down.webp?v=1');
+}
+.moonstone-control--stop {
+  background-image: url('/ui/lc/moonstone-stop.webp?v=1');
+}
+.moonstone-control--stop:active {
+  background-image: url('/ui/lc/moonstone-stop-down.webp?v=1');
+}
+.moonstone-control--exit {
+  background-image: url('/ui/lc/moonstone-exit.webp?v=1');
+}
+.moonstone-control--exit:active {
+  background-image: url('/ui/lc/moonstone-exit-down.webp?v=1');
+}
+.moonstone-control:disabled {
+  filter: grayscale(0.8) brightness(0.55);
+  cursor: default;
+}
+.moonstone-control:focus-visible {
+  outline: 2px solid var(--gilt-bright);
+  outline-offset: 2px;
+}
+.moonstone-info {
+  padding: 8px 9px;
+  border: 1px solid #74613e;
+  background: #17191d88;
+}
+.moonstone-info p {
+  margin: 0 0 8px;
+}
+.moonstone-info__stone {
+  color: #e2cd95;
+  text-align: center;
+  font-size: 14px;
+}
+.moonstone-auto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #e1dccd;
+  font-size: 13px;
+  cursor: pointer;
+}
+.moonstone-auto input {
+  width: 18px;
+  height: 18px;
+  accent-color: #bc9b53;
+}
+.moonstone-info .moonstone-info__hint {
+  margin-top: 7px;
+  color: #a6a294;
+  font-size: 12px;
+  text-align: center;
+}
+.moonstone-prize {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 6px;
+  color: #e9dcb5;
+  background: url('/ui/lc/book-row.webp') center / 100% 100% no-repeat;
+  font-size: 13px;
+}
+.moonstone-info .moonstone-info__plays {
+  margin: 8px 0 0;
+  color: #aaa38e;
+  font-size: 11px;
+  text-align: center;
+}
+.moonstone-error {
+  color: #f29a8b;
+  font-size: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .moonstone-reel__strip {
+    animation: none;
+  }
+}

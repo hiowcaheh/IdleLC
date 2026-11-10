@@ -1,5 +1,23 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## World Boss loot, Cash tickets i Statua (Codex), 2026-11-10
+
+[Pełna notatka i źródła](moonstone-cash.md). Drop właściciela jest w
+`worldBossDropTable`, surowy t_npc_dropraid pozostaje w danych. Nowe bilety Cash
+95011..95016; wspólne saldo save.cash oraz zużycie biletu zapisują się razem.
+Moonstone Box 2544 otwiera istniejący system boxes z wagami serwera 520/300/150/30.
+
+`scripts/lc/moonstone.mjs` importuje pięć pul t_moonstone_reward, w tym ilości,
+flagi i rzeczywiste sumy wag 100/100/100/102/105. Statua używa CUIGamble i grafik
+MoonStone.tex, dostęp pod Item Shop. `applyMoonstonePlay` + `playMoonstone` zużywają
+kamień i zapisują nagrodę jednym zapisem; animacja jest po stronie GUI. Auto-loop
+zatrzymują Stop, Exit, unmount, visibilitychange i brak wybranego kamienia.
+
+Ważne: `ItemStack.flag` to poziom source mineralów 498..501, nie opcja ekwipunku.
+Łączenie, pobieranie, sprzedaż, nazwy i v16 reload rozróżniają ID+flag. Nie usuwać
+tej metadanej przy dodawaniu przyszłego użycia mineralów. Pozostałe przedmioty
+nagród zachowują źródłowe ID i ilości. Starsze pola i SaveVersion nadal 16.
+
 ## World Boss: bieżący spot, kamera i Book (Codex), 2026-11-10
 
 Ta partia zastępuje poprzednią podróż do bossa: `arenaMonsterId` to bieżący zwykły

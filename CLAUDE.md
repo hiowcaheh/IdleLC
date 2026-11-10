@@ -1,5 +1,20 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-10 (Codex): [World Boss loot, Cash tickets, Statua](docs/moonstone-cash.md).
+`worldBossDropTable` nakłada zmiany właściciela na niezmienione źródłowe raidDrops:
+bez 47/673/786, 4917/4920 po 50 zamiast 45/485, 972 ×10, 2544 ×25, 95014 ×1.
+Raid ACC i zwykłe sloty bez zmian. Cash tickets 95011..95016 = 10/20/50/100/500/1000,
+ikona Phoenix Ticket 3217. `redeemCashTicket` zapisuje zużycie i wspólne save.cash razem.
+Moonstone Box 2544: 520/300/150/30 na 2545/2546/723/2547, jedna sztuka, bez Perfect.
+`lcData.moonstones` to pięć pełnych pul t_moonstone_reward (pozycja 6092 pominięta jak
+w normalnym GUI klienta). Wagi Good/Perfect sumują się do 102/105, nie poprawiać do 100.
+`ItemStack.flag` zachowuje poziom mineralów 498..501 (3/6/9/12/14), stosy po ID+flag.
+Sanitizer v16 i sprzedaż zachowują warianty; nie scalać samym itemId.
+Przycisk pod Item Shop, CUIGamble/MoonStone.tex. Automat wyłącznie w otwartym oknie,
+jedna transakcja na kamień, Stop/Exit/ukrycie karty zatrzymują. BagFeed dla nagród.
+Wynik Multi-open przeniesiony do Inventory, aby przetrwał zużycie ostatniej skrzynki.
+Weryfikacja: 619 testów / 77 plików, build i próba produkcyjna na 100 kamieni.
+
 Aktualizacja 2026-11-10 (Codex), trzecia partia World Boss: **przywołanie na bieżącym
 spocie**, zastępuje poprzednią trasę do następnego placu. `active.arenaMonsterId`
 równa się `location.monsterId`; `CombatSession.replaceMonsterHere` zachowuje stan

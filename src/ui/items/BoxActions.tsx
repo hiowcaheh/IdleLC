@@ -1,10 +1,10 @@
 /**
- * A dungeon box in the bag (data/boxes.ts): Open, Multi-open (how many, chosen in a window) and "?"
+ * A box in the bag (data/boxes.ts): Open, Multi-open (how many, chosen in a window) and "?"
  * (what the box holds and the chance of each prize). What comes out rises on the left like a drop
  * (BagFeed); opening more than one also lists the prizes in a window.
  */
 import { useState } from 'react'
-import { BOX_PRIZES } from '../../game/data/boxes.ts'
+import { BOX_PRIZES, MOONSTONE_BOX_ID } from '../../game/data/boxes.ts'
 import { getItem } from '../../game/data/items.ts'
 import { MAX_BOXES_AT_ONCE } from '../../game/logic/boxes.ts'
 import type { ItemStack } from '../../game/logic/loot.ts'
@@ -18,23 +18,24 @@ export function BoxActions({
   itemId,
   count,
   disabled,
+  onResults,
 }: {
   itemId: number
   count: number
   disabled: boolean
+  onResults(opened: number, prizes: ItemStack[]): void
 }) {
   const openBoxes = useGameStore((s) => s.openBoxes)
   const [busy, setBusy] = useState(false)
   const [choosing, setChoosing] = useState(false)
   const [contents, setContents] = useState(false)
-  const [results, setResults] = useState<{ opened: number; prizes: ItemStack[] } | null>(null)
 
   const open = async (n: number) => {
     if (busy) return
     setBusy(true)
     try {
       const prizes = await openBoxes(itemId, n)
-      if (n > 1) setResults({ opened: n, prizes })
+      if (n > 1) onResults(n, prizes)
     } catch {
       toast('The boxes could not be opened.', 'error')
     } finally {
@@ -83,14 +84,6 @@ export function BoxActions({
         />
       )}
       {contents && <BoxContents itemId={itemId} onClose={() => setContents(false)} />}
-      {results && (
-        <BoxResults
-          itemId={itemId}
-          opened={results.opened}
-          prizes={results.prizes}
-          onClose={() => setResults(null)}
-        />
-      )}
     </>
   )
 }
@@ -233,14 +226,18 @@ function BoxContents({ itemId, onClose }: { itemId: number; onClose(): void }) {
             })}
           </tbody>
         </table>
-        <p className="box-dialog__note">Monsters in its dungeon drop it (5% each).</p>
+        <p className="box-dialog__note">
+          {itemId === MOONSTONE_BOX_ID
+            ? 'Each box contains one Moonstone. World Bosses drop 25 boxes.'
+            : 'Monsters in its dungeon drop it (5% each).'}
+        </p>
       </div>
     </Sheet>
   )
 }
 
 /** What a multi-open gave: each prize with its amount. */
-function BoxResults({
+export function BoxResults({
   itemId,
   opened,
   prizes,

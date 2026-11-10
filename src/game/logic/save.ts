@@ -510,7 +510,15 @@ function sanitizeInventory(raw: unknown): ItemStack[] {
     if (!isRecord(entry)) continue
     const itemId = int(entry.itemId, 0)
     const count = int(entry.count, 0)
-    if (itemId > 0 && count > 0 && !WITHDRAWN_ITEMS[itemId]) stacks.push({ itemId, count })
+    const flag = int(entry.flag, 0)
+    if (itemId > 0 && count > 0 && !WITHDRAWN_ITEMS[itemId])
+      stacks.push({
+        itemId,
+        count,
+        ...([498, 499, 500, 501].includes(itemId) && flag > 0 && Number.isSafeInteger(flag)
+          ? { flag }
+          : {}),
+      })
   }
   return addToInventory([], stacks)
 }

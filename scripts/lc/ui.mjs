@@ -63,6 +63,17 @@ export const UI_PARTS = {
   'cash-icon-slot': [atlas('Cashshop'), 0, 236, 34, 34, { scale: 2 }],
   'cash-tag-dc': [atlas('Cashshop'), 233, 501, 22, 11, { scale: 3 }],
   'cash-sale': [atlas('Cashshop'), 126, 357, 60, 60],
+  // CUIGamble::Create/Render (MoonStone.tex): the five reels, grade row and original controls.
+  'moonstone-top': [atlas('MoonStone'), 0, 0, 255, 148, { scale: 2 }],
+  'moonstone-middle': [atlas('MoonStone'), 0, 149, 255, 17, { scale: 2 }],
+  'moonstone-bottom': [atlas('MoonStone'), 0, 167, 255, 46, { scale: 2 }],
+  'moonstone-start': [atlas('MoonStone'), 0, 374, 113, 29, { scale: 2 }],
+  'moonstone-start-down': [atlas('MoonStone'), 114, 374, 113, 29, { scale: 2 }],
+  'moonstone-stop': [atlas('MoonStone'), 0, 404, 113, 29, { scale: 2 }],
+  'moonstone-stop-down': [atlas('MoonStone'), 114, 404, 113, 29, { scale: 2 }],
+  'moonstone-exit': [atlas('MoonStone'), 0, 434, 113, 29, { scale: 2 }],
+  'moonstone-exit-down': [atlas('MoonStone'), 114, 434, 113, 29, { scale: 2 }],
+  'moonstone-select': [atlas('MoonStone'), 92, 262, 45, 45, { scale: 2 }],
   // the dungeon's loot: the icon of t_item 298 Old Pouch (ItemBtn1, row 7, column 13), a pouch the
   // Harpy Queen of Dratan drops, so it is not the field's Inventory button (owner's choice)
   'menu-dungeon-loot': [atlas('ItemBtn1'), 416, 224, 32, 32, { scale: 4 }],

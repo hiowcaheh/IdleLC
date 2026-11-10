@@ -1,5 +1,27 @@
 # Historia zmian
 
+## 2026-11-10 (Codex): drop World Bossów, bilety Cash i Statua Księżycowa
+
+1. Nowy gwarantowany drop bossów: Platinum Small Healing/Mana Potion po 50,
+   Lucky Scroll 10, Moonstone Box 25 i jeden 100 Cash Ticket. Usunięto Scroll of
+   Memorizing, Crystal of Experience i Tool Aid. Raid ACC zachowują źródłowe szanse.
+2. Bilety 10/20/50/100/500/1000 Cash: złota ikona biletu z klienta, Use w ekwipunku
+   zużywa sztukę i doładowuje wspólny portfel Item Shop jednym zapisem.
+3. Moonstone Box: źródłowe 52% Poor, 30% Average, 15% Moon Stone, 3% Good.
+   Open, Multi-open, podgląd zawartości i wynik także po zużyciu ostatniej skrzynki.
+4. Statua Księżycowa pod Item Shop, z oryginalnym GUI MoonStone.tex i pięcioma
+   przyciskami kamieni. Pełna tabela nagród serwera, oryginalne ilości i poziomy
+   mineralów, zachowywane oddzielnie w ekwipunku i po reloadzie.
+5. Start/Stop, Exit i checkbox automatu. Automat kończy się po wyczerpaniu kamieni,
+   zamknięciu okna lub ukryciu karty. Nagrody pojawiają się po lewej jak zakupy.
+
+Nadal SaveVersion **16**. [Źródła i przekazanie dla Claude](docs/moonstone-cash.md).
+Weryfikacja: **619 testów / 77 plików**, lint, formatowanie, TypeScript i build.
+Chromium produkcyjny 320/390/1280 px: automat na 100 kamieni, Stop/Exit/ukrycie
+karty, sześć nominałów Cash, otwarcie całego stosu skrzynek i reload salda/nagród.
+Balrog w buildzie produkcyjnym dał poprawny nowy drop; zdobyty bilet doładował
+portfel o 100 Cash. Próby na przygotowanych zapisach, walka przy ×20.
+
 ## 2026-11-10 (Codex): World Boss na bieżącym spocie, kamera i Book
 
 1. Przycisk bossa podniesiony o 48 px względem środka ekranu, bez powiększania ikony.

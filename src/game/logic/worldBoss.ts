@@ -1,5 +1,5 @@
 /** A single summoned encounter; charge comes only from accepted, watched field kills. */
-import { worldBossFor, WORLD_BOSSES } from '../data/worldBosses.ts'
+import { worldBossFor, worldBossDropTable, WORLD_BOSSES } from '../data/worldBosses.ts'
 import { ZONES } from '../data/zones.ts'
 import { lcData } from '../data/lcSource.ts'
 import { ITEMS } from '../data/items.ts'
@@ -291,11 +291,11 @@ export function fillWorldBossCharge(character: CharacterData): CharacterData {
   }
 }
 
-/** hardcoding.cpp DropRaidMonsterItem: independent rolls, no drop bonus of any kind. */
+/** Source independent rolls with the owner's explicit loot changes; no drop bonus of any kind. */
 export function worldBossDrops(monster: { id: string }, rng: Rng): ItemStack[] {
   const boss = WORLD_BOSSES.find((b) => b.monsterId === monster.id)
   if (!boss) throw new GameError('no-world-boss')
-  const raid = boss.raidDrops
+  const raid = worldBossDropTable(boss)
     .filter((d) => rollInt(rng, 1, 10000) <= d.probability)
     .map((d) => ({ itemId: d.item, count: d.count }))
   // Keep the raw source slots, including equipment for classes not yet playable here.
@@ -305,5 +305,6 @@ export function worldBossDrops(monster: { id: string }, rng: Rng): ItemStack[] {
     if (drop.item < 0) ended = true
     return ended ? null : { itemId: drop.item, chance: drop.chance }
   })
-  return slots ? addToInventory(raid, rollSourceDrops(slots, 1, rng)) : raid
+  const drops = slots ? addToInventory(raid, rollSourceDrops(slots, 1, rng)) : raid
+  return drops.sort((a, b) => a.itemId - b.itemId)
 }

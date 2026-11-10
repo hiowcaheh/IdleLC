@@ -13,6 +13,8 @@ import type { BookClaim } from '../logic/book.ts'
 import type { TitleUse } from '../logic/titles.ts'
 import type { DungeonId } from '../data/dungeons.ts'
 import type { DungeonPoint, DungeonUpdate } from '../logic/dungeons.ts'
+import type { CashTicketUse } from '../logic/cashTickets.ts'
+import type { MoonstonePlay } from '../logic/moonstones.ts'
 
 /** A Cash shop purchase: the character with the items, and the account's Cash left. */
 export interface CashPurchase {
@@ -109,7 +111,11 @@ export interface GameService {
   /** Uses a title item from the bag: its title is added for its days (worn if none is). */
   /** Buys `count` of a Cash shop offer for the character with the account's Cash. */
   buyCashOffer(characterId: string, offerId: string, count: number): Promise<CashPurchase>
-  /** Opens `count` dungeon boxes of the kind from the bag (data/boxes.ts). */
+  /** Consumes one ticket and credits the account's Cash balance atomically. */
+  redeemCashTicket(characterId: string, itemId: number): Promise<CashTicketUse>
+  /** Plays one normal Moonstone at the statue; stake and prize are persisted together. */
+  playMoonstone(characterId: string, stoneId: number): Promise<MoonstonePlay>
+  /** Opens `count` boxes of the kind from the bag (data/boxes.ts). */
   openBoxes(characterId: string, itemId: number, count: number): Promise<BoxOpening>
   redeemTitleItem(characterId: string, itemId: number): Promise<TitleUse>
   /** Wears an owned title, or takes the worn one off (null). */

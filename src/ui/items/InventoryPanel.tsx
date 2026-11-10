@@ -25,7 +25,8 @@ import { STAT_TOAST_MS, toast } from '../../state/toasts.ts'
 import { heroStats, nameTone, pieceName, rareLabel, wearProblem } from '../gear/format.ts'
 import { PotionNotes } from './PotionNotes.tsx'
 import { isBox } from '../../game/data/boxes.ts'
-import { BoxActions } from './BoxActions.tsx'
+import { cashTicketValue } from '../../game/data/cashTickets.ts'
+import { BoxActions, BoxResults } from './BoxActions.tsx'
 import { drinkWithToast } from './drinkWithToast.ts'
 import { comparePotions } from './potionText.ts'
 import { Sheet } from '../Sheet.tsx'
@@ -89,11 +90,17 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   const equipItem = useGameStore((s) => s.equipItem)
   const exchangeStones = useGameStore((s) => s.exchangeStones)
   const redeemTitleItem = useGameStore((s) => s.redeemTitleItem)
+  const redeemCashTicket = useGameStore((s) => s.redeemCashTicket)
   const identifyItems = useGameStore((s) => s.identifyItems)
   const [selected, setSelected] = useState<string | null>(null)
   const [category, setCategory] = useState<Category>('all')
   const [confirmAll, setConfirmAll] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [boxResults, setBoxResults] = useState<{
+    itemId: number
+    opened: number
+    prizes: ItemStack[]
+  } | null>(null)
 
   if (!character) return null
   const inventory = character.inventory
@@ -114,7 +121,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
             item,
             stack,
           }))
-        : [{ key: `item-${stack.itemId}`, item, stack }]
+        : [{ key: `item-${stack.itemId}-${stack.flag ?? 0}`, item, stack }]
     }),
   ].sort((a, b) => byType(a.item, b.item) || (b.piece?.plus ?? 0) - (a.piece?.plus ?? 0))
   const shown = entries.filter((e) => category === 'all' || categoryOf(e.item) === category)
@@ -125,7 +132,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
     const item = getItem(itemId)
     return (
       (item.gear?.classes.includes(character.classId) ?? false) ||
-      item.potion !== undefined ||
+      item.type === 'potion' ||
       item.magnifier !== undefined ||
       itemId === SMELTING_STONE_ID ||
       itemId === HEAVEN_STONE_ID
@@ -186,7 +193,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
       return `You are wearing ${name}.`
     })
 
-  const sellEverything = () => sell(sellable.map(({ itemId, count }) => ({ itemId, count })))
+  const sellEverything = () => sell(sellable)
 
   /** "Wear" button (or why not) for a piece of gear. */
   const wearActions = (
@@ -313,7 +320,12 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
     const price = sellPrice(stack.itemId)
     return (
       <>
-        <ItemInfo character={character} itemId={stack.itemId} count={stack.count} />
+        <ItemInfo
+          character={character}
+          itemId={stack.itemId}
+          count={stack.count}
+          flag={stack.flag}
+        />
         <div className="item-row__actions">
           {isRare(stack.itemId) && identifyActions({ itemId: stack.itemId, count: 1 })}
           {item.gear && wearActions(stack.itemId, 0, { itemId: stack.itemId })}
@@ -352,8 +364,30 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
               Use
             </button>
           )}
+          {cashTicketValue(stack.itemId) > 0 && (
+            <button
+              type="button"
+              className="button button--gold"
+              disabled={busy}
+              onClick={() =>
+                run(async () => {
+                  const credited = await redeemCashTicket(stack.itemId)
+                  return `Added ${fmt(credited)} Cash to your account.`
+                })
+              }
+            >
+              Use
+            </button>
+          )}
           {isBox(stack.itemId) && (
-            <BoxActions itemId={stack.itemId} count={stack.count} disabled={away} />
+            <BoxActions
+              itemId={stack.itemId}
+              count={stack.count}
+              disabled={away || dungeonLocked}
+              onResults={(opened, prizes) =>
+                setBoxResults({ itemId: stack.itemId, opened, prizes })
+              }
+            />
           )}
           {stack.itemId === SMELTING_STONE_ID && (
             <>
@@ -383,7 +417,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                 type="button"
                 className="button button--cost"
                 disabled={busy}
-                onClick={() => sell([{ itemId: stack.itemId, count: 1 }])}
+                onClick={() => sell([{ ...stack, count: 1 }])}
               >
                 <span>Sell 1</span>
                 <Gold amount={price} prefix="+" />
@@ -393,14 +427,14 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                   type="button"
                   className="button button--cost"
                   disabled={busy}
-                  onClick={() => sell([{ itemId: stack.itemId, count: stack.count }])}
+                  onClick={() => sell([stack])}
                 >
                   <span>Sell all ×{fmt(stack.count)}</span>
                   <Gold amount={price * stack.count} prefix="+" />
                 </button>
               )}
             </>
-          ) : isBox(stack.itemId) ? null : (
+          ) : isBox(stack.itemId) || cashTicketValue(stack.itemId) > 0 ? null : (
             <p className="item-row__note">The shop does not buy this item.</p>
           )}
         </div>
@@ -438,7 +472,9 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
         <ul className="bag-grid" aria-label="Bag">
           {shown.map((entry) => {
             const { key, item, piece, stack } = entry
-            const name = piece ? pieceName(piece.itemId, piece.plus, piece.rare) : item.name
+            const name = piece
+              ? pieceName(piece.itemId, piece.plus, piece.rare)
+              : `${item.name}${stack?.flag ? ` Lv ${stack.flag}` : ''}`
             const count = stack && !item.gear ? stack.count : 1
             return (
               <li key={key}>
@@ -446,6 +482,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                   item={item}
                   count={count}
                   plus={piece?.plus}
+                  effectLevel={stack?.flag}
                   tone={nameTone(piece ?? { itemId: item.id })}
                   selected={key === selected}
                   label={count > 1 ? `${name} ×${fmt(count)}` : name}
@@ -477,6 +514,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
           <div className="item-details">{details(chosen)}</div>
         </Sheet>
       )}
+      {boxResults && <BoxResults {...boxResults} onClose={() => setBoxResults(null)} />}
       {sellable.length > 0 && (
         <>
           <button

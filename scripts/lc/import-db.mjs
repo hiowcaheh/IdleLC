@@ -20,6 +20,7 @@ import { sourceFields, sourceMagic, sourceNpc } from './source-records.mjs'
 import { buildDungeonSuperBuffs, DUNGEON_SUPER_ITEMS } from './dungeon-super.mjs'
 import { ITEM_ATLAS } from './icons.mjs'
 import { buildWorldBosses, WORLD_BOSS_NPCS } from './world-boss.mjs'
+import { buildMoonstoneRewards } from './moonstone.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const MAX_LEVEL = 100
@@ -102,13 +103,21 @@ const SF_NOTDUPLICATE = 1 << 4
 const SF_NOCANCEL = 1 << 5
 /**
  * IdleLC's own items (not in the database), with client icons (owner's request, 2026-11-07): the
- * chests a dungeon's monsters drop. Their contents are game rules (src/game/data/boxes.ts). Ids
+ * chests a dungeon's monsters drop and the owner's Cash tickets. Chest contents are game rules
+ * (src/game/data/boxes.ts); tickets credit the account through redeemCashTicket. Ids
  * from 95001 stay clear of every t_item index.
  */
 export const OWN_ITEMS = [
   { id: 95001, name: 'Belfist Box', icon: { atlas: 7, row: 3, col: 6 } },
   { id: 95002, name: 'Procyon Box', icon: { atlas: 7, row: 3, col: 3 } },
   { id: 95003, name: 'Maargadum Box', icon: { atlas: 7, row: 3, col: 7 } },
+  // Owner's Cash tickets: the source Phoenix Ticket (3217), ItemBtn6 row 0 / col 4.
+  ...[10, 20, 50, 100, 500, 1000].map((cash, index) => ({
+    id: 95011 + index,
+    name: `${cash} Cash Ticket`,
+    description: `Use to add ${cash} Cash to your account's Item Shop balance. Consumes one ticket.`,
+    icon: { atlas: 6, row: 0, col: 4 },
+  })),
 ].map((item) => ({
   ...item,
   // t_item a_type_idx 2 / a_subtype_idx 9: the client's boxes opened for a random reward
@@ -312,7 +321,11 @@ export function buildData(tables) {
 
   const itemRows = new Map(tables.t_item.map((r) => [int(r.a_index), r]))
   const worldBosses = buildWorldBosses(tables)
+  const moonstones = buildMoonstoneRewards(tables)
   for (const boss of worldBosses) for (const drop of boss.raidDrops) usedItems.add(drop.item)
+  for (const stone of moonstones) for (const reward of stone.rewards) usedItems.add(reward.itemId)
+  // World Boss replacements, Moonstone Box and the five original statue stones.
+  for (const id of [4917, 4920, 2544, 2545, 2546, 2547, 2548]) usedItems.add(id)
   const isGear = (r) =>
     ((int(r.a_type_idx) === 0 && CLASS_WEAPONS.has(int(r.a_subtype_idx))) ||
       int(r.a_type_idx) === 1) &&
@@ -403,7 +416,10 @@ export function buildData(tables) {
       icon: { atlas: int(r.a_texture_id), row: int(r.a_texture_row), col: int(r.a_texture_col) },
       ...(potions.has(int(r.a_index)) ? { potion: potions.get(int(r.a_index)) } : {}),
       // what a boost potion does, in the database's words (without its "[Cash Item]" tag)
-      ...(BOOST_POTIONS.has(int(r.a_index)) && String(r.a_descr_usa ?? '').trim()
+      ...((BOOST_POTIONS.has(int(r.a_index)) ||
+        moonstones.some((s) => s.itemId === int(r.a_index)) ||
+        int(r.a_index) === 2544) &&
+      String(r.a_descr_usa ?? '').trim()
         ? {
             description: String(r.a_descr_usa)
               .replace(/^\s*\[[^\]]*\]\s*/, '')
@@ -504,6 +520,7 @@ export function buildData(tables) {
     dungeonBuffs,
     dungeonSuperBuffs: buildDungeonSuperBuffs(tables),
     worldBosses,
+    moonstones,
     npcSkills,
   }
 }
@@ -1073,6 +1090,7 @@ async function main() {
   const tables = readTables(text, [
     't_npc',
     't_npc_dropraid',
+    't_moonstone_reward',
     't_item',
     't_exp',
     't_npc_regen',

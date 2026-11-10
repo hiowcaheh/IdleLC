@@ -16,6 +16,11 @@ export interface LcWorldBoss {
   raidDrops: { item: number; count: number; probability: number; flag: number }[]
 }
 
+export interface LcMoonstone {
+  itemId: number
+  rewards: { itemId: number; count: number; weight: number; flag: number }[]
+}
+
 export interface LcMonster {
   id: string
   npcIndex: number
@@ -131,6 +136,7 @@ export interface LcData {
   dungeonBuffs?: LcSkill[]
   dungeonSuperBuffs?: LcDungeonSuperBuff[]
   worldBosses?: LcWorldBoss[]
+  moonstones?: LcMoonstone[]
   npcSkills?: Omit<LcSkill, 'classId' | 'icon'>[]
   /** Item ids the NPC shops of each field zone sell (gear and the upgrade stone), by zone id. */
   shops?: Record<string, number[]>

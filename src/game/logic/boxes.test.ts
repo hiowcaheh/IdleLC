@@ -6,7 +6,7 @@ vi.mock('../data/lcSource.ts', async () => ({
   lcModels: (await import('../data/generated/lc-models.json')).default,
 }))
 
-import { DUNGEON_BOXES } from '../data/boxes.ts'
+import { DUNGEON_BOXES, MOONSTONE_BOX_ID } from '../data/boxes.ts'
 import { HEAVEN_STONE_ID, SMELTING_STONE_ID, getItem } from '../data/items.ts'
 import { applyOpenBoxes, rollBoxPrize } from './boxes.ts'
 import { createCharacterData } from './character.ts'
@@ -19,6 +19,28 @@ const NOW = Date.UTC(2026, 10, 7, 12)
 const hero = () => ({
   ...createCharacterData({ name: 'BoxHero', classId: 'knight' }, 'b', NOW),
   level: 30,
+})
+
+describe('source Moonstone Box', () => {
+  it('matches all 1000 server rolls: 520 / 300 / 150 / 30, one stone per box', () => {
+    const totals = new Map<number, number>()
+    for (let n = 0; n < 1000; n++) {
+      const prize = rollBoxPrize(MOONSTONE_BOX_ID, () => (n + 0.5) / 1000)
+      expect(prize.count).toBe(1)
+      totals.set(prize.itemId, (totals.get(prize.itemId) ?? 0) + 1)
+    }
+    expect(Object.fromEntries(totals)).toEqual({ 2545: 520, 2546: 300, 723: 150, 2547: 30 })
+    expect(totals.has(2548)).toBe(false)
+  })
+
+  it('consumes exactly 25 boxes, pays 25 stones, and rejects another opening', () => {
+    const c = { ...hero(), inventory: [{ itemId: MOONSTONE_BOX_ID, count: 25 }] }
+    const opened = applyOpenBoxes(c, MOONSTONE_BOX_ID, 25, createRng(7))
+    expect(opened.prizes.reduce((sum, p) => sum + p.count, 0)).toBe(25)
+    expect(opened.character.inventory.some((s) => s.itemId === MOONSTONE_BOX_ID)).toBe(false)
+    expect(() => applyOpenBoxes(opened.character, MOONSTONE_BOX_ID, 1, createRng(7))).toThrow()
+    expect(c.inventory).toEqual([{ itemId: MOONSTONE_BOX_ID, count: 25 }])
+  })
 })
 
 describe('dungeon boxes (owner, 2026-11-07)', () => {

@@ -2,6 +2,7 @@
  * Dungeon boxes (own items, owner's request 2026-11-07): a monster killed in a dungeon may leave
  * that dungeon's box on the ground; the hero picks it up by walking into it and opens it from the
  * bag. Chances and contents are the owner's starting values ("we will tune it later").
+ * Moonstone Box is the separate, original server box; its source weights are retained below.
  */
 import type { DungeonId } from './dungeons.ts'
 import { HEAVEN_STONE_ID, SMELTING_STONE_ID } from './items.ts'
@@ -15,6 +16,8 @@ export const DUNGEON_BOXES: Record<DungeonId, number> = {
 
 /** Chance that one killed dungeon monster leaves a box. */
 export const DUNGEON_BOX_CHANCE = 0.05
+
+export const MOONSTONE_BOX_ID = 2544
 
 export interface BoxPrize {
   itemId: number
@@ -33,6 +36,13 @@ export const BOX_PRIZES: Readonly<Record<number, readonly BoxPrize[]>> = {
   [DUNGEON_BOXES.belfist]: STONES,
   [DUNGEON_BOXES.procyon]: STONES,
   [DUNGEON_BOXES.maargadum]: STONES,
+  // doFuncItem.cpp:7678, do_itemUse_MoonStoneBox: GetRandom(1, 1000), one stone.
+  [MOONSTONE_BOX_ID]: [
+    { itemId: 2545, count: 1, weight: 520 },
+    { itemId: 2546, count: 1, weight: 300 },
+    { itemId: 723, count: 1, weight: 150 },
+    { itemId: 2547, count: 1, weight: 30 },
+  ],
 }
 
 export const isBox = (itemId: number): boolean => BOX_PRIZES[itemId] !== undefined

@@ -12,6 +12,7 @@ export function ItemSlot({
   item,
   count = 1,
   plus = 0,
+  effectLevel = 0,
   tone = '',
   selected = false,
   label,
@@ -20,6 +21,7 @@ export function ItemSlot({
   item?: ItemDef
   count?: number
   plus?: number
+  effectLevel?: number
   /** nameTone() of the piece (" name--grade-A"…). */
   tone?: string
   selected?: boolean
@@ -40,6 +42,7 @@ export function ItemSlot({
         <span className="item-slot__icon">
           <ItemIcon item={item} fluid />
           {plus > 0 && <span className="item-slot__plus">+{plus}</span>}
+          {effectLevel > 0 && <span className="item-slot__plus">Lv {effectLevel}</span>}
           {count > 1 && <span className="item-slot__count">{fmt(count)}</span>}
         </span>
       )}

@@ -8,7 +8,7 @@ vi.mock('../data/lcSource.ts', async () => ({
 
 import { GOLDEN_MAGNIFIER_ID, getItem, getRareSet } from '../data/items.ts'
 import { getMonster } from '../data/monsters.ts'
-import { WORLD_BOSSES } from '../data/worldBosses.ts'
+import { WORLD_BOSSES, worldBossDropTable } from '../data/worldBosses.ts'
 import { ZONES } from '../data/zones.ts'
 import { worldBookMonsters, applyClaimBookReward } from './book.ts'
 import { bookRewards } from '../data/bookRewards.ts'
@@ -38,6 +38,16 @@ const guaranteed = [
   { itemId: 759, count: 1 },
   { itemId: 786, count: 5 },
   { itemId: 972, count: 5 },
+]
+const currentGuaranteed = [
+  { itemId: 169, count: 1 },
+  { itemId: 723, count: 5 },
+  { itemId: 759, count: 1 },
+  { itemId: 972, count: 10 },
+  { itemId: 2544, count: 25 },
+  { itemId: 4917, count: 50 },
+  { itemId: 4920, count: 50 },
+  { itemId: 95014, count: 1 },
 ]
 
 describe('World Boss source data and drops', () => {
@@ -80,9 +90,16 @@ describe('World Boss source data and drops', () => {
     }
   })
 
-  it('always pays the nine guaranteed source stacks, without global IdleLC extras', () => {
-    for (const boss of WORLD_BOSSES)
-      expect(worldBossDrops(getMonster(boss.monsterId), () => 0.999999)).toEqual(guaranteed)
+  it('always pays the owner’s replacements, boxes and 100 Cash ticket on every map', () => {
+    for (const boss of WORLD_BOSSES) {
+      expect(worldBossDrops(getMonster(boss.monsterId), () => 0.999999)).toEqual(currentGuaranteed)
+      const table = worldBossDropTable(boss)
+      expect(table.filter((d) => d.probability < 10000)).toEqual(
+        boss.raidDrops.filter((d) => d.probability < 10000),
+      )
+      expect(table.some((d) => [45, 47, 485, 673, 786].includes(d.item))).toBe(false)
+      for (const drop of currentGuaranteed) expect(getItem(drop.itemId).id).toBe(drop.itemId)
+    }
   })
 
   it('rolls every rare accessory independently with exact inclusive source thresholds', () => {
@@ -95,9 +112,7 @@ describe('World Boss source data and drops', () => {
       expect(rareOnly((threshold - 1) / 10000)).toHaveLength(10)
       expect(rareOnly(threshold / 10000)).toEqual([])
       let draws = 0
-      const drops = worldBossDrops(getMonster(boss.monsterId), () =>
-        ++draws === 11 ? 0 : 0.999999,
-      )
+      const drops = worldBossDrops(getMonster(boss.monsterId), () => (++draws === 8 ? 0 : 0.999999))
       expect(drops.filter((d) => d.itemId >= 1828 && d.itemId <= 1837)).toEqual([
         { itemId: 1829, count: 1 },
       ])
@@ -119,14 +134,14 @@ describe('World Boss source data and drops', () => {
         ).drops
       expect(drops(1, 1)).toEqual(drops(165, 100))
       expect(drops(165, 100)).toEqual(worldBossDrops(monster, createRng(34)))
-      expect(drops(165, 100)).toEqual(expect.arrayContaining(guaranteed))
+      expect(drops(165, 100)).toEqual(expect.arrayContaining(currentGuaranteed))
     }
   })
 
   it('keeps the raw Balrog equipment slots, including classes outside IdleLC', () => {
     let draws = 0
     const drops = worldBossDrops(getMonster('lc-308'), () =>
-      ++draws <= 19 ? 0.999999 : (draws - 20) % 2 === 0 ? 12 / 20 : 0,
+      ++draws <= 18 ? 0.999999 : (draws - 19) % 2 === 0 ? 12 / 20 : 0,
     )
     expect(drops).toContainEqual({ itemId: 394, count: 4 })
   })

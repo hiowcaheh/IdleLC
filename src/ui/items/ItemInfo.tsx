@@ -11,6 +11,7 @@ import { ItemIcon } from './ItemIcon.tsx'
 import { TYPE_LABELS } from './itemTypes.ts'
 import { potionRows } from './potionText.ts'
 import { titleDuration, titleStyle } from '../titles/format.ts'
+import { cashTicketValue } from '../../game/data/cashTickets.ts'
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 // strClient_us.lod 1891–1894: exact client captions for the separate +15 lines.
@@ -23,6 +24,7 @@ const ADDITION_CAPTIONS: Record<string, string> = {
 
 /** "Sword", "Helmet", "Potion"… */
 function kindOf(item: ItemDef): string {
+  if (cashTicketValue(item.id)) return 'Cash Ticket'
   const gear = item.gear
   if (!gear) return TYPE_LABELS[item.type]
   if (gear.slot === 'weapon') return capitalize(WEAPON_KINDS[gear.subtype] ?? 'weapon')
@@ -40,6 +42,7 @@ export function ItemInfo({
   options,
   rare,
   count = 1,
+  flag = 0,
 }: {
   character: CharacterData
   itemId: number
@@ -47,10 +50,14 @@ export function ItemInfo({
   options?: readonly ItemOption[]
   rare?: number
   count?: number
+  flag?: number
 }) {
   const item = getItem(itemId)
   const gear = item.gear
   const rows: { label: string; value: string; tone?: string }[] = []
+  const cash = cashTicketValue(itemId)
+  if (cash) rows.push({ label: 'Cash', value: `+${fmt(cash)}`, tone: 'is-good' })
+  if (flag > 0) rows.push({ label: 'Effect level', value: String(flag) })
   if (isRare(itemId)) {
     const set = rare === undefined ? undefined : getRareSet(rare)
     rows.push({
@@ -131,6 +138,9 @@ export function ItemInfo({
         </dl>
       )}
       {title?.description && <p className="item-row__note">{title.description}</p>}
+      {item.description && !item.potion && !title && (
+        <p className="item-row__note">{item.description}</p>
+      )}
     </div>
   )
 }

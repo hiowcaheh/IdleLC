@@ -109,7 +109,12 @@ export function stowDrops(
 export interface ItemStack {
   itemId: number
   count: number
+  /** Source per-instance item flag; Moonstone minerals use it as their effect level. */
+  flag?: number
 }
+
+export const stackKey = (stack: Pick<ItemStack, 'itemId' | 'flag'>): string =>
+  `${stack.itemId}:${stack.flag ?? 0}`
 
 /**
  * Preserved IdleLC entry rolls, once per eligible kill. rewardKills applies the source level gate;
@@ -131,7 +136,7 @@ export function rollDrops(
     .sort((a, b) => a.itemId - b.itemId)
 }
 
-/** Adds stacks to an inventory (one stack per item for now; equipment instances come with M5). */
+/** Adds stacks of the same source item and flag, keeping mineral levels separate. */
 export function addToInventory(
   inventory: readonly ItemStack[],
   items: readonly ItemStack[],
@@ -139,7 +144,7 @@ export function addToInventory(
   const next = inventory.map((s) => ({ ...s }))
   for (const item of items) {
     if (item.count <= 0) continue
-    const stack = next.find((s) => s.itemId === item.itemId)
+    const stack = next.find((s) => s.itemId === item.itemId && (s.flag ?? 0) === (item.flag ?? 0))
     if (stack) stack.count += item.count
     else next.push({ ...item })
   }
@@ -155,18 +160,17 @@ export function takeFromInventory(
   items: readonly ItemStack[],
 ): { inventory: ItemStack[]; taken: ItemStack[] } {
   const next = inventory.map((s) => ({ ...s }))
-  const taken = new Map<number, number>()
+  const taken = new Map<string, ItemStack>()
   for (const item of items) {
-    const stack = next.find((s) => s.itemId === item.itemId)
+    const key = stackKey(item)
+    const stack = next.find((s) => s.itemId === item.itemId && (s.flag ?? 0) === (item.flag ?? 0))
     const count = Math.min(stack?.count ?? 0, Math.max(0, Math.floor(item.count)))
     if (!stack || count <= 0) continue
     stack.count -= count
-    taken.set(item.itemId, (taken.get(item.itemId) ?? 0) + count)
+    taken.set(key, { ...stack, count: (taken.get(key)?.count ?? 0) + count })
   }
   return {
     inventory: next.filter((s) => s.count > 0),
-    taken: [...taken]
-      .map(([itemId, count]) => ({ itemId, count }))
-      .sort((a, b) => a.itemId - b.itemId),
+    taken: [...taken.values()].sort((a, b) => a.itemId - b.itemId || (a.flag ?? 0) - (b.flag ?? 0)),
   }
 }

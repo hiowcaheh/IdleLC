@@ -1,8 +1,9 @@
 # World Boss (2026-11-10, Codex)
 
 System działa w oglądanej walce idle. Przywoływanie i progi są regułami właściciela;
-modele, statystyki, umiejętności NPC i tabele przedmiotów pochodzą z dostarczonych
-plików LC. Nie zmienia systemu Dungeons, sklepu Cash ani artefaktu Seraphim.
+modele, statystyki, umiejętności NPC i bazowe tabele przedmiotów pochodzą z dostarczonych
+plików LC. Bieżące zmiany nagród właściciela oraz nowe bilety Cash opisano poniżej
+i w [notatce o Statui i Cash](moonstone-cash.md). Dungeons i Seraphim pozostają.
 
 ## Bossy i licznik
 
@@ -57,6 +58,16 @@ jako zużyty, więc nie można ponawiać losowania przeładowaniem.
 `resumeWorldBossSpot` wznawia cel bez podróży, gdy arena zgadza się z location.
 Zapis wyniku z pierwszych dwóch wersji może zawierać inną arenę; tylko ten przypadek
 zachowuje powrót przez `planTravel`, także po reloadzie.
+
+## Czwarta partia: nagrody i Cash Ticket
+
+`worldBossDropTable` nakłada reguły właściciela na surową tabelę raidDrops.
+Usunięte 47/673/786; mikstury 45/485 zastąpione 4917/4920 po 50 sztuk; Lucky Scroll
+972 daje 10. Dodatkowo zawsze Moonstone Box 2544 ×25 i 100 Cash Ticket 95014 ×1.
+Hero's Necklace, Moon Stone i Medal of Honor zostają. Łącznie osiem gwarantowanych
+stosów, poza niezależnymi raid ACC i zwykłymi slotami Balroga. Szanse akcesoriów
+i brak mnożników nadal obowiązują. Cash dopisuje dopiero Use biletu z ekwipunku.
+[Pełna tabela, źródła i mechanika skrzynki](moonstone-cash.md).
 
 ## Trzecia partia: kamera, GUI i Monster Book
 
@@ -169,7 +180,7 @@ okna po reloadzie: przygotowana postać pokonała Balroga przy ×20, bez wymusza
 Kill target. Zapisano 150450 ms i znacznik testu; łupy po reloadzie były pojedyncze,
 Continue wznowiło grę. Bez błędów JS, konsoli, HTTP i żądań.
 
-## Drop z serwera
+## Źródłowy drop z serwera (przed zmianą właściciela)
 
 Źródło: dostarczony `newproject_data.sql`, SHA-256
 `0cae2afd637966dd365f22a2795ba5402c29061aa83d01b84e6a8f7ce031d85d`.

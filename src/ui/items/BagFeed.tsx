@@ -18,6 +18,7 @@ interface Line {
   id: number
   itemId: number
   count: number
+  flag?: number
 }
 let nextId = 1
 
@@ -57,6 +58,7 @@ export function BagFeed() {
               <ItemIcon item={item} size={22} />
               <span className={`reward-feed__name${nameTone({ itemId: line.itemId })}`}>
                 {item.name}
+                {line.flag ? ` Lv ${line.flag}` : ''}
                 {line.count > 1 ? ` ×${fmt(line.count)}` : ''}
               </span>
             </span>
