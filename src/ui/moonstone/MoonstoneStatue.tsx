@@ -10,10 +10,9 @@ import { fmt } from '../gear/format.ts'
 import './moonstone.css'
 
 export function MoonstoneButton({ onClick }: { onClick(): void }) {
-  const disabled = useGameStore(
-    (s) => !!s.character?.expedition || !!s.character?.worldBoss?.active || !!s.worldBossResult,
-  )
-  if (!MOONSTONES.length) return null
+  const disabled = useGameStore((s) => !!s.character?.expedition)
+  const boss = useGameStore((s) => !!s.character?.worldBoss?.active || !!s.worldBossResult)
+  if (!MOONSTONES.length || boss) return null
   return (
     <button
       type="button"

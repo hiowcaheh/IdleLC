@@ -102,6 +102,8 @@ po reloadzie. Sprzedaż usuwa wyłącznie wybrany wariant. Import nagród zachow
 pozostałe oryginalne przedmioty (materiały, Butchers Box, boostery i tokeny).
 
 Przycisk 40 px pod Item Shop ma tę samą ramkę zdarzeń klienta i ikonę Moon Stone.
+Podczas próby World Bossa i okna łupów jest ukryty, aby na wąskim ekranie nie
+nachodził na stoper. Po wznowieniu polowania wraca na swoje miejsce.
 Modal używa oryginalnego wizerunku Statui, pięciu pól nagrody, przycisków kamieni,
 Start/Stop i Exit. Checkbox pochodzi z NewOption. `moonstone-art.mjs` eksportuje
 nowe fragmenty atlasu bez zastępowania dotychczasowych grafik.
@@ -136,3 +138,6 @@ Osobna próba produkcyjna: Balrog pokonany przy ×20 (bez DEV Kill target), osie
 gwarantowanych stosów zgodnych z tabelą. Stoper 150450 ms, assisted=true. Reload
 okna zachował pojedynczą wypłatę. Zdobyty bilet został zużyty w Inventory, a Item
 Shop pokazał 100 Cash. Bez błędów JS, konsoli, HTTP i żądań.
+
+Dodatkowo 320 px: skrót Statui znika w próbie bossa, stoper mieści się w ekranie,
+a po Leave skrót wraca i otwiera okno. Bez błędów JS, konsoli i żądań.

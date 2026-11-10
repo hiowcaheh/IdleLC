@@ -11,7 +11,8 @@
    Open, Multi-open, podgląd zawartości i wynik także po zużyciu ostatniej skrzynki.
 4. Statua Księżycowa pod Item Shop, z oryginalnym GUI MoonStone.tex i pięcioma
    przyciskami kamieni. Pełna tabela nagród serwera, oryginalne ilości i poziomy
-   mineralów, zachowywane oddzielnie w ekwipunku i po reloadzie.
+   mineralów, zachowywane oddzielnie w ekwipunku i po reloadzie. Przycisk jest
+   ukryty podczas World Bossa, aby nie nachodził na stoper na wąskim ekranie.
 5. Start/Stop, Exit i checkbox automatu. Automat kończy się po wyczerpaniu kamieni,
    zamknięciu okna lub ukryciu karty. Nagrody pojawiają się po lewej jak zakupy.
 
