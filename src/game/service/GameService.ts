@@ -55,6 +55,7 @@ export interface GameService {
   arrive(characterId: string): Promise<CharacterData>
   summonWorldBoss(characterId: string): Promise<CharacterData>
   cancelWorldBoss(characterId: string): Promise<CharacterData>
+  acknowledgeWorldBossLoot(characterId: string): Promise<CharacterData>
   /**
    * Outcome of the fights since the last report; the service checks it, pays out and takes the
    * potions drunk out of the bag.
@@ -143,6 +144,7 @@ export interface DevCommands {
   resetDungeonEntries(characterId: string): Promise<CharacterData>
   /** Adds Cash to the account; resolves with the new amount. */
   addCash(amount: number): Promise<number>
+  fillWorldBossCharge(characterId: string): Promise<CharacterData>
 }
 
 /** Subset of the Web Storage API — lets tests use an in-memory store. */

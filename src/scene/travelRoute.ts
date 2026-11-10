@@ -51,15 +51,25 @@ export function groundOf(meta: TerrainMeta, zoneId: string, monsterId: string): 
  * can't be crossed, and its metres. Undefined when there is nothing to plan on (another zone, a
  * zone without a map, the map not fetched yet): the run then keeps its short default.
  */
-export function planTravel(zoneId: string, monsterId: string): number | undefined {
+export function planTravel(
+  zoneId: string,
+  monsterId: string,
+  fromMonsterId?: string,
+): number | undefined {
   const map = ZONES[zoneId]?.map
   const data = map ? loadedMap(map) : null
-  if (!map || !data || shown.map !== map || !shown.at) {
+  const from =
+    shown.map === map && shown.at
+      ? shown.at
+      : data && fromMonsterId
+        ? groundOf(data.meta, zoneId, fromMonsterId)
+        : null
+  if (!map || !data || !from) {
     route = null
     return undefined
   }
   const to = groundOf(data.meta, zoneId, monsterId)
-  const points = data.nav ? findPath(data.nav, shown.at, to) : [shown.at, to]
+  const points = data.nav ? findPath(data.nav, from, to) : [from, to]
   route = { map, points, length: pathLength(points) }
   return route.length
 }

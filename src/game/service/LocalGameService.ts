@@ -97,6 +97,8 @@ import {
   endWorldBoss,
   summonWorldBoss as beginWorldBoss,
   worldBossDrops,
+  recordWorldBossTime,
+  fillWorldBossCharge,
 } from '../logic/worldBoss.ts'
 
 export const SAVE_KEY = 'idlelc.save'
@@ -146,8 +148,10 @@ export class LocalGameService implements GameService {
             : c
         // the game was closed on the way between spots: the hero is back where it left from
         const bossRecovered = recovered.worldBoss?.active
-          ? { ...endWorldBoss(recovered), lastPlayedAt: this.now() }
-          : recovered
+          ? { ...endWorldBoss(recovered, 'interrupted', this.now()), lastPlayedAt: this.now() }
+          : recovered.worldBoss?.pending
+            ? { ...recovered, lastPlayedAt: this.now() }
+            : recovered
         const { runFrom, ...still } = bossRecovered
         const placed = runFrom && !still.expedition ? { ...still, location: runFrom } : still
         return applyLevelTitles(
@@ -158,7 +162,9 @@ export class LocalGameService implements GameService {
     }
     if (
       status !== 'loaded' ||
-      save.characters.some((c) => c.dungeons?.active || c.runFrom || c.worldBoss?.active)
+      save.characters.some(
+        (c) => c.dungeons?.active || c.runFrom || c.worldBoss?.active || c.worldBoss?.pending,
+      )
     )
       this.persist()
     return { save: copy(this.save), status }
@@ -253,6 +259,7 @@ export class LocalGameService implements GameService {
       )
         throw new GameError('invalid-world-boss-result')
     } else if (report.encounterId) throw new GameError('world-boss-expired')
+    if (character.worldBoss?.pending) throw new GameError('world-boss-result-pending')
     if (report.monsterId !== (boss?.monsterId ?? character.location.monsterId)) {
       throw new GameError('wrong-monster', `${characterId} is not hunting ${report.monsterId}`)
     }
@@ -261,8 +268,11 @@ export class LocalGameService implements GameService {
     const elapsed = Math.max(0, (now - character.lastPlayedAt) / 1000)
     const allowed = maxKills(elapsed, this.timeScale)
     const played = Math.min(elapsed, MAX_PLAY_GAP) * this.timeScale
+    const timed = boss
+      ? recordWorldBossTime(character, report.worldBossTime, this.timeScale !== 1)
+      : character
     const fighter = boss
-      ? { ...character, location: { ...character.location, monsterId: boss.monsterId } }
+      ? { ...timed, location: { ...character.location, monsterId: boss.monsterId } }
       : character
     const result = applyCombatReport(
       fighter,
@@ -277,9 +287,22 @@ export class LocalGameService implements GameService {
     result.character = { ...result.character, location: character.location }
     result.character = boss
       ? result.kills > 0 || report.deaths > 0
-        ? endWorldBoss(result.character, result.kills > 0)
+        ? endWorldBoss(result.character, result.kills > 0 ? 'victory' : 'death', now)
         : result.character
       : chargeWorldBoss(result.character, result.kills)
+    if (boss && result.kills > 0) {
+      result.character.worldBoss = {
+        ...result.character.worldBoss!,
+        pending: {
+          record: result.character.worldBoss!.history!.at(-1)!,
+          arenaMonsterId: boss.arenaMonsterId,
+          exp: result.exp,
+          gold: result.gold,
+          sp: result.sp,
+          drops: result.drops,
+        },
+      }
+    }
     // active play in real seconds (dev speed-up aside)
     const playSeconds = character.stats.playSeconds + Math.min(elapsed, MAX_PLAY_GAP)
     const updated = this.update(characterId, () => ({
@@ -299,7 +322,20 @@ export class LocalGameService implements GameService {
   async cancelWorldBoss(characterId: string): Promise<CharacterData> {
     const character = this.character(characterId)
     return copy(
-      this.update(characterId, () => ({ ...endWorldBoss(character), lastPlayedAt: this.now() })),
+      this.update(characterId, () => ({
+        ...endWorldBoss(character, 'left', this.now()),
+        lastPlayedAt: this.now(),
+      })),
+    )
+  }
+
+  async acknowledgeWorldBossLoot(characterId: string): Promise<CharacterData> {
+    const character = this.character(characterId)
+    if (!character.worldBoss?.pending) return copy(character)
+    const worldBoss = { ...character.worldBoss }
+    delete worldBoss.pending
+    return copy(
+      this.update(characterId, () => ({ ...character, worldBoss, lastPlayedAt: this.now() })),
     )
   }
 
@@ -743,6 +779,8 @@ export class LocalGameService implements GameService {
       this.persist()
       return this.save.cash
     },
+    fillWorldBossCharge: async (characterId) =>
+      copy(this.update(characterId, (c) => fillWorldBossCharge(c))),
     addGold: async (characterId, amount) =>
       copy(
         this.update(characterId, (c) => ({
@@ -806,7 +844,9 @@ export class LocalGameService implements GameService {
   }
 
   private notOnWorldBoss(characterId: string): void {
-    if (this.character(characterId).worldBoss?.active)
+    const progress = this.character(characterId).worldBoss
+    if (progress?.pending) throw new GameError('world-boss-result-pending')
+    if (progress?.active)
       throw new GameError('world-boss-active', 'Finish or leave the World Boss encounter first.')
   }
 

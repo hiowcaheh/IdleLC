@@ -42,6 +42,127 @@ function fixture(kills = 2000) {
 }
 
 describe('World Boss service lifecycle', () => {
+  it('fills only the current map in DEV without adding kills, then marks its attempt as a test', async () => {
+    const f = fixture(15)
+    await f.game.load()
+    const filled = await f.game.dev!.fillWorldBossCharge('boss')
+    expect(filled.worldBoss!.kills).toEqual({ 'lc-zone-0': 2000 })
+    expect(filled.stats).toEqual(f.character.stats)
+    const boss = (await f.game.summonWorldBoss('boss')).worldBoss!.active!
+    await expect(f.game.dev!.fillWorldBossCharge('boss')).rejects.toThrow('world-boss-unavailable')
+    f.clock.now += 10000
+    const result = await f.game.reportCombat('boss', {
+      monsterId: boss.monsterId,
+      encounterId: boss.id,
+      kills: 1,
+      deaths: 0,
+      worldBossTime: { started: true, seconds: 2.35, assisted: false },
+    })
+    expect(result.character.worldBoss!.history!.at(-1)).toMatchObject({
+      combatMs: 2350,
+      assisted: true,
+      outcome: 'victory',
+    })
+  })
+
+  it('saves combat time and pending loot atomically, restores the window on reload, and resumes once', async () => {
+    const f = fixture()
+    await f.game.load()
+    const boss = (await f.game.summonWorldBoss('boss')).worldBoss!.active!
+    f.clock.now += 65000 // Includes the approach: the reported combat itself took only five seconds.
+    const result = await f.game.reportCombat('boss', {
+      monsterId: boss.monsterId,
+      encounterId: boss.id,
+      kills: 1,
+      deaths: 0,
+      worldBossTime: { started: true, seconds: 5, assisted: false },
+    })
+    const progress = result.character.worldBoss!
+    expect(progress.history).toHaveLength(1)
+    expect(progress.history![0]).toMatchObject({
+      encounterId: boss.id,
+      combatMs: 5000,
+      assisted: false,
+      outcome: 'victory',
+    })
+    expect(progress.pending).toMatchObject({
+      record: progress.history![0],
+      drops: result.drops,
+      gold: result.gold,
+      sp: result.sp,
+      exp: result.exp,
+    })
+    await expect(f.game.travel('boss', f.character.location)).rejects.toThrow(
+      'world-boss-result-pending',
+    )
+    await expect(f.game.startAfk('boss')).rejects.toThrow('world-boss-result-pending')
+    await expect(f.game.startDungeon('boss', 'belfist')).rejects.toThrow(
+      'world-boss-result-pending',
+    )
+    await expect(
+      f.game.reportCombat('boss', {
+        monsterId: f.character.location.monsterId,
+        kills: 1,
+        deaths: 0,
+      }),
+    ).rejects.toThrow('world-boss-result-pending')
+    f.clock.now += 120000
+    const reloaded = new LocalGameService(f.storage, { now: () => f.clock.now, rng: createRng(9) })
+    const loaded = (await reloaded.load()).save.characters[0]!
+    expect(loaded.worldBoss!.pending).toEqual(progress.pending)
+    expect(loaded.worldBoss!.history).toEqual(progress.history)
+    expect(loaded.inventory).toEqual(result.character.inventory)
+    expect(loaded.gear).toEqual(result.character.gear)
+    f.clock.now += 120000
+    const resumed = await reloaded.acknowledgeWorldBossLoot('boss')
+    expect(resumed.worldBoss!.pending).toBeUndefined()
+    expect(resumed.lastPlayedAt).toBe(f.clock.now)
+    expect(resumed.inventory).toEqual(result.character.inventory)
+    const saved = f.storage.getItem(SAVE_KEY)
+    await reloaded.acknowledgeWorldBossLoot('boss')
+    expect(f.storage.getItem(SAVE_KEY)).toBe(saved)
+    const next = await reloaded.reportCombat('boss', {
+      monsterId: f.character.location.monsterId,
+      kills: 1,
+      deaths: 0,
+    })
+    expect(next.character.stats.playSeconds).toBe(resumed.stats.playSeconds)
+    expect(next.character.optionProgress).toBe(resumed.optionProgress)
+  })
+
+  it('records timed deaths, departures and interrupted attempts, and rejects invalid clocks', async () => {
+    for (const outcome of ['death', 'left', 'interrupted'] as const) {
+      const f = fixture()
+      await f.game.load()
+      const boss = (await f.game.summonWorldBoss('boss')).worldBoss!.active!
+      const report = {
+        monsterId: boss.monsterId,
+        encounterId: boss.id,
+        kills: 0,
+        deaths: 0,
+        worldBossTime: { started: true, seconds: 12.35, assisted: false },
+      }
+      const saved = f.storage.getItem(SAVE_KEY)
+      for (const invalid of [-1, Infinity, NaN])
+        await expect(
+          f.game.reportCombat('boss', {
+            ...report,
+            worldBossTime: { ...report.worldBossTime, seconds: invalid },
+          }),
+        ).rejects.toThrow('invalid-world-boss-time')
+      expect(f.storage.getItem(SAVE_KEY)).toBe(saved)
+      f.clock.now += 20000
+      await f.game.reportCombat('boss', { ...report, deaths: outcome === 'death' ? 1 : 0 })
+      if (outcome === 'left') await f.game.cancelWorldBoss('boss')
+      if (outcome === 'interrupted') await f.game.load()
+      expect(f.read().worldBoss!.history!.at(-1)).toMatchObject({
+        outcome,
+        combatMs: 12350,
+        assisted: false,
+      })
+      expect(f.read().worldBoss!.pending).toBeUndefined()
+    }
+  })
   it('counts only accepted field kills and refuses early summoning', async () => {
     const f = fixture(1999)
     await f.game.load()

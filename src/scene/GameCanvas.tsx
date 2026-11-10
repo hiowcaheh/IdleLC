@@ -47,9 +47,14 @@ function QualityCanvas({
 }) {
   const [dpr, setDpr] = useState(() => maxDpr(quality))
   const monsterId = useGameStore(
-    (s) => s.character?.worldBoss?.active?.arenaMonsterId ?? s.character?.location.monsterId ?? '',
+    (s) =>
+      s.character?.worldBoss?.active?.arenaMonsterId ??
+      s.worldBossResult?.arenaMonsterId ??
+      s.character?.location.monsterId ??
+      '',
   )
   const dungeonId = useGameStore((s) => s.dungeon?.dungeonId)
+  const frozen = useGameStore((s) => s.worldBossResult !== null)
   const shadows = quality !== 'low'
 
   useEffect(() => {
@@ -62,6 +67,7 @@ function QualityCanvas({
   return (
     <Canvas
       className="game__canvas"
+      frameloop={frozen ? 'never' : 'always'}
       dpr={dpr}
       shadows={shadows ? 'percentage' : false}
       camera={{ fov: 45, near: 0.1, far: 400, position: [3.2, 5.6, 8.6] }}

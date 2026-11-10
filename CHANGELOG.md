@@ -1,5 +1,24 @@
 # Historia zmian
 
+## 2026-11-10 (Codex): World Boss, stoper i okno łupów
+
+1. Portret i półokrąg przycisku zmniejszone o połowę (portret 32 px), po lewej na
+   środku wysokości ekranu. Tekst licznika zachowuje czytelny rozmiar.
+2. DEV: `Fill World Boss charge` napełnia licznik bieżącej mapy bez dodawania zabójstw.
+3. Po pokonaniu bossa gra zatrzymuje się i pokazuje modal klienta z tabelą EXP, SP,
+   złota oraz wszystkich przedmiotów i ilości. `Continue` rozpoczyna powrót na spot.
+   Reload przywraca okno; nagrody są zapisane raz, zamknięcie nie wypłaca ich ponownie.
+4. Stoper `MM:SS` na górze pośrodku startuje przy pierwszym ataku, ofensywnym skillu
+   lub ataku summona. Bieg, pojawianie się i podejście nie są wliczane. Czas zapisany
+   w milisekundach przy każdej próbie, z wynikiem, mapą i NPC, pod przyszły ranking.
+   Próby z napełnieniem DEV, zmianą tempa lub narzędziami walki DEV mają znacznik testu.
+
+Nadal SaveVersion **16**, bez zmian źródłowych statystyk i dropów. Dokumentacja i
+przekazanie: [docs/world-boss.md](docs/world-boss.md).
+
+Weryfikacja: 600 testów / 72 pliki, Chromium 320/390/1280 px; stoper, pauza klatek,
+tabela nagród, reload i wznowienie bez ponownej wypłaty.
+
 ## 2026-11-10 (Codex): World Boss
 
 Szczegóły źródeł i notatka dla Claude: [docs/world-boss.md](docs/world-boss.md).

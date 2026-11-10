@@ -24,6 +24,7 @@ import type { EquipSlot } from '../game/data/types.ts'
 import type { GearSource, UpgradeResult } from '../game/logic/equipment.ts'
 import type { ItemStack } from '../game/logic/loot.ts'
 import type { CombatResult } from '../game/logic/rewards.ts'
+import type { WorldBossLoot } from '../game/logic/worldBoss.ts'
 import type { LoadResult, SaveData, Settings } from '../game/logic/save.ts'
 import type { IdentifyResult, IdentifyTarget } from '../game/logic/rare.ts'
 import type { PieceSale, PurchaseResult, SaleResult } from '../game/logic/shop.ts'
@@ -48,6 +49,7 @@ export interface CombatHud {
   playerMaxMp: number
   monsterHp: number
   monsterMaxHp: number
+  worldBossMs: number | null
 }
 
 interface GameStore {
@@ -68,6 +70,8 @@ interface GameStore {
   dungeonResult: DungeonRecord | null
   dungeonEntering: boolean
   worldBossEntering: boolean
+  worldBossResult: WorldBossLoot | null
+  dismissWorldBossResult(): Promise<void>
   summonWorldBoss(): Promise<void>
   cancelWorldBoss(): Promise<void>
   startDungeon(id: DungeonId): Promise<void>
@@ -139,6 +143,7 @@ interface GameStore {
   devAddTitleItem(titleId: number): void
   /** Gives back today's dungeon entries. */
   devResetDungeonEntries(): void
+  devFillWorldBossCharge(): void
 }
 
 function toHud(c: CombatState): CombatHud {
@@ -152,6 +157,7 @@ function toHud(c: CombatState): CombatHud {
     playerMaxMp: player.maxMp ?? 0,
     monsterHp: Math.ceil(c.monster.hp),
     monsterMaxHp: c.monster.stats.maxHp,
+    worldBossMs: c.encounterClock?.started ? Math.round(c.encounterClock.seconds * 1000) : null,
   }
 }
 
@@ -245,11 +251,15 @@ export const useGameStore = create<GameStore>((set, get) => {
       previous.worldBoss?.active &&
       !result.character.worldBoss?.active
     ) {
-      const { zoneId, monsterId } = result.character.location
-      const distance = planTravel(zoneId, monsterId)
-      combatEvents.emit(combatSession.setMonster(monsterId, distance))
-      set({ hud: toHud(combatSession.state) })
-      toast(result.kills ? 'World Boss defeated!' : 'World Boss attempt ended.')
+      const pending = result.character.worldBoss?.pending
+      if (pending) set({ worldBossResult: pending, hud: toHud(combatSession.state) })
+      else {
+        const { zoneId, monsterId } = result.character.location
+        const distance = planTravel(zoneId, monsterId)
+        combatEvents.emit(combatSession.setMonster(monsterId, distance))
+        set({ hud: toHud(combatSession.state) })
+        toast('World Boss attempt ended.')
+      }
     }
     // the server's death penalty (death.ts)
     if (result.lost.exp > 0 || result.lost.sp > 0)
@@ -286,7 +296,7 @@ export const useGameStore = create<GameStore>((set, get) => {
   /** Reports the fight; `always` also when nothing was killed or drunk (the boosts changed). */
   const reportCombat = (kills: number, deaths: number, always = false) => {
     const character = get().character
-    if (!character || character.dungeons?.active) return
+    if (!character || character.dungeons?.active || get().worldBossResult) return
     const potions = combatSession.takePotionsUsed()
     if (!always && kills === 0 && deaths === 0 && potions.length === 0) return
     const report = {
@@ -297,6 +307,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       // what is left of the boost potions, kept in the save
       boosts: combatSession.boosts(),
       encounterId: character.worldBoss?.active?.id,
+      worldBossTime: character.worldBoss?.active ? combatSession.state.encounterClock : undefined,
     }
     return enqueue(() => gameService.reportCombat(character.id, report))
       .then(applyResult)
@@ -336,6 +347,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       character.dungeons?.active ||
       get().dungeonEntering ||
       character.worldBoss?.active ||
+      get().worldBossResult ||
       get().worldBossEntering
     )
       return
@@ -388,6 +400,7 @@ export const useGameStore = create<GameStore>((set, get) => {
   const dev = (command: (characterId: string) => Promise<CharacterData> | undefined) => {
     const character = get().character
     if (!character) return
+    combatSession.markEncounterAssisted()
     enqueue(async () => command(character.id))
       .then((c) => c && applyCharacter(c))
       .catch(logError)
@@ -406,9 +419,16 @@ export const useGameStore = create<GameStore>((set, get) => {
     dungeonResult: null,
     dungeonEntering: false,
     worldBossEntering: false,
+    worldBossResult: null,
 
     async startDungeon(id) {
-      if (get().dungeonEntering || get().dungeon || get().worldBossEntering) return
+      if (
+        get().dungeonEntering ||
+        get().dungeon ||
+        get().worldBossEntering ||
+        get().worldBossResult
+      )
+        return
       const character = get().character
       if (!character || character.expedition || character.worldBoss?.active) return
       if (running()) throw new Error('Finish travelling before entering a dungeon.')
@@ -482,13 +502,17 @@ export const useGameStore = create<GameStore>((set, get) => {
       const character = save.characters.find((c) => c.id === characterId)
       if (!character) return
       dungeonSession.reset()
-      combatSession.start(character, character.location.monsterId)
+      combatSession.start(
+        character,
+        character.worldBoss?.pending?.record.monsterId ?? character.location.monsterId,
+      )
       set({
         character,
         dungeon: null,
         dungeonResult: null,
         dungeonEntering: false,
         worldBossEntering: false,
+        worldBossResult: character.worldBoss?.pending ?? null,
         afkResult: null,
         save: { ...save, activeCharacterId: characterId },
         hud: toHud(combatSession.state),
@@ -498,6 +522,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     async leaveGame() {
       if (get().dungeon) await get().finishDungeon()
       if (get().character?.worldBoss?.active) await get().cancelWorldBoss()
+      if (get().worldBossResult) await get().dismissWorldBossResult()
       dungeonSession.reset()
       reportCombat(0, 0)
       set({
@@ -506,6 +531,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         dungeonResult: null,
         dungeonEntering: false,
         worldBossEntering: false,
+        worldBossResult: null,
         timeScale: 1,
         levelUp: null,
         afkResult: null,
@@ -522,6 +548,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         character.expedition ||
         character.dungeons?.active ||
         character.worldBoss?.active ||
+        get().worldBossResult ||
         get().worldBossEntering
       )
         return
@@ -634,6 +661,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         character.worldBoss?.active ||
         get().dungeonEntering ||
         get().worldBossEntering ||
+        get().worldBossResult ||
         running() ||
         (typeof document !== 'undefined' && document.hidden)
       )
@@ -665,6 +693,25 @@ export const useGameStore = create<GameStore>((set, get) => {
       set({ hud: toHud(combatSession.state) })
     },
 
+    async dismissWorldBossResult() {
+      const character = get().character
+      if (!character || !get().worldBossResult || get().worldBossEntering) return
+      set({ worldBossEntering: true })
+      try {
+        const changed = await enqueue(() => gameService.acknowledgeWorldBossLoot(character.id))
+        applyCharacter(changed)
+        const distance = planTravel(
+          changed.location.zoneId,
+          changed.location.monsterId,
+          get().worldBossResult!.arenaMonsterId,
+        )
+        combatEvents.emit(combatSession.setMonster(changed.location.monsterId, distance))
+        set({ worldBossResult: null, hud: toHud(combatSession.state) })
+      } finally {
+        set({ worldBossEntering: false })
+      }
+    },
+
     async buyItem(itemId, count) {
       const id = playedId()
       const purchase = await enqueue(() => gameService.buyItem(id, itemId, count))
@@ -679,7 +726,7 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     async drinkPotion(itemId) {
       const character = get().character
-      if (!character || character.expedition) return 'away'
+      if (!character || character.expedition || get().worldBossResult) return 'away'
       if (character.dungeons?.active) {
         if (get().dungeon?.choices.length) return 'cooldown'
         applyDungeon(await enqueue(() => gameService.drinkDungeonPotion(character.id, itemId)))
@@ -764,6 +811,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         dungeonResult: null,
         dungeonEntering: false,
         worldBossEntering: false,
+        worldBossResult: null,
         timeScale: 1,
         afkResult: null,
         levelUp: null,
@@ -792,7 +840,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     devKillTarget() {
-      if (get().character?.expedition) return
+      if (get().character?.expedition || get().worldBossResult) return
       combatEvents.emit(combatSession.killTarget())
       set({ hud: toHud(combatSession.state) })
     },
@@ -807,6 +855,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     },
 
     devHeal() {
+      if (get().worldBossResult) return
       combatSession.heal()
       set({ hud: toHud(combatSession.state) })
     },
@@ -829,6 +878,10 @@ export const useGameStore = create<GameStore>((set, get) => {
 
     devResetDungeonEntries() {
       dev((id) => gameService.dev?.resetDungeonEntries(id))
+    },
+
+    devFillWorldBossCharge() {
+      dev((id) => gameService.dev?.fillWorldBossCharge(id))
     },
 
     devSimulateAfk(seconds) {

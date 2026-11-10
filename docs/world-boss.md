@@ -42,8 +42,8 @@ długiej klatce, dopóki serwis nie rozliczy wyniku. Przełączanie spotów, map
 ekspedycja i Dungeons są podczas próby zablokowane. Sprzęt i zwykłe okna pozostają
 dostępne. Przycisk `Leave boss` zajmuje miejsce przycisku ekspedycji.
 
-Po zwycięstwie serwis wypłaca drop raz, zapisuje zabójstwo i rozpoczyna bieg na
-poprzedni spot. Raport musi mieć bieżące ID i właściwe NPC; stary raport zwykłego
+Po zwycięstwie serwis wypłaca drop raz, zapisuje zabójstwo i zatrzymuje grę z oknem
+łupów. Zamknięcie okna rozpoczyna bieg na poprzedni spot. Raport musi mieć bieżące ID i właściwe NPC; stary raport zwykłego
 potwora, ponowione rozliczenie i raport kilku bossów są odrzucane.
 
 **Śmierć:** decyzja właściciela z 2026-11-10: zakończyć próbę, wrócić na poprzedni
@@ -51,6 +51,61 @@ spot, ponownie nabić licznik. Nie ma dropu ani zwrotu ładunku; zwykła kara za
 pozostaje. Wyjście z próby, wylogowanie i przeładowanie strony również ją kończą.
 Reload nie symuluje bossa offline i nie wypłaca nagród. Ładunek został już zapisany
 jako zużyty, więc nie można ponawiać losowania przeładowaniem.
+
+## Druga partia: stoper, tabela łupów i DEV
+
+Przycisk ma teraz portret **32 × 32 px** i półokrąg szerokości **45 px**, o połowę
+mniejsze od pierwszej wersji. Jest po lewej na 50% wysokości ekranu, z zachowaniem
+czytelnego tekstu licznika i pola dotyku.
+
+DEV ma przycisk **Fill World Boss charge**. Napełnia bieżącą mapę, nie zmienia
+zabójstw w statystykach ani progów innych map. `devCharges` oznacza pochodzenie
+następnej próby. Nie można napełniać w trakcie bossa, okna wyniku, AFK lub Dungeons.
+
+`CombatState.encounterClock` powstaje wyłącznie dla pojedynczej próby. W fazie
+`fighting` pierwsze `attack` gracza, ofensywne `cast` (attack/debuff) lub
+`summonAttack` uruchamia licznik. Kolejne kroki symulacji dodają czas do pierwszej
+śmierci. Nie liczy traveling, spawning, approach, pauzy, tła ani opóźnienia serwisu.
+Duża klatka przechodząca przez kilka faz nie dolicza ich do czasu walki. HUD
+wyświetla ten sam licznik w formacie `MM:SS`; raport przekazuje go do serwisu.
+
+`worldBoss.history` zapisuje każdą zakończoną próbę: `encounterId`, `zoneId`,
+`monsterId`, `endedAt`, `combatMs`, `outcome` (victory/death/left/interrupted),
+`assisted`. `combatMs=null` oznacza brak pierwszego ataku lub stary zapis bez
+pomiaru. Dla przerwania reloadem dostępny jest ostatni zapisany pomiar z raportu;
+przerwane próby nie są zwycięstwami do rankingu. W przyszłym rankingu kwalifikują
+się zwycięstwa z pomiarem i `assisted=false`. Napełnienie DEV, tempo inne niż ×1,
+Kill target, Heal i komendy DEV w czasie próby oznaczają ją jako testową. Ranking
+online pozostaje przyszłą funkcją; nie jest tu dodawany.
+
+Zwycięstwo zapisuje `worldBoss.pending` razem z nagrodami: rekord, arenę, EXP,
+gold, SP i listę dropów. `worldBossResult` w store zatrzymuje Canvas
+(`frameloop='never'`) i blokuje kolejne raporty. Modal używa klientowego `Sheet`,
+tabeli nagród, ikon przedmiotów, ikonki i kolorów złota. Przy raid ACC widać
+adnotację Unidentified. Wynik pozostaje po reloadzie. Zamknięcie wywołuje
+`acknowledgeWorldBossLoot`, które usuwa pending i ustawia lastPlayedAt na teraz:
+**nie wypłaca ponownie** i nie dolicza czasu oglądania tabeli do aktywnej gry.
+Powrót następuje trasą mapy; po reloadzie arena jest zapasowym początkiem trasy.
+
+To nadal opcjonalne pola **v16**. Starsze zapisy i trwające stare próby zachowują
+postęp; próby bez zegara nie dostają fikcyjnego wyniku czasowego.
+
+Weryfikacja drugiej partii: **600 testów / 72 pliki**, lint, formatowanie i TypeScript.
+Chromium: przycisk DEV napełnił licznik, portret miał dokładnie 32 × 32 px, środek
+przycisku 422 px przy wysokości 844 px. Podczas biegu zegar wynosił zero i był
+niewidoczny; w walce przy ×1 przyrósł o 2,55 s w obserwacji około 2,2 s plus czas
+wykonania komend automatyzacji. Wygrana testowa zapisała 11900 ms i assisted=true.
+Tabela miała 13 wierszy (nagłówek, trzy waluty, dziewięć przedmiotów). Przez pauzę
+nie zmienił się zegar ani liczba wyrenderowanych klatek (`frameloop=never`, klatka
+48). Sprawdzono układ 320/390/1280 px, reload i zamknięcie modalu: łupy oraz
+historia bez duplikacji, ponowny bieg na spot trasą 129,8 m. Końcowa próba bez
+błędów JS, konsoli, HTTP i żądań. To kontrolowany test integracji z narzędziami DEV,
+nie pomiar balansu ani naturalnego czasu pokonania bossa.
+
+Build produkcyjny również przeszedł próbę przywołania, zwycięstwa i odtworzenia
+okna po reloadzie: przygotowana postać pokonała Balroga przy ×20, bez wymuszania
+Kill target. Zapisano 150450 ms i znacznik testu; łupy po reloadzie były pojedyncze,
+Continue wznowiło grę. Bez błędów JS, konsoli, HTTP i żądań.
 
 ## Drop z serwera
 

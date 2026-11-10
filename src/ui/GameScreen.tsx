@@ -28,6 +28,7 @@ import { PerfOverlay } from './perf/PerfOverlay.tsx'
 import { ZoneLoading } from './ZoneLoading.tsx'
 import { DungeonLootButton } from './dungeons/DungeonLoot.tsx'
 import { WorldBossButton } from './worldBoss/WorldBossButton.tsx'
+import { WorldBossResult, WorldBossTimer } from './worldBoss/WorldBossResult.tsx'
 import {
   DungeonsButton,
   DungeonsPanel,
@@ -68,6 +69,7 @@ export function GameScreen() {
 
       <div className="hud">
         <WorldBossButton />
+        <WorldBossTimer />
         {dungeon && <DungeonHud />}
         <div className="hud__top">
           <PlayerFrame />
@@ -166,6 +168,7 @@ export function GameScreen() {
       {shopOpen && <CashShopPanel onClose={() => setShopOpen(false)} />}
       <BagFeed />
       <DungeonResult />
+      <WorldBossResult />
       <AfkSummary />
       <Toasts />
     </div>

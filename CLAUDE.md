@@ -1,5 +1,16 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-10 (Codex), druga partia World Boss: ikona 32 px przy środku
+lewej krawędzi, `dev.fillWorldBossCharge`, stoper po pierwszym ataku i modal łupów z
+pauzą. `CombatState.encounterClock` liczy tylko walkę w krokach symulacji, nie używać
+czasu od przywołania ani daty systemowej jako czasu bicia. `worldBoss.history` zapisuje
+milisekundy/wynik próby; `assisted` oznacza DEV (przyszły ranking ma je wykluczać).
+`worldBoss.pending` to zapisane już łupy i wynik. `worldBossResult` zatrzymuje Canvas
+(`frameloop='never'`) i logikę aż do `acknowledgeWorldBossLoot`; to tylko wznowienie,
+bez kolejnej wypłaty. Reload odtwarza okno, zamknięcie zeruje okno czasu aktywnej gry,
+trasa powrotu ma również zapasowy początek w arenie dla reloadu. Nadal v16, dropy i
+statystyki bez zmian. [Dokładne pola i testy](docs/world-boss.md).
+
 Aktualizacja 2026-11-10 (Codex): **World Boss**, po zachowaniu zmian Claude do `f5b95b9`.
 [Pełne przekazanie i źródła](docs/world-boss.md). Liczniki per postać/mapa tylko za
 oglądane idle: Juno 2000 / Dratan 1800 / Merac 1600 / Egeha 1500. NPC 308/307/309/331;

@@ -1,9 +1,10 @@
 .world-boss {
   position: absolute;
-  top: calc(var(--safe-top) + 125px);
+  top: 50%;
+  transform: translateY(-50%);
   left: calc(var(--safe-left) + var(--gutter));
-  width: 90px;
-  height: 112px;
+  width: 68px;
+  height: 72px;
   padding: 0;
   border: 0;
   background: none;
@@ -21,10 +22,10 @@
 }
 .world-boss__portrait {
   position: absolute;
-  top: 14px;
-  left: 13px;
-  width: 64px;
-  height: 64px;
+  top: 7px;
+  left: 18px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #161410;
   box-shadow: 0 2px 6px #000;
@@ -40,15 +41,15 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: url('/ui/lc/player-frame.webp') -1.64px -6.56px / 227.3px 76.3px no-repeat;
+  background: url('/ui/lc/player-frame.webp') -0.82px -3.28px / 113.65px 38.15px no-repeat;
   mask-image: radial-gradient(circle, transparent 65%, #000 67%);
 }
 .world-boss__charge {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 90px;
-  height: 50px;
+  left: 11.5px;
+  width: 45px;
+  height: 25px;
   overflow: visible;
   fill: none;
   stroke-width: 4px;
@@ -67,22 +68,116 @@
   position: absolute;
   left: 0;
   width: 100%;
-  line-height: 16px;
+  line-height: 14px;
   white-space: nowrap;
 }
 .world-boss__label {
-  top: 79px;
-  font-size: 12px;
+  top: 42px;
+  font-size: 10px;
   font-weight: 700;
 }
 .world-boss__count {
-  top: 95px;
-  font-size: 10px;
+  top: 56px;
+  font-size: 9px;
   font-variant-numeric: tabular-nums;
 }
 .world-boss--ready {
   cursor: pointer;
   color: #fff1b0;
+}
+.world-boss-timer {
+  position: absolute;
+  top: calc(var(--safe-top) + 132px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 120px;
+  padding: 3px 14px 5px;
+  border: solid transparent;
+  border-width: 1px 3px;
+  border-image: url('/ui/lc/client-section.webp') 1 3 fill / 1px 3px stretch;
+  color: #f3dfa2;
+  text-align: center;
+  text-shadow: 0 1px 2px #000;
+}
+.world-boss-timer span {
+  display: block;
+  font-size: 10px;
+}
+.world-boss-timer strong {
+  font-size: 21px;
+  line-height: 24px;
+  font-variant-numeric: tabular-nums;
+}
+@media (min-width: 760px) {
+  .world-boss-timer {
+    top: calc(var(--safe-top) + var(--gutter));
+  }
+}
+.sheet.world-boss-result {
+  width: min(100%, 560px);
+}
+.world-boss-result__heading {
+  text-align: center;
+  margin-bottom: 12px;
+}
+.world-boss-result__heading h3 {
+  color: var(--gilt-bright);
+  font: 700 18px var(--font-display);
+}
+.world-boss-result__heading p {
+  margin-top: 6px;
+  color: var(--parchment-dim);
+}
+.world-boss-result__heading strong {
+  margin-left: 8px;
+  color: #f3dfa2;
+  font-variant-numeric: tabular-nums;
+}
+.world-boss-result__heading small {
+  color: #c0bba8;
+  font-size: 11px;
+}
+.world-boss-result__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.world-boss-result__table th,
+.world-boss-result__table td {
+  padding: 7px 9px;
+  border-bottom: 1px solid #5a5e6377;
+}
+.world-boss-result__table th {
+  text-align: left;
+  font-weight: 500;
+}
+.world-boss-result__table thead {
+  background: url('/ui/lc/client-section.webp') center / 100% 100%;
+  color: var(--gilt-bright);
+}
+.world-boss-result__table tbody tr:nth-child(even) {
+  background: #141a2033;
+}
+.world-boss-result__table td {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.world-boss-result__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.world-boss-result__item .item-icon {
+  flex: none;
+}
+.world-boss-result__item small {
+  display: block;
+  font-size: 11px;
+}
+.world-boss-result__continue {
+  width: 100%;
+  margin-top: 10px;
 }
 .hunt--world-boss .hunt__actions {
   display: grid;

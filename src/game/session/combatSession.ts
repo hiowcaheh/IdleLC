@@ -73,12 +73,21 @@ export class CombatSession {
     return boostsOf(this.combat.player.effects, Date.now())
   }
 
-  tick(dt: number): CombatEvent[] {
+  tick(dt: number, assisted = false): CombatEvent[] {
+    if (assisted) this.markEncounterAssisted()
     if (this.hero && activeTitleId(this.hero, Date.now()) !== this.titleId)
       this.setPlayer(this.hero)
     const { state, events } = combatTick(this.combat, dt, this.rng, this.singleEncounter)
     this.combat = state
     return events
+  }
+
+  markEncounterAssisted(): void {
+    if (this.combat.encounterClock)
+      this.combat = {
+        ...this.combat,
+        encounterClock: { ...this.combat.encounterClock, assisted: true },
+      }
   }
 
   /** Sets off for another monster, `distance` metres away (its route over the map) when known. */
@@ -92,6 +101,9 @@ export class CombatSession {
       distance,
     )
     this.combat = state
+    if (singleEncounter)
+      this.combat.encounterClock = { started: false, seconds: 0, assisted: false }
+    else delete this.combat.encounterClock
     return events
   }
 
@@ -167,6 +179,7 @@ export class CombatSession {
 
   /** Dev tool. */
   killTarget(): CombatEvent[] {
+    this.markEncounterAssisted()
     const { state, events } = killMonster(this.combat)
     this.combat = state
     return events
@@ -174,6 +187,7 @@ export class CombatSession {
 
   /** Dev tool. */
   heal(): void {
+    this.markEncounterAssisted()
     this.combat = healPlayer(this.combat)
   }
 }

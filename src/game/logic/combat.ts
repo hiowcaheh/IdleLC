@@ -181,6 +181,8 @@ export interface Fighter extends FighterInit {
 }
 
 export interface CombatState {
+  /** Present only for a timed single encounter; ordinary hunting keeps no extra clock. */
+  encounterClock?: EncounterClock
   phase: CombatPhase
   /** Seconds spent in the current phase. */
   phaseTime: number
@@ -196,6 +198,12 @@ export interface CombatState {
   monsterId: string
   kills: number
   deaths: number
+}
+
+export interface EncounterClock {
+  started: boolean
+  seconds: number
+  assisted: boolean
 }
 
 export type EffectKind = 'buff' | 'debuff' | 'stun' | 'poison'
@@ -694,7 +702,27 @@ export function combatTick(
     if (singleEncounter && (s.phase === 'victory' || s.phase === 'defeat')) break
     const step = Math.min(remaining, MAX_STEP)
     remaining -= step
+    const fighting = s.phase === 'fighting'
+    const eventFrom = events.length
     advance(s, step, rng, events)
+    if (s.encounterClock && fighting) {
+      const clock = s.encounterClock
+      const attacks = events
+        .slice(eventFrom)
+        .some(
+          (e) =>
+            (e.type === 'attack' && e.source === 'player') ||
+            (e.type === 'cast' &&
+              e.source === 'player' &&
+              (e.kind === 'attack' || e.kind === 'debuff')) ||
+            e.type === 'summonAttack',
+        )
+      s.encounterClock = {
+        ...clock,
+        started: clock.started || attacks,
+        seconds: clock.seconds + (clock.started ? step : 0),
+      }
+    }
   }
   return { state: s, events }
 }

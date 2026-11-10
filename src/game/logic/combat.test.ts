@@ -63,6 +63,42 @@ const strongPlayer = { level: 10, stats: stats({ attack: 50 }) }
 const weakMonster = { level: 1, stats: stats({ maxHp: 30, attack: 2 }) }
 
 describe('combatTick', () => {
+  it('times only combat after the first offensive action, including a long frame ending in death', () => {
+    const start = {
+      ...createCombat(strongPlayer, 'boss', weakMonster),
+      encounterClock: { started: false, seconds: 0, assisted: false },
+    }
+    const traveling = changeMonster(start, 'another-boss', weakMonster, 1000).state
+    const moving = combatTick(traveling, 30, createRng(7), true)
+    expect(moving.state.phase).toBe('traveling')
+    expect(moving.state.encounterClock).toEqual({ started: false, seconds: 0, assisted: false })
+    const waiting = {
+      ...start,
+      phase: 'fighting' as const,
+      monster: { ...start.monster, hp: 1e9 },
+      player: { ...start.player, cooldown: 2 },
+    }
+    const beforeAttack = combatTick(waiting, 1, createRng(7), true)
+    expect(beforeAttack.state.encounterClock!.started).toBe(false)
+    expect(beforeAttack.state.encounterClock!.seconds).toBe(0)
+    const attack = combatTick(beforeAttack.state, 1.05, createRng(7), true)
+    expect(attack.state.encounterClock!.started).toBe(true)
+    const advanced = combatTick(attack.state, 0.75, createRng(8), true)
+    expect(
+      advanced.state.encounterClock!.seconds - attack.state.encounterClock!.seconds,
+    ).toBeCloseTo(0.75, 8)
+    const whole = combatTick(start, 120, createRng(9), true)
+    let split = start as CombatState
+    const rng = createRng(9)
+    for (let i = 0; i < 2400 && split.phase !== 'victory'; i++)
+      split = combatTick(split, 0.05, rng, true).state
+    expect(whole.state.phase).toBe('victory')
+    expect(whole.state.encounterClock!.seconds).toBeCloseTo(split.encounterClock!.seconds, 8)
+    expect(combatTick(whole.state, 120, rng, true).state.encounterClock).toEqual(
+      whole.state.encounterClock,
+    )
+    expect(start.encounterClock.seconds).toBe(0)
+  })
   it('stops a single encounter on the first death, including a long frame, until a return run', () => {
     const rng = createRng(7)
     const start = createCombat(strongPlayer, 'boss', weakMonster)

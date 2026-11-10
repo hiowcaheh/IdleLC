@@ -21,6 +21,14 @@ export function DevPanel() {
   const devTravel = useGameStore((s) => s.devTravel)
   const devAddTitleItem = useGameStore((s) => s.devAddTitleItem)
   const devResetDungeonEntries = useGameStore((s) => s.devResetDungeonEntries)
+  const fillWorldBoss = useGameStore((s) => s.devFillWorldBossCharge)
+  const bossUnavailable = useGameStore(
+    (s) =>
+      !!s.character?.worldBoss?.active ||
+      !!s.worldBossResult ||
+      !!s.character?.expedition ||
+      !!s.dungeon,
+  )
   const level = useGameStore((s) => s.character?.level ?? 1)
   const devSetLevel = useGameStore((s) => s.devSetLevel)
   const devAddExp = useGameStore((s) => s.devAddExp)
@@ -149,6 +157,17 @@ export function DevPanel() {
       <div className="dev-panel__row" role="group" aria-label="Dungeons">
         <button type="button" className="dev-chip" onClick={devResetDungeonEntries}>
           Reset dungeon entries
+        </button>
+      </div>
+
+      <div className="dev-panel__row" role="group" aria-label="World Boss">
+        <button
+          type="button"
+          className="dev-chip"
+          disabled={bossUnavailable}
+          onClick={fillWorldBoss}
+        >
+          Fill World Boss charge
         </button>
       </div>
 

@@ -1,5 +1,25 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## World Boss: stoper, pauza i DEV (Codex), 2026-11-10
+
+Zmiany na bazie `2d52b60`, bez nowych danych LC. Portret 32 px i półokrąg 45 px,
+po lewej na 50% wysokości. DEV napełnia licznik mapy, zapisuje pochodzenie testowe.
+`CombatState.encounterClock` startuje dopiero na pierwszej akcji ofensywnej gracza
+lub summona w fazie fighting. Nie zastępować go różnicą dat; wtedy wróciłby czas
+dojścia i tła. HUD czyta ten sam licznik co raport i zapis wyniku.
+
+`WorldBossProgress.history` przechowuje `WorldBossRecord`: ID próby, mapę, NPC,
+czas walki w ms (null przed pierwszym atakiem), koniec, outcome i assisted.
+Przyszły ranking uwzględnia tylko zwycięstwa z czasem i `assisted=false`.
+To nadal lokalna historia, nie ranking online ani walidacja czasu na serwerze.
+
+Zwycięstwo zapisuje nagrody i `worldBoss.pending` atomowo. Store trzyma
+`worldBossResult`, Canvas zatrzymuje klatki, raporty pola są zablokowane.
+`acknowledgeWorldBossLoot` usuwa pending i resetuje lastPlayedAt, bez wypłat;
+dopiero potem klient rozpoczyna powrót. Reload przywraca modal. W zapisie location
+nadal jest zwykły spot. Dla powrotu po reloadzie `planTravel` ma opcjonalne źródło
+`arenaMonsterId`, gdy scena nie zdążyła zgłosić shownGround. SaveVersion nadal 16.
+
 ## World Boss (Codex), 2026-11-10: notatka dla Claude
 
 [Źródła, reguły, pliki i testy](world-boss.md). Zmiany Claude do `f5b95b9` są bazą

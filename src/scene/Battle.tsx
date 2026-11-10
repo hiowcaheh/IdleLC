@@ -87,7 +87,13 @@ export function Battle() {
     clock.current.reset(performance.now())
     sync()
     document.addEventListener('visibilitychange', sync)
-    return () => document.removeEventListener('visibilitychange', sync)
+    const unsubscribe = useGameStore.subscribe((next, previous) => {
+      if (next.worldBossResult !== previous.worldBossResult) clock.current.reset(performance.now())
+    })
+    return () => {
+      document.removeEventListener('visibilitychange', sync)
+      unsubscribe()
+    }
   }, [])
   const monsterId = useGameStore((s) => s.hud.monsterId)
   const monsterDef = getMonster(monsterId)
@@ -333,6 +339,10 @@ export function Battle() {
   }, [])
 
   useFrame((_, delta) => {
+    if (useGameStore.getState().worldBossResult) {
+      clock.current.reset(performance.now())
+      return
+    }
     const away = isAway()
     if (playerGroup.current) playerGroup.current.visible = !away
     if (away) {
@@ -343,7 +353,7 @@ export function Battle() {
     const realDt = Math.min(delta, 0.1)
     const timeScale = useGameStore.getState().timeScale
     const dt = clock.current.read(performance.now()) * timeScale
-    const events = combatSession.tick(dt)
+    const events = combatSession.tick(dt, timeScale !== 1)
     if (events.length > 0) combatEvents.emit(events)
 
     const combat = combatSession.state

@@ -8,7 +8,7 @@ import { getItem } from '../data/items.ts'
 import type { MonsterDef } from '../data/types.ts'
 import { clamp } from './balance.ts'
 import type { CharacterData } from './character.ts'
-import { TIMINGS, effectRewardMultipliers } from './combat.ts'
+import { TIMINGS, effectRewardMultipliers, type EncounterClock } from './combat.ts'
 import { monsterDrops, stowDrops, takeFromInventory, type ItemStack } from './loot.ts'
 import { applyPlayTime, optionValue, type OptionGain } from './options.ts'
 import type { Hero } from './fighters.ts'
@@ -46,6 +46,7 @@ export interface CombatReport {
   boosts?: OwnedBoost[]
   /** A World Boss report belongs to exactly one consumed summon. */
   encounterId?: string
+  worldBossTime?: EncounterClock
 }
 
 export interface CombatResult {
