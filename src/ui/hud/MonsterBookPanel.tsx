@@ -6,7 +6,8 @@ import { ZONES } from '../../game/data/zones.ts'
 import { DUNGEONS } from '../../game/data/dungeons.ts'
 import { bookRewards } from '../../game/data/bookRewards.ts'
 import { getItem } from '../../game/data/items.ts'
-import { claimedRewards, nextReward } from '../../game/logic/book.ts'
+import { claimedRewards, nextReward, worldBookMonsters } from '../../game/logic/book.ts'
+import { worldBossFor } from '../../game/data/worldBosses.ts'
 import { openSpotCount, zoneSpots } from '../../game/logic/spots.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { toast } from '../../state/toasts.ts'
@@ -164,7 +165,8 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
     category === 'dungeons'
       ? DUNGEONS.map((d) => ({ id: d.zoneId, name: d.name, monsterIds: d.monsterIds }))
       : Object.values(ZONES)
-  const spots = dungeon ? [...dungeon.monsterIds] : zoneSpots(zoneId)
+  const spots = dungeon ? [...dungeon.monsterIds] : worldBookMonsters(zoneId)
+  const bossId = dungeon ? undefined : worldBossFor(zoneId)?.monsterId
   const open = dungeon ? spots.length : openSpotCount(character, zoneId)
   const monsterId = spots.includes(picked) ? picked : spots[0]!
   const monster = getMonster(monsterId)
@@ -179,8 +181,12 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
     ['Base SP', ((monster.sp ?? 0) / 10_000).toLocaleString('en-US', { maximumFractionDigits: 4 })],
     ['Base gold', <Gold amount={monster.gold} />],
     [
-      dungeon ? 'Dungeon' : 'Spot',
-      dungeon ? dungeon.name : `${index + 1}${index >= open ? ' · locked' : ''}`,
+      dungeon ? 'Dungeon' : monsterId === bossId ? 'World Boss' : 'Spot',
+      dungeon
+        ? dungeon.name
+        : monsterId === bossId
+          ? ZONES[zoneId]!.name
+          : `${index + 1}${index >= open ? ' · locked' : ''}`,
     ],
   ]
 
@@ -233,13 +239,14 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
       <p className="sheet__meta">
         {dungeon
           ? `${dungeon.name}: Dungeon monsters, entry Lv ${dungeon.minLevel}. ${fmt(zoneKills)} defeated.`
-          : `${ZONES[zoneId]?.name}: ${fmt(zoneKills)} monsters defeated · spots ${open} / ${spots.length} open`}
+          : `${ZONES[zoneId]?.name}: ${fmt(zoneKills)} monsters defeated · spots ${open} / ${zoneSpots(zoneId).length} open`}
       </p>
       <div className="book">
         <ul className="book__list" aria-label="Monsters" tabIndex={0}>
           {spots.map((id, i) => {
             const m = getMonster(id)
-            const locked = i >= open
+            const boss = id === bossId
+            const locked = !boss && i >= open
             const reward = nextReward(character, id)
             const ready =
               reward !== undefined && (character.stats.monsterKills[id] ?? 0) >= reward.kills
@@ -258,6 +265,7 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
                     className={`book__monster-name level-tone--${levelTone(character.level, m.level)}`}
                   >
                     {m.name}
+                    {boss && <small className="book__boss-tag">World Boss</small>}
                   </span>
                   {ready && (
                     <span
@@ -283,6 +291,9 @@ export function MonsterBookPanel({ onClose }: { onClose(): void }) {
             {monster.elite && <span className="book__elite">Elite</span>}
           </h3>
           {dungeon && <p className="book__dungeon-note">Dungeon monster · {dungeon.name}</p>}
+          {monsterId === bossId && (
+            <p className="book__dungeon-note">World Boss in {ZONES[zoneId]!.name}</p>
+          )}
           <p className="book__kills">
             <span className="book__kills-count">{fmt(kills)}</span>
             <span className="book__kills-label">defeated</span>

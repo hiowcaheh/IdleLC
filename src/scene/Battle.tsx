@@ -98,6 +98,9 @@ export function Battle() {
   const monsterId = useGameStore((s) => s.hud.monsterId)
   const monsterDef = getMonster(monsterId)
   const monsterModel = monsterDef.modelId
+  const worldBoss = useGameStore(
+    (s) => s.character?.worldBoss?.active?.monsterId === s.hud.monsterId,
+  )
   const showNumbers = useGameStore((s) => s.save.settings.showDamageNumbers)
   const classId = useGameStore((s) => s.character?.classId ?? 'knight')
   const equipment = useGameStore((s) => s.character?.equipment)
@@ -141,7 +144,7 @@ export function Battle() {
     const c = combatSession.state
     return {
       x: view.player.x,
-      y: view.playerHeight + BAR_LIFT,
+      y: view.player.y + view.playerHeight + BAR_LIFT,
       z: view.player.z,
       ratio: c.player.hp / effectiveStats(c.player).maxHp,
       visible: c.phase !== 'defeat' && !isAway(),
@@ -151,9 +154,10 @@ export function Battle() {
     const c = combatSession.state
     return {
       x: view.monster.x,
-      y: view.monsterHeight * (motion.current.appear || 0) + BAR_LIFT,
+      y: view.monster.y + view.monsterHeight * (motion.current.appear || 0) + BAR_LIFT,
       z: view.monster.z,
       ratio: c.monster.hp / c.monster.stats.maxHp,
+      pixels: worldBoss ? 72 : undefined,
       visible: view.monsterVisible && c.monster.hp > 0 && motion.current.sink < 0 && !isAway(),
     }
   }
@@ -427,6 +431,7 @@ export function Battle() {
 
     view.playerHeight = player.current?.height() ?? view.playerHeight
     view.monsterHeight = monster.current?.height() ?? view.monsterHeight
+    view.monsterFrameHeight = monster.current?.framingHeight() ?? view.monsterHeight
 
     m.hudTimer -= realDt
     if (m.hudTimer <= 0 || events.length > 0) {
@@ -484,6 +489,7 @@ export function Battle() {
               ref={monster}
               modelId={monsterModel}
               scale={monsterDef.scale ?? 1}
+              trackBounds={worldBoss}
             />
           </Suspense>
         </ModelBoundary>

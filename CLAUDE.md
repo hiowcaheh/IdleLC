@@ -1,5 +1,18 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-10 (Codex), trzecia partia World Boss: **przywołanie na bieżącym
+spocie**, zastępuje poprzednią trasę do następnego placu. `active.arenaMonsterId`
+równa się `location.monsterId`; `CombatSession.replaceMonsterHere` zachowuje stan
+bohatera i zaczyna `spawning`, bez `travel`. `resumeWorldBossSpot` robi to samo po
+wyniku/śmierci/wyjściu; stary zapis z inną areną zachowuje zgodny powrót trasą.
+Ikona 48 px nad środkiem. Kamera dopasowuje pełną wysokość animowanego bossa;
+osobny pomiar kości głowy prowadzi HP i nazwę. Tylko przy aktywnym bossie odsuwana
+jest mgła i wydłużany istniejący korytarz ukrywania wysokich dekoracji. HP ma 72 px.
+Stoper i wynik używają istniejących grafik klienta. `worldBookMonsters` dopisuje
+bossa na końcu Book, bez dodawania spotu łowieckiego i bez zmiany progresji map.
+Nagrody Book takie same jak zwykłe. Nadal v16, bez zmian danych LC i dropów.
+**605 testów / 73 pliki**, build i Chromium. [Szczegóły](docs/world-boss.md).
+
 Aktualizacja 2026-11-10 (Codex), druga partia World Boss: ikona 32 px przy środku
 lewej krawędzi, `dev.fillWorldBossCharge`, stoper po pierwszym ataku i modal łupów z
 pauzą. `CombatState.encounterClock` liczy tylko walkę w krokach symulacji, nie używać

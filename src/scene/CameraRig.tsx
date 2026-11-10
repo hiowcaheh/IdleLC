@@ -1,8 +1,9 @@
 import { useFrame, useThree } from '@react-three/fiber'
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { PerspectiveCamera, Vector3 } from 'three'
 import { useGameStore } from '../state/gameStore.ts'
 import { CAMERA_OFFSET, view } from './viewState.ts'
+import { fitBossCamera, bossViewMargins } from './bossCamera.ts'
 
 const LOOK_HEIGHT = 1.1
 const ZOOM_OUT = 1.12
@@ -34,6 +35,9 @@ export function CameraRig() {
   const zoneId = useGameStore((s) => s.character?.location.zoneId)
   const lastZone = useRef(zoneId)
   const viewShift = useRef({ width: 0, height: 0, shift: 0 })
+  const probe = useMemo(() => camera.clone() as PerspectiveCamera, [camera])
+  const bossFrame = useRef({ id: '', distance: 0, width: 0, height: 0 })
+  const bossPoints = useMemo(() => [new Vector3(), new Vector3(), new Vector3(), new Vector3()], [])
 
   useFrame((_, delta) => {
     if (zoneId !== lastZone.current) {
@@ -42,7 +46,12 @@ export function CameraRig() {
       view.cameraSettled = false
     }
     const aspect = size.width / size.height
-    const shift = aspect < 1 ? VIEW_SHIFT_TALL : VIEW_SHIFT_WIDE
+    const bossId = useGameStore.getState().character?.worldBoss?.active?.id
+    const shift = bossId
+      ? bossViewMargins(size.width, size.height).shift
+      : aspect < 1
+        ? VIEW_SHIFT_TALL
+        : VIEW_SHIFT_WIDE
     const last = viewShift.current
     if (
       camera instanceof PerspectiveCamera &&
@@ -53,14 +62,15 @@ export function CameraRig() {
     }
     // a little further out than the arena needs, so the fighters have room around them; big
     // monsters (Treant, Balrog…) push the camera back until they fit
+    const height = bossId ? view.monsterFrameHeight : view.monsterHeight
     const big = view.monsterVisible
-      ? Math.min(MAX_BIG_ZOOM, 1 + Math.max(0, view.monsterHeight - TALL) * BIG_ZOOM_PER_UNIT)
+      ? Math.min(MAX_BIG_ZOOM, 1 + Math.max(0, height - TALL) * BIG_ZOOM_PER_UNIT)
       : zoom.current
     // A despawn must preserve the framing. New sizes take effect while the loader covers travel;
     // tweening the distance after landing made the whole map visibly zoom in and out.
     if (big !== zoom.current) initialized.current = false
     zoom.current = big
-    const distance =
+    let distance =
       (aspect < 0.7 ? 1.65 : aspect < 1 ? 1.35 : aspect < 1.4 ? 1.1 : 1) * ZOOM_OUT * zoom.current
 
     desiredFocus.current.copy(view.player)
@@ -70,7 +80,38 @@ export function CameraRig() {
         towardMonster.setLength(MAX_FOCUS_SHIFT)
       desiredFocus.current.add(towardMonster)
     }
+    let lookHeight = LOOK_HEIGHT * (1 + (zoom.current - 1) * 1.6)
+    let bossCameraHeight: number | undefined
+    if (bossId && view.monsterVisible && camera instanceof PerspectiveCamera) {
+      if (
+        bossFrame.current.id !== bossId ||
+        bossFrame.current.width !== size.width ||
+        bossFrame.current.height !== size.height
+      )
+        bossFrame.current = { id: bossId, distance: 0, width: size.width, height: size.height }
+      probe.copy(camera)
+      bossPoints[0]!.copy(view.player)
+      bossPoints[1]!.copy(view.player).y += view.playerHeight + 0.35
+      bossPoints[2]!.copy(view.monster)
+      bossPoints[3]!.copy(view.monster).y += view.monsterFrameHeight + 0.6
+      const fit = fitBossCamera(
+        probe,
+        desiredFocus.current,
+        CAMERA_OFFSET,
+        bossPoints,
+        Math.max(bossFrame.current.distance, distance),
+        size.width,
+        size.height,
+        view.groundY,
+      )
+      distance = fit.distance
+      bossCameraHeight = fit.cameraHeight
+      if (distance > bossFrame.current.distance + 0.03) initialized.current = false
+      bossFrame.current.distance = distance
+      lookHeight = fit.lookHeight
+    }
     desired.current.copy(CAMERA_OFFSET).multiplyScalar(distance).add(desiredFocus.current)
+    if (bossCameraHeight !== undefined) desired.current.y = bossCameraHeight
 
     const k = initialized.current ? 1 - Math.exp(-Math.min(delta, 0.1) * 3) : 1
     initialized.current = true
@@ -80,7 +121,6 @@ export function CameraRig() {
       camera.position.distanceToSquared(desired.current) < 0.01 &&
       focus.current.distanceToSquared(desiredFocus.current) < 0.01
     // look higher too, so a tall monster's head and name stay in view
-    const lookHeight = LOOK_HEIGHT * (1 + (zoom.current - 1) * 1.6)
     camera.lookAt(focus.current.x, focus.current.y + lookHeight, focus.current.z)
     // before every other frame callback: the names over the fighters (Battle.tsx) are placed with
     // this frame's camera, so they stay on the HP bars

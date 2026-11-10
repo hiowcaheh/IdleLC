@@ -32,8 +32,9 @@ zwykłego spotu trzeba najpierw dobiec, zgodnie z dotychczasową zasadą przemie
 
 Przywołanie atomowo zużywa pełny licznik i tworzy `encounterId`. Bieżący potwór
 znika bez nagrody. Zapis `location` nadal wskazuje zwykły spot. Pole
-`active.arenaMonsterId` wybiera kolejny istniejący plac walki tej samej mapy;
-`planTravel` planuje tam trasę po terenie, a Run speed określa czas biegu. To miejsce
+`active.arenaMonsterId` wskazuje **ten sam spot**. `replaceMonsterHere` wymienia cel,
+zachowuje HP, MP i efekty bohatera, zaczyna fazę spawning bez travel. Bieg do innego
+placu z pierwszej wersji został usunięty na życzenie właściciela. To miejsce
 **przywołania**, nie deklaracja odtworzenia oryginalnego respawnu bossa.
 
 Walka używa zwykłych statystyk, skilli, buffów i mikstur postaci. `singleEncounter`
@@ -43,8 +44,9 @@ ekspedycja i Dungeons są podczas próby zablokowane. Sprzęt i zwykłe okna poz
 dostępne. Przycisk `Leave boss` zajmuje miejsce przycisku ekspedycji.
 
 Po zwycięstwie serwis wypłaca drop raz, zapisuje zabójstwo i zatrzymuje grę z oknem
-łupów. Zamknięcie okna rozpoczyna bieg na poprzedni spot. Raport musi mieć bieżące ID i właściwe NPC; stary raport zwykłego
-potwora, ponowione rozliczenie i raport kilku bossów są odrzucane.
+łupów. Zamknięcie okna wznawia zwykłe polowanie w miejscu. Raport musi mieć bieżące
+ID i właściwe NPC; stary raport zwykłego potwora, ponowione rozliczenie i raport
+kilku bossów są odrzucane.
 
 **Śmierć:** decyzja właściciela z 2026-11-10: zakończyć próbę, wrócić na poprzedni
 spot, ponownie nabić licznik. Nie ma dropu ani zwrotu ładunku; zwykła kara za śmierć
@@ -52,7 +54,66 @@ pozostaje. Wyjście z próby, wylogowanie i przeładowanie strony również ją 
 Reload nie symuluje bossa offline i nie wypłaca nagród. Ładunek został już zapisany
 jako zużyty, więc nie można ponawiać losowania przeładowaniem.
 
-## Druga partia: stoper, tabela łupów i DEV
+`resumeWorldBossSpot` wznawia cel bez podróży, gdy arena zgadza się z location.
+Zapis wyniku z pierwszych dwóch wersji może zawierać inną arenę; tylko ten przypadek
+zachowuje powrót przez `planTravel`, także po reloadzie.
+
+## Trzecia partia: kamera, GUI i Monster Book
+
+Przycisk zachowuje portret 32 × 32 px i półokrąg 45 px. Środek jest teraz
+**48 px powyżej połowy wysokości ekranu**. Nadal po lewej.
+
+`scene/bossCamera.ts` dobiera odległość przez projekcję obu postaci do wolnego pola
+między HUD a panelem polowania. Dla aktywnego bossa przesunięcie projekcji odpowiada
+środkowi tego pola; zwykłe ustawienia kamery zostają. Największa zmierzona wysokość
+póz latającego modelu stabilizuje kadr w czasie próby. Zmiana rozmiaru okna przelicza
+kadr. Kamera podnosi się też nad zboczami przecinającymi linię do obu postaci,
+bez przesuwania spotu ani zmiany terenu. Nie zmieniono źródłowej skali, szkieletu,
+klipów ani prędkości animacji.
+
+`Character.trackBounds` działa tylko dla aktywnego bossa: co 0,2 s gry mierzy pełny
+model do kadru, a bieżąca źródłowa kość Head prowadzi pozycję nazwy i HP. Dzięki temu
+pasek nie zostaje wysoko nad smokiem po zejściu z wysokiej pozy. Pole
+`view.monsterFrameHeight` służy kamerze, `view.monsterHeight` etykiecie. HP bossa
+zachowuje szerokość 72 px mimo odsunięcia kamery. Pozycje pasków uwzględniają Y terenu.
+
+Dalsza kamera wymaga dopasowania widoczności otoczenia. `FieldFog` wyłącznie w
+próbie bossa odsuwa początek/koniec mgły o nadmiar odległości kamery od bohatera.
+`MapProps` wydłuża istniejący korytarz ukrywania zasłaniających wysokich dekoracji do
+kamery. Domyślne 26 m, promień odczytu dekoracji 120 m, źródłowe współrzędne i
+trawa pozostają. Bez tego test wizualny pokazywał smoka ukrytego we mgle lub drzewach.
+
+Stoper korzysta z oryginalnej grafiki `cash-bar`. Wynik ma `detail-window`, panel
+`cash-card`, portret w `cash-icon-slot`, nagłówek `book-row`, sekcję Loot w `cash-bar`
+i pola ilości `name-frame`. Są to istniejące zasoby klienta, bez nowych grafik.
+Pauza i zapis nagród nadal działają tak jak w drugiej partii.
+
+`worldBookMonsters` dopisuje odpowiedniego bossa **na końcu** listy Worlds dla każdej
+mapy. Wiersz i szczegóły oznaczają World Boss. Nie dodaje spotu do polowania ani
+warunku przejścia map. Używa zwykłych `bookRewards`: 10/100/1000/10000 zabójstw,
+1/2/5/10 Heaven Stone (85). Wcześniejsze zapisane zabójstwa bossów są uwzględniane.
+
+Weryfikacja trzeciej partii:
+
+- `npm run check`: **605 testów / 73 pliki**, lint, formatowanie i TypeScript;
+  `npm run build`: poprawny.
+- Testy obejmują wymianę celu bez podróży z zachowaniem stanu bohatera, cztery
+  listy Book/nagrody, kadr nad zboczem, projekcję wysokiego modelu na 320/390/1280 px i wydłużony
+  korytarz dekoracji przy zachowaniu domyślnego zachowania.
+- Chromium 320/390/1280 px: Merac i Egeha przywołują/wznawiają cel bez travel;
+  współrzędne terenu przed i po przywołaniu identyczne. Oba smoki, HP i nazwy mieszczą
+  się w polu. Tabele bez poziomego przepełnienia, cztery bossy ostatnie w Book,
+  nagroda za 10 zabójstw odebrana raz dla każdego. Bez błędów JS/konsoli/HTTP/żądań.
+- Próby używają przygotowanych zapisów, testowego HP i DEV Kill target do wyniku.
+  Osobna kontrola kadru wyłącza skille i ulepszenia w zapisie testowym, aby kolejne
+  efekty nie uruchamiały ekranu ładowania w momencie zdjęcia. To weryfikacja
+  integracji i widoku, nie naturalnego czasu walki, balansu ani częstości dropu.
+- Build produkcyjny: Balrog pokonany przy ×20, bez DEV Kill target. Wynik testowy
+  139050 ms, assisted=true. Reload zachował pojedyncze łupy i historię; Continue
+  wznowiło polowanie bez podróży (Expedition od razu dostępne). Bez błędów JS,
+  konsoli, HTTP i żądań.
+
+## Druga partia: stoper, tabela łupów i DEV (historia)
 
 Przycisk ma teraz portret **32 × 32 px** i półokrąg szerokości **45 px**, o połowę
 mniejsze od pierwszej wersji. Jest po lewej na 50% wysokości ekranu, z zachowaniem
@@ -85,7 +146,8 @@ tabeli nagród, ikon przedmiotów, ikonki i kolorów złota. Przy raid ACC wida�
 adnotację Unidentified. Wynik pozostaje po reloadzie. Zamknięcie wywołuje
 `acknowledgeWorldBossLoot`, które usuwa pending i ustawia lastPlayedAt na teraz:
 **nie wypłaca ponownie** i nie dolicza czasu oglądania tabeli do aktywnej gry.
-Powrót następuje trasą mapy; po reloadzie arena jest zapasowym początkiem trasy.
+W tej wersji powrót następował trasą mapy, z areną jako zapasowym początkiem trasy
+po reloadzie. Trzecia partia powyżej zastępuje ten przebieg walką na bieżącym spocie.
 
 To nadal opcjonalne pola **v16**. Starsze zapisy i trwające stare próby zachowują
 postęp; próby bez zegara nie dostają fikcyjnego wyniku czasowego.
@@ -175,7 +237,7 @@ zwykłe opcje akcesorium; rare naszyjnik czeka na lupę.
 - `scripts/lc/world-boss.mjs`, `import-db.mjs`: źródłowe NPC, raidowe wiersze, rare ACC;
 - `data/worldBosses.ts`, `logic/worldBoss.ts`: postęp, próba, niezależny drop;
 - `GameService`/`LocalGameService`: komendy, walidacja raportów, atomowy zapis nagród;
-- `state/gameStore.ts`: kolejka komend, usunięcie starego celu, trasy w obie strony;
+- `state/gameStore.ts`: kolejka komend, wymiana celu w miejscu i wznowienie spotu;
 - `ui/worldBoss/`: statyczne portrety modeli klienta i półokrąg;
 - `GameCanvas`: teren placu przywołania przy zachowaniu zwykłej `location`;
 - model Kamiry oraz obu smoków w `public/models/lc/`, nowe ikony z atlasów klienta;
@@ -192,7 +254,7 @@ szanse i ilości, niezależność od poziomu/bonusów, lupy i kolory, save v16, 
 AFK/Dungeons, śmierć, reload i powtórzenie raportu. Regresja `combat.test.ts`
 pilnuje, by pojedyncza próba nie tworzyła kolejnego bossa w tej samej klatce.
 
-## Wyniki weryfikacji
+## Wyniki weryfikacji pierwszej wersji (historia)
 
 - `npm run check`: **596 testów w 72 plikach**, lint, formatowanie i TypeScript.
 - `npm run build`: poprawny build produkcyjny.

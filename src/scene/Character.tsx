@@ -69,6 +69,8 @@ export interface CharacterHandle {
   revive(): void
   /** Model height in world units (after scaling). */
   height(): number
+  /** Highest posed extent used to keep a flying boss framed across its animation. */
+  framingHeight(): number
   /** The live model, bones and weapons the client's effects attach their tags to. */
   effectTarget(): UpgradeTarget
 }
@@ -93,6 +95,7 @@ interface AnimState {
   flash: number
   flinch: number
   height: number
+  labelHeight?: number
   measured: number
   /** A clip waiting to start (a spell's release after its wind-up), in game seconds. */
   pending: { in: number; start(): void } | null
@@ -118,6 +121,8 @@ interface Props {
   scale?: number
   /** Animation speed multiplier source; defaults to the dev time scale. */
   timeScale?: () => number
+  /** Follow a flying boss's highest posed point, without recomputing every ordinary model. */
+  trackBounds?: boolean
   /** Worn weapons and armor shown on a class body (see game/assets/gear.ts). */
   gear?: readonly GearLook[]
   /** Upgrade effects follow this character's animated gear and hand bones. */
@@ -276,6 +281,7 @@ export function Character({
   upgrades,
   titleEffect,
   artifactEffect,
+  trackBounds = false,
   scale = 1,
 }: Props) {
   const model = getModel(modelId)
@@ -284,6 +290,13 @@ export function Character({
     () => prepareModel(gltf.scene, model),
     [gltf.scene, model],
   )
+  const headBone = useMemo(
+    () => [...body.bones.values()].find((bone) => /(?:^|[ _])head$/i.test(bone.name)),
+    [body.bones],
+  )
+  const headPoint = useMemo(() => new Vector3(), [])
+  const headOrigin = useMemo(() => new Vector3(), [])
+  const headScale = useMemo(() => new Vector3(), [])
   const mixer = useMemo(() => new AnimationMixer(object), [object])
   const upgradeTarget = useMemo(
     () => ({
@@ -467,11 +480,13 @@ export function Character({
         state.oneShot = false
         playBase(0.3)
       },
-      height: () => state.height,
+      height: () => state.labelHeight ?? state.height,
+      framingHeight: () => state.height,
       effectTarget: () => upgradeTarget,
     }
   }, [actions, attacks, clipAction, model, upgradeTarget])
 
+  const boundsIn = useRef(0)
   useFrame((_, delta) => {
     const state = anim.current
     const scale = timeScale ? timeScale() : useGameStore.getState().timeScale
@@ -488,12 +503,22 @@ export function Character({
 
     // Measure once the skeleton has been posed by a render (bind-pose bounds are unreliable).
     const holder = flinchRef.current
-    if (holder && state.measured < 3 && ++state.measured === 3) {
+    if (trackBounds && headBone && holder) {
+      headBone.getWorldPosition(headPoint)
+      holder.getWorldPosition(headOrigin)
+      holder.getWorldScale(headScale)
+      const y = (headPoint.y - headOrigin.y) / headScale.y + 0.45
+      if (Number.isFinite(y) && y > 0) state.labelHeight = y
+    }
+    boundsIn.current -= dt
+    const initialBounds = state.measured < 3 && ++state.measured === 3
+    if (holder && (initialBounds || (trackBounds && boundsIn.current <= 0))) {
+      boundsIn.current = 0.2
       const box = new Box3().setFromObject(object, true)
       const origin = holder.getWorldPosition(new Vector3())
       const parentScale = holder.getWorldScale(new Vector3()).y
       const h = (box.max.y - origin.y) / parentScale
-      if (Number.isFinite(h) && h > 0) state.height = h
+      if (Number.isFinite(h) && h > 0) state.height = trackBounds ? Math.max(state.height, h) : h
     }
 
     if (state.flash > 0) {

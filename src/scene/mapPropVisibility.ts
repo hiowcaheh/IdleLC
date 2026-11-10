@@ -69,6 +69,7 @@ export function selectProps<T extends PropLocation>(
   x: number,
   z: number,
   shown: T[][],
+  cameraReach = VIEW_AHEAD,
 ): void {
   for (const list of shown) list.length = 0
   grid.forEachNear(x, z, PROP_VIEW_REACH, (point) => {
@@ -77,7 +78,7 @@ export function selectProps<T extends PropLocation>(
       const dz = point.z - z
       const along = Math.max(
         -VIEW_BEHIND,
-        Math.min(VIEW_AHEAD, dx * TO_CAMERA.x + dz * TO_CAMERA.z),
+        Math.min(cameraReach, dx * TO_CAMERA.x + dz * TO_CAMERA.z),
       )
       const off = Math.hypot(dx - TO_CAMERA.x * along, dz - TO_CAMERA.z * along)
       if (off < point.radius + VIEW_MARGIN) return

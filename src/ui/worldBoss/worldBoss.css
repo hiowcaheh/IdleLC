@@ -1,6 +1,6 @@
 .world-boss {
   position: absolute;
-  top: 50%;
+  top: calc(50% - 48px);
   transform: translateY(-50%);
   left: calc(var(--safe-left) + var(--gutter));
   width: 68px;
@@ -90,11 +90,9 @@
   top: calc(var(--safe-top) + 132px);
   left: 50%;
   transform: translateX(-50%);
-  min-width: 120px;
-  padding: 3px 14px 5px;
-  border: solid transparent;
-  border-width: 1px 3px;
-  border-image: url('/ui/lc/client-section.webp') 1 3 fill / 1px 3px stretch;
+  min-width: 164px;
+  padding: 5px 18px 7px;
+  background: url('/ui/lc/cash-bar.webp?v=5985d449') center / 100% 100% no-repeat;
   color: #f3dfa2;
   text-align: center;
   text-shadow: 0 1px 2px #000;
@@ -115,10 +113,30 @@
 }
 .sheet.world-boss-result {
   width: min(100%, 560px);
+  border-image-source: url('/ui/lc/detail-window.webp');
 }
 .world-boss-result__heading {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 12px 12px;
+  border: solid transparent;
+  border-width: 12px 6px 4px;
+  border-image: url('/ui/lc/cash-card.webp?v=0ecdd927') 56 24 12 fill / 12px 6px 4px stretch;
   margin-bottom: 12px;
+}
+.world-boss-result__portrait {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  background: url('/ui/lc/cash-icon-slot.webp') center / 100% 100%;
+}
+.world-boss-result__portrait img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
 }
 .world-boss-result__heading h3 {
   color: var(--gilt-bright);
@@ -142,6 +160,13 @@
   border-collapse: collapse;
   font-size: 14px;
 }
+.world-boss-result__table caption {
+  padding: 8px 12px;
+  color: var(--gilt-bright);
+  font-family: var(--font-display);
+  font-weight: 700;
+  background: url('/ui/lc/cash-bar.webp?v=5985d449') center / 100% 100% no-repeat;
+}
 .world-boss-result__table th,
 .world-boss-result__table td {
   padding: 7px 9px;
@@ -152,11 +177,36 @@
   font-weight: 500;
 }
 .world-boss-result__table thead {
-  background: url('/ui/lc/client-section.webp') center / 100% 100%;
+  background: url('/ui/lc/book-row.webp') center / 100% 100%;
   color: var(--gilt-bright);
 }
 .world-boss-result__table tbody tr:nth-child(even) {
-  background: #141a2033;
+  background: #141a2055;
+}
+.world-boss-result__amount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 48px;
+  padding: 3px 6px;
+  border: solid transparent;
+  border-width: 0 2px;
+  border-image: url('/ui/lc/name-frame.webp') 0 2 fill / 0 2px stretch;
+}
+.world-boss-result__slot {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  background: url('/ui/lc/cash-icon-slot.webp') center / 100% 100%;
+}
+.book__boss-tag {
+  display: block;
+  margin-top: 2px;
+  color: #d8b975;
+  font-size: 10px;
+  font-weight: 500;
 }
 .world-boss-result__table td {
   text-align: right;

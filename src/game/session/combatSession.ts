@@ -6,6 +6,7 @@ import { boostEffects, boostsOf, type OwnedBoost } from '../logic/boosts.ts'
 import {
   carryVitals,
   changeMonster,
+  replaceMonsterHere,
   combatTick,
   createCombat,
   drinkPotion,
@@ -100,6 +101,17 @@ export class CombatSession {
       monsterFighter(monsterId),
       distance,
     )
+    this.combat = state
+    if (singleEncounter)
+      this.combat.encounterClock = { started: false, seconds: 0, assisted: false }
+    else delete this.combat.encounterClock
+    return events
+  }
+
+  /** A summon or the next ordinary target appears on this same hunting ground. */
+  replaceMonsterHere(monsterId: string, singleEncounter = false): CombatEvent[] {
+    this.singleEncounter = singleEncounter
+    const { state, events } = replaceMonsterHere(this.combat, monsterId, monsterFighter(monsterId))
     this.combat = state
     if (singleEncounter)
       this.combat.encounterClock = { started: false, seconds: 0, assisted: false }

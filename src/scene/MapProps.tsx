@@ -18,6 +18,7 @@ import {
   type MeshStandardMaterial,
 } from 'three'
 import { levelShift, loadProps, mapFile, type LcMap, type MapProps } from './lcMap.ts'
+import { useGameStore } from '../state/gameStore.ts'
 import {
   PropGrid,
   selectProps,
@@ -166,10 +167,10 @@ function PropsInstances({
   )
   const shown = useMemo(() => selection.map((s) => s.shown), [selection])
   const meshes = useRef<(InstancedMesh | null)[]>([])
-  const last = useRef<[number, number] | null>(null)
+  const last = useRef<[number, number, number] | null>(null)
 
-  const refresh = (cx: number, cz: number) => {
-    selectProps(grid, cx, cz, shown)
+  const refresh = (cx: number, cz: number, reach: number) => {
+    selectProps(grid, cx, cz, shown, reach)
     for (const s of selection) {
       const list = s.shown
       if (s.count === list.length && list.every((p, i) => s.previous[i] === p.id)) continue
@@ -184,7 +185,7 @@ function PropsInstances({
         if (mesh) writePropInstances(mesh, list, s.bounds)
       }
     }
-    last.current = [cx, cz]
+    last.current = [cx, cz, reach]
   }
 
   useLayoutEffect(() => {
@@ -197,10 +198,18 @@ function PropsInstances({
       })
   }, [parts])
 
-  useFrame(() => {
+  useFrame(({ camera }) => {
     const [cx, cz] = at.current.shown
     const before = last.current
-    if (!before || Math.hypot(cx - before[0], cz - before[1]) >= REFRESH_STEP) refresh(cx, cz)
+    const reach = useGameStore.getState().character?.worldBoss?.active
+      ? Math.max(26, Math.hypot(camera.position.x, camera.position.z) + 6)
+      : 26
+    if (
+      !before ||
+      Math.hypot(cx - before[0], cz - before[1]) >= REFRESH_STEP ||
+      Math.abs(reach - before[2]) >= REFRESH_STEP
+    )
+      refresh(cx, cz, reach)
   })
 
   return (

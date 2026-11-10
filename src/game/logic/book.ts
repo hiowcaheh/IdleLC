@@ -6,6 +6,15 @@ import { bookRewards, type BookReward } from '../data/bookRewards.ts'
 import type { CharacterData } from './character.ts'
 import { GameError } from './errors.ts'
 import { addToInventory } from './loot.ts'
+import { zoneSpots } from './spots.ts'
+import { worldBossFor } from '../data/worldBosses.ts'
+
+/** The book includes the map's summon after its ordinary hunting spots. */
+export function worldBookMonsters(zoneId: string): readonly string[] {
+  const spots = zoneSpots(zoneId)
+  const boss = worldBossFor(zoneId)
+  return boss ? [...spots, boss.monsterId] : spots
+}
 
 type Booked = Pick<CharacterData, 'stats'>
 

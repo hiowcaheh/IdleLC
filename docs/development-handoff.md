@@ -1,5 +1,32 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## World Boss: bieżący spot, kamera i Book (Codex), 2026-11-10
+
+Ta partia zastępuje poprzednią podróż do bossa: `arenaMonsterId` to bieżący zwykły
+spot, a `replaceMonsterHere` wymienia cel w miejscu, zachowując HP/efekty bohatera.
+Zaczyna od spawning, nie tworzy travel ani zdarzenia podróży. `resumeWorldBossSpot`
+wznawia zwykłego potwora w miejscu po wygranej, śmierci i Leave. Powrót trasą
+pozostaje tylko dla starych zapisów z innym arenaMonsterId. Pomiar walki, dropy,
+jednorazowa wypłata i zapis pending działają jak w drugiej partii. Nadal v16.
+
+`bossCamera.ts` mieści oba modele pod HUD na telefonie i desktopie. Charakter
+bossa mierzy maksymalną wysokość kolejnych póz do kadru; kamera uwzględnia zbocza
+na linii do obu postaci. Bieżąca kość Head prowadzi
+etykietę i pasek HP (72 px). Mgła uwzględnia odległość kamery od bohatera, a
+`selectProps` ma opcjonalny zasięg istniejącego korytarza dla wysokich dekoracji.
+Oba rozszerzenia działają wyłącznie podczas World Bossa; zwykłe ustawienia i
+promień wyszukiwania dekoracji 120 m zostają. Nie zmieniono modeli ani animacji.
+
+Przycisk 48 px nad środkiem. Stoper i wynik korzystają z istniejących cash-bar,
+cash-card, detail-window, name-frame i slotów klienta. `worldBookMonsters` dopisuje
+bossa na końcu Book, poza `zoneSpots`; progi 10/100/1000/10000 i Heaven Stone
+1/2/5/10 są wspólne ze zwykłymi potworami. Starsze zabójstwa bossów już się liczą.
+
+Weryfikacja: 605 testów / 73 pliki, pełne check i build; Chromium 320/390/1280 px,
+oba latające smoki, miejsce przed/po przywołaniu i wznowieniu, tabela łupów i
+cztery nagrody Book. Przygotowane zapisy i DEV, bez oceny balansu.
+[Pełny opis](world-boss.md).
+
 ## World Boss: stoper, pauza i DEV (Codex), 2026-11-10
 
 Zmiany na bazie `2d52b60`, bez nowych danych LC. Portret 32 px i półokrąg 45 px,

@@ -587,6 +587,19 @@ export function changeMonster(
   }
 }
 
+/** Replace a target on the current hunting ground, without starting any journey. */
+export function replaceMonsterHere(
+  state: CombatState,
+  monsterId: string,
+  monster: FighterInit,
+): TickResult {
+  const changed = changeMonster(state, monsterId, monster, 0)
+  changed.state.phase = 'spawning'
+  delete changed.state.travel
+  delete changed.state.encounterClock
+  return { ...changed, events: changed.events.filter((e) => e.type !== 'travel') }
+}
+
 /**
  * Replace player level, stats, skills and potions (level up, new skill, potions bought), keeping the
  * HP and MP ratios. Potions drunk since the last takePotionsUsed still count against the new supply.

@@ -8,6 +8,7 @@ import {
   ConeGeometry,
   CylinderGeometry,
   DirectionalLight,
+  Fog,
   DodecahedronGeometry,
   InstancedMesh,
   Object3D,
@@ -30,6 +31,7 @@ import { combatSession } from '../game/session/combatSession.ts'
 import { currentRoute, groundOf, setShownGround } from './travelRoute.ts'
 import { ROCKS, TERRAIN_SIZE, TREES, smoothstep, terrainHeight, type Prop } from './terrain.ts'
 import { SCREEN_RIGHT, view } from './viewState.ts'
+import { useGameStore } from '../state/gameStore.ts'
 
 type Env = ZoneDef['environment']
 
@@ -335,6 +337,20 @@ function ProceduralGround({ env }: { env: Env }) {
 
 const VEIL_AHEAD = new Vector3()
 
+/** Keep the fight outside the fog when a large boss requires a more distant camera. */
+function FieldFog({ color, map }: { color: string; map: boolean }) {
+  const fog = useRef<Fog>(null)
+  useFrame(({ camera }) => {
+    if (!fog.current) return
+    const extra = useGameStore.getState().character?.worldBoss?.active
+      ? Math.max(0, camera.position.distanceTo(view.player) - 18)
+      : 0
+    fog.current.near = (map ? 30 : 26) + extra
+    fog.current.far = (map ? 120 : 90) + extra
+  })
+  return <fog ref={fog} attach="fog" args={[color, map ? 30 : 26, map ? 120 : 90]} />
+}
+
 export function World({
   zone,
   monsterId,
@@ -353,7 +369,7 @@ export function World({
     <>
       <color attach="background" args={[env.fog]} />
       {/* a map's trees and buildings are worth seeing further off */}
-      <fog attach="fog" args={zone.map ? [env.fog, 30, 120] : [env.fog, 26, 90]} />
+      <FieldFog color={env.fog} map={!!zone.map} />
       <SkyDome env={env} />
       <hemisphereLight args={[env.skyTop, env.groundLow, 1.15]} />
       <Sun shadows={shadows} ultra={ultra} />

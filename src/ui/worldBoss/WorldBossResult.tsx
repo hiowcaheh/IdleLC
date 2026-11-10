@@ -35,22 +35,31 @@ export function WorldBossResult() {
       title="World Boss defeated"
       titleId="world-boss-result-title"
       centered
-      className="world-boss-result"
+      className="world-boss-result sheet--client"
       onClose={close}
     >
       <div className="world-boss-result__heading">
-        <h3>{getMonster(result.record.monsterId).name}</h3>
-        <p>
-          Fight time{' '}
-          <strong>
-            {result.record.combatMs === null
-              ? 'Not started'
-              : worldBossTime(result.record.combatMs)}
-          </strong>
-        </p>
-        {result.record.assisted && <small>DEV test</small>}
+        <span className="world-boss-result__portrait" aria-hidden="true">
+          <img
+            alt=""
+            src={`${import.meta.env.BASE_URL}ui/world-boss/${getMonster(result.record.monsterId).modelId}.webp?v=1`}
+          />
+        </span>
+        <div>
+          <h3>{getMonster(result.record.monsterId).name}</h3>
+          <p>
+            Fight time{' '}
+            <strong>
+              {result.record.combatMs === null
+                ? 'Not started'
+                : worldBossTime(result.record.combatMs)}
+            </strong>
+          </p>
+          {result.record.assisted && <small>DEV test</small>}
+        </div>
       </div>
       <table className="world-boss-result__table">
+        <caption>Loot</caption>
         <thead>
           <tr>
             <th scope="col">Reward</th>
@@ -60,16 +69,24 @@ export function WorldBossResult() {
         <tbody>
           <tr>
             <th scope="row">EXP</th>
-            <td>{result.exp.toLocaleString('en-US')}</td>
+            <td>
+              <span className="world-boss-result__amount">
+                {result.exp.toLocaleString('en-US')}
+              </span>
+            </td>
           </tr>
           <tr>
             <th scope="row">Skill points</th>
-            <td>{formatSp(result.sp)} SP</td>
+            <td>
+              <span className="world-boss-result__amount">{formatSp(result.sp)} SP</span>
+            </td>
           </tr>
           <tr>
             <th scope="row">Gold</th>
             <td>
-              <Gold amount={result.gold} />
+              <span className="world-boss-result__amount">
+                <Gold amount={result.gold} />
+              </span>
             </td>
           </tr>
           {result.drops.map((drop) => {
@@ -78,14 +95,20 @@ export function WorldBossResult() {
               <tr key={drop.itemId}>
                 <th scope="row">
                   <span className="world-boss-result__item">
-                    <ItemIcon item={item} size={28} />
+                    <span className="world-boss-result__slot">
+                      <ItemIcon item={item} size={28} />
+                    </span>
                     <span className={nameTone({ itemId: drop.itemId })}>
                       {item.name}
                       {isRare(drop.itemId) && <small>Unidentified</small>}
                     </span>
                   </span>
                 </th>
-                <td>×{drop.count.toLocaleString('en-US')}</td>
+                <td>
+                  <span className="world-boss-result__amount">
+                    ×{drop.count.toLocaleString('en-US')}
+                  </span>
+                </td>
               </tr>
             )
           })}

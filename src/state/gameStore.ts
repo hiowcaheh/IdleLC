@@ -243,6 +243,16 @@ export const useGameStore = create<GameStore>((set, get) => {
     }
   }
 
+  const resumeWorldBossSpot = (character: CharacterData, arenaMonsterId: string) => {
+    const { zoneId, monsterId } = character.location
+    combatEvents.emit(
+      arenaMonsterId === monsterId
+        ? combatSession.replaceMonsterHere(monsterId)
+        : combatSession.setMonster(monsterId, planTravel(zoneId, monsterId, arenaMonsterId)),
+    )
+    set({ hud: toHud(combatSession.state) })
+  }
+
   const applyResult = (result: CombatResult) => {
     const previous = get().character
     applyCharacter(result.character)
@@ -254,10 +264,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       const pending = result.character.worldBoss?.pending
       if (pending) set({ worldBossResult: pending, hud: toHud(combatSession.state) })
       else {
-        const { zoneId, monsterId } = result.character.location
-        const distance = planTravel(zoneId, monsterId)
-        combatEvents.emit(combatSession.setMonster(monsterId, distance))
-        set({ hud: toHud(combatSession.state) })
+        resumeWorldBossSpot(result.character, previous.worldBoss.active.arenaMonsterId)
         toast('World Boss attempt ended.')
       }
     }
@@ -671,9 +678,8 @@ export const useGameStore = create<GameStore>((set, get) => {
         await reportCombat(0, 0, true)
         const changed = await enqueue(() => gameService.summonWorldBoss(character.id))
         const boss = changed.worldBoss!.active!
-        const distance = planTravel(boss.zoneId, boss.arenaMonsterId)
         applyCharacter(changed)
-        combatEvents.emit(combatSession.setMonster(boss.monsterId, distance, true))
+        combatEvents.emit(combatSession.replaceMonsterHere(boss.monsterId, true))
         set({ hud: toHud(combatSession.state) })
       } finally {
         set({ worldBossEntering: false })
@@ -688,9 +694,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (!get().character?.worldBoss?.active) return
       const changed = await enqueue(() => gameService.cancelWorldBoss(character.id))
       applyCharacter(changed)
-      const distance = planTravel(changed.location.zoneId, changed.location.monsterId)
-      combatEvents.emit(combatSession.setMonster(changed.location.monsterId, distance))
-      set({ hud: toHud(combatSession.state) })
+      resumeWorldBossSpot(changed, character.worldBoss.active.arenaMonsterId)
     },
 
     async dismissWorldBossResult() {
@@ -700,12 +704,7 @@ export const useGameStore = create<GameStore>((set, get) => {
       try {
         const changed = await enqueue(() => gameService.acknowledgeWorldBossLoot(character.id))
         applyCharacter(changed)
-        const distance = planTravel(
-          changed.location.zoneId,
-          changed.location.monsterId,
-          get().worldBossResult!.arenaMonsterId,
-        )
-        combatEvents.emit(combatSession.setMonster(changed.location.monsterId, distance))
+        resumeWorldBossSpot(changed, get().worldBossResult!.arenaMonsterId)
         set({ worldBossResult: null, hud: toHud(combatSession.state) })
       } finally {
         set({ worldBossEntering: false })

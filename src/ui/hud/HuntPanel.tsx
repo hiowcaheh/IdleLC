@@ -101,7 +101,7 @@ export function HuntPanel() {
             {!boss && <span>Monsters killed: {fmt(kills)}</span>}
             <span className={`hunt__next${next && !nextOpen ? ' is-locked' : ''}`}>
               {boss ? (
-                'Return after the fight'
+                'Summoned on this spot'
               ) : next ? (
                 <>
                   Next: {getMonster(next).name}

@@ -13,6 +13,7 @@ import {
   openingGap,
   carryVitals,
   changeMonster,
+  replaceMonsterHere,
   choosePotion,
   drinkPotion,
   combatTick,
@@ -63,6 +64,24 @@ const strongPlayer = { level: 10, stats: stats({ attack: 50 }) }
 const weakMonster = { level: 1, stats: stats({ maxHp: 30, attack: 2 }) }
 
 describe('combatTick', () => {
+  it('replaces a target on the same spot without travel, preserving the hero’s HP and effects', () => {
+    const before = {
+      ...createCombat(strongPlayer, 'ordinary', weakMonster),
+      phase: 'fighting' as const,
+    }
+    before.player.hp = 17
+    const here = replaceMonsterHere(before, 'boss', strongPlayer)
+    expect(here.state.phase).toBe('spawning')
+    expect(here.state.travel).toBeUndefined()
+    expect(here.state.monsterId).toBe('boss')
+    expect(here.state.player.hp).toBe(17)
+    expect(here.state.player.effects).toEqual(before.player.effects)
+    expect(here.events).toEqual([{ type: 'despawn' }])
+    expect(before.monsterId).toBe('ordinary')
+    const returned = replaceMonsterHere(here.state, 'ordinary', weakMonster)
+    expect(returned.state.phase).toBe('spawning')
+    expect(returned.events.some((e) => e.type === 'travel')).toBe(false)
+  })
   it('times only combat after the first offensive action, including a long frame ending in death', () => {
     const start = {
       ...createCombat(strongPlayer, 'boss', weakMonster),

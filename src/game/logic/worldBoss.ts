@@ -184,9 +184,7 @@ export function summonWorldBoss(character: CharacterData, id: string, now: numbe
   if (progress.active) throw new GameError('world-boss-active')
   if ((progress.kills[boss.zoneId] ?? 0) < boss.killsRequired)
     throw new GameError('world-boss-not-ready')
-  const spots = ZONES[boss.zoneId]!.monsterIds
-  const index = spots.indexOf(character.location.monsterId)
-  const arenaMonsterId = spots[(Math.max(0, index) + 1) % spots.length]!
+  const arenaMonsterId = character.location.monsterId
   const { devCharges, ...saved } = progress
   const remaining = devCharges?.filter((zone) => zone !== boss.zoneId) ?? []
   return {

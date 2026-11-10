@@ -17,6 +17,20 @@ const point = (id: number, x: number, z: number, radius = 0, model = 0): PropLoc
 })
 
 describe('map prop selection', () => {
+  it('extends only the tall-prop corridor for a distant boss camera and preserves grass', () => {
+    const to = new Vector3(CAMERA_OFFSET.x, 0, CAMERA_OFFSET.z).normalize()
+    const points = [
+      point(0, to.x * 65, to.z * 65, 3),
+      point(1, to.x * 65, to.z * 65, 0),
+      point(2, -to.x * 65, -to.z * 65, 3),
+    ]
+    const shown: PropLocation[][] = [[]]
+    const grid = new PropGrid(points)
+    selectProps(grid, 0, 0, shown)
+    expect(shown[0]!.map((p) => p.id)).toEqual([0, 1, 2])
+    selectProps(grid, 0, 0, shown, 85)
+    expect(shown[0]!.map((p) => p.id)).toEqual([1, 2])
+  })
   it('includes the radius boundary and handles negative cell coordinates', () => {
     const points = [
       point(0, 0, 0),

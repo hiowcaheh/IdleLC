@@ -1,5 +1,24 @@
 # Historia zmian
 
+## 2026-11-10 (Codex): World Boss na bieżącym spocie, kamera i Book
+
+1. Przycisk bossa podniesiony o 48 px względem środka ekranu, bez powiększania ikony.
+2. Boss pojawia się na aktualnym spocie. Przywołanie i wznowienie zwykłego polowania
+   nie uruchamiają podróży na inny plac walki.
+3. Kamera mieści wysokie i latające modele oraz bohatera pod HUD. Pasek HP śledzi
+   źródłową kość głowy i zachowuje czytelną szerokość. Mgła i zasłaniające wysokie
+   dekoracje uwzględniają dalszą kamerę podczas próby.
+4. Stoper i okno łupów mają więcej oryginalnych ramek klienta: portret, panel,
+   nagłówek tabeli, sloty przedmiotów i pola ilości.
+5. Na końcu listy każdej mapy w Monster Book jest jej World Boss. Progi i nagrody
+   są takie jak u pozostałych potworów: 10/100/1000/10000 zabójstw, 1/2/5/10 Heaven Stone.
+
+SaveVersion nadal **16**, źródłowe statystyki i szanse dropu bez zmian.
+[Opis dla Claude](docs/world-boss.md). Weryfikacja: **605 testów / 73 pliki**, lint,
+formatowanie, TypeScript i build. Chromium 320/390/1280 px: ten sam spot,
+oba smoki, modal oraz jednorazowe odebranie nagrody Book dla czterech bossów.
+Próby na przygotowanych zapisach z DEV, bez pomiaru balansu.
+
 ## 2026-11-10 (Codex): World Boss, stoper i okno łupów
 
 1. Portret i półokrąg przycisku zmniejszone o połowę (portret 32 px), po lewej na

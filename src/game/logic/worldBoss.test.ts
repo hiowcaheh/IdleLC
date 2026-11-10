@@ -10,6 +10,8 @@ import { GOLDEN_MAGNIFIER_ID, getItem, getRareSet } from '../data/items.ts'
 import { getMonster } from '../data/monsters.ts'
 import { WORLD_BOSSES } from '../data/worldBosses.ts'
 import { ZONES } from '../data/zones.ts'
+import { worldBookMonsters, applyClaimBookReward } from './book.ts'
+import { bookRewards } from '../data/bookRewards.ts'
 import { nameTone } from '../../ui/gear/format.ts'
 import { createCharacterData } from './character.ts'
 import { stowDrops } from './loot.ts'
@@ -39,6 +41,19 @@ const guaranteed = [
 ]
 
 describe('World Boss source data and drops', () => {
+  it('puts one map boss last in the book with the ordinary milestones, without adding a hunting spot', () => {
+    for (const boss of WORLD_BOSSES) {
+      const list = worldBookMonsters(boss.zoneId)
+      expect(list).toEqual([...ZONES[boss.zoneId]!.monsterIds, boss.monsterId])
+      expect(bookRewards(boss.monsterId)).toEqual(bookRewards(list[0]!))
+      const c = hero()
+      c.stats.monsterKills[boss.monsterId] = 10
+      const paid = applyClaimBookReward(c, boss.monsterId)
+      expect(paid.reward.kills).toBe(10)
+      expect(paid.reward.items).toEqual([{ itemId: 85, count: 1 }])
+      expect(() => applyClaimBookReward(paid.character, boss.monsterId)).toThrow('not-reached')
+    }
+  })
   it('uses the four source bosses and the owner’s thresholds, outside normal hunting spots', () => {
     expect(WORLD_BOSSES.map((b) => [b.zoneId, b.monsterId, b.killsRequired])).toEqual([
       ['lc-zone-0', 'lc-308', 2000],
@@ -174,7 +189,7 @@ describe('World Boss charge and save compatibility', () => {
     const fight = summonWorldBoss(c, 'encounter', 2000)
     expect(fight.location).toEqual(c.location)
     expect(fight.worldBoss!.kills['lc-zone-0']).toBe(0)
-    expect(fight.worldBoss!.active!.arenaMonsterId).not.toBe(c.location.monsterId)
+    expect(fight.worldBoss!.active!.arenaMonsterId).toBe(c.location.monsterId)
     expect(chargeWorldBoss(fight, 2000)).toBe(fight)
     expect(() => summonWorldBoss(fight, 'twice', 2001)).toThrow('world-boss-active')
     expect(() => summonWorldBoss(hero(), 'early', 2000)).toThrow('world-boss-not-ready')
