@@ -65,7 +65,14 @@ export const UI_PARTS = {
   'cash-sale': [atlas('Cashshop'), 126, 357, 60, 60],
   // CUIGamble::Create/Render (MoonStone.tex): the five reels, grade row and original controls.
   'moonstone-top': [atlas('MoonStone'), 0, 0, 255, 148, { scale: 2 }],
-  'moonstone-mark': [atlas('MoonStone'), 87, 0, 84, 74, { scale: 2 }],
+  'moonstone-mark': [atlas('MoonStone'), 101, 0, 54, 70, { scale: 2 }],
+  // actions.lod action 52 opens CUICalendar: ActionBtn0, row 6 / col 3.
+  'calendar-mark': [atlas('ActionBtn0'), 96, 192, 32, 32, { scale: 4 }],
+  // calendar.xml: the framed date cell, selected cell and engraved weekday/title fields.
+  'calendar-cell': [atlas('CalendarUi'), 878, 439, 92, 66, { scale: 2 }],
+  'calendar-selected': [atlas('CalendarUi'), 786, 440, 90, 64, { scale: 2 }],
+  'calendar-weekday': [atlas('CalendarUi'), 17, 67, 91, 16, { scale: 2 }],
+  'calendar-heading': [atlas('CalendarUi'), 283, 22, 126, 22, { scale: 2 }],
   'moonstone-middle': [atlas('MoonStone'), 0, 149, 255, 17, { scale: 2 }],
   'moonstone-bottom': [atlas('MoonStone'), 0, 167, 255, 46, { scale: 2 }],
   'moonstone-start': [atlas('MoonStone'), 0, 374, 113, 29, { scale: 2 }],

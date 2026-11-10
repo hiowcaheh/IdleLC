@@ -1,5 +1,23 @@
 # Historia zmian
 
+## 2026-11-10 (Codex): kalendarz nagród i poprawki Moonstone
+
+1. Każdy World Boss gwarantuje dodatkowo 5 Good Moonstone i 3 Perfect Moonstone.
+2. Poprawiona ikona Statui: jeden symbol, zachowane proporcje. Okno pokazuje sam
+   oryginalny panel z opisami, bez dodatkowej ramki oraz przycisku X.
+3. Cash Ticket otrzymał wyraźną pomarańczową ikonę biletu z klienta.
+4. Nowy przycisk kalendarza pod Moonstone. Zakładki Weekly i Monthly pokazują
+   wszystkie nagrody, odebrane dni i podgląd wybranego prezentu.
+5. Po 10 minutach online jeden odbiór przyznaje razem dzisiejszy prezent tygodniowy
+   i miesięczny. Limit wspólny dla konta, reset o 00:00 UTC. Czas sumuje się i
+   przetrwa reload; tło, offline i przyspieszenie DEV nie nabijają licznika.
+
+SaveVersion **17**, migracja starszych zapisów bez utraty postępu.
+[Notatka dla Claude](docs/login-calendar.md).
+Weryfikacja: **634 testy / 79 plików**, pełne check i build. Chromium
+320/390/1280 px: nowe GUI, licznik, brak czasu w tle, wspólny odbiór i reload.
+Produkcja: użycie biletu Cash oraz dodatkowe kamienie w łupach Balroga (DEV).
+
 ## 2026-11-10 (Codex): Statua, poziome losowanie i odsłonięcie nagrody na końcu
 
 1. Ikona skrótu przedstawia twarz Statui z oryginalnego klienta w jednej ramce.

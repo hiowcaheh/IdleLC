@@ -1,5 +1,7 @@
 import { CashShopButton, CashShopPanel } from './cashShop/CashShop.tsx'
 import { MoonstoneButton, MoonstoneStatue } from './moonstone/MoonstoneStatue.tsx'
+import { CalendarRuntime } from './calendar/CalendarRuntime.tsx'
+import { CalendarButton, RewardsCalendar } from './calendar/RewardsCalendar.tsx'
 import { BagFeed } from './items/BagFeed.tsx'
 import { useMemo, useState } from 'react'
 import { skillsForClass } from '../game/data/skills.ts'
@@ -46,6 +48,7 @@ export function GameScreen() {
   const [titlesOpen, setTitlesOpen] = useState(false)
   const [dungeonsOpen, setDungeonsOpen] = useState(false)
   const [shopOpen, setShopOpen] = useState(false)
+  const [calendarOpen, setCalendarOpen] = useState(false)
   const [moonstoneOpen, setMoonstoneOpen] = useState(
     () => !!useGameStore.getState().character?.moonstoneSpin,
   )
@@ -67,6 +70,7 @@ export function GameScreen() {
       <GameCanvas />
       <PerfOverlay />
       <DungeonRuntime />
+      <CalendarRuntime />
       {/* a fresh set for the field and for a run, so neither shows the other's last place */}
       {character && !character.expedition && <SceneLabels key={dungeon ? 'dungeon' : 'field'} />}
       {character && !character.expedition && <RewardFeed />}
@@ -136,6 +140,7 @@ export function GameScreen() {
                 <DungeonsButton onClick={() => setDungeonsOpen(true)} />
                 <CashShopButton onClick={() => setShopOpen(true)} />
                 <MoonstoneButton onClick={() => setMoonstoneOpen(true)} />
+                <CalendarButton onClick={() => setCalendarOpen(true)} />
               </>
             )}
           </div>
@@ -172,6 +177,7 @@ export function GameScreen() {
       {dungeonsOpen && <DungeonsPanel onClose={() => setDungeonsOpen(false)} />}
       {shopOpen && <CashShopPanel onClose={() => setShopOpen(false)} />}
       {moonstoneOpen && <MoonstoneStatue onClose={() => setMoonstoneOpen(false)} />}
+      {calendarOpen && <RewardsCalendar onClose={() => setCalendarOpen(false)} />}
       <BagFeed />
       <DungeonResult />
       <WorldBossResult />

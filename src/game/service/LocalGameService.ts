@@ -93,6 +93,15 @@ import type {
 } from './GameService.ts'
 import { applyCashBuy } from '../logic/cashShop.ts'
 import { applyCashTicket, type CashTicketUse } from '../logic/cashTickets.ts'
+import { LOGIN_MAX_GAP_MS } from '../data/loginCalendar.ts'
+import {
+  addCalendarOnline,
+  calendarForDay,
+  calendarDayStart,
+  claimLoginCalendar,
+  type LoginCalendarProgress,
+  type CalendarClaim,
+} from '../logic/loginCalendar.ts'
 import {
   beginMoonstonePlay,
   finishMoonstonePlay,
@@ -125,6 +134,7 @@ export class LocalGameService implements GameService {
   private timeScale = 1
   private readonly dungeonRuns = new Map<string, DungeonRun>()
   private dungeonSavedAt = 0
+  private calendarClock: { characterId: string; at: number; visible: boolean } | null = null
 
   constructor(storage: KeyValueStorage, options: { now?: () => number; rng?: Rng } = {}) {
     this.storage = storage
@@ -134,6 +144,7 @@ export class LocalGameService implements GameService {
   }
 
   async load(): Promise<LoadResult> {
+    this.calendarClock = null
     this.persisted = this.read()
     const { save, status } = loadSave(this.persisted, this.now())
     this.save = {
@@ -204,7 +215,12 @@ export class LocalGameService implements GameService {
       throw new GameError('in-dungeon', 'Leave the dungeon before switching characters.')
     if (current && current !== characterId) this.notOnWorldBoss(current)
     if (characterId !== null) this.character(characterId)
-    this.save = { ...this.save, activeCharacterId: characterId }
+    this.save = {
+      ...this.save,
+      activeCharacterId: characterId,
+      ...(this.calendarClock ? { loginCalendar: this.calendarProgress(this.now()) } : {}),
+    }
+    this.calendarClock = null
     this.persist()
   }
 
@@ -706,6 +722,46 @@ export class LocalGameService implements GameService {
     }
   }
 
+  /** No offline catch-up: the first heartbeat only starts a fresh presence interval. */
+  async calendarPresence(characterId: string, visible: boolean): Promise<LoginCalendarProgress> {
+    this.character(characterId)
+    const now = this.now()
+    const before = this.save
+    const progress = this.calendarProgress(now)
+    try {
+      if (JSON.stringify(progress) !== JSON.stringify(this.save.loginCalendar)) {
+        this.save = { ...this.save, loginCalendar: progress }
+        this.persist()
+      }
+      this.calendarClock = {
+        characterId,
+        at: now,
+        visible: visible && this.save.activeCharacterId === characterId,
+      }
+      return copy(progress)
+    } catch (error) {
+      this.save = before
+      throw error
+    }
+  }
+
+  async claimLoginCalendar(characterId: string): Promise<CalendarClaim> {
+    const character = this.character(characterId)
+    if (this.save.activeCharacterId !== characterId) throw new GameError('calendar-not-playing')
+    const now = this.now()
+    const claim = claimLoginCalendar(character, this.calendarProgress(now), now)
+    const before = this.save
+    try {
+      this.save = { ...this.save, loginCalendar: claim.calendar }
+      const updated = this.update(characterId, () => claim.character)
+      if (this.calendarClock) this.calendarClock = { ...this.calendarClock, at: now }
+      return copy({ ...claim, character: updated })
+    } catch (error) {
+      this.save = before
+      throw error
+    }
+  }
+
   async beginMoonstonePlay(characterId: string, stoneId: number): Promise<MoonstoneStart> {
     this.notOnWorldBoss(characterId)
     const started = beginMoonstonePlay(
@@ -799,6 +855,7 @@ export class LocalGameService implements GameService {
   }
 
   async resetSave(): Promise<SaveData> {
+    this.calendarClock = null
     this.save = createDefaultSave(this.now())
     this.dungeonRuns.clear()
     this.persist()
@@ -885,6 +942,16 @@ export class LocalGameService implements GameService {
           ),
         })),
       ),
+  }
+
+  private calendarProgress(now: number): LoginCalendarProgress {
+    const p = calendarForDay(this.save.loginCalendar, now)
+    const clock = this.calendarClock
+    if (!clock?.visible || this.save.activeCharacterId !== clock.characterId) return p
+    const elapsed = now - clock.at
+    if (elapsed < 0 || elapsed > LOGIN_MAX_GAP_MS) return p
+    // A heartbeat spanning midnight contributes only the part after today's reset.
+    return addCalendarOnline(p, Math.max(0, now - Math.max(clock.at, calendarDayStart(now))), now)
   }
 
   private character(characterId: string): CharacterData {

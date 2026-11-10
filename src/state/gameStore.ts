@@ -72,6 +72,10 @@ interface GameStore {
   dungeonEntering: boolean
   worldBossEntering: boolean
   worldBossResult: WorldBossLoot | null
+  /** Local time of the last foreground heartbeat, for the calendar's live counter only. */
+  calendarMarkedAt: number | null
+  calendarPresence(characterId: string, visible: boolean): Promise<void>
+  claimLoginCalendar(): Promise<ItemStack[]>
   dismissWorldBossResult(): Promise<void>
   summonWorldBoss(): Promise<void>
   cancelWorldBoss(): Promise<void>
@@ -433,6 +437,23 @@ export const useGameStore = create<GameStore>((set, get) => {
     dungeonEntering: false,
     worldBossEntering: false,
     worldBossResult: null,
+    calendarMarkedAt: null,
+
+    async calendarPresence(characterId, visible) {
+      const calendar = await enqueue(() => gameService.calendarPresence(characterId, visible))
+      set({
+        save: { ...get().save, loginCalendar: calendar },
+        calendarMarkedAt: visible && get().character?.id === characterId ? Date.now() : null,
+      })
+    },
+
+    async claimLoginCalendar() {
+      const claim = await enqueue(() => gameService.claimLoginCalendar(playedId()))
+      applyCharacter(claim.character)
+      set({ save: { ...get().save, loginCalendar: claim.calendar }, calendarMarkedAt: Date.now() })
+      bagFeed.emit(claim.prizes)
+      return claim.prizes
+    },
 
     async startDungeon(id) {
       if (

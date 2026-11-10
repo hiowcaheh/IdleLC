@@ -111,12 +111,12 @@ export const OWN_ITEMS = [
   { id: 95001, name: 'Belfist Box', icon: { atlas: 7, row: 3, col: 6 } },
   { id: 95002, name: 'Procyon Box', icon: { atlas: 7, row: 3, col: 3 } },
   { id: 95003, name: 'Maargadum Box', icon: { atlas: 7, row: 3, col: 7 } },
-  // Owner's Cash tickets: the source Phoenix Ticket (3217), ItemBtn6 row 0 / col 4.
+  // Owner's Cash tickets: the orange perforated ticket (7341), ItemBtn15 row 1 / col 2.
   ...[10, 20, 50, 100, 500, 1000].map((cash, index) => ({
     id: 95011 + index,
     name: `${cash} Cash Ticket`,
     description: `Use to add ${cash} Cash to your account's Item Shop balance. Consumes one ticket.`,
-    icon: { atlas: 6, row: 0, col: 4 },
+    icon: { atlas: 15, row: 1, col: 2 },
   })),
 ].map((item) => ({
   ...item,

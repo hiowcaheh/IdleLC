@@ -1,5 +1,30 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Kalendarz i poprawki Statui (Codex), 2026-11-10
+
+[Pełna notatka](login-calendar.md). SaveVersion **17**, migracja v16 bez utraty
+Cash, gear i rezerwacji Statui. Nowy kalendarz jest wspólny dla konta: jeden claim
+UTC na oba tory razem, po 10 minutach foreground. `CalendarRuntime` żyje podczas
+gry postacią, heartbeat co 5 s. `calendarPresence` odmierza czas sam w serwisie;
+load, zmiana postaci i długie przerwy nie dają czasu online. Zmiana daty resetuje
+czas, utrzymuje historię; cofnięcie daty blokuje wcześniejszy odbiór.
+
+`claimLoginCalendar` zapisuje inventory i datę odbioru razem, z rollback po
+konflikcie i BagFeed po zapisie. Nie używać playSeconds, DEV timeScale ani AFK.
+Obecność w widocznej karcie obejmuje też okna i Dungeons. Źródłowe GUI kalendarza
+z calendar.xml/CalendarUi, ikona to akcja 52; nagrody są konfiguracją IdleLC.
+
+World Boss dodatkowo 2547 ×5 i 2548 ×3, nadal bez mnożników dropu. Cash Ticket
+ma teraz ikonę 7341 (ItemBtn15 1/2). `calendar-art.mjs` zmienia tylko sześć własnych
+ikon w lc-data i przelicza atlas przedmiotów wraz z revision. Statua używa czystej
+ramki EventBtn0 i centralnej twarzy, bez drugiego symbolu pod spodem. Modal ma
+sam oryginalny panel i opisy, bez zewnętrznej ramki oraz X; focus trap i Exit zostają.
+
+Weryfikacja: **634 testy / 79 plików**, check/build. Chromium 320/390/1280 px,
+próba produkcyjna licznika, jednego claimu na oba tory, zmiany postaci, reloadu,
+nowego biletu i dodatkowych kamieni Balroga. Przygotowane zapisy; próg dziesięciu
+minut w testach serwisu, ostatnie 30 s przygotowanego postępu w realnym GUI.
+
 ## Statua: animacja od prawej do lewej i rezerwacja (Codex), 2026-11-10
 
 Baza `c632560`. Nowy `menu-moonstone.webp` składa twarz z MoonStone.tex z jedną

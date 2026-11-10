@@ -4,6 +4,7 @@
  * When the shape changes: bump SAVE_VERSION and add a migration from the previous version.
  */
 import { sanitizeCash } from './cashShop.ts'
+import { sanitizeLoginCalendar, type LoginCalendarProgress } from './loginCalendar.ts'
 import { sanitizeMoonstoneSpin } from './moonstones.ts'
 import { sanitizeWorldBossProgress } from './worldBoss.ts'
 import { sanitizeAllocatedStats } from './statPoints.ts'
@@ -55,7 +56,7 @@ import {
   type LearnedSkill,
 } from './skills.ts'
 
-export const SAVE_VERSION = 16
+export const SAVE_VERSION = 17
 
 export type GraphicsQuality = 'auto' | 'low' | 'high' | 'ultra'
 
@@ -73,6 +74,8 @@ export interface SaveData {
   activeCharacterId: string | null
   /** The account's item-shop currency (data/cashShop.ts); absent in older v16 saves = 0. */
   cash: number
+  /** Account-wide daily login progress; absent until the first online session. */
+  loginCalendar?: LoginCalendarProgress
 }
 
 /** Upgrades a save from version N to N + 1. */
@@ -200,6 +203,8 @@ export const MIGRATIONS: Record<number, Migration> = {
   14: (save) => save,
   // v16: per-character Buffer levels, spendable dungeon points and lifetime ranking score.
   15: (save) => save,
+  // v17: account-wide online time and daily calendar claims; older accounts start empty.
+  16: (save) => save,
 }
 
 export const DEFAULT_SETTINGS: Settings = { quality: 'auto', showDamageNumbers: true }
@@ -551,6 +556,7 @@ function sanitize(raw: Record<string, unknown>, now: number): SaveData {
     if (characters.length === MAX_CHARACTERS) break
   }
   const active = characters.find((c) => c.id === raw.activeCharacterId)
+  const loginCalendar = sanitizeLoginCalendar(raw.loginCalendar)
   return {
     saveVersion: SAVE_VERSION,
     createdAt: num(raw.createdAt, now),
@@ -558,6 +564,7 @@ function sanitize(raw: Record<string, unknown>, now: number): SaveData {
     characters,
     activeCharacterId: active ? active.id : null,
     cash: sanitizeCash(raw.cash),
+    ...(loginCalendar ? { loginCalendar } : {}),
   }
 }
 

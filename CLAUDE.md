@@ -1,5 +1,19 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-10 (Codex): **kalendarz logowania, zapis v17 i poprawki Statui**.
+[Szczegóły kalendarza](docs/login-calendar.md). Jeden wspólny odbiór na konto UTC,
+po 600000 ms rzeczywistego foreground: tygodniowy i miesięczny prezent razem.
+`CalendarRuntime` wysyła obecność co 5 s, serwis mierzy czas sam; bez AFK, tła,
+DEV speed i offline catch-up. `SaveData.loginCalendar`, ulotny `calendarClock`;
+jednorazowy claim zapisuje flagę i inventory razem. Migracja 16→17 zachowuje
+starsze dane, także pending Moonstone. Reguły nagród w data/loginCalendar.ts.
+Każdy World Boss dodatkowo Good Moonstone 2547 ×5 i Perfect 2548 ×3. Ikona biletu
+Cash: ItemBtn15 row 1 / col 2, nominały bez zmian. Statua bez zewnętrznego Sheet
+z X, ale zachowuje klasę `.sheet` dla focus trap. Exit i animationend jak poprzednio.
+`event-button.mjs` czyści środek EventBtn0 przed kompozycją; brak nakładania ikon.
+Weryfikacja: **634 testy / 79 plików**, check/build, Chromium 320/390/1280 px;
+produkcyjny wspólny claim, zmiana postaci i reload, Cash Ticket i łupy Balroga DEV.
+
 Aktualizacja 2026-11-10 (Codex): **Statua, poziomy pasek i późniejsza wypłata**.
 Ikona to twarz Statui w jednej oryginalnej ramce. Pasek porusza się od prawej do
 lewej przez 3 s, zwalniając do środkowego pola. `beginMoonstonePlay` zużywa kamień

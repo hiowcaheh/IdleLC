@@ -1,6 +1,10 @@
 # World Boss loot, Cash tickets i Statua Księżycowa (2026-11-10)
 
-Baza etapu: `ba9ab98`. Zachowano poprzednie zmiany Claude i Codexa. Zmiany nagród
+Nowsza partia na bazie `cb1a4a4`: Good ×5 i Perfect ×3 u każdego bossa, poprawione
+ikony Statui i Cash Ticket, Statua bez dodatkowej ramki. [Kalendarz](login-calendar.md)
+wprowadza zapis v17.
+
+Baza pierwotnego etapu: `ba9ab98`. Zachowano poprzednie zmiany Claude i Codexa. Zmiany nagród
 World Bossów oraz bilety Cash są regułami właściciela. Kamienie, zawartość skrzynki,
 nagrody Statui i jej grafiki pochodzą z dostarczonych plików LC.
 
@@ -15,6 +19,8 @@ Każdy boss gwarantuje następujące stosy, niezależnie od poziomu i buffów:
 |   759 | Medal of Honor                |      1 |
 |   972 | Lucky Scroll                  |     10 |
 |  2544 | Moonstone Box                 |     25 |
+|  2547 | Good Moonstone                |      5 |
+|  2548 | Perfect Moonstone             |      3 |
 |  4917 | Platinum Small Healing Potion |     50 |
 |  4920 | Platinum Small Mana Potion    |     50 |
 | 95014 | 100 Cash Ticket               |      1 |
@@ -40,7 +46,8 @@ Zapisane wcześniej okno łupów nadal pokazuje faktycznie przyznane stare nagro
 |     95015 | 500 Cash Ticket  |
 |     95016 | 1000 Cash Ticket |
 
-Ikona to oryginalny złoty Phoenix Ticket 3217: `ItemBtn6.tex`, wiersz 0, kolumna 4.
+Aktualna ikona to pomarańczowy bilet 7341 z `ItemBtn15.tex`, wiersz 1, kolumna 2.
+Zastępuje poprzedni zwój Phoenix Ticket; nominały i działanie pozostają takie same.
 ID, nominały i doładowanie są własnym systemem, nie funkcją znalezioną w serwerze LC.
 Każdy boss daje jeden bilet 100 Cash; Cash dopisuje się dopiero po `Use` w ekwipunku.
 
@@ -109,9 +116,9 @@ Import nagród zachowuje też pozostałe oryginalne przedmioty.
 
 Przycisk 40 px pod Item Shop ma jedną ramkę zdarzeń klienta oraz twarz Statui
 wyciętą z MoonStone.tex (`menu-moonstone.webp`). Podczas próby World Bossa i okna
-łupów jest ukryty, aby na wąskim ekranie nie nachodził na stoper. Modal używa
-oryginalnego wizerunku Statui, pięciu widocznych pól, przycisków kamieni, Start/Stop
-i Exit. Checkbox pochodzi z NewOption.
+łupów jest ukryty, aby na wąskim ekranie nie nachodził na stoper. Modal pokazuje sam
+oryginalny wizerunek Statui, pięć widocznych pól, przyciski kamieni, Start/Stop
+i Exit oraz informacje pod nimi, bez zewnętrznej ramki i dodatkowego X. Checkbox pochodzi z NewOption.
 
 Od tej partii (baza `c632560`) animacja jest jednym poziomym paskiem 42 ikon:
 przesuwa się od prawej do lewej przez 3000 ms i zwalnia do wygranego przedmiotu
@@ -132,7 +139,8 @@ reloadzie, nie zmienia sam grade i kończy przy braku wybranego kamienia.
 
 Serwis blokuje rozpoczęcie gry podczas ekspedycji, Dungeons i próby World Bossa.
 Rozliczenie już zapisanej rundy może się zakończyć niezależnie od późniejszego
-stanu polowania. SaveVersion nadal **16**, nowe pole jest opcjonalne i sanitizowane.
+stanu polowania. Rezerwacja Statui pozostaje opcjonalna i sanitizowana; bieżący SaveVersion to **17**
+po dodaniu [kalendarza logowania](login-calendar.md).
 Bieżący serwis jest lokalny; przyszły backend powinien zachować rezerwację i
 jednorazowe rozliczenie po ID, z transakcją na każdą z tych dwóch operacji.
 

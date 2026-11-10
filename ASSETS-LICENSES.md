@@ -23,10 +23,13 @@ Surowe pliki klienta i zrzut bazy nie są w repo.
 Statua Księżycowa i bilety Cash (2026-11-10): `public/ui/lc/moonstone-*.webp`
 pochodzą z `Data/Interface/MoonStone.tex` klienta 2015, według UV w CUIGamble.
 `event-frame.webp` pochodzi z EventBtn0.tex. `menu-moonstone.webp` łączy tę ramkę
-z twarzą Statui z MoonStone.tex (x87, y0, 84×74 px).
+z twarzą Statui z MoonStone.tex (x101, y0, 54×70 px).
 Eksport: `scripts/lc/moonstone-art.mjs`.
 Atlas przedmiotów rozszerzono o źródłowe ikony nagród i kamieni. Sześć własnych
-biletów Cash używa ikony Phoenix Ticket 3217 (ItemBtn6, wiersz 0, kolumna 4).
+biletów Cash używa ikony biletu 7341 (ItemBtn15, wiersz 1, kolumna 2).
+Kalendarz: `menu-calendar.webp` z akcji 52 (`ActionBtn0`, wiersz 6, kolumna 3)
+w ramce EventBtn0; `calendar-*.webp` z `CalendarUi.tex`, według calendar.xml.
+Eksport: `scripts/lc/calendar-art.mjs`, kompozycje: `event-button.mjs`.
 Są objęte powyższą decyzją właściciela dotyczącą zasobów LC.
 
 World Boss (2026-11-10): `public/models/lc/kamira.glb`, `red_dragon.glb` i

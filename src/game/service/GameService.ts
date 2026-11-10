@@ -15,6 +15,7 @@ import type { DungeonId } from '../data/dungeons.ts'
 import type { DungeonPoint, DungeonUpdate } from '../logic/dungeons.ts'
 import type { CashTicketUse } from '../logic/cashTickets.ts'
 import type { MoonstonePlay, MoonstoneStart } from '../logic/moonstones.ts'
+import type { CalendarClaim, LoginCalendarProgress } from '../logic/loginCalendar.ts'
 
 /** A Cash shop purchase: the character with the items, and the account's Cash left. */
 export interface CashPurchase {
@@ -113,6 +114,10 @@ export interface GameService {
   buyCashOffer(characterId: string, offerId: string, count: number): Promise<CashPurchase>
   /** Consumes one ticket and credits the account's Cash balance atomically. */
   redeemCashTicket(characterId: string, itemId: number): Promise<CashTicketUse>
+  /** Real foreground presence, independent of combat speed and offline simulations. */
+  calendarPresence(characterId: string, visible: boolean): Promise<LoginCalendarProgress>
+  /** One account claim pays today's weekly and monthly rewards together. */
+  claimLoginCalendar(characterId: string): Promise<CalendarClaim>
   /** Reserves a stone and its draw without crediting the prize to the bag. */
   beginMoonstonePlay(characterId: string, stoneId: number): Promise<MoonstoneStart>
   /** Claims a reserved draw after the visual roll; retries cannot pay it twice. */

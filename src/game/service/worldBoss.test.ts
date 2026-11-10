@@ -207,6 +207,8 @@ describe('World Boss service lifecycle', () => {
         { itemId: 4920, count: 50 },
         { itemId: 972, count: 10 },
         { itemId: 2544, count: 25 },
+        { itemId: 2547, count: 5 },
+        { itemId: 2548, count: 3 },
         { itemId: 95014, count: 1 },
       ]),
     )

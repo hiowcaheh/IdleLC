@@ -18,7 +18,7 @@ import { stowDrops } from './loot.ts'
 import { applyIdentify, isRare, isUnidentified } from './rare.ts'
 import { rewardKills } from './rewards.ts'
 import { createRng } from './rng.ts'
-import { createDefaultSave, loadSave } from './save.ts'
+import { createDefaultSave, loadSave, SAVE_VERSION } from './save.ts'
 import {
   chargeWorldBoss,
   sanitizeWorldBossProgress,
@@ -45,6 +45,8 @@ const currentGuaranteed = [
   { itemId: 759, count: 1 },
   { itemId: 972, count: 10 },
   { itemId: 2544, count: 25 },
+  { itemId: 2547, count: 5 },
+  { itemId: 2548, count: 3 },
   { itemId: 4917, count: 50 },
   { itemId: 4920, count: 50 },
   { itemId: 95014, count: 1 },
@@ -188,7 +190,7 @@ describe('World Boss charge and save compatibility', () => {
     const original = createDefaultSave(1000)
     original.characters = [c, { ...hero(), id: 'other', worldBoss: undefined }]
     const loaded = loadSave(JSON.stringify(original), 1000)
-    expect(loaded.save.saveVersion).toBe(16)
+    expect(loaded.save.saveVersion).toBe(SAVE_VERSION)
     expect(loaded.save.characters[0]!.worldBoss).toEqual(c.worldBoss)
     expect(loaded.save.characters[1]!.worldBoss).toEqual({ kills: {}, defeated: {}, active: null })
     expect(

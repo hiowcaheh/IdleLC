@@ -3,9 +3,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import sharp from 'sharp'
 import { ClientFiles } from './client.mjs'
 import { buildUiParts } from './ui.mjs'
+import { eventButton } from './event-button.mjs'
 
 const client = process.argv[2]
 if (!client) throw new Error('Usage: node scripts/lc/moonstone-art.mjs <client folder>')
@@ -19,11 +19,7 @@ for (const [name, buffer] of Object.entries(art)) {
 }
 
 // The statue's own face in the same single event frame as the other shortcuts.
-const mark = await sharp(art['moonstone-mark'])
-  .resize(96, 96, { fit: 'contain', background: '#0000' })
-  .toBuffer()
-await sharp(art['event-frame'])
-  .resize(128, 128)
-  .composite([{ input: mark, left: 16, top: 16 }])
-  .webp({ lossless: true })
-  .toFile(path.join(root, 'public/ui/lc/menu-moonstone.webp'))
+fs.writeFileSync(
+  path.join(root, 'public/ui/lc/menu-moonstone.webp'),
+  await eventButton(art['event-frame'], art['moonstone-mark'], 1.2),
+)

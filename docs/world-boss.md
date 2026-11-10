@@ -63,8 +63,9 @@ zachowuje powrót przez `planTravel`, także po reloadzie.
 
 `worldBossDropTable` nakłada reguły właściciela na surową tabelę raidDrops.
 Usunięte 47/673/786; mikstury 45/485 zastąpione 4917/4920 po 50 sztuk; Lucky Scroll
-972 daje 10. Dodatkowo zawsze Moonstone Box 2544 ×25 i 100 Cash Ticket 95014 ×1.
-Hero's Necklace, Moon Stone i Medal of Honor zostają. Łącznie osiem gwarantowanych
+972 daje 10. Dodatkowo zawsze Moonstone Box 2544 ×25, Good Moonstone 2547 ×5,
+Perfect Moonstone 2548 ×3 i 100 Cash Ticket 95014 ×1.
+Hero's Necklace, Moon Stone i Medal of Honor zostają. Łącznie dziesięć gwarantowanych
 stosów, poza niezależnymi raid ACC i zwykłymi slotami Balroga. Szanse akcesoriów
 i brak mnożników nadal obowiązują. Cash dopisuje dopiero Use biletu z ekwipunku.
 [Pełna tabela, źródła i mechanika skrzynki](moonstone-cash.md).

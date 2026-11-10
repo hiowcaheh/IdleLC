@@ -21,6 +21,8 @@ export function worldBossDropTable(boss: LcWorldBoss): LcWorldBoss['raidDrops'] 
               : d,
       ),
     { item: MOONSTONE_BOX_ID, count: 25, probability: 10000, flag: 0 },
+    { item: 2547, count: 5, probability: 10000, flag: 0 },
+    { item: 2548, count: 3, probability: 10000, flag: 0 },
     { item: CASH_TICKET_100_ID, count: 1, probability: 10000, flag: 0 },
   ]
 }
