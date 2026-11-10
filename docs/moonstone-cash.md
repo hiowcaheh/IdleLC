@@ -94,39 +94,72 @@ w serwerze. Losowanie jest względem sumy wag, nie względem założonego 100%.
 Wiersze dodatkowego kamienia 6092 nie należą do pięciu normalnych przycisków klienta.
 W przekazanych tabelach tych pięciu kamieni nie ma nagrody złota (19) ani broni.
 
-`applyMoonstonePlay` sprawdza posiadanie kamienia, losuje jeden wiersz, zużywa jedną
-sztukę i dodaje nagrodę. Serwis zapisuje stawkę i wynik razem. Animacja nie losuje
-ponownie i nie decyduje o wypłacie. Pole `ItemStack.flag` zachowuje poziomy mineralów
-498..501; stosy łączą się po ID i flag, pokazują poziom w GUI i BagFeed, zachowują go
-po reloadzie. Sprzedaż usuwa wyłącznie wybrany wariant. Import nagród zachowuje też
-pozostałe oryginalne przedmioty (materiały, Butchers Box, boostery i tokeny).
+`beginMoonstonePlay` sprawdza kamień, losuje jeden źródłowy wiersz, zużywa sztukę
+oraz zapisuje opcjonalne `CharacterData.moonstoneSpin` (ID rundy, kamień, wynik,
+czas początku). Nagroda nie trafia jeszcze do inventory ani BagFeed. Po zakończeniu
+animacji `finishMoonstonePlay` wypłaca zapisany wynik i usuwa pending jednym
+zapisem. Wymaga zgodnego ID i co najmniej `MOONSTONE_SPIN_MS` od rezerwacji.
+Duplikat i konflikt zapisu są odrzucane; błąd zapisu cofa stan serwisu w pamięci.
+Wypłata używa bieżącego inventory, zachowując przedmioty zdobyte w międzyczasie.
 
-Przycisk 40 px pod Item Shop ma tę samą ramkę zdarzeń klienta i ikonę Moon Stone.
-Podczas próby World Bossa i okna łupów jest ukryty, aby na wąskim ekranie nie
-nachodził na stoper. Po wznowieniu polowania wraca na swoje miejsce.
-Modal używa oryginalnego wizerunku Statui, pięciu pól nagrody, przycisków kamieni,
-Start/Stop i Exit. Checkbox pochodzi z NewOption. `moonstone-art.mjs` eksportuje
-nowe fragmenty atlasu bez zastępowania dotychczasowych grafik.
+Źródłowe losowanie i wagi pozostają bez zmian. Pole `ItemStack.flag` zachowuje
+poziomy mineralów 498..501; stosy łączą się po ID i flag, pokazują poziom w GUI i
+BagFeed, zachowują go po reloadzie. Sprzedaż usuwa wyłącznie wybrany wariant.
+Import nagród zachowuje też pozostałe oryginalne przedmioty.
 
-Automat jest dodatkiem właściciela: jeden zapis na rundę, wybrany kamień, 900 ms
-animacji i 450 ms widocznego wyniku. Stop, Exit, zamknięcie modalu i ukrycie karty
-kończą powtarzanie; wyczerpanie wybranego kamienia również. Nie przełącza sam grade,
-nie działa offline i nie przywraca automatu po reloadzie. Serwis blokuje grę podczas
-ekspedycji, Dungeons i próby World Bossa. Nagrody pojawiają się przez ten sam BagFeed
-co zakupy w Cash Shop.
+Przycisk 40 px pod Item Shop ma jedną ramkę zdarzeń klienta oraz twarz Statui
+wyciętą z MoonStone.tex (`menu-moonstone.webp`). Podczas próby World Bossa i okna
+łupów jest ukryty, aby na wąskim ekranie nie nachodził na stoper. Modal używa
+oryginalnego wizerunku Statui, pięciu widocznych pól, przycisków kamieni, Start/Stop
+i Exit. Checkbox pochodzi z NewOption.
 
-SaveVersion nadal **16**. Bieżący serwis jest lokalny; przyszły backend powinien
-przenieść zużycie kamienia/biletu oraz nagrodę/Cash do jednej własnej transakcji.
+Od tej partii (baza `c632560`) animacja jest jednym poziomym paskiem 42 ikon:
+przesuwa się od prawej do lewej przez 3000 ms i zwalnia do wygranego przedmiotu
+pod środkowym znacznikiem. Pozostałe ikony pochodzą z tej samej puli, są wyłącznie
+wizualne i nie zużywają RNG gry. Dopiero `animationend` i kolejna klatka uruchamiają
+wypłatę, nazwę nagrody oraz powiadomienie BagFeed po lewej. Przy ograniczeniu
+animacji systemowym ustawieniem ikony czekają ukryte przez ten sam czas; ujawnienie
+i wypłata następują razem po końcu animacji.
+
+`useMoonstoneRound` prowadzi fazy idle/starting/rolling/claiming/waiting/paused.
+Automat ma 700 ms widocznego wyniku przed kolejną rundą. Stop wyłącza powtarzanie,
+ale bieżąca runda kończy animację. Exit i zamknięcie modalu również czekają na
+zatrzymanie i przyznanie bieżącej nagrody. Ukrycie karty zatrzymuje automat i
+pauzuje losowanie; Resume odtwarza je od początku bez nowego kamienia i losowania.
+Reload zachowuje rezerwację, otwiera okno w stanie paused i wymaga Resume.
+Przerwanie nie przyznaje nagrody za sam upływ czasu. Automat nie przywraca się po
+reloadzie, nie zmienia sam grade i kończy przy braku wybranego kamienia.
+
+Serwis blokuje rozpoczęcie gry podczas ekspedycji, Dungeons i próby World Bossa.
+Rozliczenie już zapisanej rundy może się zakończyć niezależnie od późniejszego
+stanu polowania. SaveVersion nadal **16**, nowe pole jest opcjonalne i sanitizowane.
+Bieżący serwis jest lokalny; przyszły backend powinien zachować rezerwację i
+jednorazowe rozliczenie po ID, z transakcją na każdą z tych dwóch operacji.
 
 ## Weryfikacja
 
-`npm run check`: **619 testów / 77 plików**, lint, formatowanie i TypeScript.
+Partia poziomego paska: `npm run check`, **623 testy / 77 plików**, i build poprawne.
+Dodatkowe testy obejmują brak wypłaty przed czasem, blokadę drugiego losowania,
+zachowanie rezerwacji i poziomu mineralów po reloadzie, powtórny odbiór oraz
+konflikt dwóch klientów przy wypłacie. Granice źródłowych pul nadal sprawdzane.
+
+Chromium 320/390/1280 px potwierdził ruch w lewo bez przesunięcia pionowego oraz
+zatrzymanie środka nagrody pod znacznikiem (odchylenie poniżej 0,4 px). Inwentarz
+nie zawiera nagrody podczas ruchu, BagFeed następuje po rzeczywistym animationend.
+Sprawdzono też systemowe ograniczenie animacji. Build produkcyjny 320/390 px:
+pojedyncza gra, automat do zera, Stop i Exit połączone z ukryciem karty, ponowne
+otwarcie zapisanego losowania i reload. Resume zużywa zero dodatkowych kamieni;
+wynik wypłaca się raz. Ukrycie symulowane zdarzeniem visibilitychange. Brak błędów
+JS, konsoli, HTTP i żądań. Przygotowane zapisy, bez pomiaru balansu lub FPS.
+
+Pierwsza partia (`667c494`): **619 testów / 77 plików**, lint, formatowanie i TypeScript.
 `npm run build`: poprawny. Testy sprawdzają wszystkie nominały i ikony, pojedyncze doładowanie i reload,
 konflikt zapisu, dokładnie 1000 wyników skrzynki, granice każdego wiersza nagród
 Statui, poziomy mineralów, sprzedaż wariantów, limity wejścia oraz nowe nagrody
 każdego z czterech bossów.
 
-Chromium na buildzie produkcyjnym, 320/390/1280 px: jeden kamień, następnie pełne
+Próby pierwszej partii, przed zmianą animacji: Chromium na buildzie produkcyjnym,
+320/390/1280 px: jeden kamień, następnie pełne
 100 sztuk Average w automacie i zatrzymanie przy zerze (101 gier z pierwszą próbą).
 Stop, Exit i test zdarzenia visibilitychange nie uruchamiają następnej rundy.
 Sprawdzono sześć nominałów, saldo 25 → 1705 Cash, zużycie po jednym bilecie i reload.

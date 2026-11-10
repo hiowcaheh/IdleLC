@@ -1,5 +1,23 @@
 # Historia zmian
 
+## 2026-11-10 (Codex): Statua, poziome losowanie i odsłonięcie nagrody na końcu
+
+1. Ikona skrótu przedstawia twarz Statui z oryginalnego klienta w jednej ramce.
+2. Nagrody jadą od prawej do lewej i zwalniają do przedmiotu pod środkowym
+   znacznikiem. Nazwa, dodanie do ekwipunku i powiadomienie po lewej pojawiają się
+   dopiero po zatrzymaniu paska.
+3. Stop wyłącza automat po bieżącej rundzie, Exit czeka na jej wynik. Przerwane
+   losowanie jest zapisane; po ukryciu karty lub reloadzie Resume dokańcza ten sam
+   wynik bez drugiego kamienia. Automat nie działa w tle.
+
+Źródłowe nagrody i szanse bez zmian. Nadal SaveVersion **16**.
+[Szczegóły i notatka dla Claude](docs/moonstone-cash.md).
+Weryfikacja: **623 testy / 77 plików**, lint, formatowanie, TypeScript i build.
+Chromium 320/390/1280 px; kierunek, środkowy wynik i powiadomienie po końcu
+animacji. Build produkcyjny: automat, Stop/Exit połączone z ukryciem karty,
+ponowne otwarcie i reload tej samej rundy, bez ponownego zużycia kamienia ani
+podwójnej nagrody.
+
 ## 2026-11-10 (Codex): drop World Bossów, bilety Cash i Statua Księżycowa
 
 1. Nowy gwarantowany drop bossów: Platinum Small Healing/Mana Potion po 50,

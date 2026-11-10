@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useMemo, type CSSProperties } from 'react'
 import { MOONSTONES, moonstoneFor } from '../../game/data/moonstones.ts'
 import { getItem } from '../../game/data/items.ts'
 import { countOwned } from '../../game/logic/potions.ts'
-import type { ItemStack } from '../../game/logic/loot.ts'
+import { MOONSTONE_SPIN_MS, type MoonstoneSpin } from '../../game/logic/moonstones.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { Sheet } from '../Sheet.tsx'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { fmt } from '../gear/format.ts'
+import { useMoonstoneRound } from './useMoonstoneRound.ts'
 import './moonstone.css'
 
 export function MoonstoneButton({ onClick }: { onClick(): void }) {
@@ -21,134 +22,126 @@ export function MoonstoneButton({ onClick }: { onClick(): void }) {
       title="Moonstone Statue"
       disabled={disabled}
       onClick={onClick}
-    >
-      <ItemIcon item={getItem(723)} size={28} />
-    </button>
+    />
   )
 }
 
-/** One saved play at a time; automatic play ends on Stop, Exit, tab hiding or an empty stake. */
-export function MoonstoneStatue({ onClose }: { onClose(): void }) {
-  const character = useGameStore((s) => s.character)
-  const playMoonstone = useGameStore((s) => s.playMoonstone)
-  const [stoneId, setStoneId] = useState(
-    () =>
-      MOONSTONES.find((s) => countOwned(character?.inventory ?? [], s.itemId))?.itemId ??
-      MOONSTONES[0]!.itemId,
-  )
-  const [autoPlay, setAutoPlay] = useState(false)
-  const auto = useRef(false)
-  const [playing, setPlaying] = useState(false)
-  const [spinning, setSpinning] = useState(false)
-  const [prize, setPrize] = useState<ItemStack | null>(null)
-  const [rounds, setRounds] = useState(0)
-  const [error, setError] = useState('')
-  const job = useRef({
-    active: false,
-    token: 0,
-    timer: null as ReturnType<typeof setTimeout> | null,
-  })
-  const stop = useCallback(() => {
-    job.current.active = false
-    job.current.token++
-    if (job.current.timer) clearTimeout(job.current.timer)
-    job.current.timer = null
-    setPlaying(false)
-    setSpinning(false)
-  }, [])
-  useEffect(() => {
-    const current = job.current
-    const hidden = () => {
-      if (document.hidden) stop()
-    }
-    document.addEventListener('visibilitychange', hidden)
-    return () => {
-      document.removeEventListener('visibilitychange', hidden)
-      current.active = false
-      current.token++
-      if (current.timer) clearTimeout(current.timer)
-    }
-  }, [stop])
+const WINNING_CELL = 36
+const STRIP_CELLS = 42
 
+/** The visual decoys never consume the game's RNG. Only the reserved source draw can win. */
+function prizeStrip(spin: MoonstoneSpin) {
+  const pool = moonstoneFor(spin.stoneId)!.rewards
+  let seed =
+    [...spin.id].reduce((n, c) => Math.imul(n ^ c.charCodeAt(0), 16777619), 2166136261) >>> 0
+  return Array.from({ length: STRIP_CELLS }, (_, i) => {
+    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0
+    return i === WINNING_CELL ? spin.prize.itemId : pool[seed % pool.length]!.itemId
+  })
+}
+
+function MoonstoneReel({
+  spin,
+  stoneId,
+  rolling,
+  paused,
+  replay,
+  onLanded,
+}: {
+  spin: MoonstoneSpin | null
+  stoneId: number
+  rolling: boolean
+  paused: boolean
+  replay: number
+  onLanded(): void
+}) {
+  const strip = useMemo(() => (spin ? prizeStrip(spin) : null), [spin])
+  const end = `-${(WINNING_CELL - 2) * 20}%`
+  return (
+    <div
+      className={`moonstone-reels${rolling ? ' is-rolling' : spin && !paused ? ' is-settled' : ''}`}
+      aria-hidden="true"
+    >
+      <div className="moonstone-pointer" />
+      {spin && strip && !paused ? (
+        <div
+          key={`${spin.id}:${replay}`}
+          className="moonstone-strip"
+          style={
+            {
+              '--moonstone-end': end,
+              '--moonstone-duration': `${MOONSTONE_SPIN_MS}ms`,
+            } as CSSProperties
+          }
+          onAnimationEnd={(e) => {
+            if (e.target === e.currentTarget) requestAnimationFrame(onLanded)
+          }}
+        >
+          {strip.map((id, i) => (
+            <span
+              key={i}
+              className={`moonstone-cell${i === WINNING_CELL ? ' moonstone-cell--winner' : ''}`}
+            >
+              <ItemIcon item={getItem(id)} fluid />
+            </span>
+          ))}
+        </div>
+      ) : (
+        <div className="moonstone-placeholder">
+          {Array.from({ length: 5 }, (_, i) => (
+            <span className="moonstone-cell" key={i}>
+              <ItemIcon item={getItem(stoneId)} fluid />
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function MoonstoneStatue({ onClose }: { onClose(): void }) {
+  const round = useMoonstoneRound(onClose)
+  const {
+    character,
+    stoneId,
+    phase,
+    spin,
+    replay,
+    autoPlay,
+    prize,
+    rounds,
+    error,
+    stopping,
+    leaving,
+    running,
+    locked,
+  } = round
   if (!character) return null
-  const stone = moonstoneFor(stoneId)!
   const owned = countOwned(character.inventory, stoneId)
   const item = getItem(stoneId)
-  const pool = stone.rewards.map((r) => r.itemId)
-  const close = () => {
-    stop()
-    onClose()
-  }
-
-  const start = () => {
-    if (job.current.active || owned < 1 || document.hidden) return
-    job.current.active = true
-    const token = ++job.current.token
-    setPlaying(true)
-    setError('')
-    const current = () => job.current.active && job.current.token === token
-    const round = async () => {
-      if (!current()) return
-      if (document.hidden) {
-        stop()
-        return
-      }
-      setSpinning(true)
-      try {
-        const won = await playMoonstone(stoneId)
-        if (!current()) return
-        setPrize(won)
-        setRounds((n) => n + 1)
-        job.current.timer = setTimeout(() => {
-          if (!current()) return
-          setSpinning(false)
-          job.current.timer = setTimeout(() => {
-            if (!current()) return
-            const remaining = countOwned(
-              useGameStore.getState().character?.inventory ?? [],
-              stoneId,
-            )
-            if (auto.current && remaining > 0 && !document.hidden) void round()
-            else stop()
-          }, 450)
-        }, 900)
-      } catch {
-        if (!current()) return
-        stop()
-        setError('The play could not be completed. Check your Moonstones and try again.')
-      }
-    }
-    void round()
-  }
-
+  const rolling = phase === 'rolling'
+  const paused = phase === 'paused'
   return (
     <Sheet
       centered
       title="Moonstone Statue"
       titleId="moonstone-title"
       className="sheet--client moonstone"
-      onClose={close}
+      onClose={round.close}
     >
       <div
         className="moonstone-machine"
-        aria-label={spinning ? 'Moonstone reels spinning' : 'Moonstone reels'}
+        aria-label={rolling ? 'Moonstone reels spinning' : 'Moonstone reels'}
       >
         <span className="moonstone-machine__title">Moonstone Statue</span>
-        <div className="moonstone-reels" aria-hidden="true">
-          {Array.from({ length: 5 }, (_, i) => (
-            <span key={i} className={`moonstone-reel${spinning ? ' is-spinning' : ''}`}>
-              {spinning ? (
-                <span className="moonstone-reel__strip" style={{ animationDelay: `${i * -0.12}s` }}>
-                  {Array.from({ length: 4 }, (_, j) => (
-                    <ItemIcon key={j} item={getItem(pool[(i + j) % pool.length]!)} size={32} />
-                  ))}
-                </span>
-              ) : (
-                <ItemIcon item={getItem(prize?.itemId ?? stoneId)} fluid />
-              )}
-            </span>
-          ))}
-        </div>
+        <MoonstoneReel
+          spin={spin}
+          stoneId={stoneId}
+          rolling={rolling}
+          paused={paused}
+          replay={replay}
+          onLanded={() => void round.landed()}
+        />
       </div>
       <div className="moonstone-stones" role="group" aria-label="Moonstone grade">
         {MOONSTONES.map((s, i) => {
@@ -161,12 +154,8 @@ export function MoonstoneStatue({ onClose }: { onClose(): void }) {
               aria-pressed={s.itemId === stoneId}
               aria-label={`Grade ${i + 1}: ${getItem(s.itemId).name}, ${fmt(n)} available`}
               title={getItem(s.itemId).name}
-              disabled={playing}
-              onClick={() => {
-                setStoneId(s.itemId)
-                setPrize(null)
-                setError('')
-              }}
+              disabled={locked}
+              onClick={() => round.chooseStone(s.itemId)}
             >
               <span className="moonstone-stone__icon">
                 <ItemIcon item={getItem(s.itemId)} fluid />
@@ -179,14 +168,21 @@ export function MoonstoneStatue({ onClose }: { onClose(): void }) {
       <div className="moonstone-controls">
         <button
           type="button"
-          className={`moonstone-control${playing ? ' moonstone-control--stop' : ' moonstone-control--start'}`}
-          aria-label={playing ? 'Stop' : 'Start'}
-          disabled={!playing && owned < 1}
-          onClick={playing ? stop : start}
+          className={`moonstone-control${running ? ' moonstone-control--stop' : ' moonstone-control--start'}`}
+          aria-label={running ? 'Stop' : paused ? 'Resume' : 'Start'}
+          disabled={
+            leaving || stopping || phase === 'claiming' || (!running && !paused && owned < 1)
+          }
+          onClick={running ? round.stop : () => void round.start()}
         >
-          <span className="visually-hidden">{playing ? 'Stop' : 'Start'}</span>
+          <span className="visually-hidden">{running ? 'Stop' : paused ? 'Resume' : 'Start'}</span>
         </button>
-        <button type="button" className="moonstone-control moonstone-control--exit" onClick={close}>
+        <button
+          type="button"
+          className="moonstone-control moonstone-control--exit"
+          disabled={leaving}
+          onClick={round.close}
+        >
           <span className="visually-hidden">Exit</span>
         </button>
       </div>
@@ -199,15 +195,19 @@ export function MoonstoneStatue({ onClose }: { onClose(): void }) {
             type="checkbox"
             className="check-box"
             checked={autoPlay}
-            onChange={(e) => {
-              auto.current = e.target.checked
-              setAutoPlay(e.target.checked)
-            }}
+            disabled={leaving}
+            onChange={(e) => round.chooseAuto(e.target.checked)}
           />{' '}
           Automatically play this grade
         </label>
         <p className="moonstone-info__hint">
-          One Moonstone per play. Automatic play stops when this grade runs out.
+          {leaving
+            ? 'Finishing this roll, then exiting.'
+            : stopping
+              ? 'Finishing this roll. Automatic play is off.'
+              : paused
+                ? 'Your draw is saved. Resume this roll without using another stone.'
+                : 'One Moonstone per play. The prize reaches your bag when the reel stops.'}
         </p>
         <div className="moonstone-prize" role="status" aria-label="Latest Moonstone prize">
           {prize ? (
@@ -220,7 +220,13 @@ export function MoonstoneStatue({ onClose }: { onClose(): void }) {
               </span>
             </>
           ) : (
-            <span>Choose a Moonstone and press Start.</span>
+            <span>
+              {running
+                ? 'Drawing…'
+                : paused
+                  ? 'Roll paused.'
+                  : 'Choose a Moonstone and press Start.'}
+            </span>
           )}
         </div>
         <p className="moonstone-info__plays">Plays this visit: {fmt(rounds)}</p>

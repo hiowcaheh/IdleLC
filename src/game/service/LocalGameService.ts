@@ -93,7 +93,12 @@ import type {
 } from './GameService.ts'
 import { applyCashBuy } from '../logic/cashShop.ts'
 import { applyCashTicket, type CashTicketUse } from '../logic/cashTickets.ts'
-import { applyMoonstonePlay, type MoonstonePlay } from '../logic/moonstones.ts'
+import {
+  beginMoonstonePlay,
+  finishMoonstonePlay,
+  type MoonstonePlay,
+  type MoonstoneStart,
+} from '../logic/moonstones.ts'
 import {
   chargeWorldBoss,
   endWorldBoss,
@@ -701,9 +706,27 @@ export class LocalGameService implements GameService {
     }
   }
 
-  async playMoonstone(characterId: string, stoneId: number): Promise<MoonstonePlay> {
+  async beginMoonstonePlay(characterId: string, stoneId: number): Promise<MoonstoneStart> {
     this.notOnWorldBoss(characterId)
-    const played = applyMoonstonePlay(this.notOnExpedition(characterId), stoneId, this.rng)
+    const started = beginMoonstonePlay(
+      this.notOnExpedition(characterId),
+      stoneId,
+      newId(),
+      this.now(),
+      this.rng,
+    )
+    const before = this.save
+    try {
+      const updated = this.update(characterId, () => started.character)
+      return copy({ ...started, character: updated })
+    } catch (error) {
+      this.save = before
+      throw error
+    }
+  }
+
+  async finishMoonstonePlay(characterId: string, spinId: string): Promise<MoonstonePlay> {
+    const played = finishMoonstonePlay(this.character(characterId), spinId, this.now())
     const before = this.save
     try {
       const updated = this.update(characterId, () => played.character)

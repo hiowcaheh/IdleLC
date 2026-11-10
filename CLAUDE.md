@@ -1,5 +1,18 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-10 (Codex): **Statua, poziomy pasek i późniejsza wypłata**.
+Ikona to twarz Statui w jednej oryginalnej ramce. Pasek porusza się od prawej do
+lewej przez 3 s, zwalniając do środkowego pola. `beginMoonstonePlay` zużywa kamień
+oraz zapisuje `character.moonstoneSpin`, bez dodawania nagrody i BagFeed.
+`finishMoonstonePlay` dopiero po animationend + klatce wypłaca wynik i usuwa pending;
+ID, próg 3 s i konflikt zapisu chronią przed powtórką. Dane i RNG nagród bez zmian.
+`useMoonstoneRound` kończy bieżącą rundę po Stop/Exit, automat czeka 700 ms.
+Ukrycie/reload pauzuje ten sam zapisany wynik; Resume bez kolejnego kamienia.
+Reload automatycznie otwiera paused modal. Nadal opcjonalne pole v16.
+Szczegóły: [docs/moonstone-cash.md](docs/moonstone-cash.md).
+Weryfikacja: **623 testy / 77 plików**, pełne check i build; Chromium oraz próba
+produkcyjna z rezerwacją, animacją, automatem, Stop/Exit, ukryciem i reloadem.
+
 Aktualizacja 2026-11-10 (Codex): [World Boss loot, Cash tickets, Statua](docs/moonstone-cash.md).
 `worldBossDropTable` nakłada zmiany właściciela na niezmienione źródłowe raidDrops:
 bez 47/673/786, 4917/4920 po 50 zamiast 45/485, 972 ×10, 2544 ×25, 95014 ×1.
@@ -10,8 +23,8 @@ Moonstone Box 2544: 520/300/150/30 na 2545/2546/723/2547, jedna sztuka, bez Perf
 w normalnym GUI klienta). Wagi Good/Perfect sumują się do 102/105, nie poprawiać do 100.
 `ItemStack.flag` zachowuje poziom mineralów 498..501 (3/6/9/12/14), stosy po ID+flag.
 Sanitizer v16 i sprzedaż zachowują warianty; nie scalać samym itemId.
-Przycisk pod Item Shop, CUIGamble/MoonStone.tex. Automat wyłącznie w otwartym oknie,
-jedna transakcja na kamień, Stop/Exit/ukrycie karty zatrzymują. BagFeed dla nagród.
+Przycisk pod Item Shop, CUIGamble/MoonStone.tex. Aktualne rozliczenie i animacja
+opisane wyżej; pierwotną natychmiastową wypłatę zastąpiła rezerwacja i odbiór.
 Wynik Multi-open przeniesiony do Inventory, aby przetrwał zużycie ostatniej skrzynki.
 Weryfikacja: 619 testów / 77 plików, build i próba produkcyjna na 100 kamieni.
 

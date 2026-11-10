@@ -46,7 +46,9 @@ export function GameScreen() {
   const [titlesOpen, setTitlesOpen] = useState(false)
   const [dungeonsOpen, setDungeonsOpen] = useState(false)
   const [shopOpen, setShopOpen] = useState(false)
-  const [moonstoneOpen, setMoonstoneOpen] = useState(false)
+  const [moonstoneOpen, setMoonstoneOpen] = useState(
+    () => !!useGameStore.getState().character?.moonstoneSpin,
+  )
   const dungeon = useGameStore((s) => s.dungeon)
   const devTools = useDevTools((s) => s.enabled)
   const character = useGameStore((s) => s.character)

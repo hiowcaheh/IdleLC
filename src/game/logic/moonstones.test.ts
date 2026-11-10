@@ -9,13 +9,23 @@ vi.mock('../data/lcSource.ts', async () => ({
 
 import { MOONSTONES } from '../data/moonstones.ts'
 import { ITEMS, itemIcon } from '../data/items.ts'
-import { applyMoonstonePlay } from './moonstones.ts'
-import { createCharacterData } from './character.ts'
+import {
+  beginMoonstonePlay,
+  finishMoonstonePlay,
+  MOONSTONE_SPIN_MS,
+  sanitizeMoonstoneSpin,
+} from './moonstones.ts'
+import { createCharacterData, type CharacterData } from './character.ts'
+import type { Rng } from './rng.ts'
 import { createDefaultSave, loadSave } from './save.ts'
 import { addToInventory, takeFromInventory } from './loot.ts'
 import { applySale } from './shop.ts'
 
 const hero = () => createCharacterData({ name: 'Moon', classId: 'mage' }, 'm', 1000)
+const play = (c: CharacterData, stoneId: number, rng: Rng) => {
+  const started = beginMoonstonePlay(c, stoneId, 'test-spin', 1000, rng)
+  return finishMoonstonePlay(started.character, started.spin.id, 1000 + MOONSTONE_SPIN_MS)
+}
 
 describe('original Moonstone statue', () => {
   it('has all five client grades, known source prizes and the source mineral levels', () => {
@@ -47,7 +57,7 @@ describe('original Moonstone statue', () => {
               { itemId: 95014, count: 1 },
             ],
           }
-          const played = applyMoonstonePlay(c, stone.itemId, () => roll / total)
+          const played = play(c, stone.itemId, () => roll / total)
           expect(played.prize).toEqual({
             itemId: r.itemId,
             count: r.count,
@@ -88,7 +98,45 @@ describe('original Moonstone statue', () => {
   })
 
   it('rejects an unknown or missing stake without changing the bag', () => {
-    expect(() => applyMoonstonePlay(hero(), 85, () => 0)).toThrow('not-a-moonstone')
-    expect(() => applyMoonstonePlay(hero(), 723, () => 0)).toThrow('not-enough-moonstones')
+    expect(() => play(hero(), 85, () => 0)).toThrow('not-a-moonstone')
+    expect(() => play(hero(), 723, () => 0)).toThrow('not-enough-moonstones')
+  })
+
+  it('reserves the stake without paying or allowing another draw until the reel finishes', () => {
+    const c = { ...hero(), inventory: [{ itemId: 2545, count: 2 }] }
+    const started = beginMoonstonePlay(c, 2545, 'spin-one', 1000, () => 0)
+    expect(started.character.inventory).toEqual([{ itemId: 2545, count: 1 }])
+    expect(started.character.moonstoneSpin).toEqual(started.spin)
+    expect(() => beginMoonstonePlay(started.character, 2545, 'another', 1000, () => 0.99)).toThrow(
+      'moonstone-play-pending',
+    )
+    expect(() =>
+      finishMoonstonePlay(started.character, started.spin.id, 1000 + MOONSTONE_SPIN_MS - 1),
+    ).toThrow('moonstone-play-not-ready')
+    expect(c.inventory[0]!.count).toBe(2)
+    const paid = finishMoonstonePlay(started.character, started.spin.id, 1000 + MOONSTONE_SPIN_MS)
+    expect(paid.character.inventory).toContainEqual(started.spin.prize)
+    expect(paid.character.moonstoneSpin).toBeUndefined()
+    expect(() => finishMoonstonePlay(paid.character, started.spin.id, 9000)).toThrow(
+      'moonstone-play-expired',
+    )
+    expect(() => finishMoonstonePlay(started.character, 'wrong-id', 9000)).toThrow(
+      'moonstone-play-expired',
+    )
+  })
+
+  it('keeps an interrupted draw and mineral level in v16 without re-rolling or refunding the stake', () => {
+    const c = { ...hero(), inventory: [{ itemId: 2548, count: 1 }] }
+    const started = beginMoonstonePlay(c, 2548, 'reserved', 1000, () => 0.3)
+    const save = { ...createDefaultSave(1000), characters: [started.character] }
+    const kept = loadSave(JSON.stringify(save), 1001).save.characters[0]!
+    expect(kept.moonstoneSpin).toEqual(started.spin)
+    expect(kept.inventory).toEqual([])
+    const paid = finishMoonstonePlay(kept, started.spin.id, 1000 + MOONSTONE_SPIN_MS)
+    expect(paid.prize).toEqual(started.spin.prize)
+    expect(paid.character.inventory).toEqual([started.spin.prize])
+    expect(
+      sanitizeMoonstoneSpin({ ...started.spin, prize: { itemId: 99999999, count: 1 } }),
+    ).toBeUndefined()
   })
 })

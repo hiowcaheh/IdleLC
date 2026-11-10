@@ -4,6 +4,7 @@
  * When the shape changes: bump SAVE_VERSION and add a migration from the previous version.
  */
 import { sanitizeCash } from './cashShop.ts'
+import { sanitizeMoonstoneSpin } from './moonstones.ts'
 import { sanitizeWorldBossProgress } from './worldBoss.ts'
 import { sanitizeAllocatedStats } from './statPoints.ts'
 import { dungeonRefundDue, sanitizeDungeonProgress } from './dungeons.ts'
@@ -279,6 +280,7 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
   const stats = isRecord(raw.stats) ? raw.stats : {}
   const createdAt = num(raw.createdAt, now)
   const location = sanitizeLocation(raw.location)
+  const moonstoneSpin = sanitizeMoonstoneSpin(raw.moonstoneSpin)
   // a run between spots of one map that the game was closed during
   const runFrom =
     isRecord(raw.runFrom) && raw.runFrom.zoneId === location.zoneId
@@ -301,6 +303,7 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
     location,
     ...(runFrom ? { runFrom } : {}),
     worldBoss: sanitizeWorldBossProgress(raw.worldBoss),
+    ...(moonstoneSpin ? { moonstoneSpin } : {}),
     reachedSpots: sanitizeReached(raw.reachedSpots, location),
     stats: {
       kills: int(stats.kills, 0),

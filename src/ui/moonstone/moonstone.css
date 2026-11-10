@@ -5,9 +5,7 @@
   width: 40px;
   height: 40px;
   pointer-events: auto;
-  display: grid;
-  place-items: center;
-  background: url('/ui/lc/event-frame.webp') center / 100% 100% no-repeat;
+  background: url('/ui/lc/menu-moonstone.webp?v=1') center / 100% 100% no-repeat;
   border-radius: 2px;
   box-shadow: 0 1px 3px #000a;
 }
@@ -45,33 +43,78 @@
   right: 2.4%;
   bottom: 1%;
   height: 29%;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 2%;
-}
-.moonstone-reel {
-  display: grid;
-  place-items: center;
   overflow: hidden;
 }
-.moonstone-reel > .item-icon {
-  width: 70% !important;
-  height: auto !important;
+.moonstone-strip,
+.moonstone-placeholder {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+.moonstone-strip {
+  transform: translateX(var(--moonstone-end));
+}
+.moonstone-reels.is-rolling .moonstone-strip {
+  animation: moonstone-slide var(--moonstone-duration) cubic-bezier(0.08, 0.5, 0.1, 1) both;
+  will-change: transform;
+}
+.moonstone-cell {
+  flex: 0 0 20%;
+  min-width: 0;
+  display: grid;
+  place-items: center;
+}
+.moonstone-cell > .item-icon {
+  width: 70%;
+  height: auto;
   aspect-ratio: 1;
 }
-.moonstone-reel__strip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  animation: moonstone-roll 0.38s linear infinite;
+.moonstone-reels.is-settled .moonstone-cell--winner {
+  filter: drop-shadow(0 0 5px #f5d485);
 }
-@keyframes moonstone-roll {
+.moonstone-pointer {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  left: 40%;
+  width: 20%;
+  height: 100%;
+  border: 1px solid #e0c77b;
+  box-shadow:
+    0 0 5px #e6ce8c88,
+    inset 0 0 6px #e6ce8c44;
+}
+.moonstone-pointer::before,
+.moonstone-pointer::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+}
+.moonstone-pointer::before {
+  top: 0;
+  border-top: 6px solid #f3d887;
+}
+.moonstone-pointer::after {
+  bottom: 0;
+  border-bottom: 6px solid #f3d887;
+}
+@keyframes moonstone-slide {
   from {
-    transform: translateY(-40%);
+    transform: translateX(0);
   }
   to {
-    transform: translateY(40%);
+    transform: translateX(var(--moonstone-end));
+  }
+}
+@keyframes moonstone-still {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 1;
   }
 }
 .moonstone-stones {
@@ -206,7 +249,10 @@
   font-size: 12px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .moonstone-reel__strip {
-    animation: none;
+  .moonstone-reels.is-rolling .moonstone-strip {
+    animation-name: moonstone-still;
+  }
+  .moonstone-reels.is-rolling .moonstone-cell {
+    visibility: hidden;
   }
 }

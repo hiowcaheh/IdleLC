@@ -65,6 +65,7 @@ export const UI_PARTS = {
   'cash-sale': [atlas('Cashshop'), 126, 357, 60, 60],
   // CUIGamble::Create/Render (MoonStone.tex): the five reels, grade row and original controls.
   'moonstone-top': [atlas('MoonStone'), 0, 0, 255, 148, { scale: 2 }],
+  'moonstone-mark': [atlas('MoonStone'), 87, 0, 84, 74, { scale: 2 }],
   'moonstone-middle': [atlas('MoonStone'), 0, 149, 255, 17, { scale: 2 }],
   'moonstone-bottom': [atlas('MoonStone'), 0, 167, 255, 46, { scale: 2 }],
   'moonstone-start': [atlas('MoonStone'), 0, 374, 113, 29, { scale: 2 }],

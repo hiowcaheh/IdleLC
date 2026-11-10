@@ -1,5 +1,31 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Statua: animacja od prawej do lewej i rezerwacja (Codex), 2026-11-10
+
+Baza `c632560`. Nowy `menu-moonstone.webp` składa twarz z MoonStone.tex z jedną
+ramką EventBtn0. W modalu 42 ikony jadą w lewo, wygrana w komórce 36 zatrzymuje się
+pod centralnym znacznikiem; czas 3 s niezależny od tempa walki. Dekoracyjne ikony
+nie losują nagród. Nazwa, inventory i BagFeed aktualizują się dopiero po animationend
+oraz klatce renderowania, także przy systemowym ograniczeniu animacji.
+
+Usunięte API `playMoonstone`/`applyMoonstonePlay`: teraz `beginMoonstonePlay`
+rezerwuje kamień i zapisuje jeden wynik w opcjonalnym `moonstoneSpin`, a
+`finishMoonstonePlay` rozlicza go raz po zgodnym ID i minimum 3 s. Obie operacje
+zapisują stan oddzielnie i cofają pamięć po konflikcie zapisu. Wypłata nie nadpisuje
+inventory kopią ze Start. SaveVersion nadal 16, sanitizer zachowuje rezerwację.
+
+`useMoonstoneRound`: Stop/Exit czekają na bieżącą animację; automat zaczyna następną
+po 700 ms wyniku. Ukrycie karty wyłącza automat i pauzuje tę samą rundę; Resume
+animuje od początku bez drugiego kamienia. Reload otwiera paused modal, bez wypłaty
+za sam upływ czasu i bez przywracania auto. Źródłowe wagi, ilości i flagi bez zmian.
+[Pełny opis](moonstone-cash.md).
+
+Weryfikacja: **623 testy / 77 plików**, pełne check i build. Chromium 320/390/1280 px:
+rzeczywisty ruch w lewo, wynik pod znacznikiem i BagFeed po animationend.
+Próba produkcyjna potwierdziła automat, pauzę także po Stop/Exit, ponowne otwarcie
+i reload, bez podwójnego kamienia lub nagrody. Zdarzenie ukrycia karty symulowane
+przez visibilitychange; przygotowane zapisy, bez pomiaru balansu i wydajności.
+
 ## World Boss loot, Cash tickets i Statua (Codex), 2026-11-10
 
 [Pełna notatka i źródła](moonstone-cash.md). Drop właściciela jest w
@@ -9,9 +35,8 @@ Moonstone Box 2544 otwiera istniejący system boxes z wagami serwera 520/300/150
 
 `scripts/lc/moonstone.mjs` importuje pięć pul t_moonstone_reward, w tym ilości,
 flagi i rzeczywiste sumy wag 100/100/100/102/105. Statua używa CUIGamble i grafik
-MoonStone.tex, dostęp pod Item Shop. `applyMoonstonePlay` + `playMoonstone` zużywają
-kamień i zapisują nagrodę jednym zapisem; animacja jest po stronie GUI. Auto-loop
-zatrzymują Stop, Exit, unmount, visibilitychange i brak wybranego kamienia.
+MoonStone.tex, dostęp pod Item Shop. Pierwotna natychmiastowa wypłata została
+zastąpiona rezerwacją i rozliczeniem opisanymi w nowszej notatce powyżej.
 
 Ważne: `ItemStack.flag` to poziom source mineralów 498..501, nie opcja ekwipunku.
 Łączenie, pobieranie, sprzedaż, nazwy i v16 reload rozróżniają ID+flag. Nie usuwać

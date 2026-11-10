@@ -3,6 +3,7 @@
  * Pure — creation rules are checked here so the server can run the same code.
  */
 import type { OwnedBoost } from './boosts.ts'
+import type { MoonstoneSpin } from './moonstones.ts'
 import { emptyDungeonProgress, type DungeonProgress } from './dungeons.ts'
 import { emptyWorldBossProgress, type WorldBossProgress } from './worldBoss.ts'
 import type { Attributes } from './attributes.ts'
@@ -92,6 +93,8 @@ export interface CharacterData {
   dungeons?: DungeonProgress
   /** Charge per map and one non-AFK encounter; absent in older v16 saves. */
   worldBoss?: WorldBossProgress
+  /** One reserved statue draw, not yet awarded; survives interruption without another stake. */
+  moonstoneSpin?: MoonstoneSpin
   /** Titles the character has (logic/titles.ts), and the worn one (shown under the name). */
   titles: OwnedTitle[]
   activeTitle: number | null

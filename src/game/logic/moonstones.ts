@@ -12,11 +12,62 @@ export interface MoonstonePlay {
   stoneId: number
 }
 
-export function applyMoonstonePlay(
+/** Visual roll time, independent of combat speed. The prize is claimed only after landing. */
+export const MOONSTONE_SPIN_MS = 3000
+
+export interface MoonstoneSpin {
+  id: string
+  stoneId: number
+  prize: ItemStack
+  startedAt: number
+}
+
+export interface MoonstoneStart {
+  character: CharacterData
+  spin: MoonstoneSpin
+}
+
+export function sanitizeMoonstoneSpin(raw: unknown): MoonstoneSpin | undefined {
+  if (!raw || typeof raw !== 'object') return undefined
+  const spin = raw as MoonstoneSpin
+  const prize = spin.prize
+  const integer = (n: unknown): n is number =>
+    typeof n === 'number' && Number.isSafeInteger(n) && n >= 0
+  if (
+    typeof spin.id !== 'string' ||
+    !spin.id ||
+    !moonstoneFor(spin.stoneId) ||
+    !integer(spin.startedAt) ||
+    !prize ||
+    !integer(prize.itemId) ||
+    !ITEMS[prize.itemId] ||
+    !integer(prize.count) ||
+    prize.count < 1 ||
+    (prize.flag !== undefined &&
+      (!integer(prize.flag) || (prize.flag > 0 && ![498, 499, 500, 501].includes(prize.itemId))))
+  )
+    return undefined
+  return {
+    id: spin.id,
+    stoneId: spin.stoneId,
+    startedAt: spin.startedAt,
+    prize: {
+      itemId: prize.itemId,
+      count: prize.count,
+      ...(prize.flag ? { flag: prize.flag } : {}),
+    },
+  }
+}
+
+/** Reserve one stone and persist its single draw; nothing is added to the bag yet. */
+export function beginMoonstonePlay(
   character: CharacterData,
   stoneId: number,
+  id: string,
+  now: number,
   rng: Rng,
-): MoonstonePlay {
+): MoonstoneStart {
+  if (character.moonstoneSpin) throw new GameError('moonstone-play-pending')
   const stone = moonstoneFor(stoneId)
   if (!stone) throw new GameError('not-a-moonstone')
   const { inventory, taken } = takeFromInventory(character.inventory, [
@@ -35,9 +86,24 @@ export function applyMoonstonePlay(
     count: reward.count,
     ...(reward.flag ? { flag: reward.flag } : {}),
   }
+  const spin = { id, startedAt: now, prize, stoneId }
+  return { character: { ...character, inventory, moonstoneSpin: spin }, spin }
+}
+
+/** Claim the reserved draw once, after the reel has stopped. Never re-roll on reload or retry. */
+export function finishMoonstonePlay(
+  character: CharacterData,
+  spinId: string,
+  now: number,
+): MoonstonePlay {
+  const spin = character.moonstoneSpin
+  if (!spin || spin.id !== spinId) throw new GameError('moonstone-play-expired')
+  if (now - spin.startedAt < MOONSTONE_SPIN_MS) throw new GameError('moonstone-play-not-ready')
+  const awarded = { ...character, inventory: addToInventory(character.inventory, [spin.prize]) }
+  delete awarded.moonstoneSpin
   return {
-    character: { ...character, inventory: addToInventory(inventory, [prize]) },
-    prize,
-    stoneId,
+    character: awarded,
+    prize: { ...spin.prize },
+    stoneId: spin.stoneId,
   }
 }
