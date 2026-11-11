@@ -1,5 +1,22 @@
 # Historia zmian
 
+## 2026-11-11 (Codex): kompaktowy kalendarz i sam panel Moonstone
+
+1. Pasek czasu online jest na górze kalendarza. Weekly i Monthly mieszczą się w
+   widoku bez przewijania, również na telefonie i w poziomie.
+2. Kliknięcie daty lub przycisku dzisiejszych prezentów otwiera modal z pełnymi
+   nazwami i ilościami. Odbiór obu nagród odbywa się w tym oknie; Return wraca do
+   kalendarza. Odebrany dzień zostaje oznaczony w obu zakładkach.
+3. W Moonstone całkowicie usunięto dolny box z opisami i wynikiem. Checkbox Auto
+   jest wewnątrz GUI po prawej u góry, a wynik i stan losowania w oryginalnym polu
+   tytułu Statui.
+
+SaveVersion nadal **17**. [Notatka dla Claude](docs/login-calendar.md).
+Weryfikacja: **634 testy / 79 plików**, check i build. Chromium produkcyjny:
+Weekly i Monthly bez przewijania w siedmiu rozmiarach od 320×568 do 1280×900,
+w tym 568×320 w poziomie; podgląd, Return, jednorazowy odbiór i fokus modali.
+Statua: Auto, Stop, Exit i wypłata po zatrzymaniu paska.
+
 ## 2026-11-10 (Codex): kalendarz nagród i poprawki Moonstone
 
 1. Każdy World Boss gwarantuje dodatkowo 5 Good Moonstone i 3 Perfect Moonstone.

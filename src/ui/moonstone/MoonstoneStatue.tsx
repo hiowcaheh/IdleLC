@@ -112,7 +112,6 @@ export function MoonstoneStatue({ onClose }: { onClose(): void }) {
     replay,
     autoPlay,
     prize,
-    rounds,
     error,
     stopping,
     leaving,
@@ -121,7 +120,6 @@ export function MoonstoneStatue({ onClose }: { onClose(): void }) {
   } = round
   if (!character) return null
   const owned = countOwned(character.inventory, stoneId)
-  const item = getItem(stoneId)
   const rolling = phase === 'rolling'
   const paused = phase === 'paused'
   return createPortal(
@@ -139,8 +137,37 @@ export function MoonstoneStatue({ onClose }: { onClose(): void }) {
           className="moonstone-machine"
           aria-label={rolling ? 'Moonstone reels spinning' : 'Moonstone reels'}
         >
-          <span id="moonstone-title" className="moonstone-machine__title">
+          <span id="moonstone-title" className="visually-hidden">
             Moonstone Statue
+          </span>
+          <label className="moonstone-auto" title="Automatically play the selected grade">
+            <input
+              type="checkbox"
+              className="check-box"
+              checked={autoPlay}
+              disabled={leaving}
+              aria-label="Automatically play this grade"
+              onChange={(e) => round.chooseAuto(e.target.checked)}
+            />
+            <span>Auto</span>
+          </label>
+          <span
+            className={`moonstone-machine__title${error ? ' is-error' : ''}`}
+            role="status"
+            aria-label="Latest Moonstone prize"
+          >
+            {error ||
+              (leaving
+                ? 'Finishing this roll, then exiting.'
+                : stopping
+                  ? 'Finishing this roll.'
+                  : prize
+                    ? `${getItem(prize.itemId).name}${prize.flag ? ` Lv ${prize.flag}` : ''} ×${fmt(prize.count)}`
+                    : paused
+                      ? 'Saved roll. Press Start to resume.'
+                      : running
+                        ? 'Drawing…'
+                        : 'Moonstone Statue')}
           </span>
           <MoonstoneReel
             spin={spin}
@@ -195,56 +222,6 @@ export function MoonstoneStatue({ onClose }: { onClose(): void }) {
           >
             <span className="visually-hidden">Exit</span>
           </button>
-        </div>
-        <div className="moonstone-info">
-          <p className="moonstone-info__stone">
-            {item.name}: <strong>{fmt(owned)}</strong> available
-          </p>
-          <label className="moonstone-auto">
-            <input
-              type="checkbox"
-              className="check-box"
-              checked={autoPlay}
-              disabled={leaving}
-              onChange={(e) => round.chooseAuto(e.target.checked)}
-            />{' '}
-            Automatically play this grade
-          </label>
-          <p className="moonstone-info__hint">
-            {leaving
-              ? 'Finishing this roll, then exiting.'
-              : stopping
-                ? 'Finishing this roll. Automatic play is off.'
-                : paused
-                  ? 'Your draw is saved. Resume this roll without using another stone.'
-                  : 'One Moonstone per play. The prize reaches your bag when the reel stops.'}
-          </p>
-          <div className="moonstone-prize" role="status" aria-label="Latest Moonstone prize">
-            {prize ? (
-              <>
-                <ItemIcon item={getItem(prize.itemId)} size={32} />
-                <span>
-                  {getItem(prize.itemId).name}
-                  {prize.flag ? ` Lv ${prize.flag}` : ''}
-                  <strong> ×{fmt(prize.count)}</strong>
-                </span>
-              </>
-            ) : (
-              <span>
-                {running
-                  ? 'Drawing…'
-                  : paused
-                    ? 'Roll paused.'
-                    : 'Choose a Moonstone and press Start.'}
-              </span>
-            )}
-          </div>
-          <p className="moonstone-info__plays">Plays this visit: {fmt(rounds)}</p>
-          {error && (
-            <p className="moonstone-error" role="alert">
-              {error}
-            </p>
-          )}
         </div>
       </div>
     </div>,

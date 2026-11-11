@@ -69,17 +69,16 @@ export function CalendarButton({ onClick }: { onClick(): void }) {
 export function RewardsCalendar({ onClose }: { onClose(): void }) {
   const { now, day, progress, onlineMs, claimed, ready } = useCalendarStatus(true)
   const [track, setTrack] = useState<CalendarTrack>('weekly')
-  const [selected, setSelected] = useState(day)
+  const [preview, setPreview] = useState<{ date: number; track: CalendarTrack } | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const dates = calendarDates(track, now)
-  const chosen =
-    dates.find((time) => calendarDay(time) === selected) ??
-    dates.find((time) => calendarDay(time) === day)!
-  const reward = loginReward(track, new Date(chosen))
-  const item = getItem(reward.itemId)
-  const selectedDay = calendarDay(chosen)
+  const selectedDay = preview ? calendarDay(preview.date) : day
+  const isToday = selectedDay === day
   const done = progress.claimedDays.includes(selectedDay)
+  const prizes = isToday
+    ? [loginReward('weekly', new Date(now)), loginReward('monthly', new Date(now))]
+    : [loginReward(preview?.track ?? track, new Date(preview?.date ?? now))]
   const status = done
     ? 'Claimed'
     : selectedDay < day
@@ -89,9 +88,15 @@ export function RewardsCalendar({ onClose }: { onClose(): void }) {
         : ready
           ? 'Ready to claim'
           : 'Today'
-  const todayPrizes = [loginReward('weekly', new Date(now)), loginReward('monthly', new Date(now))]
+  const openReward = (date: number) => {
+    setError('')
+    setPreview({ date, track })
+  }
+  const closeReward = () => {
+    if (!busy) setPreview(null)
+  }
   const claim = async () => {
-    if (busy || !ready) return
+    if (busy || !ready || !isToday) return
     setBusy(true)
     setError('')
     try {
@@ -110,60 +115,52 @@ export function RewardsCalendar({ onClose }: { onClose(): void }) {
     }
   }
   return (
-    <Sheet
-      centered
-      title="Rewards Calendar"
-      titleId="calendar-title"
-      className="sheet--client rewards-calendar"
-      onClose={onClose}
-    >
-      <div className="tabs" role="tablist" aria-label="Reward calendar">
-        {(['weekly', 'monthly'] as const).map((name) => (
-          <button
-            key={name}
-            role="tab"
-            id={`calendar-${name}-tab`}
-            aria-selected={track === name}
-            aria-controls="calendar-page"
-            className={`tabs__tab${track === name ? ' is-active' : ''}`}
-            onClick={() => {
-              setTrack(name)
-              setSelected(day)
-            }}
-          >
-            {name === 'weekly' ? 'Weekly' : 'Monthly'}
-          </button>
-        ))}
-      </div>
-      <div className="calendar-period">
-        <span className="calendar-period__icon" aria-hidden="true" />
-        <div>
+    <>
+      <Sheet
+        centered
+        title="Rewards Calendar"
+        titleId="calendar-title"
+        className={`sheet--client rewards-calendar rewards-calendar--${track}`}
+        onClose={onClose}
+      >
+        <div className="calendar-progress">
+          <Bar
+            variant="book"
+            value={onlineMs}
+            max={LOGIN_ONLINE_MS}
+            label="Daily online time"
+            text={`Online today ${clock(onlineMs, false)} / 10:00`}
+          />
+        </div>
+        <div className="tabs" role="tablist" aria-label="Reward calendar">
+          {(['weekly', 'monthly'] as const).map((name) => (
+            <button
+              key={name}
+              type="button"
+              role="tab"
+              id={`calendar-${name}-tab`}
+              aria-selected={track === name}
+              aria-controls="calendar-page"
+              className={`tabs__tab${track === name ? ' is-active' : ''}`}
+              onClick={() => setTrack(name)}
+            >
+              {name === 'weekly' ? 'Weekly' : 'Monthly'}
+            </button>
+          ))}
+        </div>
+        <div className="calendar-period">
           <h3>
             {track === 'weekly'
-              ? 'Weekly rewards'
+              ? `${displayDate(dates[0]!, { day: 'numeric', month: 'short' })} to ${displayDate(dates[6]!, { day: 'numeric', month: 'short', year: 'numeric' })}`
               : displayDate(now, { month: 'long', year: 'numeric' })}
           </h3>
-          <p>
-            {track === 'weekly'
-              ? `${displayDate(dates[0]!, { day: 'numeric', month: 'short' })} to ${displayDate(dates[6]!, { day: 'numeric', month: 'short', year: 'numeric' })}`
-              : 'A gift for every day you play'}
-          </p>
         </div>
-      </div>
-      <p className="calendar-summary">
-        {claimed
-          ? 'Today’s gifts have been collected.'
-          : ready
-            ? 'Today’s gifts are ready to collect.'
-            : `Play 10 minutes today. Still needed: ${clock(LOGIN_ONLINE_MS - onlineMs)}.`}
-      </p>
-      <div
-        id="calendar-page"
-        role="tabpanel"
-        aria-labelledby={`calendar-${track}-tab`}
-        className="calendar-layout"
-      >
-        <div className="calendar-board">
+        <div
+          id="calendar-page"
+          role="tabpanel"
+          aria-labelledby={`calendar-${track}-tab`}
+          className="calendar-board"
+        >
           {track === 'monthly' && (
             <div className="calendar-weekdays" aria-hidden="true">
               {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
@@ -174,6 +171,13 @@ export function RewardsCalendar({ onClose }: { onClose(): void }) {
           <div
             className={`calendar-grid calendar-grid--${track}`}
             aria-label={track === 'weekly' ? 'This week' : 'This month'}
+            style={
+              track === 'monthly'
+                ? {
+                    gridTemplateRows: `repeat(${Math.ceil((((new Date(dates[0]!).getUTCDay() + 6) % 7) + dates.length) / 7)}, minmax(0, 1fr))`,
+                  }
+                : undefined
+            }
           >
             {track === 'monthly' &&
               Array.from({ length: (new Date(dates[0]!).getUTCDay() + 6) % 7 }, (_, i) => (
@@ -182,104 +186,123 @@ export function RewardsCalendar({ onClose }: { onClose(): void }) {
             {dates.map((time) => {
               const key = calendarDay(time)
               const prize = loginReward(track, new Date(time))
-              const prizeItem = getItem(prize.itemId)
+              const item = getItem(prize.itemId)
               const taken = progress.claimedDays.includes(key)
               const past = key < day && !taken
               return (
                 <button
                   type="button"
                   key={key}
-                  className={`calendar-day${key === day ? ' is-today' : ''}${key === selectedDay ? ' is-selected' : ''}${taken ? ' is-claimed' : ''}${past ? ' is-missed' : ''}`}
-                  aria-pressed={key === selectedDay}
-                  aria-label={`${displayDate(time, { month: 'long', day: 'numeric' })}: ${prizeItem.name} x${prize.count}, ${taken ? 'claimed' : past ? 'missed' : key === day ? 'today' : 'upcoming'}`}
-                  onClick={() => setSelected(key)}
+                  className={`calendar-day${key === day ? ' is-today' : ''}${taken ? ' is-claimed' : ''}${past ? ' is-missed' : ''}`}
+                  aria-label={`${displayDate(time, { month: 'long', day: 'numeric' })}: ${item.name} x${prize.count}, ${taken ? 'claimed' : past ? 'missed' : key === day ? 'today' : 'upcoming'}`}
+                  aria-haspopup="dialog"
+                  onClick={() => openReward(time)}
                 >
                   <span className="calendar-day__date">
                     {track === 'weekly'
-                      ? displayDate(time, { weekday: 'short' })
+                      ? displayDate(time, { weekday: 'short', day: 'numeric' })
                       : new Date(time).getUTCDate()}
                   </span>
                   <span className="calendar-day__icon">
-                    <ItemIcon item={prizeItem} fluid />
+                    <ItemIcon item={item} fluid />
+                    <strong className="calendar-day__count">×{prize.count}</strong>
                   </span>
-                  <strong className="calendar-day__count">×{prize.count}</strong>
-                  {track === 'weekly' && (
-                    <span className="calendar-day__name">{prizeItem.name}</span>
+                  {track === 'weekly' && <span className="calendar-day__name">{item.name}</span>}
+                  {taken && (
+                    <span className="calendar-day__check" aria-hidden="true">
+                      ✓
+                    </span>
                   )}
-                  <span className="calendar-day__state">
-                    {taken ? '✓' : key === day ? 'Today' : past ? 'Missed' : ''}
-                  </span>
                 </button>
               )
             })}
           </div>
         </div>
-        <aside className="calendar-preview" aria-label="Selected reward">
-          <p className="calendar-preview__date">
-            {displayDate(chosen, { weekday: 'long', month: 'short', day: 'numeric' })}
-          </p>
-          <div className="calendar-preview__item">
-            <ItemIcon item={item} size={46} />
-            <div>
-              <strong>{item.name}</strong>
-              <span>×{reward.count}</span>
-            </div>
-          </div>
-          <span className={`calendar-state${done ? ' is-claimed' : ''}`}>{status}</span>
+        <div className="calendar-footer">
+          <button
+            type="button"
+            className={`button calendar-open-gifts${ready ? ' is-ready' : ''}`}
+            aria-haspopup="dialog"
+            onClick={() => openReward(calendarDayStart(now))}
+          >
+            {claimed ? 'View today’s gifts' : ready ? 'Collect today’s gifts' : 'Today’s gifts'}
+          </button>
           <p>
-            {selectedDay === day
-              ? 'Today’s weekly and monthly gifts are collected together.'
-              : 'Select a date to preview its reward. Only today’s gifts can be claimed.'}
+            {claimed ? 'Claimed today' : 'One daily claim'} <span>Reset 00:00 UTC</span>
           </p>
-        </aside>
-        <section className="calendar-claim" aria-label="Today's login rewards">
-          <div className="calendar-online">
-            <span>{claimed ? 'Today’s rewards claimed' : 'Time online today'}</span>
-            <strong>{clock(onlineMs, false)} / 10:00</strong>
-          </div>
-          <Bar
-            variant="book"
-            value={onlineMs}
-            max={LOGIN_ONLINE_MS}
-            label="Daily online time"
-            text={`${clock(onlineMs, false)} / 10:00`}
-          />
-          <div className="calendar-today-prizes">
-            {todayPrizes.map((prize, i) => (
-              <div key={i}>
-                <ItemIcon item={getItem(prize.itemId)} size={28} />
-                <span>
-                  <small>{i === 0 ? 'Weekly' : 'Monthly'}</small>
-                  {getItem(prize.itemId).name} <strong>×{prize.count}</strong>
-                </span>
+        </div>
+      </Sheet>
+      {preview && (
+        <Sheet
+          centered
+          title={isToday ? 'Today’s login rewards' : 'Reward preview'}
+          titleId="calendar-reward-title"
+          className="sheet--client calendar-reward"
+          onClose={closeReward}
+        >
+          <p className="calendar-reward__date">
+            {displayDate(preview.date, { weekday: 'long', month: 'long', day: 'numeric' })}
+          </p>
+          <div className="calendar-gifts">
+            {prizes.map((prize, i) => (
+              <div className="calendar-gift" key={i}>
+                <ItemIcon item={getItem(prize.itemId)} size={36} />
+                <div>
+                  <small>
+                    {isToday
+                      ? i === 0
+                        ? 'Weekly'
+                        : 'Monthly'
+                      : preview.track === 'weekly'
+                        ? 'Weekly'
+                        : 'Monthly'}
+                  </small>
+                  <strong>{getItem(prize.itemId).name}</strong>
+                  <span>×{prize.count}</span>
+                </div>
               </div>
             ))}
           </div>
-          <button
-            className="button calendar-claim__button"
-            disabled={!ready || busy}
-            onClick={() => void claim()}
-          >
-            {busy
-              ? 'Claiming…'
-              : claimed
-                ? 'Claimed today'
-                : ready
-                  ? 'Claim today’s rewards'
-                  : `Available in ${clock(LOGIN_ONLINE_MS - onlineMs)}`}
-          </button>
+          <p className={`calendar-reward__status${done ? ' is-claimed' : ''}`}>
+            {isToday
+              ? claimed
+                ? 'Both gifts have been collected today.'
+                : 'One claim collects both gifts for your account.'
+              : status}
+          </p>
           {error && (
             <p role="alert" className="calendar-error">
               {error}
             </p>
           )}
-          <p className="calendar-rules">
-            One claim per account each day. Both calendars share the same claim.
-            <br />
-            Spend 10 minutes online in the game. Resets daily at 00:00 UTC.
-          </p>
-        </section>
-      </div>
-    </Sheet>
+          <div className="calendar-reward__actions">
+            {isToday && (
+              <button
+                type="button"
+                className="button calendar-reward__claim"
+                disabled={!ready || busy}
+                onClick={() => void claim()}
+              >
+                {busy
+                  ? 'Claiming…'
+                  : claimed
+                    ? 'Claimed'
+                    : ready
+                      ? 'Claim'
+                      : `Wait ${clock(LOGIN_ONLINE_MS - onlineMs)}`}
+              </button>
+            )}
+            <button
+              type="button"
+              className="button calendar-reward__claim"
+              disabled={busy}
+              onClick={closeReward}
+            >
+              Return
+            </button>
+          </div>
+        </Sheet>
+      )}
+    </>
   )
 }

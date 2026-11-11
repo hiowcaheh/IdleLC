@@ -16,17 +16,17 @@
 .game .icon-button.hud__menu--moonstone:disabled {
   filter: grayscale(0.8) brightness(0.7);
 }
-.sheet.moonstone {
+.sheet-backdrop--center .sheet.moonstone {
   display: block;
-  width: min(calc(100vw - 24px), 460px);
+  width: min(calc(100vw - 24px), 460px, calc((100dvh - 32px) * 1.05));
   max-width: 460px;
-  max-height: calc(100dvh - 24px);
+  max-height: calc(100dvh - 32px);
   padding: 0;
   border: 0;
   border-image: none;
   background: transparent;
   box-shadow: none;
-  overflow-y: auto;
+  overflow: visible;
 }
 .moonstone-machine {
   position: relative;
@@ -40,7 +40,10 @@
   right: 8%;
   color: #d8d1bb;
   text-align: center;
-  font: 700 clamp(12px, 3vw, 18px) var(--font-display);
+  font: 700 clamp(11px, 2vw, 15px) var(--font-display);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   text-shadow: 0 1px 3px #000;
 }
 .moonstone-reels {
@@ -200,59 +203,31 @@
   outline: 2px solid var(--gilt-bright);
   outline-offset: 2px;
 }
-.moonstone-info {
-  padding: 8px 9px;
-  border: 1px solid #74613e;
-  background: #17191d88;
-}
-.moonstone-info p {
-  margin: 0 0 8px;
-}
-.moonstone-info__stone {
-  color: #e2cd95;
-  text-align: center;
-  font-size: 14px;
-}
 .moonstone-auto {
+  position: absolute;
+  z-index: 3;
+  top: 32%;
+  right: 2.5%;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: #e1dccd;
-  font-size: 13px;
+  gap: 5px;
+  min-height: 30px;
+  padding: 4px 5px;
+  color: #f0e2b8;
+  font: 700 11px var(--font-body);
+  text-shadow:
+    0 1px 3px #000,
+    1px 0 2px #000;
   cursor: pointer;
 }
 .moonstone-auto input {
-  width: 18px;
-  height: 18px;
-  accent-color: #bc9b53;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin: 0;
 }
-.moonstone-info .moonstone-info__hint {
-  margin-top: 7px;
-  color: #a6a294;
-  font-size: 12px;
-  text-align: center;
-}
-.moonstone-prize {
-  min-height: 46px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 6px;
-  color: #e9dcb5;
-  background: url('/ui/lc/book-row.webp') center / 100% 100% no-repeat;
-  font-size: 13px;
-}
-.moonstone-info .moonstone-info__plays {
-  margin: 8px 0 0;
-  color: #aaa38e;
-  font-size: 11px;
-  text-align: center;
-}
-.moonstone-error {
-  color: #f29a8b;
-  font-size: 12px;
+.moonstone-machine__title.is-error {
+  color: #f4b19e;
 }
 @media (prefers-reduced-motion: reduce) {
   .moonstone-reels.is-rolling .moonstone-strip {

@@ -1,5 +1,20 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Kompaktowy kalendarz i Moonstone (Codex), 2026-11-11
+
+Baza `915810b`, SaveVersion **17**. Zmiany w warstwie GUI: kalendarz ma licznik
+w pasku na górze, siatkę dat i przycisk prezentów w jednym widoku. Nie ma stałej
+sekcji szczegółów ani odbioru pod siatką. Kliknięcie daty lub przycisku otwiera
+kolejny Sheet. Claim dzisiejszych prezentów wywołuje istniejące claimLoginCalendar;
+Return niczego nie przyznaje. Modal daty przyszłej/przeszłej służy podglądowi.
+Focus trap obsługuje najwyższe okno i przywraca poprzedni przycisk.
+
+Moonstone: cały dolny moonstone-info usunięty z JSX i CSS. Auto jest w obrębie
+samego oryginalnego panelu, po prawej u góry; status, błąd i wynik trafiają do
+pola tytułu. Widok Statui kończy się oryginalnymi guzikami Start/Exit.
+Mechanika rezerwacji i wypłaty po animationend pozostaje opisana w moonstone-cash.
+[Szczegóły kalendarza](login-calendar.md).
+
 ## Kalendarz i poprawki Statui (Codex), 2026-11-10
 
 [Pełna notatka](login-calendar.md). SaveVersion **17**, migracja v16 bez utraty

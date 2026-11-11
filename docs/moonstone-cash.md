@@ -118,7 +118,14 @@ Przycisk 40 px pod Item Shop ma jedną ramkę zdarzeń klienta oraz twarz Statui
 wyciętą z MoonStone.tex (`menu-moonstone.webp`). Podczas próby World Bossa i okna
 łupów jest ukryty, aby na wąskim ekranie nie nachodził na stoper. Modal pokazuje sam
 oryginalny wizerunek Statui, pięć widocznych pól, przyciski kamieni, Start/Stop
-i Exit oraz informacje pod nimi, bez zewnętrznej ramki i dodatkowego X. Checkbox pochodzi z NewOption.
+i Exit. Od 2026-11-11 dolny moonstone-info jest całkowicie usunięty; status, błąd
+i nazwa wygranej wyświetlają się w oryginalnym polu tytułu. Checkbox Auto z
+NewOption jest wewnątrz panelu, po prawej u góry. Okno dopasowuje szerokość do
+wysokości ekranu także w poziomie, zachowując proporcje grafiki.
+
+Układ z 2026-11-11 sprawdzono na buildzie produkcyjnym w pionie i poziomie.
+Pod guzikami nie ma dodatkowych elementów; Auto leży w obrębie samego panelu.
+Wypłata po animacji, Stop po bieżącej rundzie i Exit po jej zakończeniu działają.
 
 Od tej partii (baza `c632560`) animacja jest jednym poziomym paskiem 42 ikon:
 przesuwa się od prawej do lewej przez 3000 ms i zwalnia do wygranego przedmiotu

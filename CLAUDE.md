@@ -1,5 +1,17 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-11 (Codex): **kalendarz bez przewijania i Moonstone bez boxa**.
+`RewardsCalendar` ma pasek czasu u góry, kompaktowe siatki i osobny Sheet do
+podglądu/odbioru. Stan `preview` przechowuje datę i tor; Claim jest dostępny tylko
+na dzisiejszej dacie. Return i Escape zamykają najwyższy modal, przywracając fokus.
+CSS dopasowuje wiersze do wysokości okna; w poziomie sterowanie jest w lewej
+kolumnie, a dni po prawej. Nie przywracać stałych calendar-preview/calendar-claim.
+W Moonstone usunięto cały moonstone-info. Auto jest wewnątrz górnej prawej części
+GUI; status/nazwa wygranej w oryginalnym pasku tytułu, bez nowych pól pod Exit.
+Nadal v17; szczegóły: [kalendarz](docs/login-calendar.md), [Statua](docs/moonstone-cash.md).
+Weryfikacja: **634 testy / 79 plików**, check/build, produkcyjny Chromium w siedmiu
+rozmiarach: brak scrolla, modalny claim raz, checkbox i zakończenie rundy Statui.
+
 Aktualizacja 2026-11-10 (Codex): **kalendarz logowania, zapis v17 i poprawki Statui**.
 [Szczegóły kalendarza](docs/login-calendar.md). Jeden wspólny odbiór na konto UTC,
 po 600000 ms rzeczywistego foreground: tygodniowy i miesięczny prezent razem.

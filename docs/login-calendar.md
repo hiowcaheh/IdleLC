@@ -4,6 +4,22 @@ Baza prac: `cb1a4a4`. Nowy system właściciela, z grafikami oryginalnego klient
 przedmiotami już używanymi w IdleLC. To nie jest kopia serwerowego attendance EXP;
 progi czasu, kalendarze i tabela przedmiotów są regułami tej aplikacji.
 
+## Układ od 2026-11-11
+
+Kliknięcie daty otwiera modal jej nagrody. Dzisiejsza data oraz przycisk pod siatką
+pokazują oba dzisiejsze prezenty z pełnymi nazwami i ilościami. Dopiero Claim wywołuje odbiór; Return i Escape wracają do kalendarza. Dni przeszłe i
+przyszłe mają podgląd bez odbioru. Stały podgląd i sekcja odbioru spod siatki
+zostały usunięte, dzięki czemu główne okno mieści się bez przewijania. Kafelki
+zawsze pokazują ilości; pełna nazwa jest w modalu.
+
+Sprawdzenie tego układu: **634 testy / 79 plików**, check i build. Chromium na
+buildzie produkcyjnym: 390×844, 320×568, 360×640, 1280×900, 844×390, 667×375
+i 568×320. Obie zakładki mają zero przepełnienia w obu osiach i wszystkie dni
+w granicach okna. Modal daje podgląd przed progiem, Return niczego nie wypłaca,
+Claim wypłaca oba prezenty raz i oznacza obie zakładki. Escape zamyka tylko
+najwyższe okno i przywraca fokus. Próby na przygotowanych zapisach; logika progu
+10 minut pozostaje objęta testami serwisu opisanymi niżej.
+
 ## Reguły
 
 - Jeden wspólny odbiór dziennie na konto lokalne, dla wszystkich postaci.
@@ -40,7 +56,9 @@ zmienia działania mikstur, kamieni, skrzynek ani nominałów Cash.
 - `calendar.xml`, `CalendarUi.tex`: pola daty (878/439, 92×66), zaznaczenie
   (786/440, 90×64), pola dni tygodnia i nagłówek. Eksport `calendar-art.mjs`.
 - Zakładki z `skill_new`, pasek postępu z Book, ramka okna, sloty oraz przycisk
-  odbioru z istniejących grafik klienta. Na telefonie przewija się treść okna.
+  odbioru z istniejących grafik klienta. Pasek czasu jest na górze. Siatki mieszczą
+  się w widoku bez przewijania; na niskich ekranach w poziomie sterowanie jest
+  w lewej kolumnie, a dni po prawej.
 - `event-button.mjs` usuwa stary symbol ze środka EventBtn0 przed nałożeniem
   nowego, zachowuje proporcje obrazu. Ten sam helper poprawia ikonę Statui.
 
