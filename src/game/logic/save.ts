@@ -57,7 +57,7 @@ import {
   type LearnedSkill,
 } from './skills.ts'
 
-export const SAVE_VERSION = 18
+export const SAVE_VERSION = 19
 
 export type GraphicsQuality = 'auto' | 'low' | 'high' | 'ultra'
 
@@ -210,6 +210,8 @@ export const MIGRATIONS: Record<number, Migration> = {
   16: (save) => save,
   // v18: Laca Ball account progress. Older accounts start with the source's base token price.
   17: (save) => save,
+  // v19: modern finite Laca Ball stock; sanitizer preserves an already paid legacy draw.
+  18: (save) => save,
 }
 
 export const DEFAULT_SETTINGS: Settings = { quality: 'auto', showDamageNumbers: true }

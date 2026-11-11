@@ -1,0 +1,98 @@
+{
+  "date": "2026-11-11",
+  "base": "568b06b81b3a89d5ceea417857b27be427eb79ed",
+  "saveVersion": 19,
+  "checks": {
+    "tests": 654,
+    "testFiles": 82,
+    "lint": "passed",
+    "format": "passed",
+    "typecheck": "passed",
+    "build": "passed"
+  },
+  "source": {
+    "table": "t_lcball",
+    "schema": "newproject_db.sql",
+    "records": "newproject_db-t_lcball.sql",
+    "logic": "SubHelper/doFuncCommand.cpp:279,371,442; GameServer/ProcSubHelperMsg.cpp",
+    "client": "Engine/Interface/UILacarette.cpp",
+    "stock": "five rows per course, a_item_max / a_item_remain, jackpot max=1",
+    "tokenCost": 1,
+    "currencies": [5123, 5124],
+    "coursesPerCurrency": 5,
+    "prizeContents": "owner-authorized IdleLC selection"
+  },
+  "unitCoverage": [
+    "source stock limits and zero-based <=0 roll boundaries",
+    "one stock reserved per draw, no visual disclosure before payout",
+    "empty rows skipped; jackpot resets only winning currency/course",
+    "shared account stock and atomic save conflict rollback",
+    "Auto 1000ms and manual 2000ms early claim boundaries, reload and one payout",
+    "v18 paid legacy draw preserved with original 3200ms minimum"
+  ],
+  "browser": {
+    "engine": "Chromium + SwiftShader; local production preview",
+    "preparedSaves": true,
+    "cases": {
+      "fiveCourses": true,
+      "jackpotReset": true,
+      "autoSuccessiveRoundsAndStop": true,
+      "closeResumeReload": true,
+      "hiddenStopsAutoAndKeepsResult": true
+    },
+    "resultVisibleMs": 1491,
+    "resultConfiguredMs": 1500,
+    "legacyMigration": true,
+    "layouts": [
+      {
+        "width": 390,
+        "height": 844,
+        "windowOverflowX": false,
+        "windowOverflowY": false,
+        "allFiveRowsFit": true
+      },
+      {
+        "width": 320,
+        "height": 568,
+        "windowOverflowX": false,
+        "windowOverflowY": false,
+        "allFiveRowsFit": true
+      },
+      {
+        "width": 360,
+        "height": 640,
+        "windowOverflowX": false,
+        "windowOverflowY": false,
+        "allFiveRowsFit": true
+      },
+      {
+        "width": 1280,
+        "height": 900,
+        "windowOverflowX": false,
+        "windowOverflowY": false,
+        "allFiveRowsFit": true
+      },
+      {
+        "width": 844,
+        "height": 390,
+        "windowOverflowX": false,
+        "windowOverflowY": false,
+        "allFiveRowsFit": true
+      },
+      {
+        "width": 568,
+        "height": 320,
+        "windowOverflowX": false,
+        "windowOverflowY": false,
+        "allFiveRowsFit": true
+      }
+    ],
+    "exitButtonRemoved": true,
+    "clientCloseButtonWorksDuringPlay": true,
+    "pageErrors": [],
+    "consoleErrors": [],
+    "httpErrors": [],
+    "requestFailures": []
+  },
+  "scope": "Pooled stock is shared by characters of a local account. A global pool for all players requires a shared backend. Tests do not measure FPS or reward balance."
+}

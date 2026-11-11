@@ -1,5 +1,18 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Laca Ball: właściwa pula SubHelper i Auto (Codex), 2026-11-11
+
+[Aktualne reguły i źródła](lacaball.md), baza `568b06b`, SaveVersion **19**.
+Poprzedni wariant t_lacarette zastąpiony nowszym t_lcball / MSG_EX_LCBALL.
+Pięć kursów na każdą z dwóch walut, pięć wygranych na kurs, liczniki remaining/max,
+jeden żeton za grę. Jackpot `1/1` resetuje cały wygrany kurs po wypłacie.
+Pule i rezerwacja są trwałe, wspólne dla postaci lokalnego konta. Backend globalnej
+puli wszystkich graczy nie jest częścią obecnej aplikacji localStorage.
+Migracja zachowuje stare opłacone wyniki, bez ponownego pobrania stawki.
+Okno szersze, tabela węższa, bez Exit, poprawiony źródłowy X. Ręcznie 2000 ms,
+Auto Draw ×2 1000 ms; kapsuła znika po 1500 ms. Auto zatrzymuje się po X,
+ukryciu karty, odznaczeniu albo wyczerpaniu żetonów. Nie wraca samo po reloadzie.
+
 ## Laca Ball, złota niedziela i Moonstone Auto ×2 (Codex), 2026-11-11
 
 [Pełna notatka, źródła, tabela nagród i zasady zapisu](lacaball.md).

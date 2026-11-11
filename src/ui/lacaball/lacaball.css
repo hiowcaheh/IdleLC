@@ -14,16 +14,17 @@
   filter: brightness(1.2);
 }
 .sheet-backdrop--center .sheet.lacaball {
+  --lacaball-content-height: min(clamp(340px, 50vw, 560px), calc(100dvh - 110px));
   display: grid;
-  grid-template-columns: 43.2% minmax(0, 1fr);
-  grid-template-rows: 38px minmax(300px, 1fr) auto;
+  grid-template-columns: minmax(0, 62fr) minmax(0, 38fr);
+  grid-template-rows: 42px var(--lacaball-content-height) auto;
   position: relative;
-  width: min(680px, calc(100vw - 20px));
-  max-width: 680px;
-  max-height: calc(100dvh - 20px);
+  width: min(940px, calc(100vw - 8px));
+  max-width: 940px;
+  max-height: calc(100dvh - 8px);
   overflow: auto;
-  padding: 0 7px 7px;
-  gap: 0 5px;
+  padding: 0 8px 9px;
+  gap: 0 8px;
   border: 0;
   border-image: none;
   border-radius: 0;
@@ -35,27 +36,45 @@
 }
 .lacaball__header {
   grid-column: 1 / -1;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
   position: relative;
+  text-align: center;
   padding-top: 4px;
 }
 .lacaball__header h2 {
   margin: 0;
-  font: 700 19px/1.25 var(--font-display);
+  font: 700 20px/1.25 var(--font-display);
   color: #f2d998;
 }
-.lacaball__header .sheet__close {
+.lacaball-close {
   position: absolute;
   right: 2px;
-  top: 8px;
+  top: 5px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  background: url('/ui/lc/lacaball-close.webp') center / contain no-repeat;
+}
+.lacaball-close:active {
+  background-image: url('/ui/lc/lacaball-close-down.webp');
+}
+.lacaball-close:focus-visible {
+  outline: 2px solid #ffe3a7;
+}
+.lacaball-play {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 36px;
+  justify-items: center;
+  align-items: center;
 }
 .lacaball-machine {
   position: relative;
-  min-width: 0;
+  width: min(100%, calc((var(--lacaball-content-height) - 36px) * 216 / 332));
   aspect-ratio: 216 / 332;
-  align-self: start;
 }
 .lacaball-machine__front,
 .lacaball-machine__balls,
@@ -78,7 +97,8 @@
   background-image: url('/ui/lc/lacaball-balls.webp');
 }
 .is-rolling .lacaball-machine__balls {
-  animation: lacaball-shake 100ms linear 13;
+  animation: lacaball-shake calc(var(--lacaball-duration) * 0.3) linear both;
+  will-change: transform;
 }
 .lacaball-machine__ball {
   z-index: 3;
@@ -87,7 +107,8 @@
   width: 22.2%;
   aspect-ratio: 1;
   background-image: url('/ui/lc/lacaball-ball.webp');
-  animation: lacaball-drop 3200ms linear both;
+  animation: lacaball-drop var(--lacaball-duration) linear both;
+  will-change: transform;
 }
 .lacaball-machine__basket {
   z-index: 4;
@@ -114,11 +135,13 @@
   right: 11%;
   bottom: 5.7%;
   width: 17.6%;
+  min-width: 28px;
   aspect-ratio: 1;
+  padding: 0;
   border: 0;
   border-radius: 50%;
-  background: url('/ui/lc/lacaball-start.webp') center / contain no-repeat;
   cursor: pointer;
+  background: url('/ui/lc/lacaball-start.webp') center / contain no-repeat;
 }
 .lacaball-machine__start:active {
   background-image: url('/ui/lc/lacaball-start-down.webp');
@@ -140,14 +163,36 @@
   font-size: 11px;
   text-align: center;
 }
+.lacaball-auto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 6px 14px;
+  color: #ecd5a2;
+  font-size: 13px;
+  cursor: pointer;
+  background: url('/ui/lc/lacaball-field.webp') center / 100% 100% no-repeat;
+}
+.lacaball-auto input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #c6a366;
+}
+.lacaball-auto b {
+  color: #a4d9e9;
+}
 .lacaball-controls {
   display: grid;
-  grid-template-rows: 30px 76px 30px minmax(0, 1fr);
+  grid-template-rows: 30px 88px 28px 24px minmax(0, 1fr);
   gap: 4px;
+  min-width: 0;
   min-height: 0;
 }
 .lacaball-token,
-.lacaball-balance {
+.lacaball-balance,
+.lacaball-pool-total {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -176,20 +221,41 @@
 .lacaball-arrow--right {
   background-image: url('/ui/lc/lacaball-token-right.webp');
 }
-.lacaball-arrow:disabled {
+.lacaball-arrow:disabled,
+.lacaball-course-arrow:disabled {
   opacity: 0.4;
+  cursor: default;
 }
 .lacaball-courses {
   display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 18px;
+  gap: 3px;
+  min-width: 0;
+}
+.lacaball-course-list {
+  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 3px;
+  min-width: 0;
+}
+.lacaball-course-arrow {
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: center / 100% 100% no-repeat;
+}
+.lacaball-course-arrow--left {
+  background-image: url('/ui/lc/lacaball-course-left.webp');
+}
+.lacaball-course-arrow--right {
+  background-image: url('/ui/lc/lacaball-course-right.webp');
 }
 .lacaball-course {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
   padding: 4px 1px;
   color: #ccc4b1;
@@ -197,9 +263,8 @@
   border-radius: 0;
   background: url('/ui/lc/lacaball-panel.webp') center / 100% 100% no-repeat;
   cursor: pointer;
-  font-family: inherit;
+  font: inherit;
   font-size: 11px;
-  line-height: 1.15;
 }
 .lacaball-course.is-active {
   border-color: #d9bc74;
@@ -208,6 +273,11 @@
 }
 .lacaball-course:disabled {
   cursor: default;
+}
+.lacaball-course small {
+  color: #bdb6a0;
+  font-size: 10px;
+  white-space: nowrap;
 }
 .lacaball-rewards {
   min-height: 0;
@@ -218,11 +288,11 @@
 }
 .lacaball-rewards__heading {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 35px 42px;
-  gap: 3px;
+  grid-template-columns: minmax(0, 1fr) 62px;
+  gap: 4px;
   color: #cabc9c;
   font-size: 11px;
-  padding: 1px 2px 5px;
+  padding: 2px 2px 5px;
 }
 .lacaball-rewards__list {
   overflow-y: auto;
@@ -231,54 +301,77 @@
 }
 .lacaball-reward {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 35px 42px;
+  grid-template-columns: 28px minmax(0, 1fr) 62px;
   align-items: center;
-  gap: 3px;
-  min-height: 36px;
-  padding: 2px 1px;
+  gap: 5px;
+  min-height: 52px;
+  padding: 5px 1px;
   color: #e5dfcd;
   border-bottom: 1px solid #ffffff0b;
-  font-size: 11px;
-  line-height: 1.2;
+  font-size: 12px;
+  line-height: 1.3;
 }
-.lacaball-reward small {
-  color: #b6b49e;
-  font-size: 10px;
+.lacaball-reward > span {
+  overflow-wrap: anywhere;
+}
+.lacaball-reward__name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
 }
 .lacaball-reward b {
+  display: block;
+  margin-top: 2px;
   color: #edcf91;
-  font-size: 10px;
+  font-size: 11px;
+}
+.lacaball-reward__stock {
+  color: #bfc4ae;
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.lacaball-reward.is-jackpot {
+  color: #ffe3a4;
+  background: linear-gradient(90deg, #b68b2a22, transparent);
+}
+.lacaball-reward.is-jackpot .lacaball-reward__stock {
+  color: #f3d28b;
+}
+.lacaball-reward.is-empty {
+  opacity: 0.45;
 }
 .lacaball-winner {
   position: absolute;
   z-index: 5;
-  top: 52%;
-  left: 8%;
-  right: 8%;
+  top: 50%;
+  left: 6%;
+  right: 6%;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 10px 18px;
-  color: #ffebbd;
+  padding: 10px 24px;
+  color: #382717;
+  text-shadow: 0 1px #fff5;
   background:
     url('/ui/lc/lacaball-capsule-left.webp') left / 24px 100% no-repeat,
     url('/ui/lc/lacaball-capsule-right.webp') right / 24px 100% no-repeat,
     url('/ui/lc/lacaball-capsule-middle.webp') center / calc(100% - 46px) calc(100% - 8px) no-repeat;
-  font: 700 16px/1.3 var(--font-display);
+  font: 700 17px/1.3 var(--font-display);
   pointer-events: none;
-  animation: lacaball-reveal 300ms ease-out both;
+  animation: lacaball-reveal 150ms ease-out both;
 }
 .lacaball-winner > .item-icon {
   flex-shrink: 0;
 }
 .lacaball-footer {
   grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 8px 5px 3px;
+  padding: 8px 5px 5px;
+  text-align: center;
 }
 .lacaball-footer p {
   color: #bdb6a3;
@@ -286,97 +379,251 @@
   line-height: 1.3;
   margin: 0;
 }
-.lacaball-footer .button {
-  flex-shrink: 0;
-  min-width: 70px;
-  min-height: 32px;
-}
 @keyframes lacaball-shake {
-  25% {
-    transform: translateX(1px);
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
   }
-  75% {
-    transform: translateX(-1px);
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translate3d(1px, 0, 0);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translate3d(-1px, 0, 0);
   }
 }
 @keyframes lacaball-drop {
   0%,
-  40.6% {
+  29.9% {
     opacity: 0;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
-  40.7% {
+  30% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
+    animation-timing-function: ease-in;
   }
-  65% {
+  70% {
     opacity: 1;
-    /* Native coin: top 224 -> 309, then a small bounce to 297 before landing. */
-    transform: translateY(177%);
+    transform: translate3d(0, 177%, 0);
+    animation-timing-function: ease-out;
   }
-  80% {
-    transform: translateY(152%);
+  85% {
+    transform: translate3d(0, 152%, 0);
+    animation-timing-function: ease-in;
   }
-  94%,
   100% {
     opacity: 1;
-    transform: translateY(177%);
+    transform: translate3d(0, 177%, 0);
   }
 }
 @keyframes lacaball-reveal {
   from {
     opacity: 0;
-    transform: scale(0.85);
+    transform: translateY(5px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0);
   }
 }
-@media (max-width: 450px) {
+@media (max-width: 600px) {
   .sheet-backdrop--center .sheet.lacaball {
-    grid-template-rows: 38px 300px auto;
-    grid-template-columns: 39% minmax(0, 1fr);
-  }
-  .lacaball-machine {
-    align-self: center;
+    --lacaball-content-height: min(440px, calc(100dvh - 110px));
+    grid-template-columns: minmax(0, 52fr) minmax(0, 48fr);
+    gap: 0 5px;
+    padding-inline: 6px;
   }
   .lacaball-controls {
-    grid-template-rows: 28px 66px 28px minmax(0, 1fr);
+    grid-template-rows: 28px 80px 26px 22px minmax(0, 1fr);
+    gap: 3px;
   }
   .lacaball-token,
-  .lacaball-balance {
+  .lacaball-balance,
+  .lacaball-pool-total {
     font-size: 10px;
     gap: 2px;
   }
   .lacaball-token > .item-icon {
     display: none;
   }
-  .lacaball-reward {
-    grid-template-columns: 24px minmax(0, 1fr) 27px 32px;
-    font-size: 10px;
+  .lacaball-courses {
+    grid-template-columns: 12px minmax(0, 1fr) 12px;
     gap: 2px;
   }
-  .lacaball-reward > .item-icon {
+  .lacaball-course-list {
+    gap: 2px;
+  }
+  .lacaball-course {
+    font-size: 9px;
+    gap: 4px;
+  }
+  .lacaball-course > .item-icon {
     width: 24px !important;
     height: 24px !important;
   }
-  .lacaball-rewards__heading {
-    grid-template-columns: minmax(0, 1fr) 27px 32px;
-    font-size: 10px;
+  .lacaball-course small {
+    font-size: 8px;
   }
-  .lacaball-reward small,
-  .lacaball-reward b {
+  .lacaball-reward {
+    grid-template-columns: 22px minmax(0, 1fr) 48px;
+    font-size: 10px;
+    gap: 3px;
+    min-height: 46px;
+    padding: 4px 0;
+  }
+  .lacaball-reward > .item-icon {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  .lacaball-reward b,
+  .lacaball-reward__stock {
     font-size: 9px;
   }
-  .lacaball-course {
+  .lacaball-rewards__heading {
+    grid-template-columns: minmax(0, 1fr) 48px;
+    font-size: 10px;
+    padding-inline: 0;
+  }
+  .lacaball-machine__status,
+  .lacaball-machine__start-label {
     font-size: 10px;
   }
-  .lacaball-machine__status {
-    font-size: 10px;
+  .lacaball-auto {
+    font-size: 11px;
+    padding-inline: 8px;
   }
   .lacaball-winner {
     font-size: 14px;
-    padding: 8px;
+  }
+}
+@media (max-height: 520px) and (min-aspect-ratio: 4/3) {
+  .sheet-backdrop--center .sheet.lacaball {
+    --lacaball-content-height: calc(100dvh - 80px);
+    grid-template-rows: 32px var(--lacaball-content-height) auto;
+  }
+  .lacaball__header h2 {
+    font-size: 18px;
+  }
+  .lacaball-close {
+    width: 24px;
+    height: 24px;
+    top: 2px;
+  }
+  .lacaball-play {
+    grid-template-rows: minmax(0, 1fr) 28px;
+  }
+  .lacaball-machine {
+    width: min(100%, calc((var(--lacaball-content-height) - 28px) * 216 / 332));
+  }
+  .lacaball-auto {
+    padding-block: 3px;
+  }
+  .lacaball-controls {
+    grid-template-areas: 'token token' 'courses courses' 'balance total' 'rewards rewards';
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: 24px 50px 20px minmax(0, 1fr);
+    gap: 2px;
+  }
+  .lacaball-token {
+    grid-area: token;
+  }
+  .lacaball-courses {
+    grid-area: courses;
+  }
+  .lacaball-balance {
+    grid-area: balance;
+  }
+  .lacaball-pool-total {
+    grid-area: total;
+  }
+  .lacaball-rewards {
+    grid-area: rewards;
+    padding: 2px;
+  }
+  .lacaball-course {
+    gap: 2px;
+    padding: 1px;
+    font-size: 9px;
+  }
+  .lacaball-course small {
+    font-size: 8px;
+  }
+  .lacaball-course > .item-icon {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  .lacaball-token,
+  .lacaball-balance,
+  .lacaball-pool-total {
+    padding-block: 1px;
+    font-size: 10px;
+  }
+  .lacaball-rewards__heading {
+    font-size: 9px;
+    padding: 0 0 2px;
+    grid-template-columns: minmax(0, 1fr) 48px;
+  }
+  .lacaball-reward {
+    grid-template-columns: 20px minmax(0, 1fr) 48px;
+    min-height: 24px;
+    padding: 1px 0;
+    gap: 3px;
+    font-size: 10px;
+  }
+  .lacaball-reward > .item-icon {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .lacaball-reward > span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+  .lacaball-reward__name {
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    min-width: 0;
+  }
+  .lacaball-reward b {
+    display: inline;
+    margin: 0;
+    flex-shrink: 0;
+    font-size: 9px;
+  }
+  .lacaball-reward__stock {
+    font-size: 10px;
+  }
+  .lacaball-footer {
+    padding-block: 4px 2px;
+  }
+  .lacaball-footer p {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .is-rolling .lacaball-machine__balls {
+    animation-name: none;
+  }
+  .lacaball-machine__ball {
+    animation-name: lacaball-still;
+  }
+  .lacaball-winner {
+    animation: none;
+  }
+  @keyframes lacaball-still {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 0;
+    }
   }
 }

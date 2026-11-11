@@ -11,15 +11,21 @@ import { buildLacaBallCourses } from './lacaball.mjs'
 import { buildIconSheet, ICON_KINDS } from './icons.mjs'
 import { eventButton } from './event-button.mjs'
 
-const [dump, client] = process.argv.slice(2)
-if (!dump || !client)
-  throw new Error('Usage: node scripts/lc/lacaball-assets.mjs <dump.sql> <client>')
+const [dump, client, accountDump, poolDump] = process.argv.slice(2)
+if (!dump || !client || !accountDump)
+  throw new Error(
+    'Usage: node scripts/lc/lacaball-assets.mjs <data.sql> <client> <db.sql> [lcball-data.sql]',
+  )
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const generated = path.join(root, 'src/game/data/generated')
-const tables = readTables(fs.readFileSync(dump, 'utf8'), ['t_item', 't_lacarette'])
+const tables = readTables(fs.readFileSync(dump, 'utf8'), ['t_item'])
+const pools = readTables(
+  fs.readFileSync(accountDump, 'utf8') + (poolDump ? '\n' + fs.readFileSync(poolDump, 'utf8') : ''),
+  ['t_lcball'],
+)
 fs.writeFileSync(
   path.join(generated, 'lc-lacaball.json'),
-  JSON.stringify(buildLacaBallCourses(tables.t_lacarette)),
+  JSON.stringify(buildLacaBallCourses(pools.t_lcball)),
 )
 
 const dataFile = path.join(generated, 'lc-data.json')
@@ -89,6 +95,8 @@ const parts = {
   'capsule-right': [480, 330, 24, 48],
   'capsule-middle': [450, 111, 8, 40],
   slot: [80, 128, 34, 34],
+  close: [475, 177, 16, 16],
+  'close-down': [492, 177, 16, 16],
 }
 const ui = path.join(root, 'public/ui/lc')
 for (const [name, rect] of Object.entries(parts))
@@ -102,4 +110,4 @@ fs.writeFileSync(
   path.join(ui, 'menu-lacaball.webp'),
   await eventButton(fs.readFileSync(path.join(ui, 'event-frame.webp')), ball),
 )
-console.log('Laca Ball: 3 courses, Token icons and original client machine extracted.')
+console.log('Laca Ball: 10 finite courses, Token icons and original client machine extracted.')

@@ -1,99 +1,113 @@
-# Laca Ball, niedzielne nagrody i Auto ×2 (2026-11-11)
+# Laca Ball: aktualny system puli (2026-11-11)
 
-Baza: `415242c`, branch main. SaveVersion **18**, migracja 17→18 zachowuje
-postacie, ekwipunek, Cash, kalendarz, Dungeons, World Boss i zarezerwowane Moonstone.
+Baza aktualizacji: `568b06b`, branch main. SaveVersion **19**. Wersja 18 używała
+starszego `t_lacarette`; aktualny system odpowiada `MSG_EX_LCBALL`, `t_lcball`
+i SubHelper, których używa okno `CUILacaball` z dołączonego klienta.
 
-## Reguły właściciela
+## Źródła i reguły
 
-- Niedziela w Weekly zajmuje cały dolny rząd i ma złote wyróżnienie. Daje jeden
-  500 Cash Ticket (95015). Każda niedziela w Monthly daje drugi taki bilet,
-  również gdy wypada ostatniego dnia miesiąca. Wspólny odbiór po 10 minutach
-  online przyznaje dwa bilety, łącznie 1000 Cash po ich użyciu. Zachowane limity
-  konta, jedna data UTC, historia odbiorów i brak odbioru wstecz.
-- Kalendarz ma tę samą ikonę, w trzeciej kolumnie na lewo od Dungeons.
-  Laca Ball zajmuje jego poprzednie miejsce pod Moonstone.
-- Token 5123 ma osobny rzut 1% za każde zabicie: Idle, AFK, ekspedycje,
-  Dungeons i World Boss. Rzut w `rewardKills`, poza bramką różnicy poziomów;
-  mnożniki dropu nie zmieniają szansy. Nie dublować go w GENERAL_DROPS.
-- ItemShop sprzedaje Token ×100 za 1000 Cash oraz Gold token ×50 za 750 Cash.
-  Gold token 5124 jest odtąd tylko w ItemShop. Przyszłe losowania Perfect
-  Moonstone zamiast Gold token ×3 dają Token ×3, z tą samą wagą 60000.
-  Surowa tabela Moonstone w lc-data pozostaje źródłowa; zmiana w adapterze.
-  Istniejące przedmioty i już zapisane wyniki losowania nie są usuwane.
+- `SubHelper/doFuncCommand.cpp:279`, `do_Command_LCBallinfo`: lista walut,
+  kursy, suma `a_item_remain/a_item_max` oraz pięć wierszy nagród w kolejności
+  `a_order`. Klient rysuje liczniki w `UILacarette.cpp:378..447`.
+- `SubHelper/doFuncCommand.cpp:371`, `do_Command_LCBalluse`: losowanie z sumy
+  pozostałych sztuk, zmniejszenie wybranego wiersza o jeden. Zachowana granica
+  źródłowa: `GetRandom(0, totalRemain - 1)`, odejmowanie, porównanie `<= 0`.
+  Obejmuje to źródłowe zachowanie na granicy pierwszego wiersza. Nie zastępować
+  stałymi procentami ani dawną tabelą `t_lacarette`.
+- `SubHelper/doFuncCommand.cpp:442`, `do_Command_LCBallsuccess`: dopiero sukces
+  nagrody z `a_order=0` przywraca `a_item_remain=a_item_max` dla całego wygranego
+  kursu i tej waluty. Inne kursy i drugi żeton zachowują postęp.
+- `GameServer/ProcSubHelperMsg.cpp:921`: jeden Token lub Gold token na losowanie.
+  Usunięto cenę rosnącą co pięć gier i reset po 24h, które należały do starszego
+  wariantu. Odczekanie doby, zmiana postaci i reload nie uzupełniają nowej puli.
+- `newproject_db.sql` zawiera schemat `t_lcball`; dane są w osobnym
+  `newproject_db-t_lcball.sql`. Pola `a_item_count` (ile otrzymujemy w wygranej)
+  i `a_item_max` (ile takich wygranych jest w puli) to różne wielkości.
 
-## Oryginalne źródła i granice adaptacji
+Włączone tylko 5123 Token i 5124 Gold token. Każda waluta ma kursy A..E, po
+pięć nagród. Trzecia waluta ze źródeł, 6653, nie jest włączona na życzenie
+właściciela. Główny wiersz ma zawsze maksymalnie jedną wygraną, `1/1`.
 
-- `GameServer/LacaRette.cpp`, `GetNeedTokenCount`: Course A kosztuje 2 Token
-  lub 1 Gold token; Course B 3 Token lub 1 Gold token; Gold Course 2 Gold token.
-  Zwykły koszt rośnie o `floor(max(1, repeat)/5)`. Pierwszych pięć gier ma bazową
-  cenę, szósta wyższą. Licznik obejmuje wszystkie kursy i oba żetony na koncie.
-- `Connector/ProcConnMsg.cpp`, `LacaretteRepeat`: reset kosztu po 24 godzinach
-  bez gry, nie o północy. Gold token ma stały koszt.
-- `GameServer/ProcConnMsg.cpp`, `MSG_CONN_LACARETTE_RETTE_REP`: jeden rzut
-  1..10000 i dziesięć kolejnych przedziałów nagród. Zachowane źródłowe wagi:
-  A/B 10/100/390/700/800/1000/1500/1500/2000/2000;
-  Gold 10/100/390/700/800/1000/1000/1500/1500/3000.
-- `Engine/Interface/UILacarette.cpp`, `CUILacaball`: ramka 500×375,
-  `Data/Interface/lacaball.tex`, trzynaście klatek potrząsania po 100 ms,
-  wypadająca i odbijająca się kula, koszyk, czerwony Start oraz kapsuła nagrody.
-  Przeniesione grafiki, etapy animacji i pola wyboru. Układ HTML dopasowuje się
-  do telefonu; lista pokazuje też jawne szanse. Pełna sekwencja IdleLC trwa 3,2 s.
-- Wyłącznie trzy zwykłe kursy; bez kursów testowych i dodatkowego darmowego
-  przydziału żetonów od NPC. Zawartości nagród poniżej są konfiguracją IdleLC
-  na wyraźne polecenie właściciela; nie przedstawiać ich jako oryginalnego dropu.
+Limity sztuk po kolei, ze źródłowej bazy:
 
-## Nagrody według kolejności przedziałów
+| Waluta     | A              | B               | C               | D               | E               |
+| ---------- | -------------- | --------------- | --------------- | --------------- | --------------- |
+| Token      | 1/10/5/50/1000 | 1/10/30/50/1000 | 1/10/30/50/1000 | 1/10/30/50/1000 | 1/10/10/50/1000 |
+| Gold token | 1/10/30/50/500 | 1/5/10/50/500   | 1/5/10/30/500   | 1/5/30/50/500   | 1/5/10/30/500   |
 
-| Kurs | Nagrody od najrzadszej do najczęstszej                                                                                                                                                                                                            |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A    | 500 Cash Ticket ×1; Perfect Moonstone ×2; Heaven Stone ×5; Golden magnifying glass ×3; Blessed Iris ×1; Good Moonstone ×3; Platinum Super Skill Pill ×1; Moonstone Box ×5; Platinum Small Healing Potion ×50; Platinum Small Mana Potion ×50      |
-| B    | 1000 Cash Ticket ×1; Perfect Moonstone ×3; Heaven Stone ×10; Golden magnifying glass ×5; Blessed Iris ×2; Good Moonstone ×5; Platinum Super Skill Pill ×2; Moonstone Box ×10; Platinum Small Healing Potion ×100; Platinum Small Mana Potion ×100 |
-| Gold | 1000 Cash Ticket ×3; 500 Cash Ticket ×1; Perfect Moonstone ×10; Heaven Stone ×25; Golden magnifying glass ×10; Blessed Iris ×5; Platinum Super Skill Pill ×5; Good Moonstone ×15; Moonstone Box ×25; Platinum Small Healing Potion ×250           |
+Nowe konto zaczyna z pełnymi pulami, nie z częściowo zużytą migawką obcego
+serwera z dumpa. Nagrody są doborem IdleLC, zgodnie z wcześniejszą zgodą
+właściciela; konfiguracja w `src/game/data/lacaball.ts`. Wykorzystują istniejące
+bilety Cash, kamienie, lupy, boosty, skrzynki i mikstury. Gold token nadal
+pochodzi wyłącznie z ItemShop. Drop Tokena 1%, ceny pakietów i kalendarz bez zmian.
 
-## Zapis i przekazanie dla Claude
+## Zapis i transakcje, dla Claude
 
-`SaveData.lacaBall` przechowuje konto: `repeat`, `lastPlayedAt` i opcjonalne
-`pending`. Rezerwacja zawiera ID rundy i postaci, kurs, walutę, koszt, początek
-i jeden wynik. Start zabiera żetony i zapisuje rezerwację razem. Dopiero koniec
-animacji oraz minimum 3200 ms pozwalają `finishLacaBall` dopisać nagrodę do
-aktualnego inventory, usunąć pending i wyświetlić BagFeed. Brak ponownego rzutu,
-podwójnej wypłaty i nadpisania zakupów zrobionych w międzyczasie.
+`SaveData.lacaBall.pools[courseId]` to pięć liczników. ID 100..104 dotyczą
+Tokena, 200..204 Gold tokena. Konto jest obecnie lokalne: pule są wspólne dla
+jego postaci i kart przeglądarki, zapisywane w localStorage. To nie jest globalna
+pula wszystkich graczy na hostingu GitHub Pages. Tak jak globalny ranking,
+wymaga ona współdzielonego backendu; oryginał trzymał te rekordy w SubHelper DB.
 
-Zamknięcie, ukrycie karty i reload nie wypłacają w tle. Resume powtarza animację
-tej samej rezerwacji bez nowej opłaty. Inna postać nie odbierze wyniku i nie
-rozpocznie gry do czasu zakończenia oczekującej rundy. Nowy Start jest blokowany
-podczas ekspedycji, Dungeons i World Bossa. Zapisy serwisu cofają stan w pamięci
-po konflikcie z inną kartą, tak jak Moonstone.
+Start zapisuje razem opłatę, odjęcie jednej wygranej oraz `pending` z ID rundy,
+postaci, kursu, żetonu, `rewardIndex`, nagrodą i czasem animacji. Drugi Start
+jest blokowany do rozliczenia. UI używa `lacaBallDisplayPool`: rezerwacja jest
+ukryta w licznikach do odsłonięcia nagrody, żeby wiersz nie zdradzał wyniku przed
+animacją. `finishLacaBall` dopisuje nagrodę do aktualnego inventory i usuwa
+pending w jednym zapisie. Po jackpotcie uzupełnia tylko wygrany kurs.
 
-Eksport samych zasobów Laca Ball, bez nadpisania pozostałych aktualizacji:
+Pozostają rollback pamięci po save-conflict, zabezpieczenie przed podwójną
+wypłatą, zachowanie zakupów z czasu animacji i zakaz nowej gry podczas World
+Bossa, Dungeons i ekspedycji. Zamknięcie lub ukrycie karty nie dopisuje nagrody;
+Resume powtarza ten sam zapisany wynik, bez kolejnego żetonu i ubytku w puli.
+
+Migracja 18→19 zachowuje już opłaconą starą rundę (kurs 1..3), jej cenę, nagrodę
+i termin 3200 ms. Taki wynik nie zmniejsza nowej puli. Wszystkie pozostałe dane
+postaci, Cash i dotychczasowe postępy pozostają zachowane.
+
+## Okno i animacja
+
+Okno poszerzone z 680 do 940 px, na telefonie ma mniejsze marginesy. Większa
+część przypada na maszynę, węższa na listę po prawej. Trzy widoczne karty kursów
+przewijają się strzałkami do pięciu, jak w kliencie. Karty pokazują stan całej
+puli, a tabela ilość nagrody i pozostałe/maksymalne wygrane. Brak procentów.
+
+Usunięto Exit. X ma własną grafikę `lacaball.tex`, poprawny narożnik i działa
+także w trakcie losowania: zatrzymuje Auto i pozostawia rezerwację do Resume.
+Ręczne losowanie trwa 2000 ms, Auto Draw ×2 trwa 1000 ms. Czas zapisany w rundzie
+wyznacza animację i minimalny termin wypłaty; przełączenie Auto w trakcie rundy
+obowiązuje następną. Kula opada i lekko odbija się w źródłowym miejscu, z płynną
+interpolacją transformacji. Przy ograniczonym ruchu pozostaje ten sam czas wypłaty.
+
+Kapsuła z nagrodą znika po 1500 ms. Potem Auto może rozpocząć kolejną rundę.
+Odznaczenie Auto, X, ukrycie karty i koniec żetonów zatrzymują serię. Automat
+nie wraca sam po ponownym otwarciu ani reloadzie.
+
+Eksport danych, oryginalnych elementów i ikon:
 
 ```sh
-node scripts/lc/lacaball-assets.mjs /path/newproject_data.sql /path/client
+node scripts/lc/lacaball-assets.mjs /path/newproject_data.sql /path/client /path/newproject_db.sql /path/newproject_db-t_lcball.sql
 ```
 
-Skrypt tworzy `lc-lacaball.json`, włącza źródłowe 5123/5124, przelicza atlas ikon
-z revision i wycina elementy lacaball.tex. `import-db.mjs` również zachowuje oba
-żetony i ich opisy. Własne nagrody edytować w `src/game/data/lacaball.ts`.
-
-## Moonstone
-
-Napis w polu Statui obniżony do środka oryginalnej tabliczki. Auto ×2 skraca obrót
-z 3000 do 1500 ms oraz przerwę z 700 do 350 ms. Czas zapisany w rezerwacji
-`durationMs`: animacja i minimalny termin wypłaty używają tej samej wartości.
-Starsze i nieprawidłowe wartości dają 3000 ms. Zmiana Auto w trakcie obrotu
-obowiązuje następny obrót; Resume zachowuje tempo już zapisanej rundy.
+Historyczna weryfikacja pierwszego etapu jest w `lacaball-validation.json`.
+Aktualny [zapis weryfikacji](lacaball-pools-validation.json) dotyczy skończonych pul.
 
 ## Weryfikacja
 
-**649 testów / 81 plików**, pełne check i produkcyjny build. Chromium na buildzie
-produkcyjnym: oba kalendarze w siedmiu rozmiarach 320×568..1280×900, również
-568×320 w poziomie, bez przewijania; pełna szerokość niedzieli i złote Monthly.
-Laca Ball w czterech rozmiarach: kursy, waluty, rezerwacja, wypłata po animacji,
-zamknięcie i reload tej samej rundy bez drugiej opłaty. Przetestowany Gold Course,
-widoczna kapsuła i BagFeed. Rzeczywiste zakupy obu pakietów potwierdzają ceny
-i ilości. Moonstone: Auto 1500 ms, Stop i ręczne 3000 ms oraz położenie napisu.
+**654 testy / 82 pliki**, pełne check i produkcyjny build. Testy obejmują granice
+losowania SubHelper, wyczerpane wiersze, odjęcie jednej wygranej, ukrycie rezerwacji
+w widoku, reset wyłącznie trafionego kursu, konflikty zapisu, wspólny stan postaci
+oraz zachowanie opłaconego wyniku v18. Osobne granice czasu 1000/2000 ms i próba
+przedwczesnej wypłaty, migracja legacy z minimum 3200 ms.
 
-Osobna próba niedzieli w GUI na przygotowanym zapisie z datą 15 listopada:
-odebrane dwa bilety 500, użyte oba w Inventory, saldo wzrosło do 1000 Cash;
-reload zachował saldo i odebraną datę. Testy używają przygotowanych zapisów,
-nie są pomiarem balansu ani FPS. [Zapis weryfikacji](lacaball-validation.json).
+Chromium na buildzie produkcyjnym: 390×844, 320×568, 360×640, 1280×900,
+844×390 i 568×320. Pięć wierszy widocznych, okno bez przepełnienia. Strzałki
+przechodzą przez pięć kursów, zmiana waluty wraca do A, koszt wynosi jeden.
+Wymuszona przygotowanym zapisem główna wygrana uzupełniła wyłącznie wybrany kurs.
+Kapsuła była widoczna około **1491 ms**, przy ustawieniu 1500 ms.
+
+Sprawdzone kolejne rundy Auto po 1000 ms animacji, wyłączenie w trakcie obrotu,
+X w trakcie gry, reload, Resume bez dodatkowego żetonu oraz zatrzymanie po
+ukryciu karty. Osobny stary zapis v18 wypłacił zachowaną nagrodę, bez ponownej
+opłaty i z zachowaniem wyłączonego Auto. Brak błędów strony, konsoli i żądań HTTP.
+Próby używały przygotowanych postaci i pul; nie są pomiarem FPS ani balansu.

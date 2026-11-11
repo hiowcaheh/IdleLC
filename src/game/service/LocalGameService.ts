@@ -808,6 +808,7 @@ export class LocalGameService implements GameService {
     characterId: string,
     courseId: number,
     tokenId: number,
+    automatic = false,
   ): Promise<LacaBallStart> {
     this.notOnWorldBoss(characterId)
     const started = beginLacaBall(
@@ -818,6 +819,7 @@ export class LocalGameService implements GameService {
       newId(),
       this.now(),
       this.rng,
+      automatic,
     )
     const before = this.save
     try {

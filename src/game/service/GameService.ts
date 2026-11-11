@@ -127,7 +127,12 @@ export interface GameService {
   ): Promise<MoonstoneStart>
   /** Claims a reserved draw after the visual roll; retries cannot pay it twice. */
   finishMoonstonePlay(characterId: string, spinId: string): Promise<MoonstonePlay>
-  beginLacaBall(characterId: string, courseId: number, tokenId: number): Promise<LacaBallStart>
+  beginLacaBall(
+    characterId: string,
+    courseId: number,
+    tokenId: number,
+    automatic?: boolean,
+  ): Promise<LacaBallStart>
   finishLacaBall(characterId: string, drawId: string): Promise<LacaBallResult>
   /** Opens `count` boxes of the kind from the bag (data/boxes.ts). */
   openBoxes(characterId: string, itemId: number, count: number): Promise<BoxOpening>

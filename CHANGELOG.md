@@ -1,5 +1,25 @@
 # Historia zmian
 
+## 2026-11-11 (Codex): skończone pule Laca Ball i Auto Draw
+
+1. Poszerzone okno i większy obszar maszyny, węższa tabela nagród po prawej.
+   Usunięty Exit, poprawiony X z grafiki klienta, dostępny również podczas gry.
+2. Płynniejsza, szybsza animacja: 2 s ręcznie, 1 s w Auto Draw ×2. Wynik znika
+   po 1,5 s, po czym automat może kontynuować. Zamknięcie i ukrycie karty
+   zatrzymują automat; przerwana runda zachowuje wynik i pobraną opłatę.
+3. Procentowe szanse zastąpione rzeczywistymi licznikami pozostałych nagród.
+   Właściwy system z `t_lcball` i kodu SubHelper: pięć kursów dla Tokena i pięć
+   dla Gold Tokena, po pięć nagród. Jeden żeton na losowanie. Wiersz głównej
+   nagrody ma `1/1`; jego wygranie uzupełnia cały wybrany kurs. Pozostałe kursy
+   zachowują stan. Nowa tabela pokazuje też ilość przedmiotów w wygranej.
+
+SaveVersion **19**, z zachowaniem opłaconych losowań v18 i pozostałych postępów.
+Pule są wspólne dla postaci lokalnego konta; pula wszystkich graczy wymaga
+współdzielonego backendu. [Źródła i przekazanie dla Claude](docs/lacaball.md).
+Weryfikacja: **654 testy / 82 pliki**, check i build. Chromium: sześć rozmiarów
+okna, pięć widocznych nagród, reset puli, Auto ×2, wynik po około 1,5 s,
+X/Resume/reload, ukrycie karty oraz migracja opłaconego losowania v18.
+
 ## 2026-11-11 (Codex): Laca Ball, złote niedziele i Moonstone Auto ×2
 
 1. Niedziela w Weekly zajmuje cały dolny rząd i ma złote wyróżnienie. Każda

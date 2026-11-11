@@ -117,7 +117,7 @@ interface GameStore {
   /** Reserves one Moonstone draw. The prize is not added or announced yet. */
   beginMoonstonePlay(stoneId: number, automatic?: boolean): Promise<MoonstoneSpin>
   finishMoonstonePlay(spinId: string): Promise<ItemStack>
-  beginLacaBall(courseId: number, tokenId: number): Promise<LacaBallDraw>
+  beginLacaBall(courseId: number, tokenId: number, automatic?: boolean): Promise<LacaBallDraw>
   finishLacaBall(drawId: string): Promise<ItemStack>
   devAddCash(amount: number): void
   /** Opens boxes from the bag; resolves with the prizes. */
@@ -698,8 +698,11 @@ export const useGameStore = create<GameStore>((set, get) => {
       return played.prize
     },
 
-    async beginLacaBall(courseId, tokenId) {
-      const started = await enqueue(() => gameService.beginLacaBall(playedId(), courseId, tokenId))
+    async beginLacaBall(courseId, tokenId, automatic = false) {
+      const id = playedId()
+      const started = await enqueue(() =>
+        gameService.beginLacaBall(id, courseId, tokenId, automatic),
+      )
       applyCharacter(started.character)
       set({ save: { ...get().save, lacaBall: started.progress } })
       return started.draw
