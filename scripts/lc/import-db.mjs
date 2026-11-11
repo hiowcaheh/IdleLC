@@ -325,7 +325,7 @@ export function buildData(tables) {
   for (const boss of worldBosses) for (const drop of boss.raidDrops) usedItems.add(drop.item)
   for (const stone of moonstones) for (const reward of stone.rewards) usedItems.add(reward.itemId)
   // World Boss replacements, Moonstone Box and the five original statue stones.
-  for (const id of [4917, 4920, 2544, 2545, 2546, 2547, 2548]) usedItems.add(id)
+  for (const id of [4917, 4920, 2544, 2545, 2546, 2547, 2548, 5123, 5124]) usedItems.add(id)
   const isGear = (r) =>
     ((int(r.a_type_idx) === 0 && CLASS_WEAPONS.has(int(r.a_subtype_idx))) ||
       int(r.a_type_idx) === 1) &&
@@ -418,7 +418,7 @@ export function buildData(tables) {
       // what a boost potion does, in the database's words (without its "[Cash Item]" tag)
       ...((BOOST_POTIONS.has(int(r.a_index)) ||
         moonstones.some((s) => s.itemId === int(r.a_index)) ||
-        int(r.a_index) === 2544) &&
+        [2544, 5123, 5124].includes(int(r.a_index))) &&
       String(r.a_descr_usa ?? '').trim()
         ? {
             description: String(r.a_descr_usa)

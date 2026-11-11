@@ -2,6 +2,7 @@ import { CashShopButton, CashShopPanel } from './cashShop/CashShop.tsx'
 import { MoonstoneButton, MoonstoneStatue } from './moonstone/MoonstoneStatue.tsx'
 import { CalendarRuntime } from './calendar/CalendarRuntime.tsx'
 import { CalendarButton, RewardsCalendar } from './calendar/RewardsCalendar.tsx'
+import { LacaBall, LacaBallButton } from './lacaball/LacaBall.tsx'
 import { BagFeed } from './items/BagFeed.tsx'
 import { useMemo, useState } from 'react'
 import { skillsForClass } from '../game/data/skills.ts'
@@ -49,6 +50,13 @@ export function GameScreen() {
   const [dungeonsOpen, setDungeonsOpen] = useState(false)
   const [shopOpen, setShopOpen] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
+  const [lacaBallOpen, setLacaBallOpen] = useState(() => {
+    const state = useGameStore.getState()
+    return (
+      !!state.save.lacaBall?.pending &&
+      state.save.lacaBall.pending.characterId === state.character?.id
+    )
+  })
   const [moonstoneOpen, setMoonstoneOpen] = useState(
     () => !!useGameStore.getState().character?.moonstoneSpin,
   )
@@ -141,6 +149,7 @@ export function GameScreen() {
                 <CashShopButton onClick={() => setShopOpen(true)} />
                 <MoonstoneButton onClick={() => setMoonstoneOpen(true)} />
                 <CalendarButton onClick={() => setCalendarOpen(true)} />
+                <LacaBallButton onClick={() => setLacaBallOpen(true)} />
               </>
             )}
           </div>
@@ -178,6 +187,7 @@ export function GameScreen() {
       {shopOpen && <CashShopPanel onClose={() => setShopOpen(false)} />}
       {moonstoneOpen && <MoonstoneStatue onClose={() => setMoonstoneOpen(false)} />}
       {calendarOpen && <RewardsCalendar onClose={() => setCalendarOpen(false)} />}
+      {lacaBallOpen && <LacaBall onClose={() => setLacaBallOpen(false)} />}
       <BagFeed />
       <DungeonResult />
       <WorldBossResult />

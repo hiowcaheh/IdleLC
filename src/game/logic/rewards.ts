@@ -5,6 +5,7 @@
 import { boostEffects, reportedBoosts, type OwnedBoost } from './boosts.ts'
 import { deathLoss } from './death.ts'
 import { getItem } from '../data/items.ts'
+import { TOKEN_DROP_CHANCE, TOKEN_ID } from '../data/lacaball.ts'
 import type { MonsterDef } from '../data/types.ts'
 import { clamp } from './balance.ts'
 import type { CharacterData } from './character.ts'
@@ -180,6 +181,9 @@ export function rewardKills(
       for (const item of fixedDrops ?? monsterDrops(monster, 1, rng, multipliers.drop))
         items.set(item.itemId, (items.get(item.itemId) ?? 0) + item.count)
     }
+    // Owner: every monster has a fixed 1% Token roll, independent of level and bonuses.
+    if (rollInt(rng, 1, 10000) <= TOKEN_DROP_CHANCE * 10000)
+      items.set(TOKEN_ID, (items.get(TOKEN_ID) ?? 0) + 1)
     // A level gained by this kill changes the penalties of the next kill, even in one report.
     const progress = gainExp(level, remainingExp, reward.exp)
     level = progress.level

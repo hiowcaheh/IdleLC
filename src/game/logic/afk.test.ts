@@ -143,7 +143,8 @@ describe('simulateAfk', () => {
     const overlevelled = { ...hero, level: 30, titles: [], activeTitle: null }
     const payout = simulateAfk(overlevelled, 3600, createRng(9), 1000)
     expect(payout.kills).toBeGreaterThan(0)
-    expect(payout).toMatchObject({ exp: payout.kills, sp: payout.kills, gold: 0, drops: [] })
+    expect(payout).toMatchObject({ exp: payout.kills, sp: payout.kills, gold: 0 })
+    expect(payout.drops).toEqual([{ itemId: 5123, count: 5 }])
     expect(payout.character.stats.kills).toBe(payout.kills)
     const estimate = estimateHourly(overlevelled, hero.location.monsterId, createRng(9), 1000)
     expect(estimate.expPerHour).toBe(estimate.killsPerHour)

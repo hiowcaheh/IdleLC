@@ -1,0 +1,66 @@
+{
+  "date": "2026-11-11",
+  "base": "415242cb0f25819d0fc74faa23b37a4de938f3c7",
+  "saveVersion": 18,
+  "automated": {
+    "tests": 649,
+    "testFiles": 81,
+    "check": "passed",
+    "build": "passed",
+    "coverage": [
+      "Sunday: two 500 Cash Tickets, including month-end Sunday, one claim per date",
+      "Laca Ball: all 60 reward interval boundaries, original costs and repetition reset",
+      "Laca Ball: timing, one payment, reload, invalid stakes and account save conflicts",
+      "Laca Ball: inventory purchases during an outstanding draw are preserved",
+      "Token: inclusive fixed 1% boundary, blue monsters, bosses and drop bonuses",
+      "Gold Token: shop-only future reward pools and exact shop packs",
+      "Moonstone: 1500/3000 ms, early claim rejected, old saves, reload and duplicate claim"
+    ]
+  },
+  "browser": {
+    "engine": "Chromium with SwiftShader",
+    "target": "local production preview",
+    "fixtures": "prepared character saves; Sunday tested with the game Date fixed to 2026-11-15",
+    "calendarViewports": [
+      [390, 844],
+      [320, 568],
+      [360, 640],
+      [1280, 900],
+      [844, 390],
+      [667, 375],
+      [568, 320]
+    ],
+    "calendar": "Weekly and Monthly: no window/body overflow, Sunday spans the entire weekly row, monthly Sundays show 500 Cash Ticket",
+    "hud": "40px unchanged calendar icon left of Dungeons; 40px Laca Ball below Moonstone",
+    "lacaBallViewports": [
+      [390, 844],
+      [320, 568],
+      [1280, 900],
+      [667, 375]
+    ],
+    "lacaBall": [
+      "Three courses, ten rewards, correct selectable currencies and displayed costs",
+      "Tokens reserved at Start; no result/inventory payout before landing",
+      "Closing and reloading preserve the same pending result without another charge",
+      "Gold Course consumes exactly two Gold Tokens and reveals the reserved prize",
+      "Original capsule art, visible result and left-hand BagFeed after payout"
+    ],
+    "shopPurchases": [
+      { "itemId": 5123, "count": 100, "cashPaid": 1000 },
+      { "itemId": 5124, "count": 50, "cashPaid": 750 }
+    ],
+    "sunday": { "ticketsClaimed": 2, "cashCreditedAfterUse": 1000, "claimPreservedOnReload": true },
+    "moonstone": "Auto records 1500 ms; Stop finishes its pending draw; manual play records 3000 ms; caption visually centered in its plate",
+    "pageErrors": [],
+    "consoleErrors": [],
+    "httpErrors": [],
+    "failedRequests": []
+  },
+  "dataAudit": {
+    "lcDataOtherTablesChanged": [],
+    "newItemIds": [5123],
+    "existingItemChanges": "5124: original English description added; item values retained",
+    "itemSpriteRevisionUpdated": true
+  },
+  "scope": "UI and transaction verification on prepared saves; no balance or FPS benchmark"
+}

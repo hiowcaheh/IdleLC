@@ -1,5 +1,11 @@
 import { allocateStatPoint, sanitizeAllocatedStats } from '../logic/statPoints.ts'
 import {
+  beginLacaBall,
+  finishLacaBall,
+  type LacaBallStart,
+  type LacaBallResult,
+} from '../logic/lacaball.ts'
+import {
   createDungeonRun,
   dailyProgress,
   dungeonCheckpoint,
@@ -762,7 +768,11 @@ export class LocalGameService implements GameService {
     }
   }
 
-  async beginMoonstonePlay(characterId: string, stoneId: number): Promise<MoonstoneStart> {
+  async beginMoonstonePlay(
+    characterId: string,
+    stoneId: number,
+    automatic = false,
+  ): Promise<MoonstoneStart> {
     this.notOnWorldBoss(characterId)
     const started = beginMoonstonePlay(
       this.notOnExpedition(characterId),
@@ -770,6 +780,7 @@ export class LocalGameService implements GameService {
       newId(),
       this.now(),
       this.rng,
+      automatic,
     )
     const before = this.save
     try {
@@ -787,6 +798,50 @@ export class LocalGameService implements GameService {
     try {
       const updated = this.update(characterId, () => played.character)
       return copy({ ...played, character: updated })
+    } catch (error) {
+      this.save = before
+      throw error
+    }
+  }
+
+  async beginLacaBall(
+    characterId: string,
+    courseId: number,
+    tokenId: number,
+  ): Promise<LacaBallStart> {
+    this.notOnWorldBoss(characterId)
+    const started = beginLacaBall(
+      this.notOnExpedition(characterId),
+      this.save.lacaBall,
+      courseId,
+      tokenId,
+      newId(),
+      this.now(),
+      this.rng,
+    )
+    const before = this.save
+    try {
+      this.save = { ...this.save, lacaBall: started.progress }
+      const character = this.update(characterId, () => started.character)
+      return copy({ ...started, character })
+    } catch (error) {
+      this.save = before
+      throw error
+    }
+  }
+
+  async finishLacaBall(characterId: string, drawId: string): Promise<LacaBallResult> {
+    const played = finishLacaBall(
+      this.character(characterId),
+      this.save.lacaBall,
+      drawId,
+      this.now(),
+    )
+    const before = this.save
+    try {
+      this.save = { ...this.save, lacaBall: played.progress }
+      const character = this.update(characterId, () => played.character)
+      return copy({ ...played, character })
     } catch (error) {
       this.save = before
       throw error

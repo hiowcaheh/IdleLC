@@ -35,12 +35,14 @@
 }
 .moonstone-machine__title {
   position: absolute;
-  top: 52%;
+  top: 59%;
+  transform: translateY(-50%);
   left: 8%;
   right: 8%;
   color: #d8d1bb;
   text-align: center;
   font: 700 clamp(11px, 2vw, 15px) var(--font-display);
+  line-height: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

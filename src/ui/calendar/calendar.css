@@ -1,7 +1,7 @@
 .game .icon-button.hud__menu--calendar {
   position: absolute;
-  top: 142px;
-  right: calc(100% + 10px);
+  top: -2px;
+  right: calc(100% + 60px);
   width: 40px;
   height: 40px;
   pointer-events: auto;
@@ -196,9 +196,10 @@
   line-height: 1.25;
 }
 .calendar-grid--weekly {
-  flex: 0 1 180px;
+  flex: 1;
   width: 100%;
-  margin-block: auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
 }
 .calendar-grid--weekly .calendar-day__date {
   left: 0;
@@ -208,6 +209,74 @@
 .calendar-grid--weekly .calendar-day__icon {
   width: min(44px, 65%);
   margin-top: -8px;
+}
+.calendar-day.calendar-day--sunday {
+  color: #ffe2a4;
+  border-color: #b99347;
+  background-image:
+    linear-gradient(135deg, #b8861929, #f4d67612 45%, #4f300b42),
+    url('/ui/lc/calendar-selected.webp');
+  box-shadow: inset 0 0 12px #d3a3482b;
+}
+.calendar-grid--weekly .calendar-day--sunday {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  grid-template-rows: 1fr 1fr;
+  gap: 0 12px;
+  padding: 10px 18px;
+  text-align: left;
+}
+.calendar-grid--weekly .calendar-day--sunday .calendar-day__date {
+  position: static;
+  grid-column: 2;
+  align-self: end;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.calendar-grid--weekly .calendar-day--sunday .calendar-day__icon {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  width: 48px;
+  margin: 0;
+}
+.calendar-grid--weekly .calendar-day--sunday .calendar-day__name {
+  position: static;
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  display: block;
+  color: #ffe4a2;
+  font: 700 17px/1.3 var(--font-display);
+}
+.calendar-day__finale {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  align-self: center;
+  max-width: 90px;
+  color: #d6b975;
+  font: 700 13px/1.3 var(--font-display);
+  text-align: right;
+}
+@media (max-width: 599px), (max-height: 520px) {
+  .calendar-grid--weekly .calendar-day--sunday {
+    padding: 5px 10px;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    gap: 0 7px;
+  }
+  .calendar-grid--weekly .calendar-day--sunday .calendar-day__icon {
+    width: 34px;
+  }
+  .calendar-grid--weekly .calendar-day--sunday .calendar-day__date {
+    font-size: 11px;
+  }
+  .calendar-grid--weekly .calendar-day--sunday .calendar-day__name {
+    font-size: 14px;
+  }
+  .calendar-day__finale {
+    max-width: 70px;
+    font-size: 11px;
+  }
 }
 .calendar-footer {
   grid-area: footer;
@@ -327,9 +396,6 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-rows: repeat(3, minmax(0, 1fr));
   }
-  .calendar-grid--weekly .calendar-day:last-child {
-    grid-column: 2;
-  }
   .calendar-day__date {
     top: 3px;
     left: 3px;
@@ -365,11 +431,8 @@
   .calendar-grid--weekly {
     flex: 1;
     margin: 0;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-template-rows: repeat(2, minmax(0, 1fr));
-  }
-  .calendar-grid--weekly .calendar-day:last-child {
-    grid-column: auto;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
   }
   .calendar-grid--weekly .calendar-day__icon {
     width: 30px;

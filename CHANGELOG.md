@@ -1,5 +1,31 @@
 # Historia zmian
 
+## 2026-11-11 (Codex): Laca Ball, złote niedziele i Moonstone Auto ×2
+
+1. Niedziela w Weekly zajmuje cały dolny rząd i ma złote wyróżnienie. Każda
+   niedziela w obu kalendarzach daje po jednym 500 Cash Ticket, łącznie dwa
+   bilety o wartości 1000 Cash. Wymagane 10 minut online i jeden odbiór na konto.
+2. Ta sama ikona kalendarza jest teraz na lewo od Dungeons, w trzeciej kolumnie.
+   Pod Moonstone pojawił się przycisk Laca Ball.
+3. Laca Ball ma trzy kursy, źródłowe koszty i wagi, GUI maszyny z klienta,
+   potrząsanie kulami, wypadanie i otwieranie kapsuły. Nagrody dobrane do IdleLC;
+   lista pokazuje ilości i szanse. Rezerwacja wyniku pozwala wznowić grę po
+   zamknięciu lub reloadzie bez drugiej opłaty i ponownego losowania.
+4. Każdy potwór ma niezależne 1% na Token, także na AFK, ekspedycji, w Dungeons
+   i jako World Boss, bez wpływu poziomu i bonusów do dropu. Gold token dostępny
+   wyłącznie w ItemShop; przyszły drop tego żetonu z Perfect Moonstone zmieniony
+   na zwykły Token z zachowaniem wagi i ilości.
+5. ItemShop: Token ×100 za 1000 Cash, Gold token ×50 za 750 Cash.
+6. Napis losowania i wygranej na Statui obniżony do środka tabliczki. Auto ×2
+   skraca obrót do 1,5 s i przerwę do 350 ms; wypłata zachowuje zgodność z animacją.
+
+SaveVersion **18**, migracja dotychczasowego postępu.
+[Źródła, nagrody i przekazanie dla Claude](docs/lacaball.md).
+Weryfikacja: **649 testów / 81 plików**, lint, formatowanie, TypeScript i build.
+Chromium produkcyjny: kalendarze w siedmiu rozmiarach bez przewijania, przebieg
+i wznowienie Laca Ball, oba zakupy żetonów. Próba niedzieli potwierdziła dwa
+bilety, 1000 Cash po użyciu i zachowany odbiór po reloadzie.
+
 ## 2026-11-11 (Codex): kompaktowy kalendarz i sam panel Moonstone
 
 1. Pasek czasu online jest na górze kalendarza. Weekly i Monthly mieszczą się w

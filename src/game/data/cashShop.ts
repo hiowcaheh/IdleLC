@@ -60,6 +60,20 @@ const pack = (
 })
 
 export const CASH_OFFERS: readonly CashOffer[] = [
+  {
+    id: 'lacaball-token-100',
+    items: [{ itemId: 5123, count: 100 }],
+    price: 1000,
+    tabs: ['hot', 'items'],
+    tag: 'new',
+  },
+  {
+    id: 'lacaball-gold-token-50',
+    items: [{ itemId: 5124, count: 50 }],
+    price: 750,
+    tabs: ['hot', 'items'],
+    tag: 'new',
+  },
   // one-hour (Iris: three-hour) boosts
   potion('adrenaline', 2138, 60, { tabs: ['hot', 'potions'], tag: 'hot' }),
   potion('super-haste', 2845, 40, { tabs: ['hot', 'potions'], tag: 'hot' }),

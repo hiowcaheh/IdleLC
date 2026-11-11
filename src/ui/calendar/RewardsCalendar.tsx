@@ -189,11 +189,12 @@ export function RewardsCalendar({ onClose }: { onClose(): void }) {
               const item = getItem(prize.itemId)
               const taken = progress.claimedDays.includes(key)
               const past = key < day && !taken
+              const sunday = new Date(time).getUTCDay() === 0
               return (
                 <button
                   type="button"
                   key={key}
-                  className={`calendar-day${key === day ? ' is-today' : ''}${taken ? ' is-claimed' : ''}${past ? ' is-missed' : ''}`}
+                  className={`calendar-day${sunday ? ' calendar-day--sunday' : ''}${key === day ? ' is-today' : ''}${taken ? ' is-claimed' : ''}${past ? ' is-missed' : ''}`}
                   aria-label={`${displayDate(time, { month: 'long', day: 'numeric' })}: ${item.name} x${prize.count}, ${taken ? 'claimed' : past ? 'missed' : key === day ? 'today' : 'upcoming'}`}
                   aria-haspopup="dialog"
                   onClick={() => openReward(time)}
@@ -208,6 +209,9 @@ export function RewardsCalendar({ onClose }: { onClose(): void }) {
                     <strong className="calendar-day__count">×{prize.count}</strong>
                   </span>
                   {track === 'weekly' && <span className="calendar-day__name">{item.name}</span>}
+                  {track === 'weekly' && sunday && (
+                    <span className="calendar-day__finale">Weekly grand reward</span>
+                  )}
                   {taken && (
                     <span className="calendar-day__check" aria-hidden="true">
                       ✓

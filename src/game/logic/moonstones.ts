@@ -14,13 +14,19 @@ export interface MoonstonePlay {
 
 /** Visual roll time, independent of combat speed. The prize is claimed only after landing. */
 export const MOONSTONE_SPIN_MS = 3000
+export const MOONSTONE_AUTO_SPIN_MS = 1500
 
 export interface MoonstoneSpin {
   id: string
   stoneId: number
   prize: ItemStack
   startedAt: number
+  /** Chosen at the start of a draw; older saved draws use the normal duration. */
+  durationMs?: typeof MOONSTONE_SPIN_MS | typeof MOONSTONE_AUTO_SPIN_MS
 }
+
+export const moonstoneSpinDuration = (spin: MoonstoneSpin): number =>
+  spin.durationMs === MOONSTONE_AUTO_SPIN_MS ? MOONSTONE_AUTO_SPIN_MS : MOONSTONE_SPIN_MS
 
 export interface MoonstoneStart {
   character: CharacterData
@@ -51,6 +57,9 @@ export function sanitizeMoonstoneSpin(raw: unknown): MoonstoneSpin | undefined {
     id: spin.id,
     stoneId: spin.stoneId,
     startedAt: spin.startedAt,
+    ...(spin.durationMs === MOONSTONE_AUTO_SPIN_MS || spin.durationMs === MOONSTONE_SPIN_MS
+      ? { durationMs: spin.durationMs }
+      : {}),
     prize: {
       itemId: prize.itemId,
       count: prize.count,
@@ -66,6 +75,7 @@ export function beginMoonstonePlay(
   id: string,
   now: number,
   rng: Rng,
+  automatic = false,
 ): MoonstoneStart {
   if (character.moonstoneSpin) throw new GameError('moonstone-play-pending')
   const stone = moonstoneFor(stoneId)
@@ -86,7 +96,8 @@ export function beginMoonstonePlay(
     count: reward.count,
     ...(reward.flag ? { flag: reward.flag } : {}),
   }
-  const spin = { id, startedAt: now, prize, stoneId }
+  const durationMs = automatic ? MOONSTONE_AUTO_SPIN_MS : MOONSTONE_SPIN_MS
+  const spin: MoonstoneSpin = { id, startedAt: now, prize, stoneId, durationMs }
   return { character: { ...character, inventory, moonstoneSpin: spin }, spin }
 }
 
@@ -98,7 +109,8 @@ export function finishMoonstonePlay(
 ): MoonstonePlay {
   const spin = character.moonstoneSpin
   if (!spin || spin.id !== spinId) throw new GameError('moonstone-play-expired')
-  if (now - spin.startedAt < MOONSTONE_SPIN_MS) throw new GameError('moonstone-play-not-ready')
+  if (now - spin.startedAt < moonstoneSpinDuration(spin))
+    throw new GameError('moonstone-play-not-ready')
   const awarded = { ...character, inventory: addToInventory(character.inventory, [spin.prize]) }
   delete awarded.moonstoneSpin
   return {

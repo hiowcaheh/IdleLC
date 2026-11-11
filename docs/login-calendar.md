@@ -6,6 +6,11 @@ progi czasu, kalendarze i tabela przedmiotów są regułami tej aplikacji.
 
 ## Układ od 2026-11-11
 
+Nowsza aktualizacja: złota niedziela zajmuje cały dolny rząd Weekly. Każda
+niedziela daje 500 Cash Ticket w każdym torze, również na końcu miesiąca.
+Wspólny claim = dwa bilety, 1000 Cash po użyciu. Pozostałe reguły odbioru bez
+zmian. Przycisk przeniesiony na lewo od Dungeons. [Szczegóły](lacaball.md).
+
 Kliknięcie daty otwiera modal jej nagrody. Dzisiejsza data oraz przycisk pod siatką
 pokazują oba dzisiejsze prezenty z pełnymi nazwami i ilościami. Dopiero Claim wywołuje odbiór; Return i Escape wracają do kalendarza. Dni przeszłe i
 przyszłe mają podgląd bez odbioru. Stały podgląd i sekcja odbioru spod siatki
@@ -33,17 +38,18 @@ najwyższe okno i przywraca fokus. Próby na przygotowanych zapisach; logika pro
 - Reset o 00:00 UTC. Tydzień od poniedziałku; miesiąc ma faktycznie 28/29/30/31 dni.
   Można podglądać wszystkie daty, odbierać tylko dzisiejsze prezenty. Pominięte
   dni nie mają odbioru wstecz. Historia obejmuje najwyżej 62 odebrane daty.
-- Przycisk kalendarza jest pod Moonstone. Po osiągnięciu progu świeci.
+- Przycisk kalendarza jest na lewo od Dungeons. Po osiągnięciu progu świeci.
   Podczas World Bossa jest ukryty razem ze skrótem Statui, poza stoperem walki.
 
 ## Nagrody
 
 Konfiguracja: [src/game/data/loginCalendar.ts](../src/game/data/loginCalendar.ts).
 Wiersze tygodnia od poniedziałku: Moonstone Box ×5, Heaven Stone ×3, Lucky Scroll
-×3, Blessed Iris ×2, Platinum Super Skill Pill ×2, Good Moonstone ×3, Perfect
-Moonstone ×2. Miesiąc obejmuje też lupy, mikstury HP/MP, Super Haste Potion i bilety
+×3, Blessed Iris ×2, Platinum Super Skill Pill ×2, Good Moonstone ×3, 500 Cash
+Ticket ×1. Miesiąc obejmuje też lupy, mikstury HP/MP, Super Haste Potion i bilety
 Cash. Siódmy dzień daje 10 Cash Ticket, czternasty 20, dwudziesty pierwszy 50;
-ostatni dzień każdego miesiąca zawsze jeden 100 Cash Ticket.
+ostatni dzień miesiąca daje 100 Cash Ticket, z wyjątkiem niedzieli, która zawsze
+daje 500 Cash Ticket.
 
 Nazwy, działanie, wymagania i ikony przedmiotów są istniejące. Kalendarz nie
 zmienia działania mikstur, kamieni, skrzynek ani nominałów Cash.

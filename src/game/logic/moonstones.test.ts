@@ -13,6 +13,8 @@ import {
   beginMoonstonePlay,
   finishMoonstonePlay,
   MOONSTONE_SPIN_MS,
+  MOONSTONE_AUTO_SPIN_MS,
+  moonstoneSpinDuration,
   sanitizeMoonstoneSpin,
 } from './moonstones.ts'
 import { createCharacterData, type CharacterData } from './character.ts'
@@ -138,5 +140,41 @@ describe('original Moonstone statue', () => {
     expect(
       sanitizeMoonstoneSpin({ ...started.spin, prize: { itemId: 99999999, count: 1 } }),
     ).toBeUndefined()
+  })
+
+  it('halves automatic draw time without changing the stake, prize or one-time payout', () => {
+    const c = { ...hero(), inventory: [{ itemId: 2548, count: 2 }] }
+    const manual = beginMoonstonePlay(c, 2548, 'manual', 1000, () => 0.3)
+    const auto = beginMoonstonePlay(c, 2548, 'auto', 1000, () => 0.3, true)
+    expect(moonstoneSpinDuration(manual.spin)).toBe(3000)
+    expect(moonstoneSpinDuration(auto.spin)).toBe(1500)
+    expect(auto.spin.prize).toEqual(manual.spin.prize)
+    expect(auto.character.inventory).toEqual([{ itemId: 2548, count: 1 }])
+    expect(() =>
+      finishMoonstonePlay(auto.character, auto.spin.id, 1000 + MOONSTONE_AUTO_SPIN_MS - 1),
+    ).toThrow('moonstone-play-not-ready')
+    const paid = finishMoonstonePlay(auto.character, auto.spin.id, 1000 + MOONSTONE_AUTO_SPIN_MS)
+    expect(paid.prize).toEqual(auto.spin.prize)
+    expect(paid.character.inventory).toContainEqual(auto.spin.prize)
+    expect(() => finishMoonstonePlay(paid.character, auto.spin.id, 9000)).toThrow(
+      'moonstone-play-expired',
+    )
+    expect(c.inventory).toEqual([{ itemId: 2548, count: 2 }])
+  })
+
+  it('keeps old and malformed-duration saves at normal speed while preserving valid fast draws', () => {
+    const c = { ...hero(), inventory: [{ itemId: 2548, count: 1 }] }
+    const auto = beginMoonstonePlay(c, 2548, 'auto', 1000, () => 0.3, true)
+    const fastSave = { ...createDefaultSave(1000), characters: [auto.character] }
+    const restored = loadSave(JSON.stringify(fastSave), 1001).save.characters[0]!
+    expect(restored.moonstoneSpin).toEqual(auto.spin)
+    for (const durationMs of [undefined, 0, -1, 1, 1499, 9999, '1500']) {
+      const old = sanitizeMoonstoneSpin({ ...auto.spin, durationMs })!
+      expect(moonstoneSpinDuration(old)).toBe(MOONSTONE_SPIN_MS)
+      expect(old.prize).toEqual(auto.spin.prize)
+      expect(() => finishMoonstonePlay({ ...c, moonstoneSpin: old }, old.id, 3999)).toThrow(
+        'moonstone-play-not-ready',
+      )
+    }
   })
 })

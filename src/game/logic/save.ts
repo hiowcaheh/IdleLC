@@ -6,6 +6,7 @@
 import { sanitizeCash } from './cashShop.ts'
 import { sanitizeLoginCalendar, type LoginCalendarProgress } from './loginCalendar.ts'
 import { sanitizeMoonstoneSpin } from './moonstones.ts'
+import { sanitizeLacaBall, type LacaBallProgress } from './lacaball.ts'
 import { sanitizeWorldBossProgress } from './worldBoss.ts'
 import { sanitizeAllocatedStats } from './statPoints.ts'
 import { dungeonRefundDue, sanitizeDungeonProgress } from './dungeons.ts'
@@ -56,7 +57,7 @@ import {
   type LearnedSkill,
 } from './skills.ts'
 
-export const SAVE_VERSION = 17
+export const SAVE_VERSION = 18
 
 export type GraphicsQuality = 'auto' | 'low' | 'high' | 'ultra'
 
@@ -76,6 +77,8 @@ export interface SaveData {
   cash: number
   /** Account-wide daily login progress; absent until the first online session. */
   loginCalendar?: LoginCalendarProgress
+  /** Account-wide Laca Ball repetition cost and an interrupted, already paid draw. */
+  lacaBall?: LacaBallProgress
 }
 
 /** Upgrades a save from version N to N + 1. */
@@ -205,6 +208,8 @@ export const MIGRATIONS: Record<number, Migration> = {
   15: (save) => save,
   // v17: account-wide online time and daily calendar claims; older accounts start empty.
   16: (save) => save,
+  // v18: Laca Ball account progress. Older accounts start with the source's base token price.
+  17: (save) => save,
 }
 
 export const DEFAULT_SETTINGS: Settings = { quality: 'auto', showDamageNumbers: true }
@@ -557,6 +562,10 @@ function sanitize(raw: Record<string, unknown>, now: number): SaveData {
   }
   const active = characters.find((c) => c.id === raw.activeCharacterId)
   const loginCalendar = sanitizeLoginCalendar(raw.loginCalendar)
+  const lacaBall = sanitizeLacaBall(
+    raw.lacaBall,
+    characters.map((c) => c.id),
+  )
   return {
     saveVersion: SAVE_VERSION,
     createdAt: num(raw.createdAt, now),
@@ -565,6 +574,7 @@ function sanitize(raw: Record<string, unknown>, now: number): SaveData {
     activeCharacterId: active ? active.id : null,
     cash: sanitizeCash(raw.cash),
     ...(loginCalendar ? { loginCalendar } : {}),
+    ...(lacaBall ? { lacaBall } : {}),
   }
 }
 

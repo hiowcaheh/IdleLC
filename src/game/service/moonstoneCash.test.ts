@@ -9,7 +9,7 @@ vi.mock('../data/lcSource.ts', async () => ({
 import { createCharacterData } from '../logic/character.ts'
 import { createDefaultSave } from '../logic/save.ts'
 import { createRng } from '../logic/rng.ts'
-import { MOONSTONE_SPIN_MS } from '../logic/moonstones.ts'
+import { MOONSTONE_SPIN_MS, MOONSTONE_AUTO_SPIN_MS } from '../logic/moonstones.ts'
 import { countOwned } from '../logic/potions.ts'
 import { LocalGameService, SAVE_KEY } from './LocalGameService.ts'
 import type { KeyValueStorage } from './GameService.ts'
@@ -163,6 +163,28 @@ describe('Cash ticket and Moonstone service transactions', () => {
     expect(f.read()).toEqual(paid)
     await stale.load()
     await expect(stale.finishMoonstonePlay('moon', started.spin.id)).rejects.toThrow(
+      'moonstone-play-expired',
+    )
+  })
+
+  it('persists a fast draw and pays the same reserved result at 1500 ms after reload', async () => {
+    const f = fixture()
+    await f.game.load()
+    const started = await f.game.beginMoonstonePlay('moon', 2548, true)
+    expect(started.spin.durationMs).toBe(MOONSTONE_AUTO_SPIN_MS)
+    expect(f.read().characters[0].moonstoneSpin).toEqual(started.spin)
+    const reloaded = f.make()
+    const loaded = await reloaded.load()
+    expect(loaded.save.characters[0]!.moonstoneSpin).toEqual(started.spin)
+    f.clock.now += MOONSTONE_AUTO_SPIN_MS - 1
+    await expect(reloaded.finishMoonstonePlay('moon', started.spin.id)).rejects.toThrow(
+      'moonstone-play-not-ready',
+    )
+    f.clock.now += 1
+    const paid = await reloaded.finishMoonstonePlay('moon', started.spin.id)
+    expect(paid.prize).toEqual(started.spin.prize)
+    expect(countOwned(paid.character.inventory, 2548)).toBe(1)
+    await expect(reloaded.finishMoonstonePlay('moon', started.spin.id)).rejects.toThrow(
       'moonstone-play-expired',
     )
   })

@@ -1,5 +1,20 @@
 # Przekazanie prac: IdleLC, odzyskane zasoby i oryginalna mechanika
 
+## Laca Ball, złota niedziela i Moonstone Auto ×2 (Codex), 2026-11-11
+
+[Pełna notatka, źródła, tabela nagród i zasady zapisu](lacaball.md).
+SaveVersion **18**, bez utraty dotychczasowego postępu. Dwa bilety 500 Cash
+za niedzielę (Weekly + Monthly), złota karta na całą szerokość tygodnia;
+kalendarz w trzeciej kolumnie na lewo od Dungeons. Jego poprzednie miejsce
+zajmuje Laca Ball z oryginalną maszyną, kursami i animacją.
+Token 1% w centralnym rewardKills, niezależnie od poziomu i mnożników.
+Gold token wyłącznie ItemShop, także usunięty z przyszłych nagród Perfect
+Moonstone. Pakiety 100 Token/1000 Cash i 50 Gold token/750 Cash.
+Koszty i wagi Laca Ball ze źródeł; zawartości nagród są konfiguracją właściciela.
+Pending zapisuje jeden wynik i opłatę, payout po animacji. Nie zastępować
+begin/finish pojedynczą natychmiastową wypłatą. Moonstone Auto ×2 ma 1500 ms
+i 350 ms przerwy; czas rezerwacji musi odpowiadać animacji.
+
 ## Kompaktowy kalendarz i Moonstone (Codex), 2026-11-11
 
 Baza `915810b`, SaveVersion **17**. Zmiany w warstwie GUI: kalendarz ma licznik

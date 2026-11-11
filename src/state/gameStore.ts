@@ -24,6 +24,7 @@ import type { EquipSlot } from '../game/data/types.ts'
 import type { GearSource, UpgradeResult } from '../game/logic/equipment.ts'
 import type { ItemStack } from '../game/logic/loot.ts'
 import type { MoonstoneSpin } from '../game/logic/moonstones.ts'
+import type { LacaBallDraw } from '../game/logic/lacaball.ts'
 import type { CombatResult } from '../game/logic/rewards.ts'
 import type { WorldBossLoot } from '../game/logic/worldBoss.ts'
 import type { LoadResult, SaveData, Settings } from '../game/logic/save.ts'
@@ -114,8 +115,10 @@ interface GameStore {
   /** Uses one ticket; resolves with the Cash credited to the account. */
   redeemCashTicket(itemId: number): Promise<number>
   /** Reserves one Moonstone draw. The prize is not added or announced yet. */
-  beginMoonstonePlay(stoneId: number): Promise<MoonstoneSpin>
+  beginMoonstonePlay(stoneId: number, automatic?: boolean): Promise<MoonstoneSpin>
   finishMoonstonePlay(spinId: string): Promise<ItemStack>
+  beginLacaBall(courseId: number, tokenId: number): Promise<LacaBallDraw>
+  finishLacaBall(drawId: string): Promise<ItemStack>
   devAddCash(amount: number): void
   /** Opens boxes from the bag; resolves with the prizes. */
   openBoxes(itemId: number, count: number): Promise<ItemStack[]>
@@ -680,9 +683,9 @@ export const useGameStore = create<GameStore>((set, get) => {
       return use.credited
     },
 
-    async beginMoonstonePlay(stoneId) {
+    async beginMoonstonePlay(stoneId, automatic = false) {
       const id = playedId()
-      const started = await enqueue(() => gameService.beginMoonstonePlay(id, stoneId))
+      const started = await enqueue(() => gameService.beginMoonstonePlay(id, stoneId, automatic))
       applyCharacter(started.character)
       return started.spin
     },
@@ -691,6 +694,21 @@ export const useGameStore = create<GameStore>((set, get) => {
       const id = playedId()
       const played = await enqueue(() => gameService.finishMoonstonePlay(id, spinId))
       applyCharacter(played.character)
+      bagFeed.emit([played.prize])
+      return played.prize
+    },
+
+    async beginLacaBall(courseId, tokenId) {
+      const started = await enqueue(() => gameService.beginLacaBall(playedId(), courseId, tokenId))
+      applyCharacter(started.character)
+      set({ save: { ...get().save, lacaBall: started.progress } })
+      return started.draw
+    },
+
+    async finishLacaBall(drawId) {
+      const played = await enqueue(() => gameService.finishLacaBall(playedId(), drawId))
+      applyCharacter(played.character)
+      set({ save: { ...get().save, lacaBall: played.progress } })
       bagFeed.emit([played.prize])
       return played.prize
     },

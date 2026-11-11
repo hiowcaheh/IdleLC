@@ -15,7 +15,7 @@ export const WEEKLY_LOGIN_REWARDS: readonly ItemStack[] = [
   reward(1288, 2),
   reward(2453, 2),
   reward(2547, 3),
-  reward(2548, 2),
+  reward(95015, 1),
 ]
 export const MONTHLY_LOGIN_REWARDS: readonly ItemStack[] = [
   reward(2544, 3),
@@ -53,6 +53,7 @@ export const MONTHLY_LOGIN_REWARDS: readonly ItemStack[] = [
 
 export function loginReward(track: CalendarTrack, date: Date): ItemStack {
   if (track === 'weekly') return { ...WEEKLY_LOGIN_REWARDS[(date.getUTCDay() + 6) % 7]! }
+  if (date.getUTCDay() === 0) return reward(95015, 1)
   const lastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate()
   return date.getUTCDate() === lastDay
     ? reward(95014, 1)

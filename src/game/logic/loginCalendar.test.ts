@@ -26,6 +26,25 @@ const NOW = Date.UTC(2026, 10, 10, 12)
 const hero = () => createCharacterData({ name: 'Calendar', classId: 'mage' }, 'calendar', NOW)
 
 describe('login calendar', () => {
+  it('gives two 500 Cash Tickets each Sunday, including a Sunday at month end', () => {
+    for (const time of [
+      Date.UTC(2026, 10, 1),
+      Date.UTC(2026, 10, 8),
+      Date.UTC(2026, 10, 15),
+      Date.UTC(2026, 10, 22),
+      Date.UTC(2026, 10, 29),
+      Date.UTC(2027, 0, 31),
+    ]) {
+      expect(loginReward('weekly', new Date(time))).toEqual({ itemId: 95015, count: 1 })
+      expect(loginReward('monthly', new Date(time))).toEqual({ itemId: 95015, count: 1 })
+      const p = addCalendarOnline(undefined, LOGIN_ONLINE_MS, time)
+      const won = claimLoginCalendar(hero(), p, time)
+      expect(won.character.inventory).toEqual([{ itemId: 95015, count: 2 }])
+      expect(() => claimLoginCalendar(won.character, won.calendar, time)).toThrow(
+        'calendar-already-claimed',
+      )
+    }
+  })
   it('uses existing items and provides real UTC weeks and leap-month lengths', () => {
     for (const r of [...WEEKLY_LOGIN_REWARDS, ...MONTHLY_LOGIN_REWARDS]) {
       expect(ITEMS[r.itemId]).toBeDefined()

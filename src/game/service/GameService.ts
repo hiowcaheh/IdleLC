@@ -15,6 +15,7 @@ import type { DungeonId } from '../data/dungeons.ts'
 import type { DungeonPoint, DungeonUpdate } from '../logic/dungeons.ts'
 import type { CashTicketUse } from '../logic/cashTickets.ts'
 import type { MoonstonePlay, MoonstoneStart } from '../logic/moonstones.ts'
+import type { LacaBallStart, LacaBallResult } from '../logic/lacaball.ts'
 import type { CalendarClaim, LoginCalendarProgress } from '../logic/loginCalendar.ts'
 
 /** A Cash shop purchase: the character with the items, and the account's Cash left. */
@@ -119,9 +120,15 @@ export interface GameService {
   /** One account claim pays today's weekly and monthly rewards together. */
   claimLoginCalendar(characterId: string): Promise<CalendarClaim>
   /** Reserves a stone and its draw without crediting the prize to the bag. */
-  beginMoonstonePlay(characterId: string, stoneId: number): Promise<MoonstoneStart>
+  beginMoonstonePlay(
+    characterId: string,
+    stoneId: number,
+    automatic?: boolean,
+  ): Promise<MoonstoneStart>
   /** Claims a reserved draw after the visual roll; retries cannot pay it twice. */
   finishMoonstonePlay(characterId: string, spinId: string): Promise<MoonstonePlay>
+  beginLacaBall(characterId: string, courseId: number, tokenId: number): Promise<LacaBallStart>
+  finishLacaBall(characterId: string, drawId: string): Promise<LacaBallResult>
   /** Opens `count` boxes of the kind from the bag (data/boxes.ts). */
   openBoxes(characterId: string, itemId: number, count: number): Promise<BoxOpening>
   redeemTitleItem(characterId: string, itemId: number): Promise<TitleUse>

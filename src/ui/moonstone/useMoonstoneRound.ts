@@ -6,7 +6,7 @@ import { countOwned } from '../../game/logic/potions.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 
 type Phase = 'idle' | 'starting' | 'rolling' | 'claiming' | 'waiting' | 'paused'
-const RESULT_HOLD_MS = 700
+const AUTO_RESULT_HOLD_MS = 350
 
 /** A saved draw is paid only by the reel's landing event, including after an interruption. */
 export function useMoonstoneRound(onClose: () => void) {
@@ -89,7 +89,7 @@ export function useMoonstoneRound(onClose: () => void) {
     transition('starting')
     setSpin(null)
     try {
-      const reserved = await useGameStore.getState().beginMoonstonePlay(stoneId)
+      const reserved = await useGameStore.getState().beginMoonstonePlay(stoneId, current.auto)
       current.pending = reserved
       if (!current.mounted) return
       setSpin(reserved)
@@ -129,7 +129,7 @@ export function useMoonstoneRound(onClose: () => void) {
           if (!current.mounted || !current.auto || document.hidden) return
           transition('idle')
           void start()
-        }, RESULT_HOLD_MS)
+        }, AUTO_RESULT_HOLD_MS)
       } else {
         transition('idle')
         setStopping(false)

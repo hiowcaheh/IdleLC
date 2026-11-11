@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { MOONSTONES, moonstoneFor } from '../../game/data/moonstones.ts'
 import { getItem } from '../../game/data/items.ts'
 import { countOwned } from '../../game/logic/potions.ts'
-import { MOONSTONE_SPIN_MS, type MoonstoneSpin } from '../../game/logic/moonstones.ts'
+import { moonstoneSpinDuration, type MoonstoneSpin } from '../../game/logic/moonstones.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { useModalFocus } from '../useModalFocus.ts'
 import { ItemIcon } from '../items/ItemIcon.tsx'
@@ -71,7 +71,7 @@ function MoonstoneReel({
           style={
             {
               '--moonstone-end': end,
-              '--moonstone-duration': `${MOONSTONE_SPIN_MS}ms`,
+              '--moonstone-duration': `${moonstoneSpinDuration(spin)}ms`,
             } as CSSProperties
           }
           onAnimationEnd={(e) => {
@@ -140,7 +140,10 @@ export function MoonstoneStatue({ onClose }: { onClose(): void }) {
           <span id="moonstone-title" className="visually-hidden">
             Moonstone Statue
           </span>
-          <label className="moonstone-auto" title="Automatically play the selected grade">
+          <label
+            className="moonstone-auto"
+            title="Automatically play the selected grade at double speed"
+          >
             <input
               type="checkbox"
               className="check-box"
@@ -149,7 +152,7 @@ export function MoonstoneStatue({ onClose }: { onClose(): void }) {
               aria-label="Automatically play this grade"
               onChange={(e) => round.chooseAuto(e.target.checked)}
             />
-            <span>Auto</span>
+            <span>Auto ×2</span>
           </label>
           <span
             className={`moonstone-machine__title${error ? ' is-error' : ''}`}

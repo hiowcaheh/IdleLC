@@ -144,7 +144,7 @@ describe('rewards', () => {
     expect(rollKillReward(monster, hero, () => 0.8, 0).gold).toBe(0)
   })
 
-  it('blocks every item drop at +6 and applies a level-up between kills in the same report', () => {
+  it('blocks level-gated items at +6 while preserving Tokens and applies a level-up between kills', () => {
     const hero = {
       ...createCharacterData({ name: 'Brom', classId: 'knight' }, 'a', 0),
       level: 6,
@@ -164,7 +164,9 @@ describe('rewards', () => {
       sp: 2,
       drops: [{ itemId: 1, count: 1 }],
     })
-    expect(rewardKills({ ...hero, level: 7 }, monster, 50, () => 0, 0).drops).toEqual([])
+    expect(rewardKills({ ...hero, level: 7 }, monster, 50, () => 0, 0).drops).toEqual([
+      { itemId: 5123, count: 50 },
+    ])
   })
 
   it('takes the potions drunk out of the inventory, never more than there are', () => {
