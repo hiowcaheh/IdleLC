@@ -11,6 +11,7 @@ import {
   dungeonBuffRank,
   dungeonBuffDefinition,
   dungeonRunsLeft,
+  dungeonEntries,
   dungeonXpNeeded,
   dungeonChoiceLevel,
   dungeonSuperBuffDefinition,
@@ -72,6 +73,7 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
   }, [])
   const def = DUNGEONS[index]!
   const left = dungeonRunsLeft(character, def.id)
+  const entries = dungeonEntries(character, def.id)
   const monsters = def.monsterIds.map(getMonster)
   const best = character.dungeons?.best[def.id]
   const locked = character.level < def.minLevel
@@ -194,7 +196,13 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
                 </div>
                 <div>
                   <dt>Entries today</dt>
-                  <dd className={left === 0 ? 'is-bad' : undefined}>{left} / 2 left</dd>
+                  {/* used / daily, and the reset-scroll extras still to use in green */}
+                  <dd className={left === 0 ? 'is-bad' : undefined}>
+                    {entries.used} / {entries.limit}
+                    {entries.extraLeft > 0 && (
+                      <span className="is-good"> (+{entries.extraLeft} extra)</span>
+                    )}
+                  </dd>
                 </div>
                 <div>
                   <dt>Best score in one run</dt>
@@ -225,7 +233,8 @@ export function DungeonsPanel({ onClose }: { onClose(): void }) {
                   </li>
                   <li>
                     Death ends the run. Earned EXP, SP, gold and loot are kept. Leaving or reloading
-                    uses the entry. Daily entries reset at 00:00 UTC.
+                    uses the entry. Daily entries reset at 00:00 UTC; a Reset Scroll (Item Shop)
+                    gives one more.
                   </li>
                 </ul>
               </section>

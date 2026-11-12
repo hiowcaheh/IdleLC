@@ -27,6 +27,8 @@ import { PotionNotes } from './PotionNotes.tsx'
 import { isBox } from '../../game/data/boxes.ts'
 import { cashTicketValue } from '../../game/data/cashTickets.ts'
 import { BoxActions, BoxResults } from './BoxActions.tsx'
+import { scrollDungeon } from '../../game/data/dungeonScrolls.ts'
+import { getDungeon } from '../../game/data/dungeons.ts'
 import { drinkWithToast } from './drinkWithToast.ts'
 import { comparePotions } from './potionText.ts'
 import { Sheet } from '../Sheet.tsx'
@@ -91,6 +93,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   const exchangeStones = useGameStore((s) => s.exchangeStones)
   const redeemTitleItem = useGameStore((s) => s.redeemTitleItem)
   const redeemCashTicket = useGameStore((s) => s.redeemCashTicket)
+  const redeemDungeonScroll = useGameStore((s) => s.redeemDungeonScroll)
   const identifyItems = useGameStore((s) => s.identifyItems)
   const [selected, setSelected] = useState<string | null>(null)
   const [category, setCategory] = useState<Category>('all')
@@ -378,6 +381,27 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
             >
               Use
             </button>
+          )}
+          {scrollDungeon(stack.itemId) && (
+            <>
+              <p className="item-row__note">
+                One more entry into {getDungeon(scrollDungeon(stack.itemId)!)!.name} today. Extra
+                entries end with the daily reset (00:00 UTC).
+              </p>
+              <button
+                type="button"
+                className="button button--gold"
+                disabled={busy || away || dungeonLocked}
+                onClick={() =>
+                  run(async () => {
+                    await redeemDungeonScroll(stack.itemId)
+                    return `${getDungeon(scrollDungeon(stack.itemId)!)!.name}: one more entry today.`
+                  })
+                }
+              >
+                Use
+              </button>
+            </>
           )}
           {isBox(stack.itemId) && (
             <BoxActions

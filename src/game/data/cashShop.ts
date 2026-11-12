@@ -8,6 +8,7 @@
  * 30 to 80 Cash (owner, 2026-11-07: all prices a fifth of the first ones). Packages save about a third against buying their contents one by one; SALE
  * offers keep their regular price in `was`.
  */
+import { DUNGEON_SCROLLS } from './dungeonScrolls.ts'
 import { GOLDEN_MAGNIFIER_ID, MAGNIFIER_ID } from './items.ts'
 
 export type CashTab = 'hot' | 'sale' | 'items' | 'potions' | 'packages'
@@ -129,6 +130,16 @@ export const CASH_OFFERS: readonly CashOffer[] = [
     tabs: ['items', 'sale'],
     was: 400,
   },
+  // one more dungeon entry today (data/dungeonScrolls.ts)
+  ...(Object.entries(DUNGEON_SCROLLS) as [string, number][]).map(
+    ([dungeon, itemId]): CashOffer => ({
+      id: `${dungeon}-scroll`,
+      items: [{ itemId, count: 1 }],
+      price: 40,
+      tabs: ['hot', 'items'],
+      tag: 'new',
+    }),
+  ),
   // packages: about a third off their contents
   pack(
     'starter-package',

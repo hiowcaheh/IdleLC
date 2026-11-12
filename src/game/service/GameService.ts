@@ -134,6 +134,8 @@ export interface GameService {
     automatic?: boolean,
   ): Promise<LacaBallStart>
   finishLacaBall(characterId: string, drawId: string): Promise<LacaBallResult>
+  /** Uses a dungeon reset scroll: one more entry into its dungeon today. */
+  redeemDungeonScroll(characterId: string, itemId: number): Promise<CharacterData>
   /** Opens `count` boxes of the kind from the bag (data/boxes.ts). */
   openBoxes(characterId: string, itemId: number, count: number): Promise<BoxOpening>
   redeemTitleItem(characterId: string, itemId: number): Promise<TitleUse>

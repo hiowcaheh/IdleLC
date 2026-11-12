@@ -120,6 +120,8 @@ interface GameStore {
   beginLacaBall(courseId: number, tokenId: number, automatic?: boolean): Promise<LacaBallDraw>
   finishLacaBall(drawId: string): Promise<ItemStack>
   devAddCash(amount: number): void
+  /** Uses a dungeon reset scroll from the bag (one more entry today). */
+  redeemDungeonScroll(itemId: number): Promise<void>
   /** Opens boxes from the bag; resolves with the prizes. */
   openBoxes(itemId: number, count: number): Promise<ItemStack[]>
   buyItem(itemId: number, count: number): Promise<PurchaseResult>
@@ -720,6 +722,11 @@ export const useGameStore = create<GameStore>((set, get) => {
       enqueue(async () => (await gameService.dev?.addCash(amount)) ?? get().save.cash)
         .then((cash) => set({ save: { ...get().save, cash } }))
         .catch(logError)
+    },
+
+    async redeemDungeonScroll(itemId) {
+      const id = playedId()
+      applyCharacter(await enqueue(() => gameService.redeemDungeonScroll(id, itemId)))
     },
 
     async openBoxes(itemId, count) {

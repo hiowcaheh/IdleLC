@@ -147,7 +147,7 @@ porównywać zgłoszone tempo z `measureHuntRate` (czy postać w ogóle może ta
 ### Skrzynki, Multi-open, sklep Cash i zwoje (wymóg właściciela, 2026-11-07)
 
 Gracze nie mogą oszukiwać ani duplikować skrzynek. Dlatego `openBoxes`, `buyCashOffer`
-i `useDungeonScroll` to funkcje serwera (RPC), nigdy zapis z przeglądarki.
+i `redeemDungeonScroll` to funkcje serwera (RPC), nigdy zapis z przeglądarki.
 
 1. **Jedna transakcja.** Funkcja sprawdza właściciela postaci (`auth.uid()`) i blokuje wiersz torby
    (`SELECT … FOR UPDATE`). Potem sprawdza liczbę skrzynek / saldo Cash, odejmuje je, losuje nagrody

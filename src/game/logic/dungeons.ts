@@ -40,6 +40,7 @@ import { rollInt, type Rng } from './rng.ts'
 import type { LcDungeonSuperBuff } from '../data/lcTypes.ts'
 import { HP_COEFFICIENT, MP_COEFFICIENT } from './attributes.ts'
 import { DUNGEON_BOX_CHANCE, DUNGEON_BOXES } from '../data/boxes.ts'
+import { MAX_EXTRA_ENTRIES, scrollDungeon } from '../data/dungeonScrolls.ts'
 
 /** Metres from a box's centre at which the hero picks it up. */
 export const DUNGEON_BOX_REACH = 1.2
@@ -85,6 +86,8 @@ export interface DungeonProgress {
   /** UTC day; never moved backwards by a local clock correction. */
   day: string
   entries: Partial<Record<DungeonId, number>>
+  /** Extra entries granted today by reset scrolls (data/dungeonScrolls.ts); absent = none. */
+  extra?: Partial<Record<DungeonId, number>>
   best: Partial<Record<DungeonId, DungeonRecord>>
   history: DungeonRecord[]
   active: DungeonCheckpoint | null
@@ -158,14 +161,57 @@ export const emptyDungeonProgress = (): DungeonProgress => ({
 export function dailyProgress(progress: DungeonProgress | undefined, now: number): DungeonProgress {
   const p = progress ?? emptyDungeonProgress()
   const day = utcDay(now)
-  return day > p.day ? { ...p, day, entries: {} } : p
+  return day > p.day ? { ...p, day, entries: {}, extra: {} } : p
 }
 export function dungeonRunsLeft(
   character: Pick<CharacterData, 'dungeons'>,
   id: DungeonId,
   now = Date.now(),
 ): number {
-  return Math.max(0, DUNGEON_DAILY_RUNS - (dailyProgress(character.dungeons, now).entries[id] ?? 0))
+  const today = dailyProgress(character.dungeons, now)
+  return Math.max(0, DUNGEON_DAILY_RUNS + (today.extra?.[id] ?? 0) - (today.entries[id] ?? 0))
+}
+
+/** Today's entries of a dungeon: used, the daily limit and the reset-scroll extras not used yet. */
+export function dungeonEntries(
+  character: Pick<CharacterData, 'dungeons'>,
+  id: DungeonId,
+  now = Date.now(),
+): { used: number; limit: number; extraLeft: number } {
+  const today = dailyProgress(character.dungeons, now)
+  const used = today.entries[id] ?? 0
+  const extra = today.extra?.[id] ?? 0
+  return {
+    used,
+    limit: DUNGEON_DAILY_RUNS,
+    extraLeft: Math.max(0, extra - Math.max(0, used - DUNGEON_DAILY_RUNS)),
+  }
+}
+
+/** A dungeon reset scroll from the bag: one more entry into its dungeon today. */
+export function applyDungeonScroll(
+  character: CharacterData,
+  itemId: number,
+  now: number,
+): { character: CharacterData; dungeonId: DungeonId } {
+  const dungeonId = scrollDungeon(itemId)
+  if (!dungeonId) throw new GameError('not-a-scroll')
+  if (character.dungeons?.active) throw new GameError('in-dungeon')
+  const owned = character.inventory.find((s) => s.itemId === itemId)?.count ?? 0
+  if (owned < 1) throw new GameError('not-enough-items')
+  const today = dailyProgress(character.dungeons, now)
+  const extra = today.extra?.[dungeonId] ?? 0
+  if (extra >= MAX_EXTRA_ENTRIES) throw new GameError('dungeon-extra-limit')
+  return {
+    dungeonId,
+    character: {
+      ...character,
+      inventory: character.inventory
+        .map((s) => (s.itemId === itemId ? { ...s, count: s.count - 1 } : s))
+        .filter((s) => s.count > 0),
+      dungeons: { ...today, extra: { ...today.extra, [dungeonId]: extra + 1 } },
+    },
+  }
 }
 
 /**
@@ -770,10 +816,15 @@ export function sanitizeDungeonProgress(raw: unknown): DungeonProgress {
       ([id, r]) => getDungeon(id) && finished(r) && r.dungeonId === id,
     ),
   )
+  const extra = Object.fromEntries(
+    Object.entries(p.extra ?? {})
+      .filter(([id, n]) => getDungeon(id) && Number.isInteger(n) && n > 0)
+      .map(([id, n]) => [id, Math.min(MAX_EXTRA_ENTRIES, n)]),
+  ) as Partial<Record<DungeonId, number>>
   const entries = Object.fromEntries(
     Object.entries(p.entries ?? {})
       .filter(([id, n]) => getDungeon(id) && Number.isInteger(n) && n >= 0)
-      .map(([id, n]) => [id, Math.min(2, n)]),
+      .map(([id, n]) => [id, Math.min(DUNGEON_DAILY_RUNS + (extra[id as DungeonId] ?? 0), n)]),
   )
   const validPoints = (n: unknown): n is number => Number.isSafeInteger(n) && (n as number) >= 0
   // v15 had no wallet. Credit its completed, recorded rounds once on migration.
@@ -812,6 +863,7 @@ export function sanitizeDungeonProgress(raw: unknown): DungeonProgress {
   return {
     day: typeof p.day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(p.day) ? p.day : '',
     entries,
+    ...(Object.keys(extra).length ? { extra } : {}),
     history,
     best,
     active: record(p.active) ? p.active : null,

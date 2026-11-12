@@ -118,6 +118,10 @@ export const OWN_ITEMS = [
     description: `Use to add ${cash} Cash to your account's Item Shop balance. Consumes one ticket.`,
     icon: { atlas: 15, row: 1, col: 2 },
   })),
+  // one more dungeon entry today (owner, 2026-11-07; src/game/data/dungeonScrolls.ts)
+  { id: 95021, name: 'Belfist Reset Scroll', icon: { atlas: 3, row: 1, col: 5 } },
+  { id: 95022, name: 'Procyon Reset Scroll', icon: { atlas: 5, row: 12, col: 12 } },
+  { id: 95023, name: 'Maargadum Reset Scroll', icon: { atlas: 5, row: 15, col: 2 } },
 ].map((item) => ({
   ...item,
   // t_item a_type_idx 2 / a_subtype_idx 9: the client's boxes opened for a random reward

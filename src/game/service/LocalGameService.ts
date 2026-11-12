@@ -6,6 +6,7 @@ import {
   type LacaBallResult,
 } from '../logic/lacaball.ts'
 import {
+  applyDungeonScroll,
   createDungeonRun,
   dailyProgress,
   dungeonCheckpoint,
@@ -848,6 +849,11 @@ export class LocalGameService implements GameService {
       this.save = before
       throw error
     }
+  }
+
+  async redeemDungeonScroll(characterId: string, itemId: number): Promise<CharacterData> {
+    const used = applyDungeonScroll(this.notOnExpedition(characterId), itemId, this.now())
+    return copy(this.update(characterId, () => used.character))
   }
 
   async openBoxes(characterId: string, itemId: number, count: number): Promise<BoxOpening> {
