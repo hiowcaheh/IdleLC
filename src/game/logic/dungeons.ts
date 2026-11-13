@@ -572,7 +572,10 @@ export function dungeonStep(
   const ix = Number.isFinite(input.x) ? input.x : 0,
     iz = Number.isFinite(input.z) ? input.z : 0
   const strength = Math.min(1, Math.hypot(ix, iz))
-  if (!blocked && strength > 0.05) {
+  // Owner's rule (2026-11-07): a hero on the run does not attack. It strikes and casts only
+  // standing; starting to run drops the swing or cast in progress (the skill is not spent).
+  const moving = !blocked && strength > 0.05
+  if (moving) {
     const length = Math.hypot(ix, iz)
     const metres = runSpeed(effectiveStats(next.player)) * dt * strength
     next.position.x += (ix / length) * metres
@@ -651,7 +654,14 @@ export function dungeonStep(
       (a, e) => (!a || distance(e, next.position) < distance(a, next.position) ? e : a),
       undefined,
     )
-  if (target) {
+  if (moving) {
+    const dropped = next.player.casting
+    if (dropped) next.player.skillCooldowns = { ...next.player.skillCooldowns, [dropped.id]: 0 }
+    next.player.impactIn = null
+    next.player.casting = null
+    next.player.cooldown = Math.max(0, next.player.cooldown - dt)
+    if (target) next.targetUid = target.uid
+  } else if (target) {
     next.targetUid = target.uid
     const events: CombatEvent[] = []
     const inRange =

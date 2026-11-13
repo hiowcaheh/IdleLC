@@ -2811,6 +2811,28 @@ a.button {
   border-color: var(--bronze-dim);
 }
 
+/* in a dungeon: the slots' menu (AUTO, when to drink, which potion), the client's option icon */
+.potion-slots__settings {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: url('/ui/lc/menu-system.webp') center / 100% 100% no-repeat;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+}
+.potion-slots__settings:active {
+  filter: brightness(1.2);
+}
+.potion-slots__settings:disabled {
+  filter: grayscale(1) brightness(0.6);
+}
+
+.potion-picker__tabs {
+  margin-bottom: 8px;
+}
+
 /* the slot the hero drinks from by itself: a plain gold frame (no pulsing, owner's request) */
 .potion-slot.is-auto .item-icon {
   border-color: #ffe788;

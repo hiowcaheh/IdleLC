@@ -31,13 +31,17 @@ const HOLD_MS = 450
 
 /**
  * The HP and MP potion quick slots: the potion the player put in each, how many are left and
- * whether the hero drinks it by itself. A tap opens the slot to choose its potion.
+ * whether the hero drinks it by itself. A tap opens the slot to choose its potion; in a dungeon a
+ * tap drinks it, and the settings button beside the slots (or holding a slot) opens their menu
+ * (owner, 2026-11-07: holding did not open it on the phone).
  */
 export function PotionSlots() {
   const character = useGameStore((s) => s.character)
   const inDungeon = useGameStore((s) => !!s.dungeon)
   const combat = useCombatTicker(500)
   const [open, setOpen] = useState<PotionGroup | null>(null)
+  // opened from the settings button: both slots in one window, switched by tabs
+  const [both, setBoth] = useState(false)
   // a held slot opens its settings; the tap that ends the hold does not drink too
   const hold = useRef<{ timer: number; opened: boolean } | null>(null)
   if (!character) return null
@@ -47,6 +51,7 @@ export function PotionSlots() {
     if (!inDungeon) return
     const timer = window.setTimeout(() => {
       if (hold.current) hold.current.opened = true
+      setBoth(false)
       setOpen(group)
     }, HOLD_MS)
     hold.current = { timer, opened: false }
@@ -100,10 +105,15 @@ export function PotionSlots() {
         onContextMenu={(e) => {
           // a long press or a right click opens the settings without the system menu
           e.preventDefault()
-          if (quick) setOpen(group)
+          if (!quick) return
+          setBoth(false)
+          setOpen(group)
         }}
         onClick={() => {
-          if (!quick) return setOpen(group)
+          if (!quick) {
+            setBoth(false)
+            return setOpen(group)
+          }
           if (hold.current?.opened) return
           void drink(itemId)
         }}
@@ -129,22 +139,52 @@ export function PotionSlots() {
 
   return (
     <div className="potion-slots" role="group" aria-label="Potions">
+      {inDungeon && (
+        <button
+          type="button"
+          className="potion-slots__settings"
+          aria-label="Potion settings: AUTO and when to drink"
+          title="Potion settings"
+          disabled={away}
+          onClick={() => {
+            setBoth(true)
+            setOpen('hp')
+          }}
+        />
+      )}
       {POTION_GROUPS.map(slot)}
       {open &&
         // a window of the game, not of the HUD corner it is opened from
         createPortal(
-          <PotionSlotPicker group={open} onClose={() => setOpen(null)} />,
+          <PotionSlotPicker
+            key={both ? 'both' : open}
+            group={open}
+            switchable={both}
+            onClose={() => setOpen(null)}
+          />,
           document.body,
         )}
     </div>
   )
 }
 
-/** Choose the potion of a quick slot from the bag, turn its automatic use on or off. */
-function PotionSlotPicker({ group, onClose }: { group: PotionGroup; onClose(): void }) {
+/**
+ * Choose the potion of a quick slot from the bag, turn its automatic use on or off. Switchable:
+ * both slots in one window with HP / MP tabs (the dungeon's settings button).
+ */
+function PotionSlotPicker({
+  group: initial,
+  switchable = false,
+  onClose,
+}: {
+  group: PotionGroup
+  switchable?: boolean
+  onClose(): void
+}) {
   const character = useGameStore((s) => s.character)
   const setPotionSlot = useGameStore((s) => s.setPotionSlot)
   const [busy, setBusy] = useState(false)
+  const [group, setGroup] = useState(initial)
   if (!character) return null
   const current = character.potionSlots[group]
   const owned = character.inventory
@@ -166,13 +206,29 @@ function PotionSlotPicker({ group, onClose }: { group: PotionGroup; onClose(): v
 
   return (
     <Sheet
-      title={`${LABELS[group]} slot`}
+      title={switchable ? 'Potion settings' : `${LABELS[group]} slot`}
       titleId="potion-slot-title"
-      className="sheet--client potion-picker"
+      className={`sheet--client potion-picker${switchable ? ' sheet--fixed' : ''}`}
       onClose={onClose}
     >
+      {switchable && (
+        <div className="tabs potion-picker__tabs" role="tablist" aria-label="Potion slots">
+          {POTION_GROUPS.map((g) => (
+            <button
+              key={g}
+              type="button"
+              role="tab"
+              aria-selected={g === group}
+              className={`tabs__tab${g === group ? ' is-active' : ''}`}
+              onClick={() => setGroup(g)}
+            >
+              {LABELS[g]}
+            </button>
+          ))}
+        </div>
+      )}
       <p className="sheet__meta">
-        Your hero drinks only the potion in this slot, in fights and on expeditions.
+        Your hero drinks only the potion in this slot: in fights, in dungeons and on expeditions.
       </p>
       <label className={`potion-picker__auto${current.auto ? ' is-on' : ''}`}>
         <span>
@@ -192,7 +248,7 @@ function PotionSlotPicker({ group, onClose }: { group: PotionGroup; onClose(): v
       {current.auto && (
         <BelowSlider
           // a saved share starts the slider over from it
-          key={slotBelow(current, group)}
+          key={`${group}-${slotBelow(current, group)}`}
           group={group}
           saved={slotBelow(current, group)}
           onCommit={(below) => put({ ...current, below })}

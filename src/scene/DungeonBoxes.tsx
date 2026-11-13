@@ -3,25 +3,30 @@
  * Data\Item\Common\ITEM_treasure02.smc (the drop model of the client's boxes, t_item a_file_smc),
  * lying on the floor. Under it a loot glow so it reads at a glance on a phone (owner's request,
  * "like Diablo"): a golden pool of light on the floor, a soft beam rising from it and sparks drifting
- * up. The hero picks a box up by walking into it. The chest was converted with:
+ * up. The hero picks a box up by walking into it. Crystals get the same glow in blue, smaller
+ * (CrystalGlow, owner's request 2026-11-07). The chest was converted with:
  *   npm run convert-lc -- --client <2015 client> --smc 'Data\Item\Common\ITEM_treasure02.smc'
  *     --out <folder>   (then copied to public/models/lc/drop/)
  */
 import { useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { useMemo, useRef } from 'react'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import {
   AdditiveBlending,
   CanvasTexture,
+  Color,
   DoubleSide,
+  Object3D,
   SRGBColorSpace,
   type Group,
+  type InstancedMesh,
   type Mesh,
   type MeshBasicMaterial,
   type Sprite,
   type Texture,
 } from 'three'
 import type { DungeonBox } from '../game/logic/dungeons.ts'
+import { dungeonSession } from '../game/session/dungeonSession.ts'
 
 const CHEST_URL = `${import.meta.env.BASE_URL}models/lc/drop/item_treasure02.glb?v=dfa1c9bf7c8d`
 /** The chest is 0.45 m wide in the client; a little larger here for phone screens. */
@@ -168,6 +173,129 @@ export function DungeonBoxes({ boxes }: { boxes: readonly DungeonBox[] }) {
       {boxes.map((box) => (
         <BoxMark key={box.uid} box={box} />
       ))}
+    </>
+  )
+}
+
+const CRYSTAL_GLOW = new Color('#3fb4ff')
+const CRYSTAL_SPARK = new Color('#b6ebff')
+/** Crystals lying at once that glow (the scene draws up to 512 crystals). */
+const MAX_CRYSTAL_GLOWS = 160
+const CRYSTAL_SPARKS = 3
+const glowAt = new Object3D()
+const glowColor = new Color()
+
+/**
+ * The chest's loot glow in blue under every crystal on the floor: a pool of light, a short beam
+ * and sparks rising, drawn as three instanced meshes (a crystal is small and there can be many).
+ * Brightness pulses per crystal through the instance colour (additive blending).
+ */
+export function CrystalGlow() {
+  const { pool, beam, spark } = glowTextures()
+  const pools = useRef<InstancedMesh>(null)
+  const beams = useRef<InstancedMesh>(null)
+  const sparks = useRef<InstancedMesh>(null)
+  useLayoutEffect(() => {
+    // the colour buffers exist from the start, so the shaders never change while playing
+    for (const [mesh, max] of [
+      [pools.current, MAX_CRYSTAL_GLOWS],
+      [beams.current, MAX_CRYSTAL_GLOWS],
+      [sparks.current, MAX_CRYSTAL_GLOWS * CRYSTAL_SPARKS],
+    ] as const) {
+      if (!mesh) continue
+      for (let i = 0; i < max; i++) mesh.setColorAt(i, glowColor.setRGB(0, 0, 0))
+      mesh.count = 0
+    }
+  }, [])
+  useFrame(({ clock, camera }) => {
+    const p = pools.current
+    const b = beams.current
+    const k = sparks.current
+    if (!p || !b || !k) return
+    const crystals = dungeonSession.state?.crystals ?? []
+    const n = Math.min(MAX_CRYSTAL_GLOWS, crystals.length)
+    const time = clock.elapsedTime
+    for (let i = 0; i < n; i++) {
+      const c = crystals[i]!
+      const t = time + ((c.uid * 1.7) % (Math.PI * 2))
+      const pulse = 0.8 + Math.sin(t * 2.4) * 0.2
+      glowAt.quaternion.identity()
+      glowAt.rotation.set(-Math.PI / 2, 0, 0)
+      glowAt.position.set(c.x, 0.03, c.z)
+      glowAt.scale.setScalar(1.5 * (0.94 + pulse * 0.08))
+      glowAt.updateMatrix()
+      p.setMatrixAt(i, glowAt.matrix)
+      p.setColorAt(i, glowColor.copy(CRYSTAL_GLOW).multiplyScalar(0.8 * pulse))
+      glowAt.rotation.set(0, 0, 0)
+      glowAt.position.set(c.x, 0.7, c.z)
+      glowAt.scale.setScalar(1)
+      glowAt.updateMatrix()
+      b.setMatrixAt(i, glowAt.matrix)
+      b.setColorAt(i, glowColor.copy(CRYSTAL_GLOW).multiplyScalar(0.45 * pulse))
+      for (let j = 0; j < CRYSTAL_SPARKS; j++) {
+        // each spark rises 1.2 m over about 1.4 s around the crystal and fades out, facing the camera
+        const life = (t * 0.7 + j / CRYSTAL_SPARKS) % 1
+        const angle = j * 2.1 + t * 0.7
+        glowAt.quaternion.copy(camera.quaternion)
+        glowAt.position.set(
+          c.x + Math.cos(angle) * 0.22,
+          0.2 + life * 1.2,
+          c.z + Math.sin(angle) * 0.22,
+        )
+        glowAt.scale.setScalar(0.1 + (1 - life) * 0.06)
+        glowAt.updateMatrix()
+        const at = i * CRYSTAL_SPARKS + j
+        k.setMatrixAt(at, glowAt.matrix)
+        k.setColorAt(at, glowColor.copy(CRYSTAL_SPARK).multiplyScalar(Math.sin(life * Math.PI)))
+      }
+    }
+    p.count = n
+    b.count = n
+    k.count = n * CRYSTAL_SPARKS
+    for (const mesh of [p, b, k]) {
+      mesh.instanceMatrix.needsUpdate = true
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
+    }
+  })
+  const material = (map: Texture, side?: typeof DoubleSide) => (
+    <meshBasicMaterial
+      map={map}
+      transparent
+      blending={AdditiveBlending}
+      depthWrite={false}
+      toneMapped={false}
+      {...(side !== undefined ? { side } : {})}
+    />
+  )
+  return (
+    <>
+      <instancedMesh
+        ref={pools}
+        args={[undefined, undefined, MAX_CRYSTAL_GLOWS]}
+        frustumCulled={false}
+        renderOrder={1}
+      >
+        <planeGeometry args={[1, 1]} />
+        {material(pool)}
+      </instancedMesh>
+      <instancedMesh
+        ref={beams}
+        args={[undefined, undefined, MAX_CRYSTAL_GLOWS]}
+        frustumCulled={false}
+        renderOrder={2}
+      >
+        <cylinderGeometry args={[0.1, 0.18, 1.4, 14, 1, true]} />
+        {material(beam, DoubleSide)}
+      </instancedMesh>
+      <instancedMesh
+        ref={sparks}
+        args={[undefined, undefined, MAX_CRYSTAL_GLOWS * CRYSTAL_SPARKS]}
+        frustumCulled={false}
+        renderOrder={3}
+      >
+        <planeGeometry args={[1, 1]} />
+        {material(spark)}
+      </instancedMesh>
     </>
   )
 }

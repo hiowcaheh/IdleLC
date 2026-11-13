@@ -374,6 +374,7 @@ export function DungeonRuntime() {
       dungeonSession.menuOpen = !!document.querySelector('[role="dialog"]')
       if (
         !dungeonSession.ready ||
+        dungeonSession.loading ||
         dungeonSession.paused ||
         store.dungeon.choices.length ||
         document.hidden ||

@@ -26,7 +26,7 @@ import type { ViewEvent } from '../state/combatEvents.ts'
 import { useFloatingTexts } from '../state/floatingTexts.ts'
 import { Character, type CharacterHandle } from './Character.tsx'
 import { DamageNumbers } from './DamageNumbers.tsx'
-import { DungeonBoxes } from './DungeonBoxes.tsx'
+import { CrystalGlow, DungeonBoxes } from './DungeonBoxes.tsx'
 import { ClientFxLayer } from './clientFx/ClientFx.tsx'
 import { castClientSkill } from './clientFx/skillFx.ts'
 import { activeArtifactVisual } from './artifactEffects.ts'
@@ -44,6 +44,7 @@ const dungeonPace = () =>
   dungeonSession.paused ||
   dungeonSession.menuOpen ||
   !dungeonSession.ready ||
+  dungeonSession.loading ||
   dungeonSession.state?.choices.length ||
   document.hidden
     ? 0
@@ -347,6 +348,7 @@ export function DungeonScene({ id }: { id: DungeonId }) {
       <Suspense fallback={null}>
         <DungeonBoxes boxes={run?.boxes ?? []} />
       </Suspense>
+      <CrystalGlow />
       <instancedMesh ref={crystals} args={[undefined, undefined, 512]} frustumCulled={false}>
         <octahedronGeometry args={[1]} />
         <meshStandardMaterial

@@ -30,6 +30,7 @@ import { TitlesPanel } from './titles/TitlesPanel.tsx'
 import { Toasts } from './Toasts.tsx'
 import { PerfOverlay } from './perf/PerfOverlay.tsx'
 import { ZoneLoading } from './ZoneLoading.tsx'
+import { DungeonLoading } from './dungeons/DungeonLoading.tsx'
 import { DungeonLootButton } from './dungeons/DungeonLoot.tsx'
 import { WorldBossButton } from './worldBoss/WorldBossButton.tsx'
 import { WorldBossResult, WorldBossTimer } from './worldBoss/WorldBossResult.tsx'
@@ -178,6 +179,7 @@ export function GameScreen() {
 
       <LoadingOverlay />
       <ZoneLoading />
+      <DungeonLoading />
       {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
       {inventoryOpen && <InventoryPanel onClose={() => setInventoryOpen(false)} />}
       {skillsOpen && <SkillsPanel onClose={() => setSkillsOpen(false)} />}

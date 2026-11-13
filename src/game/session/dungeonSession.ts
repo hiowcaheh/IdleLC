@@ -11,6 +11,8 @@ export const dungeonSession = {
   paused: false,
   menuOpen: false,
   ready: false,
+  /** The entry's loading screen is up (ui/dungeons/DungeonLoading): the run waits for it. */
+  loading: false,
   listeners: new Set<(events: readonly DungeonEvent[]) => void>(),
   set(run: DungeonRun | null, events: readonly DungeonEvent[] = []) {
     const now = performance.now()
@@ -47,5 +49,6 @@ export const dungeonSession = {
     this.paused = false
     this.menuOpen = false
     this.ready = false
+    this.loading = false
   },
 }

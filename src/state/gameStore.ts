@@ -71,6 +71,9 @@ interface GameStore {
   dungeon: DungeonRun | null
   dungeonResult: DungeonRecord | null
   dungeonEntering: boolean
+  /** The dungeon whose loading screen is shown while a run starts (ui/dungeons/DungeonLoading). */
+  dungeonLoading: DungeonId | null
+  dungeonLoaded(): void
   worldBossEntering: boolean
   worldBossResult: WorldBossLoot | null
   /** Local time of the last foreground heartbeat, for the calendar's live counter only. */
@@ -440,6 +443,7 @@ export const useGameStore = create<GameStore>((set, get) => {
     dungeon: null,
     dungeonResult: null,
     dungeonEntering: false,
+    dungeonLoading: null,
     worldBossEntering: false,
     worldBossResult: null,
     calendarMarkedAt: null,
@@ -472,12 +476,23 @@ export const useGameStore = create<GameStore>((set, get) => {
       if (!character || character.expedition || character.worldBoss?.active) return
       if (running()) throw new Error('Finish travelling before entering a dungeon.')
       reportCombat(0, 0, true)
-      set({ dungeonEntering: true, dungeonResult: null })
+      // the loading screen covers the swap of the scene; the run waits until it is gone
+      dungeonSession.loading = true
+      set({ dungeonEntering: true, dungeonResult: null, dungeonLoading: id })
       try {
         applyDungeon(await enqueue(() => gameService.startDungeon(character.id, id)))
+      } catch (error) {
+        dungeonSession.loading = false
+        set({ dungeonLoading: null })
+        throw error
       } finally {
         set({ dungeonEntering: false })
       }
+    },
+
+    dungeonLoaded() {
+      dungeonSession.loading = false
+      set({ dungeonLoading: null })
     },
 
     async advanceDungeon(seconds, input) {
@@ -550,6 +565,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         dungeon: null,
         dungeonResult: null,
         dungeonEntering: false,
+        dungeonLoading: null,
         worldBossEntering: false,
         worldBossResult: character.worldBoss?.pending ?? null,
         afkResult: null,
@@ -569,6 +585,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         dungeon: null,
         dungeonResult: null,
         dungeonEntering: false,
+        dungeonLoading: null,
         worldBossEntering: false,
         worldBossResult: null,
         timeScale: 1,
@@ -887,6 +904,7 @@ export const useGameStore = create<GameStore>((set, get) => {
         dungeon: null,
         dungeonResult: null,
         dungeonEntering: false,
+        dungeonLoading: null,
         worldBossEntering: false,
         worldBossResult: null,
         timeScale: 1,

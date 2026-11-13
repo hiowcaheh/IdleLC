@@ -1096,3 +1096,17 @@
 .dungeon-podium__place.is-empty .dungeon-podium__trophy {
   filter: grayscale(1) brightness(0.6);
 }
+
+/* entering a dungeon (DungeonLoading): the zone loading screen with a line of text, above the HUD */
+.zone-loading.dungeon-loading {
+  z-index: 60;
+  gap: 12px;
+}
+.dungeon-loading__text {
+  margin: 0;
+  color: #d9ccaa;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-shadow: 0 1px 3px #000;
+  animation: zone-loading-name 2.6s ease-out forwards;
+}
