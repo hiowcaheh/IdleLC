@@ -421,8 +421,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
           {bookZone(stack.itemId) && (
             <>
               <p className="item-row__note">
-                Fills the World Boss bar of {ZONES[bookZone(stack.itemId)!]?.name} at once. Then
-                summon the boss there as usual.
+                Then summon the boss on {ZONES[bookZone(stack.itemId)!]?.name} as usual.
               </p>
               <button
                 type="button"
