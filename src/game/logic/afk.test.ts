@@ -204,7 +204,8 @@ describe('simulateAfk', () => {
     } finally {
       MONSTERS['stone-sentinel'] = original
     }
-  })
+    // four expeditions, one of 8 h, simulated tick by tick: ~4-5 s, at the default 5 s limit on CI
+  }, 20_000)
 
   it('pays nothing for no time', () => {
     const none = simulateAfk(hero, 0, createRng(1))
