@@ -42,7 +42,8 @@ export function ItemSlot({
         <span className="item-slot__icon">
           <ItemIcon item={item} fluid />
           {plus > 0 && <span className="item-slot__plus">+{plus}</span>}
-          {effectLevel > 0 && <span className="item-slot__plus">Lv {effectLevel}</span>}
+          {/* a mineral's level up in the right corner, the count stays at the bottom */}
+          {effectLevel > 0 && <span className="item-slot__level">Lv {effectLevel}</span>}
           {count > 1 && <span className="item-slot__count">{fmt(count)}</span>}
         </span>
       )}

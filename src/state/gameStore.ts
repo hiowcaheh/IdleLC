@@ -125,6 +125,8 @@ interface GameStore {
   devAddCash(amount: number): void
   /** Uses a dungeon reset scroll from the bag (one more entry today). */
   redeemDungeonScroll(itemId: number): Promise<void>
+  /** Uses a World Boss summoning book from the bag (its map's bar is full at once). */
+  redeemWorldBossBook(itemId: number): Promise<void>
   /** Opens boxes from the bag; resolves with the prizes. */
   openBoxes(itemId: number, count: number): Promise<ItemStack[]>
   buyItem(itemId: number, count: number): Promise<PurchaseResult>
@@ -138,7 +140,8 @@ interface GameStore {
   /** Claims a monster's next monster book reward. */
   claimBookReward(monsterId: string): Promise<BookClaim>
   /** The hero drinks a potion from the bag now (the bag updates with the next report). */
-  drinkPotion(itemId: number): Promise<DrinkProblem | 'away' | null>
+  /** `flag`: the stack's flag (a mineral's level). */
+  drinkPotion(itemId: number, flag?: number): Promise<DrinkProblem | 'away' | null>
   selectMonster(monsterId: string): void
   selectZone(zoneId: string, monsterId?: string): void
   syncCombat(combat: CombatState): void
@@ -746,6 +749,11 @@ export const useGameStore = create<GameStore>((set, get) => {
       applyCharacter(await enqueue(() => gameService.redeemDungeonScroll(id, itemId)))
     },
 
+    async redeemWorldBossBook(itemId) {
+      const id = playedId()
+      applyCharacter(await enqueue(() => gameService.redeemWorldBossBook(id, itemId)))
+    },
+
     async openBoxes(itemId, count) {
       const id = playedId()
       const opening = await enqueue(() => gameService.openBoxes(id, itemId, count))
@@ -818,15 +826,17 @@ export const useGameStore = create<GameStore>((set, get) => {
       applyCharacter(await enqueue(() => gameService.setPotionSlot(id, group, slot)))
     },
 
-    async drinkPotion(itemId) {
+    async drinkPotion(itemId, flag) {
       const character = get().character
       if (!character || character.expedition || get().worldBossResult) return 'away'
       if (character.dungeons?.active) {
         if (get().dungeon?.choices.length) return 'cooldown'
-        applyDungeon(await enqueue(() => gameService.drinkDungeonPotion(character.id, itemId)))
+        applyDungeon(
+          await enqueue(() => gameService.drinkDungeonPotion(character.id, itemId, flag)),
+        )
         return null
       }
-      const { events, problem } = combatSession.drink(character, itemId)
+      const { events, problem } = combatSession.drink(character, itemId, flag)
       if (problem) return problem
       combatEvents.emit(events)
       set({ hud: toHud(combatSession.state) })

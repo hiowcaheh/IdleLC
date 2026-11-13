@@ -73,8 +73,13 @@ export function fitsSlot(itemId: number, group: PotionGroup): boolean {
 }
 
 /** How many of an item the bag holds. */
-export function countOwned(inventory: readonly ItemStack[], itemId: number): number {
-  return inventory.reduce((n, s) => n + (s.itemId === itemId ? s.count : 0), 0)
+/** How many of an item the bag holds; with `flag`, only the stacks of that flag (a mineral's level). */
+export function countOwned(inventory: readonly ItemStack[], itemId: number, flag?: number): number {
+  return inventory.reduce(
+    (n, s) =>
+      n + (s.itemId === itemId && (flag === undefined || (s.flag ?? 0) === flag) ? s.count : 0),
+    0,
+  )
 }
 
 /**

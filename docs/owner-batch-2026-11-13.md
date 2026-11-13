@@ -72,6 +72,31 @@ Laca Ball). SaveVersion pozostaje **19** (Codexa); nowe pola są opcjonalne i ni
    10, Effort Scroll 10, Platinum Training Spell 40, Super Skill Pill 50 i paczka Fortune Package
    (2× Lucky Spell Book, 6× Lucky Scroll, 6× Experience Scroll) za 150 zamiast 220.
 
+## Ósma partia
+
+Punkty 1–8 zgłoszenia były powtórzeniem siódmej partii (już wdrożonej). Nowe:
+
+9. **Minerały ataku i obrony na każdym poziomie** (498–501: Physical / Magical Attack / Defense
+   Mineral). Jak na serwerze (`doFuncItem.cpp`, `IPOTION_UP`): minerał rzuca skill `a_num_0`
+   (104–107) na poziomie z flagi przedmiotu, nie z `a_num_1`. Import zapisuje wszystkie poziomy
+   (`PotionDef.levels`: 15 poziomów, Magical Defense 14), np. Physical Attack Lv 9 = +95, Lv 15 =
+   +155, 5 minut. Poziom przechodzi przez całą ścieżkę: picie w polu (`combatSession.drink`) i w
+   podziemiu (`drinkDungeonPotion`), zużycie stosu tego poziomu, raport (`reportedBoosts`
+   odrzuca podniesienie poziomu), zapis boostów (`OwnedBoost.flag`), wyprawy i sanitizer.
+   Słabszy minerał jest odrzucany, gdy działa mocniejszy (`CanApply`), mocniejszy zastępuje słabszy.
+10. **Etykieta „Lv N” na ikonie** w prawym górnym rogu (`.item-slot__level`), ilość została na dole.
+11. **Księgi przywołania World Bossa** (sklep Cash, 500 Cash): Juno / Dratan / Merac / Egeha Boss
+    Summoning Book, id **95031–95034**, ikony kolorowych ksiąg przywołań klienta (ItemBtn6 rząd 6).
+    Użycie napełnia pasek bossa swojej mapy (`applyWorldBossBook`), potem przywołanie jak zwykle;
+    próba nie jest oznaczana jako pomoc DEV. Odmowa przy pełnym pasku, w walce z bossem, na wyprawie
+    i w podziemiu. Cena własna: ponad 5× bilet 100 Cash, który każdy World Boss daje, więc księgi
+    nie zwracają się w Cash.
+12. **Przycisk ItemShop:** zamiast prezentu oryginalna niebieska kula „Shop” klienta (TopUI, część
+    `shop-orb`, `menu-shop.webp?v=695ce5b6`).
+
+Oprócz tego: test AFK „drinks the potions…” trwał 4–5 s także przed zmianami i przekraczał
+domyślny limit 5 s na CI; dostał własny limit 20 s.
+
 ## Pytania do właściciela
 
 - Wzmacniacze „na jedno zabicie” (Experience / Skill Point / Item Drop / Gold Booster, Platinum
@@ -81,6 +106,13 @@ Laca Ball). SaveVersion pozostaje **19** (Codexa); nowe pola są opcjonalne i ni
 - Nadal otwarte: źródło Cash, „Kar/Neon 12 lv”, poziom 12 czy 10 dla wycia konia.
 
 ## Dla Codexa: co zmieniłem w Twoich plikach
+
+- Minerały 498–501 (Twoje `ItemStack.flag` z nagród Statui) działają teraz jak boosty z poziomem
+  z flagi: `PotionDef.levels`, `potionAtLevel`, `PotionSupply.flag`, `ActiveEffect.flag`,
+  `OwnedBoost.flag`; `countOwned(inventory, itemId, flag?)`. Statua i jej wagi bez zmian.
+- `logic/worldBoss.ts`: nowa `applyWorldBossBook` (księgi 95031–95034, `data/worldBossBooks.ts`);
+  `chargeWorldBoss`, `summonWorldBoss` i `fillWorldBossCharge` bez zmian.
+- `logic/afk.test.ts`: limit 20 s dla testu mikstur na wyprawie (CI przekraczał 5 s).
 
 - `logic/dungeons.ts`: `dungeonStep` nie atakuje w ruchu (`moving`), porzucony zamach zeruje
   odnowienie skilla; `dungeonRewardMultipliers` deleguje do `effectRewardMultipliers` (te same

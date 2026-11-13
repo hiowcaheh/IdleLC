@@ -1,5 +1,6 @@
 /** A single summoned encounter; charge comes only from accepted, watched field kills. */
 import { worldBossFor, worldBossDropTable, WORLD_BOSSES } from '../data/worldBosses.ts'
+import { bookZone } from '../data/worldBossBooks.ts'
 import { ZONES } from '../data/zones.ts'
 import { lcData } from '../data/lcSource.ts'
 import { ITEMS } from '../data/items.ts'
@@ -267,6 +268,36 @@ export function recordWorldBossTime(
         assisted: active.assisted === true || assisted || clock?.assisted === true,
       },
     },
+  }
+}
+
+/**
+ * A World Boss summoning book (data/worldBossBooks.ts): fills the bar of the book's map at once and
+ * takes the book. Refused while a boss fight or its loot is open, on an expedition, in a dungeon,
+ * or when that map's bar is already full (the book would be wasted).
+ */
+export function applyWorldBossBook(character: CharacterData, itemId: number): CharacterData {
+  const zoneId = bookZone(itemId)
+  const boss = zoneId ? worldBossFor(zoneId) : undefined
+  if (!zoneId || !boss) throw new GameError('not-a-book', `item ${itemId}`)
+  const stack = character.inventory.find((s) => s.itemId === itemId && s.count > 0)
+  if (!stack) throw new GameError('not-owned', `item ${itemId}`)
+  if (
+    character.worldBoss?.active ||
+    character.worldBoss?.pending ||
+    character.expedition ||
+    character.dungeons?.active
+  )
+    throw new GameError('world-boss-unavailable')
+  const progress = sanitizeWorldBossProgress(character.worldBoss)
+  if ((progress.kills[zoneId] ?? 0) >= boss.killsRequired)
+    throw new GameError('world-boss-ready', 'The bar is already full.')
+  return {
+    ...character,
+    inventory: character.inventory
+      .map((s) => (s === stack ? { ...s, count: s.count - 1 } : s))
+      .filter((s) => s.count > 0),
+    worldBoss: { ...progress, kills: { ...progress.kills, [zoneId]: boss.killsRequired } },
   }
 }
 

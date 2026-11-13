@@ -1,6 +1,6 @@
 import { getItem } from '../../game/data/items.ts'
 import type { PotionDef } from '../../game/data/types.ts'
-import { effectiveStats } from '../../game/logic/combat.ts'
+import { effectiveStats, potionAtLevel } from '../../game/logic/combat.ts'
 import { GameError } from '../../game/logic/errors.ts'
 import { combatSession } from '../../game/session/combatSession.ts'
 import { dungeonSession } from '../../game/session/dungeonSession.ts'
@@ -36,11 +36,18 @@ const heroNow = () => effectiveStats((dungeonSession.combat() ?? combatSession.s
  * a boost (Adrenaline, Haste…) changes in green and red, or what a healing potion restores over
  * time. True when it was drunk.
  */
-export async function drinkWithToast(itemId: number): Promise<boolean> {
-  const item = getItem(itemId)
+export async function drinkWithToast(itemId: number, flag?: number): Promise<boolean> {
+  const base = getItem(itemId)
+  // a mineral: its stack's level (flag) sets what it does and goes into its name
+  const leveled = base.potion?.levels && flag ? flag : undefined
+  const item = {
+    ...base,
+    name: leveled ? `${base.name} Lv ${leveled}` : base.name,
+    ...(base.potion ? { potion: potionAtLevel(base.potion, leveled) } : {}),
+  }
   try {
     const before = heroNow()
-    const problem = await useGameStore.getState().drinkPotion(itemId)
+    const problem = await useGameStore.getState().drinkPotion(itemId, leveled)
     if (problem) {
       toast(DRINK_PROBLEMS[problem], 'error')
       return false

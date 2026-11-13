@@ -5,7 +5,7 @@
  * expedition (the server's relative assist time); SF_ABSTIME ones run out by the clock.
  */
 import { getItem } from '../data/items.ts'
-import { boostEffect, type ActiveEffect } from './combat.ts'
+import { boostEffect, potionAtLevel, type ActiveEffect } from './combat.ts'
 
 /** A boost potion's effect kept in the save. */
 export interface OwnedBoost {
@@ -14,6 +14,8 @@ export interface OwnedBoost {
   remaining: number
   /** SF_ABSTIME boosts: when they run out (ms since 1970), also while the game is closed. */
   until?: number
+  /** A mineral's level (the flag of the stack drunk, PotionDef.levels). */
+  flag?: number
 }
 
 const boostOf = (itemId: number) => {
@@ -32,10 +34,11 @@ export function boostEffects(
   now: number,
 ): ActiveEffect[] {
   return (boosts ?? []).flatMap((boost) => {
-    const potion = boostOf(boost.itemId)
+    const base = boostOf(boost.itemId)
+    const potion = base && potionAtLevel(base, boost.flag)
     const left = Math.min(secondsLeft(boost, now), potion?.duration ?? 0)
-    return potion && left > 0
-      ? [boostEffect(boost.itemId, getItem(boost.itemId).name, potion, left)]
+    return base && left > 0
+      ? [boostEffect(boost.itemId, getItem(boost.itemId).name, base, left, boost.flag)]
       : []
   })
 }
@@ -53,6 +56,7 @@ export function boostsOf(effects: readonly ActiveEffect[], now: number): OwnedBo
         itemId: effect.itemId!,
         remaining,
         ...(potion.realTime ? { until: now + Math.round(effect.remaining * 1000) } : {}),
+        ...(effect.flag ? { flag: effect.flag } : {}),
       },
     ]
   })
@@ -64,20 +68,29 @@ export function boostsOf(effects: readonly ActiveEffect[], now: number): OwnedBo
  */
 export function reportedBoosts(
   saved: readonly OwnedBoost[] | undefined,
-  drunk: readonly number[],
+  drunk: readonly (number | { itemId: number; flag?: number })[],
   reported: readonly OwnedBoost[],
   now: number,
 ): OwnedBoost[] {
-  const allowed = new Set([...(saved ?? []).map((b) => b.itemId), ...drunk])
+  // a mineral counts with its level: one drunk at Lv 3 cannot be reported as Lv 14
+  const key = (b: { itemId: number; flag?: number }) => `${b.itemId}:${b.flag ?? 0}`
+  const allowed = new Set([
+    ...(saved ?? []).map(key),
+    ...drunk.map((d) => (typeof d === 'number' ? key({ itemId: d }) : key(d))),
+  ])
   const out = new Map<number, OwnedBoost>()
   for (const boost of reported) {
-    const potion = boostOf(boost.itemId)
-    if (!potion || !allowed.has(boost.itemId) || !(boost.remaining > 0)) continue
+    const base = boostOf(boost.itemId)
+    const flag = base?.levels && boost.flag ? boost.flag : undefined
+    const potion = base && potionAtLevel(base, flag)
+    if (!potion || !allowed.has(key({ itemId: boost.itemId, flag })) || !(boost.remaining > 0))
+      continue
     const remaining = Math.min(potion.duration, boost.remaining)
     out.set(boost.itemId, {
       itemId: boost.itemId,
       remaining,
       ...(potion.realTime ? { until: now + Math.round(remaining * 1000) } : {}),
+      ...(flag ? { flag } : {}),
     })
   }
   return [...out.values()]

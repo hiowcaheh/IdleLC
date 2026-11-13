@@ -9,6 +9,7 @@
  * offers keep their regular price in `was`.
  */
 import { DUNGEON_SCROLLS } from './dungeonScrolls.ts'
+import { WORLD_BOSS_BOOKS } from './worldBossBooks.ts'
 import { GOLDEN_MAGNIFIER_ID, MAGNIFIER_ID } from './items.ts'
 
 export type CashTab = 'hot' | 'sale' | 'items' | 'potions' | 'packages'
@@ -149,6 +150,16 @@ export const CASH_OFFERS: readonly CashOffer[] = [
       tag: 'new',
     }),
   ),
+  // World Boss summoning books (owner, 2026-11-13; data/worldBossBooks.ts): a map's bar at once.
+  // Own price, over five times the 100 Cash ticket every World Boss drops, so the books never pay
+  // for themselves in Cash; still half a euro for a boss that takes hours of watched kills.
+  ...Object.values(WORLD_BOSS_BOOKS).map((itemId): CashOffer => ({
+    id: `boss-book-${itemId}`,
+    items: [{ itemId, count: 1 }],
+    price: 500,
+    tabs: ['hot', 'items'],
+    tag: 'new',
+  })),
   // packages: about a third off their contents
   pack(
     'starter-package',

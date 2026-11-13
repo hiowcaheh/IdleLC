@@ -23,7 +23,7 @@ import {
 } from '../logic/dungeons.ts'
 import { dungeonPotionBoosts, expireDungeonPotions } from '../logic/dungeonPotions.ts'
 import type { DungeonId } from '../data/dungeons.ts'
-import { drinkPotion, updatePlayer } from '../logic/combat.ts'
+import { drinkPotion, potionAtLevel, updatePlayer } from '../logic/combat.ts'
 import { playerFighter, potionSupply } from '../logic/fighters.ts'
 import { getItem } from '../data/items.ts'
 import { rewardKills } from '../logic/rewards.ts'
@@ -43,7 +43,7 @@ import {
 } from '../logic/character.ts'
 import { AFK_MIN_SECONDS, simulateAfk, type AfkResult } from '../logic/afk.ts'
 import { newId } from '../logic/id.ts'
-import { applyPotionSlot, type PotionGroup, type PotionSlot } from '../logic/potions.ts'
+import { applyPotionSlot, countOwned, type PotionGroup, type PotionSlot } from '../logic/potions.ts'
 import { gainExp } from '../logic/progression.ts'
 import {
   MAX_PLAY_GAP,
@@ -122,6 +122,7 @@ import {
   worldBossDrops,
   recordWorldBossTime,
   fillWorldBossCharge,
+  applyWorldBossBook,
 } from '../logic/worldBoss.ts'
 
 export const SAVE_KEY = 'idlelc.save'
@@ -530,13 +531,23 @@ export class LocalGameService implements GameService {
     return copy(this.update(characterId, (c) => upgradeDungeonBuff(c, skillId)))
   }
 
-  async drinkDungeonPotion(characterId: string, itemId: number): Promise<DungeonUpdate> {
+  async drinkDungeonPotion(
+    characterId: string,
+    itemId: number,
+    flag?: number,
+  ): Promise<DungeonUpdate> {
     const run = this.liveDungeon(characterId)
     if (run.choices.length) throw new GameError('dungeon-paused', 'Choose a blessing first.')
     const character = this.character(characterId)
     const item = getItem(itemId)
     run.player.effects = expireDungeonPotions(run.player.effects, character.boosts, this.now())
-    const count = character.inventory.find((s) => s.itemId === itemId)?.count ?? 0
+    // a mineral is drunk from the stack of its level (the flag), at that level of its skill
+    const level = item.potion?.levels && flag ? flag : undefined
+    const count = countOwned(
+      character.inventory,
+      itemId,
+      item.potion?.levels ? (level ?? 0) : undefined,
+    )
     if (!item.potion || !count || character.level < item.level)
       throw new GameError('potion-unavailable')
     const result = drinkPotion(
@@ -549,14 +560,22 @@ export class LocalGameService implements GameService {
         kills: 0,
         deaths: 0,
       },
-      { itemId, name: item.name, count, potion: item.potion },
+      {
+        itemId,
+        name: item.name,
+        count,
+        potion: potionAtLevel(item.potion, level),
+        ...(level ? { flag: level } : {}),
+      },
     )
     if (result.problem) throw new GameError(result.problem)
     run.player = result.state.player
     run.player.potionsUsed = {}
     const updated = this.update(characterId, (c) => ({
       ...c,
-      inventory: takeFromInventory(c.inventory, [{ itemId, count: 1 }]).inventory,
+      inventory: takeFromInventory(c.inventory, [
+        { itemId, count: 1, ...(level ? { flag: level } : {}) },
+      ]).inventory,
       boosts: dungeonPotionBoosts(run.player.effects, c.boosts, this.now(), itemId),
     }))
     const init = playerFighter(updated, this.now())
@@ -854,6 +873,10 @@ export class LocalGameService implements GameService {
   async redeemDungeonScroll(characterId: string, itemId: number): Promise<CharacterData> {
     const used = applyDungeonScroll(this.notOnExpedition(characterId), itemId, this.now())
     return copy(this.update(characterId, () => used.character))
+  }
+
+  async redeemWorldBossBook(characterId: string, itemId: number): Promise<CharacterData> {
+    return copy(this.update(characterId, (c) => applyWorldBossBook(c, itemId)))
   }
 
   async openBoxes(characterId: string, itemId: number, count: number): Promise<BoxOpening> {

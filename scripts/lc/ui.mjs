@@ -50,6 +50,8 @@ export const UI_PARTS = {
   'cash-hot': [atlas('Cashshop'), 0, 357, 60, 60],
   'cash-items': [atlas('Cashshop'), 63, 357, 60, 60],
   'cash-packages': [atlas('Cashshop'), 252, 357, 60, 60],
+  // the client's own item shop button: the blue "Shop" orb by the quick slots (TopUI, normal state)
+  'shop-orb': [atlas('TopUI'), 102, 679, 57, 57],
   'cash-potions': [atlas('Cashshop'), 0, 420, 60, 60],
   'cash-tag-new': [atlas('Cashshop'), 183, 501, 22, 11, { scale: 3 }],
   'cash-tag-hot': [atlas('Cashshop'), 208, 501, 22, 11, { scale: 3 }],

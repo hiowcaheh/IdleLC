@@ -1,5 +1,11 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-13, później (Claude Code): [ósma partia](docs/owner-batch-2026-11-13.md).
+Minerały 498–501 to `IPOTION_UP`: skill na poziomie z `ItemStack.flag` (`PotionDef.levels`,
+`potionAtLevel`); flaga idzie przez picie, raport, `OwnedBoost.flag` i sanitizer. Księgi World
+Bossa **95031–95034** (`data/worldBossBooks.ts`, `applyWorldBossBook`, 500 Cash). Przycisk ItemShop
+to kula „Shop” z TopUI (`shop-orb`). Nadal SaveVersion **19**. **672 testy / 87 plików**.
+
 Aktualizacja 2026-11-13 (Claude Code): [szósta i siódma partia](docs/owner-batch-2026-11-13.md).
 Premie nagród jak w serwerze: `rewards` to osobny krok ×(1+n/100), `rewardsPer100`/`per100`
 sumowane (hcSPPlusPer100), `lucky` = Lucky Spell Book 2141 (slot dropu ×2 przy 20%, złoto ×2 przy

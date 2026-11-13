@@ -358,10 +358,13 @@ function sanitizeBoosts(raw: unknown): { boosts?: OwnedBoost[] } {
       continue
     const until =
       typeof entry.until === 'number' && Number.isFinite(entry.until) ? entry.until : null
+    // a mineral keeps its level (PotionDef.levels), only one the skill has
+    const flag = potion.levels?.[int(entry.flag, 0)] ? int(entry.flag, 0) : undefined
     boosts.push({
       itemId,
-      remaining: Math.min(potion.duration, remaining),
+      remaining: Math.min(potion.levels?.[flag ?? 0]?.duration ?? potion.duration, remaining),
       ...(potion.realTime && until !== null ? { until } : {}),
+      ...(flag ? { flag } : {}),
     })
   }
   return boosts.length > 0 ? { boosts } : {}

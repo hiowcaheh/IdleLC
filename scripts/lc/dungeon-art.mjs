@@ -105,10 +105,9 @@ for (const name of [
 await sharp(await dungeonButton(ui['event-frame'], ui['menu-dungeons'], WELL_EVENT, EVENT_BUTTON))
   .webp({ lossless: true })
   .toFile('public/ui/lc/menu-dungeons.webp')
-// the item shop button below it (owner's request, 2026-11-07): the shop's gift-box picture
-await sharp(
-  await dungeonButton(ui['event-frame'], ui['cash-packages'], WELL_EVENT, EVENT_BUTTON, 1),
-)
+// the item shop button below it (owner's request, 2026-11-07): the client's blue "Shop" orb
+// (2026-11-13: the gift-box picture read as a free present)
+await sharp(await dungeonButton(ui['event-frame'], ui['shop-orb'], WELL_EVENT, EVENT_BUTTON, 1))
   .webp({ lossless: true })
   .toFile('public/ui/lc/menu-shop.webp')
 /**

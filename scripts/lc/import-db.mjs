@@ -122,6 +122,10 @@ const OWN_PRICES = new Map([
  * only make them ×150/250 × 100/200 = 0.3 as long (Skill.cpp).
  */
 const NO_COOLDOWN_POTIONS = new Set([6916])
+/** Config.h IPOTION_UP: a potion subtype that casts its skill at the level of the item's flag. */
+const IPOTION_UP = 6
+/** The Physical / Magical Attack and Defense Minerals (skills 104–107), levels from the flag. */
+const MINERALS = new Set([498, 499, 500, 501])
 /** t_skill.a_flag bits a boost potion keeps (Skill.h): kept at death, real time, not twice. */
 const SF_ABSTIME = 1 << 3
 const SF_NOTDUPLICATE = 1 << 4
@@ -149,6 +153,19 @@ export const OWN_ITEMS = [
   { id: 95021, name: 'Belfist Reset Scroll', icon: { atlas: 10, row: 9, col: 14 } },
   { id: 95022, name: 'Procyon Reset Scroll', icon: { atlas: 10, row: 9, col: 15 } },
   { id: 95023, name: 'Maargadum Reset Scroll', icon: { atlas: 10, row: 10, col: 0 } },
+  // one use fills a map's World Boss bar (owner, 2026-11-13; src/game/data/worldBossBooks.ts);
+  // the client's coloured summoning books (ItemBtn6 row 6), which no other item here uses
+  ...[
+    ['Juno', 11],
+    ['Dratan', 12],
+    ['Merac', 10],
+    ['Egeha', 14],
+  ].map(([zone, col], index) => ({
+    id: 95031 + index,
+    name: `${zone} Boss Summoning Book`,
+    description: `Use to fill the World Boss bar of ${zone} at once. Consumes one book.`,
+    icon: { atlas: 6, row: 6, col },
+  })),
 ].map((item) => ({
   ...item,
   // t_item a_type_idx 2 / a_subtype_idx 9: the client's boxes opened for a random reward
@@ -399,6 +416,7 @@ export function buildData(tables) {
   }
   UPGRADE_STONES.forEach((id) => usedItems.add(id))
   BOOST_POTIONS.forEach((id) => usedItems.add(id))
+  MINERALS.forEach((id) => usedItems.add(id))
   DUNGEON_SUPER_ITEMS.forEach((id) => usedItems.add(id))
   const titles = buildTitles(tables.t_title, itemRows)
   titles.forEach((t) => usedItems.add(t.item))
@@ -729,12 +747,9 @@ function buildPotions(tables, itemRows, usable) {
   const potions = new Map()
   for (const r of itemRows.values()) {
     if (int(r.a_type_idx) !== 6 || !usable(r)) continue
-    if (BOOST_POTIONS.has(int(r.a_index))) {
-      // the skill level the item casts (t_item.a_num_1), its stat changes as skill effects
-      const skill = skills.get(int(r.a_num_0))
-      const level = levels.get(`${int(r.a_num_0)}/${Math.max(1, int(r.a_num_1))}`)
-      if (!skill || !level) continue
-      const effects = [1, 2, 3].flatMap((k) => {
+    // the stat changes of one level of a skill, as skill effects
+    const effectsOf = (level) =>
+      [1, 2, 3].flatMap((k) => {
         const magic = magics.get(int(level[`a_magicIndex${k}`]))
         if (!magic) return []
         const magicLevel = int(level[`a_magicLevel${k}`])
@@ -750,6 +765,40 @@ function buildPotions(tables, itemRows, usable) {
           },
         ]
       })
+    if (int(r.a_subtype_idx) === IPOTION_UP && MINERALS.has(int(r.a_index))) {
+      // doFuncItem.cpp: IPOTION_UP casts its skill at the level in the item's flag, not a_num_1
+      const skill = skills.get(int(r.a_num_0))
+      if (!skill) continue
+      const byLevel = {}
+      for (const row of tables.t_skilllevel)
+        if (int(row.a_index) === int(skill.a_index))
+          byLevel[int(row.a_level)] = {
+            duration: int(row.a_durtime) / 10,
+            effects: effectsOf(row),
+          }
+      const first = byLevel[1]
+      if (!first) continue
+      const flag = int(skill.a_flag)
+      potions.set(int(r.a_index), {
+        kind: 'boost',
+        power: 0,
+        duration: first.duration,
+        cooldown: int(skill.a_reuseTime) / 10,
+        skill: int(skill.a_index),
+        effects: first.effects,
+        levels: byLevel,
+        ...(flag & SF_NOCANCEL ? { keepOnDeath: true } : {}),
+        ...(flag & SF_ABSTIME ? { realTime: true } : {}),
+        ...(flag & SF_NOTDUPLICATE ? { exclusive: true } : {}),
+      })
+      continue
+    }
+    if (BOOST_POTIONS.has(int(r.a_index))) {
+      // the skill level the item casts (t_item.a_num_1), its stat changes as skill effects
+      const skill = skills.get(int(r.a_num_0))
+      const level = levels.get(`${int(r.a_num_0)}/${Math.max(1, int(r.a_num_1))}`)
+      if (!skill || !level) continue
+      const effects = effectsOf(level)
       const flag = int(skill.a_flag)
       const hard = HARDCODED_BOOSTS.get(int(r.a_index))
       potions.set(int(r.a_index), {

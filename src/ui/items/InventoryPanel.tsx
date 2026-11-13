@@ -10,6 +10,7 @@ import {
 } from '../../game/data/items.ts'
 import type { AccessorySlot, ItemDef, ItemType } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
+import { potionAtLevel } from '../../game/logic/combat.ts'
 import {
   STONES_PER_HEAVEN,
   checkWear,
@@ -28,6 +29,8 @@ import { isBox } from '../../game/data/boxes.ts'
 import { cashTicketValue } from '../../game/data/cashTickets.ts'
 import { BoxActions, BoxResults } from './BoxActions.tsx'
 import { scrollDungeon } from '../../game/data/dungeonScrolls.ts'
+import { bookZone } from '../../game/data/worldBossBooks.ts'
+import { ZONES } from '../../game/data/zones.ts'
 import { getDungeon } from '../../game/data/dungeons.ts'
 import { drinkWithToast } from './drinkWithToast.ts'
 import { comparePotions } from './potionText.ts'
@@ -95,6 +98,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   const redeemTitleItem = useGameStore((s) => s.redeemTitleItem)
   const redeemCashTicket = useGameStore((s) => s.redeemCashTicket)
   const redeemDungeonScroll = useGameStore((s) => s.redeemDungeonScroll)
+  const redeemWorldBossBook = useGameStore((s) => s.redeemWorldBossBook)
   const identifyItems = useGameStore((s) => s.identifyItems)
   const [selected, setSelected] = useState<string | null>(null)
   const [category, setCategory] = useState<Category>('all')
@@ -345,7 +349,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
           {item.gear && wearActions(stack.itemId, 0, { itemId: stack.itemId })}
           {item.potion && (
             <>
-              <PotionNotes potion={item.potion} />
+              <PotionNotes potion={potionAtLevel(item.potion, stack.flag)} />
               <button
                 type="button"
                 className="button button--gold"
@@ -353,7 +357,7 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                 onClick={async () => {
                   setBusy(true)
                   // drunk: the item window closes (owner's request), the toast says what it did
-                  if (await drinkWithToast(stack.itemId)) setSelected(null)
+                  if (await drinkWithToast(stack.itemId, stack.flag)) setSelected(null)
                   setBusy(false)
                 }}
               >
@@ -407,6 +411,27 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
                   run(async () => {
                     await redeemDungeonScroll(stack.itemId)
                     return `${getDungeon(scrollDungeon(stack.itemId)!)!.name}: one more entry today.`
+                  })
+                }
+              >
+                Use
+              </button>
+            </>
+          )}
+          {bookZone(stack.itemId) && (
+            <>
+              <p className="item-row__note">
+                Fills the World Boss bar of {ZONES[bookZone(stack.itemId)!]?.name} at once. Then
+                summon the boss there as usual.
+              </p>
+              <button
+                type="button"
+                className="button button--gold"
+                disabled={busy || away || dungeonLocked}
+                onClick={() =>
+                  run(async () => {
+                    await redeemWorldBossBook(stack.itemId)
+                    return `The World Boss of ${ZONES[bookZone(stack.itemId)!]?.name} is ready to summon.`
                   })
                 }
               >

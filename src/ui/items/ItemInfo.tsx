@@ -10,6 +10,7 @@ import { SLOT_LABELS, fmt, gearStats, nameTone, optionLines, pieceName } from '.
 import { ItemIcon } from './ItemIcon.tsx'
 import { TYPE_LABELS } from './itemTypes.ts'
 import { potionRows } from './potionText.ts'
+import { potionAtLevel } from '../../game/logic/combat.ts'
 import { titleDuration, titleStyle } from '../titles/format.ts'
 import { cashTicketValue } from '../../game/data/cashTickets.ts'
 
@@ -68,8 +69,9 @@ export function ItemInfo({
   }
   for (const [label, value] of gearStats(itemId, plus, rare)) rows.push({ label, value })
   // a potion's effects one per row, then how long it lasts
+  // a mineral's effects at the level of its flag
   if (item.potion)
-    for (const [label, value] of potionRows(item.potion))
+    for (const [label, value] of potionRows(potionAtLevel(item.potion, flag)))
       rows.push({ label, value, tone: label === 'Lasts' ? '' : ' is-good' })
   const level = gear ? requiredLevel(itemId, options) : item.level
   if (level > 1 && item.type !== 'material') {

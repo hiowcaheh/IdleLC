@@ -70,7 +70,8 @@ export interface GameService {
   advanceDungeon(characterId: string, seconds: number, input: DungeonPoint): Promise<DungeonUpdate>
   chooseDungeonBuff(characterId: string, skillId: number): Promise<DungeonUpdate>
   upgradeDungeonBuff(characterId: string, skillId: number): Promise<CharacterData>
-  drinkDungeonPotion(characterId: string, itemId: number): Promise<DungeonUpdate>
+  /** `flag`: the stack's flag, a mineral's level (its skill is cast at that level). */
+  drinkDungeonPotion(characterId: string, itemId: number, flag?: number): Promise<DungeonUpdate>
   finishDungeon(characterId: string): Promise<DungeonUpdate>
   /** Sends the character on an AFK expedition to its current hunting spot. */
   startAfk(characterId: string): Promise<CharacterData>
@@ -136,6 +137,8 @@ export interface GameService {
   finishLacaBall(characterId: string, drawId: string): Promise<LacaBallResult>
   /** Uses a dungeon reset scroll: one more entry into its dungeon today. */
   redeemDungeonScroll(characterId: string, itemId: number): Promise<CharacterData>
+  /** Uses a World Boss summoning book: its map's bar is full at once. */
+  redeemWorldBossBook(characterId: string, itemId: number): Promise<CharacterData>
   /** Opens `count` boxes of the kind from the bag (data/boxes.ts). */
   openBoxes(characterId: string, itemId: number, count: number): Promise<BoxOpening>
   redeemTitleItem(characterId: string, itemId: number): Promise<TitleUse>

@@ -12,6 +12,7 @@ import {
   drinkPotion,
   healPlayer,
   killMonster,
+  potionAtLevel,
   removeEffect,
   takePotionsUsed,
   updatePlayer,
@@ -28,6 +29,9 @@ import { countOwned } from '../logic/potions.ts'
 import { createRng, type Rng } from '../logic/rng.ts'
 
 /** Stand-in fighter before a character enters the game. */
+/** The key of potions drunk and reported: the item and its flag (a mineral's level). */
+const usedKey = (itemId: number, flag?: number) => `${itemId}:${flag ?? 0}`
+
 const NOBODY: FighterInit = {
   level: 1,
   stats: { maxHp: 1, attack: 0, defense: 0, attackInterval: 1, critChance: 0, critMultiplier: 1 },
@@ -39,8 +43,13 @@ export class CombatSession {
   private hero: Hero | null = null
   private titleId: number | null = null
   private singleEncounter = false
-  /** Potions reported to the service and not yet settled (not off the character's inventory yet). */
-  private readonly reported = new Map<number, number>()
+  /**
+   * Potions reported to the service and not yet settled (not off the character's inventory yet),
+   * by item and flag (`itemId:flag`; a mineral's level is its flag).
+   */
+  private readonly reported = new Map<string, number>()
+  /** Leveled potions (minerals) drunk and not reported yet, by `itemId:flag`. */
+  private readonly leveledUsed = new Map<string, number>()
 
   constructor(rng: Rng = createRng(Date.now())) {
     this.rng = rng
@@ -134,15 +143,32 @@ export class CombatSession {
    * The player has the hero drink a potion from the bag (any potion it owns, slot or not); it is
    * reported like the ones drunk by itself. Events for the scene, or why it can't.
    */
-  drink(hero: Hero, itemId: number): { events: CombatEvent[]; problem: DrinkProblem | null } {
+  drink(
+    hero: Hero,
+    itemId: number,
+    flag?: number,
+  ): { events: CombatEvent[]; problem: DrinkProblem | null } {
     const item = getItem(itemId)
     if (!item.potion) return { events: [], problem: 'none-left' }
     if (hero.level < item.level) return { events: [], problem: 'level-too-low' }
+    // a mineral is drunk at the level of its stack (the flag); other potions have none
+    const level = item.potion.levels && flag ? flag : undefined
+    const key = usedKey(itemId, level)
     // the bag still holds the potions reported but not settled
-    const count = countOwned(hero.inventory ?? [], itemId) - (this.reported.get(itemId) ?? 0)
-    const supply = { itemId, name: item.name, count, potion: item.potion }
+    const count =
+      countOwned(hero.inventory ?? [], itemId, level ?? (item.potion.levels ? 0 : undefined)) -
+      (this.reported.get(key) ?? 0) -
+      (this.leveledUsed.get(key) ?? 0)
+    const supply = {
+      itemId,
+      name: item.name,
+      count,
+      potion: potionAtLevel(item.potion, level),
+      ...(level ? { flag: level } : {}),
+    }
     const { state, events, problem } = drinkPotion(this.combat, supply)
     this.combat = state
+    if (!problem && level) this.leveledUsed.set(key, (this.leveledUsed.get(key) ?? 0) + 1)
     return { events, problem }
   }
 
@@ -158,10 +184,17 @@ export class CombatSession {
   takePotionsUsed(): ItemStack[] {
     const { state, used } = takePotionsUsed(this.combat)
     this.combat = state
-    for (const { itemId, count } of used) {
-      this.reported.set(itemId, (this.reported.get(itemId) ?? 0) + count)
+    const all: ItemStack[] = [...used]
+    for (const [key, count] of this.leveledUsed) {
+      const [itemId, flag] = key.split(':').map(Number) as [number, number]
+      all.push({ itemId, count, flag })
     }
-    return used
+    this.leveledUsed.clear()
+    for (const stack of all) {
+      const key = usedKey(stack.itemId, stack.flag)
+      this.reported.set(key, (this.reported.get(key) ?? 0) + stack.count)
+    }
+    return all
   }
 
   /**
@@ -169,10 +202,11 @@ export class CombatSession {
    * tells how many are left. Call setPlayer with the updated character afterwards.
    */
   settlePotions(potions: readonly ItemStack[]): void {
-    for (const { itemId, count } of potions) {
-      const left = (this.reported.get(itemId) ?? 0) - count
-      if (left > 0) this.reported.set(itemId, left)
-      else this.reported.delete(itemId)
+    for (const { itemId, count, flag } of potions) {
+      const key = usedKey(itemId, flag)
+      const left = (this.reported.get(key) ?? 0) - count
+      if (left > 0) this.reported.set(key, left)
+      else this.reported.delete(key)
     }
   }
 
@@ -184,7 +218,7 @@ export class CombatSession {
       ...fighter,
       potions: fighter.potions.map((p) => ({
         ...p,
-        count: Math.max(0, p.count - (this.reported.get(p.itemId) ?? 0)),
+        count: Math.max(0, p.count - (this.reported.get(usedKey(p.itemId)) ?? 0)),
       })),
     }
   }

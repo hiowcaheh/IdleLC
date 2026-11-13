@@ -237,12 +237,7 @@ export function applyCombatReport(
   const working =
     report.boosts === undefined
       ? character.boosts
-      : reportedBoosts(
-          character.boosts,
-          taken.map((p) => p.itemId),
-          report.boosts,
-          now,
-        )
+      : reportedBoosts(character.boosts, taken, report.boosts, now)
   // EXP / SP potions working in the fight (Blessed Iris, skill pills)
   const multipliers = effectRewardMultipliers(boostEffects(working, now))
   const reward = rewardKills(character, monster, kills, rng, now, multipliers, encounterDrops)

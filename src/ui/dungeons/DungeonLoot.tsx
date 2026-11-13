@@ -6,6 +6,7 @@ import { Gold } from '../Gold.tsx'
 import { Sheet } from '../Sheet.tsx'
 import { ItemIcon } from '../items/ItemIcon.tsx'
 import { drinkWithToast } from '../items/drinkWithToast.ts'
+import { potionAtLevel } from '../../game/logic/combat.ts'
 import { comparePotions, potionLine } from '../items/potionText.ts'
 import { formatSp } from '../skills/format.ts'
 
@@ -119,14 +120,15 @@ function DungeonPotions() {
     .sort((a, b) => comparePotions(a.item, b.item) || a.item.name.localeCompare(b.item.name))
   return potions.length ? (
     <ul className="dungeon-potions">
-      {potions.map(({ itemId, count, item }) => (
-        <li key={itemId}>
+      {potions.map(({ itemId, count, item, flag }) => (
+        <li key={`${itemId}-${flag ?? 0}`}>
           <ItemIcon item={item} size={32} />
           <div>
             <strong>
-              {item.name} ×{count}
+              {item.name}
+              {flag ? ` Lv ${flag}` : ''} ×{count}
             </strong>
-            <small>{potionLine(item.potion!)}</small>
+            <small>{potionLine(potionAtLevel(item.potion!, flag))}</small>
           </div>
           <button
             type="button"
@@ -135,7 +137,7 @@ function DungeonPotions() {
             aria-label={`Drink ${item.name}`}
             onClick={async () => {
               setBusy(true)
-              await drinkWithToast(itemId)
+              await drinkWithToast(itemId, flag)
               setBusy(false)
             }}
           >

@@ -4073,6 +4073,7 @@ a.button {
 }
 
 .item-slot__plus,
+.item-slot__level,
 .item-slot__count {
   position: absolute;
   font-size: 10px;
@@ -4094,6 +4095,13 @@ a.button {
   right: 2px;
   bottom: 2px;
   color: #fff;
+}
+
+/* an item's effect level (Lv 9 mineral): top right, clear of the count below */
+.item-slot__level {
+  top: 2px;
+  right: 2px;
+  color: var(--gilt-bright);
 }
 
 .tabs--small .tabs__tab {

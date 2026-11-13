@@ -84,6 +84,8 @@ export interface PotionSupply {
    * below HP_POTION_BELOW, mana below MP_POTION_BELOW, recovery whenever the bar is not full.
    */
   below?: number
+  /** The stack's item flag: a mineral's level (PotionDef.levels). */
+  flag?: number
 }
 
 export interface FighterInit {
@@ -152,6 +154,8 @@ export interface ActiveEffect {
   steal?: 'hp' | 'mp'
   /** Berserker Potion: 10% of the hero's hits on a monster deal double (hcAttackBerserker). */
   berserker?: true
+  /** A mineral's level, the flag of the stack it was drunk from (PotionDef.levels). */
+  flag?: number
 }
 
 export interface Fighter extends FighterInit {
@@ -1657,14 +1661,21 @@ function drinkPotions(f: Fighter, events: CombatEvent[]): void {
   }
 }
 
-/** A potion takes effect: counted as drunk, its kind's cooldown starts. */
-function applyPotion(f: Fighter, { itemId, name, potion }: PotionSupply, events: CombatEvent[]) {
+/**
+ * A potion takes effect: counted as drunk, its kind's cooldown starts. A leveled one (a mineral's
+ * flag) is not counted here: the stack of its level is taken by whoever drank it.
+ */
+function applyPotion(
+  f: Fighter,
+  { itemId, name, potion, flag }: PotionSupply,
+  events: CombatEvent[],
+) {
   const kind = potion.kind
-  f.potionsUsed[itemId] = (f.potionsUsed[itemId] ?? 0) + 1
+  if (!flag) f.potionsUsed[itemId] = (f.potionsUsed[itemId] ?? 0) + 1
   f.potionCooldowns[cooldownKey(potion)] = potion.cooldown
   if (kind === 'boost') {
     // the skill's buff: a second one of the same skill takes the place of the first (AddAssist)
-    const effect = boostEffect(itemId, name, potion, potion.duration)
+    const effect = boostEffect(itemId, name, potion, potionAtLevel(potion, flag).duration, flag)
     f.effects = [
       ...f.effects.filter(
         (e) =>
@@ -1710,13 +1721,17 @@ export function boostEffect(
   name: string,
   potion: PotionDef,
   remaining: number,
+  /** IPOTION_UP: the level in the item's flag (a mineral), kept with the effect for the save. */
+  flag?: number,
 ): ActiveEffect {
+  potion = potionAtLevel(potion, flag)
   return {
     skillId: potion.skill ?? 0,
     itemId,
     potion: 'boost',
-    name,
+    name: flag && potion.levels ? `${name} Lv ${flag}` : name,
     remaining,
+    ...(flag && potion.levels ? { flag } : {}),
     stats: [
       ...(potion.effects ?? []).flatMap((e) => {
         // MST_STAT_STR / DEX / INT / CON: COption::ApplyOptionValue like a worn option
@@ -1746,6 +1761,15 @@ export function boostEffect(
       ? { magics: potion.magics.map((m) => ({ ...m })) }
       : magicsOf(potion.effects)),
   }
+}
+
+/**
+ * A potion as cast at an item flag's level: IPOTION_UP (the minerals) takes its skill level from
+ * the item's flag (doFuncItem.cpp); every other potion stays as it is.
+ */
+export function potionAtLevel(potion: PotionDef, flag: number | undefined): PotionDef {
+  const level = flag ? potion.levels?.[flag] : undefined
+  return level ? { ...potion, duration: level.duration, effects: level.effects } : potion
 }
 
 /**
@@ -1835,7 +1859,7 @@ export function drinkPotion(
               supply.potion.exclusive &&
               f.effects.some((e) => e.potion === 'boost' && e.skillId === supply.potion.skill)
               ? 'working'
-              : strongerWorking(f, boostEffect(0, '', supply.potion, 0).magics)
+              : strongerWorking(f, boostEffect(0, '', supply.potion, 0, supply.flag).magics)
                 ? 'stronger'
                 : null
             : f.effects.some((e) => e.potion === kind)

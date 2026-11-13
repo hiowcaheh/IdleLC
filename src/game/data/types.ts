@@ -258,6 +258,11 @@ export interface PotionDef {
   lucky?: boolean
   /** Boosts run by their item index: the magics CAssistList::CanApply compares. */
   magics?: { magic: number; level: number }[]
+  /**
+   * IPOTION_UP (the minerals): the skill is cast at the level held in the item's flag
+   * (doFuncItem.cpp); each level's duration and stat changes. `effects` is level 1.
+   */
+  levels?: Record<number, { duration: number; effects: SkillEffectDef[] }>
 }
 
 /** An item option 1:1 from t_option. */

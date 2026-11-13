@@ -1,5 +1,18 @@
 # Historia zmian
 
+## 2026-11-13, później (Claude Code): ósma partia
+
+[Szczegóły](docs/owner-batch-2026-11-13.md#ósma-partia).
+
+1. Minerały ataku i obrony 498–501 działają na poziomie z flagi przedmiotu (skille 104–107, wszystkie
+   poziomy), w polu, w podziemiu, na wyprawie i w zapisie.
+2. „Lv N” na ikonie w prawym górnym rogu, ilość na dole.
+3. Księgi przywołania World Bossa dla Juno, Dratan, Merac i Egeha (95031–95034, 500 Cash).
+4. Przycisk ItemShop z oryginalną kulą „Shop” klienta zamiast prezentu.
+5. CI: test mikstur na wyprawie z limitem 20 s.
+
+Nadal SaveVersion **19**. Weryfikacja: **672 testy / 87 plików**, check i Chromium.
+
 ## 2026-11-13 (Claude Code): szósta i siódma partia zgłoszeń
 
 [Pełny opis i notatka dla Codexa](docs/owner-batch-2026-11-13.md).
