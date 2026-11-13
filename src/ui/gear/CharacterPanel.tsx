@@ -399,9 +399,10 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
                 </div>
               ))}
               {boosted.lucky && (
-                <div>
+                // the whole line across both columns: its value does not fit a stat box
+                <div className="hero-stats__wide">
                   <dt>Lucky Spell Book</dt>
-                  <dd>Drop ×2 20%, gold ×2 80%</dd>
+                  <dd>Drop ×2 on 20%, gold ×2 on 80%</dd>
                 </div>
               )}
             </dl>
@@ -424,6 +425,10 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
               <div>
                 <dt>Play time</dt>
                 <dd>{playTime(character.stats.playSeconds)}</dd>
+              </div>
+              <div>
+                <dt>Expedition time</dt>
+                <dd>{playTime(character.stats.expeditionSeconds ?? 0)}</dd>
               </div>
             </dl>
           </section>

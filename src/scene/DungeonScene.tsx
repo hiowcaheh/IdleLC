@@ -111,7 +111,6 @@ export function DungeonScene({ id }: { id: DungeonId }) {
   const summonGroups = useRef(new Map<ElementalType, Group>())
   const crystals = useRef<InstancedMesh>(null)
   const cameraPlaced = useRef(false)
-  const heroMoving = useRef(false)
 
   useEffect(() => {
     // the field's floating texts over the hero and each monster (Battle.tsx textAt, owner's
@@ -158,9 +157,14 @@ export function DungeonScene({ id }: { id: DungeonId }) {
           else if (e.kind === 'debuff') textAt(side(e.target), e.name, 'effect')
         }
         // a hero who runs with the stick keeps running: it shoots without its swing clip
-        // (owner's report: the Healer floated across the floor in her bow pose)
+        // (owner's report: the Healer floated across the floor in her bow pose). The logic says
+        // whether it still runs at the end of these steps (dungeonStep: it never swings while
+        // running), not the scene's last frame, which still slides to the place it stopped.
         const runningHero =
-          e.type !== 'death' && 'source' in e && e.source === 'player' && heroMoving.current
+          e.type !== 'death' &&
+          'source' in e &&
+          e.source === 'player' &&
+          dungeonSession.state?.moving === true
         if (e.type === 'attack') {
           if (!runningHero) (e.source === 'player' ? hero.current : monster)?.attack()
         } else if (e.type === 'cast') {
@@ -235,11 +239,13 @@ export function DungeonScene({ id }: { id: DungeonId }) {
     group.position.set(x, 0, z)
     let yaw = s.facing
     const target = s.enemies.find((e) => e.uid === s.targetUid)
-    const moving = Math.hypot(s.position.x - from.x, s.position.z - from.z) > 0.001
+    // running while the logic's last step ran; a hero that stopped in these steps stands (its
+    // swing plays) while it slides the last bit to the place it stopped
+    const moving =
+      s.moving !== false && Math.hypot(s.position.x - from.x, s.position.z - from.z) > 0.001
     if (!moving && target) yaw = Math.atan2(target.x - x, target.z - z)
     const turn = Math.atan2(Math.sin(yaw - group.rotation.y), Math.cos(yaw - group.rotation.y))
     group.rotation.y += turn * Math.min(1, delta * 12)
-    heroMoving.current = moving
     hero.current?.setBase(moving ? 'run' : 'idle', moving)
     view.player.copy(group.position)
     view.playerHeight = hero.current?.height() ?? 2

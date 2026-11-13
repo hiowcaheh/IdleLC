@@ -1007,16 +1007,18 @@ const SKILL_CLASSES = ['titan', 'knight', 'healer', 'mage', 'rogue', 'sorcerer']
 /**
  * Dungeon blessings beyond the class buffs (owner's request, 2026-11-07), each at one fixed level:
  * Basic Ignition 2 (an item skill: +200% attack and magic attack), the horse mount's Offensive and
- * Defensive Howling at 12 (their top level; pet level 31–50 learns them), and two picked by Claude:
- * Moon Cake (+15% attack speed, faster running away from the horde) and Stars (+50 attack, magic
- * attack and defense, for every class). `origin` is shown where class buffs show their class.
+ * Defensive Howling at 12 (their top level; pet level 31–50 learns them), and two class skills the
+ * class pool leaves out because they reflect damage (owner, 2026-11-13: character buffs instead of
+ * the Moon Cake and Stars items): the Knight's Reflection Shield 8 (65% of the damage back, +500
+ * evasion) and the Titan's Damage Reflection 6 (40% back), their top levels. `origin` is shown
+ * where class buffs show their class.
  */
 export const EXTRA_DUNGEON_BUFFS = [
   { id: 1062, level: 2, origin: 'item' },
   { id: 268, level: 12, origin: 'horse' },
   { id: 269, level: 12, origin: 'horse' },
-  { id: 388, level: 1, origin: 'event' },
-  { id: 437, level: 1, origin: 'event' },
+  { id: 1108, level: 8, origin: 'knight' },
+  { id: 400, level: 6, origin: 'titan' },
 ]
 
 /**

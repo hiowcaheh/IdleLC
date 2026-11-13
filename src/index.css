@@ -2873,28 +2873,6 @@ a.button {
   border-color: var(--bronze-dim);
 }
 
-/* in a dungeon: the slots' menu (AUTO, when to drink, which potion), the client's option icon */
-.potion-slots__settings {
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border: 0;
-  border-radius: 2px;
-  background: url('/ui/lc/menu-system.webp') center / 100% 100% no-repeat;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.55);
-  cursor: pointer;
-}
-.potion-slots__settings:active {
-  filter: brightness(1.2);
-}
-.potion-slots__settings:disabled {
-  filter: grayscale(1) brightness(0.6);
-}
-
-.potion-picker__tabs {
-  margin-bottom: 8px;
-}
-
 /* the slot the hero drinks from by itself: a plain gold frame (no pulsing, owner's request) */
 .potion-slot.is-auto .item-icon {
   border-color: #ffe788;
@@ -3408,6 +3386,17 @@ a.button {
   flex: 1;
   min-height: 34px;
   padding: 2px 8px;
+}
+
+/* a row across both columns whose value is a sentence (Lucky Spell Book in Bonuses) */
+.hero-stats > .hero-stats__wide {
+  grid-column: 1 / -1;
+}
+.hero-stats > .hero-stats__wide dd {
+  width: auto;
+  flex: 1 1 auto;
+  text-align: right;
+  white-space: normal;
 }
 
 .hero-stats__buff {
@@ -4192,6 +4181,26 @@ a.button {
   width: auto;
   min-width: 96px;
   max-width: 68%;
+}
+
+/* every value box of a card as wide as its widest value (owner, 2026-11-13: boxes of different
+   sizes looked untidy): the rows share the card's two columns */
+@supports (grid-template-columns: subgrid) {
+  .item-info__stats {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .item-info__stats > div {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: center;
+  }
+  .item-info__stats dd {
+    max-width: none;
+  }
+  .item-info__stats > .item-info__addition {
+    display: block;
+  }
 }
 
 .item-info__stats .is-unmet {

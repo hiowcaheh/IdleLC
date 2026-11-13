@@ -22,7 +22,7 @@ const stat = (id: number) =>
 
 describe('extra dungeon blessings (owner, 2026-11-07)', () => {
   it('join the pool at their fixed level, as the database gives it', () => {
-    for (const id of [1062, 268, 269, 388, 437]) {
+    for (const id of [1062, 268, 269, 1108, 400]) {
       expect(DUNGEON_BUFFS).toContain(id)
       expect(dungeonBuffRank(id, 1).kind).toBe('buff')
       expect(dungeonBuffRank(id, 1).mpCost).toBe(0)
@@ -42,15 +42,19 @@ describe('extra dungeon blessings (owner, 2026-11-07)', () => {
       ['defense', 480, false],
       ['magicDefense', 20, false],
     ])
-    expect(stat(388)).toEqual([
-      ['attackSpeed', 15, true],
-      ['runSpeed', 15, false],
-    ])
-    expect(stat(437)).toEqual([
-      ['attack', 50, false],
-      ['magicAttack', 50, false],
-      ['defense', 50, false],
-    ])
+    // class buffs in place of the Moon Cake and Stars items (owner, 2026-11-13)
+    expect(dungeonBuffDefinition(1108)!.sourceLevel).toBe(8)
+    expect(dungeonBuffDefinition(1108)!.classId).toBe('knight')
+    expect(stat(1108)).toEqual([['reflect'], ['dodge', 500, false]])
+    expect(dungeonBuffDefinition(400)!.sourceLevel).toBe(6)
+    expect(dungeonBuffDefinition(400)!.classId).toBe('titan')
+    expect(dungeonBuffRank(400, 1).effects.find((e) => e.kind === 'reflect')).toMatchObject({
+      chance: 0.5,
+      power: 40,
+      percent: true,
+    })
+    expect(DUNGEON_BUFFS).not.toContain(388)
+    expect(DUNGEON_BUFFS).not.toContain(437)
   })
 
   it('cannot be upgraded', () => {

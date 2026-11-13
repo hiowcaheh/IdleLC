@@ -102,6 +102,12 @@ export interface DungeonProgress {
 export interface DungeonRun {
   id: string
   dungeonId: DungeonId
+  /**
+   * The hero ran in the last step (the stick held). The scene draws the run or stance from it:
+   * a batch of steps can hold a run, a stop and the swing after it (owner, 2026-11-13: blows
+   * landed without their animation when the hero had just stopped).
+   */
+  moving?: boolean
   elapsed: number
   score: number
   level: number
@@ -244,10 +250,14 @@ export const DUNGEON_BUFFS = Object.values(BUFF_DEFINITIONS)
       rank.kind === 'buff' &&
       !rank.offensive &&
       rank.duration > 0 &&
-      rank.effects.some((e) => (e.kind === 'stat' && e.value > 0) || e.kind === 'regen') &&
-      // Tyrant's cost: MP drained each second while it works
+      rank.effects.some(
+        (e) => (e.kind === 'stat' && e.value > 0) || e.kind === 'regen' || e.kind === 'reflect',
+      ) &&
+      // Tyrant's cost: MP drained each second while it works; Reflection Shield and Damage
+      // Reflection (2026-11-13) send part of each blow back (MST_OTHER_REFLEX)
       rank.effects.every(
-        (e) => ['stat', 'regen'].includes(e.kind) || (e.kind === 'mpChange' && e.power < 0),
+        (e) =>
+          ['stat', 'regen', 'reflect'].includes(e.kind) || (e.kind === 'mpChange' && e.power < 0),
       )
     )
   })
@@ -574,6 +584,7 @@ export function dungeonStep(
   // Owner's rule (2026-11-07): a hero on the run does not attack. It strikes and casts only
   // standing; starting to run drops the swing or cast in progress (the skill is not spent).
   const moving = !blocked && strength > 0.05
+  next.moving = moving
   if (moving) {
     const length = Math.hypot(ix, iz)
     const metres = runSpeed(effectiveStats(next.player)) * dt * strength

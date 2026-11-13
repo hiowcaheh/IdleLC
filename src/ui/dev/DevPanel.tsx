@@ -143,11 +143,12 @@ export function DevPanel() {
         >
           +25% exp
         </button>
-        <button type="button" className="dev-chip" onClick={() => devAddGold(1000)}>
-          <Gold amount={1000} prefix="+" />
+        {/* owner, 2026-11-13: one tap for a billion gold and 10,000 SP */}
+        <button type="button" className="dev-chip" onClick={() => devAddGold(1_000_000_000)}>
+          <Gold amount={1_000_000_000} prefix="+" />
         </button>
-        <button type="button" className="dev-chip" onClick={() => devAddSp(10)}>
-          +10 SP
+        <button type="button" className="dev-chip" onClick={() => devAddSp(10_000)}>
+          +10,000 SP
         </button>
         <button type="button" className="dev-chip" onClick={() => devAddCash(10000)}>
           +10,000 Cash

@@ -199,6 +199,7 @@ describe('loadSave', () => {
       deaths: 1,
       expeditions: 0,
       playSeconds: 0,
+      expeditionSeconds: 0,
       monsterKills: {},
       bookClaims: {},
     })

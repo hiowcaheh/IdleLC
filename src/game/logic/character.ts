@@ -43,6 +43,11 @@ export interface CharacterStats {
   expeditions: number
   /** Seconds of active play (fights reported; not expeditions or time with the game closed). */
   playSeconds: number
+  /**
+   * Seconds spent on expeditions that paid (at most 8 h each), from 2026-11-13 on (owner: for
+   * achievements later); earlier expeditions are not known.
+   */
+  expeditionSeconds: number
   /** Kills by monster id — the monster book. */
   monsterKills: Record<string, number>
   /** Monster book rewards claimed, by monster id (they go in order: 1 = the 10 kills one). */
@@ -157,6 +162,7 @@ export function createCharacterData(input: NewCharacter, id: string, now: number
       kills: 0,
       deaths: 0,
       expeditions: 0,
+      expeditionSeconds: 0,
       playSeconds: 0,
       monsterKills: {},
       bookClaims: {},

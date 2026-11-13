@@ -50,6 +50,15 @@ describe('dungeon hero on the run (owner, 2026-11-07)', () => {
     expect(running.run.position.z).toBeGreaterThan(1)
   })
 
+  it('says whether it still runs after the last step, so a stop in a batch shows its swing', () => {
+    const ran = steps(arena(), { x: 0, z: 1 }, 10).run
+    expect(ran.moving).toBe(true)
+    // in one batch of steps: it runs, stops and swings; the batch ends standing
+    const stopped = steps(ran, { x: 0, z: 0 }, 30)
+    expect(stopped.run.moving).toBe(false)
+    expect(stopped.attacks).toBeGreaterThan(0)
+  })
+
   it('drops the swing in progress when it starts to run', () => {
     const standing = steps(arena(), { x: 0, z: 0 }, 2).run
     standing.player.impactIn = 0.3

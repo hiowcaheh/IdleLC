@@ -322,6 +322,7 @@ function sanitizeCharacter(raw: unknown, now: number): CharacterData | null {
       deaths: int(stats.deaths, 0),
       expeditions: int(stats.expeditions, 0),
       playSeconds: num(stats.playSeconds, 0),
+      expeditionSeconds: num(stats.expeditionSeconds, 0),
       monsterKills: sanitizeMonsterKills(stats.monsterKills),
       bookClaims: sanitizeBookClaims(stats.bookClaims),
     },

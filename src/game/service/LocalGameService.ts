@@ -41,7 +41,7 @@ import {
   type CharacterLocation,
   type NewCharacter,
 } from '../logic/character.ts'
-import { AFK_MIN_SECONDS, simulateAfk, type AfkResult } from '../logic/afk.ts'
+import { AFK_MAX_SECONDS, AFK_MIN_SECONDS, simulateAfk, type AfkResult } from '../logic/afk.ts'
 import { newId } from '../logic/id.ts'
 import { applyPotionSlot, countOwned, type PotionGroup, type PotionSlot } from '../logic/potions.ts'
 import { gainExp } from '../logic/progression.ts'
@@ -656,6 +656,10 @@ export class LocalGameService implements GameService {
       stats: {
         ...result.character.stats,
         expeditions: result.character.stats.expeditions + (counts ? 1 : 0),
+        // the time the expedition paid for (at most AFK_MAX_SECONDS)
+        expeditionSeconds:
+          (result.character.stats.expeditionSeconds ?? 0) +
+          (counts ? Math.min(Math.floor(away), AFK_MAX_SECONDS) : 0),
       },
       expedition: null,
       lastPlayedAt: now,
