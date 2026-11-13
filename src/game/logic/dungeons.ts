@@ -22,6 +22,7 @@ import {
   applyEffects,
   copyFighter,
   effectiveStats,
+  effectRewardMultipliers,
   freshFighter,
   isStunned,
   landAreaSkill,
@@ -312,14 +313,12 @@ export function dungeonSuperEffect(
   }
 }
 
-/** Source cash EXP, SP and artefact bonuses are successive multipliers, not one summed percent. */
+/**
+ * Source cash EXP, SP and artefact bonuses are successive multipliers, not one summed percent;
+ * the hero's own reward potions add their summed and lucky parts (combat.ts, 2026-11-13).
+ */
 export function dungeonRewardMultipliers(run: DungeonRun) {
-  const rates = { exp: 1, sp: 1, gold: 1, drop: 1 }
-  for (const e of run.player.effects)
-    if (e.remaining > 0 && e.rewards)
-      for (const key of ['exp', 'sp', 'gold', 'drop'] as const)
-        rates[key] *= 1 + e.rewards[key] / 100
-  return rates
+  return effectRewardMultipliers(run.player.effects)
 }
 
 export function dungeonBuffLevel(progress: DungeonProgress | undefined, id: number): number {

@@ -1,5 +1,14 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-13 (Claude Code): [szósta i siódma partia](docs/owner-batch-2026-11-13.md).
+Premie nagród jak w serwerze: `rewards` to osobny krok ×(1+n/100), `rewardsPer100`/`per100`
+sumowane (hcSPPlusPer100), `lucky` = Lucky Spell Book 2141 (slot dropu ×2 przy 20%, złoto ×2 przy
+80%). Zwoje 971/972/973/5080/5081/2140/2141/2452 w imporcie, 2138/2845 tylko za Cash
+(`CASH_ONLY_GOODS`). Zwoje resetu podziemi to **95021–95023**. Zdarzenie walki `steal` odtwarza
+`HP_STEAL`/`MP_STEAL` (`playClientGroup`, `effects.json?v=6`). Podziemia: `dungeonSession.loading`,
+brak ataku w ruchu, liczby nad potworami. Nadal SaveVersion **19** (Codexa). Weryfikacja:
+**665 testów / 85 plików**, check i Chromium.
+
 Aktualizacja 2026-11-11 (Codex): **kalendarz bez przewijania i Moonstone bez boxa**.
 `RewardsCalendar` ma pasek czasu u góry, kompaktowe siatki i osobny Sheet do
 podglądu/odbioru. Stan `preview` przechowuje datę i tor; Claim jest dostępny tylko

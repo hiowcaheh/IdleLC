@@ -44,6 +44,12 @@ const CLASSES = {
   sorcerer: ['Sorcerer', 'so'],
 }
 
+/**
+ * Groups the client starts by name on a server message, not through a skill (SessionState.cpp
+ * MSG_EFFECT_ETC_*): HP_STEAL / MP_STEAL when a steal potion takes life or mana from a hit.
+ */
+const EVENT_GROUPS = ['HP_STEAL', 'MP_STEAL']
+
 /** The name line of a record (`<id><version>name\n`). */
 function nameAt(buffer, at) {
   const end = buffer.indexOf(10, at + 5)
@@ -211,6 +217,7 @@ async function main(argv) {
     for (const name of skillGroups(record, animationEffects[skill.classId])) names.add(name)
   }
   for (const title of data.titles) if (title.effect) names.add(title.effect)
+  for (const name of EVENT_GROUPS) names.add(name)
   const collected = collectEffects(buffer, [...names])
   const kinds = {}
   for (const e of Object.values(collected.effects))

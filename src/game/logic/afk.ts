@@ -30,6 +30,8 @@ export const AFK_MIN_SECONDS = 1
 export const AFK_EFFICIENCY = 1
 /** Length of the fight sample used to measure the hunting rate, in game seconds. */
 export const HUNT_SAMPLE_SECONDS = 1200
+/** The shortest sample of one stretch of the estimated hour (boosts ending inside it). */
+const STRETCH_SAMPLE_SECONDS = 180
 
 /** Potions the hero is given when its hunting rate is measured (as many as it wants). */
 const SAMPLE_POTIONS = 1e9
@@ -132,7 +134,10 @@ export function estimateHourly(
   for (const to of ends) {
     const share = (to - from) / hour
     const working = boosts.filter((b) => b.remaining >= to - 1e-6)
-    const part = measureHuntRate(player, monster, rng, HUNT_SAMPLE_SECONDS, working)
+    // one hour's sample shared by its stretches (each at least STRETCH_SAMPLE_SECONDS): six
+    // boosts no longer measure seven full samples (owner: the Expedition window froze)
+    const sample = Math.max(STRETCH_SAMPLE_SECONDS, Math.round(HUNT_SAMPLE_SECONDS * share))
+    const part = measureHuntRate(player, monster, rng, sample, working)
     rate.killsPerHour += part.killsPerHour * share
     rate.deathsPerHour += part.deathsPerHour * share
     for (const [id, count] of Object.entries(part.potionsPerHour))

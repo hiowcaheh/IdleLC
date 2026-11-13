@@ -144,6 +144,10 @@ export interface ActiveEffect {
   dungeon?: true
   visual?: 'Angel_wing03'
   rewards?: { exp: number; sp: number; gold: number; drop: number }
+  /** hcExpPlusPer100 / hcSPPlusPer100 style percents, summed over the working effects. */
+  per100?: { exp: number; sp: number; gold: number; drop: number }
+  /** Lucky Spell Book (hcDropPlus_2141): drop rolls ×2 at 20%, gold ×2 at 80%. */
+  lucky?: true
   /** HP / MP steal potions (Battle.cpp hcHPSteelPotion / hcMPSteelPotion). */
   steal?: 'hp' | 'mp'
   /** Berserker Potion: 10% of the hero's hits on a monster deal double (hcAttackBerserker). */
@@ -251,6 +255,8 @@ export type CombatEvent =
   /** A Charge cancelled the skill the fighter was readying. */
   | { type: 'interrupt'; target: Side; skillId: number }
   | { type: 'heal'; target: Side; amount: number; mana?: boolean }
+  /** A steal potion took life or mana from a hit (Battle.cpp MSG_EFFECT_ETC_HP / MP_STEEL). */
+  | { type: 'steal'; target: Side; kind: 'hp' | 'mp' }
   | { type: 'effect'; target: Side; skillId: number; name: string; kind: EffectKind }
   | { type: 'potion'; itemId: number; name: string; kind: PotionKind }
   | { type: 'death'; who: Side }
@@ -1140,7 +1146,7 @@ function strike(
     if (rng() < 0.1) result.damage *= 2
   target.hp = Math.max(0, target.hp - result.damage)
   if (side === 'player') addHate(s, s.player, result.damage)
-  steal(self, result.damage, rng)
+  steal(self, side, result.damage, rng, events)
   events.push({
     type: 'hit',
     target: targetSide,
@@ -1380,15 +1386,23 @@ function reflect(
  * HP / MP steal (Battle.cpp): a steal potion replaces the rare option of its kind — 30% of the
  * hits give back 5% of the damage as HP, or 10% of max MP; else the option's share of the damage.
  */
-function steal(f: Fighter, damage: number, rng: Rng): void {
+function steal(f: Fighter, side: Side, damage: number, rng: Rng, events: CombatEvent[]): void {
   const stats = effectiveStats(f)
   const potion = (kind: 'hp' | 'mp') => f.effects.some((e) => e.steal === kind && e.remaining > 0)
   if (damage > 0 && potion('hp')) {
-    if (rng() >= 0.7) f.hp = Math.min(stats.maxHp, f.hp + Math.trunc((damage * 5) / 100))
+    const amount = Math.trunc((damage * 5) / 100)
+    if (rng() >= 0.7 && amount > 0) {
+      f.hp = Math.min(stats.maxHp, f.hp + amount)
+      // the client plays HP_STEAL on the hero (SessionState.cpp MSG_EFFECT_ETC_HP_STEEL)
+      events.push({ type: 'steal', target: side, kind: 'hp' })
+    }
   } else if (stats.hpSteal) f.hp = Math.min(stats.maxHp, f.hp + (damage * stats.hpSteal) / 100)
   if (damage > 0 && potion('mp')) {
-    if (rng() >= 0.7)
-      f.mp = Math.min(stats.maxMp ?? 0, f.mp + Math.trunc(((stats.maxMp ?? 0) * 10) / 100))
+    const amount = Math.trunc(((stats.maxMp ?? 0) * 10) / 100)
+    if (rng() >= 0.7 && amount > 0) {
+      f.mp = Math.min(stats.maxMp ?? 0, f.mp + amount)
+      events.push({ type: 'steal', target: side, kind: 'mp' })
+    }
   } else if (stats.mpSteal) f.mp = Math.min(stats.maxMp ?? 0, f.mp + (damage * stats.mpSteal) / 100)
 }
 
@@ -1724,9 +1738,13 @@ export function boostEffect(
     nextTick: POISON_TICK,
     ...(potion.keepOnDeath ? { keepOnDeath: true } : {}),
     ...(potion.rewards ? { rewards: { ...potion.rewards } } : {}),
+    ...(potion.rewardsPer100 ? { per100: { ...potion.rewardsPer100 } } : {}),
+    ...(potion.lucky ? { lucky: true as const } : {}),
     ...(potion.steal ? { steal: potion.steal } : {}),
     ...(potion.berserker ? { berserker: true as const } : {}),
-    ...magicsOf(potion.effects),
+    ...(potion.magics?.length
+      ? { magics: potion.magics.map((m) => ({ ...m })) }
+      : magicsOf(potion.effects)),
   }
 }
 
@@ -1738,14 +1756,39 @@ const POTION_ATTRIBUTES: Partial<
   Record<number, 'strength' | 'dexterity' | 'intelligence' | 'constitution'>
 > = { 29: 'strength', 30: 'dexterity', 31: 'intelligence', 32: 'constitution' }
 
-/** EXP / SP / gold / drop multipliers of the working effects (successive, as in the source). */
-export function effectRewardMultipliers(effects: readonly ActiveEffect[]) {
+/** What the working boosts do to a kill's rewards (rewards.ts rewardKills). */
+export interface RewardMultipliers {
+  exp: number
+  sp: number
+  gold: number
+  drop: number
+  /** Lucky Spell Book: each drop roll ×2 at 20%, the gold ×2 at 80% (hcDropPlus_2141). */
+  lucky?: true
+}
+
+const REWARD_KEYS = ['exp', 'sp', 'gold', 'drop'] as const
+
+/**
+ * EXP / SP / gold / drop multipliers of the working effects, as PC.cpp AddExpSP and
+ * Battle_NPCDropItem.cpp apply them: every `rewards` effect is a step of its own (Iris ×2, scrolls
+ * ×3/2, ×2, ×4), the `per100` ones are summed into one step (hcSPPlusPer100: Platinum Super Skill
+ * Pill +200 and Platinum Training Spell +50 make +250, not ×3 × 1.5). The server truncates after
+ * each step; the product is truncated once (at most a point or two apart).
+ */
+export function effectRewardMultipliers(effects: readonly ActiveEffect[]): RewardMultipliers {
   const rates = { exp: 1, sp: 1, gold: 1, drop: 1 }
-  for (const e of effects)
-    if (e.remaining > 0 && e.rewards)
-      for (const key of ['exp', 'sp', 'gold', 'drop'] as const)
-        rates[key] *= 1 + e.rewards[key] / 100
-  return rates
+  const summed = { exp: 0, sp: 0, gold: 0, drop: 0 }
+  let lucky = false
+  for (const e of effects) {
+    if (e.remaining <= 0) continue
+    for (const key of REWARD_KEYS) {
+      if (e.rewards) rates[key] *= 1 + e.rewards[key] / 100
+      if (e.per100) summed[key] += e.per100[key]
+    }
+    if (e.lucky) lucky = true
+  }
+  for (const key of REWARD_KEYS) rates[key] *= 1 + summed[key] / 100
+  return lucky ? { ...rates, lucky: true } : rates
 }
 
 function magicsOf(effects: readonly { magic?: number; magicLevel?: number }[] | undefined) {

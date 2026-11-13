@@ -1,5 +1,24 @@
 # Historia zmian
 
+## 2026-11-13 (Claude Code): szósta i siódma partia zgłoszeń
+
+[Pełny opis i notatka dla Codexa](docs/owner-batch-2026-11-13.md).
+
+1. Zakupy i otwarte skrzynki wypływają po lewej jak drop; portfel Cash z przyciskiem Donate;
+   ceny sklepu ÷5; Multi-open i „?” z szansami przy skrzynkach.
+2. Zwoje resetu podziemi 95021–95023 (dodatkowe wejście na dziś, `2/2 (+1 extra)`).
+3. Podziemia: ekran ładowania, atak tylko w miejscu, przycisk ustawień mikstur obok slotów,
+   niebieska poświata kryształów, liczby obrażeń jak na polu.
+4. Zwoje i pigułki EXP / SP / Gold / Drop według serwera (osobne kroki ×N, sumowane Per100,
+   Lucky Spell Book 20% / 80%), w sklepie Cash z paczką Fortune; Adrenalina i Super Haste tylko
+   za Cash.
+5. Kradzież HP/MP odtwarza grupy `HP_STEAL` / `MP_STEAL` z `Effect.dat` (`effects.json?v=6`).
+6. Komunikat po wypiciu boostu zawsze z efektem; okno Expedition bez zamrożenia; boosty z
+   ikonami po powrocie z wyprawy; wybór slotu i różnica statystyk przy akcesoriach.
+
+SaveVersion nadal **19**, bez migracji. Weryfikacja: **665 testów / 85 plików**, check i Chromium
+(ładowanie podziemia, menu mikstur, kryształy, liczby, okno akcesoriów, Expedition, toast zwoju).
+
 ## 2026-11-11 (Codex): skończone pule Laca Ball i Auto Draw
 
 1. Poszerzone okno i większy obszar maszyny, węższa tabela nagród po prawej.

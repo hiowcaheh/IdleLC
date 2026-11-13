@@ -8,7 +8,7 @@ import {
   SMELTING_STONE_ID,
   getItem,
 } from '../../game/data/items.ts'
-import type { ItemDef, ItemType } from '../../game/data/types.ts'
+import type { AccessorySlot, ItemDef, ItemType } from '../../game/data/types.ts'
 import { GameError } from '../../game/logic/character.ts'
 import {
   STONES_PER_HEAVEN,
@@ -34,6 +34,7 @@ import { comparePotions } from './potionText.ts'
 import { Sheet } from '../Sheet.tsx'
 import { ItemIcon } from './ItemIcon.tsx'
 import { WearCompare } from '../gear/WearCompare.tsx'
+import { AccessorySlotPicker } from '../gear/AccessorySlotPicker.tsx'
 import { ItemInfo } from './ItemInfo.tsx'
 import { ItemSlot } from './ItemSlot.tsx'
 
@@ -99,6 +100,11 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
   const [category, setCategory] = useState<Category>('all')
   const [confirmAll, setConfirmAll] = useState(false)
   const [busy, setBusy] = useState(false)
+  /** An accessory waiting for the player to pick its slot (AccessorySlotPicker). */
+  const [choosingSlot, setChoosingSlot] = useState<{
+    source: GearSource
+    piece: Pick<GearPiece, 'itemId' | 'plus' | 'options' | 'rare'>
+  } | null>(null)
   const [boxResults, setBoxResults] = useState<{
     itemId: number
     opened: number
@@ -190,9 +196,9 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
       return `Sold ${what} for ${fmt(sale.gold)} gold.`
     })
 
-  const wear = (source: GearSource, name: string) =>
+  const wear = (source: GearSource, name: string, slot?: AccessorySlot) =>
     run(async () => {
-      await equipItem(source)
+      await equipItem(source, slot)
       return `You are wearing ${name}.`
     })
 
@@ -228,7 +234,12 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
           type="button"
           className="button button--gold button--wide"
           disabled={busy || away || dungeonLocked || problem !== null}
-          onClick={() => wear(source, pieceName(itemId, plus, rare))}
+          onClick={() =>
+            // an accessory: the player picks which of the three slots it goes to
+            getItem(itemId).gear?.slot === 'accessory'
+              ? setChoosingSlot({ source, piece: { itemId, plus, options, rare } })
+              : wear(source, pieceName(itemId, plus, rare))
+          }
         >
           Wear
         </button>
@@ -539,6 +550,19 @@ export function InventoryPanel({ onClose }: { onClose(): void }) {
         </Sheet>
       )}
       {boxResults && <BoxResults {...boxResults} onClose={() => setBoxResults(null)} />}
+      {choosingSlot && (
+        <AccessorySlotPicker
+          character={character}
+          piece={choosingSlot.piece}
+          busy={busy}
+          onClose={() => setChoosingSlot(null)}
+          onWear={(slot) => {
+            const { source, piece } = choosingSlot
+            setChoosingSlot(null)
+            void wear(source, pieceName(piece.itemId, piece.plus, piece.rare), slot)
+          }}
+        />
+      )}
       {sellable.length > 0 && (
         <>
           <button

@@ -68,21 +68,46 @@ const BOOST_POTIONS = new Set([
   // Blessed Iris and the Platinum Super Skill Pill
   2357, 2356, 2853, 2846, 2849, 2850, 2851, 2852, 2872, 2871, 2988, 2989, 2990, 1315, 1314, 2043,
   2044, 2045, 1226, 1227, 1575, 2631, 1288, 2453,
+  // reward scrolls and pills (owner, 2026-11-13): Experience / Lucky / Effort Scroll, Huge and
+  // Superior Huge Lucky Scroll, Platinum Training Spell, Lucky Spell Book, Super Skill Pill
+  971, 972, 973, 5080, 5081, 2140, 2141, 2452,
 ])
 /**
  * Boosts the server runs by their item or skill index instead of their t_magic (CAssistList::Apply,
  * Assist.cpp: `bSkip`, the magic is not applied). steal: Battle.cpp hcHPSteelPotion (30% of the
  * hits that hurt give back 5% of the damage) / hcMPSteelPotion (30%: 10% of max MP). berserker:
- * Battle_GetDamage.cpp hcAttackBerserker (10% of the hero's hits on a monster deal double). exp:
- * skill 349 rate hcCashExpUp = its magic power; sp: item 2453 hcSPPlusPer100 += 200.
+ * Battle_GetDamage.cpp hcAttackBerserker (10% of the hero's hits on a monster deal double).
+ * rewards: a step of its own, ×(1 + n/100): skill 349 rate hcCashExpUp = its magic power (Blessed
+ * Iris, PC.cpp:1092), hcScrollExp / hcScrollSP ×3/2 (PC.cpp:1066), hcScrollDrop ×2 (972 and 5080
+ * share the flag) and hcScrollDrop_5081 ×4 (Battle_NPCDropItem.cpp:126). per100: hcSPPlusPer100,
+ * the working items summed into one step (PC.cpp:1112). lucky: hcDropPlus_2141, each drop roll ×2
+ * at 20% and the gold ×2 at 80% (Battle_NPCDropItem.cpp:133, 550).
  */
 const HARDCODED_BOOSTS = new Map([
   [2357, { steal: 'hp' }],
   [2356, { steal: 'mp' }],
   [2853, { berserker: true }],
-  [1288, { rewards: 'exp' }],
-  [2453, { rewards: 'sp' }],
+  [1288, { rewards: { exp: 'power' } }],
+  [971, { rewards: { exp: 50 } }],
+  [973, { rewards: { sp: 50 } }],
+  [972, { rewards: { drop: 100 } }],
+  [5080, { rewards: { drop: 100 } }],
+  [5081, { rewards: { drop: 300 } }],
+  [2453, { per100: { sp: 200 } }],
+  [2452, { per100: { sp: 100 } }],
+  [2140, { per100: { sp: 50 } }],
+  [2141, { lucky: true }],
 ])
+/** EXP / SP / gold / drop percents of a hard-coded boost ('power': its first magic's power). */
+const rewardPercents = (spec, effects) => {
+  const value = (v) => (v === 'power' ? (effects[0]?.power ?? 0) : (v ?? 0))
+  return {
+    exp: value(spec.exp),
+    sp: value(spec.sp),
+    gold: value(spec.gold),
+    drop: value(spec.drop),
+  }
+}
 /**
  * IdleLC prices of items the database gives no gold price (own, owner's request 2026-11-05): the
  * cooldown potion is a cash shop item there.
@@ -119,9 +144,11 @@ export const OWN_ITEMS = [
     icon: { atlas: 15, row: 1, col: 2 },
   })),
   // one more dungeon entry today (owner, 2026-11-07; src/game/data/dungeonScrolls.ts)
-  { id: 95021, name: 'Belfist Reset Scroll', icon: { atlas: 3, row: 1, col: 5 } },
-  { id: 95022, name: 'Procyon Reset Scroll', icon: { atlas: 5, row: 12, col: 12 } },
-  { id: 95023, name: 'Maargadum Reset Scroll', icon: { atlas: 5, row: 15, col: 2 } },
+  // client scroll icons no sold item uses (Mediocre / Average / Elegant Scroll, 2026-11-13: the
+  // earlier ones were the Platinum Training Spell's and the Lucky Spell Book's)
+  { id: 95021, name: 'Belfist Reset Scroll', icon: { atlas: 10, row: 9, col: 14 } },
+  { id: 95022, name: 'Procyon Reset Scroll', icon: { atlas: 10, row: 9, col: 15 } },
+  { id: 95023, name: 'Maargadum Reset Scroll', icon: { atlas: 10, row: 10, col: 0 } },
 ].map((item) => ({
   ...item,
   // t_item a_type_idx 2 / a_subtype_idx 9: the client's boxes opened for a random reward
@@ -732,18 +759,15 @@ function buildPotions(tables, itemRows, usable) {
         cooldown: int(skill.a_reuseTime) / 10,
         skill: int(skill.a_index),
         effects: hard ? [] : effects,
+        // CAssistList::CanApply still compares the magics of a hard-coded boost
+        ...(hard && effects.length
+          ? { magics: effects.map((e) => ({ magic: e.magic, level: e.magicLevel })) }
+          : {}),
         ...(hard?.steal ? { steal: hard.steal } : {}),
         ...(hard?.berserker ? { berserker: true } : {}),
-        ...(hard?.rewards
-          ? {
-              rewards: {
-                exp: hard.rewards === 'exp' ? (effects[0]?.power ?? 0) : 0,
-                sp: hard.rewards === 'sp' ? (effects[0]?.power ?? 0) : 0,
-                gold: 0,
-                drop: 0,
-              },
-            }
-          : {}),
+        ...(hard?.rewards ? { rewards: rewardPercents(hard.rewards, effects) } : {}),
+        ...(hard?.per100 ? { rewardsPer100: rewardPercents(hard.per100, effects) } : {}),
+        ...(hard?.lucky ? { lucky: true } : {}),
         ...(flag & SF_NOCANCEL ? { keepOnDeath: true } : {}),
         ...(flag & SF_ABSTIME ? { realTime: true } : {}),
         ...(flag & SF_NOTDUPLICATE ? { exclusive: true } : {}),

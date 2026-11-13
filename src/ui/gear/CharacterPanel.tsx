@@ -5,7 +5,7 @@ import { REGEN_TICK_SECONDS } from '../../game/logic/balance.ts'
 import { ATTRIBUTE_KEYS } from '../../game/logic/attributes.ts'
 import { availableStatPoints } from '../../game/logic/statPoints.ts'
 import { naturalRecovery } from '../../game/logic/recovery.ts'
-import { effectiveStats, runSpeed } from '../../game/logic/combat.ts'
+import { effectRewardMultipliers, effectiveStats, runSpeed } from '../../game/logic/combat.ts'
 import { GameError } from '../../game/logic/character.ts'
 import {
   MAX_PLUS,
@@ -186,12 +186,15 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
     ['HP steal', signed(stats.hpSteal ?? 0)],
     ['MP steal', signed(stats.mpSteal ?? 0)],
   ]
+  // worn options, then the reward boosts working now (scrolls, Iris, pills) on top of them
   const bonuses = rewardBonuses(character)
+  const boosted = effectRewardMultipliers(effects)
+  const total = (option: number, rate: number) => Math.round(((1 + option / 100) * rate - 1) * 100)
   const bonusRows: [string, number][] = [
-    ['EXP', bonuses.exp],
-    ['Skill points', bonuses.sp],
-    ['Gold', bonuses.gold],
-    ['Drop chance', bonuses.drop],
+    ['EXP', total(bonuses.exp, boosted.exp)],
+    ['Skill points', total(bonuses.sp, boosted.sp)],
+    ['Gold', total(bonuses.gold, boosted.gold)],
+    ['Drop chance', total(bonuses.drop, boosted.drop)],
   ]
   const statGroups = [
     { name: 'Attributes', rows: attributeRows },
@@ -395,6 +398,12 @@ export function CharacterPanel({ onClose }: { onClose(): void }) {
                   <dd>{signed(value)}</dd>
                 </div>
               ))}
+              {boosted.lucky && (
+                <div>
+                  <dt>Lucky Spell Book</dt>
+                  <dd>Drop ×2 20%, gold ×2 80%</dd>
+                </div>
+              )}
             </dl>
           </section>
           <section className="character-stats__group" aria-label="Hunting record">

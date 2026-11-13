@@ -9,7 +9,12 @@ import { TOKEN_DROP_CHANCE, TOKEN_ID } from '../data/lacaball.ts'
 import type { MonsterDef } from '../data/types.ts'
 import { clamp } from './balance.ts'
 import type { CharacterData } from './character.ts'
-import { TIMINGS, effectRewardMultipliers, type EncounterClock } from './combat.ts'
+import {
+  TIMINGS,
+  effectRewardMultipliers,
+  type EncounterClock,
+  type RewardMultipliers,
+} from './combat.ts'
 import { monsterDrops, stowDrops, takeFromInventory, type ItemStack } from './loot.ts'
 import { applyPlayTime, optionValue, type OptionGain } from './options.ts'
 import type { Hero } from './fighters.ts'
@@ -131,16 +136,23 @@ export function killReward(
   }
 }
 
-function rolledReward(monster: MonsterDef, level: number, bonuses: RewardBonuses, rng: Rng) {
+function rolledReward(
+  monster: MonsterDef,
+  level: number,
+  bonuses: RewardBonuses,
+  rng: Rng,
+  lucky = false,
+) {
   const rates = levelRewardRates(level, monster.level)
-  return {
-    exp: variedReward(monster.exp, rates.exp, rollInt(rng, -10, 10), bonuses.exp),
-    sp: variedReward(monster.sp ?? 0, rates.sp, rollInt(rng, -10, 10), bonuses.sp),
-    gold:
-      rollInt(rng, 1, 10000) <= rates.goldChance * 10000
-        ? Math.trunc((monster.gold * rollInt(rng, 50, 150)) / 100)
-        : 0,
-  }
+  const exp = variedReward(monster.exp, rates.exp, rollInt(rng, -10, 10), bonuses.exp)
+  const sp = variedReward(monster.sp ?? 0, rates.sp, rollInt(rng, -10, 10), bonuses.sp)
+  let gold =
+    rollInt(rng, 1, 10000) <= rates.goldChance * 10000
+      ? Math.trunc((monster.gold * rollInt(rng, 50, 150)) / 100)
+      : 0
+  // Lucky Spell Book (Battle_NPCDropItem.cpp:550): the dropped gold ×2 at 80%
+  if (gold > 0 && lucky && rollInt(rng, 1, 10000) <= 8000) gold *= 2
+  return { exp, sp, gold }
 }
 
 /** Battle_DivisionExpSP.cpp:143–230; Battle_NPCDropItem.cpp:495–528, solo and neutral events. */
@@ -155,7 +167,7 @@ export function rewardKills(
   kills: number,
   rng: Rng,
   now = Date.now(),
-  multipliers = { exp: 1, sp: 1, gold: 1, drop: 1 },
+  multipliers: RewardMultipliers = { exp: 1, sp: 1, gold: 1, drop: 1 },
   encounterDrops?: (monster: MonsterDef, rng: Rng) => ItemStack[],
 ) {
   const bonuses = rewardBonuses(hero, now)
@@ -168,7 +180,7 @@ export function rewardKills(
   for (let k = 0; k < kills; k++) {
     // Neither level penalties nor reward buffs can affect an encounter's item rolls.
     const fixedDrops = encounterDrops?.(monster, rng)
-    const base = rolledReward(monster, level, bonuses, rng)
+    const base = rolledReward(monster, level, bonuses, rng, multipliers.lucky)
     const reward = {
       exp: Math.trunc(base.exp * multipliers.exp),
       sp: Math.trunc(base.sp * multipliers.sp),
@@ -178,7 +190,8 @@ export function rewardKills(
     gold += reward.gold
     sp += reward.sp
     if (fixedDrops || levelRewardRates(level, monster.level).drops) {
-      for (const item of fixedDrops ?? monsterDrops(monster, 1, rng, multipliers.drop))
+      for (const item of fixedDrops ??
+        monsterDrops(monster, 1, rng, multipliers.drop, multipliers.lucky))
         items.set(item.itemId, (items.get(item.itemId) ?? 0) + item.count)
     }
     // Owner: every monster has a fixed 1% Token roll, independent of level and bonuses.

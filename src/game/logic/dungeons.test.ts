@@ -731,10 +731,9 @@ describe('saved dungeon commands', () => {
     await f.service.load()
     const potion = ITEMS[2138]!
     expect(potion).toBeTruthy()
-    await f.service.buyItem('d', potion.id, 1).catch(async () => {
-      await f.service.dev.addGold('d', 10000000)
-      await f.service.buyItem('d', potion.id, 1)
-    })
+    // Cash only since 2026-11-13 (owner): bought in the Cash shop instead of the Juno merchant
+    await f.service.dev.addCash(1000)
+    await f.service.buyCashOffer('d', 'adrenaline', 1)
     await f.service.startDungeon('d', 'belfist')
     const used = await f.service.drinkDungeonPotion('d', potion.id)
     expect(used.run!.player.effects.some((e) => e.itemId === potion.id)).toBe(true)

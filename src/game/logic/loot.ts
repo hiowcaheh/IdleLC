@@ -42,14 +42,17 @@ export function rollSourceDrops(
   kills: number,
   rng: Rng,
   multiplier = 1,
+  lucky = false,
 ): ItemStack[] {
   if (slots.length !== 20) throw new Error('A source drop table must preserve all 20 slots')
   const counts = new Map<number, number>()
   for (let kill = 0; kill < kills; kill++)
     for (let attempt = 0; attempt < 4; attempt++) {
       const drop = slots[rollInt(rng, 0, 19)]
+      // Lucky Spell Book (Battle_NPCDropItem.cpp:133): this roll's chance ×2 at 20%
+      const luck = lucky && rollInt(rng, 1, 10000) <= 2000 ? 2 : 1
       const roll = rollInt(rng, 1, 10000)
-      if (drop && roll <= Math.trunc(drop.chance * 10000 * multiplier))
+      if (drop && roll <= Math.trunc(drop.chance * 10000 * multiplier * luck))
         counts.set(drop.itemId, (counts.get(drop.itemId) ?? 0) + 1)
     }
   return [...counts]
@@ -62,6 +65,7 @@ export function monsterDrops(
   kills: number,
   rng: Rng,
   multiplier = 1,
+  lucky = false,
 ): ItemStack[] {
   const scale = (drops: MonsterDrop[]) =>
     multiplier === 1
@@ -69,7 +73,7 @@ export function monsterDrops(
       : drops.map((d) => ({ ...d, chance: Math.min(1, d.chance * multiplier) }))
   if (!monster.dropSlots) return rollDrops(scale(lootTable(monster)), kills, rng)
   return addToInventory(
-    rollSourceDrops(monster.dropSlots, kills, rng, multiplier),
+    rollSourceDrops(monster.dropSlots, kills, rng, multiplier, lucky),
     rollDrops(scale([...GENERAL_DROPS, ...accessoryDrops()]), kills, rng),
   )
 }

@@ -110,6 +110,15 @@ export const CASH_OFFERS: readonly CashOffer[] = [
   potion('chocolate-white', 1227, 20),
   potion('candle', 1575, 12),
   potion('red-pouch', 2631, 20),
+  // reward scrolls and pills (owner, 2026-11-13), run by the server's rules
+  // (combat.ts effectRewardMultipliers, rewards.ts): EXP / SP / drop / gold
+  potion('lucky-scroll', 972, 10, { tabs: ['hot', 'items'], tag: 'new' }),
+  potion('lucky-spell-book', 2141, 50, { tabs: ['hot', 'items'], tag: 'new' }),
+  potion('huge-lucky-scroll', 5080, 50, { tabs: ['items'] }),
+  potion('experience-scroll', 971, 10, { tabs: ['items'] }),
+  potion('effort-scroll', 973, 10, { tabs: ['items'] }),
+  potion('platinum-training-spell', 2140, 40, { tabs: ['items'] }),
+  potion('super-skill-pill', 2452, 50),
   // conveniences
   {
     id: 'golden-magnifier',
@@ -185,6 +194,17 @@ export const CASH_OFFERS: readonly CashOffer[] = [
     [2357, 10],
     [2356, 10],
   ]),
+  pack(
+    'fortune-package',
+    'Fortune Package',
+    150,
+    [
+      [2141, 2],
+      [972, 6],
+      [971, 6],
+    ],
+    { tabs: ['hot', 'packages'], tag: 'new' },
+  ),
   pack('sweets-package', 'Sweets Package', 190, [
     [2045, 10],
     [2631, 5],

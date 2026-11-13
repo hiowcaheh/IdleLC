@@ -135,12 +135,17 @@ export function tierWindow(tiers: readonly ShopTier[], level: number): ShopTier[
 const EVERYWHERE = [HEAVEN_STONE_ID]
 
 /**
- * Boost potions every IdleLC shop offers (owner's requests, 2026-11-05): 2138 Platinum Adrenaline
- * (only Juno's merchant in t_shopitem), 2845 Super Haste Potion and 6916 100 Cooldown Reduction
- * Potion (cash items in the database, own prices). Potion of Haste comes with the towns' goods
+ * Boost potions every IdleLC shop offers (owner's request, 2026-11-05): 6916 100 Cooldown Reduction
+ * Potion (a cash item in the database, own price). Potion of Haste comes with the towns' goods
  * (t_shopitem).
  */
-const BOOST_GOODS = [2138, 2845, 6916]
+const BOOST_GOODS = [6916]
+
+/**
+ * Sold for Cash only (owner, 2026-11-13): 2138 Platinum Adrenaline, also in Juno's t_shopitem, and
+ * 2845 Super Haste Potion are taken out of the gold shops.
+ */
+export const CASH_ONLY_GOODS: ReadonlySet<number> = new Set([2138, 2845])
 
 /** Only sets and seals with positive source weights can be obtained after appraisal. */
 export function shopRareInfo(itemId: number) {
@@ -220,7 +225,7 @@ export function shopOffer(
         ...BOOST_GOODS.filter((id) => ITEMS[id]),
         ...shopMagnifiers(),
       ]),
-    ],
+    ].filter((id) => !CASH_ONLY_GOODS.has(id)),
   }
 }
 

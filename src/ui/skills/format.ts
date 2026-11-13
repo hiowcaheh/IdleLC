@@ -147,6 +147,38 @@ export function statLine(effect: StatEffect): string {
   return `${STAT_LABELS[effect.stat]} ${statValue(effect.stat, effect.value, effect.percent)}`
 }
 
+type RewardPercents = { exp: number; sp: number; gold: number; drop: number }
+
+/**
+ * What a reward boost adds, as [label, value] rows: its own step (Iris, scrolls: drop ×2, EXP
+ * +50%), the summed percents (skill pills) and the Lucky Spell Book's chances.
+ */
+export function rewardParts(
+  rewards: RewardPercents | undefined,
+  per100: RewardPercents | undefined,
+  lucky: boolean | undefined,
+): [string, string][] {
+  const rows: [string, string][] = []
+  const labels = [
+    ['exp', 'EXP'],
+    ['sp', 'SP'],
+    ['gold', 'Gold'],
+    ['drop', 'Drop chance'],
+  ] as const
+  for (const [key, label] of labels) {
+    const step = rewards?.[key] ?? 0
+    const summed = per100?.[key] ?? 0
+    // a drop scroll reads as the client's "x2 Drop rate"
+    if (step) rows.push([label, key === 'drop' ? `×${1 + step / 100}` : `+${step}%`])
+    if (summed) rows.push([label, `+${summed}%`])
+  }
+  if (lucky) {
+    rows.push(['Drop chance', '×2 on 20% of rolls'])
+    rows.push(['Gold', '×2 on 80% of drops'])
+  }
+  return rows
+}
+
 /**
  * What an effect on a fighter does right now, row by row (["Attack", "+25"], ["HP per second", "+33"]);
  * `bad` marks what weakens the fighter (less defense, longer casting, poison, a stun).
@@ -164,14 +196,8 @@ export function activeEffectRows(
     rows.push({ label: 'HP per second', value: `+${effect.hpPerSecond}`, bad: false })
   if (effect.mpPerSecond)
     rows.push({ label: 'MP per second', value: `+${effect.mpPerSecond}`, bad: false })
-  if (effect.rewards)
-    for (const [key, label] of [
-      ['exp', 'EXP'],
-      ['sp', 'SP'],
-      ['gold', 'Gold'],
-      ['drop', 'Drop chance'],
-    ] as const)
-      if (effect.rewards[key]) rows.push({ label, value: `+${effect.rewards[key]}%`, bad: false })
+  for (const [label, value] of rewardParts(effect.rewards, effect.per100, effect.lucky))
+    rows.push({ label, value, bad: false })
   if (effect.steal === 'hp')
     rows.push({ label: 'HP steal', value: '5% of damage, 30% of hits', bad: false })
   if (effect.steal === 'mp')

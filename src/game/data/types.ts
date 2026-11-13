@@ -250,8 +250,14 @@ export interface PotionDef {
   steal?: 'hp' | 'mp'
   /** Boosts: Berserker Potion, 10% of hits on monsters deal double (hcAttackBerserker). */
   berserker?: boolean
-  /** Boosts: EXP / SP / gold / drop bonus in per cent (Blessed Iris, skill pills). */
+  /** Boosts: EXP / SP / gold / drop bonus in per cent, a step of its own (Iris, scrolls). */
   rewards?: { exp: number; sp: number; gold: number; drop: number }
+  /** Boosts: hcExpPlusPer100 / hcSPPlusPer100 style bonus, summed over the working boosts. */
+  rewardsPer100?: { exp: number; sp: number; gold: number; drop: number }
+  /** Boosts: Lucky Spell Book, each drop roll ×2 at 20% and the gold ×2 at 80%. */
+  lucky?: boolean
+  /** Boosts run by their item index: the magics CAssistList::CanApply compares. */
+  magics?: { magic: number; level: number }[]
 }
 
 /** An item option 1:1 from t_option. */

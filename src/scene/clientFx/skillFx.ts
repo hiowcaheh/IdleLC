@@ -287,6 +287,24 @@ export function castClientSkill(
   at(landAt, () => play(data, skill.after, targetTags))
 }
 
+/**
+ * A group the client starts by name on a character for a server message (SessionState.cpp
+ * PCStartEffectGroup): HP_STEAL / MP_STEAL when a steal potion takes life or mana from a hit.
+ */
+export function playClientGroup(name: string, on: FighterSource): void {
+  const data = clientFx()
+  if (!data?.groups[name]) return
+  play(data, name, (tag) => {
+    const fighter = on()
+    if (tag !== '__ROOT' || !fighter) return fighterTag(fighter, tag)
+    // the entity's own placement: at its feet, turned as it faces
+    const target = fighter.effectTarget()
+    target.object.getWorldPosition(point)
+    target.object.getWorldQuaternion(turn)
+    return { position: toVec(point), rotation: toQuat(turn) }
+  })
+}
+
 /** Ends everything (a new fight, a reload of the scene). */
 export function clearClientFx(): void {
   fxState.pending = []

@@ -1,12 +1,32 @@
 import { getItem } from '../../game/data/items.ts'
+import type { PotionDef } from '../../game/data/types.ts'
 import { effectiveStats } from '../../game/logic/combat.ts'
 import { GameError } from '../../game/logic/errors.ts'
 import { combatSession } from '../../game/session/combatSession.ts'
 import { dungeonSession } from '../../game/session/dungeonSession.ts'
 import { useGameStore } from '../../state/gameStore.ts'
 import { STAT_TOAST_MS, toast } from '../../state/toasts.ts'
-import { statChanges, withStatChanges } from '../statChanges.tsx'
-import { DRINK_PROBLEMS, potionLine } from './potionText.ts'
+import { statChanges, withStatChanges, type StatChange } from '../statChanges.tsx'
+import { DRINK_PROBLEMS, potionLine, potionRows, specialParts } from './potionText.ts'
+
+const asChange = ([label, text]: [string, string]): StatChange => ({
+  label,
+  text,
+  good: !text.startsWith('−'),
+})
+
+/**
+ * What a boost changed, always with something to read (owner, 2026-11-13): the stats it moved,
+ * then what never shows among the stats (steal, Berserker, EXP / SP / gold / drop); when no stat
+ * moved (a reward scroll, or the same boost again) its own effect rows.
+ */
+function boostChanges(potion: PotionDef, moved: StatChange[]): StatChange[] {
+  const special = specialParts(potion).map(asChange)
+  if (moved.length) return [...moved, ...special]
+  return potionRows(potion)
+    .filter(([label]) => label !== 'Lasts')
+    .map(asChange)
+}
 
 /** The hero as it fights now: in a dungeon run, else on the field. */
 const heroNow = () => effectiveStats((dungeonSession.combat() ?? combatSession.state).player)
@@ -27,7 +47,7 @@ export async function drinkWithToast(itemId: number): Promise<boolean> {
     }
     const changes =
       item.potion?.kind === 'boost'
-        ? statChanges(before, heroNow())
+        ? boostChanges(item.potion, statChanges(before, heroNow()))
         : item.potion
           ? [{ label: '', text: potionLine(item.potion), good: true }]
           : []

@@ -9,7 +9,9 @@ import { stacksValue } from '../game/logic/shop.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import { duration, fmt } from './expedition/format.ts'
 import { formatSp } from './skills/format.ts'
+import { ItemIcon } from './items/ItemIcon.tsx'
 import { ItemList } from './items/ItemList.tsx'
+import { potionLine } from './items/potionText.ts'
 
 /** "While you were away…" — what the character brought back from the expedition. */
 export function AfkSummary() {
@@ -68,16 +70,6 @@ export function AfkSummary() {
             <dt>Skill points</dt>
             <dd>+{formatSp(result.sp)} SP</dd>
           </div>
-          {result.boosts?.length ? (
-            <div>
-              <dt>Boosts</dt>
-              <dd>
-                {result.boosts
-                  .map((b) => `${getItem(b.itemId).name} ${duration(b.seconds)}`)
-                  .join(' · ')}
-              </dd>
-            </div>
-          ) : null}
           {(result.lost.exp > 0 || result.lost.sp > 0) && (
             <div className="afk__stat--lost">
               <dt>Lost on death</dt>
@@ -115,6 +107,30 @@ export function AfkSummary() {
             <ItemList items={potions} />
           </>
         )}
+
+        {result.boosts?.length ? (
+          <>
+            {/* the boosts that worked on the hunt, like the potions (owner, 2026-11-13) */}
+            <h3 className="afk__heading">Boosts used</h3>
+            <ul className="item-list">
+              {result.boosts.map((boost) => {
+                const item = getItem(boost.itemId)
+                return (
+                  <li key={boost.itemId} className="item-row item-row--potion">
+                    <ItemIcon item={item} />
+                    <span className="item-row__body">
+                      <span className="item-row__name">{item.name}</span>
+                      <span className="item-row__meta">
+                        {item.potion ? potionLine(item.potion) : 'Boost'}
+                      </span>
+                    </span>
+                    <span className="item-row__count">{duration(boost.seconds)}</span>
+                  </li>
+                )
+              })}
+            </ul>
+          </>
+        ) : null}
 
         <button type="button" className="button button--primary afk__ok" onClick={dismiss}>
           Continue

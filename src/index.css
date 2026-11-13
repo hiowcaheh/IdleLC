@@ -1311,6 +1311,68 @@ a.button {
   color: var(--parchment-dim);
 }
 
+/* wearing an accessory: the three slots, what each holds and the change if the piece goes there */
+.accessory-picker__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.accessory-picker__name {
+  font-weight: 700;
+  color: var(--gilt-bright);
+}
+.accessory-picker__slots {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.accessory-picker__slot {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(150, 120, 80, 0.4);
+}
+.accessory-picker__slot.is-free {
+  box-shadow: inset 0 0 0 1px rgba(143, 227, 106, 0.45);
+}
+.accessory-picker__now {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 30px;
+}
+.accessory-picker__label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gilt);
+}
+.accessory-picker__worn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 13px;
+}
+.accessory-picker__worn-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.accessory-picker__empty,
+.accessory-picker__none {
+  margin: 0;
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+
 .button--gold {
   border-color: var(--gilt);
   color: var(--gilt-bright);

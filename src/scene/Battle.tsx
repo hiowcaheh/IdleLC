@@ -15,7 +15,7 @@ import { useGameStore } from '../state/gameStore.ts'
 import { Character, type CharacterHandle } from './Character.tsx'
 import { DamageNumbers } from './DamageNumbers.tsx'
 import { ClientFxLayer } from './clientFx/ClientFx.tsx'
-import { castClientSkill } from './clientFx/skillFx.ts'
+import { castClientSkill, playClientGroup } from './clientFx/skillFx.ts'
 import { HpBar3D } from './HpBar3D.tsx'
 import { LevelUpEffect } from './LevelUpEffect.tsx'
 import { ModelBoundary } from './ModelBoundary.tsx'
@@ -247,6 +247,13 @@ export function Battle() {
           break
         case 'attack':
           ;(e.source === 'player' ? player : monster).current?.attack()
+          break
+        case 'steal':
+          // the client's HP_STEAL / MP_STEAL on the hero who drew life or mana from the hit
+          playClientGroup(
+            e.kind === 'hp' ? 'HP_STEAL' : 'MP_STEAL',
+            () => (e.target === 'player' ? player : monster).current,
+          )
           break
         case 'cast':
           textAt(e.source, e.name, 'skill')

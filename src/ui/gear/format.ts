@@ -205,11 +205,14 @@ export function optionLines(
 export function wearChanges(
   character: CharacterData,
   piece: Pick<GearPiece, 'itemId' | 'plus' | 'options' | 'rare'>,
+  /** An accessory's chosen slot; else the first free one, else the first. */
+  into?: EquipSlot,
 ): StatChange[] {
   const gear = getItem(piece.itemId).gear
   if (!gear) return []
   const slots = slotsFor(gear)
-  const slot = slots.find((s) => !character.equipment[s]) ?? slots[0]!
+  const slot =
+    into && slots.includes(into) ? into : (slots.find((s) => !character.equipment[s]) ?? slots[0]!)
   const before = heroStats(character)
   const equipment = { ...character.equipment, [slot]: { uid: 'preview', ...piece } }
   // Equipping dual swords also removes the shield, including its options.

@@ -255,7 +255,7 @@ export function clientFx(): ClientFxData | null {
 
 /** Fetches the effect data once; later calls share the same request. */
 export function loadClientFx(): Promise<ClientFxData | null> {
-  loading ??= fetch(`${import.meta.env.BASE_URL}fx/client/effects.json?v=5`)
+  loading ??= fetch(`${import.meta.env.BASE_URL}fx/client/effects.json?v=6`)
     .then((r) => (r.ok ? (r.json() as Promise<ClientFxData>) : null))
     .then((data) => (loaded = data))
     .catch(() => null)

@@ -3,7 +3,7 @@ import { useState, type ReactNode } from 'react'
 import { getItem } from '../../game/data/items.ts'
 import { getMonster } from '../../game/data/monsters.ts'
 import { ZONES } from '../../game/data/zones.ts'
-import { AFK_MAX_SECONDS } from '../../game/logic/afk.ts'
+import { AFK_MAX_SECONDS, type HourlyEstimate } from '../../game/logic/afk.ts'
 import type { CharacterData } from '../../game/logic/character.ts'
 import { POTION_GROUPS, countOwned, type PotionGroup } from '../../game/logic/potions.ts'
 import { useGameStore } from '../../state/gameStore.ts'
@@ -14,6 +14,17 @@ import { duration, fmt } from './format.ts'
 import { useHourlyEstimate } from './useHourlyEstimate.ts'
 
 const SLOT_NAMES: Record<PotionGroup, string> = { hp: 'HP slot', mp: 'MP slot' }
+
+/** Before the first measurement (the window draws at once, the numbers follow). */
+const EMPTY: HourlyEstimate = {
+  killsPerHour: 0,
+  deathsPerHour: 0,
+  potionsPerHour: {},
+  expPerHour: 0,
+  goldPerHour: 0,
+  spPerHour: 0,
+  boosts: [],
+}
 
 /** A potion the hero takes along: where it sits, how many an hour go and how long the bag lasts. */
 interface Supply {
@@ -81,8 +92,11 @@ export function ExpeditionDialog({
   const running = useGameStore((s) => s.hud.phase === 'traveling')
   const { zoneId, monsterId } = character.location
   const monster = getMonster(monsterId)
-  const estimate = useHourlyEstimate(character, monsterId)
+  const measured = useHourlyEstimate(character, monsterId)
+  const estimate = measured ?? EMPTY
   const potions = supplies(character, estimate.potionsPerHour)
+  /** A number of the estimate, or a dash while it is measured (just after the window opens). */
+  const shown = (value: ReactNode) => (measured ? value : '…')
   const [busy, setBusy] = useState(false)
 
   const onSend = async () => {
@@ -97,11 +111,15 @@ export function ExpeditionDialog({
   }
 
   const rewards: [string, ReactNode, string?][] = [
-    ['Kills', fmt(estimate.killsPerHour)],
-    ['Deaths', fmt(estimate.deathsPerHour), estimate.deathsPerHour > 0 ? 'is-bad' : undefined],
-    ['EXP', fmt(estimate.expPerHour), 'is-exp'],
-    ['SP', formatSp(estimate.spPerHour)],
-    ['Gold', <Gold amount={estimate.goldPerHour} />, 'is-gold'],
+    ['Kills', shown(fmt(estimate.killsPerHour))],
+    [
+      'Deaths',
+      shown(fmt(estimate.deathsPerHour)),
+      estimate.deathsPerHour > 0 ? 'is-bad' : undefined,
+    ],
+    ['EXP', shown(fmt(estimate.expPerHour)), 'is-exp'],
+    ['SP', shown(formatSp(estimate.spPerHour))],
+    ['Gold', shown(<Gold amount={estimate.goldPerHour} />), 'is-gold'],
   ]
 
   return (
@@ -193,7 +211,7 @@ export function ExpeditionDialog({
         </ul>
       )}
 
-      {estimate.killsPerHour === 0 && (
+      {measured && estimate.killsPerHour === 0 && (
         <p className="expedition-dialog__warning">
           {monster.name} is too strong. Your hero would not win a single fight.
         </p>

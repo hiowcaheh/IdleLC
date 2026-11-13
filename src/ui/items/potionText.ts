@@ -5,7 +5,7 @@ import {
   boostEffect,
   type DrinkProblem,
 } from '../../game/logic/combat.ts'
-import { statLine, statParts } from '../skills/format.ts'
+import { rewardParts, statLine, statParts } from '../skills/format.ts'
 
 /** Shared by the inventory and the dungeon's potion bag. */
 export const DRINK_PROBLEMS: Record<DrinkProblem | 'away', string> = {
@@ -25,14 +25,16 @@ const time = (seconds: number) =>
       ? `${Math.floor(seconds / 60)} min ${seconds % 60} s`
       : `${seconds} s`
 
-/** What a boost does beyond stats (steal, Berserker, EXP / SP), as [label, value] rows. */
-function specialParts(potion: PotionDef): [string, string][] {
+/**
+ * What a boost does beyond stats (steal, Berserker, EXP / SP / gold / drop), as [label, value]
+ * rows: none of it shows among the hero's stats.
+ */
+export function specialParts(potion: PotionDef): [string, string][] {
   const rows: [string, string][] = []
   if (potion.steal === 'hp') rows.push(['HP steal', '5% of damage, 30% of hits'])
   if (potion.steal === 'mp') rows.push(['MP steal', '10% of max MP, 30% of hits'])
   if (potion.berserker) rows.push(['Double damage', '10% of hits on monsters'])
-  if (potion.rewards?.exp) rows.push(['EXP', `+${potion.rewards.exp}%`])
-  if (potion.rewards?.sp) rows.push(['SP', `+${potion.rewards.sp}%`])
+  rows.push(...rewardParts(potion.rewards, potion.rewardsPer100, potion.lucky))
   return rows
 }
 
@@ -41,7 +43,7 @@ function boostStats(potion: PotionDef): string {
   return [
     ...boostEffect(0, '', potion, potion.duration).stats.map(statLine),
     ...specialParts(potion).map(([label, value]) =>
-      value.startsWith('+') ? `${label} ${value}` : label,
+      /^[+×]/.test(value) ? `${label} ${value}` : label,
     ),
   ].join(', ')
 }

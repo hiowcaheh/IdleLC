@@ -23,12 +23,12 @@ import { wornTitle } from '../game/logic/titles.ts'
 import { dungeonSession } from '../game/session/dungeonSession.ts'
 import { useGameStore } from '../state/gameStore.ts'
 import type { ViewEvent } from '../state/combatEvents.ts'
-import { useFloatingTexts } from '../state/floatingTexts.ts'
+import { useFloatingTexts, type FloatingKind } from '../state/floatingTexts.ts'
 import { Character, type CharacterHandle } from './Character.tsx'
 import { DamageNumbers } from './DamageNumbers.tsx'
 import { CrystalGlow, DungeonBoxes } from './DungeonBoxes.tsx'
 import { ClientFxLayer } from './clientFx/ClientFx.tsx'
-import { castClientSkill } from './clientFx/skillFx.ts'
+import { castClientSkill, playClientGroup } from './clientFx/skillFx.ts'
 import { activeArtifactVisual } from './artifactEffects.ts'
 import { HpBar3D } from './HpBar3D.tsx'
 import { placeLabel, type SceneLabelId } from './labelAnchors.ts'
@@ -36,6 +36,10 @@ import { SkillEffects } from './SkillEffects.tsx'
 import { armorUpgradePlus } from './upgradeEffects.ts'
 import { view } from './viewState.ts'
 
+/** Floating texts over one fighter within this many ms stack in rows (as Battle.tsx). */
+const TEXT_STACK_MS = 600
+const TEXT_ROWS = 4
+const TEXT_ROW_HEIGHT = 0.3
 const cameraTarget = new Vector3()
 const cameraAt = new Vector3()
 const crystalMatrix = new Object3D()
@@ -109,62 +113,104 @@ export function DungeonScene({ id }: { id: DungeonId }) {
   const cameraPlaced = useRef(false)
   const heroMoving = useRef(false)
 
-  useEffect(
-    () =>
-      dungeonSession.subscribe((events) => {
-        for (const { enemyUid, event: e } of events) {
-          const monster = enemyUid === null ? undefined : enemyHandles.current.get(enemyUid)
-          // a hero who runs with the stick keeps running: it shoots without its swing clip
-          // (owner's report: the Healer floated across the floor in her bow pose)
-          const runningHero =
-            e.type !== 'death' && 'source' in e && e.source === 'player' && heroMoving.current
-          if (e.type === 'attack') {
-            if (!runningHero) (e.source === 'player' ? hero.current : monster)?.attack()
-          } else if (e.type === 'cast') {
-            // the client's effect groups of the skill, between the caster and its target
-            const targetUid = dungeonSession.state?.targetUid
-            const enemy = () =>
-              enemyUid !== null
-                ? enemyHandles.current.get(enemyUid)
-                : targetUid !== null && targetUid !== undefined
-                  ? enemyHandles.current.get(targetUid)
-                  : undefined
-            castClientSkill(
-              e.skillId,
-              () => (e.source === 'player' ? hero.current : enemy()),
-              () => (e.source === 'player' ? enemy() : hero.current),
-              { windUp: e.windUp, landsIn: e.castTime },
+  useEffect(() => {
+    // the field's floating texts over the hero and each monster (Battle.tsx textAt, owner's
+    // request 2026-11-13): texts over one fighter close together stack in rows
+    const recent = new Map<number | 'player', number[]>()
+    const textAt = (who: number | 'player', text: string, kind: FloatingKind) => {
+      if (!useGameStore.getState().save.settings.showDamageNumbers) return
+      const run = dungeonSession.state
+      const enemy = who === 'player' ? undefined : run?.enemies.find((x) => x.uid === who)
+      const at = who === 'player' ? run?.position : enemy
+      if (!at) return
+      const handle = who === 'player' ? hero.current : enemyHandles.current.get(who)
+      const height = handle?.height() ?? 1.8
+      const now = performance.now()
+      const times = [...(recent.get(who) ?? []).filter((t) => now - t < TEXT_STACK_MS), now]
+      recent.set(who, times)
+      const row = (times.length - 1) % TEXT_ROWS
+      const lift =
+        row * TEXT_ROW_HEIGHT + (kind === 'skill' || kind === 'effect' ? TEXT_ROW_HEIGHT : 0)
+      const jitter = (Math.random() - 0.5) * 0.3
+      useFloatingTexts.getState().add(text, kind, [at.x + jitter, height + 0.45 + lift, at.z])
+    }
+    return dungeonSession.subscribe((events) => {
+      for (const { enemyUid, event: e } of events) {
+        const monster = enemyUid === null ? undefined : enemyHandles.current.get(enemyUid)
+        // the monster of the event, or the hero
+        const side = (s: 'player' | 'monster') =>
+          s === 'player' || enemyUid === null ? ('player' as const) : enemyUid
+        if (e.type === 'hit') {
+          if (e.poison) textAt(side(e.target), String(e.amount), 'poison')
+          else
+            textAt(
+              side(e.target),
+              e.deadly ? `${e.amount}!!` : e.crit ? `${e.amount}!` : String(e.amount),
+              e.target === 'player' ? 'taken' : e.crit || e.deadly ? 'crit' : 'dealt',
             )
-            const actor = e.source === 'player' ? (runningHero ? null : hero.current) : monster
-            if (
-              actor &&
-              !actor.skill(e.skillId, {
-                windUp: e.windUp,
-                landsIn: e.castTime,
-                releaseTime: e.releaseTime,
-              })
-            )
-              actor.attack()
-          } else if (e.type === 'hit') (e.target === 'player' ? hero.current : monster)?.hit(e.crit)
-          else if (e.type === 'death') (e.who === 'player' ? hero.current : monster)?.die()
-          else if (e.type === 'summonAttack') summonHandles.current.get(e.element)?.attack()
-          else if (e.type === 'summonHit') summonHandles.current.get(e.element)?.hit(e.crit)
-          else if (e.type === 'potion') {
-            // the potion's name over the hero, so a drink is seen in the crowd: always in a run,
-            // since an automatic drink is otherwise easy to miss (owner's report, 2026-11-06)
-            const height = hero.current?.height() ?? 2
-            useFloatingTexts
-              .getState()
-              .add(e.name, e.kind === 'hp' || e.kind === 'hpRegen' ? 'heal' : 'mana', [
-                view.player.x,
-                height + 0.6,
-                view.player.z,
-              ])
-          }
+        } else if (e.type === 'heal' && e.amount > 0)
+          textAt(side(e.target), `+${e.amount}`, e.mana ? 'mana' : 'heal')
+        else if (e.type === 'miss') textAt(side(e.target), 'Miss', 'miss')
+        else if (e.type === 'cast' && e.source === 'player') textAt('player', e.name, 'skill')
+        else if (e.type === 'effect') {
+          if (e.kind === 'stun') textAt(side(e.target), 'Stunned', 'effect')
+          else if (e.kind === 'poison') textAt(side(e.target), 'Poisoned', 'effect')
+          else if (e.kind === 'debuff') textAt(side(e.target), e.name, 'effect')
         }
-      }),
-    [],
-  )
+        // a hero who runs with the stick keeps running: it shoots without its swing clip
+        // (owner's report: the Healer floated across the floor in her bow pose)
+        const runningHero =
+          e.type !== 'death' && 'source' in e && e.source === 'player' && heroMoving.current
+        if (e.type === 'attack') {
+          if (!runningHero) (e.source === 'player' ? hero.current : monster)?.attack()
+        } else if (e.type === 'cast') {
+          // the client's effect groups of the skill, between the caster and its target
+          const targetUid = dungeonSession.state?.targetUid
+          const enemy = () =>
+            enemyUid !== null
+              ? enemyHandles.current.get(enemyUid)
+              : targetUid !== null && targetUid !== undefined
+                ? enemyHandles.current.get(targetUid)
+                : undefined
+          castClientSkill(
+            e.skillId,
+            () => (e.source === 'player' ? hero.current : enemy()),
+            () => (e.source === 'player' ? enemy() : hero.current),
+            { windUp: e.windUp, landsIn: e.castTime },
+          )
+          const actor = e.source === 'player' ? (runningHero ? null : hero.current) : monster
+          if (
+            actor &&
+            !actor.skill(e.skillId, {
+              windUp: e.windUp,
+              landsIn: e.castTime,
+              releaseTime: e.releaseTime,
+            })
+          )
+            actor.attack()
+        } else if (e.type === 'steal')
+          playClientGroup(e.kind === 'hp' ? 'HP_STEAL' : 'MP_STEAL', () =>
+            e.target === 'player' ? hero.current : monster,
+          )
+        else if (e.type === 'hit') (e.target === 'player' ? hero.current : monster)?.hit(e.crit)
+        else if (e.type === 'death') (e.who === 'player' ? hero.current : monster)?.die()
+        else if (e.type === 'summonAttack') summonHandles.current.get(e.element)?.attack()
+        else if (e.type === 'summonHit') summonHandles.current.get(e.element)?.hit(e.crit)
+        else if (e.type === 'potion') {
+          // the potion's name over the hero, so a drink is seen in the crowd: always in a run,
+          // since an automatic drink is otherwise easy to miss (owner's report, 2026-11-06)
+          const height = hero.current?.height() ?? 2
+          useFloatingTexts
+            .getState()
+            .add(e.name, e.kind === 'hp' || e.kind === 'hpRegen' ? 'heal' : 'mana', [
+              view.player.x,
+              height + 0.6,
+              view.player.z,
+            ])
+        }
+      }
+    })
+  }, [])
   // texts of the field (or an earlier run) do not float over the arena
   useEffect(() => {
     useFloatingTexts.getState().clear()
