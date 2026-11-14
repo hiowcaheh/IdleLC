@@ -73,6 +73,9 @@ export function RewardsCalendar({ onClose }: { onClose(): void }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const dates = calendarDates(track, now)
+  // the month as whole weeks from Monday, the empty fields drawn like the client's 6×7 grid
+  const lead = (new Date(dates[0]!).getUTCDay() + 6) % 7
+  const weeks = Math.ceil((lead + dates.length) / 7)
   const selectedDay = preview ? calendarDay(preview.date) : day
   const isToday = selectedDay === day
   const done = progress.claimedDays.includes(selectedDay)
@@ -173,15 +176,13 @@ export function RewardsCalendar({ onClose }: { onClose(): void }) {
             aria-label={track === 'weekly' ? 'This week' : 'This month'}
             style={
               track === 'monthly'
-                ? {
-                    gridTemplateRows: `repeat(${Math.ceil((((new Date(dates[0]!).getUTCDay() + 6) % 7) + dates.length) / 7)}, minmax(0, 1fr))`,
-                  }
+                ? { gridTemplateRows: `repeat(${weeks}, minmax(0, 1fr))` }
                 : undefined
             }
           >
             {track === 'monthly' &&
-              Array.from({ length: (new Date(dates[0]!).getUTCDay() + 6) % 7 }, (_, i) => (
-                <span className="calendar-empty" key={`empty-${i}`} />
+              Array.from({ length: lead }, (_, i) => (
+                <span className="calendar-empty" key={`lead-${i}`} />
               ))}
             {dates.map((time) => {
               const key = calendarDay(time)
@@ -189,37 +190,47 @@ export function RewardsCalendar({ onClose }: { onClose(): void }) {
               const item = getItem(prize.itemId)
               const taken = progress.claimedDays.includes(key)
               const past = key < day && !taken
+              const today = key === day
               const sunday = new Date(time).getUTCDay() === 0
               return (
                 <button
                   type="button"
                   key={key}
-                  className={`calendar-day${sunday ? ' calendar-day--sunday' : ''}${key === day ? ' is-today' : ''}${taken ? ' is-claimed' : ''}${past ? ' is-missed' : ''}`}
-                  aria-label={`${displayDate(time, { month: 'long', day: 'numeric' })}: ${item.name} x${prize.count}, ${taken ? 'claimed' : past ? 'missed' : key === day ? 'today' : 'upcoming'}`}
+                  className={`calendar-day${sunday ? ' calendar-day--sunday' : ''}${today ? ' is-today' : ''}${taken ? ' is-claimed' : ''}${past ? ' is-missed' : ''}`}
+                  aria-label={`${displayDate(time, { month: 'long', day: 'numeric' })}: ${item.name} x${prize.count}, ${taken ? 'claimed' : past ? 'missed' : today ? 'today' : 'upcoming'}`}
                   aria-haspopup="dialog"
                   onClick={() => openReward(time)}
                 >
                   <span className="calendar-day__date">
-                    {track === 'weekly'
-                      ? displayDate(time, { weekday: 'short', day: 'numeric' })
-                      : new Date(time).getUTCDate()}
+                    {track === 'weekly' && <small>{displayDate(time, { weekday: 'short' })}</small>}
+                    <span className="calendar-day__number">
+                      {new Date(time).getUTCDate()}
+                      {/* calendar.xml img_today: the red pen circle round today's number */}
+                      {today && <i className="calendar-day__today" aria-hidden="true" />}
+                    </span>
                   </span>
-                  <span className="calendar-day__icon">
+                  {/* calendar.xml img_plus: the client's mark of a day with an event */}
+                  {sunday && <i className="calendar-day__plus" aria-hidden="true" />}
+                  <span className="calendar-day__slot">
                     <ItemIcon item={item} fluid />
                     <strong className="calendar-day__count">×{prize.count}</strong>
+                    {taken && (
+                      <span className="calendar-day__check" aria-hidden="true">
+                        ✓
+                      </span>
+                    )}
                   </span>
                   {track === 'weekly' && <span className="calendar-day__name">{item.name}</span>}
                   {track === 'weekly' && sunday && (
                     <span className="calendar-day__finale">Weekly grand reward</span>
                   )}
-                  {taken && (
-                    <span className="calendar-day__check" aria-hidden="true">
-                      ✓
-                    </span>
-                  )}
                 </button>
               )
             })}
+            {track === 'monthly' &&
+              Array.from({ length: weeks * 7 - lead - dates.length }, (_, i) => (
+                <span className="calendar-empty" key={`tail-${i}`} />
+              ))}
           </div>
         </div>
         <div className="calendar-footer">

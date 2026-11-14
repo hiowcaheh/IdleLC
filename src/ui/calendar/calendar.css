@@ -90,14 +90,16 @@
 .calendar-weekdays span {
   display: grid;
   place-items: center;
-  color: #d5cdb7;
+  color: #f2f2f2;
   text-align: center;
   font-size: 10px;
   line-height: 1;
+  text-shadow: 0 1px 1px #000;
   background: url('/ui/lc/calendar-weekday.webp') center / 100% 100% no-repeat;
 }
+/* calendar.xml week_0: Sunday's name in red */
 .calendar-weekdays span:last-child {
-  color: #f5a48a;
+  color: #ff6a55;
 }
 .calendar-grid {
   flex: 1;
@@ -107,19 +109,26 @@
   grid-template-rows: minmax(0, 1fr);
   gap: 4px;
 }
+/* the client's empty fields of the 6×7 month grid */
+.calendar-empty {
+  background: url('/ui/lc/calendar-cell.webp') center / 100% 100% no-repeat;
+  opacity: 0.35;
+}
+
+/* a day: the client's date field (img_date_back), its number top left (text_day_number) */
 .calendar-day {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
+  display: grid;
+  place-items: center;
   min-width: 0;
   min-height: 0;
-  padding: 3px;
-  border: 1px solid transparent;
+  padding: 0;
+  border: 0;
   border-radius: 0;
+  container-type: size;
   cursor: pointer;
-  color: #c8c5b8;
-  background: #25292d url('/ui/lc/calendar-cell.webp') center / 100% 100% no-repeat;
+  color: #f2f2f2;
+  background: url('/ui/lc/calendar-cell.webp') center / 100% 100% no-repeat;
   font: inherit;
   text-align: center;
 }
@@ -130,145 +139,197 @@
   outline: 2px solid #e8ce83;
   outline-offset: -2px;
 }
-.calendar-day.is-today {
-  box-shadow: inset 0 0 0 1px #cdb477;
-  color: #ffe6a4;
-  background-image: url('/ui/lc/calendar-selected.webp');
-}
-.calendar-day.is-missed {
-  opacity: 0.48;
-}
-.calendar-day.is-claimed {
-  color: #b8e3a6;
+/* today: the client's selected field, a yellow glow of one width at any size */
+.calendar-day.is-today::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 7px solid transparent;
+  border-image: url('/ui/lc/calendar-selected.webp?v=1') 22 / 7px stretch;
+  pointer-events: none;
 }
 .calendar-day__date {
   position: absolute;
-  top: 4px;
-  left: 5px;
   z-index: 1;
-  font-size: 11px;
+  top: 4px;
+  left: 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1;
   text-shadow: 0 1px 2px #000;
 }
-.calendar-day__icon {
-  display: block;
-  position: relative;
-  width: min(34px, 70%);
-  aspect-ratio: 1;
+.calendar-day__date small {
+  color: #cfc7b0;
+  font-size: 10px;
+  font-weight: 400;
 }
-.calendar-day__icon > .item-icon {
-  width: 100%;
-  height: 100%;
+.calendar-day--sunday .calendar-day__date {
+  color: #ff7a63;
+}
+.calendar-day__number {
+  position: relative;
+}
+/* calendar.xml img_today, 34×51 over a 10 px number: a red pen circle round it, its tail below */
+.calendar-day__today {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26px;
+  height: 39px;
+  transform: translate(-46%, -30%);
+  background: url('/ui/lc/calendar-today.webp?v=5bbd4eac') center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+.calendar-day__plus {
+  position: absolute;
+  z-index: 1;
+  top: 4px;
+  right: 5px;
+  width: 13px;
+  height: 13px;
+  background: url('/ui/lc/calendar-plus.webp?v=8501235b') center / 100% 100% no-repeat;
+}
+/* the reward in an inventory slot, its amount on the corner */
+.calendar-day__slot {
+  position: relative;
+  display: block;
+  width: min(42px, 60cqh, 64cqw);
+  aspect-ratio: 1;
+  margin-top: min(9px, 12cqh);
+  background: url('/ui/lc/slot.webp') center / 100% 100% no-repeat;
+}
+/* inset in % of the slot itself (padding % would follow the day's width) */
+.calendar-day__slot > .item-icon {
+  position: absolute;
+  inset: 9%;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
 }
 .calendar-day__count {
   position: absolute;
   z-index: 1;
-  bottom: -2px;
-  right: -3px;
-  padding: 1px 2px;
-  background: #17191cdd;
-  color: #fff0b8;
+  right: -4px;
+  bottom: -3px;
+  color: #ffeec0;
   font-size: 11px;
   line-height: 1;
-  text-shadow: 0 1px 2px #000;
+  text-shadow:
+    0 0 2px #000,
+    0 1px 2px #000,
+    1px 0 1px #000,
+    -1px 0 1px #000;
+}
+.calendar-day.is-claimed .calendar-day__slot > .item-icon {
+  filter: brightness(0.55);
 }
 .calendar-day__check {
   position: absolute;
-  z-index: 1;
-  top: 2px;
-  right: 3px;
-  color: #b8e3a6;
-  font-size: 12px;
-  text-shadow: 0 1px 2px #000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #9fe27f;
+  font-size: min(22px, 60cqh);
+  font-weight: 700;
+  line-height: 1;
+  text-shadow:
+    0 0 3px #000,
+    0 1px 2px #000;
+}
+.calendar-day.is-missed .calendar-day__slot {
+  filter: grayscale(1) brightness(0.55);
+}
+.calendar-day.is-missed .calendar-day__date,
+.calendar-day.is-missed .calendar-day__name {
+  color: #8a8578;
 }
 .calendar-day__name {
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  bottom: 7px;
+  max-width: calc(100% - 8px);
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
+  color: #e6dfce;
   font-size: 11px;
-  line-height: 1.25;
+  line-height: 1.2;
+  text-shadow: 0 1px 1px #000;
 }
+
+/* Weekly: Monday to Saturday in two rows of three, Sunday's grand reward across the third */
 .calendar-grid--weekly {
-  flex: 1;
-  width: 100%;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-rows: repeat(3, minmax(0, 1fr));
 }
+.calendar-grid--weekly .calendar-day {
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-content: center;
+  gap: 4px;
+  padding: 18px 4px 6px;
+}
 .calendar-grid--weekly .calendar-day__date {
-  left: 0;
-  right: 0;
-  top: 9px;
+  top: 6px;
+  left: 8px;
+  font-size: 13px;
 }
-.calendar-grid--weekly .calendar-day__icon {
-  width: min(44px, 65%);
-  margin-top: -8px;
+.calendar-grid--weekly .calendar-day__date small {
+  font-size: 11px;
 }
-.calendar-day.calendar-day--sunday {
-  color: #ffe2a4;
-  border-color: #b99347;
-  background-image:
-    linear-gradient(135deg, #b8861929, #f4d67612 45%, #4f300b42),
-    url('/ui/lc/calendar-selected.webp');
-  box-shadow: inset 0 0 12px #d3a3482b;
+.calendar-grid--weekly .calendar-day__slot {
+  width: min(60px, 50cqh, 46cqw);
+  margin: 0;
+  align-self: end;
+}
+.calendar-grid--weekly .calendar-day__count {
+  font-size: 12px;
 }
 .calendar-grid--weekly .calendar-day--sunday {
   grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) auto;
-  grid-template-rows: 1fr 1fr;
-  gap: 0 12px;
-  padding: 10px 18px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: none;
+  justify-items: start;
+  gap: 0 14px;
+  padding: 8px 18px;
   text-align: left;
+  /* the date field's slate, not stretched across the row; a thin gold edge for the grand reward */
+  background:
+    radial-gradient(ellipse at 20% 50%, #d3a3482e, transparent 60%),
+    linear-gradient(180deg, #2b2e33, #1b1d21);
+  box-shadow:
+    inset 0 0 0 1px #b99347aa,
+    inset 0 0 14px #00000080;
 }
-.calendar-grid--weekly .calendar-day--sunday .calendar-day__date {
-  position: static;
-  grid-column: 2;
-  align-self: end;
-  font-size: 13px;
-  line-height: 1.4;
-}
-.calendar-grid--weekly .calendar-day--sunday .calendar-day__icon {
-  grid-column: 1;
-  grid-row: 1 / 3;
-  width: 48px;
-  margin: 0;
+.calendar-grid--weekly .calendar-day--sunday .calendar-day__slot {
+  grid-row: 1;
+  width: min(56px, 60cqh);
+  align-self: center;
 }
 .calendar-grid--weekly .calendar-day--sunday .calendar-day__name {
-  position: static;
-  grid-column: 2;
-  grid-row: 2;
-  align-self: start;
   display: block;
+  max-width: none;
   color: #ffe4a2;
   font: 700 17px/1.3 var(--font-display);
 }
+.calendar-grid--weekly .calendar-day--sunday .calendar-day__date {
+  top: 6px;
+  left: 8px;
+}
 .calendar-day__finale {
-  grid-column: 3;
-  grid-row: 1 / 3;
-  align-self: center;
-  max-width: 90px;
   color: #d6b975;
-  font: 700 13px/1.3 var(--font-display);
+  font: 700 13px/1.25 var(--font-display);
   text-align: right;
+  max-width: 96px;
+  text-shadow: 0 1px 2px #000;
 }
 @media (max-width: 599px), (max-height: 520px) {
   .calendar-grid--weekly .calendar-day--sunday {
-    padding: 5px 10px;
-    grid-template-columns: 38px minmax(0, 1fr) auto;
-    gap: 0 7px;
-  }
-  .calendar-grid--weekly .calendar-day--sunday .calendar-day__icon {
-    width: 34px;
-  }
-  .calendar-grid--weekly .calendar-day--sunday .calendar-day__date {
-    font-size: 11px;
+    padding: 6px 10px;
+    gap: 0 9px;
   }
   .calendar-grid--weekly .calendar-day--sunday .calendar-day__name {
     font-size: 14px;
@@ -390,30 +451,28 @@
   .calendar-weekdays span {
     font-size: 9px;
   }
-  .calendar-grid--weekly {
-    flex: 1;
-    margin: 0;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: repeat(3, minmax(0, 1fr));
-  }
   .calendar-day__date {
     top: 3px;
-    left: 3px;
+    left: 4px;
+    font-size: 11px;
+  }
+  .calendar-grid--monthly .calendar-day__plus {
+    top: 3px;
+    right: 3px;
+    width: 10px;
+    height: 10px;
+  }
+  .calendar-grid--monthly .calendar-day__count {
     font-size: 10px;
   }
-  .calendar-day__count {
-    font-size: 10px;
-  }
-  .calendar-day__icon {
-    width: min(30px, 70%);
+  .calendar-grid--monthly .calendar-day.is-today::after {
+    border-width: 5px;
+    border-image-width: 5px;
   }
 }
 @media (max-height: 540px) and (max-width: 599px) {
-  .calendar-day__name {
+  .calendar-grid--weekly .calendar-day:not(.calendar-day--sunday) .calendar-day__name {
     display: none;
-  }
-  .calendar-grid--weekly .calendar-day__icon {
-    margin-top: 4px;
   }
 }
 @media (max-height: 520px) and (min-aspect-ratio: 4/3) {
@@ -428,22 +487,8 @@
     font-size: 13px;
     text-align: center;
   }
-  .calendar-grid--weekly {
-    flex: 1;
-    margin: 0;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-template-rows: repeat(3, minmax(0, 1fr));
-  }
-  .calendar-grid--weekly .calendar-day__icon {
-    width: 30px;
-    margin-top: -6px;
-  }
   .calendar-day__name {
     font-size: 10px;
-    bottom: 4px;
-  }
-  .calendar-day__icon {
-    width: min(22px, 65%);
   }
   .calendar-day__date {
     font-size: 10px;

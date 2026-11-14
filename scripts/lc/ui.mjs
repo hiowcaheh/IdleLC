@@ -75,6 +75,9 @@ export const UI_PARTS = {
   'calendar-selected': [atlas('CalendarUi'), 786, 440, 90, 64, { scale: 2 }],
   'calendar-weekday': [atlas('CalendarUi'), 17, 67, 91, 16, { scale: 2 }],
   'calendar-heading': [atlas('CalendarUi'), 283, 22, 126, 22, { scale: 2 }],
+  // calendar.xml img_today (the red marker on today's cell) and img_plus (a day with an event)
+  'calendar-today': [atlas('CalendarUi'), 956, 6, 34, 51, { scale: 2 }],
+  'calendar-plus': [atlas('CalendarUi'), 44, 513, 15, 15, { scale: 2 }],
   'moonstone-middle': [atlas('MoonStone'), 0, 149, 255, 17, { scale: 2 }],
   'moonstone-bottom': [atlas('MoonStone'), 0, 167, 255, 46, { scale: 2 }],
   'moonstone-start': [atlas('MoonStone'), 0, 374, 113, 29, { scale: 2 }],

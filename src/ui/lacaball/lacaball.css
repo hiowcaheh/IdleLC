@@ -13,372 +13,357 @@
 .game .icon-button.hud__menu--lacaball:focus-visible {
   filter: brightness(1.2);
 }
+
+/*
+ * The client's Laca Ball window (CUILacaball): every piece is an `.lb-px` box in the client's
+ * pixels (--x --y --w --h, set inline) showing the texels --u0 --v0 (--uw × --vh) of lacaball.tex.
+ * `--K` is the window's scale, `--k` the scale of the pieces inside a group (the machine shrinks
+ * when a tall phone stacks it over the panel).
+ */
+.lacaball-backdrop.sheet-backdrop--center {
+  padding: 4px;
+}
 .sheet-backdrop--center .sheet.lacaball {
-  --lacaball-content-height: min(clamp(340px, 50vw, 560px), calc(100dvh - 110px));
-  display: grid;
-  grid-template-columns: minmax(0, 62fr) minmax(0, 38fr);
-  grid-template-rows: 42px var(--lacaball-content-height) auto;
+  --W: 500;
+  --H: 375;
+  --K: min(1.5px, calc((100vw - 12px) / 500), calc((100dvh - 12px) / 375));
+  --k: var(--K);
   position: relative;
-  width: min(940px, calc(100vw - 8px));
-  max-width: 940px;
-  max-height: calc(100dvh - 8px);
-  overflow: auto;
-  padding: 0 8px 9px;
-  gap: 0 8px;
+  flex: none;
+  width: calc(var(--K) * var(--W));
+  height: calc(var(--K) * var(--H));
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
   border: 0;
   border-image: none;
   border-radius: 0;
-  background:
-    url('/ui/lc/lacaball-top.webp') top / 100% 42px no-repeat,
-    url('/ui/lc/lacaball-bottom.webp') bottom / 100% 22px no-repeat,
-    url('/ui/lc/lacaball-middle.webp') center / 100% 100% no-repeat;
+  background: none;
   box-shadow: 0 12px 45px #000b;
+  color: #ded9a0;
+  font-size: calc(var(--K) * 11);
+  line-height: 1.15;
 }
-.lacaball__header {
-  grid-column: 1 / -1;
-  position: relative;
-  text-align: center;
-  padding-top: 4px;
-}
-.lacaball__header h2 {
-  margin: 0;
-  font: 700 20px/1.25 var(--font-display);
-  color: #f2d998;
-}
-.lacaball-close {
+.lb-at,
+.lb-px {
   position: absolute;
-  right: 2px;
-  top: 5px;
-  width: 28px;
-  height: 28px;
+  left: calc(var(--k) * var(--x));
+  top: calc(var(--k) * var(--y));
+  width: calc(var(--k) * var(--w));
+  height: calc(var(--k) * var(--h));
+}
+.lb-px {
+  display: block;
+  background: url('/ui/lc/lacaball-atlas.webp?v=6f2c5380') no-repeat;
+  background-size: calc(var(--k) * 512 * var(--w) / var(--uw))
+    calc(var(--k) * 512 * var(--h) / var(--vh));
+  background-position: calc(var(--k) * var(--u0) * var(--w) / var(--uw) * -1)
+    calc(var(--k) * var(--v0) * var(--h) / var(--vh) * -1);
+}
+button.lb-px {
+  margin: 0;
   padding: 0;
   border: 0;
   border-radius: 0;
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
-  background: url('/ui/lc/lacaball-close.webp') center / contain no-repeat;
 }
-.lacaball-close:active {
-  background-image: url('/ui/lc/lacaball-close-down.webp');
-}
-.lacaball-close:focus-visible {
+button.lb-px:focus-visible {
   outline: 2px solid #ffe3a7;
+  outline-offset: 1px;
 }
-.lacaball-play {
-  min-width: 0;
-  min-height: 0;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) 36px;
-  justify-items: center;
-  align-items: center;
-}
-.lacaball-machine {
-  position: relative;
-  width: min(100%, calc((var(--lacaball-content-height) - 36px) * 216 / 332));
-  aspect-ratio: 216 / 332;
-}
-.lacaball-machine__front,
-.lacaball-machine__balls,
-.lacaball-machine__ball,
-.lacaball-machine__basket {
-  position: absolute;
-  pointer-events: none;
-  background: center / 100% 100% no-repeat;
-}
-.lacaball-machine__front {
-  inset: 0;
-  z-index: 2;
-  background-image: url('/ui/lc/lacaball-machine.webp');
-}
-.lacaball-machine__balls {
-  top: 9%;
-  left: 1.8%;
-  width: 96.3%;
-  height: 47.6%;
-  background-image: url('/ui/lc/lacaball-balls.webp');
-}
-.is-rolling .lacaball-machine__balls {
-  animation: lacaball-shake calc(var(--lacaball-duration) * 0.3) linear both;
-  will-change: transform;
-}
-.lacaball-machine__ball {
-  z-index: 3;
-  left: 40.3%;
-  top: 56.3%;
-  width: 22.2%;
-  aspect-ratio: 1;
-  background-image: url('/ui/lc/lacaball-ball.webp');
-  animation: lacaball-drop var(--lacaball-duration) linear both;
-  will-change: transform;
-}
-.lacaball-machine__basket {
-  z-index: 4;
-  left: 32.4%;
-  bottom: 0;
-  width: 35.2%;
-  height: 5.1%;
-  background-image: url('/ui/lc/lacaball-basket.webp');
-}
-.lacaball-machine__status {
-  position: absolute;
-  z-index: 3;
-  top: 3%;
-  left: 8%;
-  right: 8%;
-  color: #f5dfb6;
-  font-size: 12px;
-  text-align: center;
-  text-shadow: 0 1px 3px #000;
-}
-.lacaball-machine__start {
-  position: absolute;
-  z-index: 4;
-  right: 11%;
-  bottom: 5.7%;
-  width: 17.6%;
-  min-width: 28px;
-  aspect-ratio: 1;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  cursor: pointer;
-  background: url('/ui/lc/lacaball-start.webp') center / contain no-repeat;
-}
-.lacaball-machine__start:active {
-  background-image: url('/ui/lc/lacaball-start-down.webp');
-}
-.lacaball-machine__start:disabled {
-  filter: saturate(0.3) brightness(0.65);
+button.lb-px:disabled {
   cursor: default;
 }
-.lacaball-machine__start:focus-visible {
-  outline: 2px solid #ffe3a7;
-}
-.lacaball-machine__start-label {
-  position: absolute;
-  z-index: 3;
-  right: 6%;
-  bottom: 0.3%;
-  width: 28%;
-  color: #f6d59e;
-  font-size: 11px;
+.lb-text {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
   text-align: center;
+  white-space: nowrap;
+  font-size: calc(var(--k) * 11);
+  line-height: calc(var(--k) * 13);
+  color: #ded9a0;
+  text-shadow: 0 1px 1px #000;
+  pointer-events: none;
 }
-.lacaball-auto {
+.lb-text b {
+  margin-left: 0.25em;
+  color: #f3d28b;
+  font-weight: 700;
+}
+.lacaball__frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.lacaball__frame--tall {
+  display: none;
+}
+.lacaball__title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--K) * 12);
+  margin: 0;
+  text-align: center;
+  font: 700 calc(var(--K) * 14) / 1.1 var(--font-display);
+  color: #ded9a0;
+  text-shadow: 0 1px 2px #000;
+  pointer-events: none;
+}
+/* Auto Draw (IdleLC): under the steel of the title bar, above the machine */
+.lacaball__auto {
+  position: absolute;
+  left: calc(var(--K) * 12);
+  top: calc(var(--K) * 23);
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 6px 14px;
-  color: #ecd5a2;
-  font-size: 13px;
+  gap: calc(var(--K) * 4);
+  font-size: calc(var(--K) * 11);
+  line-height: 1;
+  color: #ded9a0;
   cursor: pointer;
-  background: url('/ui/lc/lacaball-field.webp') center / 100% 100% no-repeat;
 }
-.lacaball-auto input {
-  width: 16px;
-  height: 16px;
+.lacaball__auto input {
+  width: calc(var(--K) * 12);
+  height: calc(var(--K) * 12);
+  min-width: 12px;
+  min-height: 12px;
   margin: 0;
   accent-color: #c6a366;
 }
-.lacaball-auto b {
+.lacaball__auto b {
   color: #a4d9e9;
 }
-.lacaball-controls {
-  display: grid;
-  grid-template-rows: 30px 88px 28px 24px minmax(0, 1fr);
-  gap: 4px;
-  min-width: 0;
-  min-height: 0;
+.lacaball__close {
+  --x: 476;
+  --y: 4;
+  --w: 16;
+  --h: 16;
+  --u0: 475;
+  --v0: 177;
+  --uw: 16;
+  --vh: 16;
 }
-.lacaball-token,
-.lacaball-balance,
-.lacaball-pool-total {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 5px;
-  padding: 3px 5px;
-  background: url('/ui/lc/lacaball-field.webp') center / 100% 100% no-repeat;
-  font-size: 12px;
-  color: #ded7c2;
+.lacaball__close:active {
+  --u0: 492;
 }
-.lacaball-token strong {
-  flex: 1;
+/* small client buttons: a larger touch area around the original picture */
+.lacaball__close::after,
+.lacaball__arrow::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--K) * -6);
+}
+
+/* left: the machine (_initBallInfo) from (6, 37) */
+.lacaball__machine {
+  position: absolute;
+  left: calc(var(--K) * 6);
+  top: calc(var(--K) * 37);
+  width: calc(var(--k) * 216);
+  height: calc(var(--k) * 333);
+}
+.is-rolling .lacaball__balls {
+  animation: lacaball-shake calc(var(--lacaball-duration) * 0.3) linear both;
+  will-change: transform;
+}
+/* no z-index: the basket after it in the DOM covers its lower half, as _renderAnim draws them */
+.lacaball__ball {
+  animation: lacaball-drop var(--lacaball-duration) linear both;
+  will-change: transform;
+}
+.lacaball__ball.is-landed,
+.lacaball__ball.is-fading {
+  animation: none;
+  opacity: 1;
+  transform: translate3d(0, 177%, 0);
+}
+.lacaball__ball.is-fading {
+  animation: lacaball-fade 250ms ease-out both;
+}
+.lacaball__start {
+  z-index: 2;
+  --u0: 434;
+  --v0: 436;
+  --uw: 38;
+  --vh: 38;
+  border-radius: 50%;
+}
+.lacaball__start:not(:disabled):active {
+  --u0: 474;
+}
+.lacaball__start:disabled {
+  filter: saturate(0.3) brightness(0.65);
+}
+.lacaball__status {
+  position: absolute;
+  z-index: 3;
+  left: 9%;
+  right: 9%;
+  top: 4.5%;
+  margin: 0;
+  padding: calc(var(--K) * 3) calc(var(--K) * 6);
+  border-radius: calc(var(--K) * 3);
+  background: #000b;
+  color: #ded9a0;
+  font-size: calc(var(--K) * 10.5);
+  line-height: 1.25;
   text-align: center;
 }
-.lacaball-arrow {
-  width: 18px;
-  height: 18px;
-  padding: 0;
+
+/* right: token bar, courses, remain row and rewards from (224, 37) */
+.lacaball__panel {
+  position: absolute;
+  left: calc(var(--K) * 224);
+  top: calc(var(--K) * 37);
+  width: calc(var(--K) * 270);
+  height: calc(var(--K) * 334);
+}
+.lacaball__arrow--prev {
+  --u0: 155;
+  --v0: 129;
+  --uw: 14;
+  --vh: 14;
+}
+.lacaball__arrow--next {
+  --u0: 171;
+  --v0: 129;
+  --uw: 14;
+  --vh: 14;
+}
+.lacaball__arrow:not(:disabled):active {
+  --v0: 145;
+}
+.lacaball__course-arrow--prev {
+  --u0: 297;
+  --v0: 104;
+  --uw: 22;
+  --vh: 70;
+}
+.lacaball__course-arrow--next {
+  --u0: 321;
+  --v0: 104;
+  --uw: 22;
+  --vh: 70;
+}
+.lacaball__course-arrow--prev:not(:disabled):active {
+  --u0: 463;
+  --v0: 103;
+}
+.lacaball__course-arrow--next:not(:disabled):active {
+  --u0: 487;
+  --v0: 103;
+}
+.lacaball__arrow:disabled,
+.lacaball__course-arrow:disabled {
+  opacity: 0.45;
+}
+.lacaball__token {
+  font-weight: 700;
+}
+.lacaball__courses {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.lacaball__course {
+  pointer-events: auto;
+}
+.lacaball__icon {
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+.lacaball__icon .item-icon {
   border: 0;
-  background: center / contain no-repeat;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-.lacaball-arrow--left {
-  background-image: url('/ui/lc/lacaball-token-left.webp');
-}
-.lacaball-arrow--right {
-  background-image: url('/ui/lc/lacaball-token-right.webp');
-}
-.lacaball-arrow:disabled,
-.lacaball-course-arrow:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-.lacaball-courses {
-  display: grid;
-  grid-template-columns: 18px minmax(0, 1fr) 18px;
-  gap: 3px;
-  min-width: 0;
-}
-.lacaball-course-list {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 3px;
-  min-width: 0;
-}
-.lacaball-course-arrow {
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  background: center / 100% 100% no-repeat;
-}
-.lacaball-course-arrow--left {
-  background-image: url('/ui/lc/lacaball-course-left.webp');
-}
-.lacaball-course-arrow--right {
-  background-image: url('/ui/lc/lacaball-course-right.webp');
-}
-.lacaball-course {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-width: 0;
-  padding: 4px 1px;
-  color: #ccc4b1;
-  border: 1px solid transparent;
   border-radius: 0;
-  background: url('/ui/lc/lacaball-panel.webp') center / 100% 100% no-repeat;
-  cursor: pointer;
-  font: inherit;
-  font-size: 11px;
+  background: none;
 }
-.lacaball-course.is-active {
-  border-color: #d9bc74;
-  color: #ffe2a2;
-  box-shadow: inset 0 0 8px #e8bd5033;
-}
-.lacaball-course:disabled {
-  cursor: default;
-}
-.lacaball-course small {
-  color: #bdb6a0;
-  font-size: 10px;
-  white-space: nowrap;
-}
-.lacaball-rewards {
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  background: url('/ui/lc/lacaball-panel.webp') center / 100% 100% no-repeat;
-  padding: 4px;
-}
-.lacaball-rewards__heading {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 62px;
-  gap: 4px;
-  color: #cabc9c;
-  font-size: 11px;
-  padding: 2px 2px 5px;
-}
-.lacaball-rewards__list {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  min-height: 0;
-}
-.lacaball-reward {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 62px;
+.lacaball__letter {
   align-items: center;
-  gap: 5px;
-  min-height: 52px;
-  padding: 5px 1px;
-  color: #e5dfcd;
-  border-bottom: 1px solid #ffffff0b;
-  font-size: 12px;
-  line-height: 1.3;
+  font: 700 calc(var(--k) * 15) / 1 var(--font-display);
+  color: #e8c46a;
 }
-.lacaball-reward > span {
-  overflow-wrap: anywhere;
+.lacaball__selected {
+  opacity: 0.333;
+  pointer-events: none;
 }
-.lacaball-reward__name {
+.lacaball__remain-label {
+  justify-content: flex-end;
+}
+.lacaball__reward-name,
+.lacaball__reward-count,
+.lacaball__prize-name {
+  align-items: center;
+  white-space: normal;
+}
+.lacaball__reward-name > span,
+.lacaball__prize-name > span {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   overflow: hidden;
+  line-height: calc(var(--k) * 12.5);
 }
-.lacaball-reward b {
-  display: block;
-  margin-top: 2px;
-  color: #edcf91;
-  font-size: 11px;
-}
-.lacaball-reward__stock {
-  color: #bfc4ae;
-  font-size: 11px;
-  text-align: center;
-  white-space: nowrap;
+.lacaball__reward-count {
   font-variant-numeric: tabular-nums;
 }
-.lacaball-reward.is-jackpot {
-  color: #ffe3a4;
-  background: linear-gradient(90deg, #b68b2a22, transparent);
+.lacaball__won-out {
+  opacity: 0.627;
+  pointer-events: none;
 }
-.lacaball-reward.is-jackpot .lacaball-reward__stock {
-  color: #f3d28b;
-}
-.lacaball-reward.is-empty {
-  opacity: 0.45;
-}
-.lacaball-winner {
+
+/* the prize capsule (_initRewardBallInfo) in the middle of the window */
+.lacaball__prize {
   position: absolute;
   z-index: 5;
-  top: 50%;
-  left: 6%;
-  right: 6%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 10px 24px;
-  color: #382717;
-  text-shadow: 0 1px #fff5;
-  background:
-    url('/ui/lc/lacaball-capsule-left.webp') left / 24px 100% no-repeat,
-    url('/ui/lc/lacaball-capsule-right.webp') right / 24px 100% no-repeat,
-    url('/ui/lc/lacaball-capsule-middle.webp') center / calc(100% - 46px) calc(100% - 8px) no-repeat;
-  font: 700 17px/1.3 var(--font-display);
+  left: calc(50% - var(--K) * 113);
+  top: calc(50% - var(--K) * 24);
+  width: calc(var(--K) * 226);
+  height: calc(var(--K) * 48);
   pointer-events: none;
-  animation: lacaball-reveal 150ms ease-out both;
+  animation: lacaball-reveal 250ms ease-out both;
 }
-.lacaball-winner > .item-icon {
-  flex-shrink: 0;
+.lacaball__prize-name {
+  font-size: calc(var(--k) * 11.5);
+  text-shadow:
+    0 0 2px #000,
+    0 1px 2px #000;
 }
-.lacaball-footer {
-  grid-column: 1 / -1;
-  padding: 8px 5px 5px;
-  text-align: center;
+
+/* a tall phone: the machine (×0.7) over the panel, 282 × 610 client pixels */
+@media (orientation: portrait) and (max-width: 559px) {
+  .sheet-backdrop--center .sheet.lacaball {
+    --W: 282;
+    --H: 610;
+    --K: min(1.3px, calc((100vw - 8px) / 282), calc((100dvh - 8px) / 610));
+  }
+  .lacaball__frame--wide {
+    display: none;
+  }
+  .lacaball__frame--tall {
+    display: block;
+  }
+  .lacaball__close {
+    --x: 258;
+  }
+  .lacaball__machine {
+    --k: calc(var(--K) * 0.7);
+    left: calc(var(--K) * 65.4);
+  }
+  .lacaball__panel {
+    left: calc(var(--K) * 6);
+    top: calc(var(--K) * 272);
+  }
 }
-.lacaball-footer p {
-  color: #bdb6a3;
-  font-size: 11px;
-  line-height: 1.3;
-  margin: 0;
-}
+
 @keyframes lacaball-shake {
   0%,
   100% {
@@ -389,15 +374,16 @@
   50%,
   70%,
   90% {
-    transform: translate3d(1px, 0, 0);
+    transform: translate3d(var(--k), 0, 0);
   }
   20%,
   40%,
   60%,
   80% {
-    transform: translate3d(-1px, 0, 0);
+    transform: translate3d(calc(var(--k) * -1), 0, 0);
   }
 }
+/* _renderAnim: falls 85 px into the basket, bounces 12 px and settles (177% and 152% of 48 px) */
 @keyframes lacaball-drop {
   0%,
   29.9% {
@@ -423,199 +409,37 @@
     transform: translate3d(0, 177%, 0);
   }
 }
+@keyframes lacaball-fade {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 177%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 177%, 0);
+  }
+}
 @keyframes lacaball-reveal {
   from {
     opacity: 0;
-    transform: translateY(5px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
-  }
-}
-@media (max-width: 600px) {
-  .sheet-backdrop--center .sheet.lacaball {
-    --lacaball-content-height: min(440px, calc(100dvh - 110px));
-    grid-template-columns: minmax(0, 52fr) minmax(0, 48fr);
-    gap: 0 5px;
-    padding-inline: 6px;
-  }
-  .lacaball-controls {
-    grid-template-rows: 28px 80px 26px 22px minmax(0, 1fr);
-    gap: 3px;
-  }
-  .lacaball-token,
-  .lacaball-balance,
-  .lacaball-pool-total {
-    font-size: 10px;
-    gap: 2px;
-  }
-  .lacaball-token > .item-icon {
-    display: none;
-  }
-  .lacaball-courses {
-    grid-template-columns: 12px minmax(0, 1fr) 12px;
-    gap: 2px;
-  }
-  .lacaball-course-list {
-    gap: 2px;
-  }
-  .lacaball-course {
-    font-size: 9px;
-    gap: 4px;
-  }
-  .lacaball-course > .item-icon {
-    width: 24px !important;
-    height: 24px !important;
-  }
-  .lacaball-course small {
-    font-size: 8px;
-  }
-  .lacaball-reward {
-    grid-template-columns: 22px minmax(0, 1fr) 48px;
-    font-size: 10px;
-    gap: 3px;
-    min-height: 46px;
-    padding: 4px 0;
-  }
-  .lacaball-reward > .item-icon {
-    width: 22px !important;
-    height: 22px !important;
-  }
-  .lacaball-reward b,
-  .lacaball-reward__stock {
-    font-size: 9px;
-  }
-  .lacaball-rewards__heading {
-    grid-template-columns: minmax(0, 1fr) 48px;
-    font-size: 10px;
-    padding-inline: 0;
-  }
-  .lacaball-machine__status,
-  .lacaball-machine__start-label {
-    font-size: 10px;
-  }
-  .lacaball-auto {
-    font-size: 11px;
-    padding-inline: 8px;
-  }
-  .lacaball-winner {
-    font-size: 14px;
-  }
-}
-@media (max-height: 520px) and (min-aspect-ratio: 4/3) {
-  .sheet-backdrop--center .sheet.lacaball {
-    --lacaball-content-height: calc(100dvh - 80px);
-    grid-template-rows: 32px var(--lacaball-content-height) auto;
-  }
-  .lacaball__header h2 {
-    font-size: 18px;
-  }
-  .lacaball-close {
-    width: 24px;
-    height: 24px;
-    top: 2px;
-  }
-  .lacaball-play {
-    grid-template-rows: minmax(0, 1fr) 28px;
-  }
-  .lacaball-machine {
-    width: min(100%, calc((var(--lacaball-content-height) - 28px) * 216 / 332));
-  }
-  .lacaball-auto {
-    padding-block: 3px;
-  }
-  .lacaball-controls {
-    grid-template-areas: 'token token' 'courses courses' 'balance total' 'rewards rewards';
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: 24px 50px 20px minmax(0, 1fr);
-    gap: 2px;
-  }
-  .lacaball-token {
-    grid-area: token;
-  }
-  .lacaball-courses {
-    grid-area: courses;
-  }
-  .lacaball-balance {
-    grid-area: balance;
-  }
-  .lacaball-pool-total {
-    grid-area: total;
-  }
-  .lacaball-rewards {
-    grid-area: rewards;
-    padding: 2px;
-  }
-  .lacaball-course {
-    gap: 2px;
-    padding: 1px;
-    font-size: 9px;
-  }
-  .lacaball-course small {
-    font-size: 8px;
-  }
-  .lacaball-course > .item-icon {
-    width: 22px !important;
-    height: 22px !important;
-  }
-  .lacaball-token,
-  .lacaball-balance,
-  .lacaball-pool-total {
-    padding-block: 1px;
-    font-size: 10px;
-  }
-  .lacaball-rewards__heading {
-    font-size: 9px;
-    padding: 0 0 2px;
-    grid-template-columns: minmax(0, 1fr) 48px;
-  }
-  .lacaball-reward {
-    grid-template-columns: 20px minmax(0, 1fr) 48px;
-    min-height: 24px;
-    padding: 1px 0;
-    gap: 3px;
-    font-size: 10px;
-  }
-  .lacaball-reward > .item-icon {
-    width: 20px !important;
-    height: 20px !important;
-  }
-  .lacaball-reward > span {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    min-width: 0;
-  }
-  .lacaball-reward__name {
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
-    min-width: 0;
-  }
-  .lacaball-reward b {
-    display: inline;
-    margin: 0;
-    flex-shrink: 0;
-    font-size: 9px;
-  }
-  .lacaball-reward__stock {
-    font-size: 10px;
-  }
-  .lacaball-footer {
-    padding-block: 4px 2px;
-  }
-  .lacaball-footer p {
-    font-size: 10px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .is-rolling .lacaball-machine__balls {
+  .is-rolling .lacaball__balls {
     animation-name: none;
   }
-  .lacaball-machine__ball {
+  .lacaball__ball {
     animation-name: lacaball-still;
   }
-  .lacaball-winner {
+  .lacaball__ball.is-landed,
+  .lacaball__ball.is-fading {
+    animation: none;
+    opacity: 0;
+  }
+  .lacaball__prize {
     animation: none;
   }
   @keyframes lacaball-still {

@@ -10,7 +10,14 @@ const root = process.argv[2]
 if (!root) throw new Error('Usage: node scripts/lc/calendar-art.mjs <client-folder>')
 const files = new ClientFiles([root])
 const art = await buildUiParts(files)
-for (const name of ['calendar-cell', 'calendar-selected', 'calendar-weekday', 'calendar-heading'])
+for (const name of [
+  'calendar-cell',
+  'calendar-selected',
+  'calendar-weekday',
+  'calendar-heading',
+  'calendar-today',
+  'calendar-plus',
+])
   fs.writeFileSync(`public/ui/lc/${name}.webp`, art[name])
 fs.writeFileSync(
   'public/ui/lc/menu-calendar.webp',
