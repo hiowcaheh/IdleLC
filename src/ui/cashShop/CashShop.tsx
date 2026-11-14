@@ -357,29 +357,25 @@ function TopUpInfo({ onClose }: { onClose(): void }) {
   return (
     <Sheet centered title="Donate" titleId="cash-topup-title" onClose={onClose}>
       <div className="cash-topup">
-        <p className="cash-topup__rate">
-          <strong>1 €</strong> = <Cash amount={CASH_PER_EURO} />
-        </p>
-        <table className="cash-contents cash-topup__table">
-          <thead>
-            <tr>
-              <th>You pay</th>
-              <th>You get</th>
-              <th>Bonus</th>
-            </tr>
-          </thead>
-          <tbody>
-            {TOP_UPS.map(([euro, bonus]) => (
-              <tr key={euro}>
-                <td>{euro} €</td>
-                <td>
-                  <Cash amount={euro * CASH_PER_EURO + bonus} />
-                </td>
-                <td className="cash-topup__bonus">{bonus ? `+${fmt(bonus)}` : ''}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="cash-topup__rate">
+          <span className="cash-topup__coin" aria-hidden="true" />
+          <span className="cash-topup__rate-text">
+            <strong>1 €</strong> = <Cash amount={CASH_PER_EURO} />
+          </span>
+          <small>Bonus Cash from 10 €</small>
+        </div>
+        <ul className="cash-topup__packs" aria-label="Cash packs">
+          {TOP_UPS.map(([euro, bonus]) => (
+            <li key={euro} className="cash-topup__pack">
+              <span className="cash-topup__euro">{euro} €</span>
+              <span className="cash-topup__get">
+                <span className="cash-topup__amount">{fmt(euro * CASH_PER_EURO + bonus)}</span>
+                <span className="cash__unit">Cash</span>
+              </span>
+              <span className="cash-topup__bonus">{bonus ? `+${fmt(bonus)} bonus` : '\u00a0'}</span>
+            </li>
+          ))}
+        </ul>
         <h3 className="cash-topup__head">How to donate</h3>
         <ol className="cash-topup__steps">
           <li>

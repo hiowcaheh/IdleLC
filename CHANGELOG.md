@@ -1,5 +1,20 @@
 # Historia zmian
 
+## 2026-11-14 (Claude Code): dziewiąta partia
+
+[Szczegóły](docs/owner-batch-2026-11-13.md#dziewiąta-partia).
+
+1. Laca Ball złożone z oryginalnego okna klienta (`CUILacaball`, atlas `lacaball.tex`): maszyna,
+   kursy, tabela nagród, kapsuła; na wysokim telefonie maszyna nad panelem.
+2. Kalendarz: czerwone kółko „dziś”, poświata zaznaczenia, złoty „+” na niedzielach, nagrody w
+   slotach, czytelne dni minione i odebrane.
+3. ItemShop: tło i ramki zakładek, nowy panel kursu i karty pakietów w Donate.
+4. Wcześniej w tej partii: menu mikstur w podziemiu dotknięciem, równe pola opisu przedmiotu,
+   DEV 1 kkk złota / 10 000 SP, pełny wiersz Lucky Spell Book, czas wypraw w Hunting record,
+   buffy klas zamiast Moon Cake / Stars, animacja ataku po zatrzymaniu w podziemiu.
+
+Nadal SaveVersion **19**. Weryfikacja: **673 testy / 87 plików**, check i Chromium.
+
 ## 2026-11-13, później (Claude Code): ósma partia
 
 [Szczegóły](docs/owner-batch-2026-11-13.md#ósma-partia).

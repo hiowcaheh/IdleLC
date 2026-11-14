@@ -97,12 +97,49 @@ Punkty 1–8 zgłoszenia były powtórzeniem siódmej partii (już wdrożonej). 
 Oprócz tego: test AFK „drinks the potions…” trwał 4–5 s także przed zmianami i przekraczał
 domyślny limit 5 s na CI; dostał własny limit 20 s.
 
+## Dziewiąta partia
+
+Odpowiedzi właściciela: wzmacniacze „na jedno zabicie” i Platinum Training Spell Book 2139
+**nie są dodawane**; cena ksiąg World Bossa (500 Cash) zostaje.
+
+4. **Laca Ball jak w kliencie.** Okno złożone element po elemencie z `CUILacaball`
+   (`UILacarette.cpp`, `_initBackground` / `_initCourseInfo` / `_initBallInfo` /
+   `_initRewardBallInfo`): każdy kawałek z `lacaball.tex` w swoim prostokącie i UV, w pikselach okna
+   500×375, jedna skala CSS (`--K`). Cała tekstura idzie jako jeden atlas
+   (`public/ui/lc/lacaball-atlas.webp`, `scripts/lc/lacaball-gui.mjs`). Po lewej maszyna z drżącymi
+   kulami i Startem, po prawej pasek żetonu ze strzałkami, trzy pola kursów (ikona głównej nagrody,
+   pozostało/maks w kolorach `_queryColor`, poświata wybranego kursu 0x55), wiersz puli kursu,
+   tabela nagród z ramkami nazwy i liczby, przyciemnienie wyczerpanej nagrody (0xA0), kapsuła
+   nagrody na środku okna. Kula po spadku zostaje w koszyku (koszyk ją przykrywa, jak w
+   `_renderAnim`) i znika razem z pojawieniem się kapsuły. Wysoki telefon: maszyna (×0,7) nad
+   panelem, te same elementy. Auto Draw ×2 pod belką tytułu. Logika rundy Codexa bez zmian.
+5. **Kalendarz** z oryginalnymi znakami `calendar.xml`: czerwone kółko wokół dzisiejszej daty
+   (`img_today`), żółta poświata zaznaczenia o stałej szerokości, złoty „+” na niedzielach
+   (`img_plus`), czerwona nazwa niedzieli, nagrody w slotach ekwipunku z ilością w rogu, minione
+   dni szare, odebrane z zielonym ✓, miesiąc rysowany pełnymi tygodniami (puste pola jak siatka
+   6×7 klienta). Nowe części `calendar-today` i `calendar-plus` w `scripts/lc/ui.mjs`.
+6. **ItemShop:** zakładki na wpuszczonym pasku, każda na ramce slotu sklepu, aktywna ze złotą
+   poświatą. Okno Donate bez rozciągniętego paska: panel kursu z niebieską monetą Cash i pakiety
+   na kartach ofert sklepu (cena w pasku nagłówka, Cash i bonus pod spodem).
+
+Punkty 5, 7, 8, 10–13 weszły wcześniej (commit `acc4b33`):
+
+5. Sloty mikstur w podziemiu otwierają menu dotknięciem, jak w polu; bez osobnego przycisku.
+6. Pola wartości w opisie przedmiotu mają równą szerokość (`subgrid`).
+7. DEV: jeden przycisk dodaje 1 000 000 000 złota, drugi 10 000 SP.
+8. Lucky Spell Book w Bonuses w pełnym wierszu („Drop ×2 on 20%, gold ×2 on 80%”).
+9. Hunting record: „Expedition time” (`CharacterStats.expeditionSeconds`, liczony przy
+   odbiorze wyprawy, maks. 8 h na wyprawę; opcjonalne pole, bez migracji).
+10. Buffy podziemi: Moon Cake i Stars zastąpione buffami klas: Knight 1108 (poziom 8) i Titan
+    400 (poziom 6), odbicie obrażeń (`reflect`).
+11. Atak bez animacji po zatrzymaniu: krok logiki zakończony zatrzymaniem był liczony jako bieg.
+    `DungeonRun.moving` mówi scenie, czy bohater w tym kroku się ruszał.
+
+Nadal SaveVersion **19**. Weryfikacja: **673 testy / 87 plików**, check, Chromium (390×844,
+320×568, 360×640, 390×664, 844×390, 568×320, 768×1024, 1280×800).
+
 ## Pytania do właściciela
 
-- Wzmacniacze „na jedno zabicie” (Experience / Skill Point / Item Drop / Gold Booster, Platinum
-  Drop Booster): dodać? Wymagają zużycia efektu przy zabiciu.
-- Platinum Training Spell Book 2139: w bazie opis +50% SP, w kodzie serwera +15%. Na razie poza
-  grą.
 - Nadal otwarte: źródło Cash, „Kar/Neon 12 lv”, poziom 12 czy 10 dla wycia konia.
 
 ## Dla Codexa: co zmieniłem w Twoich plikach
@@ -130,3 +167,18 @@ domyślny limit 5 s na CI; dostał własny limit 20 s.
   `rolledReward` (dodatkowe losowanie tylko z aktywną Lucky Spell Book).
 - `afk.ts` `estimateHourly`: próbka odcinka `max(180, 1200 × udział)`; `useHourlyEstimate`
   zwraca `null` do pierwszego pomiaru.
+
+Dziewiąta partia:
+
+- `ui/lacaball/LacaBall.tsx`, `lacaball.css`: nowy widok według `CUILacaball`; `useLacaBallRound`,
+  `logic/lacaball.ts` i dane bez zmian. Kula istnieje w fazach `rolling` / `claiming` / `result`
+  (klasy `is-landed`, `is-fading`); `landed()` wywołuje tylko koniec spadku (lub jego zastępstwo
+  przy ograniczonym ruchu), nigdy zanikanie. Wycinki `lacaball-*.webp` z
+  `lacaball-assets.mjs` nie są już używane przez okno (tylko `menu-lacaball.webp`); zostały w repo,
+  bo tworzy je Twój skrypt. Można je usunąć razem z listą `parts`, jeśli się zgadzasz.
+- `ui/calendar/RewardsCalendar.tsx`, `calendar.css`: inne znaczniki dni (`calendar-day__slot`,
+  `__number`, `__today`, `__plus`), puste pola na końcu miesiąca; logika odbioru i modal bez zmian.
+  `scripts/lc/calendar-art.mjs` zapisuje też `calendar-today` i `calendar-plus`.
+- `logic/dungeons.ts`: `DungeonRun.moving` (ustawiane w `dungeonStep`); filtr `DUNGEON_BUFFS`
+  przyjmuje `reflect`. `scene/DungeonScene.tsx`: animacja biegu z `state.moving`.
+- `logic/character.ts` / `save.ts`: `CharacterStats.expeditionSeconds` (sanitizer: 0 domyślnie).

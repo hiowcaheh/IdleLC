@@ -56,6 +56,11 @@ zmienia działania mikstur, kamieni, skrzynek ani nominałów Cash.
 
 ## GUI i źródła
 
+**2026-11-14 (Claude Code):** dni ze znakami `calendar.xml`: `img_today` (czerwone kółko wokół
+dzisiejszej daty, `calendar-today.webp`), `img_plus` na niedzielach (`calendar-plus.webp`),
+poświata `calendar-selected` jako ramka stałej szerokości, nagrody w slotach, czerwona niedziela,
+pełne tygodnie miesiąca. Reguły i odbiór bez zmian.
+
 - `actions.lod`, akcja 52: `ActionBtn0.tex`, row 6 / col 3. `UICharacterInfo.cpp`
   i `UICharacterInfoNew.cpp` otwierają dla niej CUICalendar. To oryginalny symbol
   kartki kalendarza z czerwonym grzbietem.

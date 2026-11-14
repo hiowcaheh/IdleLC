@@ -67,6 +67,13 @@ postaci, Cash i dotychczasowe postępy pozostają zachowane.
 
 ## Okno i animacja
 
+**2026-11-14 (Claude Code), na prośbę właściciela:** widok przebudowany według oryginalnego
+`CUILacaball` (`UILacarette.cpp`). Każdy element z `lacaball.tex` w swoim prostokącie i UV, w
+pikselach okna 500×375 przeliczanych jedną skalą (`--K`); na wysokim telefonie maszyna (×0,7) nad
+panelem. Atlas: `public/ui/lc/lacaball-atlas.webp` (`node scripts/lc/lacaball-gui.mjs <klient>`).
+Kula po spadku zostaje w koszyku do pojawienia się kapsuły. Reguły, czasy i zapis poniżej bez zmian.
+Szczegóły: [dziewiąta partia](owner-batch-2026-11-13.md#dziewiąta-partia).
+
 Okno poszerzone z 680 do 940 px, na telefonie ma mniejsze marginesy. Większa
 część przypada na maszynę, węższa na listę po prawej. Trzy widoczne karty kursów
 przewijają się strzałkami do pięciu, jak w kliencie. Karty pokazują stan całej

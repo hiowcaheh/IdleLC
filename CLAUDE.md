@@ -1,5 +1,11 @@
 # IdleLC — wytyczne projektu
 
+Aktualizacja 2026-11-14 (Claude Code): [dziewiąta partia](docs/owner-batch-2026-11-13.md#dziewiąta-partia).
+Laca Ball rysowane według `CUILacaball` z jednego atlasu `lacaball-atlas.webp` (piksele okna 500×375,
+skala `--K`; logika Codexa bez zmian). Kalendarz ze znakami `calendar.xml` (`calendar-today`,
+`calendar-plus`). ItemShop: pasek zakładek i karty pakietów Donate. `DungeonRun.moving`,
+`CharacterStats.expeditionSeconds`. Nadal SaveVersion **19**. **673 testy / 87 plików**.
+
 Aktualizacja 2026-11-13, później (Claude Code): [ósma partia](docs/owner-batch-2026-11-13.md).
 Minerały 498–501 to `IPOTION_UP`: skill na poziomie z `ItemStack.flag` (`PotionDef.levels`,
 `potionAtLevel`); flaga idzie przez picie, raport, `OwnedBoost.flag` i sanitizer. Księgi World
